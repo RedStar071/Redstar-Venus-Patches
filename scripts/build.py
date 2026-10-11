@@ -253,10 +253,17 @@ def build():
     print(f"Bundle: {bundle.relative_to(ROOT)}", flush=True)
 
 
-RELEASE_SUMMARY = (
-    "Hide the call button on profiles, three taps delete your own message again, and clearer settings. "
-    "Patch the original Discord 348.10 APKM."
-)
+def release_summary():
+    """This version's CHANGELOG.md entry, without its heading, in Morphe's section format.
+
+    Morphe Manager shows it when the CHANGELOG.md it fetched doesn't list the installed version yet,
+    which happens to every new release while GitHub's raw file cache (5 minutes) and Manager's own
+    (10 minutes) still hold the old file. A plain sentence there shows as one grey block.
+    """
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from release_notes import notes
+    body = notes(VERSION).split("\n", 1)[1].strip()
+    return body + "\n"
 
 
 def check_metadata(metadata):
@@ -270,14 +277,23 @@ def check_metadata(metadata):
         raise SystemExit("patches-bundle.json: created_at must be a LocalDateTime without a UTC offset")
     if not metadata["download_url"].startswith("https://github.com/VenusIsJaded/Venus-Patches/releases/download/"):
         raise SystemExit("patches-bundle.json: unexpected download_url")
+    # The fallback release notes must split into Morphe's sections, like CHANGELOG.md does.
+    if not re.search(r"^### \S", metadata["description"], re.M) or not re.search(r"^\* \*\*Discord", metadata["description"], re.M):
+        raise SystemExit("patches-bundle.json: description must be the release's CHANGELOG.md sections (see AGENTS.md)")
 
 
 def release_metadata():
     # An offset such as "+00:00" makes Morphe reject the whole remote source.
     created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    # Keep the published time for an already released version: Manager treats a new created_at as an update.
+    existing = ROOT / "patches-bundle.json"
+    if existing.exists():
+        previous = json.loads(existing.read_text())
+        if previous.get("version") == VERSION and previous.get("created_at"):
+            created_at = previous["created_at"]
     metadata = {
         "created_at": created_at,
-        "description": RELEASE_SUMMARY,
+        "description": release_summary(),
         "download_url": f"https://github.com/VenusIsJaded/Venus-Patches/releases/download/{RELEASE_TAG}/{ASSET_NAME}",
         "page_url": f"https://github.com/VenusIsJaded/Venus-Patches/releases/tag/{RELEASE_TAG}",
         "signature_download_url": "",

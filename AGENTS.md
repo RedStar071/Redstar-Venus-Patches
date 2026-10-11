@@ -74,7 +74,8 @@ gh release create v1.6.1 patches/build/libs/patches-1.6.1.mpp --title "1.6.1" --
 
 1. Bump `version`, `releaseTag` and `releaseAsset` in `gradle.properties`, and `const revision` in
    `patches/src/main/resources/venus/bootstrap.js` (the build fails if they differ).
-2. Update `RELEASE_SUMMARY` in `scripts/build.py`: one sentence, then "Patch the original Discord 348.10 APKM."
+2. Nothing to write for `patches-bundle.json`: its `description` is this version's `CHANGELOG.md` sections,
+   which Morphe shows when its cached `CHANGELOG.md` doesn't list the new release yet. Never replace it with a sentence.
 3. Add the `CHANGELOG.md` entry at the top, as above.
 4. `python3 scripts/build.py`, then `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`.
 5. Update `README.md` if a feature or setting changed.
