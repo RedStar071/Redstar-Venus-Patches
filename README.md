@@ -24,7 +24,7 @@ To turn things on or off at any time, open **Discord Settings → Venus → Sett
 | In Venus settings | Morphe patch | Starts |
 | --- | --- | --- |
 | **Chat** | | |
-| Keep deleted messages, outlined in red | NoDelete | Off |
+| Keep deleted messages, outlined in red, and what edited messages said before | NoDelete | Off |
 | Send audio files as voice messages | Custom voice messages | Off |
 | Send emojis and stickers you can't use as links | FreeNitro | On |
 | Hide that you're typing | No typing | On |
@@ -35,10 +35,11 @@ To turn things on or off at any time, open **Discord Settings → Venus → Sett
 | Hide the gift button | Hide gift button | On |
 | Double-tap a message to reply | Message tap gestures | Off |
 | **Profiles and people** | | |
-| Give names soft pastel colors | Pastelize | On |
+| Give names soft pastel colors, picked from each user ID | Pastelize | On |
 | Show which devices people are on | PlatformIndicators | On |
 | Select and copy profile bios | CopyBios | On |
 | Show and write reviews of users and servers | ReviewDB | Off |
+| Hide the call button on profiles | Hide call button | On |
 | **Servers and channels** | | |
 | Add a Read all button to the server list | Read All | On |
 | Show channels you can't open, with a lock | Hidden Channels | Off |
@@ -77,6 +78,7 @@ Discord can still see what any client needs to work, like your messages, calls a
 - **Force system font** needs Android 9 or newer. When you change it, Discord offers to reopen, so every screen switches at once instead of mixing fonts. Fonts people pick for their display name aren't changed.
 - **Quest Completer** starts off. Turn on **Complete Quests automatically** in Venus settings. It checks for new Quests when Discord opens and every 30 minutes after. It accepts and completes video, Play and Activity Quests one at a time. Play and Activity Quests count time without installing or starting anything. That time is reported the way Discord's Windows app reports it, because Discord only counts play time from desktop. Stream Quests need a real stream, so they're skipped. You still claim rewards yourself. Discord may pause Quests on accounts that complete them automatically.
 - **Passkeys and security keys can't be used to log in.** Google only lets apps signed by Discord use Discord's passkeys, and a patched app is signed with your key. This happens with any patched Discord, not because of a privacy option. Venus shows a clear message instead of "RP ID cannot be validated". Tap **Verify with something else** to use an authenticator app, SMS or a backup code.
+- **Hide the call button** removes Call next to Message when you open someone's profile, and Message stretches across to fill the row. Calls from a DM still work.
 - **Read all** uses Discord's own "Mark as read". It clears servers by default. Switch it to DMs or both in its settings, or hold the button for a one-time choice.
 
 ## For developers

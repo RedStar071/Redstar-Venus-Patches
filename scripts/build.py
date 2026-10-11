@@ -254,7 +254,7 @@ def build():
 
 
 RELEASE_SUMMARY = (
-    "Double-tap gestures, earlier versions of edited messages, a clear passkey message, bug fixes and less work. "
+    "Hide the call button on profiles, three taps delete your own message again, and clearer settings. "
     "Patch the original Discord 348.10 APKM."
 )
 

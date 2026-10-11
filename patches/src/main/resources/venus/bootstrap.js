@@ -25,8 +25,9 @@
     if (features.hideGift) selectModules([11609, 11817]);
     if (features.hideQuestDock) selectModules([14608, 14700]);
     if (features.systemEmoji) selectModules([6552]);
-    if (features.gestures) selectModules([7414, 11105, 1378]);
-    const revision = "1.6.0";
+    if (features.gestures) selectModules([7414, 11105, 1378, 10905]);
+    if (features.hideCall) selectModules([12696]);
+    const revision = "1.7.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;
@@ -35,7 +36,7 @@
         noTyping: true, quickDelete: false, quickDeleteEmbeds: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true,
         jumpToTop: true, hiddenChannels: false, pastelize:true, pastelAll:false, pastelWebhookName:true, pastelContent:false, platformIndicators:true, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewThemedSend:true, reviewWarning:true, readAll:true, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
-        hideGift:true, hideQuestDock:true, systemEmoji:true, gestures:false, gestureOwn:"edit", gestureTripleDelete:true };
+        hideGift:true, hideQuestDock:true, systemEmoji:true, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:true };
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
     const listeners = new Set();
     const dirty = new Set();
@@ -578,39 +579,40 @@
             node.useIsDisabled = function () { useSettings(owner); return !settings[owner]; };
             next[id] = node; return id;
         };
-        withOptions("chat", "noDelete", "VENUS_NODELETE", "Keep deleted messages, outlined in red", "Including your own. Delete one again to hide it.", "Deleted messages", NoDeleteSettings);
-        toggle("chat", "voice", "Send audio files as voice messages", "An audio file sent on its own becomes a real voice message, waveform included. Needs Android 10 or newer.");
-        withOptions("chat", "freeNitro", "VENUS_FREENITRO", "Send emojis and stickers you can't use as links", "They're sent as image links, not real Nitro ones.", "Emoji and sticker links",
-            () => [section("Send as links", [option("emojis", "Emojis", "Custom emojis from other servers, and animated ones.", "VENUS_FREENITRO"),
+        withOptions("chat", "noDelete", "VENUS_NODELETE", "Keep deleted messages, outlined in red", "Yours too. Also keeps what edited messages said before. Delete a kept message again to hide it.", "Deleted messages", NoDeleteSettings);
+        toggle("chat", "voice", "Send audio files as voice messages", "An audio file sent on its own becomes a real voice message with Discord's waveform. If it can't be converted, it's sent as a file. Needs Android 10 or newer.");
+        withOptions("chat", "freeNitro", "VENUS_FREENITRO", "Send emojis and stickers you can't use as links", "Custom and animated emojis and stickers you can't use are sent as image links. They aren't real Nitro emojis.", "Emoji and sticker links",
+            () => [section("Send as links", [option("emojis", "Emojis", "Custom emojis from other servers, and animated ones, without Nitro.", "VENUS_FREENITRO"),
                 option("stickers", "Stickers", "Stickers from other servers. Animated stickers may not move.", "VENUS_FREENITRO")]),
-             section("Links", [option("hyperlinks", "Show the name instead of the link", "The emoji or sticker name, linked.", "VENUS_FREENITRO"),
-                option("forceLinks", "Always send links", "Even for emojis and stickers you can already use.", "VENUS_FREENITRO")])]);
-        toggle("chat", "noTyping", "Hide that you're typing", "You still see when others type.");
-        withOptions("chat", "quickDelete", "VENUS_QUICKDELETE", "Delete messages without asking", "Skips \"are you sure?\". This can't be undone.", "Instant delete",
-            () => [section("Also skip asking", [option("quickDeleteEmbeds", "Removing link previews", "When you remove an embed from your message.", "VENUS_QUICKDELETE")])]);
-        toggle("chat", "jumpToTop", "Add a jump to first message button", "In every chat, next to Discord's jump to present button.");
-        toggle("chat", "picker", "Show file sizes when attaching", "On photos and videos in the attachment picker.");
-        toggle("chat", "favouriteAnything", "Favourite any image or video", "From the media viewer, like GIFs.");
-        toggle("chat", "hideGift", "Hide the gift button", "On the message bar.");
-        withOptions("chat", "gestures", "VENUS_GESTURES", "Double-tap a message to reply", "Your own messages open for editing instead. Replaces double-tap to react.", "Message tap gestures", GestureSettings);
-        withOptions("people", "pastelize", "VENUS_PASTELIZE", "Give names soft pastel colors", "Names and mentions without a role color.", "Pastel names",
-            () => [section("Options", [option("pastelAll", "Color every name", "Even people with a role color.", "VENUS_PASTELIZE"),
-                option("pastelWebhookName", "Color webhooks by name", "Webhooks with the same name share a color.", "VENUS_PASTELIZE"),
-                option("pastelContent", "Color message text", "The message as well as the name.", "VENUS_PASTELIZE")])]);
-        withOptions("people", "platformIndicators", "VENUS_PLATFORMINDICATORS", "Show which devices people are on", "Desktop, mobile, web, console or VR icons.", "Device icons",
+             section("Links", [option("hyperlinks", "Show the name instead of the link", "Chat shows the emoji or sticker name as a link, instead of the whole link.", "VENUS_FREENITRO"),
+                option("forceLinks", "Always send links", "Even for emojis and stickers you could send normally.", "VENUS_FREENITRO")])]);
+        toggle("chat", "noTyping", "Hide that you're typing", "Others don't see \"typing...\" for you. You still see when they type.");
+        withOptions("chat", "quickDelete", "VENUS_QUICKDELETE", "Delete messages without asking", "Skips \"are you sure?\" when you delete a message. It can't be undone.", "Instant delete",
+            () => [section("Also skip asking", [option("quickDeleteEmbeds", "Removing link previews", "Also skip it when you remove a link preview from your own message.", "VENUS_QUICKDELETE")])]);
+        toggle("chat", "jumpToTop", "Add a jump to first message button", "In every chat, and in the menu when you hold a channel or thread.");
+        toggle("chat", "picker", "Show file sizes when attaching", "Shows each photo and video's size in the attachment picker.");
+        toggle("chat", "favouriteAnything", "Favourite any image or video", "Adds the favourite star to any image or video in the media viewer, like GIFs.");
+        toggle("chat", "hideGift", "Hide the gift button", "Removes the Nitro gift button next to the message box.");
+        withOptions("chat", "gestures", "VENUS_GESTURES", "Double-tap a message to reply", "Your own messages open for editing, and three taps delete them. Double-tap no longer reacts.", "Message tap gestures", GestureSettings);
+        withOptions("people", "pastelize", "VENUS_PASTELIZE", "Give names soft pastel colors", "Names and mentions without a role color get a color picked from their user ID, so each person always has the same one.", "Pastel names",
+            () => [section("Options", [option("pastelAll", "Color every name", "Also replace role colors with each person's pastel color.", "VENUS_PASTELIZE"),
+                option("pastelWebhookName", "Color webhooks by name", "Pick a webhook's color from its name, so webhooks with the same name match. Off: from its ID.", "VENUS_PASTELIZE"),
+                option("pastelContent", "Color message text", "Color what they write too, in a lighter shade of their name color.", "VENUS_PASTELIZE")])]);
+        withOptions("people", "platformIndicators", "VENUS_PLATFORMINDICATORS", "Show which devices people are on", "Desktop, mobile, web, console or VR icons, colored by status.", "Device icons",
             () => [section("Show icons", [option("piDmHeader", "On the DM top bar", "Next to the name at the top of a DM.", "VENUS_PLATFORMINDICATORS"),
-                option("piUserList", "In lists", "Members, friends, DMs and people in voice.", "VENUS_PLATFORMINDICATORS"),
+                option("piUserList", "In lists", "In the member list, friends, DMs and voice.", "VENUS_PLATFORMINDICATORS"),
                 option("piProfile", "On profiles", "Next to the name on a profile.", "VENUS_PLATFORMINDICATORS")]),
-             section("Avatars", [option("piHideMobile", "Plain status dot", "Hide Discord's phone badge, since the icons already show mobile.", "VENUS_PLATFORMINDICATORS")])]);
-        toggle("people", "copyBios", "Select and copy profile bios", "Links in bios still work.");
-        withOptions("people", "reviewDB", "VENUS_REVIEWDB", "Show and write reviews of users and servers", "From the community ReviewDB service. Opening reviews shares that ID with it.", "Reviews", ReviewSettings);
-        withOptions("servers", "readAll", "VENUS_READALL", "Add a Read all button to the server list", "Under Direct Messages. Hold it for a one-time choice.", "Read all", ReadAllSettings);
-        toggle("servers", "hiddenChannels", "Show channels you can't open, with a lock", "You still can't read them or join locked voice channels.");
-        toggle("servers", "dashless", "Show spaces instead of dashes in channel names", "Only changes how they look.");
-        toggle("servers", "hideQuestDock", "Hide the Quests promotion", "Above your profile bar.");
+             section("Avatars", [option("piHideMobile", "Plain status dot", "Hide Discord's phone badge on avatars, since the icons already show mobile.", "VENUS_PLATFORMINDICATORS")])]);
+        toggle("people", "copyBios", "Select and copy profile bios", "Hold a bio to select and copy part of it. Links still work.");
+        withOptions("people", "reviewDB", "VENUS_REVIEWDB", "Show and write reviews of users and servers", "From the community ReviewDB service. Opening a profile's or server's reviews sends its ID to ReviewDB.", "Reviews", ReviewSettings);
+        withOptions("servers", "readAll", "VENUS_READALL", "Add a Read all button to the server list", "Under Direct Messages. Choose what it clears, or hold it to choose once.", "Read all", ReadAllSettings);
+        toggle("servers", "hiddenChannels", "Show channels you can't open, with a lock", "Shows their name, and when they were made and last used. You still can't read them or join locked voice channels.");
+        toggle("servers", "dashless", "Show spaces instead of dashes in channel names", "Only changes how names look, not the channels.");
+        toggle("people", "hideCall", "Hide the call button on profiles", "Message stretches across to fill the space.");
+        toggle("servers", "hideQuestDock", "Hide the Quests promotion", "Hides the Quest banner above your profile bar. Quests still work.");
         toggle("extras", "systemFont", "Force system font", "");
         toggle("extras", "systemEmoji", "Force system emojis", "");
-        withOptions("extras", "quests", "VENUS_QUESTS", "Complete Quests automatically", "In the background while Discord is open. You still claim rewards.", "Quests", QuestSettings);
+        withOptions("extras", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Video, Play and Activity Quests, in the background while Discord is open. You still claim rewards.", "Quests", QuestSettings);
         const sections = [section("Chat", groups.chat), section("Profiles and people", groups.people),
             section("Servers and channels", groups.servers), section("More", groups.extras)].filter(entry => entry.settings.length);
         route(P, "Settings", sections);
@@ -1792,11 +1794,15 @@
     // (DoubleTapToReactUtils 7414, which every double-tap reaches), so Discord's own "double-tap to
     // react" setting needs nothing changed. Reply and edit go through the same actions as swiping:
     // replyToMessage (11047) and LongPressMessageActionSheetUtils.handleEdit (11032).
-    // A third tap arrives as a second double-tap on the same message: Android has already waited for the
-    // second tap, so the reply waits this long for a third before it opens.
-    const GESTURE_TRIPLE_MS = 260, GESTURE_PAIR_MS = 1500, GESTURE_DELETED_MS = 3000;
-    const gesture = {timer:undefined, pending:null, pendingAt:0, deleted:null, deletedAt:0};
-    function gestureCancel() { if (gesture.timer !== undefined && global.clearTimeout) global.clearTimeout(gesture.timer); gesture.timer = undefined; gesture.pending = null; }
+    // The third tap is not a second double-tap. Discord's native tap tracker (NestedScrollOnTouchTracker)
+    // starts over once a double-tap fires, so the next touch is reported as a single tap
+    // (MessagesHandlers.handleTapMessage, 10905), and only after Android's double-tap timeout (300 ms)
+    // passes with no fourth tap. Waiting 260 ms for another double-tap meant the editor always opened
+    // first. Edit now waits long enough for that single tap: a quick third tap lands 400-550 ms after
+    // the double-tap. A second double-tap (tap four) still counts too.
+    const GESTURE_TRIPLE_MS = 650, GESTURE_PAIR_MS = 1500, GESTURE_DELETED_MS = 3000;
+    const gesture = {timer:undefined, pending:null, channel:null, pendingAt:0, deleted:null, deletedAt:0};
+    function gestureCancel() { if (gesture.timer !== undefined && global.clearTimeout) global.clearTimeout(gesture.timer); gesture.timer = undefined; gesture.pending = null; gesture.channel = null; }
     function gestureOwn(message) {
         const user = userStore && userStore.getCurrentUser();
         return !!(user && message && message.author && message.author.id === user.id);
@@ -1821,6 +1827,37 @@
         try { const result = actions.deleteMessage(channel && channel.id || message.channel_id, message.id, false);
             if (result && typeof result.catch === "function") result.catch(() => {}); return true; } catch (_) { return false; }
     }
+    function gestureDeletePending(now) {
+        const message = gesture.pending, channel = gesture.channel;
+        gestureCancel();
+        gesture.deleted = message.id; gesture.deletedAt = now;
+        gestureDelete(message, channel);
+    }
+    // A single tap on the message that was just double-tapped is the third tap.
+    function gestureTap(event) {
+        if (!enabled("gestures") || !settings.gestureTripleDelete || !gesture.pending) return false;
+        const data = event && event.nativeEvent, id = data && data.messageId, now = Date.now();
+        if (id == null || String(id) !== String(gesture.pending.id) || now - gesture.pendingAt >= GESTURE_PAIR_MS) return false;
+        gestureDeletePending(now);
+        return true;
+    }
+    // MessagesHandlers defines handleTapMessage on each instance in its constructor, so it's wrapped per instance.
+    function hookTapHandlers(exports) {
+        const Handlers = exports && exports.MessagesHandlers;
+        if (typeof Handlers !== "function" || typeof Reflect === "undefined" || typeof Reflect.construct !== "function") return exports;
+        function MessagesHandlers() {
+            const handlers = Reflect.construct(Handlers, arguments);
+            const tap = handlers && handlers.handleTapMessage;
+            if (typeof tap === "function") handlers.handleTapMessage = function (event) {
+                try { if (gestureTap(event)) return undefined; } catch (_) {}
+                return tap.apply(this, arguments);
+            };
+            return handlers;
+        }
+        MessagesHandlers.prototype = Handlers.prototype;
+        try { Object.setPrototypeOf(MessagesHandlers, Handlers); } catch (_) {}
+        return replaceValue(exports, "MessagesHandlers", MessagesHandlers);
+    }
     function gestureAct(message, channel) {
         if (!message || !channel) return;
         const own = gestureOwn(message);
@@ -1835,19 +1872,15 @@
         // The taps that just deleted a message can land once more before it disappears: ignore them.
         if (gesture.deleted === id && now - gesture.deletedAt < GESTURE_DELETED_MS) { gestureCancel(); return; }
         if (gesture.pending && gesture.pending.id === id && now - gesture.pendingAt < GESTURE_PAIR_MS) {
-            const own = gestureOwn(message);
-            gestureCancel();
-            if (settings.gestureTripleDelete && own) {
-                gesture.deleted = id; gesture.deletedAt = now;
-                gestureDelete(message, channel);
-            } else gestureAct(message, channel);
+            if (settings.gestureTripleDelete && gestureOwn(message)) { gesture.channel = channel; gestureDeletePending(now); return; }
+            gestureCancel(); gestureAct(message, channel);
             return;
         }
         gestureCancel();
         // Nothing waits for a third tap when it couldn't delete anything.
         if (!settings.gestureTripleDelete || !gestureOwn(message)) { gestureAct(message, channel); return; }
-        gesture.pending = message; gesture.pendingAt = now;
-        gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending; gesture.pending = null;
+        gesture.pending = message; gesture.channel = channel; gesture.pendingAt = now;
+        gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending; gesture.pending = null; gesture.channel = null;
             if (waiting === message) gestureAct(message, channel); }, GESTURE_TRIPLE_MS);
     }
     function GestureSettings() {
@@ -1855,12 +1888,13 @@
         const ui = reviewUI();
         if (!RN) return null;
         const Group = ui.TableRowGroup || RN.View, on = enabled("gestures");
-        const choices = [["edit", "Edit it"], ["reply", "Reply to it"]];
+        const choices = [["edit", "Edit it", "Opens it for editing, if Discord lets you edit it. Otherwise you reply."],
+            ["reply", "Reply to it", "Starts a reply, like double-tapping anyone else's message."]];
         const groups = [
-            el(Group, {key:"own", title:"Double-tap your own message"}, choices.map(([value, label]) => ui.TableRow &&
-                el(ui.TableRow, {key:value, label:(settings.gestureOwn === value ? "\u2713 " : "") + label, disabled:!on, onPress:() => setSetting("gestureOwn", value)}))),
+            el(Group, {key:"own", title:"Double-tap your own message"}, choices.map(([value, label, subLabel]) => ui.TableRow &&
+                el(ui.TableRow, {key:value, label:(settings.gestureOwn === value ? "\u2713 " : "") + label, subLabel, disabled:!on, onPress:() => setSetting("gestureOwn", value)}))),
             el(Group, {key:"triple", title:"Tap three times"},
-                switchRow(ui.TableSwitchRow, "gestureTripleDelete", "Delete your own message", "Tap one of your messages three times to delete it, without asking."))];
+                switchRow(ui.TableSwitchRow, "gestureTripleDelete", "Delete your own message", "Tap one of your messages three times quickly to delete it, without asking. Someone else's message is never deleted."))];
         return settingsBody(ui, groups);
     }
     // Quest Completer: finds unfinished Quests and completes them in the background, with no screen.
@@ -2308,7 +2342,7 @@
         const text = questStatusText();
         const groups = [
             el(Group, {key:"types", title:"Quests to complete"},
-                toggle("questsVideo", "Video Quests", "Reports the video as watched, at normal speed."),
+                toggle("questsVideo", "Video Quests", "Reports the video as watched, at normal speed, without playing it."),
                 toggle("questsPlay", "Play Quests", "Counts time for the game without installing or starting it."),
                 toggle("questsActivity", "Activity Quests", "Counts time in an Activity without starting one."),
                 toggle("questsEnroll", "Accept new Quests", "Accept Quests you haven't started, one at a time. Off: only Quests you accepted yourself.")),
@@ -2324,8 +2358,10 @@
             el(RN.View,{style:{paddingVertical:24,paddingHorizontal:12,gap:24}},groups);
         return RN.ScrollView ? el(RN.ScrollView,scroll || null,body) : body;
     }
+    // Greyed out while the main switch is off, like the options on the Settings list.
     function switchRow(Switch,key,label,subLabel) {
-        return Switch ? el(Switch,{key,label,subLabel,value:settings[key],onValueChange:value=>setSetting(key,value)}) : null;
+        const owner=featureFor(key);
+        return Switch ? el(Switch,{key,label,subLabel,value:settings[key],disabled:owner!==key && !settings[owner],onValueChange:value=>setSetting(key,value)}) : null;
     }
     // Settings page: Discord's own radio list (TableRadioGroup 5995 / TableRadioRow 5994).
     function ReadAllSettings() {
@@ -2712,8 +2748,8 @@
                 el(ui.TableRow,{key:"logout",label:"Sign out of ReviewDB",variant:authenticated ? "danger" : undefined,disabled:!authenticated,onPress:clearReviewAuth,
                     subLabel:"ReviewDB stays in Discord's Authorized Apps until you remove it there."})),
             el(Group,{key:"settings",title:"Settings"},
-                toggle("reviewThemedSend","Profile-colored send button","Match the send button to the profile's theme colors."),
-                toggle("reviewWarning","Show the be-respectful note","Show ReviewDB's reminder at the top of reviews."))];
+                toggle("reviewThemedSend","Profile-colored send button","Color the review send button with the profile's theme colors."),
+                toggle("reviewWarning","Show the be-respectful note","Show ReviewDB's reminder to be respectful above reviews."))];
         return settingsBody(ui,groups);
     }
     function NoDeleteSettings() {
@@ -2728,15 +2764,17 @@
         // An emptied field keeps the current maximum instead of silently resetting it to 512.
         const commit=() => { if (draft) setSetting("noDeleteLimit",draft); setDraft(String(settings.noDeleteLimit)); };
         const Text=inspectedExport(4833,"Text");
-        const hint="Type 1 to "+MAX_DELETED+", then tap done. Now: "+settings.noDeleteLimit+". When it's full, the oldest message is removed.";
+        const hint="How many deleted messages to keep, from 1 to "+MAX_DELETED+". Now: "+settings.noDeleteLimit+". When it's full, the oldest is removed first.";
         const onText=text => setDraft(String(text).replace(/[^0-9]/g,"").slice(0,4));
-        const inputProps={value:draft,keyboardType:"number-pad",maxLength:4,placeholder:"512",onBlur:commit,onSubmitEditing:commit,returnKeyType:"done"};
+        const inputProps={value:draft,keyboardType:"number-pad",maxLength:4,placeholder:"512",onBlur:commit,onSubmitEditing:commit,returnKeyType:"done",
+            // Read-only while NoDelete is off, like the switches above it.
+            editable:!!settings.noDelete,isDisabled:!settings.noDelete};
         // Discord's TextInput reports text via onChange(text); RN's via onChangeText.
         const input=ui.TextInput ? el(ui.TextInput,Object.assign({label:"Maximum saved messages",onChange:onText},inputProps)) :
             el(RN.TextInput,Object.assign({onChangeText:onText,style:{fontSize:16,padding:12}},inputProps));
         const groups=[
-            el(Group,{key:"edits",title:"Edited messages"},toggle("noDeleteEdits","Show what messages said before","Earlier versions appear faded and crossed out above an edited message, from when this is on.")),
-            el(Group,{key:"save",title:"Saving"},toggle("noDeleteSave","Save permanently","Keep deleted messages and earlier versions after Discord restarts, saved only on this phone for your account. When off, they're cleared on restart.")),
+            el(Group,{key:"edits",title:"Edited messages"},toggle("noDeleteEdits","Show what messages said before","Saves what a message said before it was edited, and shows it faded and crossed out above it. Covers edits made while Discord is open, up to 10 per message.")),
+            el(Group,{key:"save",title:"Saving"},toggle("noDeleteSave","Save permanently","Keep deleted messages and what edited messages said before after Discord restarts. Saved only on this phone, for your account. Off: cleared when Discord restarts.")),
             el(Group,{key:"limit",title:"Maximum saved messages"},el(RN.View,{style:{padding:12,gap:8}},input,
                 Text ? el(Text,{variant:"text-xs/medium",color:"text-muted"},hint) : el(RN.Text,{style:{color:"#949ba4",fontSize:12}},hint)))];
         return settingsBody(ui,groups,{keyboardShouldPersistTaps:"handled"});
@@ -2995,6 +3033,40 @@
         useSettings("hideGift");
         return enabled("hideGift") && props && props.shouldShowGiftButton ? Object.assign({}, props, {shouldShowGiftButton:false}) : props;
     }
+    // Hide call button: UserProfileContactButtons (12696) draws Message and Call side by side, each in a
+    // flex:1 slot, or as icon buttons next to a friend button. Its disableCalls prop only greys Call out, so
+    // the Call button and the slot it sat in are left out of what it renders. Message's slot then takes the
+    // whole row, and the change animates when the setting flips while a profile is open.
+    function isCallButton(node) {
+        const icon = node && node.props && node.props.icon, Phone = inspectedExport(7309, "PhoneCallIcon");
+        return !!(Phone && icon && icon.type === Phone);
+    }
+    function withoutCall(node, depth) {
+        if (!node || typeof node !== "object" || depth > 12) return node;
+        if (Array.isArray(node)) {
+            let changed = false;
+            const next = node.map(child => { const value = withoutCall(child, depth + 1); if (value !== child) changed = true; return value; });
+            return changed ? next.filter(child => child !== null) : node;
+        }
+        if (!node.props) return node;
+        if (isCallButton(node)) return null;
+        const children = node.props.children, next = withoutCall(children, depth + 1);
+        if (next === children) return node;
+        // A slot that only held the Call button goes too, so nothing keeps half the row.
+        if (next === null || Array.isArray(next) && !next.length) return null;
+        return React.cloneElement(node, Object.assign({}, node.props, {children:next}));
+    }
+    function profileButtons(orig, self, args) {
+        useSettings("hideCall");
+        const hidden = !!enabled("hideCall"), last = React.useRef(hidden);
+        if (last.current !== hidden) {
+            last.current = hidden;
+            const animate = RN && RN.LayoutAnimation;
+            try { if (animate && animate.Presets) animate.configureNext(animate.Presets.easeInEaseOut); } catch (_) {}
+        }
+        const rendered = orig.apply(self, args);
+        return hidden ? withoutCall(rendered, 0) : rendered;
+    }
     // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
     let noQuestDock = null;
     function questDockHidden() { useSettings("hideQuestDock"); return enabled("hideQuestDock"); }
@@ -3123,6 +3195,7 @@
         if (features.reviewDB && id === 13521) return hookComponent(exports,reviewGuild);
         if (features.hideGift && (id === 11609 || id === 11817) && exports && exports.default)
             return replaceValue(exports, "default", propsComponent(exports.default, withoutGift));
+        if (features.hideCall && id === 12696) return hookComponent(exports, profileButtons);
         if (features.hideQuestDock && id === 14608) return hideQuestHooks(exports);
         if (features.hideQuestDock && id === 14700) return hideQuestDock(exports);
         if (features.systemEmoji && id === 6552 && exports && exports.default)
@@ -3192,6 +3265,7 @@
         // Discord's "double-tap to change your reaction" tip would point at a gesture that now replies.
         if (features.gestures && id === 11105) return hookExport(exports, "DoubleTapEmojiEditNudge", (orig, self, args) => enabled("gestures") ? null : orig.apply(self, args));
         if (features.gestures && id === 1378) userStore = exports.default;
+        if (features.gestures && id === 10905) return hookTapHandlers(exports);
         if (id === 6880) {
             let actions = exports.default;
             if (!actions) return exports;

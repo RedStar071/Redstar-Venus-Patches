@@ -50,7 +50,10 @@ Rules:
 - **Never include:** "Good to know", "Install" or "How to update" sections, SHA-256 sums, test or patch-check
   results, notes about versions that weren't published or numbers that changed, internal module IDs, or
   "your settings carry over". Explanations belong in `README.md`, not in release notes.
-- Keep it short. One bullet per change a user would notice. Merge small related changes.
+- Keep each bullet short, but **list every change a user can see**: every new feature, every bug fixed (including
+  settings that misbehaved) and every general change (wording, layout, defaults) under 🔧 Improvements.
+  Don't drop a visible change to make the notes shorter. Merge only near-identical changes.
+- A new feature means a minor version (1.6.0 → 1.7.0). Fixes and improvements only mean a patch version.
 - Only list changes users can see. Internal work (docs, scripts, these notes) isn't mentioned.
 
 ## The GitHub release

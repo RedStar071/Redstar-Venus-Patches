@@ -72,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -271,22 +271,22 @@ private fun bundledPlugin(key: String, title: String, summary: String) = rawReso
 }
 
 @Suppress("unused")
-val noTyping = bundledPlugin("noTyping", "No typing", "Hides that you're typing. You still see when others type.")
+val noTyping = bundledPlugin("noTyping", "No typing", "Hides \"typing...\" from others when you type. You still see when they type.")
 
 @Suppress("unused")
-val quickDelete = bundledPlugin("quickDelete", "QuickDelete", "Skips the \"are you sure?\" when deleting messages or embeds. Turn it on in Venus settings.")
+val quickDelete = bundledPlugin("quickDelete", "QuickDelete", "Skips the \"are you sure?\" when deleting messages or link previews. Turn it on in Venus settings.")
 
 @Suppress("unused")
-val noDelete = bundledPlugin("noDelete", "NoDelete", "Keeps deleted messages visible, outlined in red. You can save them for good and choose how many to keep. Turn it on in Venus settings.")
+val noDelete = bundledPlugin("noDelete", "NoDelete", "Keeps deleted messages visible, outlined in red, and shows what edited messages said before. You can save both for good and choose how many to keep. Turn it on in Venus settings.")
 
 @Suppress("unused")
-val jumpToTop = bundledPlugin("jumpToTop", "JumpToTop", "Adds a button to jump to the first message in a chat.")
+val jumpToTop = bundledPlugin("jumpToTop", "JumpToTop", "Adds a button to jump to the first message in a chat, channel or thread.")
 
 @Suppress("unused")
 val hiddenChannels = bundledPlugin("hiddenChannels", "Hidden Channels", "Shows channels you can't open, with a lock and when they were created and last used. It can't show their messages. Turn it on in Venus settings.")
 
 @Suppress("unused")
-val pastelize = bundledPlugin("pastelize", "Pastelize", "Gives names and mentions without a role color a soft pastel color.")
+val pastelize = bundledPlugin("pastelize", "Pastelize", "Gives names and mentions without a role color a soft pastel color, picked from each person's user ID so it never changes.")
 
 @Suppress("unused")
 val platformIndicators = bundledPlugin("platformIndicators", "PlatformIndicators", "Shows whether people are on desktop, mobile, web, console or VR, on profiles, in lists and in DMs.")
@@ -497,6 +497,10 @@ val hideGiftButton = bundledPlugin("hideGift", "Hide gift button",
 @Suppress("unused")
 val messageGestures = bundledPlugin("gestures", "Message tap gestures",
     "Double-tap a message to reply, or to edit your own. Tap your own message three times to delete it. Based on Geastures+ by kmmiio99o. Turn it on in Venus settings.")
+
+@Suppress("unused")
+val hideCallButton = bundledPlugin("hideCall", "Hide call button",
+    "Removes the Call button from people's profiles. The Message button stretches across to fill the space.")
 
 @Suppress("unused")
 val hideQuestDock = bundledPlugin("hideQuestDock", "Hide Quests promotion",
