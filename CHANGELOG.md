@@ -1,233 +1,308 @@
-# What's new
+## [1.6.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.5.0...v1.6.0) (2026-10-11)
 
-Every release works with **Discord 348.10 - Stable**. Always patch the original APKM. Releases up to 1.3.6 were for Discord 347.12.
+### ✨ New Features
 
-## 1.6.0 — Tap gestures, earlier versions of edited messages, and fixes
+* **Discord - Message tap gestures:** Double-tap a message to reply, or your own message to edit it
+* **Discord - Message tap gestures:** Tap your own message three times to delete it
+* **Discord - NoDelete:** Show what an edited message said before, faded and crossed out above it
 
-This release includes 1.5.1's passkey message, which wasn't published separately.
+### 🐛 Bug Fixes
 
-### What's new
-- **Double-tap a message to reply.** Turn on **Double-tap a message to reply** in Venus settings. Double-tapping someone's message starts a reply, like swiping does. Double-tapping your own message opens it for editing. To reply to your own messages instead, choose **Reply to it** in its options.
-- **Tap your own message three times to delete it.** It's deleted straight away, with no question asked. Someone else's message is never deleted. Turn it off with **Delete your own message** in its options.
-- Tap gestures start off. While they're on, double-tapping no longer adds a reaction, and Discord's tip about double-tap reactions is hidden. Based on Geastures+ by kmmiio99o.
-- **See what an edited message said before.** With NoDelete on, earlier versions show above an edited message, faded and crossed out in a quote, oldest first. They use Discord's own quote and small text, so they match your theme and font. Mentions and links in them are plain text, so they never ping anyone.
-- It starts on, and covers edits made while Discord is open, up to 10 versions a message. Turn it off with **Show what messages said before** in NoDelete's settings. With **Save permanently** on, earlier versions are saved with your deleted messages.
+* **Discord:** Passkeys and security keys show "RP ID cannot be validated" instead of explaining why they can't work in patched Discord ([#37](https://github.com/VenusIsJaded/Venus-Patches/issues/37))
+* **Discord - NoDelete:** Deleted messages stop saving after the saved file is damaged
+* **Discord - Venus settings:** About shows the wrong version
+* **Discord - Read All:** Error message starts with "Error:"
 
-### Fixed
-- **Passkeys and security keys say why they can't work.** Instead of "[50152] RP ID cannot be validated", Discord points you to **Verify with something else**. Google only lets apps signed by Discord use Discord's passkeys, so no patch can make them work. It isn't caused by the privacy options, and they all stay on.
-- **Saving deleted messages works again after a damaged file.** If the saved file couldn't be read, saving stopped until Discord restarted, and the file was read again on every reconnect. New messages now replace it. A file that only failed to open is left alone, so nothing is lost.
-- **About shows the right version.** 1.5.1 still said 1.5.0.
-- **Read all's error message is clearer.** It no longer starts with "Error:".
+### ⚡ Performance Improvements
 
-### Less work
-- **Saving a deleted message doesn't rewrite every other one.** With Save permanently on, each new deletion turned up to 5,000 kept messages into text again. Each one is now worked out once.
-- **Hidden Channels does less while it's off.** It went through every channel in a server each time the channel list drew. It now does that once, until the server's channels change.
-- **Chats with kept messages check less per message.**
+* **Discord - NoDelete:** Saving a deleted message no longer rewrites every other saved message
+* **Discord - NoDelete:** Chats with kept messages do fewer checks per message
+* **Discord - Hidden Channels:** Do less work while turned off
 
-## 1.5.1 — A clear message when passkeys can't work
+## [1.5.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.4.4...v1.5.0) (2026-10-11)
 
-- **Logging in with a passkey or security key now says what's wrong.** Instead of "[50152] RP ID cannot be validated", Discord says passkeys and security keys only work in Discord signed by Discord, and points you to **Verify with something else**.
-- **Why they can't work:** Google only lets apps signed with Discord's own key use Discord's passkeys. A patched app is signed with your key, so Google refuses before Discord gets the passkey. No patch can change that. It isn't caused by the privacy options, and they all stay on.
-- **To log in,** tap **Verify with something else** and use an authenticator app, SMS or a backup code. You can also add an authenticator app from Discord on the web or a computer.
-- Only the message changes. The error itself and everything else Discord does with it are left alone.
+### ✨ New Features
 
-## 1.5.0 — A tidier Settings page, system font and emojis, and less clutter
+* **Discord:** Add `Force system font` patch
+* **Discord:** Add `Force system emojis` patch
+* **Discord:** Add `Hide gift button` patch
+* **Discord:** Add `Hide Quests promotion` patch
 
-- **Plugins is now Settings.** It's listed first under **Venus** in Discord's settings, above **About**.
-- **No more plugin names.** Each switch says what it does, like **Send audio files as voice messages**, **Hide that you're typing** or just **Force system font**. Simple ones are a single line.
-- **Grouped so it's easy to scan:** Chat, Profiles and people, Servers and channels, and More.
-- **Settings with more options have a switch and a button.** The switch turns it on or off right there. The round arrow button, or tapping the row, opens its options: deleted messages, emoji and sticker links, instant delete, pastel names, device icons, reviews, Read all and Quests.
-- **Options are greyed out while their main switch is off,** and option pages no longer repeat an "Enable" switch.
-- **New: Force system font.** Discord uses your phone's font instead of gg sans, in chat and everywhere else, keeping bold and italic. Code blocks use your phone's monospace font, and fonts people pick for their display name stay as they are. Needs Android 9 or newer. When you change it, Discord offers to reopen so every screen switches at once. Choose **Later** to switch next time you open Discord.
-- **Quest Completer starts off.** It's still selected in Morphe, but does nothing until you turn on **Complete Quests automatically** in Venus settings. If you already turned it on, it stays on.
-- **New: Force system emojis.** Discord shows your phone's emojis instead of its own, in chat, reactions, statuses and the emoji picker. An emoji your phone doesn't have yet stays Discord's, and custom server emojis aren't changed. It starts on. When you change it, Discord offers to reopen, like the font.
-- **New: Hide the gift button.** The Nitro gift button on the message bar is gone. Turn the switch off to bring it back. It starts on.
-- **New: Hide the Quests promotion.** The Quest banner above your profile bar, under the server list, is gone, along with the space kept for it. Quests themselves, and Quest Completer, still work. It starts on.
-- Your other settings carry over, so nothing else turns on or off.
+### 🔧 Improvements
 
-## 1.4.4 — Bug fixes and less work
+* **Discord - Venus settings:** Plugins is now Settings, grouped into Chat, Profiles and people, Servers and channels, and More
+* **Discord - Venus settings:** Each switch says what it does instead of showing a plugin name
+* **Discord - Venus settings:** Settings with more options have a switch and an arrow button
+* **Discord - Venus settings:** Options are greyed out while their main switch is off
+* **Discord - Quest Completer:** Starts off until you turn on Complete Quests automatically
 
-- **Read All no longer brings back an older server list.** The button's list was remembered by the list's data alone, so a later render could get an earlier render's list settings back. Each render now keeps its own, and the button's row is still shared, so the list doesn't redraw.
-- **Quest Completer names the game again after a dropped connection.** If looking up which of a game's files to report failed once, that game went unnamed until Discord restarted. Only Discord's real answer is remembered now.
-- **A dropped connection no longer parks a Quest for 6 hours.** If accepting a Quest failed because you were offline, it was left alone as if Discord had refused it. It's now tried again after about 5 minutes. A real refusal or captcha still waits hours.
-- **Quest Completer stops on a Quest Discord has stopped counting.** It used to send a heartbeat every minute for as long as Discord stayed open. After 5 heartbeats with no new time, it stops and tries again later.
-- **The ReviewDB review menu closes properly.** Its close button closed nothing, because it didn't say which sheet to close.
-- **Opening Discord doesn't rewrite your saved deleted messages.** With **Save permanently** on, the whole file was written again on every start, even when nothing had changed. It's only written now when something did change.
-- **The Quest Completer page doesn't redraw every 5 seconds.** It updates when a Quest starts, finishes or fails, including the moment one finishes.
+## [1.4.4](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.4.3...v1.4.4) (2026-10-10)
 
-## 1.4.3 — Play Quests count again
+### 🐛 Bug Fixes
 
-- **Play Quests finish now.** In 1.4.2 they were accepted, then stopped with "Couldn't finish …: HTTP 401", and Discord showed "Waiting for you to launch … on desktop or connected console". Discord only counts play time that comes from its desktop app or a linked console, so Quest Completer now reports it the way Discord for Windows does.
-- **Activity Quests finish too.** Quests you'd normally play inside Discord, like VALORANT Aces, were refused the same way. They're now reported like desktop does, naming the Activity instead of a call. Activity Quests made for phones still come from your phone.
-- **Only those reports change.** Accepting Quests and watching videos still come from your phone, as before, because Discord allows that.
-- **Paced like the desktop app.** Play time is reported once a minute, not every 20 seconds, and it stops as soon as the Quest is done, the same as desktop. A 15-minute Quest still takes about 15 minutes.
-- **It names the game properly.** Each report says which game it's for, and which of the game's files is running, using Discord's own list for that game. Test builds and launchers are never picked.
-- **Everything else is still your phone.** Messages, calls and the rest of Discord aren't touched.
-- Stream Quests still need a real stream, so they're skipped. You still claim rewards yourself, and Discord may pause Quests on accounts that complete them automatically.
+* **Discord - Read All:** The server list can come back from an older render
+* **Discord - Quest Completer:** A game stays unnamed after one dropped connection
+* **Discord - Quest Completer:** Being offline pauses a Quest for 6 hours
+* **Discord - Quest Completer:** Heartbeats continue after Discord stops counting a Quest
+* **Discord - ReviewDB:** The review menu's close button does nothing
 
-## 1.4.2 — Quest Completer does Play Quests
+### ⚡ Performance Improvements
 
-- **Play Quests work.** Quests like "Play VALORANT for 15 minutes" or "Play AION 2 with your Discord client open" used to be skipped, so they were never accepted or completed. Quest Completer now accepts them and completes them in the background, like video Quests.
-- **No game needed.** Discord counts time for the Quest's game without it being installed or started. It takes as long as the Quest asks, usually 15 minutes.
-- **It works with new and older Quests.** Discord moved where a Quest says which game it's for. Both places are read.
-- **Turn it off on its own** in **Venus → Plugins → Quest Completer → Play Quests**. Turning it off stops a Play Quest that's running.
-- **Video Quests still go first** when a Quest offers both a video and a game.
-- Stream Quests still need a real stream, so they're skipped. You still claim rewards yourself, and Discord may pause Quests on accounts that complete them automatically.
+* **Discord - NoDelete:** Opening Discord no longer rewrites saved deleted messages
+* **Discord - Quest Completer:** The settings page no longer redraws every 5 seconds
 
-## 1.4.1 — Quest Completer
+## [1.4.3](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.4.2...v1.4.3) (2026-10-09)
 
-- **New plugin: Quest Completer.** When you open Discord, it checks for Quests you haven't finished and completes them in the background. No screen opens and nothing needs a tap.
-- **It accepts new Quests for you,** one at a time, then completes them. To only finish Quests you accepted yourself, turn off **Accept new Quests** in its settings.
-- **Video and Activity Quests are supported.** Videos are reported as watched at normal speed, and Activity time is counted without starting the Activity. Play and stream Quests need a computer, so they're skipped.
-- **It keeps checking while Discord is open.** New Quests are picked up every 30 minutes, the one ending soonest goes first, and Discord's own Quest screens show the progress.
-- **Nothing pops up.** If Discord asks for a captcha or says to slow down, that Quest is skipped quietly and tried again later.
-- **Choose what it does** in **Venus → Plugins → Quest Completer**: video Quests, Activity Quests and accepting new Quests can each be turned off, and a status line shows what it has completed.
-- You still claim rewards yourself. Discord may pause Quests on accounts that complete them automatically, so use it at your own risk.
+### 🐛 Bug Fixes
 
-## 1.4.0 — Original names and icons are back, plus fixes
+* **Discord - Quest Completer:** Play Quests stop with "HTTP 401" and never finish
+* **Discord - Quest Completer:** Activity Quests are refused the same way
 
-This release was first published as 1.3.10. Only the number changed.
+### 🔧 Improvements
 
-- **Every feature has its 1.3.8 name again,** in Morphe and in Venus settings: CopyBios, Dashless, FavouriteAnything, File size on picker, FreeNitro, Hidden Channels, JumpToTop, No typing, NoDelete, Pastelize, PlatformIndicators, QuickDelete and ReviewDB. Your settings carry over, so nothing turns on or off.
-- **PlatformIndicators has its original icons back.**
-- **Everything else from 1.3.9 stays,** including the removed size cap and the clearer [NOTICE](NOTICE).
-- **Lowering NoDelete's maximum is instant.** Going from 5000 to 1 used to send up to 4,999 separate deletes. Each chat now gets one.
-- **ReviewDB's refresh works properly.** Refreshing a profile's reviews could push a different profile out of the cache. A failed older request could also wipe newer reviews.
-- **Hidden Channels shows locked channels more reliably** when Discord's permission value comes in a different number type.
-- **Smoother chats with NoDelete or Pastelize on.** Rows in chats with no kept messages skip the deleted-message check, and sorting kept messages does less work.
-- **Opening a server with Hidden Channels on does less work.** Each locked channel's name is looked up once, not twice, and channel names are remembered without extra copies or account lookups.
-- Without NoDelete patched in, Discord no longer schedules a saved-message restore every time it connects.
+* **Discord - Quest Completer:** Play time is reported once a minute, the way Discord for Windows does
 
-## 1.3.9 — New names, new icons and no size cap
+## [1.4.2](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.4.1...v1.4.2) (2026-10-09)
 
-- **Every feature is named after what it does.** Your settings carry over, so nothing turns on or off.
+### ✨ New Features
 
-  | Before | Now |
-  | --- | --- |
-  | CopyBios | **Selectable bios** |
-  | Dashless | **Spaced channel names** |
-  | FavouriteAnything | **Favourite any media** |
-  | File size on picker | **Attachment sizes** |
-  | FreeNitro | **Emoji and sticker links** |
-  | Hidden Channels | **Locked channels** |
-  | JumpToTop | **Jump to first message** |
-  | No typing | **Silent typing** |
-  | NoDelete | **Keep deleted messages** |
-  | Pastelize | **Pastel names** |
-  | PlatformIndicators | **Device badges** |
-  | QuickDelete | **Instant delete** |
-  | ReviewDB | **Reviews** |
+* **Discord - Quest Completer:** Complete Play Quests without installing or starting the game
+* **Discord - Quest Completer:** Add a Play Quests switch
 
-- **Device badges has new icons.** Desktop, web, mobile, console and VR are drawn by Venus, and are still tinted by status.
-- **No more size cap.** Venus had a 119,000-character limit on its built-in code. It was a safety margin, not a real limit, so it's gone. New features won't have to squeeze in.
-- **Clearer credits.** [NOTICE](NOTICE) now says where ideas came from, and that Venus doesn't include code from other client mods.
+## [1.4.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.4.0...v1.4.1) (2026-10-09)
 
-## 1.3.8 — Bug fixes and a smoother Discord
+### ✨ New Features
 
-- **NoDelete keeps your saved messages.** With **Save permanently** on, turning NoDelete off used to erase every saved message. They're now kept, and come back when you turn NoDelete on again.
-- **Read All clears every DM.** One DM with no messages could stop the rest from being marked as read. Lots of unread DMs are also sent in smaller batches, like Discord does.
-- **JumpToTop's menu stays put.** Holding a channel or thread no longer rebuilds the whole menu every time it updates.
-- **Hidden Channels does half the permission checks,** and works more reliably for channels Discord has only partly loaded.
-- **Smoother chats and lists.** PlatformIndicators, ReviewDB and Hidden Channels do much less work when people come online, type or change status.
-- **Less work when messages are deleted.** NoDelete only makes a saved copy when **Save permanently** is on, and turning it off clears a chat in one step.
-- Leaving NoDelete's maximum box without changing it no longer re-saves your settings.
+* **Discord:** Add `Quest Completer` patch, which accepts and completes video and Activity Quests in the background
 
-## 1.3.7 — Discord 348.10
+## [1.4.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.9...v1.4.0) (2026-10-09)
 
-- **Works with Discord 348.10.** Patch the original **348.10 - Stable** APKM. Discord 347.12 is no longer supported, so update Discord before you patch again.
-- **Every plugin and privacy option was checked against 348.10.** All 21 patches apply, and the patched app passes the same checks as before.
-- **Crash reporting is blocked properly.** One of Discord's two crash-report senders was blocked in a way that could break, so reports could still get through. It's now turned off cleanly.
-- **JumpToTop works on threads.** Holding a thread now shows **Jump to top**, like channels and forum posts.
-- **PlatformIndicators shows in the voice panel again,** next to people in the call.
-- **ReviewDB's Copy Text and review cards work again.** Discord moved them in 348.10.
-- **Smoother lists with PlatformIndicators on.** Icons only update when that person's status changes, not every time anyone's does.
+### 🐛 Bug Fixes
 
-## 1.3.6 — Read All button and a Pastelize fix
+* **Discord - ReviewDB:** Refreshing reviews can drop another profile's reviews
+* **Discord - Hidden Channels:** Some locked channels don't show
 
-- **New plugin: Read All.** A **Read all** button sits in the server list, under the Direct Messages button and above the line before your servers. One tap marks everything as read.
-- **Choose what it clears** in **Venus → Plugins → Read All**: **Servers**, **Direct messages**, or **Servers and DMs**. Hold the button to pick a one-time choice without changing the setting.
-- **Pastelize's "Color message text" works.** Messages show in the person's pastel color, instead of turning blue and showing *usernameOnClick* when tapped.
+### 🔧 Improvements
 
-## 1.3.5 — Clearer patches and tidier settings
+* **Discord:** Restore the 1.3.8 feature names in Morphe and Venus settings
+* **Discord - PlatformIndicators:** Restore the original icons
 
-- **Patches are easier to read in Morphe.** They're grouped under **Plugins** and **Privacy**, and every description says what the patch does in plain words.
-- **Venus settings are tidier.** Plugins are listed A to Z, Pastelize has its own page, and the wording is clearer throughout.
-- **Settings update right away.** Changing a PlatformIndicators, ReviewDB or Pastelize option no longer needs you to leave and reopen the page or chat.
-- **File sizes read correctly.** A file just under 1 MB no longer shows as *1024 KB*, and sizes use KB and MB.
-- **NoDelete's maximum is safer to edit.** Clearing the box keeps your number instead of resetting it to 512, and the hint follows your theme.
-- The ReviewDB send button only lights up when there's something to send.
-- **Less background work.** NoDelete no longer rewrites its file for every deleted message when saving is off, logging out no longer rewrites your settings, and Hidden Channels does less work per channel.
-- **Patching is a little faster,** especially on phones.
+### ⚡ Performance Improvements
 
-## 1.3.4 — Morphe source fix and less background work
+* **Discord - NoDelete:** Lowering the maximum is instant
+* **Discord - NoDelete:** Smoother chats with NoDelete or Pastelize on
+* **Discord - Hidden Channels:** Opening a server does less work
 
-- **Adding Venus Patches to Morphe works again.** Morphe showed *"The patch bundle could not be downloaded"* when you added this repository as a source. Importing the `.mpp` file manually wasn't affected.
-- **Less work while you chat.** With Pastelize or NoDelete on, name colors and the red outline are reused instead of being worked out again for every message.
-- **Less work when you open a server** with Hidden Channels on, because the channel list is read once instead of twice.
-- **Fewer checks on every Discord event** and every setting lookup.
-- **Patching uses less memory,** which helps when patching on phones with little RAM.
+## [1.3.9](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.8...v1.3.9) (2026-10-09)
 
-## 1.3.3 — Discord's own voice-message waveform
+### 🔧 Improvements
 
-- **Converted voice messages look like ones recorded in Discord.** They use Discord's own waveform, so quiet audio looks quiet, loud audio looks loud, and the number of bars follows the clip's length.
-- **More audio files work,** including A-law and µ-law WAVs, RF64 and streamed WAVs, and WAVs using ADPCM, GSM or MP3.
-- **More files are recognised as audio,** including `.m4a`, `.opus` and `.3ga` files that some apps label as video.
-- Recordings that were cut off or only partly downloaded now convert up to where they stop.
-- Some AAC, Opus and Vorbis files no longer fail with *Audio format changed during decoding*.
+* **Discord:** Name every feature after what it does
+* **Discord - PlatformIndicators:** New device icons
+* **Discord:** Remove the size cap on Venus's built-in code
 
-## 1.3.2 — Server reviews in the server menu
+## [1.3.8](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.7...v1.3.8) (2026-10-09)
 
-- Hold a server and tap **Reviews** to open its reviews right inside the same menu. Tap again to close them.
-- Reviews now show **Loading**, **No reviews yet**, or an error with **Retry**, so a failed load is no longer silent.
+### 🐛 Bug Fixes
 
-## 1.3.1 — PlatformIndicators crash fix
+* **Discord - NoDelete:** Turning NoDelete off erases saved messages
+* **Discord - Read All:** One empty DM stops the other DMs from being marked as read
+* **Discord - JumpToTop:** The channel menu rebuilds every time it updates
 
-- Fixed the *Rendered fewer/more hooks* errors when you opened or switched chats with PlatformIndicators on.
-- Server and user-menu reviews open more reliably, and give feedback when they can't open.
+### ⚡ Performance Improvements
 
-## 1.3.0 — PlatformIndicators in DMs and instant NoDelete outline
+* **Discord - Hidden Channels:** Half the permission checks
+* **Discord - PlatformIndicators:** Less work when people come online, type or change status
+* **Discord - NoDelete:** Less work when messages are deleted
 
-- PlatformIndicators icons now show in the DM list and on the DM top bar.
-- The red NoDelete outline appears right away, instead of only after you reopen the chat.
+## [1.3.7](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.6...v1.3.7) (2026-10-08)
 
-## 1.2.9 — NoDelete settings and original PlatformIndicators icons
+### 🐛 Bug Fixes
 
-- NoDelete keeps your own deleted messages again, and has a settings page. You can choose **Save permanently** and the **maximum saved messages** (1–5000).
-- PlatformIndicators uses the original plugin's icons and settings, and shows icons in more places, including VR.
-- Server **Reviews** now opens when you tap it.
+* **Discord - Disable crash reporting:** Some crash reports can still be sent
+* **Discord - JumpToTop:** Missing on threads
+* **Discord - PlatformIndicators:** Missing in the voice panel
+* **Discord - ReviewDB:** Copy Text and review cards don't work
 
-## 1.2.8 — Stronger privacy options
+### ⚡ Performance Improvements
 
-- The privacy options can't be bypassed by a cached Discord update anymore.
-- Added **Disable advertising identifiers**.
-- Blocks more crash-report, system-log and metrics paths.
+* **Discord - PlatformIndicators:** Icons only update when that person's status changes
 
-## 1.2.7 — Privacy options
+### 🚀 Updated App Support
 
-- Added **Disable analytics**, **Disable crash reporting**, **Disable telemetry and touch logging** and **Disable install attribution**. You choose them in Morphe, and they're on by default.
+* **Discord:** Add support for `348.10 - Stable` and drop `347.12`
 
-## 1.2.6 — ReviewDB sign-in and NoDelete fixes
+## [1.3.6](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.5...v1.3.6) (2026-10-08)
 
-- ReviewDB sign-in works and stays signed in. Reviews look and behave like the original plugin.
-- NoDelete keeps messages in the right order and no longer causes errors after deleting.
+### ✨ New Features
 
-## 1.2.5 — ReviewDB redesign
+* **Discord:** Add `Read All` patch
 
-- Reviews use Discord's own look and follow your theme.
-- Delete and report now ask before they act, and permissions match Vencord.
+### 🐛 Bug Fixes
 
-## 1.2.4 — New Hidden Channels popup
+* **Discord - Pastelize:** Color message text turns messages blue and shows "usernameOnClick"
 
-- Tapping a locked channel opens a native Discord dialog showing when it was created and last used.
-- Fixed duplicate popups.
+## [1.3.5](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.4...v1.3.5) (2026-10-08)
 
-## 1.2.3 and earlier
+### 🐛 Bug Fixes
 
-- **1.2.3:** ReviewDB settings moved to their own page, and Hidden Channels shows more real names.
-- **1.2.2:** ReviewDB, Hidden Channels, PlatformIndicators and NoDelete look more like the originals.
-- **1.2.1:** Fixed Pastelize, ReviewDB, Hidden Channels, PlatformIndicators and NoDelete.
-- **1.2.0:** Added Pastelize, PlatformIndicators and ReviewDB.
-- **1.1.1:** Faster voice conversion and fewer re-renders.
-- **1.1.0:** Added No typing, QuickDelete, NoDelete, JumpToTop and Hidden Channels.
-- **1.0.0:** Added the **Settings → Venus** section, CopyBios, Dashless, FavouriteAnything and FreeNitro.
-- **1.0.0-dev:** First previews, with picker file sizes and voice messages.
+* **Discord - File size on picker:** Files just under 1 MB show as 1024 KB
+* **Discord - NoDelete:** Clearing the maximum box resets it to 512
+
+### 🔧 Improvements
+
+* **Discord:** Group patches under Plugins and Privacy in Morphe, with plain descriptions
+* **Discord - Venus settings:** Changing an option applies right away
+
+### ⚡ Performance Improvements
+
+* **Discord - NoDelete:** Less background work with saving off
+* **Discord:** Patching is faster
+
+## [1.3.4](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.3...v1.3.4) (2026-10-07)
+
+### 🐛 Bug Fixes
+
+* **Discord:** Adding Venus Patches as a Morphe source shows "The patch bundle could not be downloaded"
+
+### ⚡ Performance Improvements
+
+* **Discord - Pastelize:** Name colors are reused instead of worked out for every message
+* **Discord:** Patching uses less memory
+
+## [1.3.3](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.2...v1.3.3) (2026-10-07)
+
+### ✨ New Features
+
+* **Discord - Custom voice messages:** Use Discord's own waveform
+* **Discord - Custom voice messages:** Support more WAV types and more audio files
+
+### 🐛 Bug Fixes
+
+* **Discord - Custom voice messages:** Some files fail with "Audio format changed during decoding"
+
+## [1.3.2](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.1...v1.3.2) (2026-10-06)
+
+### ✨ New Features
+
+* **Discord - ReviewDB:** Open server reviews inside the server menu
+
+## [1.3.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.0...v1.3.1) (2026-10-06)
+
+### 🐛 Bug Fixes
+
+* **Discord - PlatformIndicators:** "Rendered fewer hooks" errors when switching chats
+
+## [1.3.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.9...v1.3.0) (2026-10-05)
+
+### ✨ New Features
+
+* **Discord - PlatformIndicators:** Show icons in the DM list and DM top bar
+
+### 🐛 Bug Fixes
+
+* **Discord - NoDelete:** The red outline only appears after reopening the chat
+
+## [1.2.9](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.8...v1.2.9) (2026-10-05)
+
+### ✨ New Features
+
+* **Discord - NoDelete:** Add Save permanently and a maximum number of saved messages
+
+### 🐛 Bug Fixes
+
+* **Discord - NoDelete:** Your own deleted messages aren't kept
+* **Discord - ReviewDB:** Server reviews don't open
+
+## [1.2.8](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.7...v1.2.8) (2026-10-05)
+
+### ✨ New Features
+
+* **Discord:** Add `Disable advertising identifiers` patch
+
+### 🐛 Bug Fixes
+
+* **Discord:** A cached Discord update can bypass the privacy options
+
+## [1.2.7](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.6...v1.2.7) (2026-10-05)
+
+### ✨ New Features
+
+* **Discord:** Add `Disable analytics`, `Disable crash reporting`, `Disable telemetry and touch logging` and `Disable install attribution` patches
+
+## [1.2.6](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.5...v1.2.6) (2026-10-05)
+
+### 🐛 Bug Fixes
+
+* **Discord - ReviewDB:** Signing in doesn't work
+* **Discord - NoDelete:** Messages are out of order after deleting
+
+## [1.2.5](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.4...v1.2.5) (2026-10-05)
+
+### 🔧 Improvements
+
+* **Discord - ReviewDB:** Use Discord's own look, and ask before deleting or reporting
+
+## [1.2.4](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.3...v1.2.4) (2026-10-05)
+
+### ✨ New Features
+
+* **Discord - Hidden Channels:** Tapping a locked channel shows when it was created and last used
+
+### 🐛 Bug Fixes
+
+* **Discord - Hidden Channels:** Popups open twice
+
+## [1.2.3](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.2...v1.2.3) (2026-10-04)
+
+### 🐛 Bug Fixes
+
+* **Discord - Hidden Channels:** Some channels show without their real names
+
+## [1.2.2](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.1...v1.2.2) (2026-10-04)
+
+### 🐛 Bug Fixes
+
+* **Discord:** ReviewDB, Hidden Channels, PlatformIndicators and NoDelete don't match the originals
+
+## [1.2.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.0...v1.2.1) (2026-10-04)
+
+### 🐛 Bug Fixes
+
+* **Discord:** Pastelize, ReviewDB, Hidden Channels, PlatformIndicators and NoDelete don't work
+
+## [1.2.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.1.1...v1.2.0) (2026-10-04)
+
+### ✨ New Features
+
+* **Discord:** Add `Pastelize`, `PlatformIndicators` and `ReviewDB` patches
+
+## [1.1.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.1.0...v1.1.1) (2026-10-04)
+
+### ⚡ Performance Improvements
+
+* **Discord - Custom voice messages:** Faster conversion
+
+## [1.1.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.0.0...v1.1.0) (2026-10-04)
+
+### ✨ New Features
+
+* **Discord:** Add `No typing`, `QuickDelete`, `NoDelete`, `JumpToTop` and `Hidden Channels` patches
+
+## [1.0.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.0.0-dev.3...v1.0.0) (2026-10-04)
+
+### ✨ New Features
+
+* **Discord:** Add `Venus settings`, `CopyBios`, `Dashless`, `FavouriteAnything` and `FreeNitro` patches
+
+## [1.0.0-dev.3](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.0.0-dev.1...v1.0.0-dev.3) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* **Discord:** Discord doesn't start after patching
+
+## 1.0.0-dev.1 (2026-10-03)
+
+### ✨ New Features
+
+* **Discord:** Add `File size on picker` and `Custom voice messages` patches

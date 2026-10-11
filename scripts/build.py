@@ -113,6 +113,8 @@ context.Terser.minify(source, {compress:false, mangle:false,
 
 
 def build():
+    # Morphe Manager draws CHANGELOG.md as sections; a malformed entry shows as one grey block.
+    run(sys.executable, ROOT / "scripts/release_notes.py", "--check")
     tools()
     run("node", "--test", "tests/runtime.test.cjs")
     runtime = compact_runtime()
