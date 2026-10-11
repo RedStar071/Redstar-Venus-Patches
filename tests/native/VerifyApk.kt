@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
         // The recorded revision must match the runtime that was actually injected.
         val revision = Regex("const revision\\s*=\\s*\"([^\"]+)\"").find(script)!!.groupValues[1]
         check("\"revision\":\"$revision\"" in metadata) { "injection.json revision does not match the runtime" }
-        for (feature in listOf("copyBios", "dashless", "favouriteAnything", "freeNitro", "noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests"))
+        for (feature in listOf("copyBios", "dashless", "favouriteAnything", "freeNitro", "noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont", "systemEmoji", "hideGift", "hideQuestDock"))
             check("$feature:true" in script) { "Missing selected feature: $feature" }
         check("VenusRoot" !in script && "RN.Modal" !in script && "registerRoot" !in script)
         check("SETTING_RENDERER_CONFIG" in script && "VENUS_FREENITRO" in script)
@@ -173,10 +173,36 @@ fun main(args: Array<String>) {
         dex.getEntry(name)!!.dexFile.classes.count { it.type == "Lcom/facebook/react/bridge/Promise;" }
     }
     check(promises == 1) { "Compile-only Promise stub leaked into the APK" }
+    // Every branch, try range and handler in every patched or added method lands on an instruction start.
+    // ART refuses a class with a bad branch, so one broken guard (1.5.0's double getSize guard) freezes Discord at boot.
+    for (name in dex.dexEntryNames) for (cls in dex.getEntry(name)!!.dexFile.classes) for (method in cls.methods) {
+        val implementation = method.implementation ?: continue
+        val code = implementation.instructions.toList()
+        val starts = HashSet<Int>(); val at = IntArray(code.size); var pc = 0
+        for ((i, instruction) in code.withIndex()) { at[i] = pc; starts += pc; pc += instruction.codeUnits }
+        for ((i, instruction) in code.withIndex()) if (instruction is com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction)
+            check(at[i] + instruction.codeOffset in starts) { "$name ${cls.type}->${method.name}: branch at ${at[i]} lands inside an instruction" }
+        for (block in implementation.tryBlocks) {
+            check(block.startCodeAddress in starts) { "$name ${cls.type}->${method.name}: try block inside an instruction" }
+            block.exceptionHandlers.forEach { check(it.handlerCodeAddress in starts) { "$name ${cls.type}->${method.name}: handler inside an instruction" } }
+        }
+    }
+    // Force system font, when selected: its reopen request owns fileExists, never getSize.
+    val fontBridge = fileModules.single().methods.single { it.name == "fileExists" }
+    val fontCalls = fontBridge.implementation!!.instructions.mapNotNull { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.definingClass }
+    if ("Lapp/venus/font/SystemFont;" in fontCalls)
+        check(bridgeRefs.filterIsInstance<MethodReference>().none { it.definingClass == "Lapp/venus/font/SystemFont;" }) { "Font bridge must not share getSize" }
+    // Force system emojis, when selected: its reopen request owns getVideoDimensions, never a bridge another feature uses.
+    val videoBridge = fileModules.single().methods.single { it.name == "getVideoDimensions" }
+    val videoCalls = videoBridge.implementation!!.instructions.mapNotNull { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.definingClass }
+    if ("Lapp/venus/emoji/SystemEmoji;" in videoCalls) {
+        check(videoCalls.count { it.startsWith("Lapp/venus/") } == 1) { "getVideoDimensions has more than one Venus guard" }
+        check(fontCalls.none { it == "Lapp/venus/emoji/SystemEmoji;" } && bridgeRefs.filterIsInstance<MethodReference>().none { it.definingClass == "Lapp/venus/emoji/SystemEmoji;" }) { "Emoji bridge must not share another FileModule method" }
+    }
     if (args.getOrNull(1) == "signed") {
         val verification = ApkVerifier.Builder(apk).setMinCheckedPlatformVersion(26).build().verify()
         check(verification.isVerified) { "APK signature invalid: ${verification.errors}" }
         println("APK signing certificate and signature verified")
     }
-    println("PASS: no private startup invocation, one main bundle load, guarded HBC98 prelude and footer, preserved original global instructions, host extension method/field/type linkage, ordinary-size bypass, unique classes, valid registers, stubs excluded")
+    println("PASS: no private startup invocation, one main bundle load, guarded HBC98 prelude and footer, preserved original global instructions, host extension method/field/type linkage, ordinary-size bypass, instruction-aligned branches in every method, unique classes, valid registers, stubs excluded")
 }

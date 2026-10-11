@@ -22,15 +22,19 @@
     if (features.reviewDB) selectModules([12627, 13521, 13987, 8510, 5997, 6621, 1378, 585]);
     if (features.readAll) selectModules([15929]);
     if (features.quests) selectModules([585, 7120]);
-    const revision = "1.4.4";
+    if (features.hideGift) selectModules([11609, 11817]);
+    if (features.hideQuestDock) selectModules([14608, 14700]);
+    if (features.systemEmoji) selectModules([6552]);
+    const revision = "1.5.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;
     const deferred = new Map();
-    const settings = { picker: true, voice: false, copyBios: true, dashless: true, favouriteAnything: true, emojis: true, stickers: true, hyperlinks: true, forceLinks: false,
+    const settings = { picker: true, voice: false, copyBios: true, dashless: true, favouriteAnything: true, freeNitro: true, emojis: true, stickers: true, hyperlinks: true, forceLinks: false,
         noTyping: true, quickDelete: false, quickDeleteEmbeds: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512,
         jumpToTop: true, hiddenChannels: false, pastelize:true, pastelAll:false, pastelWebhookName:true, pastelContent:false, platformIndicators:true, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewThemedSend:true, reviewWarning:true, readAll:true, readAllMode:"guilds",
-        quests:true, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true };
+        quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
+        hideGift:true, hideQuestDock:true, systemEmoji:true };
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
     const listeners = new Set();
     const dirty = new Set();
@@ -67,13 +71,20 @@
     const enabled = key => {
         let feature = featureTable.get(key);
         if (feature === undefined) featureTable.set(key, feature = featureFor(key));
-        return features[feature] && settings[key];
+        return features[feature] && settings[key] && (feature !== "freeNitro" || settings.freeNitro);
     };
 
+    // The font Discord started with; the native side reads the same saved setting at launch.
+    let fontInUse = false;
+    // Emojis are the same: the native side reads the saved setting once at launch, and so does this.
+    let emojiInUse = true;
+    function settingsSnapshot() {
+        return JSON.stringify(features.reviewDB && reviewToken && reviewAccount ? Object.assign({}, settings, {reviewAuth:{account:reviewAccount, token:reviewToken}}) : settings);
+    }
     function save() {
         if (!files || status.storage === "loading") return;
         // Keep only the newest waiting snapshot, not one Promise/string per toggle.
-        nextSave = JSON.stringify(features.reviewDB && reviewToken && reviewAccount ? Object.assign({}, settings, {reviewAuth:{account:reviewAccount, token:reviewToken}}) : settings);
+        nextSave = settingsSnapshot();
         if (writePending) return;
         writePending = true;
         function persist() {
@@ -123,6 +134,8 @@
             clearSizes();
         }
         if (features.quests && featureFor(key) === "quests") questsSettingChanged(key, value);
+        if (key === "systemFont" && features.systemFont && status.storage !== "loading" && status.storage !== "waiting" && value !== fontInUse) later(() => askRestart("font"), 0);
+        if (key === "systemEmoji" && features.systemEmoji && status.storage !== "loading" && status.storage !== "waiting" && value !== emojiInUse) later(() => askRestart("emoji"), 0);
         save();
         notify(key);
         return true;
@@ -154,6 +167,8 @@
                     typeof auth.account === "string" && /^\d{17,20}$/.test(auth.account)) { reviewToken = auth.token; reviewAccount = auth.account; }
             }
             status.storage = "ready";
+            fontInUse = settings.systemFont;
+            emojiInUse = settings.systemEmoji;
             if (!enabled("picker")) clearSizes();
             // Persist edits made while the asynchronous restore was in flight.
             if (dirty.size) save();
@@ -443,9 +458,60 @@
         };
     }
     function settingNode(key, title, description, parent) {
-        return { type: "toggle", parent, useTitle: () => title, useDescription: () => description,
+        const node = { type: "toggle", parent, useTitle: () => title,
             useValue: function () { useSettings(key); return settings[key]; },
             onValueChange: value => setSetting(key, value) };
+        // No description, no empty second line under the title.
+        if (description) node.useDescription = () => description;
+        return node;
+    }
+    // Force system font applies from the next start: React Native measures text once but re-reads the
+    // font on every draw, so switching mid-session would draw the new font in space sized for the old one.
+    // Force system emojis is the same: Discord's native chat draws each emoji once and keeps it.
+    // Each one reopens Discord through its own native method, so no method carries two Venus guards.
+    function askRestart(kind) {
+        const font = kind === "font";
+        if (!features[font ? "systemFont" : "systemEmoji"] || !RN || !RN.Alert) return;
+        const on = settings[font ? "systemFont" : "systemEmoji"];
+        RN.Alert.alert(font ? (on ? "Use your phone's font" : "Use Discord's font") : (on ? "Use your phone's emojis" : "Use Discord's emojis"),
+            "Discord needs to reopen to change the " + (font ? "font" : "emojis") + " everywhere.", [
+            {text:"Later", style:"cancel"},
+            {text:"Reopen now", onPress:() => {
+                // Write the setting first, so the reopened Discord starts with it.
+                Promise.resolve().then(() => files && files.writeFile("documents", PREFS, settingsSnapshot(), "utf8"))
+                    .then(() => files && (font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart"))).catch(() => {});
+            }}]);
+    }
+    // A main-list row with its own switch and a separate button that opens more options.
+    // Discord's pressable rows render an element from useTrailing; tapping the row also opens the page.
+    let rowStyles = null;
+    function subpageStyles() {
+        if (rowStyles) return rowStyles;
+        const ui = reviewUI(), c = ui.colors;
+        let hook = null;
+        if (typeof ui.createStyles === "function" && c) try {
+            hook = ui.createStyles({divider:{width:1, height:24, marginHorizontal:12, backgroundColor:c.BORDER_SUBTLE},
+                button:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:c.BACKGROUND_MOD_SUBTLE}});
+        } catch (_) { hook = null; }
+        rowStyles = hook || (() => ({divider:{width:1, height:24, marginHorizontal:12, backgroundColor:"#ffffff1f"},
+            button:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#ffffff14"}}));
+        return rowStyles;
+    }
+    let stackNavigation;
+    function SubpageTrailing(props) {
+        useSettings(props.setting);
+        // Discord's own themed colors; the icon takes its themed default color itself.
+        let styles; try { styles = subpageStyles()(); } catch (_) { styles = null; }
+        styles = styles || {divider:{}, button:{}};
+        const FormSwitch = inspectedExport(6622, "FormSwitch"), Chevron = inspectedExport(6631, "ChevronSmallRightIcon");
+        const Press = RN.Pressable || RN.TouchableOpacity || RN.View;
+        const on = !!settings[props.setting];
+        return el(RN.View, {style:{flexDirection:"row", alignItems:"center"}},
+            FormSwitch ? el(FormSwitch, {value:on, accessibilityLabel:props.label, onValueChange:value => setSetting(props.setting, value)}) : null,
+            el(RN.View, {style:styles.divider}),
+            el(Press, {style:styles.button, onPress:props.open, accessibilityRole:"button", accessibilityLabel:"More options",
+                hitSlop:{top:6, bottom:6, left:6, right:6}},
+                Chevron ? el(Chevron, {size:"sm"}) : el(RN.Text, {style:{fontSize:18, color:"#b5bac1"}}, "\u203A")));
     }
     function nativeRegistry(registry) {
         if (!registry || !registry.ACCOUNT || registry.VENUS_GENERAL) return registry;
@@ -458,81 +524,85 @@
         }
         next.VENUS_VERSION = { type: "static", parent: "VENUS_GENERAL", useTitle: () => "Venus Patches " + revision,
             useDescription: function () { useSettings(); return aboutText(); } };
-        route("VENUS_GENERAL", "General", [section("About", ["VENUS_VERSION"])]);
-        // Listed alphabetically, like Discord's own settings. Plugins with several
-        // options open their own page; simple ones are a single switch.
-        const plugins = [];
-        function plugin(key, title, hint) {
+        route("VENUS_GENERAL", "About", [section("About", ["VENUS_VERSION"])]);
+        // The Settings list: no plugin names, just what each switch does, grouped by where it shows up.
+        const P = "VENUS_PLUGINS";
+        const groups = {chat:[], people:[], servers:[], extras:[]};
+        function toggle(group, key, title, hint) {
             if (!features[key]) return;
-            const id = "VENUS_" + key.toUpperCase(); plugins.push(id);
-            next[id] = settingNode(key, title, hint, "VENUS_PLUGINS");
+            const id = "VENUS_" + key.toUpperCase(); groups[group].push(id);
+            next[id] = settingNode(key, title, hint, P);
         }
-        plugin("copyBios", "CopyBios", "Select and copy text in profile bios.");
-        plugin("voice", "Custom voice messages", "Send an audio file on its own as a real voice message. Needs Android 10 or newer.");
-        plugin("dashless", "Dashless", "Show spaces instead of dashes in channel names.");
-        plugin("favouriteAnything", "FavouriteAnything", "Favourite any image or video from the media viewer.");
-        plugin("picker", "File size on picker", "Show each file's size on photos and videos when you attach them.");
-        if (features.freeNitro) {
-            plugins.push("VENUS_FREENITRO");
-            route("VENUS_FREENITRO", "FreeNitro", [section("Sharing", ["VENUS_EMOJIS", "VENUS_STICKERS"]),
-                section("Options", ["VENUS_HYPERLINKS", "VENUS_FORCELINKS"])], "VENUS_PLUGINS");
-            next.VENUS_EMOJIS = settingNode("emojis", "Free emojis", "Send emojis you can't use as image links.", "VENUS_FREENITRO");
-            next.VENUS_STICKERS = settingNode("stickers", "Free stickers", "Send stickers you can't use as image links. Animated stickers may not move.", "VENUS_FREENITRO");
-            next.VENUS_HYPERLINKS = settingNode("hyperlinks", "Short links", "Show the emoji or sticker name instead of the full link.", "VENUS_FREENITRO");
-            next.VENUS_FORCELINKS = settingNode("forceLinks", "Always send links", "Use links even for emojis and stickers you can already use.", "VENUS_FREENITRO");
+        // A switch plus a button to its own page. Tapping the row opens the page too; the page keeps
+        // a short title in Discord's header, read from its route node like any Discord settings page.
+        const navigators = new Map();
+        function withOptions(group, key, id, title, hint, pageTitle, page) {
+            if (!features[key]) return;
+            // Option pages are built only for patched settings, so unpatched ones leave no nodes behind.
+            if (typeof page === "function" && !page.prototype) page = page();
+            if (Array.isArray(page)) route(id, pageTitle, page, P);
+            else { route(id, pageTitle, [], P); next[id].screen.getComponent = () => page; }
+            const screen = next[id].screen, rowId = id + "_ROW";
+            const open = () => {
+                const navigation = navigators.get(rowId);
+                if (!navigation) return;
+                try { global.__r(14239).onRouteSettingOnPress({navigation, screen}); }
+                catch (_) { try { navigation.navigate(screen.route); } catch (__) {} }
+            };
+            groups[group].push(rowId);
+            next[rowId] = { type: "pressable", parent: P, unsearchable: true, useTitle: () => title, onPress: open,
+                useTrailing: function () {
+                    // Called as a hook by Discord's row, so it can read the settings stack it's in.
+                    // Resolved once, so the row always calls the same number of hooks.
+                    if (stackNavigation === undefined) stackNavigation = inspectedExport(1491, "useStackNavigation") || null;
+                    navigators.set(rowId, stackNavigation ? stackNavigation() : null);
+                    return el(SubpageTrailing, {setting:key, label:title, open});
+                } };
+            if (hint) next[rowId].useDescription = () => hint;
         }
-        plugin("hiddenChannels", "Hidden Channels", "Show channels you can't open, with a lock. You still can't read them or join locked voice channels.");
-        plugin("jumpToTop", "JumpToTop", "Add a button to jump to the first message in a chat.");
-        plugin("noTyping", "No typing", "Hide that you're typing. You still see when others type.");
-        if (features.noDelete) {
-            plugins.push("VENUS_NODELETE");
-            route("VENUS_NODELETE", "NoDelete", [section("NoDelete", [])], "VENUS_PLUGINS");
-            next.VENUS_NODELETE.screen.getComponent = () => NoDeleteSettings;
-        }
-        if (features.pastelize) {
-            const P = "VENUS_PASTELIZE"; plugins.push(P);
-            route(P, "Pastelize", [section("Pastelize", ["VENUS_PASTEL_ENABLED"]),
-                section("Options", ["VENUS_PASTELALL", "VENUS_PASTELWEBHOOKNAME", "VENUS_PASTELCONTENT"])], "VENUS_PLUGINS");
-            next.VENUS_PASTEL_ENABLED = settingNode("pastelize", "Enable Pastelize", "Give names and mentions without a role color a soft pastel color.", P);
-            next.VENUS_PASTELALL = settingNode("pastelAll", "Color every name", "Use pastel colors even for people with a role color.", P);
-            next.VENUS_PASTELWEBHOOKNAME = settingNode("pastelWebhookName", "Color webhooks by name", "Webhooks with the same name share a color.", P);
-            next.VENUS_PASTELCONTENT = settingNode("pastelContent", "Color message text", "Color the message as well as the name.", P);
-        }
-        if (features.platformIndicators) {
-            const P = "VENUS_PLATFORMINDICATORS"; plugins.push(P);
-            route(P, "PlatformIndicators", [section("PlatformIndicators", ["VENUS_PI_ENABLED"]),
-                section("Show icons", ["VENUS_PI_DM", "VENUS_PI_LIST", "VENUS_PI_PROFILE"]), section("Options", ["VENUS_PI_MOBILE"])], "VENUS_PLUGINS");
-            next.VENUS_PI_ENABLED = settingNode("platformIndicators", "Enable PlatformIndicators", "Show whether people are on desktop, mobile, web, console or VR.", P);
-            next.VENUS_PI_DM = settingNode("piDmHeader", "On the DM top bar", "Next to the name at the top of a DM.", P);
-            next.VENUS_PI_LIST = settingNode("piUserList", "In lists", "Members, friends, DMs and people in voice.", P);
-            next.VENUS_PI_PROFILE = settingNode("piProfile", "On profiles", "Next to the name on a profile.", P);
-            next.VENUS_PI_MOBILE = settingNode("piHideMobile", "Plain status dot on avatars", "Hide Discord's phone badge, since the icons already show mobile.", P);
-        }
-        if (features.readAll) {
-            plugins.push("VENUS_READALL");
-            route("VENUS_READALL", "Read All", [section("Read All", [])], "VENUS_PLUGINS");
-            next.VENUS_READALL.screen.getComponent = () => ReadAllSettings;
-        }
-        if (features.quickDelete) {
-            plugins.push("VENUS_QUICKDELETE");
-            route("VENUS_QUICKDELETE", "QuickDelete", [section("Skip confirmation", ["VENUS_QUICKDELETE_MESSAGES", "VENUS_QUICKDELETE_EMBEDS"])], "VENUS_PLUGINS");
-            next.VENUS_QUICKDELETE_MESSAGES = settingNode("quickDelete", "Delete messages instantly", "Skip \"are you sure?\" when deleting a message. This can't be undone.", "VENUS_QUICKDELETE");
-            next.VENUS_QUICKDELETE_EMBEDS = settingNode("quickDeleteEmbeds", "Remove embeds instantly", "Skip \"are you sure?\" when removing a link preview.", "VENUS_QUICKDELETE");
-        }
-        if (features.quests) {
-            plugins.push("VENUS_QUESTS");
-            route("VENUS_QUESTS", "Quest Completer", [section("Quest Completer", [])], "VENUS_PLUGINS");
-            next.VENUS_QUESTS.screen.getComponent = () => QuestSettings;
-        }
-        if (features.reviewDB) {
-            plugins.push("VENUS_REVIEWDB");
-            route("VENUS_REVIEWDB", "ReviewDB", [section("ReviewDB", ["VENUS_REVIEWDB_ENABLED"])], "VENUS_PLUGINS");
-            next.VENUS_REVIEWDB_ENABLED = settingNode("reviewDB", "Enable ReviewDB", "Read and write reviews of users and servers.", "VENUS_REVIEWDB");
-            next.VENUS_REVIEWDB.screen.getComponent = () => ReviewSettings;
-        }
-        // Sorted by the title people see, so the list stays alphabetical as plugins are added.
-        plugins.sort((a, b) => next[a].useTitle().toLowerCase().localeCompare(next[b].useTitle().toLowerCase()));
-        route("VENUS_PLUGINS", "Plugins", [section("Plugins", plugins)]);
+        // Option IDs are the ones earlier releases used, so nothing that points at them moves.
+        const OPTION_IDS = {emojis:"VENUS_EMOJIS", stickers:"VENUS_STICKERS", hyperlinks:"VENUS_HYPERLINKS", forceLinks:"VENUS_FORCELINKS", quickDeleteEmbeds:"VENUS_QUICKDELETE_EMBEDS", pastelAll:"VENUS_PASTELALL", pastelWebhookName:"VENUS_PASTELWEBHOOKNAME", pastelContent:"VENUS_PASTELCONTENT", piDmHeader:"VENUS_PI_DM", piUserList:"VENUS_PI_LIST", piProfile:"VENUS_PI_PROFILE", piHideMobile:"VENUS_PI_MOBILE"};
+        const option = (key, title, hint, parent) => {
+            const id = OPTION_IDS[key], owner = featureFor(key), node = settingNode(key, title, hint, parent);
+            // Greyed out while the main switch on the Settings list is off.
+            node.useIsDisabled = function () { useSettings(owner); return !settings[owner]; };
+            next[id] = node; return id;
+        };
+        withOptions("chat", "noDelete", "VENUS_NODELETE", "Keep deleted messages, outlined in red", "Including your own. Delete one again to hide it.", "Deleted messages", NoDeleteSettings);
+        toggle("chat", "voice", "Send audio files as voice messages", "An audio file sent on its own becomes a real voice message, waveform included. Needs Android 10 or newer.");
+        withOptions("chat", "freeNitro", "VENUS_FREENITRO", "Send emojis and stickers you can't use as links", "They're sent as image links, not real Nitro ones.", "Emoji and sticker links",
+            () => [section("Send as links", [option("emojis", "Emojis", "Custom emojis from other servers, and animated ones.", "VENUS_FREENITRO"),
+                option("stickers", "Stickers", "Stickers from other servers. Animated stickers may not move.", "VENUS_FREENITRO")]),
+             section("Links", [option("hyperlinks", "Show the name instead of the link", "The emoji or sticker name, linked.", "VENUS_FREENITRO"),
+                option("forceLinks", "Always send links", "Even for emojis and stickers you can already use.", "VENUS_FREENITRO")])]);
+        toggle("chat", "noTyping", "Hide that you're typing", "You still see when others type.");
+        withOptions("chat", "quickDelete", "VENUS_QUICKDELETE", "Delete messages without asking", "Skips \"are you sure?\". This can't be undone.", "Instant delete",
+            () => [section("Also skip asking", [option("quickDeleteEmbeds", "Removing link previews", "When you remove an embed from your message.", "VENUS_QUICKDELETE")])]);
+        toggle("chat", "jumpToTop", "Add a jump to first message button", "In every chat, next to Discord's jump to present button.");
+        toggle("chat", "picker", "Show file sizes when attaching", "On photos and videos in the attachment picker.");
+        toggle("chat", "favouriteAnything", "Favourite any image or video", "From the media viewer, like GIFs.");
+        toggle("chat", "hideGift", "Hide the gift button", "On the message bar.");
+        withOptions("people", "pastelize", "VENUS_PASTELIZE", "Give names soft pastel colors", "Names and mentions without a role color.", "Pastel names",
+            () => [section("Options", [option("pastelAll", "Color every name", "Even people with a role color.", "VENUS_PASTELIZE"),
+                option("pastelWebhookName", "Color webhooks by name", "Webhooks with the same name share a color.", "VENUS_PASTELIZE"),
+                option("pastelContent", "Color message text", "The message as well as the name.", "VENUS_PASTELIZE")])]);
+        withOptions("people", "platformIndicators", "VENUS_PLATFORMINDICATORS", "Show which devices people are on", "Desktop, mobile, web, console or VR icons.", "Device icons",
+            () => [section("Show icons", [option("piDmHeader", "On the DM top bar", "Next to the name at the top of a DM.", "VENUS_PLATFORMINDICATORS"),
+                option("piUserList", "In lists", "Members, friends, DMs and people in voice.", "VENUS_PLATFORMINDICATORS"),
+                option("piProfile", "On profiles", "Next to the name on a profile.", "VENUS_PLATFORMINDICATORS")]),
+             section("Avatars", [option("piHideMobile", "Plain status dot", "Hide Discord's phone badge, since the icons already show mobile.", "VENUS_PLATFORMINDICATORS")])]);
+        toggle("people", "copyBios", "Select and copy profile bios", "Links in bios still work.");
+        withOptions("people", "reviewDB", "VENUS_REVIEWDB", "Show and write reviews of users and servers", "From the community ReviewDB service. Opening reviews shares that ID with it.", "Reviews", ReviewSettings);
+        withOptions("servers", "readAll", "VENUS_READALL", "Add a Read all button to the server list", "Under Direct Messages. Hold it for a one-time choice.", "Read all", ReadAllSettings);
+        toggle("servers", "hiddenChannels", "Show channels you can't open, with a lock", "You still can't read them or join locked voice channels.");
+        toggle("servers", "dashless", "Show spaces instead of dashes in channel names", "Only changes how they look.");
+        toggle("servers", "hideQuestDock", "Hide the Quests promotion", "Above your profile bar.");
+        toggle("extras", "systemFont", "Force system font", "");
+        toggle("extras", "systemEmoji", "Force system emojis", "");
+        withOptions("extras", "quests", "VENUS_QUESTS", "Complete Quests automatically", "In the background while Discord is open. You still claim rewards.", "Quests", QuestSettings);
+        const sections = [section("Chat", groups.chat), section("Profiles and people", groups.people),
+            section("Servers and channels", groups.servers), section("More", groups.extras)].filter(entry => entry.settings.length);
+        route(P, "Settings", sections);
         status.menu = true;
         return next;
     }
@@ -542,7 +612,7 @@
         const index = config.sections.findIndex(s => s && Array.isArray(s.settings) && s.settings.includes("ACCOUNT"));
         if (index < 0 || config.sections.some(s => s && s.label === "Venus")) return orig.apply(self, args);
         const sections = config.sections.slice();
-        sections.splice(index + 1, 0, section("Venus", ["VENUS_GENERAL", "VENUS_PLUGINS"]));
+        sections.splice(index + 1, 0, section("Venus", ["VENUS_PLUGINS", "VENUS_GENERAL"]));
         const next = Array.from(args); next[0] = Object.assign({}, config, { sections });
         return orig.apply(self, next);
     }
@@ -2054,7 +2124,6 @@
         const toggle = (key, label, subLabel) => switchRow(Switch, key, label, subLabel);
         const text = questStatusText();
         const groups = [
-            el(Group, {key:"plugin", title:"Quest Completer"}, toggle("quests", "Complete Quests automatically", "Runs in the background whenever Discord is open. No screen opens and nothing needs a tap.")),
             el(Group, {key:"types", title:"Quests to complete"},
                 toggle("questsVideo", "Video Quests", "Reports the video as watched, at normal speed."),
                 toggle("questsPlay", "Play Quests", "Counts time for the game without installing or starting it."),
@@ -2091,7 +2160,6 @@
             el(Group,{key:"mode"},choices.map(([value,label]) => ui.TableRow &&
                 el(ui.TableRow,{key:value,label:(settings.readAllMode===value ? "\u2713 " : "")+label,disabled:!on,onPress:() => setSetting("readAllMode",value)})));
         const groups=[
-            el(Group,{key:"plugin",title:"Read All"},switchRow(Switch,"readAll","Show the Read all button","In the server list, under Direct Messages. Hold it for a one-time choice.")),
             picker];
         return settingsBody(ui,groups);
     }
@@ -2451,7 +2519,6 @@
         const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const toggle=(key,label,subLabel) => switchRow(Switch,key,label,subLabel);
         const groups=[
-            el(Group,{key:"plugin",title:"ReviewDB"},toggle("reviewDB","Enable ReviewDB","Read and write reviews of users and servers. Opening reviews shares that user or server ID with manti.vendicated.dev.")),
             el(Group,{key:"auth",title:"Account"},
                 el(ui.TableRow,{key:"login",label:pending ? "Signing in..." : authenticated ? "Signed in to ReviewDB" : "Sign in to ReviewDB",
                     arrow:true,disabled:!enabled("reviewDB") || authenticated || pending,onPress:authenticateReviews,subLabel:reviewAuthError || (authenticated ? undefined : "Needed to post, delete or report reviews. Your Discord token is never used.")}),
@@ -2481,7 +2548,6 @@
         const input=ui.TextInput ? el(ui.TextInput,Object.assign({label:"Maximum saved messages",onChange:onText},inputProps)) :
             el(RN.TextInput,Object.assign({onChangeText:onText,style:{fontSize:16,padding:12}},inputProps));
         const groups=[
-            el(Group,{key:"plugin",title:"NoDelete"},toggle("noDelete","Enable NoDelete","Keep deleted messages, including your own, outlined in red. Delete one again to hide it.")),
             el(Group,{key:"save",title:"Saving"},toggle("noDeleteSave","Save permanently","Keep them after Discord restarts, saved only on this phone for your account. When off, they're cleared on restart.")),
             el(Group,{key:"limit",title:"Maximum saved messages"},el(RN.View,{style:{padding:12,gap:8}},input,
                 Text ? el(Text,{variant:"text-xs/medium",color:"text-muted"},hint) : el(RN.Text,{style:{color:"#949ba4",fontSize:12}},hint)))];
@@ -2718,6 +2784,59 @@
         next[0]=Object.assign({},props,{menu:Object.assign({},menu,{items:menu.items.concat([{label:"Reviews",action:() => openReviewSheet(id)}])})});
         return orig.apply(self,next);
     }
+    // Rewrites a component's props before Discord's own render, through memo and forwardRef wrappers.
+    // The change runs inside the render, so it may use hooks, and it always runs, so the hook count never changes.
+    function propsComponent(component, change) {
+        if (typeof component === "function") {
+            const patched = function (props) {
+                const args = Array.from(arguments); args[0] = change(props);
+                return component.apply(this, args);
+            };
+            if (component.displayName) patched.displayName = component.displayName;
+            return patched;
+        }
+        if (component && typeof component === "object" && component.$$typeof) for (const key of ["type", "render"]) {
+            const inner = data(component, key);
+            if (!inner || typeof inner !== "function" && typeof inner !== "object") continue;
+            const patched = propsComponent(inner, change);
+            if (patched !== inner) return cloneWith(component, key, patched);
+        }
+        return component;
+    }
+    function withoutGift(props) {
+        useSettings("hideGift");
+        return enabled("hideGift") && props && props.shouldShowGiftButton ? Object.assign({}, props, {shouldShowGiftButton:false}) : props;
+    }
+    // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
+    let noQuestDock = null;
+    function questDockHidden() { useSettings("hideQuestDock"); return enabled("hideQuestDock"); }
+    function hideQuestHooks(exports) {
+        const types = inspectedExport(5764, "AdCreativeType");
+        if (!types || types.NO_FILL === undefined) return exports;
+        noQuestDock = Object.freeze({type:types.NO_FILL});
+        exports = hookExport(exports, "useMobileQuestDock", (orig, self, args) => { const dock = orig.apply(self, args); return questDockHidden() ? noQuestDock : dock; });
+        exports = hookExport(exports, "useMobileQuestDockHeight", (orig, self, args) => { const height = orig.apply(self, args); return questDockHidden() ? 0 : height; });
+        for (const key of ["useIsMobileQuestDockRendered", "useIsMobileQuestDockRenderedBase", "useIsMobileQuestDockVisibleToUser"])
+            exports = hookExport(exports, key, (orig, self, args) => { const value = orig.apply(self, args); return questDockHidden() ? false : value; });
+        return exports;
+    }
+    // The dock itself sits in its own component, so switching it off unmounts it instead of changing its hooks.
+    function hideQuestDock(exports) {
+        const Dock = exports && exports.default;
+        if (!Dock) return exports;
+        const HiddenQuestDock = function (props) { return questDockHidden() ? null : el(Dock, props); };
+        HiddenQuestDock.displayName = "QuestDock";
+        return replaceValue(exports, "default", HiddenQuestDock);
+    }
+    // React Native emojis (reaction lists, statuses, the emoji grid) draw a Unicode emoji with the phone's
+    // font when forceTextEmoji is set. Only Unicode emojis: custom ones have a CDN picture and a word for a name.
+    function systemEmojiProps(props) {
+        if (!emojiInUse || !features.systemEmoji || !props || props.forceTextEmoji || typeof props.name !== "string" || !props.name ||
+            /[A-Za-z0-9_:]/.test(props.name)) return props;
+        const src = props.src, uri = src && typeof src === "object" ? src.uri : src;
+        if (uri != null && !(typeof uri === "string" && /^asset:/.test(uri))) return props;
+        return Object.assign({}, props, {forceTextEmoji:true});
+    }
     function cloneWith(object, key, value) {
         // ES module markers, React tags, symbols and lazy getters are not necessarily enumerable.
         // Object.assign loses them and Metro imports the exports object as a component.
@@ -2814,6 +2933,12 @@
         if (features.reviewDB && id === 13987) return hookExport(exports,"ContextMenuPopout",reviewMenu);
 
         if (features.reviewDB && id === 13521) return hookComponent(exports,reviewGuild);
+        if (features.hideGift && (id === 11609 || id === 11817) && exports && exports.default)
+            return replaceValue(exports, "default", propsComponent(exports.default, withoutGift));
+        if (features.hideQuestDock && id === 14608) return hideQuestHooks(exports);
+        if (features.hideQuestDock && id === 14700) return hideQuestDock(exports);
+        if (features.systemEmoji && id === 6552 && exports && exports.default)
+            return replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps));
         if (id === 14130) exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG);
         if (id === 10874) return hookExport(exports, "createList", settingsSections);
         if (id === 14236) SettingsList = exports.SettingsList;

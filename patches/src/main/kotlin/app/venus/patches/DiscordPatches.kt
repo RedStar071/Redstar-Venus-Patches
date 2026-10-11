@@ -71,7 +71,8 @@ private val runtimeAssets = rawResourcePatch {
             "/*__FEATURES__*/",
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
-                listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests")
+                listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
+                    "systemEmoji", "hideGift", "hideQuestDock")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -202,31 +203,60 @@ val customVoiceMessages = bytecodePatch(
     extendWith("extensions/voice.mpe")
     execute {
         voiceSelected = true
-        val fileSize = Fingerprint(
-            definingClass = "Lcom/discord/file_manager/FileModule;",
+        voiceBridge(Fingerprint(
+            definingClass = FILE_MODULE,
             name = "getSize",
             returnType = "V",
-            parameters = listOf("Ljava/lang/String;", "Lcom/facebook/react/bridge/Promise;")
-        ).method
-        if ((fileSize.implementation?.registerCount ?: 0) - 3 < 2)
-            throw PatchException("File bridge no longer has two safe scratch registers")
-        // Existing TurboModule schemas cannot expose arbitrary new ReactMethod functions.
-        // Dispatch a private URI prefix through the existing Promise bridge; normal size requests fall through.
-        fileSize.addInstructions(0, """
-            const-string v0, "venus-voice-v1:"
-            invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
-            move-result v0
-            if-eqz v0, :venus_original_size
-            invoke-virtual {p0}, Lcom/facebook/react/bridge/ReactContextBaseJavaModule;->getReactApplicationContext()Lcom/facebook/react/bridge/ReactApplicationContext;
-            move-result-object v0
-            invoke-static {p1, p2, v0}, Lapp/venus/extension/VoiceProcessor;->dispatch(Ljava/lang/String;Lcom/facebook/react/bridge/Promise;Landroid/content/Context;)Z
-            move-result v1
-            if-eqz v1, :venus_original_size
-            return-void
-            :venus_original_size
-            nop
-        """)
+            parameters = listOf("Ljava/lang/String;", PROMISE)
+        ).method)
     }
+}
+
+internal const val FILE_MODULE = "Lcom/discord/file_manager/FileModule;"
+internal const val PROMISE = "Lcom/facebook/react/bridge/Promise;"
+/** Instructions [voiceBridge] adds before Discord's own getSize code, counting the nop its label lands on. */
+internal const val VOICE_BRIDGE_SIZE = 11
+
+/**
+ * Existing TurboModule schemas cannot expose arbitrary new ReactMethod functions, so voice messages
+ * dispatch a private URI prefix through getSize's Promise; normal size requests fall through.
+ *
+ * Each Discord method gets at most one Venus prefix. Morphe re-encodes an earlier prefix's branches
+ * when a second one is inserted in front of it, and in 1.5.0 that left getSize's branches pointing
+ * into the middle of an instruction: Android rejected FileModule and Discord froze on its icon.
+ */
+internal fun voiceBridge(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if ((method.implementation?.registerCount ?: 0) - 3 < 2)
+        throw PatchException("File bridge no longer has two safe scratch registers")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        const-string v0, "venus-voice-v1:"
+        invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+        move-result v0
+        if-eqz v0, :venus_original_size
+        invoke-virtual {p0}, Lcom/facebook/react/bridge/ReactContextBaseJavaModule;->getReactApplicationContext()Lcom/facebook/react/bridge/ReactApplicationContext;
+        move-result-object v0
+        invoke-static {p1, p2, v0}, Lapp/venus/extension/VoiceProcessor;->dispatch(Ljava/lang/String;${PROMISE}Landroid/content/Context;)Z
+        move-result v1
+        if-eqz v1, :venus_original_size
+        return-void
+        :venus_original_size
+        nop
+    """)
+}
+
+/** Fails the patch, instead of freezing Discord, if another Venus prefix already sits in this method. */
+internal fun requireUnpatched(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod, marker: String) {
+    val strings = method.implementation?.instructions?.mapNotNull {
+        ((it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference
+            as? com.android.tools.smali.dexlib2.iface.reference.StringReference)?.string
+    } ?: emptyList()
+    val calls = method.implementation?.instructions?.mapNotNull {
+        ((it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference
+            as? com.android.tools.smali.dexlib2.iface.reference.MethodReference)?.definingClass
+    } ?: emptyList()
+    if (strings.any { it.startsWith(marker) } || calls.any { it.startsWith("Lapp/venus/") })
+        throw PatchException("${method.definingClass}->${method.name} already has a Venus guard; each method may only get one")
 }
 
 // Each feature is its own selectable patch, bundled offline in the Venus runtime.
@@ -266,6 +296,207 @@ val reviewDB = bundledPlugin("reviewDB", "ReviewDB", "Read and write reviews of 
 
 @Suppress("unused")
 val readAll = bundledPlugin("readAll", "Read All", "Adds a Read all button to the server list, under the Direct Messages button. Choose whether it clears servers, DMs or both.")
+
+internal const val FONT_MANAGER = "Lcom/facebook/react/common/assets/ReactFontManager;"
+internal const val FONT_STYLE = "Lcom/facebook/react/common/assets/ReactFontManager\$TypefaceStyle;"
+internal const val SYSTEM_FONT = "Lapp/venus/font/SystemFont;"
+/** Instructions [useSystemFont] adds before Discord's own font lookup, counting the nop its label lands on. */
+internal const val SYSTEM_FONT_GUARD_SIZE = 9
+
+/**
+ * Every Discord text, React Native or native chat, gets its font from this one ReactFontManager method.
+ * When Force system font is on, Discord's own families come back as the phone's font; everything else,
+ * and every lookup while it's off, runs Discord's code untouched. 6 registers, 4 of them parameters: v0-v1 are free.
+ */
+internal fun useSystemFont(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val implementation = method.implementation ?: throw PatchException("Font lookup has no code")
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;", FONT_STYLE, "Landroid/content/res/AssetManager;") ||
+        method.returnType != "Landroid/graphics/Typeface;" || implementation.registerCount - 4 < 2)
+        throw PatchException("ReactFontManager.getTypeface ABI changed")
+    method.addInstructions(0, """
+        sget-boolean v0, $SYSTEM_FONT->enabled:Z
+        if-eqz v0, :venus_discord_font
+        invoke-virtual {p2}, $FONT_STYLE->getNearestStyle()I
+        move-result v0
+        invoke-static {p1, v0}, $SYSTEM_FONT->typeface(Ljava/lang/String;I)Landroid/graphics/Typeface;
+        move-result-object v0
+        if-eqz v0, :venus_discord_font
+        return-object v0
+        :venus_discord_font
+        nop
+    """)
+}
+
+/** Reads the saved Force system font setting once, right after Application.onCreate's super call. */
+internal fun readSystemFontSetting(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val first = method.implementation?.instructions?.firstOrNull()
+    val target = (first as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference?.toString()
+    if (first?.opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_SUPER || target != "Landroid/app/Application;->onCreate()V")
+        throw PatchException("MainApplication.onCreate no longer starts with super.onCreate()")
+    method.addInstructions(1, "invoke-static {p0}, $SYSTEM_FONT->init(Landroid/content/Context;)V")
+}
+
+/** Instructions [systemFontBridge] adds before Discord's own fileExists code, counting the nop its label lands on. */
+internal const val SYSTEM_FONT_BRIDGE_SIZE = 9
+
+/**
+ * Lets Venus settings reopen Discord after the font changes. Uses fileExists, not getSize: voice messages
+ * already guard getSize, and a second prefix in one method breaks the first one's branches (see [voiceBridge]).
+ * Venus only ever asks fileExists about absolute paths, so the private prefix can't match a real request.
+ */
+internal fun systemFontBridge(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;", PROMISE) || method.returnType != "V" ||
+        (method.implementation?.registerCount ?: 0) - 3 < 2)
+        throw PatchException("FileModule.fileExists ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        const-string v0, "venus-font-v1:"
+        invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+        move-result v0
+        if-eqz v0, :venus_font_exists
+        invoke-static {p1, p2}, $SYSTEM_FONT->dispatch(Ljava/lang/String;$PROMISE)Z
+        move-result v1
+        if-eqz v1, :venus_font_exists
+        return-void
+        :venus_font_exists
+        nop
+    """)
+}
+
+@Suppress("unused")
+val forceSystemFont = bytecodePatch(
+    name = "Force system font",
+    description = "Lets Discord use your phone's font instead of gg sans. Turn it on in Venus settings. Needs Android 9 or newer."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    extendWith("extensions/font.mpe")
+    execute {
+        additionalSelections += "systemFont"
+        useSystemFont(Fingerprint(
+            definingClass = FONT_MANAGER,
+            name = "getTypeface",
+            returnType = "Landroid/graphics/Typeface;",
+            parameters = listOf("Ljava/lang/String;", FONT_STYLE, "Landroid/content/res/AssetManager;")
+        ).method)
+        systemFontBridge(Fingerprint(
+            definingClass = FILE_MODULE,
+            name = "fileExists",
+            returnType = "V",
+            parameters = listOf("Ljava/lang/String;", PROMISE)
+        ).method)
+        readSystemFontSetting(Fingerprint(
+            definingClass = "Lcom/discord/MainApplication;",
+            name = "onCreate",
+            returnType = "V",
+            parameters = listOf()
+        ).method)
+    }
+}
+
+internal const val SURROGATES = "Lcom/discord/emoji/Surrogates;"
+internal const val SYSTEM_EMOJI = "Lapp/venus/emoji/SystemEmoji;"
+/** Instructions [useSystemEmoji] adds before Discord's own emoji picture lookup, counting the nop its label lands on. */
+internal const val SYSTEM_EMOJI_GUARD_SIZE = 7
+
+/**
+ * Native chat, reactions and the emoji picker all get a Unicode emoji's picture from this one method,
+ * which returns Discord's bundled asset:///emoji-….png. When Force system emojis is on, it returns the
+ * phone's drawing instead; an emoji the phone can't draw, and every lookup while it's off, runs Discord's
+ * code untouched. 3 registers, 1 of them the parameter: v0-v1 are free.
+ */
+internal fun useSystemEmoji(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val implementation = method.implementation ?: throw PatchException("Emoji picture lookup has no code")
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;") || method.returnType != "Ljava/lang/String;" ||
+        implementation.registerCount - 1 < 2)
+        throw PatchException("Surrogates.toAssetUrl ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        sget-boolean v0, $SYSTEM_EMOJI->enabled:Z
+        if-eqz v0, :venus_discord_emoji
+        invoke-static {p0}, $SYSTEM_EMOJI->url(Ljava/lang/String;)Ljava/lang/String;
+        move-result-object v0
+        if-eqz v0, :venus_discord_emoji
+        return-object v0
+        :venus_discord_emoji
+        nop
+    """)
+}
+
+/** Instructions [systemEmojiBridge] adds before Discord's own getVideoDimensions code, counting the nop its label lands on. */
+internal const val SYSTEM_EMOJI_BRIDGE_SIZE = 7
+
+/**
+ * Lets Venus settings reopen Discord after the emoji setting changes. getVideoDimensions only ever rejects on
+ * Android ("only supported on iOS") and Discord's JS never calls it, so a request with the private prefix
+ * goes to Venus and anything else still gets Discord's own answer. No other Venus guard uses this method.
+ */
+internal fun systemEmojiBridge(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;", PROMISE) || method.returnType != "V" ||
+        (method.implementation?.registerCount ?: 0) - 3 < 1)
+        throw PatchException("FileModule.getVideoDimensions ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        const-string v0, "venus-emoji-v1:"
+        invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+        move-result v0
+        if-eqz v0, :venus_emoji_dimensions
+        invoke-static {p1, p2}, $SYSTEM_EMOJI->dispatch(Ljava/lang/String;$PROMISE)V
+        return-void
+        :venus_emoji_dimensions
+        nop
+    """)
+}
+
+/** Reads the saved Force system emojis setting once, right after Application.onCreate's super call. */
+internal fun readSystemEmojiSetting(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val first = method.implementation?.instructions?.firstOrNull()
+    val target = (first as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference?.toString()
+    if (first?.opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_SUPER || target != "Landroid/app/Application;->onCreate()V")
+        throw PatchException("MainApplication.onCreate no longer starts with super.onCreate()")
+    method.addInstructions(1, "invoke-static {p0}, $SYSTEM_EMOJI->init(Landroid/content/Context;)V")
+}
+
+@Suppress("unused")
+val forceSystemEmojis = bytecodePatch(
+    name = "Force system emojis",
+    description = "Shows your phone's emojis instead of Discord's, in chat, reactions and the emoji picker. Emojis your phone doesn't have stay Discord's."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    extendWith("extensions/emoji.mpe")
+    execute {
+        additionalSelections += "systemEmoji"
+        useSystemEmoji(Fingerprint(
+            definingClass = SURROGATES,
+            name = "toAssetUrl-impl",
+            returnType = "Ljava/lang/String;",
+            parameters = listOf("Ljava/lang/String;")
+        ).method)
+        systemEmojiBridge(Fingerprint(
+            definingClass = FILE_MODULE,
+            name = "getVideoDimensions",
+            returnType = "V",
+            parameters = listOf("Ljava/lang/String;", PROMISE)
+        ).method)
+        readSystemEmojiSetting(Fingerprint(
+            definingClass = "Lcom/discord/MainApplication;",
+            name = "onCreate",
+            returnType = "V",
+            parameters = listOf()
+        ).method)
+    }
+}
+
+@Suppress("unused")
+val hideGiftButton = bundledPlugin("hideGift", "Hide gift button",
+    "Removes the Nitro gift button from the message bar.")
+
+@Suppress("unused")
+val hideQuestDock = bundledPlugin("hideQuestDock", "Hide Quests promotion",
+    "Hides the Quests promotion above your profile bar, under the server list.")
 
 internal const val USER_AGENT_INTERCEPTOR = "Lcom/discord/client_info/ClientUserAgent\$DiscordUserAgentInterceptor;"
 /** The start of the Windows desktop User-Agent that Quest Completer sends Play and Activity heartbeats with. */

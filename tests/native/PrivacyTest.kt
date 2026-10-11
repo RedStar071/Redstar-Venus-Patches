@@ -16,6 +16,8 @@ import java.nio.ByteOrder
 import java.util.zip.ZipFile
 
 /** Detached method assembly and in-memory HBC fixtures only. Never runs Patcher or writes an APK. */
+private data class Quad<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
+
 fun main(args: Array<String>) {
     val groups = listOf(HbcPrivacy.analytics, HbcPrivacy.telemetry, HbcPrivacy.crash)
     val natives = NativePrivacy.crash + NativePrivacy.telemetry + NativePrivacy.attribution + NativePrivacy.advertising
@@ -119,6 +121,120 @@ fun main(args: Array<String>) {
         check(methods.any { it.definingClass == call.definingClass && it.name == call.name && it.returnType == call.returnType &&
             it.parameterTypes.map { p -> p.toString() } == call.parameterTypes.map { p -> p.toString() } }) { "Unresolved host call $call" }
     check((guard[10] as FiveRegisterInstruction).let { it.registerC == parameter && it.registerD == 0 }) { "Guard must proceed with the original request" }
+    // Force system font: assembled on Discord's real font lookup and Application.onCreate (detached fixtures).
+    val fontMethod = methods.single { it.definingClass == FONT_MANAGER && it.name == "getTypeface" &&
+        it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", FONT_STYLE, "Landroid/content/res/AssetManager;") }
+    val fontOriginal = fontMethod.implementation!!.instructions.map { it.opcode }
+    val font = MutableMethod(fontMethod)
+    useSystemFont(font)
+    val fontGuarded = font.implementation!!.instructions.toList()
+    check(font.implementation!!.registerCount == fontMethod.implementation!!.registerCount) { "Font guard changed the register count" }
+    check(fontGuarded.size == fontOriginal.size + SYSTEM_FONT_GUARD_SIZE) { "Font guard is ${fontGuarded.size - fontOriginal.size} instructions" }
+    check(fontGuarded.drop(SYSTEM_FONT_GUARD_SIZE).map { it.opcode } == fontOriginal) { "Discord's own font lookup changed" }
+    val fontGuard = fontGuarded.take(SYSTEM_FONT_GUARD_SIZE - 1)
+    check(fontGuard.map { it.opcode } == listOf(Opcode.SGET_BOOLEAN, Opcode.IF_EQZ, Opcode.INVOKE_VIRTUAL, Opcode.MOVE_RESULT,
+        Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT_OBJECT, Opcode.IF_EQZ, Opcode.RETURN_OBJECT)) { "Font guard opcodes: ${fontGuard.map { it.opcode }}" }
+    check(fontGuarded[SYSTEM_FONT_GUARD_SIZE - 1].opcode == Opcode.NOP)
+    val fontUnits = fontGuard.sumOf { it.codeUnits }
+    for (index in listOf(1, 6)) {
+        val at = fontGuard.take(index).sumOf { it.codeUnits }
+        check(at + (fontGuard[index] as OffsetInstruction).codeOffset == fontUnits) { "Font guard branch $index lands at the wrong place" }
+    }
+    // p1 = family name, p2 = TypefaceStyle: only v0 is written.
+    val fontRegs = font.implementation!!.registerCount
+    check(fontRegs == 6) { "Font lookup has $fontRegs registers, expected 6" }
+    check((fontGuard[2] as FiveRegisterInstruction).registerC == fontRegs - 2) { "getNearestStyle must run on the TypefaceStyle parameter" }
+    check((fontGuard[4] as FiveRegisterInstruction).let { it.registerC == fontRegs - 3 && it.registerD == 0 }) { "Font guard passes the wrong family" }
+    for (instruction in fontGuard) if (instruction is OneRegisterInstruction) check(instruction.registerA == 0) { "Font guard writes outside v0" }
+    check(((fontGuard[0] as ReferenceInstruction).reference as FieldReference).let { it.definingClass == SYSTEM_FONT && it.name == "enabled" && it.type == "Z" })
+    check(((fontGuard[2] as ReferenceInstruction).reference as MethodReference).let { ref -> methods.any { it.definingClass == ref.definingClass &&
+        it.name == "getNearestStyle" && it.returnType == "I" && it.parameterTypes.isEmpty() && it.accessFlags and 1 != 0 } }) { "getNearestStyle is gone" }
+    val appCreate = methods.single { it.definingClass == "Lcom/discord/MainApplication;" && it.name == "onCreate" && it.parameterTypes.isEmpty() }
+    val app = MutableMethod(appCreate)
+    readSystemFontSetting(app)
+    val appCode = app.implementation!!.instructions.toList()
+    check(appCode.size == appCreate.implementation!!.instructions.count() + 1 && appCode[0].opcode == Opcode.INVOKE_SUPER &&
+        appCode[1].opcode == Opcode.INVOKE_STATIC && (appCode[1] as FiveRegisterInstruction).registerC == app.implementation!!.registerCount - 1 &&
+        ((appCode[1] as ReferenceInstruction).reference as MethodReference).let { it.definingClass == SYSTEM_FONT && it.name == "init" }) { "Font setting must load right after super.onCreate()" }
+    // Every branch and try range must land on an instruction start. 1.5.0's first build put two guards in getSize,
+    // Morphe re-encoded the first one's branches into the middle of an instruction, and Android froze Discord at boot.
+    fun checkBranches(method: MutableMethod, label: String) {
+        val code = method.implementation!!.instructions.toList()
+        val starts = HashSet<Int>(); val at = IntArray(code.size); var pc = 0
+        for ((i, instruction) in code.withIndex()) { at[i] = pc; starts += pc; pc += instruction.codeUnits }
+        for ((i, instruction) in code.withIndex()) if (instruction is OffsetInstruction)
+            check(at[i] + instruction.codeOffset in starts) { "$label: branch at ${at[i]} lands inside an instruction" }
+        for (block in method.implementation!!.tryBlocks) {
+            check(block.startCodeAddress in starts) { "$label: try block starts inside an instruction" }
+            block.exceptionHandlers.forEach { check(it.handlerCodeAddress in starts) { "$label: handler inside an instruction" } }
+        }
+    }
+    checkBranches(font, "Font guard"); checkBranches(interceptor, "User-Agent guard")
+    // Force system emojis: the one native emoji picture lookup, its reopen bridge and the launch-time setting read.
+    val emojiMethod = methods.single { it.definingClass == SURROGATES && it.name == "toAssetUrl-impl" &&
+        it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;") && it.returnType == "Ljava/lang/String;" }
+    check(emojiMethod.accessFlags and 8 != 0) { "toAssetUrl-impl is no longer static" }
+    val emojiOriginal = emojiMethod.implementation!!.instructions.map { it.opcode }
+    val emoji = MutableMethod(emojiMethod)
+    useSystemEmoji(emoji)
+    val emojiCode = emoji.implementation!!.instructions.toList()
+    check(emoji.implementation!!.registerCount == 3 && emojiMethod.implementation!!.registerCount == 3) { "Emoji lookup register count changed" }
+    check(emojiCode.size == emojiOriginal.size + SYSTEM_EMOJI_GUARD_SIZE && emojiCode.drop(SYSTEM_EMOJI_GUARD_SIZE).map { it.opcode } == emojiOriginal) { "Discord's own emoji lookup changed" }
+    val emojiGuard = emojiCode.take(SYSTEM_EMOJI_GUARD_SIZE - 1)
+    check(emojiGuard.map { it.opcode } == listOf(Opcode.SGET_BOOLEAN, Opcode.IF_EQZ, Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT_OBJECT,
+        Opcode.IF_EQZ, Opcode.RETURN_OBJECT) && emojiCode[SYSTEM_EMOJI_GUARD_SIZE - 1].opcode == Opcode.NOP) { "Emoji guard opcodes: ${emojiGuard.map { it.opcode }}" }
+    for (instruction in emojiGuard) if (instruction is OneRegisterInstruction) check(instruction.registerA == 0) { "Emoji guard writes outside v0" }
+    check((emojiGuard[2] as FiveRegisterInstruction).let { it.registerCount == 1 && it.registerC == 2 }) { "Emoji guard must pass the surrogates parameter" }
+    check(((emojiGuard[2] as ReferenceInstruction).reference as MethodReference).let { it.definingClass == SYSTEM_EMOJI && it.name == "url" })
+    checkBranches(emoji, "Emoji guard")
+    // No caller depends on Discord's asset URL beyond loading it as a picture.
+    val emojiCallers = methods.filter { m -> m.implementation?.instructions?.any { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.let { r ->
+        r.definingClass == SURROGATES && r.name == "toAssetUrl-impl" } == true } == true }.map { it.definingClass + "->" + it.name }.sorted()
+    check(emojiCallers == listOf("Lcom/discord/emoji/RenderableEmoji\$Unicode;->getUrl", "Lcom/discord/emoji_picker/EmojiPickerItem\$Emoji;->getUnicodeUrl")) { "Emoji lookup callers changed: $emojiCallers" }
+    val videoOriginal = methods.single { it.definingClass == FILE_MODULE && it.name == "getVideoDimensions" }
+    check(videoOriginal.implementation!!.instructions.any { ((it as? ReferenceInstruction)?.reference as? StringReference)?.string == "getVideoDimensions is only supported on iOS" }) { "getVideoDimensions now does real work on Android" }
+    val video = MutableMethod(videoOriginal)
+    systemEmojiBridge(video)
+    val videoCode = video.implementation!!.instructions.toList()
+    check(videoCode.size == videoOriginal.implementation!!.instructions.count() + SYSTEM_EMOJI_BRIDGE_SIZE &&
+        videoCode.drop(SYSTEM_EMOJI_BRIDGE_SIZE).map { it.opcode } == videoOriginal.implementation!!.instructions.map { it.opcode }) { "Discord's own getVideoDimensions changed" }
+    check(((videoCode[0] as ReferenceInstruction).reference as StringReference).string == "venus-emoji-v1:")
+    check(videoCode[SYSTEM_EMOJI_BRIDGE_SIZE - 2].opcode == Opcode.RETURN_VOID && videoCode[SYSTEM_EMOJI_BRIDGE_SIZE - 1].opcode == Opcode.NOP)
+    for (instruction in videoCode.take(SYSTEM_EMOJI_BRIDGE_SIZE)) if (instruction is OneRegisterInstruction) check(instruction.registerA == 0) { "Emoji bridge writes outside v0" }
+    checkBranches(video, "Emoji bridge")
+    check(try { systemEmojiBridge(video); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second guard in getVideoDimensions was accepted" }
+    // Font and emoji settings both load right after super.onCreate(), in either order, with nothing else moved.
+    val both = MutableMethod(appCreate)
+    readSystemFontSetting(both); readSystemEmojiSetting(both)
+    val bothCode = both.implementation!!.instructions.toList()
+    check(bothCode.size == appCreate.implementation!!.instructions.count() + 2 && bothCode[0].opcode == Opcode.INVOKE_SUPER &&
+        bothCode.drop(3).map { it.opcode } == appCreate.implementation!!.instructions.drop(1).map { it.opcode } &&
+        bothCode.subList(1, 3).map { ((it as ReferenceInstruction).reference as MethodReference).definingClass }.toSet() == setOf(SYSTEM_FONT, SYSTEM_EMOJI)) { "Setting reads must sit right after super.onCreate()" }
+    checkBranches(both, "MainApplication.onCreate")
+    // The voice and font bridges each own one FileModule method, never the same one.
+    fun fileMethod(name: String) = methods.single { it.definingClass == FILE_MODULE && it.name == name &&
+        it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", PROMISE) && it.returnType == "V" }
+    for ((name, install, size, prefix) in listOf(
+        Quad("getSize", ::voiceBridge, VOICE_BRIDGE_SIZE, "venus-voice-v1:"),
+        Quad("fileExists", ::systemFontBridge, SYSTEM_FONT_BRIDGE_SIZE, "venus-font-v1:"))) {
+        val original = fileMethod(name)
+        val bridge = MutableMethod(original)
+        install(bridge)
+        val code = bridge.implementation!!.instructions.toList()
+        check(bridge.implementation!!.registerCount == original.implementation!!.registerCount) { "$name bridge changed the register count" }
+        check(code.size == original.implementation!!.instructions.count() + size) { "$name bridge is ${code.size - original.implementation!!.instructions.count()} instructions" }
+        check(code.drop(size).map { it.opcode } == original.implementation!!.instructions.map { it.opcode }) { "Discord's own $name changed" }
+        check(code[size - 2].opcode == Opcode.RETURN_VOID && code[size - 1].opcode == Opcode.NOP)
+        check(((code[0] as ReferenceInstruction).reference as StringReference).string == prefix)
+        val parameters = bridge.implementation!!.registerCount - 3
+        for (instruction in code.take(size)) if (instruction is OneRegisterInstruction) check(instruction.registerA in 0..1) { "$name bridge writes outside v0-v1" }
+        check(code.take(size).filterIsInstance<FiveRegisterInstruction>().all { ins ->
+            listOf(ins.registerC, ins.registerD, ins.registerE).take(ins.registerCount).all { it == 0 || it >= parameters } }) { "$name bridge reads a clobbered local" }
+        checkBranches(bridge, "$name bridge")
+        // A second Venus guard in the same method is refused at patch time instead of shipping broken branches.
+        val refused = try { voiceBridge(bridge); false } catch (_: app.morphe.patcher.patch.PatchException) { true }
+        check(refused) { "A second guard in $name was accepted" }
+    }
     fun resolveHost(ref: MethodReference): Boolean = methods.any {
         it.definingClass == ref.definingClass && it.name == ref.name && it.returnType == ref.returnType &&
             it.parameterTypes.map { parameter -> parameter.toString() } == ref.parameterTypes.map { parameter -> parameter.toString() } && it.accessFlags and 1 != 0
@@ -243,7 +359,7 @@ fun main(args: Array<String>) {
             check(calls.single().definingClass == "Ljava/lang/Throwable;" && calls.single().name == "toString")
         } else check(calls.isEmpty())
     }
-    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 80 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility and the Quest Completer desktop User-Agent guard; no APK patched")
+    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 80 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards and one branch-safe guard per FileModule bridge; no APK patched")
 }
 
 

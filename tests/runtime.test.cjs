@@ -470,7 +470,7 @@ test('conversion disabled has no codec bridge calls for audio uploads', async ()
     await upload.reactNativeCompressAndExtractData();assert.equal(calls,0);
 });
 
-const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true};
+const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true};
 function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
@@ -517,7 +517,7 @@ function nitroHarness() {
         sendStickers(...args){assert.equal(this,actions);sent.push(args);return 'stickers';}}},null,6880).default;
     return {...b,user,channel,emojis,stickers,premium,rules,actions,sent};
 }
-test('native registry adds authorless General, Plugins and FreeNitro routes without changing stock config', () => {
+test('native registry adds authorless About, Settings and option-page routes without changing stock config', () => {
     const b=settingsHarness();
     assert.equal(b.original.VENUS_GENERAL,undefined);
     assert.equal(b.registry.ACCOUNT,b.original.ACCOUNT);
@@ -538,7 +538,7 @@ test('Venus section inserts once after Account with immutable list input and sto
     const result=b.builder.createList(input,'extra');
     assert.equal(input.sections.length,2);assert.equal(result.sections.length,3);assert.equal(result.extra,'extra');
     assert.equal(result.sections[0],first);assert.equal(result.sections[1].label,'Venus');
-    assert.deepEqual(Array.from(result.sections[1].settings),['VENUS_GENERAL','VENUS_PLUGINS']);
+    assert.deepEqual(Array.from(result.sections[1].settings),['VENUS_PLUGINS','VENUS_GENERAL']);
     const again=b.builder.createList(result);assert.equal(again.sections,result.sections);
     const other={sections:[{settings:['CHAT']}]};assert.equal(b.builder.createList(other).sections,other.sections);
 });
@@ -548,7 +548,7 @@ test('native toggle closures bind each key independently and respect patch selec
     assert.equal(b.api.settings.dashless,true);
     b.registry.VENUS_EMOJIS.onValueChange(false); assert.equal(b.api.settings.emojis,false);
     assert.equal(b.registry.VENUS_STICKERS.useValue(),true);
-    const selected=settingsHarness({picker:false,voice:false,freeNitro:false});
+    const selected=settingsHarness({picker:false,voice:false,freeNitro:false,copyBios:false});
     assert.equal(selected.registry.VENUS_EMOJIS,undefined);assert.equal(selected.registry.VENUS_COPYBIOS,undefined);
     assert.equal(selected.api.setSetting('emojis',true),false);
 });
@@ -1298,10 +1298,11 @@ async function loadedReviews(b,userId) {
 }
 test('ReviewDB settings: Account and Settings groups with native rows',()=>{
     const b=reviewHarness();b.api.setSetting('reviewDB',true);const tree=b.Settings();
-    assert.deepEqual(walkElements(tree,n=>n.type==='RowGroup').map(n=>n.props.title),['ReviewDB','Account','Settings']);
+    assert.deepEqual(walkElements(tree,n=>n.type==='RowGroup').map(n=>n.props.title),['Account','Settings']);
     const login=walkElements(tree,n=>n.props.label==='Sign in to ReviewDB')[0];assert.equal(login.type,'NativeRow');assert.equal(login.props.arrow,true);assert.equal(login.props.disabled,false);
     const logout=walkElements(tree,n=>n.props.label==='Sign out of ReviewDB')[0];assert.equal(logout.props.disabled,true);assert.match(logout.props.subLabel,/Authorized Apps/);
-    assert.deepEqual(walkElements(tree,n=>n.type==='SwitchRow').map(n=>n.props.label),['Enable ReviewDB','Profile-colored send button','Show the be-respectful note']);
+    // The main switch lives on the Settings list row, not repeated on its page.
+    assert.deepEqual(walkElements(tree,n=>n.type==='SwitchRow').map(n=>n.props.label),['Profile-colored send button','Show the be-respectful note']);
     assert.equal(walkElements(tree,n=>n.type==='Stack')[0].props.spacing,24);
 });
 test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE callback still signs in',async()=>{
@@ -1894,17 +1895,94 @@ test('a sub-option change wakes components subscribed to its plugin',()=>{
     b.load(React,null,19);b.load({View:'View',Text:'Text',Modal:'Modal'},null,17);
     function SettingsList(){} b.load({SettingsList},null,14236);
     const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}},null,14130).SETTING_RENDERER_CONFIG;
-    registry.VENUS_PI_ENABLED.useValue(); // subscribes to "platformIndicators"
+    // The Settings row's switch subscribes to "platformIndicators"; its options must wake it too.
+    b.context.__r=()=>null;
+    const trailing=registry.VENUS_PLATFORMINDICATORS_ROW.useTrailing();trailing.type(trailing.props);
     b.api.setSetting('piProfile',false);assert.ok(renders>0,'PlatformIndicators did not re-render for piProfile');
     const before=renders;b.api.setSetting('copyBios',false);assert.equal(renders,before,'unrelated plugin woke PlatformIndicators');
 });
-test('Venus plugins are alphabetical and Pastelize options have their own page',()=>{
-    const b=settingsHarness();
+function settingsRows(b) {
     const node=b.registry.VENUS_PLUGINS.screen.getComponent()().props.node;
-    const titles=node.sections[0].settings.map(id=>b.registry[id].useTitle());
-    assert.equal(titles.join('|'),[...titles].sort((x,y)=>x.toLowerCase().localeCompare(y.toLowerCase())).join('|'));
-    assert.equal(b.registry.VENUS_PASTELALL.parent,'VENUS_PASTELIZE');assert.equal(b.registry.VENUS_PASTELIZE.type,'route');
+    return JSON.parse(JSON.stringify(node.sections.map(section=>[section.label,section.settings.map(id=>b.registry[id].useTitle())])));
+}
+test('Settings list is grouped, plugin names are gone and every row says what it does',()=>{
+    const b=settingsHarness();
+    assert.equal(b.registry.VENUS_PLUGINS.useTitle(),'Settings');assert.equal(b.registry.VENUS_GENERAL.useTitle(),'About');
+    const rows=settingsRows(b);
+    assert.deepEqual(rows.map(([label])=>label),['Chat','Profiles and people','Servers and channels','More']);
+    const titles=rows.flatMap(([,list])=>list);
+    assert.equal(titles.length,20);assert.equal(new Set(titles).size,20);
+    for (const old of ['CopyBios','Dashless','FavouriteAnything','FreeNitro','Hidden Channels','JumpToTop','No typing','NoDelete','Pastelize',
+        'PlatformIndicators','QuickDelete','Read All','Quest Completer','ReviewDB','Custom voice messages','File size on picker'])
+        assert.ok(!titles.some(title=>title.includes(old)),'plugin name '+old+' still shown');
+    assert.ok(titles.includes('Send audio files as voice messages'));
+    // Simple settings are just their name: no empty second line.
+    assert.equal(b.registry.VENUS_SYSTEMFONT.useTitle(),'Force system font');assert.equal(b.registry.VENUS_SYSTEMFONT.useDescription,undefined);
+    for (const [,list] of rows) for (const title of list) assert.ok(title.length<=48,'too long for one row: '+title);
     assert.match(b.registry.VENUS_VERSION.useTitle(),/^Venus Patches \d/);
+});
+test('settings with more options have a switch and a separate button to their page',()=>{
+    const b=settingsHarness();
+    function FormSwitch(){} function ChevronSmallRightIcon(){}
+    const navigated=[];const navigation={navigate:route=>navigated.push(route)};
+    b.context.__r=id=>({6622:{FormSwitch},6631:{ChevronSmallRightIcon},1491:{useStackNavigation:()=>navigation},
+        14239:{onRouteSettingOnPress:({navigation:nav,screen})=>nav.navigate(screen.route)}}[id]||null);
+    const pages={VENUS_PASTELIZE:'pastelize',VENUS_FREENITRO:'freeNitro',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_QUICKDELETE:'quickDelete',
+        VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests'};
+    for (const [page,key] of Object.entries(pages)) {
+        const row=b.registry[page+'_ROW'];
+        assert.equal(row.type,'pressable');assert.equal(row.parent,'VENUS_PLUGINS');assert.equal(row.unsearchable,true);
+        assert.equal(b.registry[page].type,'route');assert.equal(b.registry[page].parent,'VENUS_PLUGINS');
+        const trailing=row.useTrailing();assert.equal(trailing.props.setting,key);
+        const tree=trailing.type(trailing.props);
+        const nodes=walkElements(tree,()=>true);
+        const sw=nodes.find(n=>n.type===FormSwitch);assert.ok(sw,'no switch on '+page);assert.equal(sw.props.value,!!b.api.settings[key]);
+        sw.props.onValueChange(!b.api.settings[key]);assert.equal(sw.props.value,!b.api.settings[key]);
+        const button=nodes.find(n=>n.props&&n.props.accessibilityLabel==='More options');assert.ok(button);
+        assert.ok(nodes.some(n=>n.type===ChevronSmallRightIcon));
+        button.props.onPress();assert.equal(navigated.at(-1),page);
+        row.onPress();assert.equal(navigated.at(-1),page);
+    }
+    assert.equal(b.registry.VENUS_PASTELALL.parent,'VENUS_PASTELIZE');assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
+    const pastel=b.registry.VENUS_PASTELIZE.screen.getComponent()().props.node;
+    assert.equal(JSON.stringify(pastel.sections.map(x=>x.settings)),JSON.stringify([['VENUS_PASTELALL','VENUS_PASTELWEBHOOKNAME','VENUS_PASTELCONTENT']]));
+});
+test('emoji and sticker links have one main switch on the Settings list',()=>{
+    const b=nitroHarness();
+    const content='<:x:2>';
+    b.actions.sendMessage('channel',{content});assert.notEqual(b.sent.at(-1)[1].content,content);
+    b.api.setSetting('freeNitro',false);
+    b.actions.sendMessage('channel',{content});assert.equal(b.sent.at(-1)[1].content,content);
+    assert.equal(b.premium.canUseEmojisEverywhere(b.user),false);
+    b.api.setSetting('freeNitro',true);assert.equal(b.premium.canUseEmojisEverywhere(b.user),true);
+});
+test('Force system font is saved, and offers to reopen Discord only when the font would change',async()=>{
+    const b=boot({systemFont:true});const writes=[],sizes=[],alerts=[];
+    b.load({View:'View',Text:'Text',Modal:'Modal',Alert:{alert:(...args)=>alerts.push(args)}},null,17);
+    b.context.setTimeout=(fn)=>{fn();return 0;};
+    b.load(native({writeFile:async(...args)=>writes.push(args),fileExists:async uri=>{if(uri.startsWith('venus-font-v1:'))sizes.push(uri);return false;},getSize:async uri=>{sizes.push(uri);return 0;}}));
+    await flush();await flush();
+    assert.equal(b.api.settings.systemFont,false);
+    b.api.setSetting('systemFont',true);await flush();await flush();
+    assert.equal(alerts.length,1);assert.match(alerts[0][1],/reopen/);
+    assert.equal(JSON.parse(writes.at(-1)[2]).systemFont,true);
+    assert.equal(alerts[0][2].map(button=>button.text).join('|'),'Later|Reopen now');
+    alerts[0][2][1].onPress();await flush();await flush();await flush();
+    assert.equal(JSON.parse(writes.at(-1)[2]).systemFont,true);assert.equal(sizes.at(-1),'venus-font-v1:restart');
+    // Switching back before reopening matches the font in use, so there's nothing to ask.
+    b.api.setSetting('systemFont',false);await flush();assert.equal(alerts.length,1);
+    const off=boot({});assert.equal(off.api.setSetting('systemFont',true),false);
+});
+test('options are greyed out while their main switch is off',()=>{
+    const b=settingsHarness();
+    assert.equal(b.registry.VENUS_PASTELALL.useIsDisabled(),false);
+    b.api.setSetting('pastelize',false);assert.equal(b.registry.VENUS_PASTELALL.useIsDisabled(),true);
+    b.api.setSetting('freeNitro',false);assert.equal(b.registry.VENUS_EMOJIS.useIsDisabled(),true);
+});
+test('unselected settings hide their rows and empty groups',()=>{
+    const b=settingsHarness({copyBios:true});
+    assert.deepEqual(settingsRows(b),[['Profiles and people',['Select and copy profile bios']]]);
+    assert.equal(b.registry.VENUS_SYSTEMFONT,undefined);assert.equal(b.registry.VENUS_PASTELIZE_ROW,undefined);
 });
 test('NoDelete does not rewrite an already erased archive for every deletion',async()=>{
     const b=await archiveHarness(null);
@@ -2218,7 +2296,8 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
     b.context.__r = id => native[id] || null;
     b.load({default:dispatcher}, null, 585);
     b.load({default:store}, null, 7120);
-    for (const [key, value] of Object.entries(settings)) b.api.setSetting(key, value);
+    // Quest Completer is patched in but starts switched off; these tests switch it on like a user would.
+    for (const [key, value] of Object.entries(Object.assign({quests:true}, settings))) b.api.setSetting(key, value);
     // Runs fake time forward up to `horizon` (default 20 minutes), firing timers in order.
     async function run(horizon = 20 * 60 * 1000) {
         const end = clock + horizon;
@@ -2422,12 +2501,27 @@ test('Quest Completer asks Discord for Quests when the phone hasn\'t loaded them
 test('Quest Completer settings page has its switches and stays alphabetical', () => {
     const b = settingsHarness();
     assert.equal(b.registry.VENUS_QUESTS.type, 'route'); assert.equal(b.registry.VENUS_QUESTS.parent, 'VENUS_PLUGINS');
-    assert.equal(b.registry.VENUS_QUESTS.useTitle(), 'Quest Completer');
+    assert.equal(b.registry.VENUS_QUESTS.useTitle(), 'Quests');
     const node = b.registry.VENUS_PLUGINS.screen.getComponent()().props.node;
-    assert.ok(node.sections[0].settings.includes('VENUS_QUESTS'));
-    for (const key of ['quests', 'questsVideo', 'questsPlay', 'questsActivity', 'questsEnroll']) {
+    assert.ok(node.sections.at(-1).settings.includes('VENUS_QUESTS_ROW'));
+    // Patched in, but off until you turn it on in Discord.
+    assert.equal(b.api.settings.quests, false); assert.equal(b.api.setSetting('quests', true), true); assert.equal(b.api.settings.quests, true);
+    for (const key of ['questsVideo', 'questsPlay', 'questsActivity', 'questsEnroll']) {
         assert.equal(b.api.settings[key], true); assert.equal(b.api.setSetting(key, false), true); assert.equal(b.api.settings[key], false);
     }
+});
+test('Quest Completer starts off in Discord and sends nothing until you turn it on', async () => {
+    const b = boot({quests:true});
+    const timers = [];
+    b.context.setTimeout = (fn, ms) => { timers.push(fn); return timers.length; };
+    b.context.clearTimeout = () => {};
+    const subs = new Map();
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 585);
+    assert.equal(b.api.settings.quests, false);
+    subs.get('CONNECTION_OPEN')({user:{id:'1'}});
+    assert.equal(timers.length, 0);
+    b.api.setSetting('quests', true);
+    assert.equal(timers.length, 1);
 });
 test('unselected Quest Completer never touches QuestStore or the dispatcher', () => {
     const b = boot({readAll:true});
@@ -2506,4 +2600,74 @@ test('NoDelete restoring an unchanged archive at startup does not rewrite it', a
     const other=await archiveHarness(JSON.stringify({version:1,accountId:'owner',messages:[{id:'1',channelId:'c',message:raw},{id:'bad'}]}));
     await new Promise(r=>setTimeout(r,900));await flush();
     assert.equal(other.writes.filter(([name])=>name==='venus-deleted-messages.json').length,1,'a cleaned-up archive is written once');
+});
+
+test('Force system emojis is saved, starts on and offers to reopen Discord through its own native method',async()=>{
+    const b=boot({systemEmoji:true,systemFont:true});const writes=[],requests=[],alerts=[];
+    b.load({View:'View',Text:'Text',Modal:'Modal',Alert:{alert:(...args)=>alerts.push(args)}},null,17);
+    b.context.setTimeout=(fn)=>{fn();return 0;};
+    b.load(native({writeFile:async(...args)=>writes.push(args),fileExists:async uri=>{requests.push(['exists',uri]);return false;},
+        getVideoDimensions:async uri=>{requests.push(['video',uri]);return 'restarting';}}));
+    await flush();await flush();
+    assert.equal(b.api.settings.systemEmoji,true);
+    b.api.setSetting('systemEmoji',false);await flush();await flush();
+    assert.equal(alerts.length,1);assert.equal(alerts[0][0],"Use Discord's emojis");assert.match(alerts[0][1],/emojis everywhere/);
+    alerts[0][2][1].onPress();await flush();await flush();await flush();
+    assert.equal(JSON.parse(writes.at(-1)[2]).systemEmoji,false);
+    assert.deepEqual(requests.at(-1),['video','venus-emoji-v1:restart']);
+    assert.ok(!requests.some(([kind,uri])=>kind==='exists'&&uri.startsWith('venus-emoji')),'emoji reopen must not share the font bridge');
+    b.api.setSetting('systemEmoji',true);await flush();assert.equal(alerts.length,1);
+    b.api.setSetting('systemFont',true);await flush();assert.equal(alerts.length,2);assert.equal(alerts[1][0],"Use your phone's font");
+    assert.equal(boot({}).api.setSetting('systemEmoji',false),false);
+});
+test('Force system emojis draws only Unicode emojis with the phone font in React Native',()=>{
+    const b=boot({systemEmoji:true});const seen=[];
+    const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
+    const exports=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:Emoji})},null,6552);
+    const render=props=>exports.default.type(props);
+    const twemoji={name:'\u{1F600}',src:'asset:/emoji-1f600.png',textEmojiStyle:{fontSize:16}};
+    render(twemoji);assert.equal(seen.at(-1).forceTextEmoji,true);assert.equal(twemoji.forceTextEmoji,undefined);
+    assert.equal(seen.at(-1).textEmojiStyle,twemoji.textEmojiStyle);
+    const custom={name:'blobwave',src:'https://cdn.discordapp.com/emojis/1.webp'};render(custom);assert.equal(seen.at(-1),custom);
+    const customUnicodeName={name:'\u{1F600}',src:{uri:'https://cdn.discordapp.com/emojis/2.png'}};render(customUnicodeName);assert.equal(seen.at(-1),customUnicodeName);
+    const plain={name:'\u2764\uFE0F'};render(plain);assert.equal(seen.at(-1).forceTextEmoji,true);
+    const off=boot({});const untouched={default:Emoji};assert.equal(off.load(untouched,null,6552).default,Emoji);
+});
+test('Hide gift button removes it from both message bar sides and comes back when switched off',()=>{
+    const b=boot({hideGift:true});reactHarness(b);const seen=[];
+    const left=b.load({displayName:'ChatInputActions',default:Object.freeze({$$typeof:Symbol.for('react.memo'),
+        type:Object.freeze({$$typeof:Symbol.for('react.forward_ref'),render(props,ref){seen.push(['left',props,ref]);return 'left';}})})},null,11609);
+    const right=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:function Right(props){seen.push(['right',props]);return 'right';}})},null,11817);
+    const props=Object.freeze({channel:{id:'1'},shouldShowGiftButton:true,canStartThreads:true});
+    assert.equal(left.default.type.render(props,'ref'),'left');
+    assert.equal(seen.at(-1)[1].shouldShowGiftButton,false);assert.equal(seen.at(-1)[1].canStartThreads,true);assert.equal(seen.at(-1)[2],'ref');
+    assert.equal(left.default.$$typeof,Symbol.for('react.memo'));assert.equal(left.default.type.$$typeof,Symbol.for('react.forward_ref'));
+    right.default.type(props);assert.equal(seen.at(-1)[1].shouldShowGiftButton,false);
+    const none={shouldShowGiftButton:false};right.default.type(none);assert.equal(seen.at(-1)[1],none);
+    b.api.setSetting('hideGift',false);right.default.type(props);assert.equal(seen.at(-1)[1],props);
+    const off=boot({});const stock={default:function Right(){}};assert.equal(off.load(stock,null,11817).default,stock.default);
+});
+test('Hide Quests promotion gives Discord its own empty-dock answer and unmounts the dock',()=>{
+    const b=boot({hideQuestDock:true});const {React}=reactHarness(b);
+    b.context.__r=id=>id===5764?{AdCreativeType:{QUEST:1,BOUNTY:3,NO_FILL:4}}:null;
+    const quest={type:1,quest:{id:'q'}};
+    const hooks=b.load({useMobileQuestDock:()=>quest,useMobileQuestDockHeight:()=>88,useIsMobileQuestDockRendered:()=>true,
+        useIsMobileQuestDockRenderedBase:()=>true,useIsMobileQuestDockVisibleToUser:()=>true,useQuestDockHeroAsset:()=>'hero'},null,14608);
+    assert.deepEqual({...hooks.useMobileQuestDock()},{type:4});assert.equal(hooks.useMobileQuestDockHeight(),0);
+    assert.equal(hooks.useIsMobileQuestDockRendered(),false);assert.equal(hooks.useIsMobileQuestDockRenderedBase(),false);
+    assert.equal(hooks.useIsMobileQuestDockVisibleToUser(),false);assert.equal(hooks.useQuestDockHeroAsset(),'hero');
+    function QuestDock(){return 'dock';}
+    const dock=b.load({default:QuestDock,QuestDockQuestContent:function(){}},null,14700);
+    assert.equal(dock.default({}),null);assert.equal(typeof dock.QuestDockQuestContent,'function');
+    b.api.setSetting('hideQuestDock',false);
+    assert.equal(hooks.useMobileQuestDock(),quest);assert.equal(hooks.useMobileQuestDockHeight(),88);assert.equal(hooks.useIsMobileQuestDockRendered(),true);
+    const element=dock.default({a:1});assert.equal(element.type,QuestDock);assert.equal(element.props.a,1);
+    const off=boot({});const stock={useMobileQuestDock:()=>quest};assert.equal(off.load(stock,null,14608).useMobileQuestDock,stock.useMobileQuestDock);
+});
+test('the new switches sit in their groups with one-line titles',()=>{
+    const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
+    assert.ok(rows.Chat.includes('Hide the gift button'));assert.ok(rows['Servers and channels'].includes('Hide the Quests promotion'));
+    assert.deepEqual(rows.More.slice(0,2),['Force system font','Force system emojis']);
+    assert.equal(b.registry.VENUS_SYSTEMEMOJI.useDescription,undefined);
+    const only=settingsHarness({hideGift:true});assert.deepEqual(settingsRows(only),[['Chat',['Hide the gift button']]]);
 });
