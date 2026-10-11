@@ -2,6 +2,20 @@
 
 Every release works with **Discord 348.10 - Stable**. Always patch the original APKM. Releases up to 1.3.6 were for Discord 347.12.
 
+## 1.5.0 — A tidier Settings page, system font and emojis, and less clutter
+
+- **Plugins is now Settings.** It's listed first under **Venus** in Discord's settings, above **About**.
+- **No more plugin names.** Each switch says what it does, like **Send audio files as voice messages**, **Hide that you're typing** or just **Force system font**. Simple ones are a single line.
+- **Grouped so it's easy to scan:** Chat, Profiles and people, Servers and channels, and More.
+- **Settings with more options have a switch and a button.** The switch turns it on or off right there. The round arrow button, or tapping the row, opens its options: deleted messages, emoji and sticker links, instant delete, pastel names, device icons, reviews, Read all and Quests.
+- **Options are greyed out while their main switch is off,** and option pages no longer repeat an "Enable" switch.
+- **New: Force system font.** Discord uses your phone's font instead of gg sans, in chat and everywhere else, keeping bold and italic. Code blocks use your phone's monospace font, and fonts people pick for their display name stay as they are. Needs Android 9 or newer. When you change it, Discord offers to reopen so every screen switches at once. Choose **Later** to switch next time you open Discord.
+- **Quest Completer starts off.** It's still selected in Morphe, but does nothing until you turn on **Complete Quests automatically** in Venus settings. If you already turned it on, it stays on.
+- **New: Force system emojis.** Discord shows your phone's emojis instead of its own, in chat, reactions, statuses and the emoji picker. An emoji your phone doesn't have yet stays Discord's, and custom server emojis aren't changed. It starts on. When you change it, Discord offers to reopen, like the font.
+- **New: Hide the gift button.** The Nitro gift button on the message bar is gone. Turn the switch off to bring it back. It starts on.
+- **New: Hide the Quests promotion.** The Quest banner above your profile bar, under the server list, is gone, along with the space kept for it. Quests themselves, and Quest Completer, still work. It starts on.
+- Your other settings carry over, so nothing else turns on or off.
+
 ## 1.4.4 — Bug fixes and less work
 
 - **Read All no longer brings back an older server list.** The button's list was remembered by the list's data alone, so a later render could get an earlier render's list settings back. Each render now keeps its own, and the button's row is still shared, so the list doesn't redraw.

@@ -19,26 +19,34 @@ You can also download `patches-<version>.mpp` from [Releases](https://github.com
 
 ## Features
 
-To turn plugins on or off at any time, open **Discord Settings → Venus → Plugins**. The **Starts** column shows whether a plugin is on the first time you open Discord.
+To turn things on or off at any time, open **Discord Settings → Venus → Settings**. Rows with an arrow button have more options. The **Morphe patch** column is the name to look for when patching, and **Starts** shows whether it's on the first time you open Discord.
 
-| Feature | What it does | Starts |
+| In Venus settings | Morphe patch | Starts |
 | --- | --- | --- |
-| **CopyBios** | Lets you select and copy profile bios | On |
-| **Custom voice messages** | Sends an audio file as a real voice message, waveform included | Off |
-| **Dashless** | Shows spaces instead of dashes in channel names | On |
-| **FavouriteAnything** | Lets you favourite any image or video | On |
-| **File size on picker** | Shows file sizes on photos and videos when you attach them | On |
-| **FreeNitro** | Sends emojis and stickers you can't use as links | On |
-| **Hidden Channels** | Shows channels you can't open, with a lock | Off |
-| **JumpToTop** | Adds a button to jump to the first message | On |
-| **No typing** | Hides that you're typing | On |
-| **NoDelete** | Keeps deleted messages visible, outlined in red | Off |
-| **Pastelize** | Gives names and mentions soft pastel colors | On |
-| **PlatformIndicators** | Shows whether people are on desktop, mobile, web, console or VR | On |
-| **QuickDelete** | Skips the "are you sure?" when deleting | Off |
-| **Read All** | Adds a Read all button to the server list for servers, DMs or both | On |
-| **Quest Completer** | Completes video, Play and Activity Quests in the background, with no screen or tap | On |
-| **ReviewDB** | Read and write reviews of users and servers | Off |
+| **Chat** | | |
+| Keep deleted messages, outlined in red | NoDelete | Off |
+| Send audio files as voice messages | Custom voice messages | Off |
+| Send emojis and stickers you can't use as links | FreeNitro | On |
+| Hide that you're typing | No typing | On |
+| Delete messages without asking | QuickDelete | Off |
+| Add a jump to first message button | JumpToTop | On |
+| Show file sizes when attaching | File size on picker | On |
+| Favourite any image or video | FavouriteAnything | On |
+| Hide the gift button | Hide gift button | On |
+| **Profiles and people** | | |
+| Give names soft pastel colors | Pastelize | On |
+| Show which devices people are on | PlatformIndicators | On |
+| Select and copy profile bios | CopyBios | On |
+| Show and write reviews of users and servers | ReviewDB | Off |
+| **Servers and channels** | | |
+| Add a Read all button to the server list | Read All | On |
+| Show channels you can't open, with a lock | Hidden Channels | Off |
+| Show spaces instead of dashes in channel names | Dashless | On |
+| Hide the Quests promotion | Hide Quests promotion | On |
+| **More** | | |
+| Force system font | Force system font | Off |
+| Force system emojis | Force system emojis | On |
+| Complete Quests automatically | Quest Completer | Off |
 
 ### Privacy options
 
@@ -57,12 +65,15 @@ Discord can still see what any client needs to work, like your messages, calls a
 ## Good to know
 
 - **Voice messages** need Android 10 or newer. Most audio files work. If a file can't be converted, it's sent as a normal attachment.
-- **NoDelete** keeps messages until Discord restarts. To keep them for good, turn on **Save permanently** in its settings. Delete a kept message again to hide it.
-- **Hidden Channels** only shows a channel's name and dates. It can't show messages or let you join locked voice channels.
-- **ReviewDB** loads reviews from the community ReviewDB service at `manti.vendicated.dev`. To post or report reviews, sign in from its settings page. Signing in never uses your Discord token.
-- **FreeNitro** sends links, not real Nitro emojis or stickers.
-- **Quest Completer** checks for new Quests when Discord opens and every 30 minutes after. It accepts and completes video, Play and Activity Quests one at a time. Play and Activity Quests count time without installing or starting anything. That time is reported the way Discord's Windows app reports it, because Discord only counts play time from desktop. Stream Quests need a real stream, so they're skipped. You still claim rewards yourself. Discord may pause Quests on accounts that complete them automatically.
-- **Read All** uses Discord's own "Mark as read". It clears servers by default. Switch it to DMs or both in its settings, or hold the button for a one-time choice.
+- **Deleted messages** are kept until Discord restarts. To keep them for good, turn on **Save permanently** in its settings. Delete a kept message again to hide it.
+- **Channels you can't open** only show a channel's name and dates. It can't show messages or let you join locked voice channels.
+- **Reviews** load from the community ReviewDB service at `manti.vendicated.dev`. To post or report reviews, sign in from its settings page. Signing in never uses your Discord token.
+- **Emoji and sticker links** are links, not real Nitro emojis or stickers.
+- **Force system emojis** shows your phone's emojis in chat, reactions, statuses and the emoji picker. An emoji your phone doesn't have yet stays Discord's. Custom server emojis aren't changed. Like the font, changing it offers to reopen Discord.
+- **Hide the Quests promotion** hides the Quest banner above your profile bar, under the server list. Quests themselves, and Quest Completer, still work.
+- **Force system font** needs Android 9 or newer. When you change it, Discord offers to reopen, so every screen switches at once instead of mixing fonts. Fonts people pick for their display name aren't changed.
+- **Quest Completer** starts off. Turn on **Complete Quests automatically** in Venus settings. It checks for new Quests when Discord opens and every 30 minutes after. It accepts and completes video, Play and Activity Quests one at a time. Play and Activity Quests count time without installing or starting anything. That time is reported the way Discord's Windows app reports it, because Discord only counts play time from desktop. Stream Quests need a real stream, so they're skipped. You still claim rewards yourself. Discord may pause Quests on accounts that complete them automatically.
+- **Read all** uses Discord's own "Mark as read". It clears servers by default. Switch it to DMs or both in its settings, or hold the button for a one-time choice.
 
 ## For developers
 

@@ -147,6 +147,46 @@ def build():
         "--release", "--min-api", "26", "--lib", TOOLS / "android.jar",
         "--classpath", TOOLS / "morphe.jar", "--classpath", stubs,
         "--output", voice_dex, voice_classes)
+    # Force system font: the same Java-only rules as the voice extension.
+    font_classes = BUILD / "font-classes.jar"
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+        "-jvm-target", "11", "-Xlambdas=class", "-cp", f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
+        *sorted((ROOT / "extensions/font/src/main/kotlin").rglob("*.kt")), "-d", font_classes)
+    with zipfile.ZipFile(font_classes) as native:
+        for name in native.namelist():
+            if not name.endswith(".class"):
+                continue
+            content = native.read(name)
+            for unsafe in (b"kotlin/text/", b"kotlin/collections/", b"kotlin/Result", b"kotlin/Unit", b"kotlin/io/"):
+                if unsafe in content:
+                    raise SystemExit(f"Unsafe host Kotlin helper in {name}: {unsafe.decode()}; use Java APIs")
+    font_dex = BUILD / "font-dex"
+    font_dex.mkdir(exist_ok=True)
+    for stale in font_dex.glob("classes*.dex"):
+        stale.unlink()
+    run("java", "-Xmx384m", "-cp", TOOLS / "r8.jar", "com.android.tools.r8.D8",
+        "--release", "--min-api", "26", "--lib", TOOLS / "android.jar",
+        "--classpath", stubs, "--output", font_dex, font_classes)
+    # Force system emojis: the same Java-only rules again.
+    emoji_classes = BUILD / "emoji-classes.jar"
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+        "-jvm-target", "11", "-Xlambdas=class", "-cp", f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
+        *sorted((ROOT / "extensions/emoji/src/main/kotlin").rglob("*.kt")), "-d", emoji_classes)
+    with zipfile.ZipFile(emoji_classes) as native:
+        for name in native.namelist():
+            if not name.endswith(".class"):
+                continue
+            content = native.read(name)
+            for unsafe in (b"kotlin/text/", b"kotlin/collections/", b"kotlin/Result", b"kotlin/Unit", b"kotlin/io/"):
+                if unsafe in content:
+                    raise SystemExit(f"Unsafe host Kotlin helper in {name}: {unsafe.decode()}; use Java APIs")
+    emoji_dex = BUILD / "emoji-dex"
+    emoji_dex.mkdir(exist_ok=True)
+    for stale in emoji_dex.glob("classes*.dex"):
+        stale.unlink()
+    run("java", "-Xmx384m", "-cp", TOOLS / "r8.jar", "com.android.tools.r8.D8",
+        "--release", "--min-api", "26", "--lib", TOOLS / "android.jar",
+        "--classpath", stubs, "--output", emoji_dex, emoji_classes)
     classes = BUILD / "classes.jar"
     sources = sorted((ROOT / "patches/src/main/kotlin").rglob("*.kt"))
     run(TOOLS / "kotlinc/bin/kotlinc", "-no-stdlib", "-no-reflect",
@@ -195,6 +235,8 @@ def build():
                 content = runtime.read_bytes() if path.name == "bootstrap.js" else path.read_bytes()
                 add(path.relative_to(ROOT / "patches/src/main/resources"), content)
         add("extensions/voice.mpe", (voice_dex / "classes.dex").read_bytes())
+        add("extensions/font.mpe", (font_dex / "classes.dex").read_bytes())
+        add("extensions/emoji.mpe", (emoji_dex / "classes.dex").read_bytes())
         for path in sorted(dex.glob("classes*.dex")):
             add(path.name, path.read_bytes())
     run("java", "-Xmx256m", "-cp", f"{bundle}:{TOOLS / 'morphe.jar'}:{TOOLS / 'gson.jar'}",
@@ -205,7 +247,7 @@ def build():
 
 
 RELEASE_SUMMARY = (
-    "Bug fixes and less work: Read All, Quest Completer, ReviewDB and NoDelete fixes. "
+    "A tidier Settings page, system font and emojis, no gift button or Quests promotion, and Quest Completer starts off. "
     "Patch the original Discord 348.10 APKM."
 )
 
