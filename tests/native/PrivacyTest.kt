@@ -57,6 +57,8 @@ fun main(args: Array<String>) {
         val needsLoader = withSettings || selected.any { it in privacy.take(3) }
         check(ordered.count { it === packagedDiscordBundle } == if (needsLoader) 1 else 0)
         if (!withSettings) check(venusSettings !in ordered)
+        // Any selection gets the passkey hint, exactly once.
+        check(ordered.count { it === passkeyErrorHint } == if (selected.isNotEmpty() || withSettings) 1 else 0)
         check(ordered.count { it === discordBundleGuard } == if (selected.isNotEmpty() || withSettings) 1 else 0)
         for ((i, patch) in ordered.withIndex()) check(patch.dependencies.all { ordered.indexOf(it) < i })
     }
@@ -170,6 +172,28 @@ fun main(args: Array<String>) {
         }
     }
     checkBranches(font, "Font guard"); checkBranches(interceptor, "User-Agent guard")
+    // Passkey hint: assembled on Discord's one security key reject (a detached fixture, not a Patcher run).
+    val rejectMethod = methods.single { it.definingClass == SECURITY_KEY_MODULE && it.name == "reject" &&
+        it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/Throwable;") }
+    val rejectOriginal = rejectMethod.implementation!!.instructions.map { it.opcode }
+    val reject = MutableMethod(rejectMethod)
+    explainPasskeyError(reject)
+    val rejectCode = reject.implementation!!.instructions.toList()
+    check(reject.implementation!!.registerCount == 6 && rejectMethod.implementation!!.registerCount == 6) { "Security key reject register count changed" }
+    check(rejectCode.size == rejectOriginal.size + PASSKEY_HINT_GUARD_SIZE &&
+        rejectCode.drop(PASSKEY_HINT_GUARD_SIZE).map { it.opcode } == rejectOriginal) { "Discord's own reject changed" }
+    check(rejectCode[PASSKEY_HINT_GUARD_SIZE - 1].opcode == Opcode.NOP)
+    check(rejectCode.take(PASSKEY_HINT_GUARD_SIZE).mapNotNull { ((it as? ReferenceInstruction)?.reference as? StringReference)?.string } ==
+        listOf(RP_ID_ERROR, PASSKEY_HINT))
+    // Only v0-v1 and the message (p2 = v4) are written; the error code and cause reach Discord as they came.
+    for (instruction in rejectCode.take(PASSKEY_HINT_GUARD_SIZE)) if (instruction is OneRegisterInstruction && instruction.opcode != Opcode.IF_EQZ &&
+        instruction.opcode != Opcode.IF_NEZ) check(instruction.registerA in 0..1 || instruction.registerA == 4) { "Passkey hint writes v${instruction.registerA}" }
+    checkBranches(reject, "Passkey hint")
+    check(try { explainPasskeyError(reject); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second passkey hint was accepted" }
+    // Every passkey and security key failure still reaches this one reject.
+    val rejectCallers = methods.filter { m -> m.implementation?.instructions?.any { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.let { r ->
+        r.definingClass == SECURITY_KEY_MODULE && r.name == "reject" && r.parameterTypes.size == 3 } == true } == true }.map { it.definingClass + "->" + it.name }.toSet()
+    check(rejectCallers == setOf("$SECURITY_KEY_MODULE->reject", "$SECURITY_KEY_MODULE->reject\$default", "$SECURITY_KEY_MODULE->access\$reject")) { "Security key reject callers changed: $rejectCallers" }
     // Force system emojis: the one native emoji picture lookup, its reopen bridge and the launch-time setting read.
     val emojiMethod = methods.single { it.definingClass == SURROGATES && it.name == "toAssetUrl-impl" &&
         it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;") && it.returnType == "Ljava/lang/String;" }
@@ -359,7 +383,7 @@ fun main(args: Array<String>) {
             check(calls.single().definingClass == "Ljava/lang/Throwable;" && calls.single().name == "toString")
         } else check(calls.isEmpty())
     }
-    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 80 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards and one branch-safe guard per FileModule bridge; no APK patched")
+    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 80 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge; no APK patched")
 }
 
 

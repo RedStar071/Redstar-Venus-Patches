@@ -2,6 +2,35 @@
 
 Every release works with **Discord 348.10 - Stable**. Always patch the original APKM. Releases up to 1.3.6 were for Discord 347.12.
 
+## 1.6.0 — Tap gestures, earlier versions of edited messages, and fixes
+
+This release includes 1.5.1's passkey message, which wasn't published separately.
+
+### What's new
+- **Double-tap a message to reply.** Turn on **Double-tap a message to reply** in Venus settings. Double-tapping someone's message starts a reply, like swiping does. Double-tapping your own message opens it for editing. To reply to your own messages instead, choose **Reply to it** in its options.
+- **Tap your own message three times to delete it.** It's deleted straight away, with no question asked. Someone else's message is never deleted. Turn it off with **Delete your own message** in its options.
+- Tap gestures start off. While they're on, double-tapping no longer adds a reaction, and Discord's tip about double-tap reactions is hidden. Based on Geastures+ by kmmiio99o.
+- **See what an edited message said before.** With NoDelete on, earlier versions show above an edited message, faded and crossed out in a quote, oldest first. They use Discord's own quote and small text, so they match your theme and font. Mentions and links in them are plain text, so they never ping anyone.
+- It starts on, and covers edits made while Discord is open, up to 10 versions a message. Turn it off with **Show what messages said before** in NoDelete's settings. With **Save permanently** on, earlier versions are saved with your deleted messages.
+
+### Fixed
+- **Passkeys and security keys say why they can't work.** Instead of "[50152] RP ID cannot be validated", Discord points you to **Verify with something else**. Google only lets apps signed by Discord use Discord's passkeys, so no patch can make them work. It isn't caused by the privacy options, and they all stay on.
+- **Saving deleted messages works again after a damaged file.** If the saved file couldn't be read, saving stopped until Discord restarted, and the file was read again on every reconnect. New messages now replace it. A file that only failed to open is left alone, so nothing is lost.
+- **About shows the right version.** 1.5.1 still said 1.5.0.
+- **Read all's error message is clearer.** It no longer starts with "Error:".
+
+### Less work
+- **Saving a deleted message doesn't rewrite every other one.** With Save permanently on, each new deletion turned up to 5,000 kept messages into text again. Each one is now worked out once.
+- **Hidden Channels does less while it's off.** It went through every channel in a server each time the channel list drew. It now does that once, until the server's channels change.
+- **Chats with kept messages check less per message.**
+
+## 1.5.1 — A clear message when passkeys can't work
+
+- **Logging in with a passkey or security key now says what's wrong.** Instead of "[50152] RP ID cannot be validated", Discord says passkeys and security keys only work in Discord signed by Discord, and points you to **Verify with something else**.
+- **Why they can't work:** Google only lets apps signed with Discord's own key use Discord's passkeys. A patched app is signed with your key, so Google refuses before Discord gets the passkey. No patch can change that. It isn't caused by the privacy options, and they all stay on.
+- **To log in,** tap **Verify with something else** and use an authenticator app, SMS or a backup code. You can also add an authenticator app from Discord on the web or a computer.
+- Only the message changes. The error itself and everything else Discord does with it are left alone.
+
 ## 1.5.0 — A tidier Settings page, system font and emojis, and less clutter
 
 - **Plugins is now Settings.** It's listed first under **Venus** in Discord's settings, above **About**.

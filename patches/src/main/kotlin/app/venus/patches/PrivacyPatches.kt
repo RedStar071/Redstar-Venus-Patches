@@ -188,7 +188,7 @@ val disableAnalytics = rawResourcePatch(
 ) {
     compatibleWith(discord)
     section(PRIVACY)
-    dependsOn(packagedDiscordBundle)
+    dependsOn(passkeyErrorHint, packagedDiscordBundle)
     execute { HbcPrivacy.apply(get("assets/index.android.bundle"), HbcPrivacy.analytics) }
 }
 
@@ -208,7 +208,7 @@ val disableCrashReporting = bytecodePatch(
 ) {
     compatibleWith(discord)
     section(PRIVACY)
-    dependsOn(crashTransport)
+    dependsOn(passkeyErrorHint, crashTransport)
     execute {
         for (target in NativePrivacy.crash) target.install(Fingerprint(
             definingClass = target.owner, name = target.name, parameters = target.parameters, returnType = target.returns
@@ -223,7 +223,7 @@ val disableTelemetry = bytecodePatch(
 ) {
     compatibleWith(discord)
     section(PRIVACY)
-    dependsOn(telemetryProducers)
+    dependsOn(passkeyErrorHint, telemetryProducers)
     execute {
         for (target in NativePrivacy.telemetry) target.install(Fingerprint(
             definingClass = target.owner, name = target.name, parameters = target.parameters, returnType = target.returns
@@ -238,7 +238,7 @@ val disableAttribution = bytecodePatch(
 ) {
     compatibleWith(discord)
     section(PRIVACY)
-    dependsOn(discordBundleGuard)
+    dependsOn(passkeyErrorHint, discordBundleGuard)
     execute {
         for (target in NativePrivacy.attribution) target.install(Fingerprint(
             definingClass = target.owner, name = target.name, parameters = target.parameters, returnType = target.returns
@@ -253,7 +253,7 @@ val disableAdvertisingIdentifiers = bytecodePatch(
 ) {
     compatibleWith(discord)
     section(PRIVACY)
-    dependsOn(discordBundleGuard)
+    dependsOn(passkeyErrorHint, discordBundleGuard)
     execute {
         for (target in NativePrivacy.advertising) target.install(Fingerprint(
             definingClass = target.owner, name = target.name, parameters = target.parameters, returnType = target.returns

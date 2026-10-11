@@ -97,6 +97,11 @@ context.Terser.minify(source, {compress:false, mangle:false,
     result = subprocess.run(["node", "-e", script, str(TOOLS / "terser.js"), str(source)],
                             cwd=ROOT, check=True, capture_output=True, text=True)
     content = result.stdout
+    # The About page reads this, so it must match the release. 1.5.1 still said 1.5.0.
+    import re
+    revision = re.search(r'const revision\s*=\s*"([^"]+)"', source.read_text())
+    if not revision or revision.group(1) != VERSION:
+        raise SystemExit(f"bootstrap.js revision {revision and revision.group(1)} != gradle.properties version {VERSION}")
     # No size budget: the injector stores the runtime as bytecode, not in a size-limited slot.
     if content.count("/*__FEATURES__*/") != 1:
         raise SystemExit("Invalid compact runtime")
@@ -247,7 +252,7 @@ def build():
 
 
 RELEASE_SUMMARY = (
-    "A tidier Settings page, system font and emojis, no gift button or Quests promotion, and Quest Completer starts off. "
+    "Double-tap gestures, earlier versions of edited messages, a clear passkey message, bug fixes and less work. "
     "Patch the original Discord 348.10 APKM."
 )
 

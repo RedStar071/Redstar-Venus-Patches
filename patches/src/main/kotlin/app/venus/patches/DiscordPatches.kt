@@ -72,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -134,7 +134,7 @@ val venusSettings = bytecodePatch(
 ) {
     compatibleWith(discord)
     section(PLUGINS)
-    dependsOn(runtimeAssets, packagedDiscordBundle)
+    dependsOn(runtimeAssets, packagedDiscordBundle, passkeyErrorHint)
 }
 
 @Suppress("unused")
@@ -493,6 +493,10 @@ val forceSystemEmojis = bytecodePatch(
 @Suppress("unused")
 val hideGiftButton = bundledPlugin("hideGift", "Hide gift button",
     "Removes the Nitro gift button from the message bar.")
+
+@Suppress("unused")
+val messageGestures = bundledPlugin("gestures", "Message tap gestures",
+    "Double-tap a message to reply, or to edit your own. Tap your own message three times to delete it. Based on Geastures+ by kmmiio99o. Turn it on in Venus settings.")
 
 @Suppress("unused")
 val hideQuestDock = bundledPlugin("hideQuestDock", "Hide Quests promotion",
