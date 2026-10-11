@@ -1,3 +1,22 @@
+## [1.7.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.6.0...v1.7.0) (2026-10-11)
+
+### ✨ New Features
+
+* **Discord:** Add `Hide call button` patch, which removes Call from profiles so Message fills the row
+
+### 🐛 Bug Fixes
+
+* **Discord - Message tap gestures:** Tapping your own message three times opens it for editing instead of deleting it
+* **Discord - Venus settings:** Options on a setting's page stay switchable while that setting is off
+* **Discord - NoDelete:** The maximum saved messages box can be edited while NoDelete is off
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Clearer descriptions for every setting
+* **Discord - NoDelete:** Say that it also keeps what edited messages said before
+* **Discord - Pastelize:** Say that each color comes from the person's user ID
+* **Discord - Message tap gestures:** Describe the Edit it and Reply to it choices
+
 ## [1.6.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.5.0...v1.6.0) (2026-10-11)
 
 ### ✨ New Features

@@ -470,7 +470,7 @@ test('conversion disabled has no codec bridge calls for audio uploads', async ()
     await upload.reactNativeCompressAndExtractData();assert.equal(calls,0);
 });
 
-const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true};
+const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true};
 function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
@@ -1953,7 +1953,7 @@ test('Settings list is grouped, plugin names are gone and every row says what it
     const rows=settingsRows(b);
     assert.deepEqual(rows.map(([label])=>label),['Chat','Profiles and people','Servers and channels','More']);
     const titles=rows.flatMap(([,list])=>list);
-    assert.equal(titles.length,21);assert.equal(new Set(titles).size,21);
+    assert.equal(titles.length,22);assert.equal(new Set(titles).size,22);
     assert.ok(titles.includes('Double-tap a message to reply'));
     for (const old of ['CopyBios','Dashless','FavouriteAnything','FreeNitro','Hidden Channels','JumpToTop','No typing','NoDelete','Pastelize',
         'PlatformIndicators','QuickDelete','Read All','Quest Completer','ReviewDB','Custom voice messages','File size on picker'])
@@ -2116,6 +2116,22 @@ test('Read All settings use Discord\'s native radio list with three choices',()=
     const group=nodes.find(n=>n.type===TableRadioGroup);assert.ok(group);assert.equal(group.props.value,'guilds');
     assert.equal(nodes.filter(n=>n.type===TableRadioRow).map(n=>n.props.label).join('|'),'Servers|Direct messages|Servers and DMs');
     group.props.onChange('both');assert.equal(b.api.settings.readAllMode,'both');
+});
+test('option page switches are greyed out while their main switch is off',()=>{
+    const b=settingsHarness();
+    function TableSwitchRow(){} function TableRowGroup(){}
+    b.context.__r=id=>({6621:{TableSwitchRow},5997:{TableRowGroup}}[id]||null);
+    const rows=key=>{const found=[];(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);
+        if(n.type===TableSwitchRow)found.push(n);walk(n.props&&n.props.children);})(b.registry[key].screen.getComponent()());return found;};
+    const row=(key,setting)=>rows(key).find(n=>n.props.key===setting);
+    b.api.setSetting('gestures',false);assert.equal(row('VENUS_GESTURES','gestureTripleDelete').props.disabled,true,'Message tap gestures is off');
+    b.api.setSetting('gestures',true);assert.equal(row('VENUS_GESTURES','gestureTripleDelete').props.disabled,false);
+    b.api.setSetting('noDelete',false);assert.deepEqual(rows('VENUS_NODELETE').map(n=>n.props.disabled),[true,true]);
+    b.api.setSetting('noDelete',true);assert.deepEqual(rows('VENUS_NODELETE').map(n=>n.props.disabled),[false,false]);
+    assert.match(row('VENUS_NODELETE','noDeleteEdits').props.subLabel,/before it was edited/);
+    const input=()=>{let found;(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);
+        if(n.props&&n.props.keyboardType==='number-pad')found=n;walk(n.props&&n.props.children);})(b.registry.VENUS_NODELETE.screen.getComponent()());return found;};
+    assert.equal(input().props.editable,true);b.api.setSetting('noDelete',false);assert.equal(input().props.editable,false,'the maximum box is read-only too');
 });
 test('Read All mode persists and an invalid saved mode falls back to Servers',async()=>{
     const b=boot(allFeatures);
@@ -2727,7 +2743,12 @@ function gestureHarness(features={gestures:true}) {
     let reacted=0;const utils=b.load({handleAddDefaultDoubleTapReaction(){reacted++;return 'react';}},null,7414);
     const tap=(m,c={id:'c'})=>utils.handleAddDefaultDoubleTapReaction(m,c);
     const flushTimers=()=>{timers.splice(0).forEach(fn=>fn&&fn());};
-    return {...b,calls,tap,flushTimers,reacted:()=>reacted,setMe:id=>{me=id;}};
+    // Discord builds one MessagesHandlers per chat and defines handleTapMessage on it in the constructor.
+    let singles=0;
+    class MessagesHandlers { constructor(){this.handleTapMessage=e=>{singles++;return 'tap:'+e.nativeEvent.messageId;};} get params(){return 'p';} }
+    const Wrapped=b.load({MessagesHandlers},null,10905).MessagesHandlers;const handlers=new Wrapped();
+    const single=m=>handlers.handleTapMessage({nativeEvent:{messageId:m.id,channelId:'c'}});
+    return {...b,calls,tap,single,handlers,flushTimers,reacted:()=>reacted,singles:()=>singles,setMe:id=>{me=id;}};
 }
 test('Message tap gestures: double-tap replies, edits your own, and is off by default',()=>{
     const g=gestureHarness();const theirs={id:'1',author:{id:'other'}},mine={id:'2',author:{id:'me'},state:'SENT'};
@@ -2745,12 +2766,55 @@ test('Message tap gestures: three taps delete only your own message, once',()=>{
     g.api.setSetting('gestureTripleDelete',false);const other={id:'3',author:{id:'me'},state:'SENT'};
     g.tap(other);assert.deepEqual(g.calls.at(-1),['edit','3','message_swipe'],'no wait when three taps can\'t delete');
 });
+test('Message tap gestures: the third tap, which Discord reports as a single tap, deletes your own message',()=>{
+    // Android: tap, tap = handleAddDefaultDoubleTapReaction; Discord's tracker then starts over, so tap three
+    // reaches MessagesHandlers.handleTapMessage about 300 ms later. 1.6.0 opened the editor before it arrived.
+    const g=gestureHarness();g.api.setSetting('gestures',true);const mine={id:'2',author:{id:'me'},state:'SENT'},theirs={id:'1',author:{id:'other'}};
+    g.tap(mine);assert.equal(g.calls.length,0,'the editor waits for a third tap');
+    assert.equal(g.single(mine),undefined,'the third tap is used, not passed on');assert.deepEqual(g.calls,[['delete','2']]);
+    g.flushTimers();assert.equal(g.calls.length,1,'the editor never opens after deleting');
+    g.tap(mine);g.flushTimers();assert.equal(g.calls.length,1,'later taps on the deleted message are ignored');
+    assert.equal(g.single(theirs),'tap:1','other single taps reach Discord');assert.equal(g.singles(),1);
+    const other={id:'3',author:{id:'me'},state:'SENT'};g.tap(other);assert.equal(g.single(theirs),'tap:1','a tap on another message deletes nothing');
+    g.flushTimers();assert.deepEqual(g.calls.at(-1),['edit','3','message_swipe']);
+    g.tap(theirs);assert.equal(g.single(theirs),'tap:1');assert.deepEqual(g.calls.at(-1),['reply','1','message_swipe'],'someone else\'s message is never deleted');
+    g.api.setSetting('gestureTripleDelete',false);const four={id:'4',author:{id:'me'},state:'SENT'};g.tap(four);
+    assert.equal(g.single(four),'tap:4','with three taps off, a single tap is Discord\'s');assert.deepEqual(g.calls.at(-1),['edit','4','message_swipe']);
+    assert.equal(g.handlers.params,'p','Discord\'s own handler class still works');
+    const off=boot({});class Stock{};assert.equal(off.load({MessagesHandlers:Stock},null,10905).MessagesHandlers,Stock,'untouched without the patch');
+});
 test('Message tap gestures: a message you can\'t edit gets a reply, and the reaction tip is hidden',()=>{
     const g=gestureHarness();g.api.setSetting('gestures',true);g.api.setSetting('gestureTripleDelete',false);
     g.tap({id:'4',author:{id:'me'},state:'SENDING'});assert.deepEqual(g.calls.at(-1),['reply','4','message_swipe']);
     const nudge=g.load({DoubleTapEmojiEditNudge:()=>'tip'},null,11105);assert.equal(nudge.DoubleTapEmojiEditNudge(),null);
     g.api.setSetting('gestures',false);assert.equal(nudge.DoubleTapEmojiEditNudge(),'tip');
     const off=boot({});const untouched={handleAddDefaultDoubleTapReaction(){return 'react';}};assert.equal(off.load(untouched,null,7414).handleAddDefaultDoubleTapReaction,untouched.handleAddDefaultDoubleTapReaction);
+});
+test('Hide call button removes Call from profiles, and Message takes the whole row',()=>{
+    const b=boot({hideCall:true});const {React,RN}=reactHarness(b);
+    function PhoneCallIcon(){} function ChatIcon(){} function Button(){} function IconButton(){}
+    let animated=0;RN.LayoutAnimation={Presets:{easeInEaseOut:'ease'},configureNext:p=>{assert.equal(p,'ease');animated++;}};
+    let refValue;React.useRef=v=>{if(refValue===undefined)refValue={current:v};return refValue;};
+    b.context.__r=id=>({7309:{PhoneCallIcon}}[id]||null);
+    const el=(type,props,...children)=>React.createElement(type,props,...children);
+    // Discord's two-button layout: each button in its own flex:1 slot, side by side.
+    const two=()=>el('View',{style:{flexDirection:'row',gap:12}},
+        el('View',{style:{flex:1}},el(Button,{text:'Message',icon:el(ChatIcon,{size:'md'}),grow:true})),
+        el('View',{style:{flex:1}},el(Button,{text:'Call',icon:el(PhoneCallIcon,{size:'md'}),grow:true})));
+    // With a friend button: Message and Call are icon buttons in one group.
+    const three=()=>el('View',null,el('View',{style:{flexGrow:1}},el(Button,{text:'Add Friend'})),
+        el('View',{style:{flexDirection:'row'}},el(IconButton,{icon:el(ChatIcon,{})}),el(IconButton,{icon:el(PhoneCallIcon,{})})));
+    let layout=two;const Buttons=b.load({default:function UserProfileContactButtons(){return layout();}},null,12696).default;
+    const types=n=>{const out=[];(function walk(v){if(!v||typeof v!=='object')return;if(Array.isArray(v))return v.forEach(walk);out.push(v.type);walk(v.props&&v.props.children);walk(v.props&&v.props.icon);})(n);return out;};
+    let tree=Buttons({});const row=tree.props.children;
+    assert.ok(!types(tree).includes(PhoneCallIcon),'no Call button');assert.ok(types(tree).includes(ChatIcon),'Message stays');
+    assert.ok(!Array.isArray(row)||row.length===1,'Call\'s slot is gone too, so Message\'s flex:1 slot fills the row');
+    layout=three;tree=Buttons({});assert.ok(!types(tree).includes(PhoneCallIcon));assert.equal(types(tree).filter(t=>t===IconButton).length,1);
+    assert.equal(animated,0,'nothing animates on first open');
+    b.api.setSetting('hideCall',false);layout=two;tree=Buttons({});assert.ok(types(tree).includes(PhoneCallIcon),'switched off: Call is back');
+    assert.equal(animated,1,'Message slides across when the setting changes');
+    const off=boot({});const stock={default:function C(){}};assert.equal(off.load(stock,null,12696).default,stock.default,'untouched without the patch');
+    const rows=Object.fromEntries(settingsRows(settingsHarness({hideCall:true})));assert.deepEqual(rows['Profiles and people'],['Hide the call button on profiles']);
 });
 function editHarness(saved) {
     const b=boot(allFeatures);const store=new Map();let disk=saved;const writes=[];
