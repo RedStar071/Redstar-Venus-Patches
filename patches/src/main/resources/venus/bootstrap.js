@@ -107,7 +107,8 @@
         }
         Promise.resolve().then(persist);
     }
-    function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) && n > 0 ? Math.min(MAX_DELETED, n) : 512; }
+    // Typing 0 in the maximum box used to jump it to 512; anything below 1 now means the lowest, 1.
+    function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(MAX_DELETED, n)) : 512; }
     function setSetting(key, value) {
         if (!owns(settings, key) || !features[featureFor(key)]) return false;
         if (key === "readAllMode") {

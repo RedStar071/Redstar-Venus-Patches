@@ -2876,3 +2876,9 @@ test('QuickDelete link previews ask again once QuickDelete itself is off',()=>{
     action.show(embed);assert.equal(confirmed,1);
     b.api.setSetting('quickDelete',false);assert.equal(action.show(embed),embed);assert.equal(confirmed,1);
 });
+test('NoDelete maximum of 0 becomes the lowest allowed, not 512',()=>{
+    const b=deletionHarness();b.api.setSetting('noDelete',true);b.api.setSetting('noDeleteLimit','20');
+    b.api.setSetting('noDeleteLimit','0');assert.equal(b.api.settings.noDeleteLimit,1);
+    b.api.setSetting('noDeleteLimit',-5);assert.equal(b.api.settings.noDeleteLimit,1);
+    b.api.setSetting('noDeleteLimit','abc');assert.equal(b.api.settings.noDeleteLimit,512);
+});
