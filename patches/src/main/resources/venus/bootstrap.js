@@ -1725,14 +1725,18 @@
         if (!enabled("readAll") || !READ_ALL_MODES.includes(mode)) return;
         const api=readAllExports(), ui=reviewUI();
         let guilds=0, dms=0;
+        // Unread servers or DMs with no way to clear them used to say "Nothing unread".
+        const unavailable=() => { throw new Error("Discord's read states haven't loaded yet. Try again in a moment."); };
         try {
             if (mode!=="dms") {
                 const ids=unreadGuildIds(api);
-                if (ids.length && typeof api.markGuilds==="function") { api.markGuilds(ids, api.sections && api.sections.GUILD_LIST); guilds=ids.length; }
+                if (ids.length && typeof api.markGuilds!=="function") unavailable();
+                if (ids.length) { api.markGuilds(ids, api.sections && api.sections.GUILD_LIST); guilds=ids.length; }
             }
             if (mode!=="guilds") {
                 const ids=unreadDmIds(api);
-                if (ids.length && api.readActions && typeof api.readActions.bulkAck==="function" && api.reads) {
+                if (ids.length && !(api.readActions && typeof api.readActions.bulkAck==="function" && api.reads)) unavailable();
+                if (ids.length) {
                     const type=api.readTypes && api.readTypes.CHANNEL != null ? api.readTypes.CHANNEL : 0;
                     // A DM without a known last message can't be acknowledged; sending it anyway
                     // made the whole request fail. Discord's own /read-states/ack-bulk takes 100 at a time.
@@ -1741,7 +1745,11 @@
                     dms=acks.length;
                 }
             }
-        } catch (error) { reviewToast(ui,"Couldn't mark as read: "+String(error && error.message || error)); return; }
+        } catch (error) {
+            // What was already cleared stays cleared; say so instead of only the error.
+            const done=guilds ? " ("+guilds+(guilds===1 ? " server was" : " servers were")+" marked as read)" : "";
+            reviewToast(ui,"Couldn't mark as read: "+String(error && error.message || error)+done); return;
+        }
         const parts=[];
         if (guilds) parts.push(guilds+(guilds===1 ? " server" : " servers"));
         if (dms) parts.push(dms+(dms===1 ? " DM" : " DMs"));

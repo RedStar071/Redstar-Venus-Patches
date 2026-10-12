@@ -2906,3 +2906,11 @@ test('Force system emojis also draws keycap emojis with the phone font',()=>{
     for (const name of ['1\uFE0F\u20E3','#\uFE0F\u20E3','*\u20E3']) {exports.default({name});assert.equal(seen.at(-1).forceTextEmoji,true,name);}
     for (const name of ['12','emoji_1','1','#']) {const props={name};exports.default(props);assert.equal(seen.at(-1),props,name);}
 });
+test('Read All says the DMs could not be cleared instead of "Nothing unread"',()=>{
+    const b=readAllHarness();b.context.__r=(old=>id=>id===6532?null:old(id))(b.context.__r);
+    b.api.setSetting('readAllMode','both');pressReadAll(b);
+    assert.equal(b.calls.guilds.length,1);
+    assert.match(b.calls.toasts.at(-1),/^Couldn't mark as read: .*\(2 servers were marked as read\)$/);
+    b.api.setSetting('readAllMode','dms');pressReadAll(b);
+    assert.doesNotMatch(b.calls.toasts.at(-1),/Nothing unread|servers were/);
+});
