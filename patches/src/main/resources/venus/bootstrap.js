@@ -1648,11 +1648,13 @@
         const hex = "#" + [component(0),component(8),component(4)].map(value => value.toString(16).padStart(2,"0")).join("");
         return {hex, value:RN.processColor(hex)};
     }
+    // Every chat row runs this: the content array is only copied once a node actually changes.
     function pastelMentions(content, guildId) {
         if (!Array.isArray(content)) return content;
-        let changed = false;
-        const next = content.map(node => {
-            if (!node || typeof node !== "object") return node;
+        let next = null;
+        for (let i = 0; i < content.length; i++) {
+            const node = content[i];
+            if (!node || typeof node !== "object") continue;
             let result = node;
             if (node.type === "mention" && node.userId && (!node.colorString || settings.pastelAll) &&
                 (!guildId || guildMembers && guildMembers.getMember(guildId,node.userId))) {
@@ -1663,28 +1665,28 @@
                 const children = pastelMentions(node.content,guildId);
                 if (children !== node.content) result = Object.assign({},result,{content:children});
             }
-            if (result !== node) changed = true;
-            return result;
-        });
-        return changed ? next : content;
+            if (result !== node) { if (!next) next = content.slice(); next[i] = result; }
+        }
+        return next || content;
     }
     function pastelMessage(message, source) {
         if (!message || !message.authorId) return message;
         if (message.guildId && (!guildMembers || !guildMembers.getMember(message.guildId,message.authorId)) && !(source && source.webhookId)) return message;
-        let next = Object.assign({},message,{shouldShowRoleOnName:true}), seed;
+        let seed;
         if (source && source.webhookId) seed = settings.pastelWebhookName ? message.username : source.webhookId;
         else if (!(source && source.colorString != null ? source.colorString : message.roleColor) || settings.pastelAll) seed = message.authorId;
         const color = seed && pastelColor(seed,0.75,0.6);
-        if (color) next = Object.assign({},message,{roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true});
+        // One copy of the row's message, with every change in it.
+        const changes = color ? {roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true} : {shouldShowRoleOnName:true};
         const content = pastelMentions(message.content,message.guildId);
-        if (content !== message.content) next = Object.assign({},next,{content});
+        if (content !== message.content) changes.content = content;
         // Native MessageView applies Message.textColor via TextView.setTextColor (348.10 bridge field).
         // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
         if (color && settings.pastelContent) {
             const text = pastelColor(seed,0.85,0.75);
-            if (text) next = Object.assign({},next,{textColor:text.value});
+            if (text) changes.textColor = text.value;
         }
-        return next;
+        return Object.assign({},message,changes);
     }
     // Read All: a ReadAllNotificationsButton port for the mobile server bar (GuildsBar 15920,
     // useGuildsBarProps 15929). The button lives in the SEPARATOR row, below the DM button and
@@ -3043,20 +3045,18 @@
     // flex:1 slot, or as icon buttons next to a friend button. Its disableCalls prop only greys Call out, so
     // the Call button and the slot it sat in are left out of what it renders. Message's slot then takes the
     // whole row, and the change animates when the setting flips while a profile is open.
-    function isCallButton(node) {
-        const icon = node && node.props && node.props.icon, Phone = inspectedExport(7309, "PhoneCallIcon");
-        return !!(Phone && icon && icon.type === Phone);
-    }
-    function withoutCall(node, depth) {
+    // The icon is looked up once per render, not once for every element in the row.
+    function withoutCall(node, depth, Phone) {
         if (!node || typeof node !== "object" || depth > 12) return node;
         if (Array.isArray(node)) {
             let changed = false;
-            const next = node.map(child => { const value = withoutCall(child, depth + 1); if (value !== child) changed = true; return value; });
+            const next = node.map(child => { const value = withoutCall(child, depth + 1, Phone); if (value !== child) changed = true; return value; });
             return changed ? next.filter(child => child !== null) : node;
         }
         if (!node.props) return node;
-        if (isCallButton(node)) return null;
-        const children = node.props.children, next = withoutCall(children, depth + 1);
+        const icon = node.props.icon;
+        if (icon && icon.type === Phone) return null;
+        const children = node.props.children, next = withoutCall(children, depth + 1, Phone);
         if (next === children) return node;
         // A slot that only held the Call button goes too, so nothing keeps half the row.
         if (next === null || Array.isArray(next) && !next.length) return null;
@@ -3071,7 +3071,9 @@
             try { if (animate && animate.Presets) animate.configureNext(animate.Presets.easeInEaseOut); } catch (_) {}
         }
         const rendered = orig.apply(self, args);
-        return hidden ? withoutCall(rendered, 0) : rendered;
+        if (!hidden) return rendered;
+        const Phone = inspectedExport(7309, "PhoneCallIcon");
+        return Phone ? withoutCall(rendered, 0, Phone) : rendered;
     }
     // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
     let noQuestDock = null;
