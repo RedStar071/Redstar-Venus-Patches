@@ -661,6 +661,7 @@
             return props.selectable === true ? props : Object.assign({}, props, { selectable: true });
         }, 0);
     }
+    const DASHLESS_TYPES = new Set([0, 5, 15, 16]);
     function channelLabel(orig, self, args) {
         const channel=args[0];
         let next=args;
@@ -671,7 +672,7 @@
             next[0]=cloneWith(cloneWith(channel,"name",hiddenName(channel)),"isObfuscated",()=>false);
         }
         const name=orig.apply(self,next);
-        return enabled("dashless") && channel && [0, 5, 15, 16].includes(channel.type) && typeof name === "string" ? name.replace(/-/g, " ") : name;
+        return enabled("dashless") && channel && DASHLESS_TYPES.has(channel.type) && typeof name === "string" ? name.replace(/-/g, " ") : name;
     }
     const videoPattern = /\.(mp4|webm|mov|avi|mkv|flv|wmv|m4v|gifv)(?:[?#]|$)/i;
     const video = uri => typeof uri === "string" && videoPattern.test(uri);
@@ -1236,7 +1237,7 @@
         entry.versions.push({content:before.length > MAX_VERSION_TEXT ? before.slice(0, MAX_VERSION_TEXT) + "\u2026" : before,
             at:at && typeof at.toISOString === "function" ? at.toISOString() : typeof at === "string" ? at : null});
         if (entry.versions.length > MAX_VERSIONS) entry.versions.splice(0, entry.versions.length - MAX_VERSIONS);
-        entry.text = undefined; entry.view = undefined;
+        entry.text = undefined; entry.view = undefined; entry.joined = undefined;
         edits.set(key, entry);
         persistDeleted();
     }
@@ -1257,7 +1258,11 @@
         if (!edits.size || !settings.noDeleteEdits || !message || !Array.isArray(message.content)) return message;
         const entry = edits.get(deletedKey(channelId, id));
         if (!entry || !entry.versions.length) return message;
-        return Object.assign({}, message, {content:[editHistoryNodes(entry)].concat(message.content)});
+        // Rows are generated again for every change in the chat; reuse the joined content while neither side changed.
+        const view = editHistoryNodes(entry), joined = entry.joined;
+        const content = joined && joined.view === view && joined.source === message.content ? joined.value :
+            (entry.joined = {view, source:message.content, value:[view].concat(message.content)}).value;
+        return Object.assign({}, message, {content});
     }
     function deleteMessage(orig, self, args) {
         const key = deletedKey(args[0], args[1]), event = deleted.get(key);
@@ -1310,7 +1315,7 @@
         if (typeof importer !== "function") return importer;
         return function () {
             const result = importer.apply(this,arguments);
-            if (!result || ![2051,4472].includes(arguments[0])) return result;
+            if (!result || arguments[0] !== 2051 && arguments[0] !== 4472) return result;
             const real = result.default || result;
             if (arguments[0] === 2051) {
                 const methods=new Map();
