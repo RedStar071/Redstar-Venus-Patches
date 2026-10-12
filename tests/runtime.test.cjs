@@ -2899,3 +2899,10 @@ test('Quest Completer saved on starts even when Discord connects before settings
     assert.equal(b.api.settings.quests, true);
     assert.deepEqual(timers, [8000]);
 });
+test('Force system emojis also draws keycap emojis with the phone font',()=>{
+    const b=boot({systemEmoji:true});const seen=[];
+    const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
+    const exports=b.load({default:Emoji},null,6552);
+    for (const name of ['1\uFE0F\u20E3','#\uFE0F\u20E3','*\u20E3']) {exports.default({name});assert.equal(seen.at(-1).forceTextEmoji,true,name);}
+    for (const name of ['12','emoji_1','1','#']) {const props={name};exports.default(props);assert.equal(seen.at(-1),props,name);}
+});

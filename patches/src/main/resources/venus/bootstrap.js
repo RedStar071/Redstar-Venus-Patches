@@ -3104,8 +3104,10 @@
     // React Native emojis (reaction lists, statuses, the emoji grid) draw a Unicode emoji with the phone's
     // font when forceTextEmoji is set. Only Unicode emojis: custom ones have a CDN picture and a word for a name.
     function systemEmojiProps(props) {
+        // A word is a custom emoji's name. Keycaps (#\uFE0F\u20E3, 1\uFE0F\u20E3...) start with a digit or # but
+        // are Unicode emojis too, and used to keep Discord's picture.
         if (!emojiInUse || !features.systemEmoji || !props || props.forceTextEmoji || typeof props.name !== "string" || !props.name ||
-            /[A-Za-z0-9_:]/.test(props.name)) return props;
+            /[A-Za-z_:]/.test(props.name) || /[0-9#*]/.test(props.name) && !/^[0-9#*]\uFE0F?\u20E3$/.test(props.name)) return props;
         const src = props.src, uri = src && typeof src === "object" ? src.uri : src;
         if (uri != null && !(typeof uri === "string" && /^asset:/.test(uri))) return props;
         return Object.assign({}, props, {forceTextEmoji:true});
