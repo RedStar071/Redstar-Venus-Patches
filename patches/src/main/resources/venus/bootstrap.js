@@ -263,23 +263,28 @@
             return () => listeners.delete(entry);
         }, [key]);
     }
+    // A size already read and still fresh, without starting a read.
+    function knownSize(uri) {
+        const entry = typeof uri === "string" && sizeCache.get(uri);
+        return entry && entry.done && entry.expires > Date.now() ? entry.value : null;
+    }
+    // One style object for every badge, not two per photo tile per render.
+    const BADGE_STYLE = { position: "absolute", top: 3, left: 3, borderRadius: 4, backgroundColor: "#17181ccc", paddingHorizontal: 4, paddingVertical: 2 };
+    const BADGE_TEXT = { color: "white", fontSize: 10, fontWeight: "700", includeFontPadding: false };
+    const PICKER_WRAP = { position: "relative" };
     function SizeBadge(props) {
         useSettings("picker");
-        const [bytes, update] = React.useState(null);
+        // The picker recycles tiles while scrolling: a size it already knows shows straight away, with no blank first frame.
+        const [state, update] = React.useState(() => ({uri:props.uri, bytes:knownSize(props.uri)}));
+        const bytes = state && state.uri === props.uri ? state.bytes : knownSize(props.uri);
         React.useEffect(() => {
             let live = true;
-            update(null);
-            if (enabled("picker")) getSize(props.uri).then(value => { if (live) update(value); });
+            const uri = props.uri;
+            if (enabled("picker")) getSize(uri).then(value => { if (live) update(old => old && old.uri === uri && old.bytes === value ? old : {uri, bytes:value}); });
             return () => { live = false; };
         }, [props.uri, settings.picker]);
         if (!enabled("picker") || bytes === null || !RN) return null;
-        return el(RN.View, {
-            pointerEvents: "none",
-            style: { position: "absolute", top: 3, left: 3, borderRadius: 4,
-                backgroundColor: "#17181ccc", paddingHorizontal: 4, paddingVertical: 2 }
-        }, el(RN.Text, {
-            style: { color: "white", fontSize: 10, fontWeight: "700", includeFontPadding: false }
-        }, formatSize(bytes)));
+        return el(RN.View, { pointerEvents: "none", style: BADGE_STYLE }, el(RN.Text, { style: BADGE_TEXT }, formatSize(bytes)));
     }
     function pickerProps(props) {
         if (!enabled("picker") || !React || !RN || !props) return props;
@@ -287,7 +292,7 @@
         const uri = first && first.props && first.props.localImageSource && first.props.localImageSource.uri;
         if (typeof uri !== "string") return props;
         return Object.assign({}, props, { children: el(RN.View, {
-            style: { position: "relative" }, pointerEvents: "box-none"
+            style: PICKER_WRAP, pointerEvents: "box-none"
         }, props.children, el(SizeBadge, { uri })) });
     }
     function pickerComponent(component) {

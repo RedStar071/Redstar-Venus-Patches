@@ -2974,3 +2974,21 @@ test('sticker link text escapes spoiler, strikethrough and heading markup',()=>{
     b.actions.sendStickers('channel',['20'],{content:''});
     assert.match(b.sent.at(-1)[2].content,/^\[\\\|\\\|boo\\\|\\\| \\~\\~x\\~\\~ \\#1\]\(https:\/\/media\.discordapp\.net\/stickers\/20\.png\?size=160\)$/);
 });
+test('file size badge shows a known size at once and never the old photo\'s size on a reused tile',async()=>{
+    const b=boot({picker:true});const {React,RN}=reactHarness(b);
+    let state, effect;
+    React.useState=init=>{if(state===undefined)state=typeof init==='function'?init():init;return [state,fn=>{state=typeof fn==='function'?fn(state):fn;}];};
+    React.useEffect=fn=>{effect=fn;};
+    b.load({default:native({getSize:async uri=>uri==='file://a'?2048:4096})});await flush();await flush();
+    await b.api.getSize('file://a');
+    function Pressable(props){return props;}Pressable.displayName='Pressable';
+    const tile=b.load({default:Pressable},null,414).default;
+    const badgeOf=uri=>tile({children:[{props:{localImageSource:{uri}}}]}).children.props.children[1];
+    const render=badge=>badge.type(badge.props);
+    const first=render(badgeOf('file://a'));assert.equal(first.props.children.props.children,'2 KB','cached size, first frame');
+    const style=first.props.style;
+    assert.equal(render(badgeOf('file://b')),null,'a reused tile hides the old size until the new one is read');
+    effect();await flush();await flush();
+    assert.equal(render(badgeOf('file://b')).props.children.props.children,'4 KB');
+    assert.equal(render(badgeOf('file://b')).props.style,style,'one shared style object');
+});
