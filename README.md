@@ -58,8 +58,8 @@ These are listed under **Privacy** in Morphe and are all selected. They work onc
 | --- | --- |
 | **Disable analytics** | Discord's usage tracking |
 | **Disable crash reporting** | Crash reports and logs sent to Sentry |
-| **Disable telemetry and touch logging** | Performance tracking and records of what you tap |
-| **Disable advertising identifiers** | Reading your Google advertising ID |
+| **Disable telemetry and touch logging** | Performance tracking, per-screen smoothness (jank) stats and records of what you tap |
+| **Disable advertising identifiers** | Reading your Google advertising ID, by Discord or by AppsFlyer |
 | **Disable install attribution** | Tracking of how you installed the app (AppsFlyer) |
 
 Discord can still see what any client needs to work, like your messages, calls and activity on its servers.

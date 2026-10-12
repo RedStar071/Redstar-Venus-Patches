@@ -249,7 +249,7 @@ val disableCrashReporting = bytecodePatch(
 @Suppress("unused")
 val disableTelemetry = bytecodePatch(
     name = "Disable telemetry and touch logging",
-    description = "Stops performance tracking and records of what you tap. Always on once patched."
+    description = "Stops performance tracking, per-screen smoothness stats and records of what you tap. Always on once patched."
 ) {
     compatibleWith(discord)
     section(PRIVACY)
@@ -279,7 +279,7 @@ val disableAttribution = bytecodePatch(
 @Suppress("unused")
 val disableAdvertisingIdentifiers = bytecodePatch(
     name = "Disable advertising identifiers",
-    description = "Stops Discord from reading your Google advertising ID. Always on once patched."
+    description = "Stops Discord and AppsFlyer from reading your Google advertising ID. Always on once patched."
 ) {
     compatibleWith(discord)
     section(PRIVACY)
