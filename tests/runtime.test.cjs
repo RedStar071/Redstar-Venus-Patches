@@ -2937,3 +2937,8 @@ test('Hidden Channels hands the channel list the same renamed record each time',
     const first=list.getChannel('c1'),second=list.getChannel('c1');
     assert.notEqual(first,record);assert.equal(first,second);assert.equal(first.id,'c1');
 });
+test('Message tap gestures: switching gestures off while waiting for a third tap does nothing',()=>{
+    const g=gestureHarness();g.api.setSetting('gestures',true);const mine={id:'2',author:{id:'me'},state:'SENT'};
+    g.tap(mine);g.api.setSetting('gestures',false);g.flushTimers();assert.equal(g.calls.length,0);
+    g.api.setSetting('gestures',true);g.tap(mine);g.flushTimers();assert.deepEqual(g.calls.at(-1),['edit','2','message_swipe']);
+});

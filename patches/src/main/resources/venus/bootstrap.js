@@ -138,6 +138,7 @@
         // it used to write an empty file, so turning it back on lost every saved message.
         if (key === "noDelete" && !value) { clearDeleted(true, settings.noDeleteSave); archiveRestored = false; }
         if (key === "hiddenChannels") {hiddenViews.clear();}
+        if (key === "gestures" && !value && features.gestures) gestureCancel();
         if ((key === "noDeleteEdits" || key === "noDelete") && !value && edits.size) { edits.clear(); persistDeleted(); }
         settings[key] = value;
         if (key === "noDeleteSave") { if (value) restoreDeleted(); else archiveRestored = false; persistDeleted(); }
@@ -1917,7 +1918,8 @@
         if (!settings.gestureTripleDelete || !gestureOwn(message)) { gestureAct(message, channel); return; }
         gesture.pending = message; gesture.channel = channel; gesture.pendingAt = now;
         gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending; gesture.pending = null; gesture.channel = null;
-            if (waiting === message) gestureAct(message, channel); }, GESTURE_TRIPLE_MS);
+            // Switching gestures off while it waited used to still open the editor (or reply) a moment later.
+            if (waiting === message && enabled("gestures")) gestureAct(message, channel); }, GESTURE_TRIPLE_MS);
     }
     function GestureSettings() {
         useSettings("gestures");
