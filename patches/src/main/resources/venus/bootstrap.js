@@ -859,18 +859,22 @@
         if (trimmed === "Hidden channel (name unavailable)" || trimmed === "Hidden category (name unavailable)") return null;
         return channel.name;
     }
-    function rememberChannelName(channel, accountId, knownName) {
+    // guildId: for gateway channel lists, whose entries don't carry their server. It used to copy every channel
+    // of every server on READY just to add guild_id.
+    function rememberChannelName(channel, accountId, knownName, guildId) {
         // Directory scans pass the account once; don't ask UserStore again for every channel.
         let owner = accountId;
         if (typeof owner !== "string") { const current = userStore && userStore.getCurrentUser(); owner = current && current.id; }
         if (hiddenAccount !== owner) {hiddenNames.clear();hiddenAccount = owner;}
+        if (!channel) return;
+        const guild = guildId || channel.guild_id;
         const name = knownName || receivedName(channel);
-        if (!channel || !channel.guild_id || !channel.id || !name) return;
+        if (!guild || !channel.id || !name) return;
         const known = hiddenNames.get(channel.id);
         // READY replays thousands of unchanged names: don't churn the cache for them.
-        if (known && known.guild === channel.guild_id && known.name === name) return;
+        if (known && known.guild === guild && known.name === name) return;
         if (hiddenNames.size >= 4096 && !known) hiddenNames.delete(hiddenNames.keys().next().value);
-        hiddenNames.set(channel.id,{guild:channel.guild_id,name});
+        hiddenNames.set(channel.id,{guild,name});
     }
     function hiddenName(channel) {
         // Basic records can retain names absent from full/obfuscated records. Never
@@ -916,13 +920,13 @@
         function rememberGuild(guild) {
             if (!guild || !guild.id) return;
             for (const key of ["channels","threads"]) if (Array.isArray(guild[key]))
-                guild[key].forEach(channel => rememberChannelName(Object.assign({guild_id:guild.id},channel),owner));
+                guild[key].forEach(channel => rememberChannelName(channel,owner,undefined,channel && channel.guild_id || guild.id));
         }
         if (GUILD_EVENTS.has(event.type)) rememberGuild(event.guild);
         if (READY_EVENTS.has(event.type) && Array.isArray(event.guilds)) event.guilds.forEach(rememberGuild);
         if (BATCH_EVENTS.has(event.type)) {
             for (const key of ["channels","threads"]) if (Array.isArray(event[key]))
-                event[key].forEach(channel => rememberChannelName(Object.assign({guild_id:event.guildId},channel),owner));
+                event[key].forEach(channel => rememberChannelName(channel,owner,undefined,channel && channel.guild_id || event.guildId));
         }
         // Real unobfuscated names arrive inside message mention_channels (fn34524/fn35281):
         // harvest them so mentioned hidden channels resolve even when stores are redacted.
