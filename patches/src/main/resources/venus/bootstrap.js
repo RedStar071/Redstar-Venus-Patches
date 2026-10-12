@@ -501,9 +501,13 @@
             "Discord needs to reopen to change the " + (font ? "font" : "emojis") + " everywhere.", [
             {text:"Later", style:"cancel"},
             {text:"Reopen now", onPress:() => {
-                // Write the setting first, so the reopened Discord starts with it.
-                Promise.resolve().then(() => files && files.writeFile("documents", PREFS, settingsSnapshot(), "utf8"))
-                    .then(() => files && (font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart"))).catch(() => {});
+                // Write the setting first, so the reopened Discord starts with it. If it can't be saved, Discord used to
+                // reopen anyway with the old setting; now it stays open and says so.
+                if (!files) return;
+                Promise.resolve().then(() => files.writeFile("documents", PREFS, settingsSnapshot(), "utf8")).then(
+                    () => Promise.resolve(font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart")).catch(() => {}),
+                    () => { status.storage = "save failed (session only)"; notify();
+                        try { RN.Alert.alert("Couldn't save the setting", "Discord didn't reopen, so nothing changed. Try again in a moment."); } catch (_) {} });
             }}]);
     }
     // A main-list row with its own switch and a separate button that opens more options.

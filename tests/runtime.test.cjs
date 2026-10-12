@@ -2958,3 +2958,14 @@ test('NoDelete forgets kept messages and edit history of a server you leave, but
     b.events.length=0;b.api.setSetting('noDelete',false);
     assert.deepEqual(b.events.map(e=>e.channelId),['b'],'leaving g1 forgets only its channel');
 });
+test('Force system font does not reopen Discord when the setting could not be saved',async()=>{
+    const b=boot({systemFont:true});const requests=[],alerts=[];let failing=false;
+    b.load({View:'View',Text:'Text',Modal:'Modal',Alert:{alert:(...args)=>alerts.push(args)}},null,17);
+    b.context.setTimeout=(fn)=>{fn();return 0;};
+    b.load(native({writeFile:async()=>{if(failing)throw new Error('disk full');},fileExists:async uri=>{requests.push(uri);return false;}}));
+    await flush();await flush();
+    b.api.setSetting('systemFont',true);await flush();await flush();
+    failing=true;alerts[0][2][1].onPress();await flush();await flush();await flush();
+    assert.equal(requests.filter(uri=>uri.startsWith('venus-font-v1:')).length,0,'no reopen');
+    assert.equal(alerts.at(-1)[0],"Couldn't save the setting");
+});
