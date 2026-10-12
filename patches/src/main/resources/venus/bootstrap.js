@@ -1369,10 +1369,20 @@
         const channel = typeof value === "string" ? receivedChannel(value) : value;
         return !!(channel && channel.type !== 4 && hiddenMetadata(channel));
     }
+    // Channel records are immutable and replaced on change, so one renamed copy per record and name is reused.
+    // A new copy on every lookup gave the channel list a different object each render, and copied every property.
+    const renamedChannels = new WeakMap();
+    function renamedChannel(channel, name) {
+        if (name === channel.name) return channel;
+        const known = renamedChannels.get(channel);
+        if (known && known.name === name) return known.value;
+        const value = cloneWith(channel,"name",name);
+        renamedChannels.set(channel, {name, value});
+        return value;
+    }
     function displayChannel(channel) {
         if (!hiddenMetadata(channel)) return channel;
-        const name = hiddenName(channel);
-        return name === channel.name ? channel : cloneWith(channel,"name",name);
+        return renamedChannel(channel, hiddenName(channel));
     }
     function hiddenDirectory(orig, self, args) {
         const result = orig.apply(self, args), guild = args[0];
@@ -1434,7 +1444,7 @@
                 ids.add(channel.id);
                 const name = names.get(channel);
                 // Hidden names were resolved for the signature above; reuse them instead of asking again.
-                const shown = name === undefined ? displayChannel(channel) : name === channel.name ? channel : cloneWith(channel,"name",name);
+                const shown = name === undefined ? displayChannel(channel) : renamedChannel(channel, name);
                 added.push({channel:shown,comparator:channel.position || 0});
             });
             if (!added.length && !renamed) return;

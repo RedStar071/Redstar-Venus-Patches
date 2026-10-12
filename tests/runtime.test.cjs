@@ -2923,3 +2923,17 @@ test('Force system emojis matches Discord\'s native emojis when saved settings a
     assert.equal(b.api.status.storage,'read failed (defaults)');
     const props={name:'\u{1F600}'};exports.default(props);assert.equal(seen.at(-1),props);
 });
+test('Hidden Channels hands the channel list the same renamed record each time',()=>{
+    const b=boot(allFeatures);b.api.setSetting('hiddenChannels',true);
+    b.load({Permissions:{VIEW_CHANNEL:1024}},null,1086);
+    const record=Object.freeze({id:'c1',guild_id:'g',type:0,name:'hidden'});
+    b.load({default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}},null,2051);
+    b.load({default:{can:()=>false,canBasicChannel:()=>false}},null,4472);
+    let list;
+    b.context.__d((g,r,importDefault,importAll,module)=>{module.exports={store:importDefault(2051)};},6952,[]);
+    const module={exports:{}};
+    b.factories.get(6952)(b.context,()=>{},id=>id===2051?{default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}}:{},()=>{},module,module.exports,[]);
+    list=module.exports.store.default||module.exports.store;
+    const first=list.getChannel('c1'),second=list.getChannel('c1');
+    assert.notEqual(first,record);assert.equal(first,second);assert.equal(first.id,'c1');
+});
