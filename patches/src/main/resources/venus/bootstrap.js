@@ -14,7 +14,7 @@
     if (features.freeNitro) selectModules([1378, 2051, 5772, 5815, 4491, 13528, 6756, 6880]);
     if (features.noTyping) selectModules([11348]);
     if (features.quickDelete) selectModules([5205, 1127]);
-    if (features.noDelete) selectModules([585, 5057, 5059, 1378, 6880, 7378]);
+    if (features.noDelete) selectModules([585, 5057, 5059, 1378, 2051, 6880, 7378]);
     if (features.jumpToTop) selectModules([11642, 11643, 11644, 8838, 9804, 10418, 15746, 6880, 2051]);
     if (features.hiddenChannels) selectModules([1086, 1097, 1113, 2051, 4470, 6952, 4472, 4990, 6880, 585, 1378, 15859, 5410]);
     if (features.pastelize) selectModules([7378, 1252, 2111]);
@@ -1196,6 +1196,17 @@
         // The store's own MESSAGE_UPDATE change re-renders; never emitChange mid-dispatch.
         return orig.call(self,{type:"MESSAGE_UPDATE",message:{id:event.id,channel_id:event.channelId,content:message.content || ""}}) || true;
     }
+    // Kept messages and edit history of channels that are gone for good.
+    function forgetChannels(ids) {
+        let dropped = false;
+        ids.forEach(id => {
+            const bucket = deletedByChannel.get(id);
+            if (bucket) { Array.from(bucket.keys()).forEach(dropDeleted); dropped = true; }
+        });
+        if (dropped) invalidateDeleted();
+        for (const [key, entry] of edits) if (ids.has(entry.channelId)) { edits.delete(key); dropped = true; }
+        if (dropped) persistDeleted();
+    }
     function dispatchEvent(orig, self, args) {
         const event = args[0];
         if (!event) return orig.apply(self, args);
@@ -1204,12 +1215,15 @@
         if (features.noDelete && RESTORE_EVENTS.has(event.type)) Promise.resolve().then(restoreDeleted);
         // Views are keyed by the store's own ChannelMessages identity, so unrelated events
         // (typing, presence, reactions) no longer force a re-merge and re-sort of every chat.
-        if (event.type === "CHANNEL_DELETE") {
-            const id = event.channel && event.channel.id || event.channelId || event.id, bucket = deletedByChannel.get(id);
-            if (bucket) { Array.from(bucket.keys()).forEach(dropDeleted); invalidateDeleted(); persistDeleted(); }
-            let dropped = false;
-            for (const [key, entry] of edits) if (entry.channelId === id) { edits.delete(key); dropped = true; }
-            if (dropped) persistDeleted();
+        if (event.type === "CHANNEL_DELETE") forgetChannels(new Set([event.channel && event.channel.id || event.channelId || event.id]));
+        // Leaving a server (not an outage, which says unavailable) used to keep its kept messages and edit history
+        // in memory and in the saved file for good, where nothing could ever show or remove them.
+        if (event.type === "GUILD_DELETE" && event.guild && event.guild.id && !event.guild.unavailable && (deleted.size || edits.size)) {
+            const ids = new Set(), guild = event.guild.id;
+            const inGuild = channelId => { const channel = receivedChannel(channelId); return !!(channel && channel.guild_id === guild); };
+            deletedByChannel.forEach((bucket, channelId) => { if (inGuild(channelId)) ids.add(channelId); });
+            edits.forEach(entry => { if (!ids.has(entry.channelId) && inGuild(entry.channelId)) ids.add(entry.channelId); });
+            if (ids.size) forgetChannels(ids);
         }
         if (!enabled("noDelete")) return orig.apply(self, args);
         if (event.type === "MESSAGE_UPDATE" && settings.noDeleteEdits) rememberEdit(event.message);

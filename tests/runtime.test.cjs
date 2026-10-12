@@ -2942,3 +2942,19 @@ test('Message tap gestures: switching gestures off while waiting for a third tap
     g.tap(mine);g.api.setSetting('gestures',false);g.flushTimers();assert.equal(g.calls.length,0);
     g.api.setSetting('gestures',true);g.tap(mine);g.flushTimers();assert.deepEqual(g.calls.at(-1),['edit','2','message_swipe']);
 });
+test('NoDelete forgets kept messages and edit history of a server you leave, but not after an outage',()=>{
+    const b=deletionHarness();b.api.setSetting('noDelete',true);
+    const channels={a:{id:'a',guild_id:'g1'},b:{id:'b',guild_id:'g2'}};
+    b.load({default:{getChannel:id=>channels[id],getBasicChannel:()=>null}},null,2051);
+    b.messages.set('a:1',{content:'one'});b.messages.set('b:2',{content:'two'});
+    b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'a',id:'1'});b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'b',id:'2'});
+    assert.equal(b.messages.size,2);
+    b.dispatch.dispatch({type:'GUILD_DELETE',guild:{id:'g1',unavailable:true}});
+    b.events.length=0;b.api.setSetting('noDelete',false);
+    const removed=b.events.map(e=>e.channelId);assert.deepEqual(removed.sort(),['a','b'],'an outage keeps both');
+    b.api.setSetting('noDelete',true);b.messages.set('a:1',{content:'one'});b.messages.set('b:2',{content:'two'});
+    b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'a',id:'1'});b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'b',id:'2'});
+    b.dispatch.dispatch({type:'GUILD_DELETE',guild:{id:'g1'}});
+    b.events.length=0;b.api.setSetting('noDelete',false);
+    assert.deepEqual(b.events.map(e=>e.channelId),['b'],'leaving g1 forgets only its channel');
+});
