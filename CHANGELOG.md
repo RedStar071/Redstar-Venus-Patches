@@ -1,3 +1,49 @@
+## [1.8.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.7.0...v1.8.0) (2026-10-12)
+
+### ✨ New Features
+
+* **Discord - Disable telemetry and touch logging:** Also stop per-screen smoothness (jank) stats from being saved and sent
+
+### 🐛 Bug Fixes
+
+* **Discord - Disable advertising identifiers:** AppsFlyer still reads your Google advertising ID itself
+* **Discord - QuickDelete:** Removing link previews keeps skipping the confirmation after QuickDelete is turned off
+* **Discord - NoDelete:** Typing 0 as the maximum saved messages jumps it back to 512
+* **Discord - NoDelete:** A saved file too big to read back can still be written
+* **Discord - NoDelete:** Servers you leave keep their kept messages and edit history forever
+* **Discord - Quest Completer:** Doesn't start until a reconnect when Discord connects before settings load
+* **Discord - Force system emojis:** Keycap emojis like 1️⃣ and #️⃣ keep Discord's picture
+* **Discord - Force system emojis:** Emojis don't match chat when saved settings can't be read
+* **Discord - Force system emojis:** Old emoji designs keep showing after a phone or emoji font update
+* **Discord - Force system font:** Reopen now restarts Discord with the old setting when it couldn't be saved
+* **Discord - Read All:** Shows "Nothing unread" when unread servers or DMs couldn't be cleared yet
+* **Discord - Message tap gestures:** Turning gestures off during a double-tap still opens the editor or replies
+* **Discord - Custom voice messages:** Cancelling an upload that's being converted deletes it instead
+* **Discord - FreeNitro:** Sticker or emoji names with `||`, `~~` or `#` turn link text into a spoiler, strikethrough or heading
+
+### 🔧 Improvements
+
+* **Discord - Read All:** Say why unread items couldn't be cleared and which servers were marked as read
+* **Discord - Force system emojis:** Old emoji drawings are removed from the cache in the background
+* **Discord - Disable telemetry and touch logging:** Say that it also stops per-screen smoothness stats
+* **Discord - Disable advertising identifiers:** Say that it stops both Discord and AppsFlyer reading the ID
+
+### ⚡ Performance Improvements
+
+* **Discord - Pastelize:** One copy of each chat row's message instead of up to four
+* **Discord - Pastelize:** Mentions are copied only when something in them actually changes
+* **Discord - Hide call button:** Look up the call icon once per profile instead of per element
+* **Discord - Hidden Channels:** Reuse one renamed copy per locked channel instead of copying it every lookup
+* **Discord - Hidden Channels:** No longer copy every channel of every server when Discord connects
+* **Discord - NoDelete:** Edit history reuses the joined message content until something changes
+* **Discord - Dashless:** Check channel types without building a list every time
+* **Discord - Custom voice messages:** Check audio file types without building a list every time
+* **Discord - PlatformIndicators:** Less work on every presence update
+* **Discord - Venus settings:** Row switches and arrows are found once instead of on every render
+* **Discord - File size on picker:** Known sizes show straight away on recycled photo tiles, never an old one
+* **Discord - File size on picker:** Size badges share one style instead of making new ones per tile
+* **Discord - Force system font:** Threads meeting a new font family share one cache slot
+
 ## [1.7.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.6.0...v1.7.0) (2026-10-11)
 
 ### ✨ New Features
