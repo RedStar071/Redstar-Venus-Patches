@@ -2864,3 +2864,131 @@ test('NoDelete saves edit history with Save permanently and restores it for the 
     const old=editHarness(JSON.stringify({version:1,accountId:'owner',messages:[]}));await flush();await flush();
     old.api.setSetting('noDelete',true);old.api.setSetting('noDeleteSave',true);await flush();await flush();assert.equal(old.api.status.archive,'saved locally');
 });
+
+// ---- 1.7.1 regressions ----
+test('QuickDelete link previews ask again once QuickDelete itself is off',()=>{
+    const b=boot(allFeatures);let confirmed=0;
+    const translations={message:'Delete Message',embed:'Remove all embeds'};
+    b.load({t:{AMvpS4:'message','vXZ+Fo':'embed'},intl:{string:key=>translations[key]}},null,1127);
+    const action=b.load({default:{show(value){return value;}}},null,5205).default;
+    const embed={body:translations.embed,onConfirm(){confirmed++;}};
+    b.api.setSetting('quickDelete',true);b.api.setSetting('quickDeleteEmbeds',true);
+    action.show(embed);assert.equal(confirmed,1);
+    b.api.setSetting('quickDelete',false);assert.equal(action.show(embed),embed);assert.equal(confirmed,1);
+});
+test('NoDelete maximum of 0 becomes the lowest allowed, not 512',()=>{
+    const b=deletionHarness();b.api.setSetting('noDelete',true);b.api.setSetting('noDeleteLimit','20');
+    b.api.setSetting('noDeleteLimit','0');assert.equal(b.api.settings.noDeleteLimit,1);
+    b.api.setSetting('noDeleteLimit',-5);assert.equal(b.api.settings.noDeleteLimit,1);
+    b.api.setSetting('noDeleteLimit','abc');assert.equal(b.api.settings.noDeleteLimit,512);
+});
+test('Quest Completer saved on starts even when Discord connects before settings load', async () => {
+    const b = boot({quests:true});
+    const timers = [];
+    b.context.setTimeout = (fn, ms) => { timers.push(ms); return timers.length; };
+    b.context.clearTimeout = () => {};
+    const subs = new Map();
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 585);
+    let release;
+    const saved = new Promise(resolve => { release = resolve; });
+    b.load({default:native({fileExists:async () => true, readFile:() => saved})});
+    subs.get('CONNECTION_OPEN')({user:{id:'1'}});
+    assert.equal(timers.length, 0);
+    release(JSON.stringify({quests:true}));
+    await flush(); await flush(); await flush();
+    assert.equal(b.api.settings.quests, true);
+    assert.deepEqual(timers, [8000]);
+});
+test('Force system emojis also draws keycap emojis with the phone font',()=>{
+    const b=boot({systemEmoji:true});const seen=[];
+    const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
+    const exports=b.load({default:Emoji},null,6552);
+    for (const name of ['1\uFE0F\u20E3','#\uFE0F\u20E3','*\u20E3']) {exports.default({name});assert.equal(seen.at(-1).forceTextEmoji,true,name);}
+    for (const name of ['12','emoji_1','1','#']) {const props={name};exports.default(props);assert.equal(seen.at(-1),props,name);}
+});
+test('Read All says the DMs could not be cleared instead of "Nothing unread"',()=>{
+    const b=readAllHarness();b.context.__r=(old=>id=>id===6532?null:old(id))(b.context.__r);
+    b.api.setSetting('readAllMode','both');pressReadAll(b);
+    assert.equal(b.calls.guilds.length,1);
+    assert.match(b.calls.toasts.at(-1),/^Couldn't mark as read: .*\(2 servers were marked as read\)$/);
+    b.api.setSetting('readAllMode','dms');pressReadAll(b);
+    assert.doesNotMatch(b.calls.toasts.at(-1),/Nothing unread|servers were/);
+});
+test('Force system emojis matches Discord\'s native emojis when saved settings are damaged',async()=>{
+    const b=boot({systemEmoji:true});const seen=[];
+    const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
+    const exports=b.load({default:Emoji},null,6552);
+    b.load({default:native({fileExists:async()=>true,readFile:async()=>'{broken'})});
+    await flush();await flush();await flush();
+    assert.equal(b.api.status.storage,'read failed (defaults)');
+    const props={name:'\u{1F600}'};exports.default(props);assert.equal(seen.at(-1),props);
+});
+test('Hidden Channels hands the channel list the same renamed record each time',()=>{
+    const b=boot(allFeatures);b.api.setSetting('hiddenChannels',true);
+    b.load({Permissions:{VIEW_CHANNEL:1024}},null,1086);
+    const record=Object.freeze({id:'c1',guild_id:'g',type:0,name:'hidden'});
+    b.load({default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}},null,2051);
+    b.load({default:{can:()=>false,canBasicChannel:()=>false}},null,4472);
+    let list;
+    b.context.__d((g,r,importDefault,importAll,module)=>{module.exports={store:importDefault(2051)};},6952,[]);
+    const module={exports:{}};
+    b.factories.get(6952)(b.context,()=>{},id=>id===2051?{default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}}:{},()=>{},module,module.exports,[]);
+    list=module.exports.store.default||module.exports.store;
+    const first=list.getChannel('c1'),second=list.getChannel('c1');
+    assert.notEqual(first,record);assert.equal(first,second);assert.equal(first.id,'c1');
+});
+test('Message tap gestures: switching gestures off while waiting for a third tap does nothing',()=>{
+    const g=gestureHarness();g.api.setSetting('gestures',true);const mine={id:'2',author:{id:'me'},state:'SENT'};
+    g.tap(mine);g.api.setSetting('gestures',false);g.flushTimers();assert.equal(g.calls.length,0);
+    g.api.setSetting('gestures',true);g.tap(mine);g.flushTimers();assert.deepEqual(g.calls.at(-1),['edit','2','message_swipe']);
+});
+test('NoDelete forgets kept messages and edit history of a server you leave, but not after an outage',()=>{
+    const b=deletionHarness();b.api.setSetting('noDelete',true);
+    const channels={a:{id:'a',guild_id:'g1'},b:{id:'b',guild_id:'g2'}};
+    b.load({default:{getChannel:id=>channels[id],getBasicChannel:()=>null}},null,2051);
+    b.messages.set('a:1',{content:'one'});b.messages.set('b:2',{content:'two'});
+    b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'a',id:'1'});b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'b',id:'2'});
+    assert.equal(b.messages.size,2);
+    b.dispatch.dispatch({type:'GUILD_DELETE',guild:{id:'g1',unavailable:true}});
+    b.events.length=0;b.api.setSetting('noDelete',false);
+    const removed=b.events.map(e=>e.channelId);assert.deepEqual(removed.sort(),['a','b'],'an outage keeps both');
+    b.api.setSetting('noDelete',true);b.messages.set('a:1',{content:'one'});b.messages.set('b:2',{content:'two'});
+    b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'a',id:'1'});b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'b',id:'2'});
+    b.dispatch.dispatch({type:'GUILD_DELETE',guild:{id:'g1'}});
+    b.events.length=0;b.api.setSetting('noDelete',false);
+    assert.deepEqual(b.events.map(e=>e.channelId),['b'],'leaving g1 forgets only its channel');
+});
+test('Force system font does not reopen Discord when the setting could not be saved',async()=>{
+    const b=boot({systemFont:true});const requests=[],alerts=[];let failing=false;
+    b.load({View:'View',Text:'Text',Modal:'Modal',Alert:{alert:(...args)=>alerts.push(args)}},null,17);
+    b.context.setTimeout=(fn)=>{fn();return 0;};
+    b.load(native({writeFile:async()=>{if(failing)throw new Error('disk full');},fileExists:async uri=>{requests.push(uri);return false;}}));
+    await flush();await flush();
+    b.api.setSetting('systemFont',true);await flush();await flush();
+    failing=true;alerts[0][2][1].onPress();await flush();await flush();await flush();
+    assert.equal(requests.filter(uri=>uri.startsWith('venus-font-v1:')).length,0,'no reopen');
+    assert.equal(alerts.at(-1)[0],"Couldn't save the setting");
+});
+test('sticker link text escapes spoiler, strikethrough and heading markup',()=>{
+    const b=nitroHarness();b.stickers['20'].name='||boo|| ~~x~~ #1';
+    b.actions.sendStickers('channel',['20'],{content:''});
+    assert.match(b.sent.at(-1)[2].content,/^\[\\\|\\\|boo\\\|\\\| \\~\\~x\\~\\~ \\#1\]\(https:\/\/media\.discordapp\.net\/stickers\/20\.png\?size=160\)$/);
+});
+test('file size badge shows a known size at once and never the old photo\'s size on a reused tile',async()=>{
+    const b=boot({picker:true});const {React,RN}=reactHarness(b);
+    let state, effect;
+    React.useState=init=>{if(state===undefined)state=typeof init==='function'?init():init;return [state,fn=>{state=typeof fn==='function'?fn(state):fn;}];};
+    React.useEffect=fn=>{effect=fn;};
+    b.load({default:native({getSize:async uri=>uri==='file://a'?2048:4096})});await flush();await flush();
+    await b.api.getSize('file://a');
+    function Pressable(props){return props;}Pressable.displayName='Pressable';
+    const tile=b.load({default:Pressable},null,414).default;
+    const badgeOf=uri=>tile({children:[{props:{localImageSource:{uri}}}]}).children.props.children[1];
+    const render=badge=>badge.type(badge.props);
+    const first=render(badgeOf('file://a'));assert.equal(first.props.children.props.children,'2 KB','cached size, first frame');
+    const style=first.props.style;
+    assert.equal(render(badgeOf('file://b')),null,'a reused tile hides the old size until the new one is read');
+    effect();await flush();await flush();
+    assert.equal(render(badgeOf('file://b')).props.children.props.children,'4 KB');
+    assert.equal(render(badgeOf('file://b')).props.style,style,'one shared style object');
+});

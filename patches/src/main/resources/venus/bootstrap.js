@@ -14,7 +14,7 @@
     if (features.freeNitro) selectModules([1378, 2051, 5772, 5815, 4491, 13528, 6756, 6880]);
     if (features.noTyping) selectModules([11348]);
     if (features.quickDelete) selectModules([5205, 1127]);
-    if (features.noDelete) selectModules([585, 5057, 5059, 1378, 6880, 7378]);
+    if (features.noDelete) selectModules([585, 5057, 5059, 1378, 2051, 6880, 7378]);
     if (features.jumpToTop) selectModules([11642, 11643, 11644, 8838, 9804, 10418, 15746, 6880, 2051]);
     if (features.hiddenChannels) selectModules([1086, 1097, 1113, 2051, 4470, 6952, 4472, 4990, 6880, 585, 1378, 15859, 5410]);
     if (features.pastelize) selectModules([7378, 1252, 2111]);
@@ -75,7 +75,9 @@
     const enabled = key => {
         let feature = featureTable.get(key);
         if (feature === undefined) featureTable.set(key, feature = featureFor(key));
-        return features[feature] && settings[key] && (feature !== "freeNitro" || settings.freeNitro);
+        // An option only counts while its main switch is on too. Only FreeNitro checked that, so
+        // "Removing link previews" kept skipping the question after QuickDelete itself was turned off.
+        return !!(features[feature] && settings[key] && (feature === key || settings[feature]));
     };
 
     // The font Discord started with; the native side reads the same saved setting at launch.
@@ -105,7 +107,8 @@
         }
         Promise.resolve().then(persist);
     }
-    function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) && n > 0 ? Math.min(MAX_DELETED, n) : 512; }
+    // Typing 0 in the maximum box used to jump it to 512; anything below 1 now means the lowest, 1.
+    function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(MAX_DELETED, n)) : 512; }
     function setSetting(key, value) {
         if (!owns(settings, key) || !features[featureFor(key)]) return false;
         if (key === "readAllMode") {
@@ -135,6 +138,7 @@
         // it used to write an empty file, so turning it back on lost every saved message.
         if (key === "noDelete" && !value) { clearDeleted(true, settings.noDeleteSave); archiveRestored = false; }
         if (key === "hiddenChannels") {hiddenViews.clear();}
+        if (key === "gestures" && !value && features.gestures) gestureCancel();
         if ((key === "noDeleteEdits" || key === "noDelete") && !value && edits.size) { edits.clear(); persistDeleted(); }
         settings[key] = value;
         if (key === "noDeleteSave") { if (value) restoreDeleted(); else archiveRestored = false; persistDeleted(); }
@@ -184,9 +188,14 @@
             // Persist edits made while the asynchronous restore was in flight.
             if (dirty.size) save();
             restoreDeleted();
-            if (features.quests && !enabled("quests")) questsStop();
+            if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
             notify("*");
-        }).catch(() => { status.storage = "read failed (defaults)"; if (dirty.size) save(); notify("*"); });
+        }).catch(() => {
+            // The native side reads the same file at launch and falls back to Discord's font and emojis when it
+            // can't. Assuming the phone's emojis here drew React Native emojis one way and chat the other.
+            status.storage = "read failed (defaults)"; fontInUse = false; emojiInUse = false;
+            if (dirty.size) save(); notify("*");
+        });
     }
 
     function formatSize(bytes) {
@@ -254,23 +263,28 @@
             return () => listeners.delete(entry);
         }, [key]);
     }
+    // A size already read and still fresh, without starting a read.
+    function knownSize(uri) {
+        const entry = typeof uri === "string" && sizeCache.get(uri);
+        return entry && entry.done && entry.expires > Date.now() ? entry.value : null;
+    }
+    // One style object for every badge, not two per photo tile per render.
+    const BADGE_STYLE = { position: "absolute", top: 3, left: 3, borderRadius: 4, backgroundColor: "#17181ccc", paddingHorizontal: 4, paddingVertical: 2 };
+    const BADGE_TEXT = { color: "white", fontSize: 10, fontWeight: "700", includeFontPadding: false };
+    const PICKER_WRAP = { position: "relative" };
     function SizeBadge(props) {
         useSettings("picker");
-        const [bytes, update] = React.useState(null);
+        // The picker recycles tiles while scrolling: a size it already knows shows straight away, with no blank first frame.
+        const [state, update] = React.useState(() => ({uri:props.uri, bytes:knownSize(props.uri)}));
+        const bytes = state && state.uri === props.uri ? state.bytes : knownSize(props.uri);
         React.useEffect(() => {
             let live = true;
-            update(null);
-            if (enabled("picker")) getSize(props.uri).then(value => { if (live) update(value); });
+            const uri = props.uri;
+            if (enabled("picker")) getSize(uri).then(value => { if (live) update(old => old && old.uri === uri && old.bytes === value ? old : {uri, bytes:value}); });
             return () => { live = false; };
         }, [props.uri, settings.picker]);
         if (!enabled("picker") || bytes === null || !RN) return null;
-        return el(RN.View, {
-            pointerEvents: "none",
-            style: { position: "absolute", top: 3, left: 3, borderRadius: 4,
-                backgroundColor: "#17181ccc", paddingHorizontal: 4, paddingVertical: 2 }
-        }, el(RN.Text, {
-            style: { color: "white", fontSize: 10, fontWeight: "700", includeFontPadding: false }
-        }, formatSize(bytes)));
+        return el(RN.View, { pointerEvents: "none", style: BADGE_STYLE }, el(RN.Text, { style: BADGE_TEXT }, formatSize(bytes)));
     }
     function pickerProps(props) {
         if (!enabled("picker") || !React || !RN || !props) return props;
@@ -278,7 +292,7 @@
         const uri = first && first.props && first.props.localImageSource && first.props.localImageSource.uri;
         if (typeof uri !== "string") return props;
         return Object.assign({}, props, { children: el(RN.View, {
-            style: { position: "relative" }, pointerEvents: "box-none"
+            style: PICKER_WRAP, pointerEvents: "box-none"
         }, props.children, el(SizeBadge, { uri })) });
     }
     function pickerComponent(component) {
@@ -319,12 +333,13 @@
     const audioName = /\.(mp3|mp2|mpga|m4a|m4b|aac|wav|wave|flac|ogg|oga|opus|amr|awb|3ga|3gp|3gpp|aif|aiff|aifc|wma|ac3|eac3|caf|weba|alac)$/i;
     // Audio-only extensions: some providers label these voice notes video/mp4, video/3gpp or video/webm.
     const audioOnlyName = /\.(mp3|m4a|m4b|aac|wav|flac|oga|opus|amr|awb|3ga|weba|aif|aiff|aifc|caf)$/i;
+    const AUDIO_APPLICATION_TYPES = new Set(["application/ogg","application/x-ogg","application/x-flac","application/x-wav","application/x-opus"]);
     function isAudio(upload) {
         if (!upload || upload.spoiler) return false;
         const item = upload.item || {};
         const mime = String(upload.mimeType || item.mimeType || "").toLowerCase().split(";")[0].trim();
         const name = String(upload.filename || item.filename || "");
-        if (mime.startsWith("audio/") || ["application/ogg","application/x-ogg","application/x-flac","application/x-wav","application/x-opus"].includes(mime)) return true;
+        if (mime.startsWith("audio/") || AUDIO_APPLICATION_TYPES.has(mime)) return true;
         if (mime.startsWith("video/")) return audioOnlyName.test(name);
         if (mime && mime !== "application/octet-stream" && mime !== "binary/octet-stream") return false;
         return audioName.test(name);
@@ -389,9 +404,11 @@
         prototype.reactNativeCompressAndExtractData = patched;
         wrapped.set(orig, patched);
         wrapped.set(patched, patched);
-        for (const key of ["cancel", "delete"]) {
+        // One function scope per method: Hermes's native eval can lower loop-local const to var (see readSize),
+        // and then both wrappers called the last method, so cancelling an upload deleted it instead.
+        function stopFirst(key) {
             const method = prototype[key];
-            if (typeof method !== "function") continue;
+            if (typeof method !== "function") return;
             prototype[key] = function () {
                 const job = conversions.get(this);
                 if (job) {
@@ -401,6 +418,7 @@
                 return method.apply(this, arguments);
             };
         }
+        stopFirst("cancel"); stopFirst("delete");
         status.conversion = true;
     }
     function attachmentPayload(orig, self, args) {
@@ -488,9 +506,13 @@
             "Discord needs to reopen to change the " + (font ? "font" : "emojis") + " everywhere.", [
             {text:"Later", style:"cancel"},
             {text:"Reopen now", onPress:() => {
-                // Write the setting first, so the reopened Discord starts with it.
-                Promise.resolve().then(() => files && files.writeFile("documents", PREFS, settingsSnapshot(), "utf8"))
-                    .then(() => files && (font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart"))).catch(() => {});
+                // Write the setting first, so the reopened Discord starts with it. If it can't be saved, Discord used to
+                // reopen anyway with the old setting; now it stays open and says so.
+                if (!files) return;
+                Promise.resolve().then(() => files.writeFile("documents", PREFS, settingsSnapshot(), "utf8")).then(
+                    () => Promise.resolve(font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart")).catch(() => {}),
+                    () => { status.storage = "save failed (session only)"; notify();
+                        try { RN.Alert.alert("Couldn't save the setting", "Discord didn't reopen, so nothing changed. Try again in a moment."); } catch (_) {} });
             }}]);
     }
     // A main-list row with its own switch and a separate button that opens more options.
@@ -508,13 +530,15 @@
             button:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#ffffff14"}}));
         return rowStyles;
     }
-    let stackNavigation;
+    let stackNavigation, trailingSwitch, trailingChevron;
     function SubpageTrailing(props) {
         useSettings(props.setting);
         // Discord's own themed colors; the icon takes its themed default color itself.
         let styles; try { styles = subpageStyles()(); } catch (_) { styles = null; }
         styles = styles || {divider:{}, button:{}};
-        const FormSwitch = inspectedExport(6622, "FormSwitch"), Chevron = inspectedExport(6631, "ChevronSmallRightIcon");
+        // Kept once found; a missing one is looked up again next render, in case its module loads later.
+        const FormSwitch = trailingSwitch || (trailingSwitch = inspectedExport(6622, "FormSwitch"));
+        const Chevron = trailingChevron || (trailingChevron = inspectedExport(6631, "ChevronSmallRightIcon"));
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View;
         const on = !!settings[props.setting];
         return el(RN.View, {style:{flexDirection:"row", alignItems:"center"}},
@@ -658,6 +682,7 @@
             return props.selectable === true ? props : Object.assign({}, props, { selectable: true });
         }, 0);
     }
+    const DASHLESS_TYPES = new Set([0, 5, 15, 16]);
     function channelLabel(orig, self, args) {
         const channel=args[0];
         let next=args;
@@ -668,7 +693,7 @@
             next[0]=cloneWith(cloneWith(channel,"name",hiddenName(channel)),"isObfuscated",()=>false);
         }
         const name=orig.apply(self,next);
-        return enabled("dashless") && channel && [0, 5, 15, 16].includes(channel.type) && typeof name === "string" ? name.replace(/-/g, " ") : name;
+        return enabled("dashless") && channel && DASHLESS_TYPES.has(channel.type) && typeof name === "string" ? name.replace(/-/g, " ") : name;
     }
     const videoPattern = /\.(mp4|webm|mov|avi|mkv|flv|wmv|m4v|gifv)(?:[?#]|$)/i;
     const video = uri => typeof uri === "string" && videoPattern.test(uri);
@@ -747,7 +772,8 @@
     }
     function shareLink(name, uri) {
         // Escape Markdown without permitting forged mentions or link syntax in sticker names.
-        return settings.hyperlinks && name ? "[" + String(name).replace(/([\\\[\]()*_`<>@])/g, "\\$1").replace(/[\r\n]/g, " ") + "](" + uri + ")" : uri;
+        // ~ | # too: a sticker called ||surprise|| or ~~old~~ turned the link text into a spoiler or strikethrough.
+        return settings.hyperlinks && name ? "[" + String(name).replace(/([\\\[\]()*_`<>@~|#])/g, "\\$1").replace(/[\r\n]/g, " ") + "](" + uri + ")" : uri;
     }
     function emojiMessage(message, channelId) {
         if (!enabled("emojis") || !message || typeof message.content !== "string" || !message.content.includes("<") || !emojiStore || !channelStore) return message;
@@ -843,18 +869,22 @@
         if (trimmed === "Hidden channel (name unavailable)" || trimmed === "Hidden category (name unavailable)") return null;
         return channel.name;
     }
-    function rememberChannelName(channel, accountId, knownName) {
+    // guildId: for gateway channel lists, whose entries don't carry their server. It used to copy every channel
+    // of every server on READY just to add guild_id.
+    function rememberChannelName(channel, accountId, knownName, guildId) {
         // Directory scans pass the account once; don't ask UserStore again for every channel.
         let owner = accountId;
         if (typeof owner !== "string") { const current = userStore && userStore.getCurrentUser(); owner = current && current.id; }
         if (hiddenAccount !== owner) {hiddenNames.clear();hiddenAccount = owner;}
+        if (!channel) return;
+        const guild = guildId || channel.guild_id;
         const name = knownName || receivedName(channel);
-        if (!channel || !channel.guild_id || !channel.id || !name) return;
+        if (!guild || !channel.id || !name) return;
         const known = hiddenNames.get(channel.id);
         // READY replays thousands of unchanged names: don't churn the cache for them.
-        if (known && known.guild === channel.guild_id && known.name === name) return;
+        if (known && known.guild === guild && known.name === name) return;
         if (hiddenNames.size >= 4096 && !known) hiddenNames.delete(hiddenNames.keys().next().value);
-        hiddenNames.set(channel.id,{guild:channel.guild_id,name});
+        hiddenNames.set(channel.id,{guild,name});
     }
     function hiddenName(channel) {
         // Basic records can retain names absent from full/obfuscated records. Never
@@ -900,13 +930,13 @@
         function rememberGuild(guild) {
             if (!guild || !guild.id) return;
             for (const key of ["channels","threads"]) if (Array.isArray(guild[key]))
-                guild[key].forEach(channel => rememberChannelName(Object.assign({guild_id:guild.id},channel),owner));
+                guild[key].forEach(channel => rememberChannelName(channel,owner,undefined,channel && channel.guild_id || guild.id));
         }
         if (GUILD_EVENTS.has(event.type)) rememberGuild(event.guild);
         if (READY_EVENTS.has(event.type) && Array.isArray(event.guilds)) event.guilds.forEach(rememberGuild);
         if (BATCH_EVENTS.has(event.type)) {
             for (const key of ["channels","threads"]) if (Array.isArray(event[key]))
-                event[key].forEach(channel => rememberChannelName(Object.assign({guild_id:event.guildId},channel),owner));
+                event[key].forEach(channel => rememberChannelName(channel,owner,undefined,channel && channel.guild_id || event.guildId));
         }
         // Real unobfuscated names arrive inside message mention_channels (fn34524/fn35281):
         // harvest them so mentioned hidden channels resolve even when stores are redacted.
@@ -983,9 +1013,12 @@
             // Edit history rides in the same file. Older releases ignore the extra key, so nothing breaks either way.
             const history = [];
             if (settings.noDeleteSave && settings.noDeleteEdits) edits.forEach(entry => { const text = editText(entry); if (text) history.push(text); });
-            archivePending = "{\"version\":1,\"accountId\":" + JSON.stringify(settings.noDeleteSave && user ? user.id : null) +
+            const text = "{\"version\":1,\"accountId\":" + JSON.stringify(settings.noDeleteSave && user ? user.id : null) +
                 ",\"messages\":[" + parts.join(",") + "]" + (history.length ? ",\"edits\":[" + history.join(",") + "]" : "") + "}";
-            if (archivePending.length > ARCHIVE_BYTES) throw new Error("Deleted message archive exceeds 32 MB");
+            // A file this big can never be read back. It used to stay queued, so a write already in progress
+            // saved it anyway right after, and kept up to 32 MB of text in memory until the next deletion.
+            if (text.length > ARCHIVE_BYTES) throw new Error("Deleted message archive exceeds 32 MB");
+            archivePending = text;
         } catch (_) { status.archive = "save failed"; notify(); return; }
         if (archiveWriting) return;
         archiveWriting = true;
@@ -1180,6 +1213,17 @@
         // The store's own MESSAGE_UPDATE change re-renders; never emitChange mid-dispatch.
         return orig.call(self,{type:"MESSAGE_UPDATE",message:{id:event.id,channel_id:event.channelId,content:message.content || ""}}) || true;
     }
+    // Kept messages and edit history of channels that are gone for good.
+    function forgetChannels(ids) {
+        let dropped = false;
+        ids.forEach(id => {
+            const bucket = deletedByChannel.get(id);
+            if (bucket) { Array.from(bucket.keys()).forEach(dropDeleted); dropped = true; }
+        });
+        if (dropped) invalidateDeleted();
+        for (const [key, entry] of edits) if (ids.has(entry.channelId)) { edits.delete(key); dropped = true; }
+        if (dropped) persistDeleted();
+    }
     function dispatchEvent(orig, self, args) {
         const event = args[0];
         if (!event) return orig.apply(self, args);
@@ -1188,12 +1232,15 @@
         if (features.noDelete && RESTORE_EVENTS.has(event.type)) Promise.resolve().then(restoreDeleted);
         // Views are keyed by the store's own ChannelMessages identity, so unrelated events
         // (typing, presence, reactions) no longer force a re-merge and re-sort of every chat.
-        if (event.type === "CHANNEL_DELETE") {
-            const id = event.channel && event.channel.id || event.channelId || event.id, bucket = deletedByChannel.get(id);
-            if (bucket) { Array.from(bucket.keys()).forEach(dropDeleted); invalidateDeleted(); persistDeleted(); }
-            let dropped = false;
-            for (const [key, entry] of edits) if (entry.channelId === id) { edits.delete(key); dropped = true; }
-            if (dropped) persistDeleted();
+        if (event.type === "CHANNEL_DELETE") forgetChannels(new Set([event.channel && event.channel.id || event.channelId || event.id]));
+        // Leaving a server (not an outage, which says unavailable) used to keep its kept messages and edit history
+        // in memory and in the saved file for good, where nothing could ever show or remove them.
+        if (event.type === "GUILD_DELETE" && event.guild && event.guild.id && !event.guild.unavailable && (deleted.size || edits.size)) {
+            const ids = new Set(), guild = event.guild.id;
+            const inGuild = channelId => { const channel = receivedChannel(channelId); return !!(channel && channel.guild_id === guild); };
+            deletedByChannel.forEach((bucket, channelId) => { if (inGuild(channelId)) ids.add(channelId); });
+            edits.forEach(entry => { if (!ids.has(entry.channelId) && inGuild(entry.channelId)) ids.add(entry.channelId); });
+            if (ids.size) forgetChannels(ids);
         }
         if (!enabled("noDelete")) return orig.apply(self, args);
         if (event.type === "MESSAGE_UPDATE" && settings.noDeleteEdits) rememberEdit(event.message);
@@ -1230,7 +1277,7 @@
         entry.versions.push({content:before.length > MAX_VERSION_TEXT ? before.slice(0, MAX_VERSION_TEXT) + "\u2026" : before,
             at:at && typeof at.toISOString === "function" ? at.toISOString() : typeof at === "string" ? at : null});
         if (entry.versions.length > MAX_VERSIONS) entry.versions.splice(0, entry.versions.length - MAX_VERSIONS);
-        entry.text = undefined; entry.view = undefined;
+        entry.text = undefined; entry.view = undefined; entry.joined = undefined;
         edits.set(key, entry);
         persistDeleted();
     }
@@ -1251,7 +1298,11 @@
         if (!edits.size || !settings.noDeleteEdits || !message || !Array.isArray(message.content)) return message;
         const entry = edits.get(deletedKey(channelId, id));
         if (!entry || !entry.versions.length) return message;
-        return Object.assign({}, message, {content:[editHistoryNodes(entry)].concat(message.content)});
+        // Rows are generated again for every change in the chat; reuse the joined content while neither side changed.
+        const view = editHistoryNodes(entry), joined = entry.joined;
+        const content = joined && joined.view === view && joined.source === message.content ? joined.value :
+            (entry.joined = {view, source:message.content, value:[view].concat(message.content)}).value;
+        return Object.assign({}, message, {content});
     }
     function deleteMessage(orig, self, args) {
         const key = deletedKey(args[0], args[1]), event = deleted.get(key);
@@ -1304,7 +1355,7 @@
         if (typeof importer !== "function") return importer;
         return function () {
             const result = importer.apply(this,arguments);
-            if (!result || ![2051,4472].includes(arguments[0])) return result;
+            if (!result || arguments[0] !== 2051 && arguments[0] !== 4472) return result;
             const real = result.default || result;
             if (arguments[0] === 2051) {
                 const methods=new Map();
@@ -1353,10 +1404,20 @@
         const channel = typeof value === "string" ? receivedChannel(value) : value;
         return !!(channel && channel.type !== 4 && hiddenMetadata(channel));
     }
+    // Channel records are immutable and replaced on change, so one renamed copy per record and name is reused.
+    // A new copy on every lookup gave the channel list a different object each render, and copied every property.
+    const renamedChannels = new WeakMap();
+    function renamedChannel(channel, name) {
+        if (name === channel.name) return channel;
+        const known = renamedChannels.get(channel);
+        if (known && known.name === name) return known.value;
+        const value = cloneWith(channel,"name",name);
+        renamedChannels.set(channel, {name, value});
+        return value;
+    }
     function displayChannel(channel) {
         if (!hiddenMetadata(channel)) return channel;
-        const name = hiddenName(channel);
-        return name === channel.name ? channel : cloneWith(channel,"name",name);
+        return renamedChannel(channel, hiddenName(channel));
     }
     function hiddenDirectory(orig, self, args) {
         const result = orig.apply(self, args), guild = args[0];
@@ -1418,7 +1479,7 @@
                 ids.add(channel.id);
                 const name = names.get(channel);
                 // Hidden names were resolved for the signature above; reuse them instead of asking again.
-                const shown = name === undefined ? displayChannel(channel) : name === channel.name ? channel : cloneWith(channel,"name",name);
+                const shown = name === undefined ? displayChannel(channel) : renamedChannel(channel, name);
                 added.push({channel:shown,comparator:channel.position || 0});
             });
             if (!added.length && !renamed) return;
@@ -1642,11 +1703,13 @@
         const hex = "#" + [component(0),component(8),component(4)].map(value => value.toString(16).padStart(2,"0")).join("");
         return {hex, value:RN.processColor(hex)};
     }
+    // Every chat row runs this: the content array is only copied once a node actually changes.
     function pastelMentions(content, guildId) {
         if (!Array.isArray(content)) return content;
-        let changed = false;
-        const next = content.map(node => {
-            if (!node || typeof node !== "object") return node;
+        let next = null;
+        for (let i = 0; i < content.length; i++) {
+            const node = content[i];
+            if (!node || typeof node !== "object") continue;
             let result = node;
             if (node.type === "mention" && node.userId && (!node.colorString || settings.pastelAll) &&
                 (!guildId || guildMembers && guildMembers.getMember(guildId,node.userId))) {
@@ -1657,28 +1720,28 @@
                 const children = pastelMentions(node.content,guildId);
                 if (children !== node.content) result = Object.assign({},result,{content:children});
             }
-            if (result !== node) changed = true;
-            return result;
-        });
-        return changed ? next : content;
+            if (result !== node) { if (!next) next = content.slice(); next[i] = result; }
+        }
+        return next || content;
     }
     function pastelMessage(message, source) {
         if (!message || !message.authorId) return message;
         if (message.guildId && (!guildMembers || !guildMembers.getMember(message.guildId,message.authorId)) && !(source && source.webhookId)) return message;
-        let next = Object.assign({},message,{shouldShowRoleOnName:true}), seed;
+        let seed;
         if (source && source.webhookId) seed = settings.pastelWebhookName ? message.username : source.webhookId;
         else if (!(source && source.colorString != null ? source.colorString : message.roleColor) || settings.pastelAll) seed = message.authorId;
         const color = seed && pastelColor(seed,0.75,0.6);
-        if (color) next = Object.assign({},message,{roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true});
+        // One copy of the row's message, with every change in it.
+        const changes = color ? {roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true} : {shouldShowRoleOnName:true};
         const content = pastelMentions(message.content,message.guildId);
-        if (content !== message.content) next = Object.assign({},next,{content});
+        if (content !== message.content) changes.content = content;
         // Native MessageView applies Message.textColor via TextView.setTextColor (348.10 bridge field).
         // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
         if (color && settings.pastelContent) {
             const text = pastelColor(seed,0.85,0.75);
-            if (text) next = Object.assign({},next,{textColor:text.value});
+            if (text) changes.textColor = text.value;
         }
-        return next;
+        return Object.assign({},message,changes);
     }
     // Read All: a ReadAllNotificationsButton port for the mobile server bar (GuildsBar 15920,
     // useGuildsBarProps 15929). The button lives in the SEPARATOR row, below the DM button and
@@ -1712,14 +1775,18 @@
         if (!enabled("readAll") || !READ_ALL_MODES.includes(mode)) return;
         const api=readAllExports(), ui=reviewUI();
         let guilds=0, dms=0;
+        // Unread servers or DMs with no way to clear them used to say "Nothing unread".
+        const unavailable=() => { throw new Error("Discord's read states haven't loaded yet. Try again in a moment."); };
         try {
             if (mode!=="dms") {
                 const ids=unreadGuildIds(api);
-                if (ids.length && typeof api.markGuilds==="function") { api.markGuilds(ids, api.sections && api.sections.GUILD_LIST); guilds=ids.length; }
+                if (ids.length && typeof api.markGuilds!=="function") unavailable();
+                if (ids.length) { api.markGuilds(ids, api.sections && api.sections.GUILD_LIST); guilds=ids.length; }
             }
             if (mode!=="guilds") {
                 const ids=unreadDmIds(api);
-                if (ids.length && api.readActions && typeof api.readActions.bulkAck==="function" && api.reads) {
+                if (ids.length && !(api.readActions && typeof api.readActions.bulkAck==="function" && api.reads)) unavailable();
+                if (ids.length) {
                     const type=api.readTypes && api.readTypes.CHANNEL != null ? api.readTypes.CHANNEL : 0;
                     // A DM without a known last message can't be acknowledged; sending it anyway
                     // made the whole request fail. Discord's own /read-states/ack-bulk takes 100 at a time.
@@ -1728,7 +1795,11 @@
                     dms=acks.length;
                 }
             }
-        } catch (error) { reviewToast(ui,"Couldn't mark as read: "+String(error && error.message || error)); return; }
+        } catch (error) {
+            // What was already cleared stays cleared; say so instead of only the error.
+            const done=guilds ? " ("+guilds+(guilds===1 ? " server was" : " servers were")+" marked as read)" : "";
+            reviewToast(ui,"Couldn't mark as read: "+String(error && error.message || error)+done); return;
+        }
         const parts=[];
         if (guilds) parts.push(guilds+(guilds===1 ? " server" : " servers"));
         if (dms) parts.push(dms+(dms===1 ? " DM" : " DMs"));
@@ -1881,7 +1952,8 @@
         if (!settings.gestureTripleDelete || !gestureOwn(message)) { gestureAct(message, channel); return; }
         gesture.pending = message; gesture.channel = channel; gesture.pendingAt = now;
         gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending; gesture.pending = null; gesture.channel = null;
-            if (waiting === message) gestureAct(message, channel); }, GESTURE_TRIPLE_MS);
+            // Switching gestures off while it waited used to still open the editor (or reply) a moment later.
+            if (waiting === message && enabled("gestures")) gestureAct(message, channel); }, GESTURE_TRIPLE_MS);
     }
     function GestureSettings() {
         useSettings("gestures");
@@ -2308,6 +2380,11 @@
         dispatcher.subscribe("CONNECTION_OPEN", questsConnected);
         dispatcher.subscribe("LOGOUT", () => { questsReset(); quest.user = null; });
     }
+    // Discord can connect before the saved settings finish loading. Quest Completer was still off at that
+    // moment, so it never started until the next reconnect. Start it now if Discord is already connected.
+    function questsLoaded() {
+        if (quest.user && quest.refetchTimer === undefined && !quest.running) questsStart(8000);
+    }
     function questsSettingChanged(key, value) {
         if (key === "quests" && !value) { questsStop(); return; }
         if (!enabled("quests")) return;
@@ -2436,13 +2513,17 @@
         }
         return clients || null;
     }
-    function platformKey(userId) {
-        const clients = presenceStore && platformClients(userId);
-        return clients ? Object.keys(clients).map(key => key + ":" + clients[key]).join(",") : "";
+    function clientsKey(clients) {
+        if (!clients) return "";
+        let key = "";
+        for (const name in clients) key += name + ":" + clients[name] + ",";
+        return key;
     }
+    function platformKey(userId) { return clientsKey(presenceStore && platformClients(userId)); }
     // One listener per store for every badge on screen, not two per badge. Each change works
     // out a person's clients once, however many badges show them, and wakes only those badges.
     const platformSubs = new Map(), platformStores = new Set();
+    // PresenceStore changes for every presence update of anyone: the key is built without temporary arrays.
     function platformChanged() {
         platformSubs.forEach((entry, userId) => {
             const key = platformKey(userId);
@@ -3037,20 +3118,18 @@
     // flex:1 slot, or as icon buttons next to a friend button. Its disableCalls prop only greys Call out, so
     // the Call button and the slot it sat in are left out of what it renders. Message's slot then takes the
     // whole row, and the change animates when the setting flips while a profile is open.
-    function isCallButton(node) {
-        const icon = node && node.props && node.props.icon, Phone = inspectedExport(7309, "PhoneCallIcon");
-        return !!(Phone && icon && icon.type === Phone);
-    }
-    function withoutCall(node, depth) {
+    // The icon is looked up once per render, not once for every element in the row.
+    function withoutCall(node, depth, Phone) {
         if (!node || typeof node !== "object" || depth > 12) return node;
         if (Array.isArray(node)) {
             let changed = false;
-            const next = node.map(child => { const value = withoutCall(child, depth + 1); if (value !== child) changed = true; return value; });
+            const next = node.map(child => { const value = withoutCall(child, depth + 1, Phone); if (value !== child) changed = true; return value; });
             return changed ? next.filter(child => child !== null) : node;
         }
         if (!node.props) return node;
-        if (isCallButton(node)) return null;
-        const children = node.props.children, next = withoutCall(children, depth + 1);
+        const icon = node.props.icon;
+        if (icon && icon.type === Phone) return null;
+        const children = node.props.children, next = withoutCall(children, depth + 1, Phone);
         if (next === children) return node;
         // A slot that only held the Call button goes too, so nothing keeps half the row.
         if (next === null || Array.isArray(next) && !next.length) return null;
@@ -3065,7 +3144,9 @@
             try { if (animate && animate.Presets) animate.configureNext(animate.Presets.easeInEaseOut); } catch (_) {}
         }
         const rendered = orig.apply(self, args);
-        return hidden ? withoutCall(rendered, 0) : rendered;
+        if (!hidden) return rendered;
+        const Phone = inspectedExport(7309, "PhoneCallIcon");
+        return Phone ? withoutCall(rendered, 0, Phone) : rendered;
     }
     // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
     let noQuestDock = null;
@@ -3091,8 +3172,10 @@
     // React Native emojis (reaction lists, statuses, the emoji grid) draw a Unicode emoji with the phone's
     // font when forceTextEmoji is set. Only Unicode emojis: custom ones have a CDN picture and a word for a name.
     function systemEmojiProps(props) {
+        // A word is a custom emoji's name. Keycaps (#\uFE0F\u20E3, 1\uFE0F\u20E3...) start with a digit or # but
+        // are Unicode emojis too, and used to keep Discord's picture.
         if (!emojiInUse || !features.systemEmoji || !props || props.forceTextEmoji || typeof props.name !== "string" || !props.name ||
-            /[A-Za-z0-9_:]/.test(props.name)) return props;
+            /[A-Za-z_:]/.test(props.name) || /[0-9#*]/.test(props.name) && !/^[0-9#*]\uFE0F?\u20E3$/.test(props.name)) return props;
         const src = props.src, uri = src && typeof src === "object" ? src.uri : src;
         if (uri != null && !(typeof uri === "string" && /^asset:/.test(uri))) return props;
         return Object.assign({}, props, {forceTextEmoji:true});

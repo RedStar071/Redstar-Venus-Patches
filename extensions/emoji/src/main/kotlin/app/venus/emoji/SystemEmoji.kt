@@ -25,7 +25,8 @@ object SystemEmoji {
     private const val MAX_PREFS = 4 * 1024 * 1024
     private const val SIZE = 128
     private const val PREFIX = "venus-emoji-v1:"
-    // Changed whenever the drawing changes, so files drawn by an older release are never reused.
+    // Changed whenever the drawing changes, so files drawn by an older release are never reused. Inside it, one
+    // folder per emoji font (see fontStamp), so a font update draws every emoji again.
     private const val FOLDER = "venus-emoji-v1"
     private val urls = ConcurrentHashMap<String, String>()
     private val unsupported = ConcurrentHashMap<String, Boolean>()
@@ -50,10 +51,45 @@ object SystemEmoji {
                 JSONObject(String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8))
                     .optBoolean("systemEmoji", true)
             if (!on) false else {
-                val folder = File(context.cacheDir, FOLDER)
-                if (folder.isDirectory || folder.mkdirs()) { directory = folder; true } else false
+                // One folder per emoji font: after a system or emoji font update the old drawings were shown forever.
+                // Folders for an older font are removed, so the cache never holds two sets.
+                val root = File(context.cacheDir, FOLDER)
+                val folder = File(root, fontStamp())
+                if (folder.isDirectory || folder.mkdirs()) {
+                    directory = folder
+                    // Off the launch path: there can be thousands of old drawings.
+                    val cleanup = Thread({
+                        try {
+                            val old = root.listFiles()
+                            // Releases up to 1.7.0 drew straight into this folder: those loose files go too.
+                            if (old != null) for (stale in old) if (stale.name != folder.name) { if (stale.isDirectory) removeFolder(stale) else stale.delete() }
+                        } catch (_: Throwable) { }
+                    }, "Venus-Emoji-Cleanup")
+                    cleanup.isDaemon = true
+                    cleanup.priority = Thread.MIN_PRIORITY
+                    cleanup.start()
+                    true
+                } else false
             }
         } catch (_: Throwable) { false }
+    }
+
+    /** The phone's emoji font, by file size and date, plus the Android build. Changes whenever either is updated. */
+    private fun fontStamp(): String {
+        var stamp = android.os.Build.FINGERPRINT.hashCode().toLong()
+        for (path in EMOJI_FONTS) {
+            val file = File(path)
+            if (file.exists()) stamp = stamp * 31 + (if (file.isFile) file.length() * 17 else 0L) + file.lastModified()
+        }
+        return "f" + java.lang.Long.toHexString(stamp)
+    }
+    private val EMOJI_FONTS = arrayOf("/system/fonts/NotoColorEmoji.ttf", "/system/fonts/NotoColorEmojiFlags.ttf",
+        "/system/fonts/SamsungColorEmoji.ttf", "/data/fonts/files")
+
+    private fun removeFolder(folder: File) {
+        val files = folder.listFiles()
+        if (files != null) for (file in files) file.delete()
+        folder.delete()
     }
 
     /**

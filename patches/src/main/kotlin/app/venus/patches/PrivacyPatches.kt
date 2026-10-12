@@ -9,7 +9,7 @@ import com.android.tools.smali.dexlib2.iface.Method
 
 /** Native entry-point guards; interfaces, constructors, cleanup and operational network APIs stay intact. */
 internal object NativePrivacy {
-    enum class Result { VOID, TRUE, FALSE, NULL, SELF, EMPTY_STRING, PROMISE_NULL, PROMISE_TRUE, PROMISE_FALSE, AF_SUCCESS, EMPTY_MAP, PROFILE_START, AD_ID_MAP, CALLBACK_NULL, CALLBACK_FALSE, CALLBACK_EMPTY_STRING, BOXED_FALSE, THROWABLE_STRING }
+    enum class Result { VOID, TRUE, FALSE, NULL, SELF, EMPTY_STRING, PROMISE_NULL, PROMISE_TRUE, PROMISE_FALSE, PROMISE_EMPTY_ARRAY, NO_AD_ID, AF_SUCCESS, EMPTY_MAP, PROFILE_START, AD_ID_MAP, CALLBACK_NULL, CALLBACK_FALSE, CALLBACK_EMPTY_STRING, BOXED_FALSE, THROWABLE_STRING }
     data class Target(val owner: String, val name: String, val parameters: List<String>, val returns: String, val result: Result) {
         fun matches(method: Method) = method.definingClass == owner && method.name == name &&
             method.parameterTypes.map { it.toString() } == parameters && method.returnType == returns
@@ -47,6 +47,20 @@ internal object NativePrivacy {
                 }
                 Result.SELF -> { require(!isStatic && returns == "Lcom/appsflyer/AppsFlyerLib;"); "return-object p0" }
                 Result.EMPTY_STRING -> { require(returns == "Ljava/lang/String;"); "const-string v0, \"\"\nreturn-object v0" }
+                Result.NO_AD_ID -> {
+                    // An ad ID object saying what Android says after "Delete advertising ID": no ID, and
+                    // limited ad tracking. Callers read its fields straight away, so null would crash them.
+                    require(isStatic && parameters == listOf("Landroid/content/Context;") && returns.startsWith("L") && registers >= 3)
+                    "new-instance v0, $returns\nconst-string v1, \"\"\nconst/4 v2, 0x1\n" +
+                        "invoke-direct {v0, v1, v2}, $returns-><init>(Ljava/lang/String;Z)V\nreturn-object v0"
+                }
+                Result.PROMISE_EMPTY_ARRAY -> {
+                    require(returns == "V" && parameters.last() == "Lcom/facebook/react/bridge/Promise;" && registers >= 2)
+                    "move-object/from16 v0, p${lastParameter()}\n" +
+                        "invoke-static {}, Lcom/facebook/react/bridge/Arguments;->createArray()Lcom/facebook/react/bridge/WritableArray;\n" +
+                        "move-result-object v1\n" +
+                        "invoke-interface {v0, v1}, Lcom/facebook/react/bridge/Promise;->resolve(Ljava/lang/Object;)V\nreturn-void"
+                }
                 Result.PROMISE_NULL, Result.PROMISE_TRUE, Result.PROMISE_FALSE -> {
                     require(returns == "V" && parameters.last() == "Lcom/facebook/react/bridge/Promise;" && registers >= 2)
                     val value = when (result) {
@@ -146,9 +160,25 @@ internal object NativePrivacy {
         Target("Lcom/discord/crash_reporting/TelemetryRing;", "append", listOf("Ljava/lang/String;", "J", "Ljava/lang/String;", "Ljava/util/Map;", "Ljava/util/List;"), "V", Result.VOID),
         Target("Lcom/discord/crash_reporting/TelemetryRing;", "enqueueWrite", listOf("Lcom/discord/crash_reporting/TelemetryRingSqliteStore\$EntryPayload;"), "V", Result.VOID),
         Target("Lcom/discord/crash_reporting/TelemetryRingModule;", "append", listOf("Ljava/lang/String;", "D", "Ljava/lang/String;", "Lcom/facebook/react/bridge/ReadableMap;", "Lcom/facebook/react/bridge/ReadableArray;"), "V", Result.VOID),
+        // Jank stats: per-frame timings for every screen, named and saved to disk, then uploaded as
+        // ANDROID_JANK_STATS / ANDROID_JANK_SESSION events. Nothing in the app shows or uses them.
+        // No frame listeners are attached, so there is nothing to measure, save or send.
+        Target("Lcom/discord/jank_stats/JankStatsAggregator;", "initialize", listOf("Landroid/view/Window;"), "V", Result.VOID),
+        // Reads the JankStats object initialize no longer makes; enable/disable already allow it to be missing.
+        Target("Lcom/discord/jank_stats/JankStatsAggregator;", "setJankHeuristicMultiplier", listOf("F"), "V", Result.VOID),
+        Target("Lcom/discord/jank_stats/FrameMetricsAggregator;", "initialize", listOf("Landroid/view/Window;"), "V", Result.VOID),
+        // Discord's JankStatsManager skips the upload when the report is null.
+        Target("Lcom/discord/jank_stats/JankStatsModule;", "requestReport", listOf(), "Lcom/facebook/react/bridge/WritableMap;", Result.NULL),
+        // JankSessionManager stops when there are no pending sessions.
+        Target("Lcom/discord/jank_stats/JankSessionModule;", "getPendingReports", listOf("Lcom/facebook/react/bridge/Promise;"), "V", Result.PROMISE_EMPTY_ARRAY),
     )
     val advertising = listOf(
         Target("Lcom/discord/ads/AdsModule;", "getGoogleAdvertisingId", listOf("Lcom/facebook/react/bridge/Promise;"), "V", Result.AD_ID_MAP),
+        // The two places that actually ask Google Play services for the ID: Google's AdvertisingIdClient,
+        // and AppsFlyer's own copy of it. AppsFlyer reads the ID itself, so this used to keep working
+        // whenever Disable install attribution wasn't selected.
+        Target("Lpe/a;", "a", listOf("Landroid/content/Context;"), "Lcom/google/android/gms/ads/identifier/AdvertisingIdClient\$Info;", Result.NO_AD_ID),
+        Target("Lcom/appsflyer/internal/AFb1qSDK;", "AFAdRevenueData", listOf("Landroid/content/Context;"), "Lcom/appsflyer/internal/AFb1qSDK\$AFa1uSDK;", Result.NO_AD_ID),
     )
     val attribution = listOf(
         Target("Lcom/discord/analytics/InstallReferrerModule;", "get", listOf("Lcom/facebook/react/bridge/Promise;"), "V", Result.PROMISE_NULL),
@@ -219,7 +249,7 @@ val disableCrashReporting = bytecodePatch(
 @Suppress("unused")
 val disableTelemetry = bytecodePatch(
     name = "Disable telemetry and touch logging",
-    description = "Stops performance tracking and records of what you tap. Always on once patched."
+    description = "Stops performance tracking, per-screen smoothness stats and records of what you tap. Always on once patched."
 ) {
     compatibleWith(discord)
     section(PRIVACY)
@@ -249,7 +279,7 @@ val disableAttribution = bytecodePatch(
 @Suppress("unused")
 val disableAdvertisingIdentifiers = bytecodePatch(
     name = "Disable advertising identifiers",
-    description = "Stops Discord from reading your Google advertising ID. Always on once patched."
+    description = "Stops Discord and AppsFlyer from reading your Google advertising ID. Always on once patched."
 ) {
     compatibleWith(discord)
     section(PRIVACY)

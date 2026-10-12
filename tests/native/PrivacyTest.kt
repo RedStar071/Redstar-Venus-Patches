@@ -21,7 +21,7 @@ private data class Quad<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
 fun main(args: Array<String>) {
     val groups = listOf(HbcPrivacy.analytics, HbcPrivacy.telemetry, HbcPrivacy.crash)
     val natives = NativePrivacy.crash + NativePrivacy.telemetry + NativePrivacy.attribution + NativePrivacy.advertising
-    check(natives.size == 80 && natives.distinct().size == natives.size)
+    check(natives.size == 87 && natives.distinct().size == natives.size)
     check(groups.flatten().size == 17 && groups.flatten().map { it.offset }.distinct().size == 17)
     check(HbcPrivacy.resolvedPromise.last() == 6.toByte())
     // Every stub must decode into whole HBC98 instructions (1.3.6 used NewFastArray by mistake and misdecoded).
@@ -285,7 +285,24 @@ fun main(args: Array<String>) {
             check(regs.all { it in 0 until fixture.implementation!!.registerCount })
         }
         val calls = prefix.mapNotNull { ((it as? ReferenceInstruction)?.reference as? MethodReference) }
-        if (target.result.name.startsWith("PROMISE")) {
+        if (target.result == NativePrivacy.Result.NO_AD_ID) {
+            // new-instance, "", true, <init>(String, boolean), return it. The constructor must exist and only store the two fields.
+            check(prefix.map { it.opcode } == listOf(Opcode.NEW_INSTANCE, Opcode.CONST_STRING, Opcode.CONST_4, Opcode.INVOKE_DIRECT, Opcode.RETURN_OBJECT))
+            check(((prefix[1] as ReferenceInstruction).reference as StringReference).string == "" && (prefix[2] as WideLiteralInstruction).wideLiteral == 1L)
+            val init = calls.single()
+            check(init.name == "<init>" && init.definingClass == target.returns && init.parameterTypes.map { it.toString() } == listOf("Ljava/lang/String;", "Z"))
+            val constructor = methods.single { it.definingClass == init.definingClass && it.name == "<init>" &&
+                it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", "Z") }
+            check(constructor.implementation!!.instructions.map { it.opcode } == listOf(Opcode.INVOKE_DIRECT, Opcode.IPUT_OBJECT, Opcode.IPUT_BOOLEAN, Opcode.RETURN_VOID)) {
+                "Ad ID constructor of ${init.definingClass} does more than store its fields" }
+        } else if (target.result == NativePrivacy.Result.PROMISE_EMPTY_ARRAY) {
+            // Arguments.createArray() then Promise.resolve(that array): Discord's JS reads .length on it.
+            check(calls.map { it.definingClass + "->" + it.name } == listOf("Lcom/facebook/react/bridge/Arguments;->createArray",
+                "Lcom/facebook/react/bridge/Promise;->resolve")) { "Empty-array stub calls: $calls" }
+            check(calls.all { resolveHost(it) }) { "Missing public array ABI" }
+            check((prefix.first() as TwoRegisterInstruction).registerB == originalMethod.implementation!!.registerCount - 1)
+            check((prefix[2] as OneRegisterInstruction).registerA == 1 && (prefix[3] as FiveRegisterInstruction).let { it.registerC == 0 && it.registerD == 1 })
+        } else if (target.result.name.startsWith("PROMISE")) {
             check(calls.single().definingClass == "Lcom/facebook/react/bridge/Promise;" && calls.single().name == "resolve")
             val move = prefix.first() as TwoRegisterInstruction
             check(move.registerB == originalMethod.implementation!!.registerCount - 1)
@@ -383,7 +400,7 @@ fun main(args: Array<String>) {
             check(calls.single().definingClass == "Ljava/lang/Throwable;" && calls.single().name == "toString")
         } else check(calls.isEmpty())
     }
-    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 80 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge; no APK patched")
+    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 87 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge; no APK patched")
 }
 
 
