@@ -2864,3 +2864,15 @@ test('NoDelete saves edit history with Save permanently and restores it for the 
     const old=editHarness(JSON.stringify({version:1,accountId:'owner',messages:[]}));await flush();await flush();
     old.api.setSetting('noDelete',true);old.api.setSetting('noDeleteSave',true);await flush();await flush();assert.equal(old.api.status.archive,'saved locally');
 });
+
+// ---- 1.7.1 regressions ----
+test('QuickDelete link previews ask again once QuickDelete itself is off',()=>{
+    const b=boot(allFeatures);let confirmed=0;
+    const translations={message:'Delete Message',embed:'Remove all embeds'};
+    b.load({t:{AMvpS4:'message','vXZ+Fo':'embed'},intl:{string:key=>translations[key]}},null,1127);
+    const action=b.load({default:{show(value){return value;}}},null,5205).default;
+    const embed={body:translations.embed,onConfirm(){confirmed++;}};
+    b.api.setSetting('quickDelete',true);b.api.setSetting('quickDeleteEmbeds',true);
+    action.show(embed);assert.equal(confirmed,1);
+    b.api.setSetting('quickDelete',false);assert.equal(action.show(embed),embed);assert.equal(confirmed,1);
+});

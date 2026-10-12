@@ -75,7 +75,9 @@
     const enabled = key => {
         let feature = featureTable.get(key);
         if (feature === undefined) featureTable.set(key, feature = featureFor(key));
-        return features[feature] && settings[key] && (feature !== "freeNitro" || settings.freeNitro);
+        // An option only counts while its main switch is on too. Only FreeNitro checked that, so
+        // "Removing link previews" kept skipping the question after QuickDelete itself was turned off.
+        return !!(features[feature] && settings[key] && (feature === key || settings[feature]));
     };
 
     // The font Discord started with; the native side reads the same saved setting at launch.
