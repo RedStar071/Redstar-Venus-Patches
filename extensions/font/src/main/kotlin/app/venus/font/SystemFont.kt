@@ -87,9 +87,11 @@ object SystemFont {
         @Suppress("UNCHECKED_CAST")
         var slots = cache[family] as Array<Any?>?
         if (slots == null) {
-            slots = arrayOfNulls<Any>(4)
+            val made = arrayOfNulls<Any>(4)
             // Bounded by Discord's own family names; a full cache just stops remembering.
-            if (cache.size < 256) cache.putIfAbsent(family, slots)
+            // Two threads can see the same new family: both use the array that went in first.
+            @Suppress("UNCHECKED_CAST")
+            slots = (if (cache.size < 256) cache.putIfAbsent(family, made) as Array<Any?>? else null) ?: made
         }
         val cached = slots[nearestStyle]
         if (cached != null) return if (cached === skip) null else cached as Typeface
