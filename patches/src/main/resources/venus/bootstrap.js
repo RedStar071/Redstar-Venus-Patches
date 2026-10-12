@@ -189,7 +189,12 @@
             restoreDeleted();
             if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
             notify("*");
-        }).catch(() => { status.storage = "read failed (defaults)"; if (dirty.size) save(); notify("*"); });
+        }).catch(() => {
+            // The native side reads the same file at launch and falls back to Discord's font and emojis when it
+            // can't. Assuming the phone's emojis here drew React Native emojis one way and chat the other.
+            status.storage = "read failed (defaults)"; fontInUse = false; emojiInUse = false;
+            if (dirty.size) save(); notify("*");
+        });
     }
 
     function formatSize(bytes) {

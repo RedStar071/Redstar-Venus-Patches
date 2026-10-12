@@ -2914,3 +2914,12 @@ test('Read All says the DMs could not be cleared instead of "Nothing unread"',()
     b.api.setSetting('readAllMode','dms');pressReadAll(b);
     assert.doesNotMatch(b.calls.toasts.at(-1),/Nothing unread|servers were/);
 });
+test('Force system emojis matches Discord\'s native emojis when saved settings are damaged',async()=>{
+    const b=boot({systemEmoji:true});const seen=[];
+    const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
+    const exports=b.load({default:Emoji},null,6552);
+    b.load({default:native({fileExists:async()=>true,readFile:async()=>'{broken'})});
+    await flush();await flush();await flush();
+    assert.equal(b.api.status.storage,'read failed (defaults)');
+    const props={name:'\u{1F600}'};exports.default(props);assert.equal(seen.at(-1),props);
+});
