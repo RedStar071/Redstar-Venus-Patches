@@ -399,9 +399,11 @@
         prototype.reactNativeCompressAndExtractData = patched;
         wrapped.set(orig, patched);
         wrapped.set(patched, patched);
-        for (const key of ["cancel", "delete"]) {
+        // One function scope per method: Hermes's native eval can lower loop-local const to var (see readSize),
+        // and then both wrappers called the last method, so cancelling an upload deleted it instead.
+        function stopFirst(key) {
             const method = prototype[key];
-            if (typeof method !== "function") continue;
+            if (typeof method !== "function") return;
             prototype[key] = function () {
                 const job = conversions.get(this);
                 if (job) {
@@ -411,6 +413,7 @@
                 return method.apply(this, arguments);
             };
         }
+        stopFirst("cancel"); stopFirst("delete");
         status.conversion = true;
     }
     function attachmentPayload(orig, self, args) {
