@@ -2969,3 +2969,8 @@ test('Force system font does not reopen Discord when the setting could not be sa
     assert.equal(requests.filter(uri=>uri.startsWith('venus-font-v1:')).length,0,'no reopen');
     assert.equal(alerts.at(-1)[0],"Couldn't save the setting");
 });
+test('sticker link text escapes spoiler, strikethrough and heading markup',()=>{
+    const b=nitroHarness();b.stickers['20'].name='||boo|| ~~x~~ #1';
+    b.actions.sendStickers('channel',['20'],{content:''});
+    assert.match(b.sent.at(-1)[2].content,/^\[\\\|\\\|boo\\\|\\\| \\~\\~x\\~\\~ \\#1\]\(https:\/\/media\.discordapp\.net\/stickers\/20\.png\?size=160\)$/);
+});
