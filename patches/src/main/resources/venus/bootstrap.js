@@ -328,12 +328,13 @@
     const audioName = /\.(mp3|mp2|mpga|m4a|m4b|aac|wav|wave|flac|ogg|oga|opus|amr|awb|3ga|3gp|3gpp|aif|aiff|aifc|wma|ac3|eac3|caf|weba|alac)$/i;
     // Audio-only extensions: some providers label these voice notes video/mp4, video/3gpp or video/webm.
     const audioOnlyName = /\.(mp3|m4a|m4b|aac|wav|flac|oga|opus|amr|awb|3ga|weba|aif|aiff|aifc|caf)$/i;
+    const AUDIO_APPLICATION_TYPES = new Set(["application/ogg","application/x-ogg","application/x-flac","application/x-wav","application/x-opus"]);
     function isAudio(upload) {
         if (!upload || upload.spoiler) return false;
         const item = upload.item || {};
         const mime = String(upload.mimeType || item.mimeType || "").toLowerCase().split(";")[0].trim();
         const name = String(upload.filename || item.filename || "");
-        if (mime.startsWith("audio/") || ["application/ogg","application/x-ogg","application/x-flac","application/x-wav","application/x-opus"].includes(mime)) return true;
+        if (mime.startsWith("audio/") || AUDIO_APPLICATION_TYPES.has(mime)) return true;
         if (mime.startsWith("video/")) return audioOnlyName.test(name);
         if (mime && mime !== "application/octet-stream" && mime !== "binary/octet-stream") return false;
         return audioName.test(name);
@@ -517,13 +518,15 @@
             button:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#ffffff14"}}));
         return rowStyles;
     }
-    let stackNavigation;
+    let stackNavigation, trailingSwitch, trailingChevron;
     function SubpageTrailing(props) {
         useSettings(props.setting);
         // Discord's own themed colors; the icon takes its themed default color itself.
         let styles; try { styles = subpageStyles()(); } catch (_) { styles = null; }
         styles = styles || {divider:{}, button:{}};
-        const FormSwitch = inspectedExport(6622, "FormSwitch"), Chevron = inspectedExport(6631, "ChevronSmallRightIcon");
+        // Kept once found; a missing one is looked up again next render, in case its module loads later.
+        const FormSwitch = trailingSwitch || (trailingSwitch = inspectedExport(6622, "FormSwitch"));
+        const Chevron = trailingChevron || (trailingChevron = inspectedExport(6631, "ChevronSmallRightIcon"));
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View;
         const on = !!settings[props.setting];
         return el(RN.View, {style:{flexDirection:"row", alignItems:"center"}},
