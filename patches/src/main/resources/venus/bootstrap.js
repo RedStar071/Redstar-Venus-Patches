@@ -986,9 +986,12 @@
             // Edit history rides in the same file. Older releases ignore the extra key, so nothing breaks either way.
             const history = [];
             if (settings.noDeleteSave && settings.noDeleteEdits) edits.forEach(entry => { const text = editText(entry); if (text) history.push(text); });
-            archivePending = "{\"version\":1,\"accountId\":" + JSON.stringify(settings.noDeleteSave && user ? user.id : null) +
+            const text = "{\"version\":1,\"accountId\":" + JSON.stringify(settings.noDeleteSave && user ? user.id : null) +
                 ",\"messages\":[" + parts.join(",") + "]" + (history.length ? ",\"edits\":[" + history.join(",") + "]" : "") + "}";
-            if (archivePending.length > ARCHIVE_BYTES) throw new Error("Deleted message archive exceeds 32 MB");
+            // A file this big can never be read back. It used to stay queued, so a write already in progress
+            // saved it anyway right after, and kept up to 32 MB of text in memory until the next deletion.
+            if (text.length > ARCHIVE_BYTES) throw new Error("Deleted message archive exceeds 32 MB");
+            archivePending = text;
         } catch (_) { status.archive = "save failed"; notify(); return; }
         if (archiveWriting) return;
         archiveWriting = true;
