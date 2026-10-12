@@ -2882,3 +2882,20 @@ test('NoDelete maximum of 0 becomes the lowest allowed, not 512',()=>{
     b.api.setSetting('noDeleteLimit',-5);assert.equal(b.api.settings.noDeleteLimit,1);
     b.api.setSetting('noDeleteLimit','abc');assert.equal(b.api.settings.noDeleteLimit,512);
 });
+test('Quest Completer saved on starts even when Discord connects before settings load', async () => {
+    const b = boot({quests:true});
+    const timers = [];
+    b.context.setTimeout = (fn, ms) => { timers.push(ms); return timers.length; };
+    b.context.clearTimeout = () => {};
+    const subs = new Map();
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 585);
+    let release;
+    const saved = new Promise(resolve => { release = resolve; });
+    b.load({default:native({fileExists:async () => true, readFile:() => saved})});
+    subs.get('CONNECTION_OPEN')({user:{id:'1'}});
+    assert.equal(timers.length, 0);
+    release(JSON.stringify({quests:true}));
+    await flush(); await flush(); await flush();
+    assert.equal(b.api.settings.quests, true);
+    assert.deepEqual(timers, [8000]);
+});

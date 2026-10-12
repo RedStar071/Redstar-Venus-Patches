@@ -187,7 +187,7 @@
             // Persist edits made while the asynchronous restore was in flight.
             if (dirty.size) save();
             restoreDeleted();
-            if (features.quests && !enabled("quests")) questsStop();
+            if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
             notify("*");
         }).catch(() => { status.storage = "read failed (defaults)"; if (dirty.size) save(); notify("*"); });
     }
@@ -2315,6 +2315,11 @@
         quest.dispatcher = dispatcher;
         dispatcher.subscribe("CONNECTION_OPEN", questsConnected);
         dispatcher.subscribe("LOGOUT", () => { questsReset(); quest.user = null; });
+    }
+    // Discord can connect before the saved settings finish loading. Quest Completer was still off at that
+    // moment, so it never started until the next reconnect. Start it now if Discord is already connected.
+    function questsLoaded() {
+        if (quest.user && quest.refetchTimer === undefined && !quest.running) questsStart(8000);
     }
     function questsSettingChanged(key, value) {
         if (key === "quests" && !value) { questsStop(); return; }
