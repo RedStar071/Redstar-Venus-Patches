@@ -2479,13 +2479,17 @@
         }
         return clients || null;
     }
-    function platformKey(userId) {
-        const clients = presenceStore && platformClients(userId);
-        return clients ? Object.keys(clients).map(key => key + ":" + clients[key]).join(",") : "";
+    function clientsKey(clients) {
+        if (!clients) return "";
+        let key = "";
+        for (const name in clients) key += name + ":" + clients[name] + ",";
+        return key;
     }
+    function platformKey(userId) { return clientsKey(presenceStore && platformClients(userId)); }
     // One listener per store for every badge on screen, not two per badge. Each change works
     // out a person's clients once, however many badges show them, and wakes only those badges.
     const platformSubs = new Map(), platformStores = new Set();
+    // PresenceStore changes for every presence update of anyone: the key is built without temporary arrays.
     function platformChanged() {
         platformSubs.forEach((entry, userId) => {
             const key = platformKey(userId);
