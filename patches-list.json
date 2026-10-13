@@ -791,7 +791,7 @@
     },
     {
       "name": "Profile bar settings button",
-      "description": "Adds a settings button to your profile bar, next to the notifications bell. It opens Discord's settings.",
+      "description": "Adds a button to your profile bar, next to the notifications bell, that opens Venus settings.",
       "default": true,
       "category": "Plugins",
       "dependencies": [
