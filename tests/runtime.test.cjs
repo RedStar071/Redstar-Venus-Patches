@@ -562,8 +562,10 @@ test('new plugin preferences persist and late restores cannot overwrite edits', 
     b.load(native({fileExists:async()=>true,readFile:()=>new Promise(resolve=>complete=resolve),writeFile:async(...args)=>writes.push(args)}));
     await flush();b.api.setSetting('stickers',false);
     complete('{"emojis":false,"stickers":true,"copyBios":false,"hyperlinks":false,"forceLinks":true}');await flush();
+    // Options removed in 1.10.0 are ignored when an older settings file is read.
+    assert.equal('forceLinks' in b.api.settings,false);
     assert.equal(b.api.settings.stickers,false);assert.equal(b.api.settings.emojis,false);
-    assert.equal(b.api.settings.copyBios,false);assert.equal(b.api.settings.hyperlinks,false);assert.equal(b.api.settings.forceLinks,true);
+    assert.equal(b.api.settings.copyBios,false);assert.equal(b.api.settings.hyperlinks,false);
     assert.equal(JSON.parse(writes.at(-1)[2]).stickers,false);
 });
 test('unselected plugin factories remain completely unwrapped', () => {
@@ -641,10 +643,10 @@ test('emoji sharing ignores code blocks, inline code, escaped tokens, unknown an
     b.actions.sendMessage('channel',message);assert.equal(b.sent[0][1],message);
     b.actions.sendMessage('missing',{content:'<:x:2>'});assert.equal(b.sent[1][1].content,'<:x:2>');
 });
-test('emoji links honor live Nitro changes, forcing and plain-link options without rewriting originals', () => {
+test('emoji links honor live Nitro changes and the short-link option without rewriting originals', () => {
     const b=nitroHarness();const message={content:'<:x:2>'};
-    b.user.premiumType=2;b.actions.sendMessage('channel',message);assert.equal(b.sent.at(-1)[1],message);
-    b.api.setSetting('forceLinks',true);b.api.setSetting('hyperlinks',false);
+    b.user.premiumType=2;b.actions.sendMessage('channel',message);assert.equal(b.sent.at(-1)[1],message,'Nitro: sent as a real emoji');
+    b.user.premiumType=null;b.api.setSetting('hyperlinks',false);
     b.actions.sendMessage('channel',message);assert.match(b.sent.at(-1)[1].content,/^https:\/\/cdn.discordapp.com\/emojis\/2.webp/);
     b.api.setSetting('emojis',false);b.actions.sendMessage('channel',message);assert.equal(b.sent.at(-1)[1],message);
 });
@@ -740,13 +742,13 @@ test('immutable function export hooks retain the Metro module marker and stock d
 });
 
 
-test('attachment tools and all five ports live in Plugins, never General', () => {
+test('attachment tools and all five ports live in Features, never About', () => {
     const b=settingsHarness();
     const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
-    assert.equal(general.sections.length,1);assert.equal(general.sections[0].label,'About');
+    assert.deepEqual(Array.from(general.sections,s=>s.label),['Venus Patches','Links']);
     for (const id of ['PICKER','VOICE','NOTYPING','NODELETE','JUMPTOTOP','HIDDENCHANNELS','QUICKDELETE'])
         assert.equal(b.registry['VENUS_'+id].parent,'VENUS_PLUGINS');
-    for (const key of ['quickDelete','quickDeleteEmbeds','noDelete','hiddenChannels']) assert.equal(b.api.settings[key],false);
+    for (const key of ['quickDelete','noDelete','hiddenChannels']) assert.equal(b.api.settings[key],false);
 });
 test('unselected new plugins do not wrap any optional factory or expose switches', () => {
     const b=boot({});const factory=()=>{};
@@ -765,7 +767,7 @@ test('No typing restores both original methods and receiver when switched off', 
     assert.equal(patched.startTyping('123'),'start');assert.equal(patched.stopTyping('456'),'stop');
     assert.deepEqual(calls,[['123'],['456']]);
 });
-test('QuickDelete uses exact localized strings, independent switches and stock fallback', () => {
+test('QuickDelete uses exact localized strings, one switch for messages and link previews, and stock fallback', () => {
     const b=boot(allFeatures);let shown=0,confirmed=0;
     const tokens={AMvpS4:'message', 'vXZ+Fo':'embed'};const translations={message:'Supprimer le message ?',embed:'Supprimer cet aperçu ?'};
     b.load({t:tokens,intl:{string:key=>translations[key]}},null,1127);
@@ -776,9 +778,8 @@ test('QuickDelete uses exact localized strings, independent switches and stock f
     assert.equal(action.show(message),'confirmed');assert.equal(confirmed,1);
     const other={body:'Delete channel',onConfirm(){throw Error('must not confirm');}};assert.equal(action.show(other),other);
     const substring={body:'Unrelated '+translations.message,onConfirm(){throw Error('unsafe matching');}};assert.equal(action.show(substring),substring);
-    const embed={body:translations.embed,onConfirm(){confirmed++;}};action.show(embed);assert.equal(confirmed,1);
-    b.api.setSetting('quickDeleteEmbeds',true);action.show(embed);assert.equal(confirmed,2);
-    b.api.setSetting('quickDelete',false);action.show(message);assert.equal(confirmed,2);assert.equal(shown,5);
+    const embed={body:translations.embed,onConfirm(){confirmed++;}};action.show(embed);assert.equal(confirmed,2,'link previews skip asking too');
+    b.api.setSetting('quickDelete',false);action.show(message);action.show(embed);assert.equal(confirmed,2);assert.equal(shown,5);
     translations.embed='';assert.equal(action.show(embed),embed);
 });
 function deletionHarness() {
@@ -1305,7 +1306,8 @@ test('Pastelize respects source role colors and unknown members, and colors webh
     const webhook={...row,message:{webhookId:'hook'},result:{message:{...message,referencedMessage:{message:{authorId:'reply',content:[],guildId:'g'}}}}};
     seeds.length=0;result=rows.generate(webhook);assert.equal(seeds.includes('Name'),true);assert.equal(seeds.includes('reply'),true);
     assert.notEqual(result.message.referencedMessage.message.roleColor,undefined);
-    b.api.setSetting('pastelWebhookName',false);seeds.length=0;rows.generate(webhook);assert.equal(seeds.includes('hook'),true);
+    // A webhook without a name falls back to its ID.
+    seeds.length=0;rows.generate({...webhook,result:{message:{...webhook.result.message,username:''}}});assert.equal(seeds.includes('hook'),true);
     b.api.setSetting('pastelAll',true);assert.notEqual(rows.generate(row).message.roleColor,null);
     assert.equal(message.content[0].content[0].colorString,undefined);
 });
@@ -1345,11 +1347,11 @@ async function loadedReviews(b,userId) {
 }
 test('ReviewDB settings: Account and Settings groups with native rows',()=>{
     const b=reviewHarness();b.api.setSetting('reviewDB',true);const tree=b.Settings();
-    assert.deepEqual(walkElements(tree,n=>n.type==='RowGroup').map(n=>n.props.title),['Account','Settings']);
+    assert.deepEqual(walkElements(tree,n=>n.type==='RowGroup').map(n=>n.props.title),['Account','Display']);
     const login=walkElements(tree,n=>n.props.label==='Sign in to ReviewDB')[0];assert.equal(login.type,'NativeRow');assert.equal(login.props.arrow,true);assert.equal(login.props.disabled,false);
     const logout=walkElements(tree,n=>n.props.label==='Sign out of ReviewDB')[0];assert.equal(logout.props.disabled,true);assert.match(logout.props.subLabel,/Authorized Apps/);
     // The main switch lives on the Settings list row, not repeated on its page.
-    assert.deepEqual(walkElements(tree,n=>n.type==='SwitchRow').map(n=>n.props.label),['Profile-colored send button','Show the be-respectful note']);
+    assert.deepEqual(walkElements(tree,n=>n.type==='SwitchRow').map(n=>n.props.label),['Show the be-respectful note']);
     assert.equal(walkElements(tree,n=>n.type==='Stack')[0].props.spacing,24);
 });
 test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE callback still signs in',async()=>{
@@ -1923,9 +1925,9 @@ test('NoDelete outline colors are computed once and still follow a replaced proc
 });
 test('enabled() feature lookup stays correct for every setting',()=>{
     const b=boot({freeNitro:true,pastelize:true,quickDelete:true,noDelete:true,platformIndicators:true,reviewDB:true});
-    for (const key of ['emojis','stickers','hyperlinks','forceLinks','pastelAll','quickDeleteEmbeds','noDeleteSave','piDmHeader','reviewWarning'])
+    for (const key of ['emojis','stickers','hyperlinks','pastelAll','pastelContent','noDeleteSave','piDmHeader','reviewWarning'])
         assert.equal(b.api.setSetting(key,!b.api.settings[key]),true,key);
-    for (const key of ['picker','voice','dashless','hiddenChannels']) assert.equal(b.api.setSetting(key,true),false,key);
+    for (const key of ['picker','voice','dashless','hiddenChannels','forceLinks','quickDeleteEmbeds','pastelWebhookName','reviewThemedSend']) assert.equal(b.api.setSetting(key,true),false,key);
 });
 
 // ---- 1.3.5 regressions ----
@@ -1952,22 +1954,47 @@ function settingsRows(b) {
     const node=b.registry.VENUS_PLUGINS.screen.getComponent()().props.node;
     return JSON.parse(JSON.stringify(node.sections.map(section=>[section.label,section.settings.map(id=>b.registry[id].useTitle())])));
 }
-test('Settings list is grouped, plugin names are gone and every row says what it does',()=>{
+test('Features list is grouped, plugin names are gone and every row says what it does',()=>{
     const b=settingsHarness();
-    assert.equal(b.registry.VENUS_PLUGINS.useTitle(),'Settings');assert.equal(b.registry.VENUS_GENERAL.useTitle(),'About');
+    assert.equal(b.registry.VENUS_PLUGINS.useTitle(),'Features');assert.equal(b.registry.VENUS_GENERAL.useTitle(),'About');
     const rows=settingsRows(b);
-    assert.deepEqual(rows.map(([label])=>label),['Chat','Profiles and people','Servers and channels','More']);
+    assert.deepEqual(rows.map(([label])=>label),['Messages','Sending','People','Servers','Appearance','Quests']);
     const titles=rows.flatMap(([,list])=>list);
     assert.equal(titles.length,26);assert.equal(new Set(titles).size,26);
-    assert.ok(titles.includes('Double-tap a message to reply'));
+    assert.ok(titles.includes('Double-tap to reply'));assert.ok(titles.includes('Send Nitro stickers and emojis as links'));
     for (const old of ['CopyBios','Dashless','FavouriteAnything','FreeNitro','Hidden Channels','JumpToTop','No typing','NoDelete','Pastelize',
         'PlatformIndicators','QuickDelete','Read All','Quest Completer','ReviewDB','Custom voice messages','File size on picker'])
         assert.ok(!titles.some(title=>title.includes(old)),'plugin name '+old+' still shown');
-    assert.ok(titles.includes('Send audio files as voice messages'));
-    // Simple settings are just their name: no empty second line.
-    assert.equal(b.registry.VENUS_SYSTEMFONT.useTitle(),'Force system font');assert.equal(b.registry.VENUS_SYSTEMFONT.useDescription,undefined);
-    for (const [,list] of rows) for (const title of list) assert.ok(title.length<=48,'too long for one row: '+title);
+    assert.ok(titles.includes('Send audio as voice messages'));
+    // Every row says what it does in one or two short sentences, and has its own icon.
+    const ids=b.registry.VENUS_PLUGINS.screen.getComponent()().props.node.sections.flatMap(s=>s.settings);
+    for (const id of ids) {
+        const row=b.registry[id], text=row.useDescription && row.useDescription();
+        assert.ok(text && text.length<=130,'missing or long description: '+id);assert.equal(typeof row.IconComponent,'function',id);
+    }
+    assert.equal(new Set(ids.map(id=>b.registry[id].IconComponent)).size,26,'each feature has its own icon');
+    for (const [,list] of rows) for (const title of list) assert.ok(title.length<=40,'too long for one row: '+title);
     assert.match(b.registry.VENUS_VERSION.useTitle(),/^Venus Patches \d/);
+});
+test('row icons are Discord\'s own, loaded when drawn, with a fallback',()=>{
+    const b=settingsHarness();function TrashIcon(props){return {icon:'trash',props};}
+    const Icon=b.registry.VENUS_NODELETE_ROW.IconComponent;
+    b.context.__r=()=>null;assert.equal(Icon({size:'md'}).type,b.original.ACCOUNT.IconComponent,'missing module: the Account icon');
+    b.context.__r=id=>id===4791?{TrashIcon}:null;assert.equal(Icon({size:'md'}).type,TrashIcon);
+    assert.equal(b.registry.VENUS_NODELETE.IconComponent,Icon,'its page uses the same icon');
+});
+test('About shows the version, features on, status and links',()=>{
+    const b=settingsHarness();const opened=[];
+    const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
+    assert.deepEqual(JSON.parse(JSON.stringify(general.sections)),[{label:'Venus Patches',settings:['VENUS_VERSION','VENUS_STATUS']},
+        {label:'Links',settings:['VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']}]);
+    assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 26 features on/);
+    b.api.setSetting('dashless',false);const before=Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]);
+    b.api.setSetting('dashless',true);assert.equal(Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]),before+1);
+    assert.equal(b.registry.VENUS_STATUS.useTitle(),'Status');
+    b.load({View:'View',Text:'Text',Modal:'Modal',Linking:{openURL:url=>{opened.push(url);return Promise.resolve();}}},null,17);
+    b.registry.VENUS_LINK_ISSUES.onPress();assert.equal(opened[0],'https://github.com/VenusIsJaded/Venus-Patches/issues/new/choose');
+    assert.equal(b.registry.VENUS_LINK_SOURCE.withArrow,true);
 });
 test('settings with more options have a switch and a separate button to their page',()=>{
     const b=settingsHarness();
@@ -1975,7 +2002,7 @@ test('settings with more options have a switch and a separate button to their pa
     const navigated=[];const navigation={navigate:route=>navigated.push(route)};
     b.context.__r=id=>({6622:{FormSwitch},6631:{ChevronSmallRightIcon},1491:{useStackNavigation:()=>navigation},
         14239:{onRouteSettingOnPress:({navigation:nav,screen})=>nav.navigate(screen.route)}}[id]||null);
-    const pages={VENUS_PASTELIZE:'pastelize',VENUS_FREENITRO:'freeNitro',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_QUICKDELETE:'quickDelete',
+    const pages={VENUS_PASTELIZE:'pastelize',VENUS_FREENITRO:'freeNitro',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_TRANSLATE:'translate',
         VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests',VENUS_GESTURES:'gestures'};
     for (const [page,key] of Object.entries(pages)) {
         const row=b.registry[page+'_ROW'];
@@ -1993,7 +2020,7 @@ test('settings with more options have a switch and a separate button to their pa
     }
     assert.equal(b.registry.VENUS_PASTELALL.parent,'VENUS_PASTELIZE');assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
     const pastel=b.registry.VENUS_PASTELIZE.screen.getComponent()().props.node;
-    assert.equal(JSON.stringify(pastel.sections.map(x=>x.settings)),JSON.stringify([['VENUS_PASTELALL','VENUS_PASTELWEBHOOKNAME','VENUS_PASTELCONTENT']]));
+    assert.equal(JSON.stringify(pastel.sections.map(x=>x.settings)),JSON.stringify([['VENUS_PASTELALL','VENUS_PASTELCONTENT']]));
 });
 test('emoji and sticker links have one main switch on the Settings list',()=>{
     const b=nitroHarness();
@@ -2029,7 +2056,7 @@ test('options are greyed out while their main switch is off',()=>{
 });
 test('unselected settings hide their rows and empty groups',()=>{
     const b=settingsHarness({copyBios:true});
-    assert.deepEqual(settingsRows(b),[['Profiles and people',['Select and copy profile bios']]]);
+    assert.deepEqual(settingsRows(b),[['People',['Copy profile bios']]]);
     assert.equal(b.registry.VENUS_SYSTEMFONT,undefined);assert.equal(b.registry.VENUS_PASTELIZE_ROW,undefined);
 });
 test('NoDelete does not rewrite an already erased archive for every deletion',async()=>{
@@ -2735,10 +2762,10 @@ test('Hide Quests promotion gives Discord its own empty-dock answer and unmounts
 });
 test('the new switches sit in their groups with one-line titles',()=>{
     const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
-    assert.ok(rows.Chat.includes('Hide the gift button'));assert.ok(rows['Servers and channels'].includes('Hide the Quests promotion'));
-    assert.deepEqual(rows.More.slice(0,2),['Force system font','Force system emojis']);
-    assert.equal(b.registry.VENUS_SYSTEMEMOJI.useDescription,undefined);
-    const only=settingsHarness({hideGift:true});assert.deepEqual(settingsRows(only),[['Chat',['Hide the gift button']]]);
+    assert.ok(rows.Appearance.includes('Hide the gift button'));assert.ok(rows.Quests.includes('Hide the Quests banner'));
+    assert.deepEqual(rows.Appearance.slice(0,2),["Use your phone's font","Use your phone's emojis"]);
+    assert.match(b.registry.VENUS_SYSTEMEMOJI.useDescription(),/reopens/);
+    const only=settingsHarness({hideGift:true});assert.deepEqual(settingsRows(only),[['Appearance',['Hide the gift button']]]);
 });
 
 function gestureHarness(features={gestures:true}) {
@@ -2824,7 +2851,7 @@ test('Hide call button removes Call from profiles, and Message takes the whole r
     b.api.setSetting('hideCall',false);layout=two;tree=Buttons({});assert.ok(types(tree).includes(PhoneCallIcon),'switched off: Call is back');
     assert.equal(animated,1,'Message slides across when the setting changes');
     const off=boot({});const stock={default:function C(){}};assert.equal(off.load(stock,null,12696).default,stock.default,'untouched without the patch');
-    const rows=Object.fromEntries(settingsRows(settingsHarness({hideCall:true})));assert.deepEqual(rows['Profiles and people'],['Hide the call button on profiles']);
+    const rows=Object.fromEntries(settingsRows(settingsHarness({hideCall:true})));assert.deepEqual(rows.Appearance,['Hide the call button']);
 });
 function editHarness(saved) {
     const b=boot(allFeatures);const store=new Map();let disk=saved;const writes=[];
@@ -3101,9 +3128,9 @@ test('short messages, premium limits and the off switch are left alone',async()=
 });
 test('the three new switches sit in their groups',()=>{
     const rows=Object.fromEntries(settingsRows(settingsHarness()));
-    assert.ok(rows.Chat.includes('Send messages longer than the limit'));
-    assert.ok(rows['Profiles and people'].includes('Fix unknown mentions'));
-    assert.ok(rows['Servers and channels'].includes('Add a Venus settings button to your profile bar'));
+    assert.ok(rows.Sending.includes('Send long messages'));
+    assert.ok(rows.People.includes('Fix unknown mentions'));
+    assert.ok(rows.Appearance.includes('Venus button on profile bar'));
 });
 
 // Translate messages: a fake Google Translate, a Flux dispatcher that records redraws, and the row generator.
@@ -3202,9 +3229,9 @@ test('Translate messages starts off, sends nothing while off and redraws when sw
     assert.equal(b.row('1',content,'hola amigo').content,content,'switched off: the original again');
     const off=boot({});const unpatched=[];off.load({default:{dispatch(){},subscribe:t=>unpatched.push(t)}},null,585);assert.deepEqual(unpatched,[]);
 });
-test('Translate messages has a settings row with its own page in Chat',()=>{
+test('Translate messages has a settings row with its own page in Messages',()=>{
     const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
-    assert.ok(rows.Chat.includes('Translate messages into your language'));
+    assert.ok(rows.Messages.includes('Translate messages'));
     assert.equal(b.registry.VENUS_TRANSLATE.useTitle(),'Translate messages');
 });
 test('Pastelize colors the text of the message a reply quotes when Color message text is on (#45)',()=>{
@@ -3230,7 +3257,7 @@ test('Pastelize colors the text of the message a reply quotes when Color message
 test('every feature starts off, and its options keep their own defaults',()=>{
     const b=boot(allFeatures,true,false);const s=b.api.settings;
     for (const key of Object.keys(allFeatures)) if (key in s) assert.equal(s[key],false,key+' starts off');
-    for (const key of ['emojis','stickers','hyperlinks','noDeleteEdits','pastelWebhookName','piDmHeader','piUserList','piProfile','reviewWarning','questsVideo','gestureTripleDelete','translateNote'])
+    for (const key of ['emojis','stickers','hyperlinks','noDeleteEdits','piDmHeader','piUserList','piProfile','reviewWarning','questsVideo','gestureTripleDelete','translateNote'])
         assert.equal(s[key],true,key+' is on once its feature is');
 });
 // The translator, three requests at a time and saving what it translated, against a fake Google and a fake phone.
@@ -3283,4 +3310,47 @@ test('Translate messages keeps translations on the phone, so a chat opened after
     assert.equal(again.requests.length,0,'nothing sent to Google again');
     const broken=fastHarness({disk:'{not json'});await flush();await flush();broken.api.setSetting('translate',true);await broken.run(5);
     broken.row('1','hola amigo');await broken.run();assert.equal(broken.requests.length,1,'a damaged file is ignored');
+});
+// ---- 1.10.0 settings overhaul ----
+function pageNodes(tree){const out=[];(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);out.push(n);walk(n.props&&n.props.children);})(tree);return out;}
+test('Clear kept messages removes kept deletions from chat and the saved file, after asking',async()=>{
+    const b=deletionHarness();const {RN}=reactHarness(b);const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
+    b.context.__r=id=>({5916:{TableRow:'Row'}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    b.api.setSetting('noDelete',true);
+    const page=()=>registry.VENUS_NODELETE.screen.getComponent()();
+    const clear=()=>pageNodes(page()).find(n=>n.type==='Row'&&n.props.label==='Clear kept messages');
+    assert.equal(clear().props.disabled,true,'nothing to clear yet');
+    b.messages.set('c:1',{content:'one',state:'SENT'});b.messages.set('c:2',{content:'two',state:'SENT'});
+    b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'2'});
+    assert.equal(b.messages.size,2,'kept');
+    assert.ok(pageNodes(page()).some(n=>typeof n.props.children==='string'&&/^2 deleted messages and 0 edited messages kept/.test(n.props.children)));
+    const row=clear();assert.equal(row.props.disabled,false);assert.equal(row.props.variant,'danger');
+    row.props.onPress();assert.equal(alerts.length,1);assert.equal(alerts[0][0],'Clear kept messages?');assert.equal(b.messages.size,2,'nothing removed before confirming');
+    alerts[0][2].find(button=>button.text==='Clear').onPress();
+    assert.equal(b.messages.size,0,'gone from chat');assert.equal(b.events.at(-1).type,'MESSAGE_DELETE_BULK');
+    b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});assert.equal(b.messages.size,0,'and not kept again');
+    assert.equal(clear().props.disabled,true);
+});
+test('Clear saved translations forgets them on the phone and translates the screen again',async()=>{
+    const b=fastHarness();const {RN}=reactHarness(b);const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
+    b.context.__r=id=>({5916:{TableRow:'Row'}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    const clear=()=>pageNodes(registry.VENUS_TRANSLATE.screen.getComponent()()).find(n=>n.type==='Row'&&n.props.label==='Clear saved translations');
+    assert.equal(clear().props.disabled,true);assert.equal(clear().props.subLabel,'Nothing saved yet.');
+    await flush();await flush();b.api.setSetting('translate',true);await b.run(5);
+    b.row('1','hola amigo');await b.run();
+    assert.match(clear().props.subLabel,/^1 translation kept on this phone/);
+    clear().props.onPress();alerts[0][2].find(button=>button.text==='Clear').onPress();await flush();await flush();
+    assert.equal(b.getDisk(),'{"version":1,"entries":[]}','the saved file is emptied');
+    const before=b.requests.length;b.row('1','hola amigo');await b.run();assert.equal(b.requests.length,before+1,'translated again');
+});
+test('choice pages use Discord\'s radio list: tap gestures, Read all and Translate',()=>{
+    const b=settingsHarness();function TableRadioGroup(){} function TableRadioRow(){}
+    b.context.__r=id=>({5995:{TableRadioGroup},5994:{TableRadioRow}}[id]||null);
+    const radios=key=>pageNodes(b.registry[key].screen.getComponent()()).filter(n=>n.type===TableRadioGroup);
+    const [own]=radios('VENUS_GESTURES');assert.equal(own.props.title,'Double-tap your own message');assert.equal(own.props.value,'edit');
+    own.props.onChange('reply');assert.equal(b.api.settings.gestureOwn,'reply');
+    assert.equal(radios('VENUS_READALL')[0].props.title,'When you tap Read all');
+    const [target]=radios('VENUS_TRANSLATE');assert.equal(target.props.title,'Translate into');target.props.onChange('phone');assert.equal(b.api.settings.translateTarget,'phone');
 });
