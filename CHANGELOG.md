@@ -1,3 +1,23 @@
+## [1.10.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.9.0...v1.10.0) (2026-10-13)
+
+### ✨ New Features
+
+* **Discord - Venus settings:** Every feature has its own Discord icon in the list
+* **Discord - Venus settings:** About shows how many features are on, plus What's new and help links
+* **Discord - Keep deleted messages:** Clear kept messages from its settings, with a count of what's kept
+* **Discord - Translate messages:** Clear saved translations from its settings
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Settings is now Features, in six groups, from Messages to Quests
+* **Discord - Venus settings:** Shorter, clearer titles and descriptions for every feature and option
+* **Discord - Venus settings:** Option pages show a status card, Discord's radio lists and short notes
+* **Discord:** Patches are named by what they do, the same as in Venus
+* **Discord - Send Nitro stickers and emojis as links:** Removed Always send links, which only replaced emojis you could already use
+* **Discord - Skip delete confirmation:** One switch now covers both messages and link previews
+* **Discord - Pastel name colors:** Webhooks always get their color from their name
+* **Discord - User and server reviews:** The send button always uses the profile's colors
+
 ## [1.9.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.8.0...v1.9.0) (2026-10-13)
 
 ### ✨ New Features
