@@ -543,7 +543,7 @@ test('Venus section inserts once after Account with immutable list input and sto
     const result=b.builder.createList(input,'extra');
     assert.equal(input.sections.length,2);assert.equal(result.sections.length,3);assert.equal(result.extra,'extra');
     assert.equal(result.sections[0],first);assert.equal(result.sections[1].label,'Venus');
-    assert.deepEqual(Array.from(result.sections[1].settings),['VENUS_PLUGINS','VENUS_GENERAL']);
+    assert.deepEqual(Array.from(result.sections[1].settings),['VENUS_PLUGINS','VENUS_LANGUAGE','VENUS_GENERAL']);
     const again=b.builder.createList(result);assert.equal(again.sections,result.sections);
     const other={sections:[{settings:['CHAT']}]};assert.equal(b.builder.createList(other).sections,other.sections);
 });
@@ -1204,7 +1204,7 @@ test('PlatformIndicators uses real client status, hides unknown/offline clients 
     const badges=named.props.children[1];const rendered=badges.type(badges.props);
     assert.deepEqual(Array.from(rendered.props.children,c=>c.props.children.props.platform),['desktop','mobile']);
     assert.deepEqual(Array.from(rendered.props.children,c=>c.props.children.props.color),['#23a55a','#f0b232']);
-    assert.deepEqual(Array.from(rendered.props.children,c=>c.props.accessibilityLabel),['Desktop: online','Mobile: idle']);
+    assert.deepEqual(Array.from(rendered.props.children,c=>c.props.accessibilityLabel),['Desktop: Online','Mobile: Idle']);
     b.api.setSetting('piProfile',false);assert.equal(exports.DisplayName({user:{id:'u'}}).type,'Name');b.api.setSetting('piProfile',true);
     b.api.setSetting('platformIndicators',false);assert.equal(badges.type(badges.props),null);
 });
@@ -1391,7 +1391,7 @@ test('ReviewDB profile section renders directly after the profile note card dire
     assert.equal(form.props.subLabel.type,'FormSubLabel');assert.equal(form.props.subLabel.props.text,'hello');assert.equal(form.props.leading.props.style.height,36);
     assert.equal(walkElements(form.props.label,n=>n.type==='FormLabel')[0].props.text,'Other');
     const input=profileCard.props.children[1];const rendered=input.type(input.props);
-    assert.equal(walkElements(rendered,n=>n.type==='NativeTextInput')[0].props.placeholder,'You must be authenticated to add a review.');
+    assert.equal(walkElements(rendered,n=>n.type==='NativeTextInput')[0].props.placeholder,'Sign in to ReviewDB in Venus settings to write a review.');
     form.props.onLongPress();assert.equal(b.simple.at(-1).header.title,'Review by Other');assert.deepEqual(Array.from(b.simple.at(-1).options,o=>o.label),['Copy Text']);
     b.simple.at(-1).options[0].onPress();assert.deepEqual(b.copied,['hello']);
     b.api.setSetting('reviewWarning',false);assert.equal(m.render().props.children.props.children[0].props.children.length,1);
@@ -3261,7 +3261,7 @@ test('every feature starts off, and its options keep their own defaults',()=>{
         assert.equal(s[key],true,key+' is on once its feature is');
 });
 // The translator, three requests at a time and saving what it translated, against a fake Google and a fake phone.
-function fastHarness({answer, disk=null}={}) {
+function fastHarness({answer, disk=null, files={}}={}) {
     const b=boot({translate:true});reactHarness(b);
     const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length;};b.context.clearTimeout=()=>{};
     const requests=[], pending=[];let saved=disk;const writes=[];
@@ -3273,7 +3273,7 @@ function fastHarness({answer, disk=null}={}) {
         resolve({ok:true,status:200,json:async()=>texts.map(t=>[t.replace(/hola/g,'hello').replace(/amigo/g,'friend'),'es'])});
     });
     b.load({default:native({fileExists:async p=>p.endsWith('venus-translations.json')&&saved!==null,readFile:async p=>p.endsWith('venus-translations.json')?saved:'{}',
-        writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-translations.json')saved=text;}})});
+        writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-translations.json')saved=text;},...files})});
     b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1378);
     b.load({default:{locale:'en-US',systemLocale:'en-US'}},null,2115);
     const dispatched=[];b.load({default:{dispatch(e){dispatched.push(e);},subscribe(){}}},null,585);
@@ -3352,5 +3352,139 @@ test('choice pages use Discord\'s radio list: tap gestures, Read all and Transla
     const [own]=radios('VENUS_GESTURES');assert.equal(own.props.title,'Double-tap your own message');assert.equal(own.props.value,'edit');
     own.props.onChange('reply');assert.equal(b.api.settings.gestureOwn,'reply');
     assert.equal(radios('VENUS_READALL')[0].props.title,'When you tap Read all');
-    const [target]=radios('VENUS_TRANSLATE');assert.equal(target.props.title,'Translate into');target.props.onChange('phone');assert.equal(b.api.settings.translateTarget,'phone');
+    const [mode,target]=radios('VENUS_TRANSLATE');assert.equal(mode.props.title,'When to translate');assert.equal(mode.props.value,'auto');
+    mode.props.onChange('manual');assert.equal(b.api.settings.translateMode,'manual');assert.equal(target.props.title,'Translate into');target.props.onChange('phone');assert.equal(b.api.settings.translateTarget,'phone');
+});
+// ---- Quoted replies (#51), translating single messages (#50) and the settings language ----
+function replyRow(b, quoted) {
+    return new b.Rows().generate({rowType:1,message:{id:'r1',channel_id:'c',content:'ok',author:{id:'them'},messageReference:{message_id:quoted.id}},
+        result:{message:{id:'r1',channelId:'c',authorId:'them',content:[T('ok')],referencedMessage:{state:'LOADED',message:quoted}}}}).message;
+}
+test('a reply shows the message it quotes translated, like that message in chat (#51)',async()=>{
+    const b=translateHarness();
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);b.Rows=Rows;
+    const quoted={id:'q1',authorId:'them',content:[T('hola amigo')]};
+    assert.equal(replyRow(b,quoted).referencedMessage.message.content,quoted.content,'as written until it is translated');
+    await b.run();
+    assert.equal(b.requests.length,1);assert.deepEqual(b.requests[0].texts,['hola amigo'],'the quote is asked for, once');
+    assert.ok(b.dispatched.some(e=>e.type==='MESSAGE_UPDATE'&&e.message.id==='r1'),'the reply is redrawn when its quote is translated');
+    const shown=replyRow(b,quoted).referencedMessage.message;
+    assert.deepEqual(JSON.parse(JSON.stringify(shown.content)),[T('hello friend')],'translated, without the note');
+    assert.equal(quoted.content[0].content,'hola amigo','Discord\'s record is never changed');
+    // The quoted message itself in chat shares the same translation: no second request.
+    b.row('q1',[T('hola amigo')],'hola amigo');await b.run();assert.equal(b.requests.length,1);
+    // Your own quoted message stays as you wrote it.
+    const mine={id:'q2',authorId:'me',content:[T('hola perro')]};replyRow(b,mine);await b.run();
+    assert.equal(b.requests.length,1,'own messages are never sent');
+});
+test('Only when you ask: nothing is sent until you tap Translate in the hold menu, and Show original undoes it (#50)',async()=>{
+    const b=translateHarness();b.api.setSetting('translateMode','manual');await b.run();
+    const content=[T('hola amigo')];
+    assert.equal(b.row('1',content,'hola amigo').content,content);await b.run();
+    assert.equal(b.requests.length,0,'manual: nothing sent');
+    // The hold menu (LongPressMessageActionSheet 11023) gets a Translate row next to Discord's own.
+    const own={label:'Copy Text',onPress(){},icon:{props:{IconComponent(){}}}};
+    const sheet=b.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',key:'copy',props:own}]}};}},null,11023);
+    const message={id:'1',channel_id:'c',content:'hola amigo',author:{id:'them'}};
+    const rowsOf=tree=>tree.props.children.map(child=>child.props.label);
+    let tree=sheet.default({message});assert.deepEqual(rowsOf(tree),['Copy Text','Translate']);
+    tree.props.children[1].props.onPress();
+    // Discord draws the row again after the redraw.
+    b.row('1',content,'hola amigo');await b.run();
+    assert.equal(b.requests.length,1,'only the message you picked is sent');
+    assert.deepEqual(JSON.parse(JSON.stringify(b.row('1',content,'hola amigo').content[0])),T('hello friend'));
+    tree=sheet.default({message});assert.equal(tree.props.children[1].props.label,'Show original');
+    tree.props.children[1].props.onPress();await b.run();
+    assert.equal(b.row('1',content,'hola amigo').content,content,'back to the original');
+    // Automatic mode: Show original keeps one message as written, the rest stay translated.
+    b.api.setSetting('translateMode','auto');await b.run();
+    b.row('2',[T('hola perro')],'hola perro');await b.run();
+    const message2={id:'2',channel_id:'c',content:'hola perro',author:{id:'them'}};
+    tree=sheet.default({message:message2});assert.equal(tree.props.children[1].props.label,'Show original');
+    tree.props.children[1].props.onPress();await b.run();
+    assert.equal(b.row('2',[T('hola perro')],'hola perro').content[0].content,'hola perro');
+    assert.equal(b.api.setSetting('translateMode','sometimes'),false);
+    // Switched off: the hold menu is Discord's own.
+    b.api.setSetting('translate',false);assert.deepEqual(rowsOf(sheet.default({message})),['Copy Text']);
+});
+test('your own message can be translated from the hold menu, and a message in your language says so',async()=>{
+    const b=translateHarness({answer:texts=>texts.map(t=>t==='good morning everyone'?[t,'en']:[t.replace(/hola/g,'hello'),'es'])});
+    const toasts=[];b.context.__r=id=>id===4531?{default:{open:t=>toasts.push(t.content)}}:null;
+    const sheet=b.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',props:{label:'Copy Text',onPress(){}}}]}};}},null,11023);
+    const label=message=>sheet.default({message}).props.children[1].props.label;
+    const mine={id:'m',channel_id:'c',content:'hola',author:{id:'me'}};
+    assert.equal(label(mine),'Translate','your own message starts as written');
+    sheet.default({message:mine}).props.children[1].props.onPress();
+    b.row('m',[T('hola amigo')],'hola amigo','me');await b.run();assert.equal(b.requests.length,1);
+    const english={id:'e',channel_id:'c',content:'good morning everyone',author:{id:'them'}};
+    b.api.setSetting('translateMode','manual');await b.run();
+    sheet.default({message:english}).props.children[1].props.onPress();
+    b.row('e',[T('good morning everyone')],'good morning everyone');await b.run();
+    b.row('e',[T('good morning everyone')],'good morning everyone');await b.run();
+    assert.deepEqual(toasts,['This message is already in your language']);
+});
+function languageHarness({locale='en-US', packs={}}={}) {
+    const b=settingsHarness();const reads=[];
+    const timers=[];b.context.setTimeout=(fn)=>{timers.push(fn);return timers.length;};
+    b.load({default:native({readAsset:async(uri,encoding)=>{reads.push([uri,encoding]);const code=uri.split(':')[1];
+        if (!packs[code]) throw new Error('missing');return JSON.stringify({code,strings:packs[code]});}})});
+    const store={locale,listeners:[],addChangeListener(fn){this.listeners.push(fn);}};b.load({default:store},null,2115);
+    const run=async()=>{for (let i=0;i<10;i++){await flush();while (timers.length) timers.shift()();}};
+    return {...b,reads,store,run};
+}
+const RU={'Features':'Функции','Language':'Язык','Keep deleted messages':'Сохранять удалённые сообщения','Cancel':'Отмена',
+    '{n} translations':{one:'{n} перевод',few:'{n} перевода',many:'{n} переводов',other:'{n} переводов'},'{n} translation':'{n} перевод',
+    '{on} of {total} features on. Turn them on or off in Features.':'Включено {on} из {total}.'};
+test('Venus settings follow Discord\'s language, and Language picks another one',async()=>{
+    const b=languageHarness({locale:'ru',packs:{ru:RU}});
+    const title=key=>b.registry[key].useTitle();
+    assert.equal(title('VENUS_PLUGINS'),'Features','English until the language file has loaded');
+    await b.run();
+    assert.deepEqual(b.reads,[['venus-i18n-v1:ru','utf8']],'read once, from the patched APK');
+    assert.equal(title('VENUS_PLUGINS'),'Функции');assert.equal(title('VENUS_LANGUAGE'),'Язык');
+    assert.equal(b.registry.VENUS_NODELETE_ROW.useTitle(),'Сохранять удалённые сообщения');
+    assert.equal(title('VENUS_GENERAL'),'About','a text the file doesn\'t have stays English');
+    assert.match(b.registry.VENUS_VERSION.useDescription(),/^Включено \d+ из \d+\.$/,'with its numbers filled in');
+    // Picking English from Language beats Discord's language, and is saved.
+    assert.equal(b.api.setSetting('language','en'),true);assert.equal(b.api.settings.language,'en');
+    assert.equal(title('VENUS_PLUGINS'),'Features');
+    assert.equal(b.api.setSetting('language','klingon'),false);
+    b.api.setSetting('language','auto');assert.equal(title('VENUS_PLUGINS'),'Функции');
+    // Discord switched to a language with no file: English, not a half-translated page.
+    b.store.locale='de';b.store.listeners.forEach(fn=>fn());await b.run();
+    assert.equal(title('VENUS_PLUGINS'),'Features');assert.ok(b.reads.some(r=>r[0]==='venus-i18n-v1:de'));
+    // The Language page lists every language in its own words.
+    function TableRadioGroup(){} function TableRadioRow(){}
+    b.context.__r=id=>({5995:{TableRadioGroup},5994:{TableRadioRow}}[id]||null);
+    const page=pageNodes(b.registry.VENUS_LANGUAGE.screen.getComponent()());
+    const group=page.find(n=>n.type===TableRadioGroup);assert.equal(group.props.value,'auto');
+    const labels=page.filter(n=>n.type===TableRadioRow).map(n=>n.props.label);
+    assert.ok(labels.length>=30);assert.ok(labels.includes('\u0420\u0443\u0441\u0441\u043a\u0438\u0439'));assert.ok(labels.includes('Deutsch'));
+    group.props.onChange('ru');assert.equal(b.api.settings.language,'ru');
+});
+test('plural forms come from the language file, for every form its language has',async()=>{
+    const b=fastHarness({files:{readAsset:async()=>JSON.stringify({code:'ru',strings:RU})}});
+    await flush();await flush();b.api.setSetting('translate',true);b.api.setSetting('language','ru');await b.run(5);
+    b.context.__r=id=>({5916:{TableRow:'Row'}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    const sub=()=>pageNodes(registry.VENUS_TRANSLATE.screen.getComponent()()).find(n=>n.type==='Row'&&n.props.label==='Clear saved translations').props.subLabel;
+    for (const n of [1,3,5]) b.row('p'+n,'hola amigo numero '+n);
+    await b.run();
+    assert.match(sub(),/^3 перевода/,'few');
+    for (const n of [6,7]) b.row('p'+n,'hola amigo numero '+n);
+    await b.run();assert.match(sub(),/^5 переводов/,'many');
+});
+test('every language file has every Venus text and keeps its {placeholders}',()=>{
+    const folder='patches/src/main/resources/venus/i18n';
+    const codes=fs.readFileSync(folder+'/index.txt','utf8').split('\n').filter(Boolean);
+    assert.ok(codes.includes('ru'));assert.ok(codes.length>=29);
+    const start=raw.indexOf('UI_LANGUAGES');assert.ok(start>0);
+    const names=raw.slice(start,raw.indexOf('UI_CODES',start)).replace(/\s/g,'');
+    for (const code of codes) {
+        assert.ok(names.includes('["'+code+'",'),code+' is listed in Language');
+        const pack=JSON.parse(fs.readFileSync(folder+'/'+code+'.json','utf8'));assert.equal(pack.code,code);
+        for (const [english,value] of Object.entries(pack.strings)) for (const text of typeof value==='object'?Object.values(value):[value])
+            assert.deepEqual((text.match(/\{\w+\}/g)||[]).sort(),(english.match(/\{\w+\}/g)||[]).sort(),code+': '+english);
+        assert.ok(Object.keys(pack.strings).length>=300,code+' is complete');
+    }
 });

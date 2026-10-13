@@ -1,3 +1,20 @@
+## [1.11.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.10.0...v1.11.0) (2026-10-13)
+
+### ✨ New Features
+
+* **Discord - Venus settings:** Venus settings in 30 languages, including Russian ([#50](https://github.com/VenusIsJaded/Venus-Patches/issues/50))
+* **Discord - Venus settings:** Pick the settings language in Language, or follow Discord's
+* **Discord - Translate messages:** Translate only the messages you pick, from the hold menu ([#50](https://github.com/VenusIsJaded/Venus-Patches/issues/50))
+* **Discord - Translate messages:** Hold a message to show its original, or translate your own
+
+### 🐛 Bug Fixes
+
+* **Discord - Translate messages:** A reply shows the message it quotes untranslated ([#51](https://github.com/VenusIsJaded/Venus-Patches/issues/51))
+
+### 🔧 Improvements
+
+* **Discord - Translate messages:** "Translated from" names the language in the settings language
+
 ## [1.10.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.9.0...v1.10.0) (2026-10-13)
 
 ### ✨ New Features

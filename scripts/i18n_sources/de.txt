@@ -1,0 +1,301 @@
+0|@unknown-user-Erwähnungen werden nachgeschlagen und zeigen den Namen der Person.
+1|Ein Button, mit dem du direkt zum Anfang eines Chats, Kanals oder Threads springst.
+2|Ein Button unter den Direktnachrichten, der alles als gelesen markiert. Halte ihn gedrückt, um zu wählen, was.
+3|Eine Verknüpfung zu Venus neben der Benachrichtigungsglocke.
+4|Eine kleine Zeile „Übersetzt aus: Spanisch“ unter jeder Übersetzung.
+5|Über
+6|Neue Quests annehmen
+7|Nimmt Quests, die du noch nicht begonnen hast, nacheinander an. Aus: nur Quests, die du selbst annimmst.
+8|Konto
+9|Aktivitäts-Quests
+10|Die Aktivitätszeit zählt, ohne dass du die Aktivität startest.
+11|Eine einzeln gesendete Audiodatei wird zu einer echten Sprachnachricht mit Wellenform. Benötigt Android 10 oder neuer.
+12|Darstellung
+13|Möchtest du diese Bewertung wirklich löschen?
+14|Möchtest du diese Bewertung wirklich melden?
+15|Automatisch
+16|Avatare
+17|Avatare zeigen einen einfachen Statuspunkt, da die Symbole das Handy bereits anzeigen.
+18|Abbrechen
+19|Änderungen in jeder Version.
+20|Kanäle, die du nicht öffnen kannst, erscheinen mit einem Schloss. Nur Name und Daten sind sichtbar, keine Nachrichten.
+21|Löschen
+22|Behaltene Nachrichten löschen
+23|Behaltene Nachrichten löschen?
+24|Gespeicherte Übersetzungen löschen
+25|Gespeicherte Übersetzungen löschen?
+26|Nachrichtentext einfärben
+27|Farben
+28|Quests automatisch abschließen
+29|{name} abgeschlossen.
+30|{n} Quest abgeschlossen, seit Discord geöffnet wurde.
+31|{n} Quest abgeschlossen, seit Discord geöffnet wurde. || {n} Quests abgeschlossen, seit Discord geöffnet wurde.
+32|Konsole
+33|Bewertungstext kopiert
+34|Text kopieren
+35|Profil-Bios kopieren
+36|{name} konnte nicht abgeschlossen werden: {problem}
+37|Bewertungen konnten nicht geladen werden: {problem}
+38|Sprachnachricht konnte nicht erstellt werden
+39|Konnte nicht als gelesen markiert werden: {problem}
+40|Bewertungen konnten nicht geöffnet werden: {problem}
+41|Einstellung konnte nicht gespeichert werden
+42|Anmeldung fehlgeschlagen: {problem}
+43|Erstellt
+44|Bewertung löschen
+45|Lösche eine behaltene Nachricht erneut, um nur diese auszublenden.
+46|Gelöschte und bearbeitete Nachrichten bleiben nach dem Schließen von Discord erhalten. Nur auf diesem Handy und für dieses Konto gespeichert.
+47|Gelöschte Nachrichten
+48|Gelöschte Nachrichten bleiben rot umrandet im Chat. Zeigt auch, was in bearbeiteten Nachrichten vorher stand.
+49|Desktop
+50|Desktop-, Handy-, Web-, Konsolen- oder VR-Symbole neben Namen, in der Farbe des Status.
+51|Geräteanzeigen
+52|Direktnachrichten
+53|Discord-Konto nicht verfügbar
+54|Discord wurde nicht neu geöffnet, daher hat sich nichts geändert. Versuch es gleich noch einmal.
+55|Discord hat Quests für dieses Konto pausiert.
+56|Discord muss neu geöffnet werden, damit sich die Emojis überall ändern.
+57|Discord muss neu geöffnet werden, damit sich die Schriftart überall ändert.
+58|Discords Autorisierungsbildschirm ist nicht verfügbar. Öffne diese Seite erneut und versuch es noch einmal.
+59|Discords Sprache
+60|Discords Lesestatus ist noch nicht geladen. Versuch es gleich noch einmal.
+61|Anzeige
+62|Bitte nicht stören
+63|Tippe doppelt auf eine Nachricht, um zu antworten, oder auf deine eigene, um sie zu bearbeiten, statt zu reagieren.
+64|Doppeltippen zum Antworten
+65|Doppeltippen auf eigene Nachricht
+66|Doppeltippen fügt keine Reaktion mehr hinzu. Halte eine Nachricht gedrückt, um zu reagieren.
+67|Jedes Foto und Video in der Anhangsauswahl zeigt seine Größe.
+68|Bearbeiten
+69|Bearbeitete Nachrichten
+70|Emojis
+71|Emojis von anderen Servern und animierte Emojis.
+72|Alle gelöschten Nachrichten und der Bearbeitungsverlauf, die Venus behalten hat, werden entfernt. Das kann nicht rückgängig gemacht werden.
+73|Jede Nachricht auf dem Bildschirm in einer anderen Sprache.
+74|Jeder Name nutzt seine Pastellfarbe, auch mit Rollenfarbe.
+75|Beliebige Bilder und Videos favorisieren
+76|Funktionen
+77|Schließt Video-, Spiel- und Aktivitäts-Quests im Hintergrund ab. Belohnungen holst du dir weiterhin selbst ab.
+78|Unbekannte Erwähnungen reparieren
+79|Folgt Discords Spracheinstellung.
+80|Von 1 bis {max}. Ist das Limit erreicht, wird die älteste zuerst entfernt.
+81|Google Translate hat um eine Pause gebeten.
+82|Google Translate antwortet nicht ({problem}).
+83|Versteckte Kategorie (Name nicht verfügbar)
+84|Versteckter Kanal (Name nicht verfügbar)
+85|Quest-Banner ausblenden
+86|Anruf-Button ausblenden
+87|Geschenk-Button ausblenden
+88|Handy-Symbol ausblenden
+89|Tippanzeige ausblenden
+90|Halte eine Bio gedrückt, um ihren Text auszuwählen und zu kopieren. Links funktionieren weiterhin.
+91|Halte eine Nachricht gedrückt und tippe auf Übersetzen. Sonst wird nichts gesendet.
+92|Halte den Button gedrückt, um einmalig zu wählen, ohne dies zu ändern.
+93|Gedrückt halten zum Auswählen
+94|Abwesend
+95|In Direktnachrichten
+96|Im Chat, bei Reaktionen und in der Emoji-Auswahl. Discord wird zum Übernehmen neu geöffnet.
+97|In Listen
+98|Sie wird stattdessen als normale Datei gesendet.
+99|Zur ersten Nachricht springen
+100|Nach oben springen
+101|Nach Neustart behalten
+102|Gelöschte Nachrichten behalten
+103|Höchstens behalten
+104|Behaltene gelöschte Nachrichten sind auf diesem Handy gespeichert.
+105|Behaltene gelöschte Nachrichten konnten nicht gespeichert werden.
+106|Behaltene Nachrichten gelöscht
+107|Sprache
+108|Letzte Nachricht
+109|Zuletzt angepinnt
+110|Letztes Problem: {problem}
+111|Zuletzt: {name}
+112|Später
+113|Limit
+114|Link-Stil
+115|Links
+116|Bewertungen werden geladen …
+117|Sprache wird geladen …
+118|Deine Einstellungen werden geladen …
+119|Gesperrter Kanal
+120|Gesperrter Sprachkanal
+121|Verwalten
+122|Direktnachrichten als gelesen markieren
+123|Server und Direktnachrichten als gelesen markieren
+124|Server als gelesen markieren
+125|{what} als gelesen markiert
+126|Markiert alle ungelesenen Direkt- und Gruppennachrichten als gelesen.
+127|Markiert alle ungelesenen Server als gelesen.
+128|Markiert mit einem Tippen alles als gelesen.
+129|Mitgliederliste, Freunde, Direktnachrichtenliste und Sprachkanäle.
+130|Nachrichten
+131|Nachrichten und Linkvorschauen werden sofort entfernt, ohne „Bist du sicher?“. Das kann nicht rückgängig gemacht werden.
+132|Nachrichten in anderen Sprachen werden in deiner angezeigt. Ihr Text wird an Google Translate gesendet.
+133|Nachrichten auf dem Bildschirm werden erneut übersetzt.
+134|Handy
+135|Weitere Optionen
+136|Namen ohne Rollenfarbe bekommen eine sanfte Pastellfarbe, für jede Person immer dieselbe.
+137|Nötig, um Bewertungen zu posten, zu löschen oder zu melden. Nutzt nie deinen Discord-Token.
+138|Neue Quests
+139|Neben dem Namen oben in einer Direktnachricht.
+140|Neben dem Namen in einem Profil.
+141|Nitro-Sticker und -Emojis
+142|Nein
+143|Es wurden keine Funktionen eingebaut.
+144|Noch keine Nachrichten
+145|Noch nichts angepinnt
+146|Noch keine Bewertungen.
+147|Noch nichts behalten. Gelöschte Nachrichten erscheinen hier.
+148|Noch nichts gespeichert.
+149|Seit dem Öffnen von Discord noch nichts übersetzt.
+150|Nichts ungelesen
+151|Gerade: {name}.
+152|In Profilen
+153|Online
+154|Nur Venus' eigene Einstellungen und Meldungen ändern sich. Discords Sprache stellst du in Discords Spracheinstellungen ein.
+155|Nur Nachrichten auf dem Bildschirm werden an Google Translate gesendet, jede einmal, ohne dein Discord-Konto. Halte eine Nachricht gedrückt, um ihr Original zu sehen oder deine eigene zu übersetzen.
+156|Nur Nachrichten, die du auswählst, werden an Google Translate gesendet, jede einmal, ohne dein Discord-Konto.
+157|Nur auf Wunsch
+158|Öffnet ein neues Issue auf GitHub.
+159|Öffnet sie zum Bearbeiten, wenn Discord es zulässt.
+160|Andere sehen nicht, wenn du tippst. Du siehst weiterhin, wenn sie tippen.
+161|Pastellfarben für Namen
+162|Pastellnamen
+163|Personen
+164|Spiel-Quests
+165|Spielzeit zählt, ohne das Spiel zu installieren oder zu öffnen.
+166|Quests
+167|Abzuschließende Quests
+168|Alles gelesen
+169|„Alles gelesen“-Button
+170|Lies und schreib Community-Bewertungen für diesen Server.
+171|Lies und schreib Bewertungen zu Profilen und Servern über den Community-Dienst ReviewDB.
+172|Entfernt „Anrufen“ aus Profilen. „Nachricht“ füllt den Platz.
+173|Entfernt alle gelöschten Nachrichten und den Bearbeitungsverlauf, die Venus behalten hat, aus dem Chat und von diesem Handy.
+174|Entfernt den Nitro-Geschenk-Button aus der Nachrichtenleiste.
+175|Entfernt die Quest-Werbung über deiner Profilleiste. Quests funktionieren weiterhin.
+176|Jetzt neu öffnen
+177|Rollenfarben ersetzen
+178|Ersetzt Discords Schriftart überall. Discord wird zum Übernehmen neu geöffnet. Benötigt Android 9 oder neuer.
+179|Antworten
+180|Bewertung melden
+181|Problem melden
+182|Wird als mit normaler Geschwindigkeit angesehen gemeldet, ohne das Video abzuspielen.
+183|Erneut versuchen
+184|Bewertungen erneut laden
+185|Bewertung von {name}
+186|Bewertung gelöscht
+187|Bewertung gepostet
+188|Bewertung gemeldet
+189|ReviewDB-Systemnachricht
+190|ReviewDB bleibt in Discords autorisierten Apps, bis du es dort entfernst.
+191|ReviewDBs Erinnerung, freundlich zu sein, über den Bewertungen.
+192|Bewertungen
+193|Bewertungen sind nicht verfügbar. Öffne das Servermenü erneut und versuch es noch einmal.
+194|Bewertungen stammen von manti.vendicated.dev. Beim Öffnen wird die ID des Profils oder Servers an ReviewDB gesendet.
+195|Wie Discord
+196|Wie Discord ({language})
+197|Wie bei Nachrichten anderer.
+198|Gespeicherte gelöschte Nachrichten konnten nicht geladen werden.
+199|Gespeicherte Übersetzungen gelöscht
+200|Nitro-Sticker und -Emojis als Links senden
+201|Als Links senden
+202|Audio als Sprachnachricht senden
+203|Lange Nachrichten senden
+204|Bewertung senden
+205|Senden
+206|Server
+207|Server und Direktnachrichten
+208|Kurze Links
+209|Venus-Einstellungen anzeigen auf
+210|Geräteanzeigen einblenden
+211|Bearbeitungsverlauf anzeigen
+212|Dateigrößen beim Anhängen anzeigen
+213|Versteckte Kanäle anzeigen
+214|Symbole anzeigen
+215|Original anzeigen
+216|Hinweis zu Respekt anzeigen
+217|Originalsprache anzeigen
+218|Originaltext anzeigen
+219|Zeigt „general chat“ statt „general-chat“. Ändert nur, wie Namen aussehen.
+220|Bei ReviewDB anmelden
+221|Melde dich in den Venus-Einstellungen bei ReviewDB an, um eine Bewertung zu schreiben.
+222|Von ReviewDB abmelden
+223|Bei ReviewDB angemeldet
+224|Anmeldung läuft …
+225|Löschbestätigung überspringen
+226|Quellcode
+227|Leerzeichen in Kanalnamen
+228|Markiere ein Bild oder Video in der Medienansicht mit einem Stern, um es in deinen GIF-Favoriten zu behalten.
+229|Status
+230|Sticker
+231|Sticker und Emojis, für die du Nitro bräuchtest, werden als Link gesendet, der im Chat als Sticker- oder Emoji-Bild erscheint.
+232|Sticker von anderen Servern. Animierte bewegen sich eventuell nicht.
+233|Speicher
+234|Erfolgreich bei ReviewDB angemeldet
+235|Tippgesten
+236|Tippe, um eine Bewertung zu schreiben
+237|Tippe, um die Serverbewertungen zu schließen.
+238|Tippe, um deine Bewertung zu bearbeiten
+239|Tippe dreimal auf deine eigene Nachricht, um sie ohne Bestätigung zu löschen. Betrifft nie Nachrichten anderer.
+240|Der Link wird als Name des Emojis oder Stickers angezeigt statt als lange Webadresse.
+241|Die unübersetzte Nachricht als Zitat unter der Übersetzung.
+242|Diese Nachricht ist bereits in deiner Sprache
+243|Übersetzen
+244|Übersetzen in
+245|Nachrichten übersetzen
+246|Übersetzt aus: {language}
+247|Übersetzt aus: {language}. Original:
+248|{n} Nachricht übersetzt, seit Discord geöffnet wurde.
+249|{n} Nachricht übersetzt, seit Discord geöffnet wurde. || {n} Nachrichten übersetzt, seit Discord geöffnet wurde.
+250|Dreifachtippen
+251|Dreifachtippen zum Löschen
+252|Neuer Versuch in {n} s.
+253|Ausgeschaltet. Schalte es unter Funktionen ein, um zu starten.
+254|Schreib über das Zeichenlimit hinaus. Lange Nachrichten werden in Teilen gesendet, getrennt an Zeilen oder Wörtern.
+255|Nicht verfügbar
+256|Bewertung aktualisieren
+257|Discords Emojis verwenden
+258|Discords Schriftart verwenden
+259|Emojis deines Handys verwenden
+260|Schriftart deines Handys verwenden
+261|Nutzer- und Serverbewertungen
+262|Venus Patches
+263|Venus Patches auf GitHub. Kostenlos und Open Source (GPL-3.0).
+264|Venus-Button in der Profilleiste
+265|Venus-Einstellungen
+266|Video-Quests
+267|Trotzdem ansehen
+268|Warte auf neue Quests.
+269|Web
+270|Was eine Nachricht vor der Bearbeitung sagte, verblasst und durchgestrichen darüber. Bis zu 10 Versionen je Nachricht.
+271|Was Leute schreiben, wird ebenfalls eingefärbt, in einem helleren Ton ihres Namens.
+272|Neuigkeiten
+273|Wann übersetzen
+274|Beim Tippen auf „Alles gelesen“
+275|Ja
+276|Du hast keine Berechtigung, diesen Kanal anzusehen. Diese Details stammen aus dem, was Discord deinem Client bereits gesendet hat.
+277|Belohnungen holst du dir weiterhin selbst ab. Stream-Quests brauchen einen echten Stream und werden übersprungen. Discord kann Quests bei Konten pausieren, die sie automatisch abschließen.
+278|Sprache deines Handys
+279|Deine gespeicherten Einstellungen konnten nicht gelesen werden, daher gelten die Standardwerte.
+280|Deine Einstellungen sind auf diesem Handy gespeichert.
+281|Deine Einstellungen können gerade nicht gespeichert werden. Änderungen gelten, bis Discord neu startet.
+282|eine andere Sprache
+283|{count} auf diesem Handy gespeichert, damit wieder geöffnete Chats sie sofort zeigen.
+284|{deleted} und {edited} behalten, bis Discord neu startet.
+285|{deleted} und {edited} behalten und auf diesem Handy gespeichert.
+286|{language}. Ändere sie in Discords Spracheinstellungen.
+287|{n} Direktnachricht
+288|{n} Direktnachricht || {n} Direktnachrichten
+289|{n} gelöschte Nachricht
+290|{n} gelöschte Nachricht || {n} gelöschte Nachrichten
+291|{n} bearbeitete Nachricht
+292|{n} bearbeitete Nachricht || {n} bearbeitete Nachrichten
+293|{n} Server
+294|{n} Server wurde als gelesen markiert
+295|{n} Server || {n} Server
+296|{n} Server wurde als gelesen markiert || {n} Server wurden als gelesen markiert
+297|{n} Übersetzung
+298|{n} Übersetzung || {n} Übersetzungen
+299|{n} in der Warteschlange.
+300|{on} von {total} Funktionen an. Schalte sie unter Funktionen ein oder aus.
