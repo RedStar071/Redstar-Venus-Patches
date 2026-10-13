@@ -1,6 +1,6 @@
 # Venus Patches
 
-Extra features and privacy options for Discord on Android, built into the app with **[Morphe](https://morphe.software)**. Everything works offline. Nothing is downloaded from the internet to run, and nothing is tracked.
+Extra features and privacy options for Discord on Android, built into the app with **[Morphe](https://morphe.software)**. Everything works offline, except the few features that say they use a service (ReviewDB, Translate messages). Nothing is downloaded from the internet to run, and nothing is tracked.
 
 [**Add to Morphe**](https://morphe.software/add-source?github=VenusIsJaded/Venus-Patches&name=Venus%20Patches) · [Downloads](https://github.com/VenusIsJaded/Venus-Patches/releases) · [What's new](CHANGELOG.md) · [Report a problem](https://github.com/VenusIsJaded/Venus-Patches/issues)
 
@@ -12,6 +12,7 @@ Extra features and privacy options for Discord on Android, built into the app wi
 2. Tap **[Add to Morphe](https://morphe.software/add-source?github=VenusIsJaded/Venus-Patches&name=Venus%20Patches)**. You can also add `https://github.com/VenusIsJaded/Venus-Patches` as a source.
 3. Choose the **original** Discord 348.10 APKM. Don't pick an APK you've already patched.
 4. Every patch is selected for you, under **Plugins** and **Privacy**. Leave **Venus settings** on, then patch and install.
+5. Open **Discord Settings → Venus → Settings** and turn on the features you want. They all start off.
 
 You can also download `patches-<version>.mpp` from [Releases](https://github.com/VenusIsJaded/Venus-Patches/releases) and import it under **Sources → + → Local**.
 
@@ -19,35 +20,39 @@ You can also download `patches-<version>.mpp` from [Releases](https://github.com
 
 ## Features
 
-To turn things on or off at any time, open **Discord Settings → Venus → Settings**. Rows with an arrow button have more options. The **Morphe patch** column is the name to look for when patching, and **Starts** shows whether it's on the first time you open Discord.
+To turn things on or off at any time, open **Discord Settings → Venus → Settings**. Rows with an arrow button have more options. The **Morphe patch** column is the name to look for when patching. **Everything starts off**, so Discord looks and works like normal until you turn on what you want. Your choices from an earlier version are kept.
 
 | In Venus settings | Morphe patch | Starts |
 | --- | --- | --- |
 | **Chat** | | |
 | Keep deleted messages, outlined in red, and what edited messages said before | NoDelete | Off |
 | Send audio files as voice messages | Custom voice messages | Off |
-| Send emojis and stickers you can't use as links | FreeNitro | On |
-| Hide that you're typing | No typing | On |
+| Send emojis and stickers you can't use as links | FreeNitro | Off |
+| Hide that you're typing | No typing | Off |
 | Delete messages without asking | QuickDelete | Off |
-| Add a jump to first message button | JumpToTop | On |
-| Show file sizes when attaching | File size on picker | On |
-| Favourite any image or video | FavouriteAnything | On |
-| Hide the gift button | Hide gift button | On |
+| Add a jump to first message button | JumpToTop | Off |
+| Show file sizes when attaching | File size on picker | Off |
+| Favourite any image or video | FavouriteAnything | Off |
+| Hide the gift button | Hide gift button | Off |
+| Send messages longer than the limit | Split Large Messages | Off |
+| Translate messages into your language | Translate messages | Off |
 | Double-tap a message to reply | Message tap gestures | Off |
 | **Profiles and people** | | |
-| Give names soft pastel colors, picked from each user ID | Pastelize | On |
-| Show which devices people are on | PlatformIndicators | On |
-| Select and copy profile bios | CopyBios | On |
+| Give names soft pastel colors, picked from each user ID | Pastelize | Off |
+| Show which devices people are on | PlatformIndicators | Off |
+| Select and copy profile bios | CopyBios | Off |
 | Show and write reviews of users and servers | ReviewDB | Off |
-| Hide the call button on profiles | Hide call button | On |
+| Hide the call button on profiles | Hide call button | Off |
+| Fix unknown mentions | ValidUser | Off |
 | **Servers and channels** | | |
-| Add a Read all button to the server list | Read All | On |
+| Add a Read all button to the server list | Read All | Off |
 | Show channels you can't open, with a lock | Hidden Channels | Off |
-| Show spaces instead of dashes in channel names | Dashless | On |
-| Hide the Quests promotion | Hide Quests promotion | On |
+| Show spaces instead of dashes in channel names | Dashless | Off |
+| Hide the Quests promotion | Hide Quests promotion | Off |
+| Add a Venus settings button to your profile bar | Profile bar settings button | Off |
 | **More** | | |
 | Force system font | Force system font | Off |
-| Force system emojis | Force system emojis | On |
+| Force system emojis | Force system emojis | Off |
 | Complete Quests automatically | Quest Completer | Off |
 
 ### Privacy options
@@ -79,6 +84,10 @@ Discord can still see what any client needs to work, like your messages, calls a
 - **Quest Completer** starts off. Turn on **Complete Quests automatically** in Venus settings. It checks for new Quests when Discord opens and every 30 minutes after. It accepts and completes video, Play and Activity Quests one at a time. Play and Activity Quests count time without installing or starting anything. That time is reported the way Discord's Windows app reports it, because Discord only counts play time from desktop. Stream Quests need a real stream, so they're skipped. You still claim rewards yourself. Discord may pause Quests on accounts that complete them automatically.
 - **Passkeys and security keys can't be used to log in.** Google only lets apps signed by Discord use Discord's passkeys, and a patched app is signed with your key. This happens with any patched Discord, not because of a privacy option. Venus shows a clear message instead of "RP ID cannot be validated". Tap **Verify with something else** to use an authenticator app, SMS or a backup code.
 - **Hide the call button** removes Call next to Message when you open someone's profile, and Message stretches across to fill the row. Calls from a DM still work.
+- **Fix unknown mentions** works on its own: when a message mentions someone Discord hasn't loaded (shown as @unknown-user), Venus looks them up one at a time and redraws the message with their name. There's no button to press. Accounts that no longer exist show as Deleted User. Based on [ValidUser](https://github.com/fshinz/Revenge-Plugins/tree/master/plugins/ValidUser) by fshin, o.oer and kmmiio99o.
+- **Venus settings button on your profile bar** sits next to the notifications bell, under the server list, and opens Venus settings in one tap. Back goes to Discord's settings.
+- **Translate messages** starts off. With it on, messages in another language show translated into Discord's language, or your phone's if you pick that in its settings, with a small "Translated from Spanish" line under them. Mentions, emojis, links, code and formatting stay as they were. Your own messages, short ones like "ok" and ones already in your language aren't changed. It can also show the original in a quote. Translations come from Google Translate's free service, the one its browser extension uses, so there's no key or account to set up. Only messages on screen are sent, once each, in batches, without your Discord account. The newest messages go first, up to three requests run at once, and if a request is slow or fails it's sent to Google's other server straight away. Translations are kept on your phone, so a chat you open again, even after a restart, shows them at once. Google doesn't publish a limit for it. If it asks to slow down, Venus waits and tries again later. This is the one feature that sends message text off your phone.
+- **Send messages longer than the limit** lets the message box go past 2,000 characters (4,000 with Nitro). A long message is sent as several, split at line breaks, then spaces. A code block cut in two is closed and opened again in the next part. Replies only apply to the first part, and the parts wait for slowmode. Based on SplitLargeMessages by sunnie.
 - **Read all** uses Discord's own "Mark as read". It clears servers by default. Switch it to DMs or both in its settings, or hold the button for a one-time choice.
 
 ## For developers

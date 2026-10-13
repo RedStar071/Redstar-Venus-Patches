@@ -72,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -285,8 +285,67 @@ val jumpToTop = bundledPlugin("jumpToTop", "JumpToTop", "Adds a button to jump t
 @Suppress("unused")
 val hiddenChannels = bundledPlugin("hiddenChannels", "Hidden Channels", "Shows channels you can't open, with a lock and when they were created and last used. It can't show their messages. Turn it on in Venus settings.")
 
+internal const val REPLY_PREVIEW = "Lcom/discord/chat/presentation/message/MessageViewReplyPreview;"
+internal const val REPLY_BINDING = "Lcom/discord/chat/databinding/MessageViewReplyPreviewBinding;"
+internal const val BRIDGE_MESSAGE = "Lcom/discord/chat/bridge/Message;"
+/** Instructions [pastelReplyText] adds before Discord's own reply text code, counting the nop its label lands on. */
+internal const val PASTEL_REPLY_GUARD_SIZE = 17
+
+/**
+ * Discord's reply preview paints the quoted text in one theme color, set once when the view is made, and
+ * never reads the message's textColor, so Pastelize's "Color message text" never reached replies (#45).
+ * Before the reply text is drawn, this sets it to the replied message's textColor, or Discord's own
+ * color when there is none: Venus only sends textColor on a reply when it colors it. Recycled previews
+ * get their color set each time. 43 registers, 4 of them parameters: v0-v2 are free until Discord's first move.
+ */
+internal fun pastelReplyText(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val implementation = method.implementation ?: throw PatchException("Reply preview text has no code")
+    if (method.parameterTypes.map { it.toString() } != listOf("Lcom/discord/chat/bridge/structurabletext/StructurableText;", REPLY_PREVIEW, BRIDGE_MESSAGE, "I") ||
+        method.returnType != "Lkotlin/Unit;" || implementation.registerCount - 5 < 3)
+        throw PatchException("MessageViewReplyPreview reply text ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        move-object/from16 v2, p2
+        if-eqz v2, :venus_reply_text
+        invoke-virtual {v2}, $BRIDGE_MESSAGE->getTextColor()Ljava/lang/Integer;
+        move-result-object v0
+        if-nez v0, :venus_reply_color
+        invoke-static {}, Lcom/discord/theme/ThemeManagerKt;->getTheme()Lcom/discord/theme/DiscordThemeObject;
+        move-result-object v0
+        invoke-virtual {v0}, Lcom/discord/theme/DiscordThemeObject;->getInteractiveTextDefault()I
+        move-result v0
+        goto :venus_reply_set
+        :venus_reply_color
+        invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+        move-result v0
+        :venus_reply_set
+        move-object/from16 v1, p1
+        iget-object v1, v1, $REPLY_PREVIEW->binding:$REPLY_BINDING
+        iget-object v1, v1, $REPLY_BINDING->replyText:Lcom/discord/chat/presentation/message/view/MessageContentView;
+        invoke-virtual {v1, v0}, Landroid/widget/TextView;->setTextColor(I)V
+        :venus_reply_text
+        nop
+    """)
+}
+
 @Suppress("unused")
-val pastelize = bundledPlugin("pastelize", "Pastelize", "Gives names and mentions without a role color a soft pastel color, picked from each person's user ID so it never changes.")
+val pastelize = bytecodePatch(
+    name = "Pastelize",
+    description = "Gives names and mentions without a role color a soft pastel color, picked from each person's user ID so it never changes."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    execute {
+        additionalSelections += "pastelize"
+        pastelReplyText(Fingerprint(
+            definingClass = REPLY_PREVIEW,
+            name = "configureReply\$lambda\$9",
+            returnType = "Lkotlin/Unit;",
+            parameters = listOf("Lcom/discord/chat/bridge/structurabletext/StructurableText;", REPLY_PREVIEW, BRIDGE_MESSAGE, "I")
+        ).method)
+    }
+}
 
 @Suppress("unused")
 val platformIndicators = bundledPlugin("platformIndicators", "PlatformIndicators", "Shows whether people are on desktop, mobile, web, console or VR, on profiles, in lists and in DMs.")
@@ -505,6 +564,22 @@ val hideCallButton = bundledPlugin("hideCall", "Hide call button",
 @Suppress("unused")
 val hideQuestDock = bundledPlugin("hideQuestDock", "Hide Quests promotion",
     "Hides the Quests promotion above your profile bar, under the server list.")
+
+@Suppress("unused")
+val validUser = bundledPlugin("validUser", "ValidUser",
+    "Mentions that show as @unknown-user are looked up automatically and show the person's name. Deleted accounts show as Deleted User. Based on ValidUser by fshin, o.oer and kmmiio99o.")
+
+@Suppress("unused")
+val youBarSettings = bundledPlugin("youBarSettings", "Profile bar settings button",
+    "Adds a button to your profile bar, next to the notifications bell, that opens Venus settings.")
+
+@Suppress("unused")
+val splitLargeMessages = bundledPlugin("splitMessages", "Split Large Messages",
+    "Lets you type past the message limit and sends a long message as several, split between lines or words. Code blocks stay closed in each part. Based on SplitLargeMessages by sunnie.")
+
+@Suppress("unused")
+val translateMessages = bundledPlugin("translate", "Translate messages",
+    "Shows messages in other languages translated into Discord's language or your phone's, with a note saying from what. Sends their text to Google Translate, without your account. Turn it on in Venus settings.")
 
 internal const val USER_AGENT_INTERCEPTOR = "Lcom/discord/client_info/ClientUserAgent\$DiscordUserAgentInterceptor;"
 /** The start of the Windows desktop User-Agent that Quest Completer sends Play and Activity heartbeats with. */
