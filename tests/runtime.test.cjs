@@ -71,11 +71,16 @@ Promise.all([
         }
     });
 
-function boot(features = {picker:true, voice:true}, ready = true) {
+const OLD_ON = ['picker','copyBios','dashless','favouriteAnything','freeNitro','noTyping','jumpToTop','pastelize','platformIndicators','readAll',
+    'hideGift','hideQuestDock','systemEmoji','hideCall','validUser','youBarSettings','splitMessages'];
+function boot(features = {picker:true, voice:true}, ready = true, oldDefaults = true) {
     const warnings = [];
     const context = vm.createContext({console: {warn: (...args) => warnings.push(args)}});
     const source = raw.replace('/*__FEATURES__*/', JSON.stringify(features));
     vm.runInContext(source, context);
+    // Every feature starts off since 1.9.0. These tests were written for the old defaults, so they start from
+    // them; 'every feature starts off' checks the real ones.
+    if (oldDefaults) for (const key of OLD_ON) if (key in context.__venusPatches.settings) context.__venusPatches.settings[key] = true;
     const factories = new Map();
     context.__d = (factory, id) => factories.set(id, factory);
     function load(exports, factory, explicitId) {
@@ -470,7 +475,7 @@ test('conversion disabled has no codec bridge calls for audio uploads', async ()
     await upload.reactNativeCompressAndExtractData();assert.equal(calls,0);
 });
 
-const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true};
+const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true, validUser:true, youBarSettings:true, splitMessages:true, translate:true};
 function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
@@ -1953,7 +1958,7 @@ test('Settings list is grouped, plugin names are gone and every row says what it
     const rows=settingsRows(b);
     assert.deepEqual(rows.map(([label])=>label),['Chat','Profiles and people','Servers and channels','More']);
     const titles=rows.flatMap(([,list])=>list);
-    assert.equal(titles.length,22);assert.equal(new Set(titles).size,22);
+    assert.equal(titles.length,26);assert.equal(new Set(titles).size,26);
     assert.ok(titles.includes('Double-tap a message to reply'));
     for (const old of ['CopyBios','Dashless','FavouriteAnything','FreeNitro','Hidden Channels','JumpToTop','No typing','NoDelete','Pastelize',
         'PlatformIndicators','QuickDelete','Read All','Quest Completer','ReviewDB','Custom voice messages','File size on picker'])
@@ -2679,8 +2684,13 @@ test('Force system emojis is saved, starts on and offers to reopen Discord throu
     b.api.setSetting('systemFont',true);await flush();assert.equal(alerts.length,2);assert.equal(alerts[1][0],"Use your phone's font");
     assert.equal(boot({}).api.setSetting('systemEmoji',false),false);
 });
-test('Force system emojis draws only Unicode emojis with the phone font in React Native',()=>{
-    const b=boot({systemEmoji:true});const seen=[];
+// Discord drawing its emojis at launch reads the saved setting; these start from one saved with emojis on.
+async function emojiOn() {
+    const b=boot({systemEmoji:true});b.load({default:native({fileExists:async()=>true,readFile:async()=>JSON.stringify({systemEmoji:true})})});
+    await flush();await flush();await flush();return b;
+}
+test('Force system emojis draws only Unicode emojis with the phone font in React Native',async()=>{
+    const b=await emojiOn();const seen=[];
     const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
     const exports=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:Emoji})},null,6552);
     const render=props=>exports.default.type(props);
@@ -2899,8 +2909,8 @@ test('Quest Completer saved on starts even when Discord connects before settings
     assert.equal(b.api.settings.quests, true);
     assert.deepEqual(timers, [8000]);
 });
-test('Force system emojis also draws keycap emojis with the phone font',()=>{
-    const b=boot({systemEmoji:true});const seen=[];
+test('Force system emojis also draws keycap emojis with the phone font',async()=>{
+    const b=await emojiOn();const seen=[];
     const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
     const exports=b.load({default:Emoji},null,6552);
     for (const name of ['1\uFE0F\u20E3','#\uFE0F\u20E3','*\u20E3']) {exports.default({name});assert.equal(seen.at(-1).forceTextEmoji,true,name);}
@@ -2991,4 +3001,286 @@ test('file size badge shows a known size at once and never the old photo\'s size
     effect();await flush();await flush();
     assert.equal(render(badgeOf('file://b')).props.children.props.children,'4 KB');
     assert.equal(render(badgeOf('file://b')).props.style,style,'one shared style object');
+});
+
+// Fix unknown mentions, profile bar settings button and long messages.
+function validHarness(users = {}) {
+    const b=boot({validUser:true});
+    const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push(fn);return timers.length;};
+    const run=async()=>{for (let i=0;i<50 && timers.length;i++){timers.shift()();await flush();await flush();}};
+    const known=new Map(Object.entries(users));const subs={};const dispatched=[];
+    const dispatcher={subscribe(type,fn){(subs[type]||(subs[type]=[])).push(fn);},dispatch(event){dispatched.push(event);
+        if (event.type==='USER_UPDATE') known.set(event.user.id,event.user);(subs[event.type]||[]).forEach(fn=>fn(event));}};
+    b.load({default:{getUser:id=>known.get(id),getCurrentUser:()=>({id:'me'})}},null,1378);
+    b.load({default:dispatcher},null,585);
+    const asked=[];let answer=id=>{known.set(id,{id,username:'u'+id});return Promise.resolve({id});};
+    b.context.__r=id=>id===7630?{getUser:userId=>{asked.push(userId);return answer(userId);}}:null;
+    return {...b,dispatcher,dispatched,known,asked,run,setAnswer:fn=>{answer=fn;},subs};
+}
+test('Fix unknown mentions looks up unknown people automatically and redraws the message',async()=>{
+    const b=validHarness({'11111111111111111':{id:'11111111111111111'}});
+    const message={id:'m1',channel_id:'c',content:'hi <@22222222222222222> and <@!11111111111111111>',
+        embeds:[{description:'<@33333333333333333>'}],components:[{type:17,components:[{type:10,content:'<@44444444444444444>'}]}]};
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'c',message});
+    await b.run();
+    assert.deepEqual(b.asked,['22222222222222222','33333333333333333','44444444444444444'],'only unknown people, once each');
+    const updates=b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE');
+    assert.equal(updates.length,2);assert.equal(updates[0].message.content,message.content+'\u200b');
+    assert.equal(updates[1].message.content,message.content);assert.equal(updates[1].message.id,'m1');
+    // Its own redraw isn't checked again, and the same people are never asked for twice.
+    b.dispatcher.dispatch({type:'LOAD_MESSAGES_SUCCESS',channelId:'c',messages:[{id:'m2',content:'<@22222222222222222>'}]});
+    await b.run();assert.equal(b.asked.length,3);
+});
+test('Fix unknown mentions marks deleted accounts and retries other errors later',async()=>{
+    const b=validHarness();
+    b.setAnswer(id=>Promise.reject(id==='55555555555555555'?{status:404,body:{code:10013}}:{status:500}));
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',message:{id:'m',channel_id:'c',content:'<@55555555555555555> <@66666666666666666>'}});
+    await b.run();
+    assert.equal(b.known.get('55555555555555555').username,'Deleted User');
+    assert.equal(b.known.has('66666666666666666'),false);
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',message:{id:'n',channel_id:'c',content:'<@66666666666666666>'}});
+    await b.run();assert.equal(b.asked.filter(id=>id==='66666666666666666').length,2,'a failed lookup is tried again');
+});
+test('Fix unknown mentions does nothing while switched off',async()=>{
+    const b=validHarness();b.api.setSetting('validUser',false);
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',message:{id:'m',channel_id:'c',content:'<@22222222222222222>'}});
+    await b.run();assert.deepEqual(b.asked,[]);
+    const off=boot({});const subs=[];off.load({default:{subscribe:t=>subs.push(t),dispatch(){}}},null,585);assert.deepEqual(subs,[]);
+});
+test('profile bar gets a settings button next to the notifications bell',()=>{
+    const b=boot({youBarSettings:true});const {React}=reactHarness(b);React.Fragment='Fragment';
+    function YouBarButton(){} function SettingsIcon(){} const opened=[];
+    b.context.__r=id=>({16031:{default:YouBarButton},6799:{SettingsIcon},14615:{YOU_BAR_BUTTON_ICON_SIZE:20},6801:{openUserSettings:options=>opened.push(options)}})[id];
+    function Bell(){return 'bell';}
+    const memo={$$typeof:Symbol.for('react.memo'),type:Bell,compare:null};
+    const exports=b.load({default:memo},null,16032);
+    assert.equal(exports.default.$$typeof,Symbol.for('react.memo'));
+    const tree=exports.default.type({hasNameplate:true});
+    assert.equal(tree.type,'Fragment');assert.equal(tree.props.children[0],'bell');
+    const extra=tree.props.children[1];const button=extra.type(extra.props);
+    assert.equal(button.type,YouBarButton);assert.equal(button.props.accessibilityLabel,'Venus settings');
+    assert.equal(button.props.icon.type,SettingsIcon);assert.equal(button.props.hasNameplate,true);
+    button.props.onPress();assert.equal(opened.length,1);assert.equal(opened[0],undefined,'no Venus page yet: Discord\'s settings');
+    b.context.__venusPatches.status.menu=true;button.props.onPress();assert.deepEqual(JSON.parse(JSON.stringify(opened[1])),{screen:'VENUS_PLUGINS'},'opens Venus settings, not Discord\'s');
+    b.api.setSetting('youBarSettings',false);assert.equal(extra.type(extra.props),null);
+    const again=exports.default.type({});assert.equal(again.type,'Fragment','same shape when off, so the bell never remounts');
+});
+function splitHarness(premium=false) {
+    const b=boot({splitMessages:true});const sent=[];
+    const timers=[];b.context.setTimeout=(fn)=>{timers.push(fn);return 1;};
+    const run=async()=>{for (let i=0;i<50;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();};
+    const constants=b.load({MAX_MESSAGE_LENGTH:2000,MAX_MESSAGE_LENGTH_PREMIUM:4000,OTHER:1},null,1086);
+    b.load({default:{getCurrentUser:()=>({id:'me',premiumType:premium?2:0}),getUser(){}}},null,1378);
+    b.load({default:{getChannel:()=>({id:'c',rateLimitPerUser:0})}},null,2051);
+    const actions=b.load({default:{sendMessage(channel,message,a,b2){sent.push([channel,message,a,b2]);return Promise.resolve();}}},null,6880).default;
+    const length=b.load({default:()=>premium?4000:2000,getMaxMessageLength:()=>premium?4000:2000},null,8602);
+    return {...b,sent,actions,constants,length,run};
+}
+test('long messages are split into parts within the limit, code blocks kept closed',async()=>{
+    const b=splitHarness();
+    assert.equal(b.length.getMaxMessageLength(),1<<30);assert.equal(b.constants.MAX_MESSAGE_LENGTH,1<<30);assert.equal(b.constants.OTHER,1);
+    const lines=Array.from({length:300},(_,i)=>'line number '+i+' with some words');
+    const content=lines.slice(0,100).join('\n')+'\n```js\n'+lines.slice(100).join('\n')+'\n```';
+    b.actions.sendMessage('c',{content,tts:false,invalidEmojis:[]},true,{messageReference:{message_id:'r'}});
+    await b.run();
+    assert.ok(b.sent.length>=4,'several parts: '+b.sent.length);
+    for (const [,message] of b.sent) { assert.ok(message.content.length<=2000,'part too long: '+message.content.length);
+        assert.equal((message.content.match(/```/g)||[]).length%2,0,'code block left open'); }
+    assert.equal(b.sent[0][3].messageReference.message_id,'r','the reply stays on the first part');
+    assert.equal(JSON.stringify(b.sent[1][3]),'{}');
+    const joined=b.sent.map(([,m])=>m.content).join('\n').replace(/\n```\n```js\n/g,'\n');
+    for (const line of lines) assert.ok(joined.includes(line),'lost: '+line);
+});
+test('short messages, premium limits and the off switch are left alone',async()=>{
+    const b=splitHarness(true);const msg={content:'x'.repeat(3500)};
+    b.actions.sendMessage('c',msg);await b.run();assert.equal(b.sent.length,1);assert.equal(b.sent[0][1],msg);
+    b.api.setSetting('splitMessages',false);
+    assert.equal(b.length.getMaxMessageLength(),4000);assert.equal(b.constants.MAX_MESSAGE_LENGTH,2000);
+    const big={content:'y '.repeat(5000)};b.actions.sendMessage('c',big);await b.run();assert.equal(b.sent.at(-1)[1],big);
+    const off=boot({});const stock={MAX_MESSAGE_LENGTH:2000};assert.equal(off.load(stock,null,1086).MAX_MESSAGE_LENGTH,2000);
+});
+test('the three new switches sit in their groups',()=>{
+    const rows=Object.fromEntries(settingsRows(settingsHarness()));
+    assert.ok(rows.Chat.includes('Send messages longer than the limit'));
+    assert.ok(rows['Profiles and people'].includes('Fix unknown mentions'));
+    assert.ok(rows['Servers and channels'].includes('Add a Venus settings button to your profile bar'));
+});
+
+// Translate messages: a fake Google Translate, a Flux dispatcher that records redraws, and the row generator.
+function translateHarness({answer, locale='en-US', system='de-DE', on=true}={}) {
+    const b=boot({translate:true});const {React}=reactHarness(b);
+    const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push(fn);return timers.length;};b.context.clearTimeout=()=>{};
+    const requests=[];
+    // Google's batch answer: one [text, language] pair per q=.
+    let reply=answer || (texts=>texts.map(t=>[t.replace(/hola/g,'hello').replace(/perro/g,'dog').replace(/amigo/g,'friend'),'es']));
+    b.context.fetch=async(url,options)=>{
+        const texts=options.body.split('&').map(p=>decodeURIComponent(p.slice(2)));requests.push({url,texts,options});
+        const result=reply(texts,url);
+        if (result && result.status) return {ok:false,status:result.status,json:async()=>({})};
+        return {ok:true,status:200,json:async()=>result};
+    };
+    b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1378);
+    b.load({default:{locale,systemLocale:system}},null,2115);
+    const dispatched=[];const subs={};
+    b.load({default:{dispatch(e){dispatched.push(e);},subscribe(t,fn){(subs[t]||(subs[t]=[])).push(fn);}}},null,585);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);
+    // Switching on asks for a redraw a moment later: let that happen before the test's messages exist.
+    if (on) { b.api.setSetting('translate',true); while (timers.length) timers.shift()(); }
+    const run=async()=>{for (let i=0;i<40;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();await flush();};
+    const row=(id,content,raw,author='them')=>new Rows().generate({rowType:1,message:{id,channel_id:'c',content:raw,author:{id:author}},
+        result:{message:{id,channelId:'c',authorId:author,content}}}).message;
+    return {...b,React,requests,dispatched,subs,run,row,timers,setReply:fn=>{reply=fn;}};
+}
+const T=text=>({type:'text',content:text});
+test('Translate messages translates other languages in batches and keeps mentions, emojis and formatting',async()=>{
+    const b=translateHarness();
+    const mention={type:'mention',userId:'1',content:[T('@Ana')]};const emoji={type:'customEmoji',id:'9',name:'wave'};
+    const first=[T('hola '),mention,T(', mi '),{type:'strong',content:[T('perro')]},T(' '),emoji];
+    assert.equal(b.row('1',first,'hola <@1>, mi **perro** <:wave:9>').content,first,'original until the translation arrives');
+    b.row('2',[T('hola amigo')],'hola amigo');
+    await b.run();
+    assert.equal(b.requests.length,1,'both messages in one request');
+    assert.match(b.requests[0].url,/^https:\/\/translate\.googleapis\.com\/translate_a\/t\?client=dict-chrome-ex&sl=auto&tl=en$/);
+    assert.equal(b.requests[0].options.credentials,'omit');
+    assert.deepEqual(b.requests[0].texts,['hola amigo','hola <a i=0/>, mi <g i=1>perro</g> <a i=2/>'],'newest first');
+    // Each translated message is redrawn once, with a zero-width space that is then taken out again.
+    const updates=b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE');
+    assert.deepEqual(updates.map(e=>e.message.content),['hola amigo\u200b','hola <@1>, mi **perro** <:wave:9>\u200b','hola amigo','hola <@1>, mi **perro** <:wave:9>']);
+    const shown=b.row('1',first,'hola <@1>, mi **perro** <:wave:9>').content;
+    assert.equal(shown[1],mention,'the very same mention node');assert.equal(shown[5],emoji);
+    assert.deepEqual(JSON.parse(JSON.stringify(shown.slice(0,5))),[T('hello '),{type:'mention',userId:'1',content:[T('@Ana')]},T(', mi '),{type:'strong',content:[T('dog')]},T(' ')]);
+    assert.equal(shown.at(-1).type,'subtext');assert.equal(shown.at(-1).content[0].content,'Translated from Spanish');
+    assert.equal(b.row('1',first,'hola <@1>, mi **perro** <:wave:9>').content,shown,'built once, reused on every render');
+    // The redraw's zero-width space never asks for a new translation.
+    b.row('1',[T('hola '),mention,T(', mi '),{type:'strong',content:[T('perro')]},T(' \u200b'),emoji],'x');await b.run();
+    assert.equal(b.requests.length,1);
+});
+test('Translate messages leaves your own messages, your language, short text and broken answers alone',async()=>{
+    const b=translateHarness({answer:texts=>texts.map(t=>t==='good morning everyone'?[t,'en']:t.startsWith('bonjour')?['hello <a i=0/> <a i=0/>','fr']:[t.toUpperCase(),'es'])});
+    b.row('1',[T('hola amigo')],'hola amigo','me');
+    b.row('2',[T('ok'),{type:'emoji',name:'x'}],'ok :x:');
+    b.row('3',[T('good morning everyone')],'good morning everyone');
+    const broken=[T('bonjour '),{type:'mention',userId:'5'}];b.row('4',broken,'bonjour <@5>');
+    await b.run();
+    assert.deepEqual(b.requests.flatMap(r=>r.texts).sort(),['bonjour <a i=0/>','good morning everyone'],'own messages and "ok" are never sent');
+    assert.equal(b.row('3',[T('good morning everyone')],'good morning everyone').content.length,1,'already English');
+    assert.equal(b.row('4',broken,'bonjour <@5>').content,broken,'a doubled mention means the original is shown');
+    assert.equal(b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE').length,0,'nothing changed, so nothing is redrawn');
+    b.row('3',[T('good morning everyone')],'good morning everyone');await b.run();assert.equal(b.requests.length,1,'never asked again');
+});
+test('Translate messages follows Discord\'s or the phone\'s language, and the note and original options',async()=>{
+    const b=translateHarness({locale:'zh-TW',system:'pt-BR'});
+    b.row('1',[T('hola amigo')],'hola amigo');await b.run();
+    assert.match(b.requests[0].url,/tl=zh-TW$/);
+    b.api.setSetting('translateTarget','phone');assert.equal(b.api.settings.translateTarget,'phone');
+    assert.equal(b.api.setSetting('translateTarget','klingon'),false);
+    await b.run();
+    b.row('1',[T('hola amigo')],'hola amigo');await b.run();assert.match(b.requests.at(-1).url,/tl=pt$/);
+    b.api.setSetting('translateNote',false);await b.run();
+    assert.deepEqual(JSON.parse(JSON.stringify(b.row('1',[T('hola amigo')],'hola amigo').content)),[T('hello friend')],'no note');
+    b.api.setSetting('translateOriginal',true);await b.run();
+    const content=b.row('1',[T('hola amigo')],'hola amigo').content;
+    assert.equal(content.at(-2).content[0].content,'Translated from Spanish. Original:');
+    assert.deepEqual(JSON.parse(JSON.stringify(content.at(-1))),{type:'blockQuote',content:[T('hola amigo')]});
+});
+test('Translate messages waits and tries the other server when Google says to slow down',async()=>{
+    let calls=0;const b=translateHarness({answer:(texts,url)=>(++calls===1?{status:429}:texts.map(t=>['hello friend','es']))});
+    b.row('1',[T('hola amigo')],'hola amigo');await b.run();
+    assert.equal(b.requests.length,2);
+    assert.match(b.requests[0].url,/^https:\/\/translate\.googleapis\.com\//);assert.match(b.requests[1].url,/^https:\/\/clients5\.google\.com\//);
+    assert.equal(JSON.stringify(b.row('1',[T('hola amigo')],'hola amigo').content[0]),JSON.stringify(T('hello friend')));
+});
+test('Translate messages starts off, sends nothing while off and redraws when switched on or off',async()=>{
+    const b=translateHarness({on:false});
+    assert.equal(b.api.settings.translate,false,'starts off');
+    const content=[T('hola amigo')];
+    assert.equal(b.row('1',content,'hola amigo').content,content);await b.run();assert.equal(b.requests.length,0);
+    b.api.setSetting('translate',true);await b.run();
+    assert.deepEqual(b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE').map(e=>e.message.content),['hola amigo\u200b','hola amigo'],'switching on redraws what was on screen');
+    b.row('1',content,'hola amigo');await b.run();assert.equal(b.requests.length,1);
+    b.api.setSetting('translate',false);await b.run();
+    assert.equal(b.row('1',content,'hola amigo').content,content,'switched off: the original again');
+    const off=boot({});const unpatched=[];off.load({default:{dispatch(){},subscribe:t=>unpatched.push(t)}},null,585);assert.deepEqual(unpatched,[]);
+});
+test('Translate messages has a settings row with its own page in Chat',()=>{
+    const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
+    assert.ok(rows.Chat.includes('Translate messages into your language'));
+    assert.equal(b.registry.VENUS_TRANSLATE.useTitle(),'Translate messages');
+});
+test('Pastelize colors the text of the message a reply quotes when Color message text is on (#45)',()=>{
+    const b=boot(allFeatures);const {RN}=reactHarness(b);RN.processColor=hex=>parseInt(hex.slice(1),16)|0xff000000;
+    b.load(seed=>Array.from(seed).reduce((a,c)=>a+c.charCodeAt(0),0),null,1252);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);const rows=new Rows();
+    // Discord gives every message, quoted ones too, its theme text color.
+    const quoted={authorId:'111',username:'Ana',roleColor:null,textColor:-1,content:[{type:'text',content:'Hi'}]};
+    const row={rowType:1,message:{},result:{message:{authorId:'222',username:'Bo',roleColor:null,textColor:-1,content:[],referencedMessage:{state:'LOADED',message:quoted}}}};
+    let reply=rows.generate(row).message.referencedMessage.message;
+    assert.equal('textColor' in reply,false,'off: the preview keeps Discord\'s own reply color');
+    assert.equal(typeof reply.roleColor,'number','the quoted name is still pastel');
+    b.api.setSetting('pastelContent',true);
+    const shown=rows.generate(row).message;reply=shown.referencedMessage.message;
+    assert.equal(typeof reply.textColor,'number');assert.notEqual(reply.textColor,-1);
+    assert.equal(reply.textColor,rows.generate({...row,result:{message:{...quoted}}}).message.textColor,'the same color as that person\'s own messages');
+    assert.notEqual(shown.textColor,reply.textColor,'each person keeps their own color');
+    assert.equal(quoted.textColor,-1,'Discord\'s record is never changed');
+    b.api.setSetting('pastelize',false);
+    reply=rows.generate(row).message.referencedMessage.message;
+    assert.equal('textColor' in reply,false,'switched off: Discord\'s reply color again');assert.equal(reply.roleColor,null);
+});
+test('every feature starts off, and its options keep their own defaults',()=>{
+    const b=boot(allFeatures,true,false);const s=b.api.settings;
+    for (const key of Object.keys(allFeatures)) if (key in s) assert.equal(s[key],false,key+' starts off');
+    for (const key of ['emojis','stickers','hyperlinks','noDeleteEdits','pastelWebhookName','piDmHeader','piUserList','piProfile','reviewWarning','questsVideo','gestureTripleDelete','translateNote'])
+        assert.equal(s[key],true,key+' is on once its feature is');
+});
+// The translator, three requests at a time and saving what it translated, against a fake Google and a fake phone.
+function fastHarness({answer, disk=null}={}) {
+    const b=boot({translate:true});reactHarness(b);
+    const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length;};b.context.clearTimeout=()=>{};
+    const requests=[], pending=[];let saved=disk;const writes=[];
+    b.context.fetch=(url,options)=>new Promise((resolve,reject)=>{
+        const texts=options.body.split('&').map(p=>decodeURIComponent(p.slice(2)));const request={url,texts,resolve,reject};requests.push(request);
+        const reply=answer&&answer(request,requests.length);
+        if (reply==='hang') return pending.push(request);
+        if (reply&&reply.status) return resolve({ok:false,status:reply.status,json:async()=>({})});
+        resolve({ok:true,status:200,json:async()=>texts.map(t=>[t.replace(/hola/g,'hello').replace(/amigo/g,'friend'),'es'])});
+    });
+    b.load({default:native({fileExists:async p=>p.endsWith('venus-translations.json')&&saved!==null,readFile:async p=>p.endsWith('venus-translations.json')?saved:'{}',
+        writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-translations.json')saved=text;}})});
+    b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1378);
+    b.load({default:{locale:'en-US',systemLocale:'en-US'}},null,2115);
+    const dispatched=[];b.load({default:{dispatch(e){dispatched.push(e);},subscribe(){}}},null,585);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);
+    const run=async(rounds=60)=>{for (let i=0;i<rounds;i++){await flush();if(!timers.length)break;timers.shift().fn();}await flush();await flush();};
+    const row=(id,text)=>new Rows().generate({rowType:1,message:{id,channel_id:'c',content:text,author:{id:'them'}},
+        result:{message:{id,channelId:'c',authorId:'them',content:[{type:'text',content:text}]}}}).message.content;
+    return {...b,requests,pending,run,row,timers,dispatched,writes,getDisk:()=>saved};
+}
+test('Translate messages sends up to three requests at once and a slow one never holds up the rest',async()=>{
+    const b=fastHarness({answer:(request,n)=>n===1?'hang':null});
+    await flush();await flush();b.api.setSetting('translate',true);await b.run(5);
+    // 200 messages: 5 batches of 40, never more than three in flight while the first hangs.
+    for (let i=0;i<200;i++) b.row('m'+i,'hola amigo numero '+i);
+    await b.run();
+    assert.ok(b.requests.length>=4,'kept going past the stuck request: '+b.requests.length);
+    assert.ok(b.requests.every(r=>r.texts.length<=40));
+    assert.equal(JSON.stringify(b.row('m199','hola amigo numero 199')[0]),JSON.stringify({type:'text',content:'hello friend numero 199'}),'newest translated first, without waiting for the stuck one');
+});
+test('Translate messages tries the other server at once after a timeout and does not give up',async()=>{
+    const b=fastHarness({answer:(request,n)=>n===1?{status:503}:null});
+    await flush();await flush();b.api.setSetting('translate',true);await b.run(5);
+    b.row('1','hola amigo');await b.run();
+    assert.equal(b.requests.length,2);assert.match(b.requests[1].url,/clients5\.google\.com/);
+    const waits=b.timers.map(t=>t.ms);assert.ok(!waits.some(ms=>ms>=15000),'a network error waits a moment, not 15 seconds');
+    assert.equal(b.row('1','hola amigo')[0].content,'hello friend');
+});
+test('Translate messages keeps translations on the phone, so a chat opened after a restart shows them at once',async()=>{
+    const first=fastHarness();await flush();await flush();first.api.setSetting('translate',true);await first.run(5);
+    first.row('1','hola amigo');await first.run();assert.equal(first.requests.length,1);
+    const disk=first.getDisk();assert.ok(disk,'saved');const saved=JSON.parse(disk);assert.deepEqual(saved.entries,[['en','hola amigo','hello friend','es']]);
+    const again=fastHarness({disk});await flush();await flush();again.api.setSetting('translate',true);await again.run(5);
+    assert.equal(again.row('1','hola amigo')[0].content,'hello friend','straight from the phone');await again.run();
+    assert.equal(again.requests.length,0,'nothing sent to Google again');
+    const broken=fastHarness({disk:'{not json'});await flush();await flush();broken.api.setSetting('translate',true);await broken.run(5);
+    broken.row('1','hola amigo');await broken.run();assert.equal(broken.requests.length,1,'a damaged file is ignored');
 });

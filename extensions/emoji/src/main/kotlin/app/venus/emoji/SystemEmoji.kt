@@ -46,10 +46,10 @@ object SystemEmoji {
         appContext = context?.applicationContext ?: context
         enabled = try {
             val file = File(context!!.filesDir, PREFS)
-            // Starts on, like Venus settings: no saved settings yet, or none for this switch, means on.
-            val on = !file.isFile || file.length() <= MAX_PREFS &&
+            // Starts off, like every Venus setting: no saved settings yet, or none for this switch, means off.
+            val on = file.isFile && file.length() <= MAX_PREFS &&
                 JSONObject(String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8))
-                    .optBoolean("systemEmoji", true)
+                    .optBoolean("systemEmoji", false)
             if (!on) false else {
                 // One folder per emoji font: after a system or emoji font update the old drawings were shown forever.
                 // Folders for an older font are removed, so the cache never holds two sets.

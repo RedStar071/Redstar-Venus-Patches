@@ -172,6 +172,32 @@ fun main(args: Array<String>) {
         }
     }
     checkBranches(font, "Font guard"); checkBranches(interceptor, "User-Agent guard")
+    // Pastelize reply text (#45): assembled on Discord's real reply preview text lambda (a detached fixture).
+    val replyMethod = methods.single { it.definingClass == REPLY_PREVIEW && it.name == "configureReply\$lambda\$9" }
+    val replyOriginal = replyMethod.implementation!!.instructions.map { it.opcode }
+    val reply = MutableMethod(replyMethod)
+    pastelReplyText(reply)
+    val replyCode = reply.implementation!!.instructions.toList()
+    check(reply.implementation!!.registerCount == replyMethod.implementation!!.registerCount) { "Reply guard changed the register count" }
+    check(replyCode.size == replyOriginal.size + PASTEL_REPLY_GUARD_SIZE) { "Reply guard is ${replyCode.size - replyOriginal.size} instructions" }
+    check(replyCode.drop(PASTEL_REPLY_GUARD_SIZE).map { it.opcode } == replyOriginal) { "Discord's own reply text code changed" }
+    check(replyCode[PASTEL_REPLY_GUARD_SIZE - 1].opcode == Opcode.NOP)
+    val replyGuard = replyCode.take(PASTEL_REPLY_GUARD_SIZE)
+    // Only v0-v2 are written, and Discord's own code writes them before it reads them.
+    for (instruction in replyGuard) if (instruction is OneRegisterInstruction && instruction.opcode != Opcode.IF_EQZ && instruction.opcode != Opcode.IF_NEZ)
+        check(instruction.registerA in 0..2) { "Reply guard writes outside v0-v2" }
+    val replyRegs = reply.implementation!!.registerCount
+    check((replyGuard[0] as TwoRegisterInstruction).registerB == replyRegs - 2) { "Reply guard must read the replied message (p2)" }
+    check(replyGuard.any { it is TwoRegisterInstruction && it.opcode == Opcode.MOVE_OBJECT_FROM16 && it.registerB == replyRegs - 3 }) { "Reply guard must read the preview (p1)" }
+    check(replyCode[PASTEL_REPLY_GUARD_SIZE].opcode == Opcode.MOVE_OBJECT_FROM16) { "Discord's code no longer starts by moving its parameters" }
+    for (call in replyGuard.mapNotNull { (it as? ReferenceInstruction)?.reference as? MethodReference })
+        check(methods.any { it.definingClass == call.definingClass && it.name == call.name && it.returnType == call.returnType &&
+            it.parameterTypes.map { p -> p.toString() } == call.parameterTypes.map { p -> p.toString() } } ||
+            call.definingClass == "Ljava/lang/Integer;" || call.definingClass == "Landroid/widget/TextView;") { "Unresolved reply guard call $call" }
+    val dexClasses = dex.dexEntryNames.flatMap { dex.getEntry(it)!!.dexFile.classes }
+    for (field in replyGuard.mapNotNull { (it as? ReferenceInstruction)?.reference as? FieldReference })
+        check(dexClasses.any { c -> c.type == field.definingClass && c.fields.any { it.name == field.name && it.type == field.type } }) { "Unresolved reply guard field $field" }
+    checkBranches(reply, "Reply guard")
     // Passkey hint: assembled on Discord's one security key reject (a detached fixture, not a Patcher run).
     val rejectMethod = methods.single { it.definingClass == SECURITY_KEY_MODULE && it.name == "reject" &&
         it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/Throwable;") }

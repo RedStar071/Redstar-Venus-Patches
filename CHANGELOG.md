@@ -1,3 +1,25 @@
+## [1.9.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.8.0...v1.9.0) (2026-10-13)
+
+### ✨ New Features
+
+* **Discord:** Add `ValidUser` patch
+* **Discord - ValidUser:** Fix @unknown-user mentions automatically, with no extra taps
+* **Discord:** Add `Profile bar settings button` patch
+* **Discord - Profile bar settings button:** Open Venus settings from a button next to the notifications bell
+* **Discord:** Add `Split Large Messages` patch
+* **Discord - Split Large Messages:** Send messages over the limit as several, keeping code blocks closed
+* **Discord:** Add `Translate messages` patch
+* **Discord - Translate messages:** Show messages in other languages translated into your language, newest first
+* **Discord - Translate messages:** Keep translations on your phone, so reopened chats show them at once
+
+### 🐛 Bug Fixes
+
+* **Discord - Pastelize:** Color message text doesn't color the message a reply quotes ([#45](https://github.com/VenusIsJaded/Venus-Patches/issues/45))
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Every feature starts off, so nothing changes until you turn it on
+
 ## [1.8.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.7.0...v1.8.0) (2026-10-12)
 
 ### ✨ New Features

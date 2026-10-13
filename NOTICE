@@ -41,3 +41,10 @@ code is written for this project against Discord 348.10's own modules.
 
 patches/src/main/kotlin/util/PatchListGenerator.kt is adapted from the Morphe patches
 template (https://github.com/MorpheApp/morphe-patches-template) and keeps its header.
+
+ValidUser is based on the ValidUser Revenge plugin by fshin, o.oer and kmmiio99o
+(fshinz/Revenge-Plugins). Split Large Messages is based on the SplitLargeMessages Vendetta plugin by
+sunnie (sunnniee/vendetta-plugins). Both are rewritten for this project against Discord 348.10's modules.
+
+Translate messages uses Google Translate's public web endpoint (translate.googleapis.com) at the user's
+request. No Google code is included; translations are Google's.
