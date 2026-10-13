@@ -194,6 +194,27 @@ def build():
     run("java", "-Xmx384m", "-cp", TOOLS / "r8.jar", "com.android.tools.r8.D8",
         "--release", "--min-api", "26", "--lib", TOOLS / "android.jar",
         "--classpath", stubs, "--output", emoji_dex, emoji_classes)
+    # Settings languages: the same Java-only rules again.
+    i18n_classes = BUILD / "i18n-classes.jar"
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+        "-jvm-target", "11", "-Xlambdas=class", "-cp", f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
+        *sorted((ROOT / "extensions/i18n/src/main/kotlin").rglob("*.kt")), "-d", i18n_classes)
+    with zipfile.ZipFile(i18n_classes) as native:
+        for name in native.namelist():
+            if not name.endswith(".class"):
+                continue
+            content = native.read(name)
+            for unsafe in (b"kotlin/text/", b"kotlin/collections/", b"kotlin/Result", b"kotlin/Unit", b"kotlin/io/"):
+                if unsafe in content:
+                    raise SystemExit(f"Unsafe host Kotlin helper in {name}: {unsafe.decode()}; use Java APIs")
+    i18n_dex = BUILD / "i18n-dex"
+    i18n_dex.mkdir(exist_ok=True)
+    for stale in i18n_dex.glob("classes*.dex"):
+        stale.unlink()
+    run("java", "-Xmx384m", "-cp", TOOLS / "r8.jar", "com.android.tools.r8.D8",
+        "--release", "--min-api", "26", "--lib", TOOLS / "android.jar",
+        "--classpath", stubs, "--output", i18n_dex, i18n_classes)
+    check_languages()
     classes = BUILD / "classes.jar"
     sources = sorted((ROOT / "patches/src/main/kotlin").rglob("*.kt"))
     run(TOOLS / "kotlinc/bin/kotlinc", "-no-stdlib", "-no-reflect",
@@ -244,6 +265,7 @@ def build():
         add("extensions/voice.mpe", (voice_dex / "classes.dex").read_bytes())
         add("extensions/font.mpe", (font_dex / "classes.dex").read_bytes())
         add("extensions/emoji.mpe", (emoji_dex / "classes.dex").read_bytes())
+        add("extensions/i18n.mpe", (i18n_dex / "classes.dex").read_bytes())
         for path in sorted(dex.glob("classes*.dex")):
             add(path.name, path.read_bytes())
     run("java", "-Xmx256m", "-cp", f"{bundle}:{TOOLS / 'morphe.jar'}:{TOOLS / 'gson.jar'}",
@@ -251,6 +273,24 @@ def build():
     checksum = libs / "SHA256SUMS"
     checksum.write_text(f"{digest(bundle)}  {bundle.name}\n")
     print(f"Bundle: {bundle.relative_to(ROOT)}", flush=True)
+
+
+def check_languages():
+    """Every language file the index lists exists, is valid JSON and keeps every {placeholder} of the English text."""
+    import re
+    folder = ROOT / "patches/src/main/resources/venus/i18n"
+    codes = [line.strip() for line in (folder / "index.txt").read_text().splitlines() if line.strip()]
+    for code in codes:
+        pack = json.loads((folder / f"{code}.json").read_text(encoding="utf-8"))
+        strings = pack.get("strings")
+        if pack.get("code") != code or not isinstance(strings, dict) or not strings:
+            raise SystemExit(f"i18n/{code}.json: bad header")
+        for english, value in strings.items():
+            needed = set(re.findall(r"\{\w+\}", english))
+            for text in (value.values() if isinstance(value, dict) else [value]):
+                if not isinstance(text, str) or set(re.findall(r"\{\w+\}", text)) != needed:
+                    raise SystemExit(f"i18n/{code}.json: {english!r} must keep {sorted(needed)}")
+    print(f"Languages: {len(codes)}", flush=True)
 
 
 def release_summary():

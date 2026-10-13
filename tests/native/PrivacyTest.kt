@@ -285,6 +285,25 @@ fun main(args: Array<String>) {
         val refused = try { voiceBridge(bridge); false } catch (_: app.morphe.patcher.patch.PatchException) { true }
         check(refused) { "A second guard in $name was accepted" }
     }
+    // The settings-language bridge owns readAsset(uri, encoding, promise): the URI is p1, the Promise p3.
+    run {
+        val original = methods.single { it.definingClass == FILE_MODULE && it.name == "readAsset" && it.returnType == "V" &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", "Ljava/lang/String;", PROMISE) }
+        val bridge = MutableMethod(original)
+        languageBridge(bridge)
+        val code = bridge.implementation!!.instructions.toList()
+        check(bridge.implementation!!.registerCount == original.implementation!!.registerCount) { "readAsset bridge changed the register count" }
+        check(code.size == original.implementation!!.instructions.count() + LANGUAGE_BRIDGE_SIZE) { "readAsset bridge is ${code.size - original.implementation!!.instructions.count()} instructions" }
+        check(code.drop(LANGUAGE_BRIDGE_SIZE).map { it.opcode } == original.implementation!!.instructions.map { it.opcode }) { "Discord's own readAsset changed" }
+        check(code[LANGUAGE_BRIDGE_SIZE - 2].opcode == Opcode.RETURN_VOID && code[LANGUAGE_BRIDGE_SIZE - 1].opcode == Opcode.NOP)
+        check(((code[0] as ReferenceInstruction).reference as StringReference).string == "venus-i18n-v1:")
+        val parameters = bridge.implementation!!.registerCount - 4
+        for (instruction in code.take(LANGUAGE_BRIDGE_SIZE)) if (instruction is OneRegisterInstruction) check(instruction.registerA in 0..1) { "readAsset bridge writes outside v0-v1" }
+        check(code.take(LANGUAGE_BRIDGE_SIZE).filterIsInstance<FiveRegisterInstruction>().all { ins ->
+            listOf(ins.registerC, ins.registerD, ins.registerE).take(ins.registerCount).all { it == 0 || it >= parameters } }) { "readAsset bridge reads a clobbered local" }
+        checkBranches(bridge, "readAsset bridge")
+        check(try { languageBridge(bridge); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second guard in readAsset was accepted" }
+    }
     fun resolveHost(ref: MethodReference): Boolean = methods.any {
         it.definingClass == ref.definingClass && it.name == ref.name && it.returnType == ref.returnType &&
             it.parameterTypes.map { parameter -> parameter.toString() } == ref.parameterTypes.map { parameter -> parameter.toString() } && it.accessFlags and 1 != 0
@@ -426,7 +445,7 @@ fun main(args: Array<String>) {
             check(calls.single().definingClass == "Ljava/lang/Throwable;" && calls.single().name == "toString")
         } else check(calls.isEmpty())
     }
-    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 87 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge; no APK patched")
+    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 87 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge (getSize, fileExists, readAsset); no APK patched")
 }
 
 

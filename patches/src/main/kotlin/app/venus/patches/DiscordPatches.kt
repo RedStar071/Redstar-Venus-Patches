@@ -127,15 +127,77 @@ internal fun pinPackagedDiscordBundle(method: app.morphe.patcher.util.proxy.muta
     """)
 }
 
+/** Copies every language file from the bundle into the APK's assets/venus/i18n. */
+private val i18nAssets = rawResourcePatch {
+    execute {
+        val index = object {}.javaClass.getResourceAsStream("/venus/i18n/index.txt")?.bufferedReader()?.use { it.readText() }
+            ?: throw PatchException("Venus language list missing from bundle")
+        val folder = get("assets/venus/i18n", false)
+        folder.mkdirs()
+        for (code in index.lines().map { it.trim() }.filter { it.isNotEmpty() }) {
+            if (!Regex("^[A-Za-z-]{2,10}$").matches(code)) throw PatchException("Bad language code $code")
+            val bytes = object {}.javaClass.getResourceAsStream("/venus/i18n/$code.json")?.use { it.readBytes() }
+                ?: throw PatchException("Venus language $code missing from bundle")
+            java.io.File(folder, "$code.json").writeBytes(bytes)
+        }
+    }
+}
+
+internal const val LANGUAGES = "Lapp/venus/i18n/Languages;"
+/** Instructions [languageBridge] adds before Discord's own readAsset code, counting the nop its label lands on. */
+internal const val LANGUAGE_BRIDGE_SIZE = 11
+
+/**
+ * Venus settings languages: assets/venus/i18n/<code>.json, read through FileModule.readAsset with a private prefix
+ * (readAsset(uri, encoding, promise): p1 is the URI, p3 the Promise). Discord's own readAsset calls fall through.
+ * Its own method, like the voice and font bridges: each FileModule method gets at most one Venus guard.
+ */
+internal fun languageBridge(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;", "Ljava/lang/String;", PROMISE) || method.returnType != "V" ||
+        (method.implementation?.registerCount ?: 0) - 4 < 2)
+        throw PatchException("FileModule.readAsset ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        const-string v0, "venus-i18n-v1:"
+        invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+        move-result v0
+        if-eqz v0, :venus_original_asset
+        invoke-virtual {p0}, Lcom/facebook/react/bridge/ReactContextBaseJavaModule;->getReactApplicationContext()Lcom/facebook/react/bridge/ReactApplicationContext;
+        move-result-object v0
+        invoke-static {p1, p3, v0}, $LANGUAGES->dispatch(Ljava/lang/String;${PROMISE}Landroid/content/Context;)Z
+        move-result v1
+        if-eqz v1, :venus_original_asset
+        return-void
+        :venus_original_asset
+        nop
+    """)
+}
+
+/** Hidden helper of Venus settings: the language files and the bridge that reads them. */
+internal val settingsLanguages = bytecodePatch {
+    dependsOn(discordBundleGuard, i18nAssets)
+    extendWith("extensions/i18n.mpe")
+    execute {
+        languageBridge(Fingerprint(
+            definingClass = FILE_MODULE,
+            name = "readAsset",
+            returnType = "V",
+            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", PROMISE)
+        ).method)
+    }
+}
+
 @Suppress("unused")
 val venusSettings = bytecodePatch(
     name = "Venus settings",
-    description = "Adds Venus to Discord's settings, where you turn each feature on or off. Needed by every feature."
+    description = "Adds Venus to Discord's settings, where you turn each feature on or off, in your language. Needed by every feature."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
-    dependsOn(runtimeAssets, packagedDiscordBundle, passkeyErrorHint)
+    dependsOn(runtimeAssets, packagedDiscordBundle, passkeyErrorHint, settingsLanguages)
 }
+
+
 
 @Suppress("unused")
 val fileSizeOnPicker = rawResourcePatch(

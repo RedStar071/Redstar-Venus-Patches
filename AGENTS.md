@@ -55,6 +55,8 @@ Rules:
   Don't drop a visible change to make the notes shorter. Merge only near-identical changes.
 - A new feature means a minor version (1.6.0 → 1.7.0). Fixes and improvements only mean a patch version.
 - Only list changes users can see. Internal work (docs, scripts, these notes) isn't mentioned.
+- Compare with the **previous release**, not with earlier commits. A bug or slowdown in something new in this
+  release was never seen by users, so it isn't a fix: the feature is simply listed under ✨ New Features.
 
 ## The GitHub release
 
@@ -140,6 +142,6 @@ gestures").
 - The feature's name is **the same in Venus and in Morphe**: the Venus row title, the Morphe patch `name` in
   `DiscordPatches.kt` and the README features table. Morphe patches sit in the **Features** category. The
   Morphe description is the Venus description, plus any credit.
-- Update `README.md` (features table and "Good to know") and the tests in `tests/runtime.test.cjs` whenever a
+- Update `README.md` (features table) and the tests in `tests/runtime.test.cjs` whenever a
   title, group or option changes. The Features list test checks title and description length and that each icon
   is unique.

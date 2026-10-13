@@ -30,8 +30,10 @@
     if (features.validUser) selectModules([585, 1378]);
     if (features.youBarSettings) selectModules([16032]);
     if (features.splitMessages) selectModules([1086, 1378, 2051, 6880, 8602]);
-    if (features.translate) selectModules([585, 1378, 2115, 7378]);
-    const revision = "1.10.0";
+    if (features.translate) selectModules([585, 1378, 7378, 11023]);
+    // LocaleStore: Venus settings follow Discord's language unless you pick another one.
+    selectModules([2115]);
+    const revision = "1.11.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;
@@ -44,7 +46,7 @@
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
-        translate:false, translateTarget:"discord", translateNote:true, translateOriginal:false };
+        translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false, language:"auto" };
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
     const listeners = new Set();
     const dirty = new Set();
@@ -67,6 +69,96 @@
     const GESTURE_OWN_MODES = ["edit", "reply"];
     // Which language Translate messages translates into: Discord's own language, or the phone's.
     const TRANSLATE_TARGETS = ["discord", "phone"];
+    // When Translate messages translates: everything on screen, or only messages you pick from the hold menu.
+    const TRANSLATE_MODES = ["auto", "manual"];
+    // The language of Venus settings. English is built in; every other one is a file in the patched APK
+    // (assets/venus/i18n), read once when it's first needed, so none of them slows down Discord's start.
+    const UI_LANGUAGES = [["en","English","English"],["bg","\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438","Bulgarian"],["cs","\u010ce\u0161tina","Czech"],
+        ["da","Dansk","Danish"],["de","Deutsch","German"],["el","\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac","Greek"],["es","Espa\u00f1ol","Spanish"],
+        ["fi","Suomi","Finnish"],["fr","Fran\u00e7ais","French"],["hi","\u0939\u093f\u0928\u094d\u0926\u0940","Hindi"],["hr","Hrvatski","Croatian"],
+        ["hu","Magyar","Hungarian"],["id","Bahasa Indonesia","Indonesian"],["it","Italiano","Italian"],["ja","\u65e5\u672c\u8a9e","Japanese"],
+        ["ko","\ud55c\uad6d\uc5b4","Korean"],["lt","Lietuvi\u0173","Lithuanian"],["nl","Nederlands","Dutch"],["no","Norsk","Norwegian"],
+        ["pl","Polski","Polish"],["pt-BR","Portugu\u00eas do Brasil","Portuguese (Brazil)"],["ro","Rom\u00e2n\u0103","Romanian"],
+        ["ru","\u0420\u0443\u0441\u0441\u043a\u0438\u0439","Russian"],["sv","Svenska","Swedish"],["th","\u0e44\u0e17\u0e22","Thai"],
+        ["tr","T\u00fcrk\u00e7e","Turkish"],["uk","\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430","Ukrainian"],
+        ["vi","Ti\u1ebfng Vi\u1ec7t","Vietnamese"],["zh-CN","\u7b80\u4f53\u4e2d\u6587","Chinese (Simplified)"],["zh-TW","\u7e41\u9ad4\u4e2d\u6587","Chinese (Traditional)"]];
+    const UI_CODES = new Set(UI_LANGUAGES.map(entry => entry[0]));
+    const isLanguage = value => value === "auto" || UI_CODES.has(value);
+    const I18N_PREFIX = "venus-i18n-v1:";
+    const i18n = {packs:new Map(), loading:new Set(), version:0, shownIn:null};
+    // A language file that couldn't be read: English is shown instead.
+    const EMPTY_PACK = Object.freeze({});
+    let localeStore = null;
+    // Discord's language as one of Venus's: "pt-BR" and "pt-PT" both read Portuguese, "es-419" Spanish.
+    function languageFor(locale) {
+        if (typeof locale !== "string") return "en";
+        const parts = locale.replace("_", "-").split("-"), base = parts[0].toLowerCase(), region = (parts[1] || "").toUpperCase();
+        if (base === "zh") return /^(TW|HK|MO|HANT)$/.test(region) ? "zh-TW" : "zh-CN";
+        if (base === "pt") return "pt-BR";
+        if (base === "nb" || base === "nn") return "no";
+        return UI_CODES.has(base) ? base : "en";
+    }
+    function uiLanguage() {
+        if (settings.language !== "auto") return UI_CODES.has(settings.language) ? settings.language : "en";
+        let locale = null;
+        try { locale = localeStore && localeStore.locale; } catch (_) {}
+        return languageFor(locale);
+    }
+    // Every Venus text goes through here: the chosen language's wording, or the English one until it has loaded
+    // (or when it has no wording for it). {name} parts are filled in afterwards, so numbers are never translated.
+    function tr(text, vars) {
+        let out = text;
+        const code = uiLanguage();
+        if (code !== "en") {
+            const pack = i18n.packs.get(code);
+            if (pack) { const found = pack[text]; if (typeof found === "string" && found) out = found; }
+            else loadLanguage(code);
+        }
+        return vars ? out.replace(/\{(\w+)\}/g, (match, name) => vars[name] != null ? String(vars[name]) : match) : out;
+    }
+    // Which plural form a whole number takes in each Venus language (CLDR's rules). Discord's Hermes has no
+    // Intl.PluralRules, so these are built in: Russian needs "21 перевод" and "22 перевода", French "0 traduction".
+    function pluralKind(code, n) {
+        n = Math.abs(Math.floor(n));
+        const d = n % 10, h = n % 100, teen = h >= 11 && h <= 19, few = d >= 2 && d <= 4 && !(h >= 12 && h <= 14);
+        switch (code) {
+            case "ja": case "ko": case "zh-CN": case "zh-TW": case "th": case "vi": case "id": return "other";
+            case "fr": case "pt-BR": case "hi": return n <= 1 ? "one" : "other";
+            case "ru": case "uk": return d === 1 && h !== 11 ? "one" : few ? "few" : "many";
+            case "hr": return d === 1 && h !== 11 ? "one" : few ? "few" : "other";
+            case "pl": return n === 1 ? "one" : few ? "few" : "many";
+            case "cs": return n === 1 ? "one" : n >= 2 && n <= 4 ? "few" : "other";
+            case "lt": return d === 1 && !teen ? "one" : d >= 2 && !teen ? "few" : "other";
+            case "ro": return n === 1 ? "one" : n === 0 || h >= 1 && h <= 19 ? "few" : "other";
+            default: return n === 1 ? "one" : "other";
+        }
+    }
+    // "1 translation" / "3 translations". A language file can give every plural form its language has,
+    // as {"one":..., "few":..., "many":..., "other":...}.
+    function pl(n, one, other) {
+        const code = uiLanguage(), pack = code !== "en" && i18n.packs.get(code), forms = pack && pack[other];
+        const kind = pack ? pluralKind(code, n) : n === 1 ? "one" : "other";
+        let text;
+        if (forms && typeof forms === "object") text = typeof forms[kind] === "string" ? forms[kind] : typeof forms.other === "string" ? forms.other : tr(kind === "one" ? one : other);
+        else text = tr(kind === "one" ? one : other);
+        return text.replace(/\{n\}/g, String(n));
+    }
+    function loadLanguage(code) {
+        if (code === "en" || i18n.packs.has(code) || i18n.loading.has(code) || !files || typeof files.readAsset !== "function") return;
+        i18n.loading.add(code);
+        Promise.resolve().then(() => files.readAsset(I18N_PREFIX + code, "utf8")).then(text => {
+            const pack = JSON.parse(text), strings = pack && pack.strings;
+            if (!strings || typeof strings !== "object" || Array.isArray(strings)) throw new Error("Invalid language file");
+            i18n.packs.set(code, strings);
+        }).catch(() => { i18n.packs.set(code, EMPTY_PACK); }).then(() => { i18n.loading.delete(code); languageChanged(); });
+    }
+    function languageChanged() {
+        i18n.version++; i18n.shownIn = uiLanguage();
+        notify("*");
+        // Only the "Translated from ..." line under a translation is in Venus's language: redraw just those rows,
+        // not every message on screen, and nothing while the feature is off or that line isn't shown.
+        if (features.translate && enabled("translate") && (settings.translateNote || settings.translateOriginal)) translateRelabel();
+    }
     // A sub-option (piProfile, reviewWarning, pastelAll...) must also wake components that
     // subscribed to its plugin: those pages and badges read several of its settings at once.
     const notify = key => {
@@ -120,6 +212,12 @@
     // Typing 0 in the maximum box used to jump it to 512; anything below 1 now means the lowest, 1.
     function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(MAX_DELETED, n)) : 512; }
     function setSetting(key, value) {
+        // The settings language isn't a feature: it's always there.
+        if (key === "language") {
+            if (!isLanguage(value)) return false;
+            if (settings.language === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.language = value; dirty.add(key); save(); loadLanguage(uiLanguage()); languageChanged(); return true;
+        }
         if (!owns(settings, key) || !features[featureFor(key)]) return false;
         if (key === "readAllMode") {
             if (!READ_ALL_MODES.includes(value)) return false;
@@ -131,10 +229,10 @@
             if (settings.gestureOwn === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.gestureOwn = value; dirty.add(key); save(); notify(key); return true;
         }
-        if (key === "translateTarget") {
-            if (!TRANSLATE_TARGETS.includes(value)) return false;
-            if (settings.translateTarget === value && status.storage !== "loading" && status.storage !== "waiting") return true;
-            settings.translateTarget = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
+        if (key === "translateTarget" || key === "translateMode") {
+            if (!(key === "translateMode" ? TRANSLATE_MODES : TRANSLATE_TARGETS).includes(value)) return false;
+            if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings[key] = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
         }
         if (key === "noDeleteLimit") {
             const limit = deleteLimit(value);
@@ -192,7 +290,8 @@
                 for (const key of Object.keys(settings))
                     if (!dirty.has(key) && typeof loaded[key] === typeof settings[key] && (key !== "readAllMode" || READ_ALL_MODES.includes(loaded[key])) &&
                         (key !== "gestureOwn" || GESTURE_OWN_MODES.includes(loaded[key])) &&
-                        (key !== "translateTarget" || TRANSLATE_TARGETS.includes(loaded[key])))
+                        (key !== "translateTarget" || TRANSLATE_TARGETS.includes(loaded[key])) &&
+                        (key !== "translateMode" || TRANSLATE_MODES.includes(loaded[key])) && (key !== "language" || isLanguage(loaded[key])))
                         settings[key] = key === "noDeleteLimit" ? deleteLimit(loaded[key]) : loaded[key];
                 const auth = loaded.reviewAuth;
                 // Restore a saved ReviewDB sign-in (a ReviewDB token, never the Discord token).
@@ -209,6 +308,7 @@
             if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
+            i18n.shownIn = uiLanguage(); loadLanguage(i18n.shownIn);
             notify("*");
         }).catch(() => {
             // The native side reads the same file at launch and falls back to Discord's font and emojis when it
@@ -407,8 +507,8 @@
             // Unsupported codecs/devices remain ordinary orig attachments, never spoofed voice files.
             status.audioError = String(error && error.message || error);
             notify();
-            if (!job.cancelled && RN && RN.Alert) RN.Alert.alert("Couldn't make a voice message",
-                status.audioError + "\n\nIt will be sent as a normal file instead.");
+            if (!job.cancelled && RN && RN.Alert) RN.Alert.alert(tr("Couldn't make a voice message"),
+                status.audioError + "\n\n" + tr("It will be sent as a normal file instead."));
             return orig.apply(upload, args);
         }).finally(() => { activeJobs.delete(upload); });
         job.promise = promise;
@@ -486,18 +586,26 @@
     // Native setting nodes use Discord's own themed rows, navigation and back stack.
     let SettingsList;
     const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : key;
-    function section(label, keys) { return { label, settings: keys }; }
+    // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
+    function section(label, keys) {
+        const entry = { settings: keys };
+        Object.defineProperty(entry, "label", { enumerable: true, configurable: true, get: () => label === "Venus" ? label : tr(label) });
+        return entry;
+    }
+    // Rows Discord draws from a hook (useTitle, useDescription) redraw when the language changes. Called outside
+    // a render (search, tests) the hook throws before registering anything, so it's simply skipped there.
+    function useLanguage() { try { if (React) useSettings("language"); } catch (_) {} }
     // Plain-language status for General -> About; the raw values stay in status for diagnostics.
     function aboutText() {
         const storage = status.storage;
-        const lines = [storage === "ready" || storage === "saved" ? "Your settings are saved on this phone." :
+        const lines = [tr(storage === "ready" || storage === "saved" ? "Your settings are saved on this phone." :
             storage === "waiting" || storage === "loading" ? "Loading your settings..." :
             /^read failed/.test(storage) ? "Your saved settings couldn't be read, so the defaults are in use." :
-            "Your settings can't be saved right now. Changes last until Discord restarts."];
+            "Your settings can't be saved right now. Changes last until Discord restarts.")];
         const archive = {"saved locally":"Kept deleted messages are saved on this phone.", "save failed":"Kept deleted messages couldn't be saved.",
             "restore failed":"Saved deleted messages couldn't be loaded."}[status.archive];
-        if (archive) lines.push(archive);
-        if (status.audioError) lines.push("Last problem: " + status.audioError);
+        if (archive) lines.push(tr(archive));
+        if (status.audioError) lines.push(tr("Last problem: {problem}", {problem:status.audioError}));
         return lines.join("\n");
     }
     // Discord's own icon for each feature row, from its design system. Resolved when a row first draws, never
@@ -530,7 +638,7 @@
     function featureSummary() {
         const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
         const on = keys.filter(key => settings[key]).length;
-        return keys.length ? on + " of " + keys.length + " features on. Turn them on or off in Features." : "No features were patched in.";
+        return keys.length ? tr("{on} of {total} features on. Turn them on or off in Features.", {on, total:keys.length}) : tr("No features were patched in.");
     }
     function settingsPage(sections) {
         const node = { type: "list", sections };
@@ -539,11 +647,11 @@
         };
     }
     function settingNode(key, title, description, parent) {
-        const node = { type: "toggle", parent, useTitle: () => title,
+        const node = { type: "toggle", parent, useTitle: () => { useLanguage(); return tr(title); },
             useValue: function () { useSettings(key); return settings[key]; },
             onValueChange: value => setSetting(key, value) };
         // No description, no empty second line under the title.
-        if (description) node.useDescription = () => description;
+        if (description) node.useDescription = () => tr(description);
         return node;
     }
     // Force system font applies from the next start: React Native measures text once but re-reads the
@@ -554,17 +662,17 @@
         const font = kind === "font";
         if (!features[font ? "systemFont" : "systemEmoji"] || !RN || !RN.Alert) return;
         const on = settings[font ? "systemFont" : "systemEmoji"];
-        RN.Alert.alert(font ? (on ? "Use your phone's font" : "Use Discord's font") : (on ? "Use your phone's emojis" : "Use Discord's emojis"),
-            "Discord needs to reopen to change the " + (font ? "font" : "emojis") + " everywhere.", [
-            {text:"Later", style:"cancel"},
-            {text:"Reopen now", onPress:() => {
+        RN.Alert.alert(tr(font ? (on ? "Use your phone's font" : "Use Discord's font") : (on ? "Use your phone's emojis" : "Use Discord's emojis")),
+            tr(font ? "Discord needs to reopen to change the font everywhere." : "Discord needs to reopen to change the emojis everywhere."), [
+            {text:tr("Later"), style:"cancel"},
+            {text:tr("Reopen now"), onPress:() => {
                 // Write the setting first, so the reopened Discord starts with it. If it can't be saved, Discord used to
                 // reopen anyway with the old setting; now it stays open and says so.
                 if (!files) return;
                 Promise.resolve().then(() => files.writeFile("documents", PREFS, settingsSnapshot(), "utf8")).then(
                     () => Promise.resolve(font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart")).catch(() => {}),
                     () => { status.storage = "save failed (session only)"; notify();
-                        try { RN.Alert.alert("Couldn't save the setting", "Discord didn't reopen, so nothing changed. Try again in a moment."); } catch (_) {} });
+                        try { RN.Alert.alert(tr("Couldn't save the setting"), tr("Discord didn't reopen, so nothing changed. Try again in a moment.")); } catch (_) {} });
             }}]);
     }
     // A main-list row with its own switch and a separate button that opens more options.
@@ -596,7 +704,7 @@
         return el(RN.View, {style:{flexDirection:"row", alignItems:"center"}},
             FormSwitch ? el(FormSwitch, {value:on, accessibilityLabel:props.label, onValueChange:value => setSetting(props.setting, value)}) : null,
             el(RN.View, {style:styles.divider}),
-            el(Press, {style:styles.button, onPress:props.open, accessibilityRole:"button", accessibilityLabel:"More options",
+            el(Press, {style:styles.button, onPress:props.open, accessibilityRole:"button", accessibilityLabel:tr("More options"),
                 hitSlop:{top:6, bottom:6, left:6, right:6}},
                 Chevron ? el(Chevron, {size:"sm"}) : el(RN.Text, {style:{fontSize:18, color:"#b5bac1"}}, "\u203A")));
     }
@@ -606,19 +714,19 @@
         const icon = registry.ACCOUNT.IconComponent;
         function route(key, title, sections, parent, IconComponent) {
             const page = settingsPage(sections);
-            next[key] = { type: "route", parent, useTitle: () => title, IconComponent: IconComponent || icon,
+            next[key] = { type: "route", parent, useTitle: () => { useLanguage(); return tr(title); }, IconComponent: IconComponent || icon,
                 screen: { route: key, getComponent: () => page } };
         }
         // About: the version and how many features are on, whether settings are saved, and where to get help.
         next.VENUS_VERSION = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(16292, "SparklesIcon", icon),
             useTitle: () => "Venus Patches " + revision, useDescription: function () { useSettings(); return featureSummary(); } };
         next.VENUS_STATUS = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(4788, "CircleInformationIcon", icon),
-            useTitle: () => "Status", useDescription: function () { useSettings(); return aboutText(); } };
+            useTitle: () => { useLanguage(); return tr("Status"); }, useDescription: function () { useSettings(); return aboutText(); } };
         const links = [];
         function link(id, title, hint, url, iconId, iconName) {
             links.push(id);
-            next[id] = { type: "pressable", parent: "VENUS_GENERAL", unsearchable: true, withArrow: true, useTitle: () => title,
-                useDescription: () => hint, onPress: () => openLink(url), IconComponent: venusIcon(iconId, iconName, icon) };
+            next[id] = { type: "pressable", parent: "VENUS_GENERAL", unsearchable: true, withArrow: true, useTitle: () => { useLanguage(); return tr(title); },
+                useDescription: () => tr(hint), onPress: () => openLink(url), IconComponent: venusIcon(iconId, iconName, icon) };
         }
         link("VENUS_LINK_CHANGES", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16292, "SparklesIcon");
         link("VENUS_LINK_ISSUES", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15329, "BugIcon");
@@ -652,15 +760,15 @@
                 catch (_) { try { navigation.navigate(screen.route); } catch (__) {} }
             };
             groups[group].push(rowId);
-            next[rowId] = { type: "pressable", parent: P, unsearchable: true, useTitle: () => title, onPress: open, IconComponent: iconFor(key),
+            next[rowId] = { type: "pressable", parent: P, unsearchable: true, useTitle: () => { useLanguage(); return tr(title); }, onPress: open, IconComponent: iconFor(key),
                 useTrailing: function () {
                     // Called as a hook by Discord's row, so it can read the settings stack it's in.
                     // Resolved once, so the row always calls the same number of hooks.
                     if (stackNavigation === undefined) stackNavigation = inspectedExport(1491, "useStackNavigation") || null;
                     navigators.set(rowId, stackNavigation ? stackNavigation() : null);
-                    return el(SubpageTrailing, {setting:key, label:title, open});
+                    return el(SubpageTrailing, {setting:key, label:tr(title), open});
                 } };
-            if (hint) next[rowId].useDescription = () => hint;
+            if (hint) next[rowId].useDescription = () => tr(hint);
         }
         // Option IDs are the ones earlier releases used, so nothing that points at them moves.
         const OPTION_IDS = {emojis:"VENUS_EMOJIS", stickers:"VENUS_STICKERS", hyperlinks:"VENUS_HYPERLINKS", pastelAll:"VENUS_PASTELALL", pastelContent:"VENUS_PASTELCONTENT", piDmHeader:"VENUS_PI_DM", piUserList:"VENUS_PI_LIST", piProfile:"VENUS_PI_PROFILE", piHideMobile:"VENUS_PI_MOBILE"};
@@ -714,8 +822,28 @@
         const sections = [section("Messages", groups.messages), section("Sending", groups.sending), section("People", groups.people),
             section("Servers", groups.servers), section("Appearance", groups.appearance), section("Quests", groups.quests)].filter(entry => entry.settings.length);
         route(P, "Features", sections, undefined, venusIcon(14478, "PuzzlePieceIcon", icon));
+        // Language: the language Venus settings are shown in, Discord's own by default.
+        route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(14958, "LanguageIcon", icon));
+        next.VENUS_LANGUAGE.screen.getComponent = () => LanguageSettings;
+        next.VENUS_LANGUAGE.useDescription = function () { useLanguage(); return languageLabel(settings.language); };
         status.menu = true;
         return next;
+    }
+    function languageLabel(code) {
+        if (code === "auto") { const shown = UI_LANGUAGES.find(entry => entry[0] === uiLanguage()); return tr("Same as Discord ({language})", {language:shown ? shown[1] : "English"}); }
+        const found = UI_LANGUAGES.find(entry => entry[0] === code);
+        return found ? found[1] : code;
+    }
+    // Each language is listed in its own words, with its English name under it, so you can find yours in any language.
+    function LanguageSettings() {
+        useSettings("language");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const choices = [["auto", tr("Same as Discord"), tr("Follows Discord's Language setting.")]].concat(UI_LANGUAGES.map(([code, name, english]) => [code, name, english]));
+        const groups = [
+            radioGroup(ui, "language", "Show Venus settings in", "language", true, choices, true),
+            footnote("note", i18n.loading.has(uiLanguage()) ? "Loading the language..." : "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.")];
+        return settingsBody(ui, groups);
     }
     function settingsSections(orig, self, args) {
         const config = args[0];
@@ -723,7 +851,7 @@
         const index = config.sections.findIndex(s => s && Array.isArray(s.settings) && s.settings.includes("ACCOUNT"));
         if (index < 0 || config.sections.some(s => s && s.label === "Venus")) return orig.apply(self, args);
         const sections = config.sections.slice();
-        sections.splice(index + 1, 0, section("Venus", ["VENUS_PLUGINS", "VENUS_GENERAL"]));
+        sections.splice(index + 1, 0, section("Venus", ["VENUS_PLUGINS", "VENUS_LANGUAGE", "VENUS_GENERAL"]));
         const next = Array.from(args); next[0] = Object.assign({}, config, { sections });
         return orig.apply(self, next);
     }
@@ -932,6 +1060,7 @@
     let archiveTimer;
     const hiddenViews = new Map(), hiddenNames = new Map(), hiddenScans = new Map();
     let hiddenAccount;
+    const HIDDEN_CHANNEL = "Hidden channel (name unavailable)", HIDDEN_CATEGORY = "Hidden category (name unavailable)";
     function receivedName(channel) {
         if (!channel || typeof channel.name !== "string") return null;
         const trimmed = channel.name.trim();
@@ -940,7 +1069,7 @@
         // Strip surrounding underscores and compare case-insensitively so redacted stubs never pollute the cache.
         if (trimmed.replace(/^_+|_+$/g, "").toLowerCase() === "hidden") return null;
         // Never cache our own unavailable facades as if they were real names.
-        if (trimmed === "Hidden channel (name unavailable)" || trimmed === "Hidden category (name unavailable)") return null;
+        if (trimmed === HIDDEN_CHANNEL || trimmed === HIDDEN_CATEGORY || trimmed === tr(HIDDEN_CHANNEL) || trimmed === tr(HIDDEN_CATEGORY)) return null;
         return channel.name;
     }
     // guildId: for gateway channel lists, whose entries don't carry their server. It used to copy every channel
@@ -971,7 +1100,7 @@
             (full && full.guild_id === channel.guild_id && receivedName(full));
         if (name) {rememberChannelName(channel,hiddenAccount,name);return name;}
         const cached = hiddenNames.get(channel.id);
-        return cached && cached.guild === channel.guild_id ? cached.name : channel.type === 4 ? "Hidden category (name unavailable)" : "Hidden channel (name unavailable)";
+        return cached && cached.guild === channel.guild_id ? cached.name : tr(channel.type === 4 ? HIDDEN_CATEGORY : HIDDEN_CHANNEL);
     }
     const CHANNEL_EVENTS = new Set(["CHANNEL_CREATE","CHANNEL_UPDATE"]), GUILD_EVENTS = new Set(["GUILD_CREATE","GUILD_UPDATE"]);
     const READY_EVENTS = new Set(["CONNECTION_OPEN","CONNECTION_OPEN_SUPPLEMENTAL"]), BATCH_EVENTS = new Set(["CHANNEL_UPDATES","THREAD_LIST_SYNC"]);
@@ -1400,7 +1529,7 @@
         const onPress = () => msgActions.jumpToMessage({channelId, messageId:channelId, flash:true, jumpType:"ANIMATED"});
         const child = result && result.props && result.props.children;
         if (child && child.props && typeof child.props.onPress === "function") {
-            const top = React.cloneElement(child, {key:"venus-jump-top", onPress, accessibilityLabel:"Jump to top"});
+            const top = React.cloneElement(child, {key:"venus-jump-top", onPress, accessibilityLabel:tr("Jump to top")});
             return React.cloneElement(result, {children:el(RN.View, {style:{gap:8}},
                 el(RN.View, {style:{transform:[{scaleY:-1}]}}, top), child)});
         }
@@ -1409,7 +1538,7 @@
         const bottom = Math.max(0,Number.isFinite(inputHeight) ? inputHeight : 64) + Math.max(0,Number(suggestionHeight) || 0) + 12;
         return el(RN.View, {pointerEvents:"box-none", style:{position:"absolute",bottom,right:16}},
             el(RN.View,{style:{transform:[{scaleY:-1}]}},
-                el(jumpPill,{icon:jumpIcon,onPress,accessibilityLabel:"Jump to top"})));
+                el(jumpPill,{icon:jumpIcon,onPress,accessibilityLabel:tr("Jump to top")})));
     }
     function hiddenCan(orig, self, args) {
         // One real permission check per call. The old path ran it twice for every visible
@@ -1576,6 +1705,14 @@
         showHidden(channel, () => { hiddenConfirmed.add(channelId); return orig.apply(self, args); });
         return Promise.resolve();
     }
+    // "A, B and C" in Venus's language. Japanese and Chinese join with "、" and no spaces (「8 日、7 時間と7 分」),
+    // Thai with plain spaces, as it has no commas.
+    function joinAnd(parts) {
+        if (parts.length < 2) return parts[0] || "";
+        const code = uiLanguage(), tight = code === "ja" || code === "zh-CN" || code === "zh-TW";
+        const head = parts.slice(0, -1).join(tight ? "、" : code === "th" ? " " : ", "), last = parts[parts.length - 1];
+        return tight ? head + tr("and") + last : head + " " + tr("and") + " " + last;
+    }
     function preciseAgo(ms) {
         // Precise relative durations:
         // "8 days, 7 hours and 7 minutes ago". Three largest nonzero units.
@@ -1586,18 +1723,17 @@
         const parts = [];
         function take(unit, singular, plural) {
             const value = Math.floor(diff / unit);
-            if (value > 0) { parts.push(value + " " + (value === 1 ? singular : plural)); diff -= value * unit; }
+            if (value > 0) { parts.push(pl(value, singular, plural)); diff -= value * unit; }
         }
         if (diff < 45 * 1000) {
             const secs = Math.floor(diff / 1000);
-            return secs <= 5 ? "just now" : secs + " seconds ago";
+            return secs <= 5 ? tr("just now") : pl(secs, "{n} second ago", "{n} seconds ago");
         }
-        take(year, "year", "years"); take(month, "month", "months"); take(day, "day", "days");
-        take(hour, "hour", "hours"); take(minute, "minute", "minutes");
+        take(year, "{n} year", "{n} years"); take(month, "{n} month", "{n} months"); take(day, "{n} day", "{n} days");
+        take(hour, "{n} hour", "{n} hours"); take(minute, "{n} minute", "{n} minutes");
         const shown = parts.slice(0, 3);
-        if (!shown.length) return "just now";
-        if (shown.length === 1) return shown[0] + " ago";
-        return shown.slice(0, -1).join(", ") + " and " + shown[shown.length - 1] + " ago";
+        if (!shown.length) return tr("just now");
+        return tr("{time} ago", {time: joinAnd(shown)});
     }
     function snowflakeMs(id) {
         if (typeof id !== "string" || !/^\d{17,20}$/.test(id)) return NaN;
@@ -1623,9 +1759,9 @@
         const pin = channel.lastPinTimestamp || channel.last_pin_timestamp;
         const last = channel.lastMessageId || channel.last_message_id;
         return [
-            ["Created", hiddenStamp(channel.id, "Unavailable")],
-            ["Last message", last ? hiddenStamp(last, "No messages yet") : {relative:"No messages yet", absolute:null}],
-            ["Last pin", pin ? hiddenStamp(pin, "No pins yet") : {relative:"No pins yet", absolute:null}]
+            [tr("Created"), hiddenStamp(channel.id, tr("Unavailable"))],
+            [tr("Last message"), last ? hiddenStamp(last, tr("No messages yet")) : {relative:tr("No messages yet"), absolute:null}],
+            [tr("Last pin"), pin ? hiddenStamp(pin, tr("No pins yet")) : {relative:tr("No pins yet"), absolute:null}]
         ];
     }
     function HiddenDetails(props) {
@@ -1652,8 +1788,8 @@
         const settle = () => { if (hiddenPrompts.get(channel.id) === prompt) hiddenPrompts.delete(channel.id); };
         const confirm = () => { settle(); if (typeof onViewAnyway === "function") onViewAnyway(); };
         const rows = hiddenDetails(channel);
-        const title = channel.type === 2 || channel.type === 13 ? "Locked voice channel" : "Locked channel";
-        const body = "You don't have permission to view this channel. These details come from what Discord already sent your client.";
+        const title = tr(channel.type === 2 || channel.type === 13 ? "Locked voice channel" : "Locked channel");
+        const body = tr("You don't have permission to view this channel. These details come from what Discord already sent your client.");
         // Discord's native alert (the "Delete Message" dialog): blurred backdrop,
         // themed card, Discord buttons. String title/body/confirmText + children
         // selects the modern AlertModal path in AlertActionCreators.show (module 5205).
@@ -1663,7 +1799,7 @@
         if (React && alerts && typeof alerts.show === "function" && Text) {
             try {
                 alerts.show({title, body, children:el(HiddenDetails, {rows, Text}),
-                    confirmText:"View Anyway", cancelText:"Cancel", onConfirm:confirm, onCancel:settle});
+                    confirmText:tr("View Anyway"), cancelText:tr("Cancel"), onConfirm:confirm, onCancel:settle});
                 return;
             } catch (_) { /* fall through to the platform alert */ }
         }
@@ -1671,8 +1807,8 @@
         const message = rows.map(([label, stamp]) => label + ": " + stamp.relative + (stamp.absolute ? " (" + stamp.absolute + ")" : "")).join("\n");
         try {
             RN.Alert.alert(title, message, [
-                {text:"Cancel", style:"cancel", onPress:settle},
-                {text:"View Anyway", onPress:confirm}
+                {text:tr("Cancel"), style:"cancel", onPress:settle},
+                {text:tr("View Anyway"), onPress:confirm}
             ], {cancelable:true, onDismiss:settle});
         } catch (_) { settle(); }
     }
@@ -1720,7 +1856,7 @@
             const template = props.children.find(child => child && child.props && typeof child.props.label === "string" && typeof child.props.onPress === "function");
             if (!template || props.children.some(child => child && child.key === "venus-jump-top")) return props;
             added = true;
-            const row = React.cloneElement(template, {key:"venus-jump-top",label:"Jump to top",icon:undefined,
+            const row = React.cloneElement(template, {key:"venus-jump-top",label:tr("Jump to top"),icon:undefined,
                 onPress:function () {
                     if (typeof onClose === "function") onClose();
                     msgActions.jumpToMessage({channelId:channel.id,messageId:channel.id,flash:true,jumpType:"ANIMATED"});
@@ -1862,7 +1998,7 @@
         const api=readAllExports(), ui=reviewUI();
         let guilds=0, dms=0;
         // Unread servers or DMs with no way to clear them used to say "Nothing unread".
-        const unavailable=() => { throw new Error("Discord's read states haven't loaded yet. Try again in a moment."); };
+        const unavailable=() => { throw new Error(tr("Discord's read states haven't loaded yet. Try again in a moment.")); };
         try {
             if (mode!=="dms") {
                 const ids=unreadGuildIds(api);
@@ -1883,21 +2019,21 @@
             }
         } catch (error) {
             // What was already cleared stays cleared; say so instead of only the error.
-            const done=guilds ? " ("+guilds+(guilds===1 ? " server was" : " servers were")+" marked as read)" : "";
-            reviewToast(ui,"Couldn't mark as read: "+String(error && error.message || error)+done); return;
+            const done=guilds ? " ("+pl(guilds,"{n} server was marked as read","{n} servers were marked as read")+")" : "";
+            reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(error && error.message || error)})+done); return;
         }
         const parts=[];
-        if (guilds) parts.push(guilds+(guilds===1 ? " server" : " servers"));
-        if (dms) parts.push(dms+(dms===1 ? " DM" : " DMs"));
-        reviewToast(ui, parts.length ? "Marked "+parts.join(" and ")+" as read" : "Nothing unread");
+        if (guilds) parts.push(pl(guilds,"{n} server","{n} servers"));
+        if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
+        reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread");
     }
     // Holding the button: Discord's own action sheet with the three one-time choices.
     function readAllChooser() {
         const ui=reviewUI();
-        const options=[["guilds","Mark servers as read"],["dms","Mark DMs as read"],["both","Mark servers and DMs as read"]]
+        const options=[["guilds",tr("Mark servers as read")],["dms",tr("Mark DMs as read")],["both",tr("Mark servers and DMs as read")]]
             .map(([mode,label]) => ({label, onPress:() => readAll(mode)}));
-        if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:"VenusReadAll",header:{title:"Read all"},options}); return; } catch (_) {}
-        if (RN && RN.Alert) RN.Alert.alert("Read all",undefined,options.map(option => ({text:option.label,onPress:option.onPress})).concat([{text:"Cancel",style:"cancel"}]));
+        if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:"VenusReadAll",header:{title:tr("Read all")},options}); return; } catch (_) {}
+        if (RN && RN.Alert) RN.Alert.alert(tr("Read all"),undefined,options.map(option => ({text:option.label,onPress:option.onPress})).concat([{text:tr("Cancel"),style:"cancel"}]));
     }
     let readAllStyleHook, readAllStylesTried=false;
     function ReadAllButton() {
@@ -1915,11 +2051,11 @@
         if (readAllStyleHook) try { styles=readAllStyleHook(); } catch (_) {}
         styles=styles || {pill:{backgroundColor:"#4e505899"},pressed:{backgroundColor:"#4e5058"},text:{color:"#dbdee1"}};
         return el(RN.View,{style:{height:READ_ALL_HEIGHT,alignItems:"center",justifyContent:"center"}},
-            el(RN.Pressable,{accessibilityRole:"button",accessibilityHint:"Hold to choose",
+            el(RN.Pressable,{accessibilityRole:"button",accessibilityHint:tr("Hold to choose"),
                 hitSlop:6,onPress:() => readAll(settings.readAllMode),onLongPress:readAllChooser,delayLongPress:350,
                 style:({pressed}) => [{height:26,minWidth:48,paddingHorizontal:8,borderRadius:13,alignItems:"center",justifyContent:"center"},styles.pill,
                     pressed ? styles.pressed : null,pressed ? {transform:[{scale:0.96}]} : null]},
-                el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[{fontSize:11,fontWeight:"700",includeFontPadding:false},styles.text]},"Read all")));
+                el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[{fontSize:11,fontWeight:"700",includeFontPadding:false},styles.text]},tr("Read all"))));
     }
     function readAllBarProps(orig, self, args) {
         const result=orig.apply(self,args);
@@ -2049,7 +2185,7 @@
         const groups = [
             radioGroup(ui, "own", "Double-tap your own message", "gestureOwn", on, [["edit", "Edit it", "Opens it for editing, when Discord lets you."],
                 ["reply", "Reply to it", "Same as someone else's message."]]),
-            el(ui.TableRowGroup || RN.View, {key:"triple", title:"Triple-tap"},
+            el(ui.TableRowGroup || RN.View, {key:"triple", title:tr("Triple-tap")},
                 switchRow(ui.TableSwitchRow, "gestureTripleDelete", "Triple-tap to delete", "Tap your own message three times to delete it, with no confirmation. Never affects other people's messages.")),
             footnote("note", "Double-tapping no longer adds a reaction. Hold a message to react instead.")];
         return settingsBody(ui, groups);
@@ -2100,8 +2236,10 @@
         if (quest.scanTimer !== undefined || typeof global.setTimeout !== "function") return;
         quest.scanTimer = global.setTimeout(questsScan, ms);
     }
-    function questStatus(text, error) {
-        if (error) quest.error = text; else { quest.last = text; quest.error = ""; }
+    // Kept as the English text and its parts, and put in the settings language when shown.
+    function questStatus(text, error, vars) {
+        const status = {text, vars};
+        if (error) quest.error = status; else { quest.last = status; quest.error = ""; }
         notify("quests");
     }
     // Discord's HTTP client (its auth and headers), with this request's own interceptResponse. Discord asks
@@ -2314,12 +2452,12 @@
             quest.completed++;
             // The store's own update follows; don't pick the same quest again in the meantime.
             quest.skip.set(entry.id, Date.now() + 10 * 60 * 1000);
-            questStatus("Completed " + entry.name + ".", false);
+            questStatus("Completed {name}.", false, {name:entry.name});
         }, error => {
             if (entry.generation !== quest.generation) return;
             const wait = questRetryAfter(error);
             quest.skip.set(entry.id, Date.now() + Math.max(wait, QUEST_RETRY_MS));
-            questStatus("Couldn't finish " + entry.name + ": " + String(error && error.message || error), true);
+            questStatus("Couldn't finish {name}: {problem}", true, {name:entry.name, problem:String(error && error.message || error)});
         }).then(() => {
             if (quest.running === entry) { quest.running = null; notify("quests"); }
             if (entry.generation === quest.generation) questsSchedule(2000 + Math.floor(Math.random() * 2000));
@@ -2486,14 +2624,13 @@
     }
     function questStatusText() {
         if (!enabled("quests")) return "Turned off. Switch it on in Features to start.";
-        const lines = [quest.completed ? "Completed " + quest.completed + (quest.completed === 1 ? " Quest" : " Quests") + " since Discord opened." : "Waiting for new Quests."];
-        if (quest.running) lines.push("Now: " + quest.running.name + ".");
-        if (quest.last) lines.push("Last: " + quest.last);
-        if (quest.error) lines.push(quest.error);
+        const lines = [quest.completed ? pl(quest.completed, "Completed {n} Quest since Discord opened.", "Completed {n} Quests since Discord opened.") : tr("Waiting for new Quests.")];
+        if (quest.running) lines.push(tr("Now: {name}.", {name:quest.running.name}));
+        if (quest.last) lines.push(tr("Last: {name}", {name:tr(quest.last.text, quest.last.vars)}));
+        if (quest.error) lines.push(tr(quest.error.text, quest.error.vars));
         return lines.join("\n");
     }
     // Settings page: the Quest types, a status card and what to know.
-    const QUEST_NOTE = "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.";
     function QuestSettings() {
         // Every status change (start, finish, error) already notifies "quests"; no 5-second redraw timer.
         useSettings("quests");
@@ -2503,13 +2640,13 @@
         const toggle = (key, label, subLabel) => switchRow(Switch, key, label, subLabel);
         const groups = [
             statusCard("status", questStatusText()),
-            el(Group, {key:"types", title:"Quests to complete"},
+            el(Group, {key:"types", title:tr("Quests to complete")},
                 toggle("questsVideo", "Video Quests", "Reported as watched at normal speed, without playing the video."),
                 toggle("questsPlay", "Play Quests", "Play time counts without installing or opening the game."),
                 toggle("questsActivity", "Activity Quests", "Activity time counts without starting the Activity.")),
-            el(Group, {key:"enroll", title:"New Quests"},
+            el(Group, {key:"enroll", title:tr("New Quests")},
                 toggle("questsEnroll", "Accept new Quests", "Accepts Quests you haven't started, one at a time. Off: only Quests you accept yourself.")),
-            footnote("note", QUEST_NOTE)];
+            footnote("note", "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.")];
         return settingsBody(ui, groups);
     }
     // Shared by the Read All, ReviewDB and NoDelete pages: Discord's spacing, scrolling and switch rows.
@@ -2521,10 +2658,11 @@
     // Greyed out while the main switch is off, like the options on the Settings list.
     function switchRow(Switch,key,label,subLabel) {
         const owner=featureFor(key);
-        return Switch ? el(Switch,{key,label,subLabel,value:settings[key],disabled:owner!==key && !settings[owner],onValueChange:value=>setSetting(key,value)}) : null;
+        return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),value:settings[key],disabled:owner!==key && !settings[owner],onValueChange:value=>setSetting(key,value)}) : null;
     }
     // One choice from a few: Discord's radio list (TableRadioGroup 5995 / TableRadioRow 5994), or check-marked rows.
-    function radioGroup(ui,key,title,setting,on,choices) {
+    function radioGroup(ui,key,title,setting,on,choices,raw) {
+        title=tr(title); if (!raw) choices=choices.map(([value,label,subLabel]) => [value,tr(label),subLabel && tr(subLabel)]);
         const RadioGroup=inspectedExport(5995,"TableRadioGroup"), RadioRow=inspectedExport(5994,"TableRadioRow");
         if (RadioGroup && RadioRow) return el(RadioGroup,{key,title,value:settings[setting],onChange:value => setSetting(setting,value)},
             choices.map(([value,label,subLabel]) => el(RadioRow,{key:value,value,label,subLabel,disabled:!on})));
@@ -2533,12 +2671,14 @@
     }
     // Small muted text under a page's groups: what else to know, without a row of its own.
     function footnote(key,text) {
+        text=tr(text);
         const Text=inspectedExport(4833,"Text");
         return el(RN.View,{key,style:{paddingHorizontal:16}},
             Text ? el(Text,{variant:"text-xs/medium",color:"text-muted"},text) : el(RN.Text,{style:{color:"#949ba4",fontSize:12}},text));
     }
     // A rounded card with live status, in the theme's card colors.
     function statusCard(key,text) {
+        text=tr(text);
         const ui=reviewUI(), Text=inspectedExport(4833,"Text"), c=ui.colors;
         const style={borderRadius:16,paddingHorizontal:16,paddingVertical:14,backgroundColor:c && c.CARD_BACKGROUND_DEFAULT || "#ffffff0f"};
         return el(RN.View,{key,style},
@@ -2546,14 +2686,15 @@
     }
     // A full-width row that does something once, like clearing what a feature saved.
     function actionRow(ui,key,label,subLabel,onPress,disabled,danger) {
-        return ui.TableRow ? el(ui.TableRow,{key,label,subLabel,onPress,disabled:!!disabled,variant:danger ? "danger" : undefined}) : null;
+        return ui.TableRow ? el(ui.TableRow,{key,label:tr(label),subLabel:subLabel && tr(subLabel),onPress,disabled:!!disabled,variant:danger ? "danger" : undefined}) : null;
     }
     function confirmAction(title,body,confirmText,onConfirm) {
+        title=tr(title); body=tr(body); confirmText=tr(confirmText);
         const ui=reviewUI();
-        if (ui.alerts && typeof ui.alerts.show==="function") try { ui.alerts.show({title,body,confirmText,cancelText:"Cancel",onConfirm}); return; } catch (_) {}
-        if (RN && RN.Alert) RN.Alert.alert(title,body,[{text:"Cancel",style:"cancel"},{text:confirmText,style:"destructive",onPress:onConfirm}]);
+        if (ui.alerts && typeof ui.alerts.show==="function") try { ui.alerts.show({title,body,confirmText,cancelText:tr("Cancel"),onConfirm}); return; } catch (_) {}
+        if (RN && RN.Alert) RN.Alert.alert(title,body,[{text:tr("Cancel"),style:"cancel"},{text:confirmText,style:"destructive",onPress:onConfirm}]);
     }
-    function count(n,word) { return n+" "+word+(n===1 ? "" : "s"); }
+    function count(n,word) { return pl(n,"{n} "+word,"{n} "+word+"s"); }
     // Settings page: Discord's own radio list (TableRadioGroup 5995 / TableRadioRow 5994).
     function ReadAllSettings() {
         useSettings("readAll");
@@ -2581,7 +2722,8 @@
         const id = source.id || message.id;
         // Before edit history, so the crossed-out old versions above it stay as they were written.
         if (enabled("translate")) {
-            const shown = translateRow(next.message, source, channelId, id);
+            let shown = translateRow(next.message, source, channelId, id);
+            if (shown.referencedMessage) shown = translateReply(shown, source, channelId, id);
             if (shown !== next.message) next = Object.assign({},next,{message:shown});
         } else if (features.translate) translateSeen(source, channelId, id, null);
         if (edits.size && enabled("noDelete")) {
@@ -2611,6 +2753,7 @@
     }
     const PLATFORM_COLORS = {online:"#23a55a",idle:"#f0b232",dnd:"#f23f43"};
     const PLATFORM_LABELS = {desktop:"Desktop",mobile:"Mobile",web:"Web",embedded:"Console",vr:"VR"};
+    const PLATFORM_STATUS = {online:"Online",idle:"Idle",dnd:"Do Not Disturb"};
     // This user's clients as a stable key, so a badge only re-renders when its own presence changes.
     function platformClients(userId) {
         let clients = presenceStore.getClientStatus(userId);
@@ -2673,7 +2816,7 @@
         const colors = PLATFORM_COLORS, labels = PLATFORM_LABELS;
         // One icon per reported client, in presence order.
         const icons = Object.keys(clients).filter(key => key !== "unknown" && colors[clients[key]]).map(key =>
-            el(RN.View,{key,accessible:true,accessibilityRole:"image",accessibilityLabel:(labels[key] || key)+": "+clients[key]},
+            el(RN.View,{key,accessible:true,accessibilityRole:"image",accessibilityLabel:tr(labels[key] || key)+": "+tr(PLATFORM_STATUS[clients[key]] || clients[key])},
                 el(PlatformPng,{platform:key,color:colors[clients[key]]})));
         return icons.length ? el(RN.View,{key:"venus-platforms",style:{flexDirection:"row",gap:2,alignItems:"center"}},icons) : null;
     }
@@ -2906,7 +3049,7 @@
         return parts;
     }
     function reviewToast(ui,content) {
-        try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open({key:"venus-toast",content}); } catch (_) {}
+        try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open({key:"venus-toast",content:tr(content)}); } catch (_) {}
     }
     function hideReviewSheet(ui,key) { try { if (ui.sheets && typeof ui.sheets.hideActionSheet==="function") ui.sheets.hideActionSheet(key); } catch (_) {} }
     // Styles from Discord's createStyles: semantic tokens resolve
@@ -2934,12 +3077,12 @@
         const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const toggle=(key,label,subLabel) => switchRow(Switch,key,label,subLabel);
         const groups=[
-            el(Group,{key:"auth",title:"Account"},
-                el(ui.TableRow,{key:"login",label:pending ? "Signing in..." : authenticated ? "Signed in to ReviewDB" : "Sign in to ReviewDB",
-                    arrow:true,disabled:!enabled("reviewDB") || authenticated || pending,onPress:authenticateReviews,subLabel:reviewAuthError || (authenticated ? undefined : "Needed to post, delete or report reviews. Never uses your Discord token.")}),
-                el(ui.TableRow,{key:"logout",label:"Sign out of ReviewDB",variant:authenticated ? "danger" : undefined,disabled:!authenticated,onPress:clearReviewAuth,
-                    subLabel:"ReviewDB stays in Discord's Authorized Apps until you remove it there."})),
-            el(Group,{key:"settings",title:"Display"},
+            el(Group,{key:"auth",title:tr("Account")},
+                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : authenticated ? "Signed in to ReviewDB" : "Sign in to ReviewDB"),
+                    arrow:true,disabled:!enabled("reviewDB") || authenticated || pending,onPress:authenticateReviews,subLabel:reviewAuthError || (authenticated ? undefined : tr("Needed to post, delete or report reviews. Never uses your Discord token."))}),
+                el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),variant:authenticated ? "danger" : undefined,disabled:!authenticated,onPress:clearReviewAuth,
+                    subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")})),
+            el(Group,{key:"settings",title:tr("Display")},
                 toggle("reviewWarning","Show the be-respectful note","ReviewDB's reminder to be kind, shown above reviews.")),
             footnote("note","Reviews come from manti.vendicated.dev. Opening reviews sends that profile's or server's ID to ReviewDB.")];
         return settingsBody(ui,groups);
@@ -2960,19 +3103,20 @@
             // Read-only while NoDelete is off, like the switches above it.
             editable:!!settings.noDelete,isDisabled:!settings.noDelete};
         // Discord's TextInput reports text via onChange(text); RN's via onChangeText.
-        const input=ui.TextInput ? el(ui.TextInput,Object.assign({label:"Keep up to",onChange:onText},inputProps)) :
+        const input=ui.TextInput ? el(ui.TextInput,Object.assign({label:tr("Keep up to"),onChange:onText},inputProps)) :
             el(RN.TextInput,Object.assign({onChangeText:onText,style:{fontSize:16,padding:12}},inputProps));
         const kept=deleted.size, changed=edits.size;
         const summary=!settings.noDelete ? "Turned off. Switch it on in Features to start." :
-            kept || changed ? count(kept,"deleted message")+" and "+count(changed,"edited message")+" kept"+(settings.noDeleteSave ? ", saved on this phone." : " until Discord restarts.") :
-            "Nothing kept yet. Deleted messages will show here.";
+            kept || changed ? tr(settings.noDeleteSave ? "{deleted} and {edited} kept, saved on this phone." : "{deleted} and {edited} kept until Discord restarts.",
+                {deleted:count(kept,"deleted message"), edited:count(changed,"edited message")}) :
+            tr("Nothing kept yet. Deleted messages will show here.");
         const groups=[
             statusCard("status",summary),
-            el(Group,{key:"edits",title:"Edited messages"},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.")),
-            el(Group,{key:"save",title:"Storage"},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.")),
-            el(Group,{key:"limit",title:"Limit"},el(RN.View,{style:{padding:12,gap:8}},input)),
-            footnote("limit-note","From 1 to "+MAX_DELETED+". When full, the oldest is removed first."),
-            el(Group,{key:"clear",title:"Manage"},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
+            el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.")),
+            el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.")),
+            el(Group,{key:"limit",title:tr("Limit")},el(RN.View,{style:{padding:12,gap:8}},input)),
+            footnote("limit-note",tr("From 1 to {max}. When full, the oldest is removed first.",{max:MAX_DELETED})),
+            el(Group,{key:"clear",title:tr("Manage")},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
                 () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),!kept && !changed,true)),
             footnote("note","Delete a kept message again to hide just that one.")];
         return settingsBody(ui,groups,{keyboardShouldPersistTaps:"handled"});
@@ -2988,9 +3132,9 @@
     function authenticateReviews() {
         if (!enabled("reviewDB") || reviewAuthState==="exchanging") return;
         const ui=reviewUI();
-        if (typeof ui.pushModal!=="function" || typeof ui.popModal!=="function" || !ui.OAuth) {RN.Alert.alert("ReviewDB","Discord's authorization screen is unavailable. Reopen this page and try again.");return;}
+        if (typeof ui.pushModal!=="function" || typeof ui.popModal!=="function" || !ui.OAuth) {RN.Alert.alert("ReviewDB",tr("Discord's authorization screen is unavailable. Reopen this page and try again."));return;}
         const accountId=currentId();
-        if (!accountId) {RN.Alert.alert("ReviewDB","Discord account unavailable");return;}
+        if (!accountId) {RN.Alert.alert("ReviewDB",tr("Discord account unavailable"));return;}
         const attempt=++reviewAuthAttempt, key="oauth2-authorize";
         let closed=false;
         reviewAuthError="";notify("reviewDB");
@@ -2999,7 +3143,7 @@
         function fail(error) {
             if (!live()) return;
             reviewAuthState="idle";reviewAuthError=String(error && error.message || error);notify("reviewDB");
-            reviewToast(ui,"Authorization failed! "+reviewAuthError);
+            reviewToast(ui,tr("Couldn't sign in: {problem}",{problem:reviewAuthError}));
         }
         ui.pushModal({key,modal:{key,modal:ui.OAuth,animation:"slide-up",shouldPersistUnderModals:false,closable:true,props:{
             clientId:"915703782174752809",redirectUri:REVIEW_API+"/auth",scopes:["identify"],responseType:"code",permissions:BigInt(0),cancelCompletesFlow:false,
@@ -3060,29 +3204,29 @@
     function reviewActions(review, owner, ui, refetch) {
         const system=review.type===3, me=currentId(), sender=review.sender || {};
         function confirm(title, content, onConfirm) {
-            if (ui.alerts && typeof ui.alerts.show==="function") try { ui.alerts.show({title,body:content,confirmText:"Yes",cancelText:"No",onConfirm}); return; } catch (_) {}
-            RN.Alert.alert(title,content,[{text:"No",style:"cancel"},{text:"Yes",style:"destructive",onPress:onConfirm}]);
+            if (ui.alerts && typeof ui.alerts.show==="function") try { ui.alerts.show({title,body:content,confirmText:tr("Yes"),cancelText:tr("No"),onConfirm}); return; } catch (_) {}
+            RN.Alert.alert(title,content,[{text:tr("No"),style:"cancel"},{text:tr("Yes"),style:"destructive",onPress:onConfirm}]);
         }
         function mutate(path, method, body, done) {
             reviewRequest(path,method,body).then(result => {reviewCache.delete(owner);refetch();reviewToast(ui,result && result.message || done);},
                 error => reviewToast(ui,String(error && error.message || error)));
         }
-        const options=[{label:"Copy Text",onPress:() => {
+        const options=[{label:tr("Copy Text"),onPress:() => {
             try { (ui.clipboard || RN.Clipboard).setString(review.comment); } catch (_) {}
             reviewToast(ui,"Copied Review Text");
         }}];
         if (reviewAuth() && !system) {
-            if (sender.discordID===me || owner===me || reviewAdmins.has(me)) options.push({label:"Delete Review",isDestructive:true,
-                onPress:() => confirm("Delete Review","Are you sure you want to delete this review?",() => mutate("/users/"+owner+"/reviews","DELETE",{reviewid:review.id},"Review deleted"))});
-            options.push({label:"Report Review",isDestructive:true,
-                onPress:() => confirm("Report Review","Are you sure you want to report this review?",() => mutate("/reports","PUT",{reviewid:review.id},"Review reported"))});
+            if (sender.discordID===me || owner===me || reviewAdmins.has(me)) options.push({label:tr("Delete Review"),isDestructive:true,
+                onPress:() => confirm(tr("Delete Review"),tr("Are you sure you want to delete this review?"),() => mutate("/users/"+owner+"/reviews","DELETE",{reviewid:review.id},"Review deleted"))});
+            options.push({label:tr("Report Review"),isDestructive:true,
+                onPress:() => confirm(tr("Report Review"),tr("Are you sure you want to report this review?"),() => mutate("/reports","PUT",{reviewid:review.id},"Review reported"))});
         }
-        const title=system ? "ReviewDB System Message" : "Review by "+String(sender.username || "Unknown");
+        const title=system ? tr("ReviewDB System Message") : tr("Review by {name}",{name:String(sender.username || "Unknown")});
         if (typeof ui.simpleSheet==="function") try {
             ui.simpleSheet({key:"ReviewOverflow",header:{title,onClose:() => hideReviewSheet(ui,"ReviewOverflow")},options});return;
         } catch (_) {}
         RN.Alert.alert(title,undefined,options.map(option => ({text:option.label,style:option.isDestructive ? "destructive" : "default",onPress:option.onPress}))
-            .concat([{text:"Cancel",style:"cancel"}]));
+            .concat([{text:tr("Cancel"),style:"cancel"}]));
     }
     function ReviewRow(props) {
         const review=props.review, ui=props.ui, styles=props.styles, sender=review.sender;
@@ -3113,7 +3257,7 @@
         let theme=null;
         if (reviewThemeHook) try {theme=reviewThemeHook();} catch (_) {}
         const authenticated=!!reviewAuth(), canSend=authenticated && !busy && text.trim().length>0;
-        const placeholder=!authenticated ? "You must be authenticated to add a review." : "Tap to "+(props.shouldEdit ? "edit your" : "add a")+" review";
+        const placeholder=tr(!authenticated ? "Sign in to ReviewDB in Venus settings to write a review." : props.shouldEdit ? "Tap to edit your review" : "Tap to add a review");
         function send() {
             if (!canSend || !text.trim()) return;
             setBusy(true);
@@ -3129,7 +3273,7 @@
         const color=theme && theme.primaryColor || "#5865f2";
         return el(RN.View,{style:{flexDirection:"row",alignItems:"center",gap:8,paddingHorizontal:8,paddingVertical:4}},
             el(RN.View,{style:{flex:1}},input),
-            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:props.shouldEdit ? "Update review" : "Send review",disabled:!canSend,onPress:send,
+            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr(props.shouldEdit ? "Update review" : "Send review"),disabled:!canSend,onPress:send,
                 style:{minHeight:40,minWidth:40,borderRadius:999,alignItems:"center",justifyContent:"center",backgroundColor:color,opacity:canSend ? 1 : 0.25}},
                 ui.Send ? el(ui.Send,{size:"sm",color:"#ffffff"}) : el(RN.Text,{style:{color:"#ffffff",fontWeight:"700"}},">")));
     }
@@ -3153,19 +3297,19 @@
         const shown=settings.reviewWarning ? list : list.filter(review => review.type!==3);
         const refetch=() => {reviewCache.delete(userId);reload(n => n+1);};
         const rows=error ? el(RN.View,{style:{gap:8}},
-            el(RN.Text,{accessibilityRole:"alert",style:styles.text},"Couldn't load reviews: "+error),
-            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:"Retry reviews",onPress:refetch,style:{padding:12}},el(RN.Text,{style:styles.text},"Retry"))) :
-            reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},"Loading reviews...") :
-            !shown.length ? el(RN.Text,{style:styles.muted},"No reviews yet.") :
+            el(RN.Text,{accessibilityRole:"alert",style:styles.text},tr("Couldn't load reviews: {problem}",{problem:error})),
+            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Retry reviews"),onPress:refetch,style:{padding:12}},el(RN.Text,{style:styles.text},tr("Retry")))) :
+            reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},tr("Loading reviews...")) :
+            !shown.length ? el(RN.Text,{style:styles.muted},tr("No reviews yet.")) :
             shown.map((review,index) => el(ReviewRow,{key:(review.id==null ? "" : String(review.id))+":"+index,review,owner:userId,ui,styles,refetch}));
         return el(RN.View,{style:[styles.card]},
-            el(Card,props.standalone ? {accessibilityLabel:"Reviews"} : {title:"Reviews"},
+            el(Card,props.standalone ? {accessibilityLabel:tr("Reviews")} : {title:tr("Reviews")},
                 el(RN.View,{style:{gap:8}},rows),
                 el(ReviewInput,{userId,ui,styles,refetch,shouldEdit:list.some(review => review.type!==3 && review.sender.discordID===me)})));
     }
     function ReviewSheet(props) {
         const ui=reviewUI();
-        return el(ui.ActionSheet,{header:ui.Header ? el(ui.Header,{title:"Reviews",trailing:ui.Close ? el(ui.Close,{onPress:() => hideReviewSheet(ui,props.sheetKey)}) : undefined}) : undefined},
+        return el(ui.ActionSheet,{header:ui.Header ? el(ui.Header,{title:tr("Reviews"),trailing:ui.Close ? el(ui.Close,{onPress:() => hideReviewSheet(ui,props.sheetKey)}) : undefined}) : undefined},
             el(RN.View,null,el(RN.ScrollView,{style:{gap:12,marginBottom:12}},el(ReviewSection,{userId:props.userId,standalone:true}))));
     }
     function openReviewSheet(userId) {
@@ -3178,7 +3322,7 @@
         // chain entirely. The inspected store (fn31181) accepts "stack".
         const key="VenusReviews:"+userId;
         try { ui.showSheet({key,content:el(ReviewSheet,{userId,sheetKey:key}),stackingBehavior:"stack"}); }
-        catch (error) { reviewToast(ui,"Couldn't open reviews: "+String(error && error.message || error)); }
+        catch (error) { reviewToast(ui,tr("Couldn't open reviews: {problem}",{problem:String(error && error.message || error)})); }
     }
     // Profiles: reviews go in as the LAST card of the profile card stack
     // (after the note). In 348.10 UserProfileNote (12627) is that last card in the normal, bot,
@@ -3197,8 +3341,8 @@
         React.useEffect(() => {setOpen(false);},[props.guildId]);
         if (!enabled("reviewDB") || !RN || !ui.TableRow) return null;
         return el(RN.View,null,
-            el(ui.TableRowGroup || RN.View,null,el(ui.TableRow,{label:"Reviews",arrow:!open,
-                subLabel:open ? "Tap to close server reviews." : "Read and write community reviews for this server.",
+            el(ui.TableRowGroup || RN.View,null,el(ui.TableRow,{label:tr("Reviews"),arrow:!open,
+                subLabel:tr(open ? "Tap to close server reviews." : "Read and write community reviews for this server."),
                 accessibilityState:{expanded:open},onPress:() => {if (enabled("reviewDB")) setOpen(value => !value);}})),
             open ? el(ReviewSection,{key:props.guildId,userId:props.guildId,standalone:true}) : null);
     }
@@ -3213,7 +3357,7 @@
         const props=args[0], menu=props && props.menu, id=menu && menu.key;
         if (!enabled("reviewDB") || !menu || !Array.isArray(menu.items) || menu.items.length!==3 || typeof id!=="string" || !/^\d{17,20}$/.test(id)) return orig.apply(self,args);
         const next=Array.from(args);
-        next[0]=Object.assign({},props,{menu:Object.assign({},menu,{items:menu.items.concat([{label:"Reviews",action:() => openReviewSheet(id)}])})});
+        next[0]=Object.assign({},props,{menu:Object.assign({},menu,{items:menu.items.concat([{label:tr("Reviews"),action:() => openReviewSheet(id)}])})});
         return orig.apply(self,next);
     }
     // Rewrites a component's props before Discord's own render, through memo and forwardRef wrappers.
@@ -3512,7 +3656,7 @@
             youBarParts = {Button, Icon, style:{width:size, height:size}};
         }
         const nameplate = !!(props && props.hasNameplate);
-        return el(youBarParts.Button, {hasNameplate:nameplate, hasBadge:false, accessibilityLabel:"Venus settings", onPress:openSettings,
+        return el(youBarParts.Button, {hasNameplate:nameplate, hasBadge:false, accessibilityLabel:tr("Venus settings"), onPress:openSettings,
             icon:el(youBarParts.Icon, {size:"custom", style:youBarParts.style, color:nameplate ? "white" : undefined})});
     }
     // Opens Venus settings, not Discord's. openUserSettings (6801) opens the settings navigator on the screen it's
@@ -3640,15 +3784,22 @@
         mk:"Macedonian", ml:"Malayalam", mn:"Mongolian", mr:"Marathi", ms:"Malay", my:"Burmese", ne:"Nepali", nl:"Dutch", no:"Norwegian", pa:"Punjabi",
         pl:"Polish", pt:"Portuguese", ro:"Romanian", ru:"Russian", sk:"Slovak", sl:"Slovenian", sq:"Albanian", sr:"Serbian", sv:"Swedish", sw:"Swahili",
         ta:"Tamil", te:"Telugu", th:"Thai", tr:"Turkish", uk:"Ukrainian", ur:"Urdu", uz:"Uzbek", vi:"Vietnamese", zh:"Chinese"};
-    let localeStore = null;
     const translate = {dispatcher:null, cache:new Map(), queue:[], shown:new Map(), timer:undefined, active:0,
         host:0, pausedUntil:0, failures:0, translated:0, error:"", generation:0, version:0, layouts:new WeakMap(), refreshing:new Set(),
-        restored:false, restoring:false, saveTimer:undefined, saving:false};
+        restored:false, restoring:false, saveTimer:undefined, saving:false,
+        // Your choice for single messages from the hold menu: true translates it, false keeps the original.
+        // With "Only when you ask", only messages set to true are translated.
+        choice:new Map(), asked:new Set()};
+    const TRANSLATE_CHOICES = 1000;
+    function translateWanted(id) {
+        const choice = translate.choice.get(id);
+        return settings.translateMode === "manual" ? choice === true : choice !== false;
+    }
     function translateInit(dispatcher) {
         if (translate.dispatcher || !dispatcher || typeof dispatcher.dispatch !== "function") return;
         translate.dispatcher = dispatcher;
         if (typeof dispatcher.subscribe === "function") dispatcher.subscribe("LOGOUT", () => {
-            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear();
+            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear();
             // Another account's messages must never be shown from this one's translations.
             if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         });
@@ -3667,6 +3818,11 @@
             const saved = JSON.parse(text);
             if (!saved || saved.version !== 1 || !Array.isArray(saved.entries)) return;
             let restored = 0;
+            // Messages you translated, or kept original, from the hold menu. A choice made since Discord opened wins.
+            if (Array.isArray(saved.choices)) saved.choices.slice(-TRANSLATE_CHOICES).forEach(item => {
+                if (Array.isArray(item) && item.length === 2 && typeof item[0] === "string" && /^\d{1,20}$/.test(item[0]) && typeof item[1] === "boolean" &&
+                    !translate.choice.has(item[0])) { translate.choice.set(item[0], item[1]); restored++; }
+            });
             saved.entries.slice(-TRANSLATE_SAVED).forEach(item => {
                 if (!Array.isArray(item) || item.length !== 4 || !item.every(part => typeof part === "string")) return;
                 const [target, text, translated, language] = item, key = translateKey(target, text), known = translate.cache.get(key);
@@ -3685,9 +3841,10 @@
             if (translate.saving) { translatePersist(); return; }
             const entries = [];
             translate.cache.forEach(entry => { if (entry.state === "done" && typeof entry.translated === "string") entries.push([entry.target, entry.text, entry.translated, entry.language || ""]); });
-            let text = JSON.stringify({version:1, entries:entries.slice(-TRANSLATE_SAVED)});
+            const choices = Array.from(translate.choice.entries());
+            let text = JSON.stringify(choices.length ? {version:1, entries:entries.slice(-TRANSLATE_SAVED), choices} : {version:1, entries:entries.slice(-TRANSLATE_SAVED)});
             // Too big to read back: keep the newest half instead.
-            if (text.length > TRANSLATE_SAVED_BYTES) text = JSON.stringify({version:1, entries:entries.slice(-Math.floor(TRANSLATE_SAVED / 2))});
+            if (text.length > TRANSLATE_SAVED_BYTES) text = JSON.stringify({version:1, entries:entries.slice(-Math.floor(TRANSLATE_SAVED / 2)), choices});
             translate.saving = true;
             Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, text, "utf8")).catch(() => {}).then(() => { translate.saving = false; });
         }, 3000, false);
@@ -3711,15 +3868,20 @@
         const base = String(code || "").split("-")[0].toLowerCase();
         return ({iw:"he", jw:"jv", nb:"no", nn:"no", tl:"fil"})[base] || base;
     }
-    let languageNames;
+    // Language names in the language Venus is shown in.
+    const languageNames = new Map();
     function languageName(code) {
-        const base = languageBase(code);
-        if (languageNames === undefined) {
-            languageNames = null;
-            try { if (global.Intl && typeof global.Intl.DisplayNames === "function") languageNames = new global.Intl.DisplayNames(["en"], {type:"language"}); } catch (_) {}
+        // The language actually shown: English until the chosen one has loaded, so a line never mixes two.
+        const chosen = uiLanguage(), pack = i18n.packs.get(chosen);
+        const base = languageBase(code), ui = chosen === "en" || pack && pack !== EMPTY_PACK ? chosen : "en";
+        if (!languageNames.has(ui)) {
+            let names = null;
+            try { if (global.Intl && typeof global.Intl.DisplayNames === "function") names = new global.Intl.DisplayNames([ui, "en"], {type:"language"}); } catch (_) {}
+            languageNames.set(ui, names);
         }
-        try { const name = languageNames && languageNames.of(code); if (typeof name === "string" && name && name !== code) return name; } catch (_) {}
-        return LANGUAGE_NAMES[base] || String(code || "another language");
+        const names = languageNames.get(ui);
+        try { const name = names && names.of(code); if (typeof name === "string" && name && name !== code) return name; } catch (_) {}
+        return tr(LANGUAGE_NAMES[base] || "another language");
     }
     function escapeTranslate(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     // The row's content as text to translate: plain text stays text, formatting becomes <g i=N>...</g> around
@@ -3801,10 +3963,11 @@
     function translateRow(message, source, channelId, id) {
         if (!message || !Array.isArray(message.content) || !source || typeof source.content !== "string" || !channelId || !id) return message;
         const author = source.author && source.author.id || message.authorId, me = currentUser();
-        // Your own messages are already in a language you read.
-        if (me && author === me.id) return message;
+        // Your own messages are already in a language you read, unless you ask for one from the hold menu.
+        if (me && author === me.id && translate.choice.get(id) !== true) return message;
+        if (!translateWanted(id)) { translateSeen(source, channelId, id, null); return message; }
         const layout = translateLayout(message.content);
-        if (!layout) return message;
+        if (!layout) { translateNothing(id); return message; }
         const target = translateTarget(), key = translateKey(target, layout.text);
         translateSeen(source, channelId, id, key);
         let entry = translate.cache.get(key);
@@ -3816,12 +3979,98 @@
             translateSchedule(60);
         }
         if (entry.state === "queued" || entry.state === "sending") { entry.ids.add(id); return message; }
-        if (entry.state !== "done") return message;
+        if (entry.state !== "done") { translateNothing(id); return message; }
+        translate.asked.delete(id);
         if (layout.view === undefined || layout.viewOf !== entry || layout.viewVersion !== translate.version) {
             layout.viewOf = entry; layout.viewVersion = translate.version;
             layout.view = translateView(entry, layout, message.content);
         }
         return layout.view ? Object.assign({}, message, {content:layout.view}) : message;
+    }
+    // A message you asked to translate from the hold menu that has nothing to translate says so, once.
+    function translateNothing(id) {
+        if (!translate.asked.delete(id)) return;
+        later(() => reviewToast(reviewUI(), "This message is already in your language"), 0);
+    }
+    // The message a reply quotes, above the reply. It was always shown as written, even when that message was
+    // shown translated in chat (#51). It now gets the same translation, without the note or the original, since
+    // the preview is one short line. Translations are kept by text, so this never costs a second request.
+    function translateReply(message, source, channelId, id) {
+        const quoted = message.referencedMessage && message.referencedMessage.message;
+        if (!quoted || !Array.isArray(quoted.content) || !channelId || !id) return message;
+        const reference = source && (source.messageReference || source.message_reference);
+        const quotedId = quoted.id || reference && (reference.message_id || reference.messageId);
+        const me = currentUser();
+        if (!quotedId || me && quoted.authorId === me.id && translate.choice.get(quotedId) !== true || !translateWanted(quotedId)) return message;
+        const layout = translateLayout(quoted.content);
+        if (!layout) return message;
+        const target = translateTarget(), key = translateKey(target, layout.text);
+        // Known as the reply's row, so the reply is redrawn once its quote is translated.
+        if (source && typeof source.content === "string") translateSeen(source, channelId, id, null);
+        let entry = translate.cache.get(key);
+        if (!entry) {
+            entry = {state:"queued", text:layout.text, layout, target, ids:new Set()};
+            translateRemember(key, entry);
+            translate.queue.unshift(key);
+            translateSchedule(60);
+        }
+        if (entry.state === "queued" || entry.state === "sending") { entry.ids.add(id); return message; }
+        if (entry.state !== "done") return message;
+        if (layout.preview === undefined || layout.previewOf !== entry) { layout.previewOf = entry; layout.preview = translateNodes(entry.translated, layout); }
+        if (!layout.preview) return message;
+        return Object.assign({}, message, {referencedMessage:Object.assign({}, message.referencedMessage,
+            {message:Object.assign({}, quoted, {content:layout.preview})})});
+    }
+    // Hold a message: "Translate" or "Show original", for just that message.
+    function translateToggle(message) {
+        const id = message && message.id;
+        if (!id || !enabled("translate")) return;
+        const wanted = !translateShownFor(message);
+        translate.choice.delete(id);
+        // Back to what the mode does anyway (and not your own message): nothing to remember.
+        const mine = currentUser() && message.author && message.author.id === currentUser().id;
+        if (wanted !== (settings.translateMode !== "manual") || mine) {
+            if (translate.choice.size >= TRANSLATE_CHOICES) translate.choice.delete(translate.choice.keys().next().value);
+            translate.choice.set(id, wanted);
+        }
+        if (wanted) translate.asked.add(id); else translate.asked.delete(id);
+        translatePersist();
+        const channelId = message.channel_id || message.channelId;
+        if (typeof message.content === "string" && message.content && channelId) translateSeen(message, channelId, id, null);
+        // Every row showing this message or quoting it.
+        const ids = new Set([id]);
+        translate.shown.forEach((entry, shownId) => { if (entry.quotes === id) ids.add(shownId); });
+        translateRedraw(ids);
+    }
+    // Whether this message is (or will be) shown translated: your own only when you asked.
+    function translateShownFor(message) {
+        const mine = currentUser() && message.author && message.author.id === currentUser().id;
+        return mine ? translate.choice.get(message.id) === true : translateWanted(message.id);
+    }
+    // LongPressMessageActionSheet (11023): one more row, after Discord's own, styled like them.
+    function translateSheet(orig, self, args) {
+        const tree = orig.apply(self, args), props = args[0], message = props && props.message;
+        if (!enabled("translate") || !React || !tree || !message || !message.id || typeof message.content !== "string" || !message.content.trim()) return tree;
+        const label = translateShownFor(message) ? tr("Show original") : tr("Translate");
+        let added = false;
+        const Icon = venusIcon(14958, "LanguageIcon");
+        return cloneTree(tree, function (node, nodeProps) {
+            if (added || !Array.isArray(nodeProps.children)) return nodeProps;
+            const rows = nodeProps.children.filter(child => child && child.props && typeof child.props.label === "string" && typeof child.props.onPress === "function");
+            if (!rows.length || nodeProps.children.some(child => child && child.key === "venus-translate")) return nodeProps;
+            added = true;
+            const template = rows[rows.length - 1], icon = template.props.icon;
+            const row = React.cloneElement(template, {key:"venus-translate", label, arrow:false, variant:undefined, disabled:false,
+                icon:icon && icon.props && "IconComponent" in icon.props ? React.cloneElement(icon, {IconComponent:Icon}) : icon,
+                onPress:function () {
+                    const sheets = reviewUI().sheets;
+                    try { if (sheets && typeof sheets.hideActionSheet === "function") sheets.hideActionSheet("MessageLongPressActionSheet"); } catch (_) {}
+                    if (typeof props.onClose === "function") try { props.onClose(); } catch (_) {}
+                    translateToggle(message);
+                }});
+            const index = nodeProps.children.indexOf(template) + 1;
+            return Object.assign({}, nodeProps, {children:nodeProps.children.slice(0, index).concat([row], nodeProps.children.slice(index))});
+        }, 0);
     }
     // Messages drawn lately, so switching on or changing an option can redraw them. Never while a redraw has
     // its zero-width space in, or that space would be put back for good.
@@ -3830,15 +4079,17 @@
         let entry = translate.shown.get(id);
         if (entry) translate.shown.delete(id);
         else if (translate.shown.size >= 300) translate.shown.delete(translate.shown.keys().next().value);
-        if (!entry) entry = {channelId, id, raw:"", key:null};
+        if (!entry) entry = {channelId, id, raw:"", key:null, quotes:null};
         entry.raw = source.content; entry.key = key || entry.key;
+        const reference = source.messageReference || source.message_reference;
+        if (reference && (reference.message_id || reference.messageId)) entry.quotes = reference.message_id || reference.messageId;
         translate.shown.set(id, entry);
     }
     function translateView(entry, layout, original) {
         let view = translateNodes(entry.translated, layout);
         if (!view) return null;
         if (settings.translateNote || settings.translateOriginal) view = view.concat([{type:"br"}, {type:"subtext", content:[{type:"text",
-            content:"Translated from " + languageName(entry.language) + (settings.translateOriginal ? ". Original:" : "")}]}]);
+            content:tr(settings.translateOriginal ? "Translated from {language}. Original:" : "Translated from {language}", {language:languageName(entry.language)})}]}]);
         // A quote can't hold a quote or a code block, so those originals just follow on the next line.
         if (settings.translateOriginal) view = view.concat(layout.nodes.some(node => node.type === "blockQuote" || node.type === "codeBlock") ?
             [{type:"br"}].concat(original) : [{type:"blockQuote", content:original}]);
@@ -3939,8 +4190,8 @@
             const wait = limited ? Math.min(600000, 15000 * Math.pow(2, Math.min(6, translate.failures - 1))) :
                 translate.failures < 3 ? 500 * translate.failures : Math.min(120000, 5000 * Math.pow(2, Math.min(5, translate.failures - 3)));
             translate.pausedUntil = Math.max(translate.pausedUntil, Date.now() + wait);
-            translate.error = translate.failures < 3 && !limited ? "" : (limited ? "Google Translate asked to slow down" : "Google Translate isn't answering (" + String(error && error.message || error) + ")") +
-                ". Trying again in " + Math.max(1, Math.round(wait / 1000)) + " s.";
+            translate.error = translate.failures < 3 && !limited ? "" : (limited ? tr("Google Translate asked to slow down.") : tr("Google Translate isn't answering ({problem}).", {problem:String(error && error.message || error)})) +
+                " " + tr("Trying again in {n} s.", {n:Math.max(1, Math.round(wait / 1000))});
         }).then(() => {
             translate.active--;
             if (generation === translate.generation && translate.queue.length) translateSchedule(translate.failures ? 0 : 30);
@@ -3972,11 +4223,17 @@
             if (!cached || cached.state !== "same" && cached.state !== "failed") ids.add(id); });
         translateRedraw(ids);
     }
+    function translateRelabel() {
+        translate.version++;
+        const ids = new Set();
+        translate.shown.forEach((entry, id) => { const cached = entry.key && translate.cache.get(entry.key); if (cached && cached.state === "done") ids.add(id); });
+        translateRedraw(ids);
+    }
     function translateStatus() {
         if (translate.error) return translate.error;
         const waiting = translate.queue.length;
-        return (translate.translated ? "Translated " + translate.translated + " message" + (translate.translated === 1 ? "" : "s") + " since Discord opened." : "Nothing translated yet since Discord opened.") +
-            (waiting ? " " + waiting + " waiting." : "");
+        return (translate.translated ? pl(translate.translated, "Translated {n} message since Discord opened.", "Translated {n} messages since Discord opened.") : tr("Nothing translated yet since Discord opened.")) +
+            (waiting ? " " + tr("{n} waiting.", {n:waiting}) : "");
     }
     function TranslateSettings() {
         useSettings("translate");
@@ -3987,28 +4244,37 @@
         let saved = 0; translate.cache.forEach(entry => { if (entry.state === "done") saved++; });
         const groups = [
             statusCard("status", on ? translateStatus() : "Turned off. Switch it on in Features to start."),
-            radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", "Discord's language", name("discord") + ". Change it in Discord's Language settings."],
-                ["phone", "Your phone's language", name("phone") + "."]]),
-            el(Group, {key:"show", title:"Display"},
+            radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language."],
+                ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent."]]),
+            radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")})],
+                ["phone", tr("Your phone's language"), name("phone") + "."]], true),
+            el(Group, {key:"show", title:tr("Display")},
                 switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation."),
                 switchRow(Switch, "translateOriginal", "Show the original text", "The untranslated message, in a quote under the translation.")),
-            el(Group, {key:"clear", title:"Manage"}, actionRow(ui, "clear", "Clear saved translations",
-                saved ? count(saved, "translation") + " kept on this phone, so chats you reopen show them at once." : "Nothing saved yet.",
+            el(Group, {key:"clear", title:tr("Manage")}, actionRow(ui, "clear", "Clear saved translations",
+                saved ? tr("{count} kept on this phone, so chats you reopen show them at once.", {count:count(saved, "translation")}) : "Nothing saved yet.",
                 () => confirmAction("Clear saved translations?", "Messages on screen will be translated again.", "Clear", translateForget), !saved, true)),
-            footnote("note", "Only messages on screen are sent to Google Translate, once each, without your Discord account. Your own messages and ones already in your language are left as they are.")];
+            footnote("note", settings.translateMode === "manual" ? "Only messages you choose are sent to Google Translate, once each, without your Discord account." :
+                "Only messages on screen are sent to Google Translate, once each, without your Discord account. Hold a message to show its original, or translate your own.")];
         return settingsBody(ui, groups);
     }
     // Clear saved translations: forgets every translation, on the phone too, and translates what's on screen again.
     function translateForget() {
-        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = "";
+        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear();
         if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         translateChanged(); notify("translate");
         reviewToast(reviewUI(), "Saved translations cleared");
     }
     function activatePlugins(id, exports) {
         if ((features.validUser || features.splitMessages || features.translate) && id === 1378 && exports && exports.default) userStore = exports.default;
-        if (features.translate && id === 2115 && exports && exports.default) localeStore = exports.default;
+        if (id === 2115 && exports && exports.default && !localeStore) {
+            localeStore = exports.default;
+            // Following Discord's language: switching it there switches Venus too.
+            try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
+                if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); } }); } catch (_) {}
+        }
         if (features.translate && id === 585 && exports && exports.default) translateInit(exports.default);
+        if (features.translate && id === 11023) return hookComponent(exports, translateSheet);
         if (features.splitMessages && id === 8602) return maxLengthModule(exports);
         if (features.youBarSettings && id === 16032) return hookComponent(exports, youBarButtons);
         if (features.validUser && id === 585 && exports && exports.default) validInit(exports.default);
