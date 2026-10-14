@@ -11,7 +11,24 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Complete Quests automatically:** Keep completing Quests in the background when you leave Discord
+* **Discord - Complete Quests automatically:** Fixed Quests stopping progress when you leave Discord by keeping the Gateway connection alive in the background
+* **Discord - Disable analytics:** Fixed session heartbeats, search tracking, impression events, and network action logs still being recorded and sent
+* **Discord - Disable telemetry and touch logging:** Fixed screen smoothness (jank) session threads, startup TTI markers, and React component span timers still running on every screen change
+* **Discord - Disable crash reporting:** Fixed Sentry breadcrumbs, crash tags, crash persistence, and JS exception reports still being recorded
+
+### 🔧 Improvements
+
+* **Discord - Disable analytics:** Expand analytics blocking to 48 Hermes bytecode functions, including ad/Quest tracking and voice stats
+* **Discord - Disable telemetry and touch logging:** Expand telemetry blocking to 40 Hermes bytecode functions and 46 native Android methods
+* **Discord - Disable crash reporting:** Expand crash reporting blocking to 16 Hermes bytecode functions and 45 native Sentry and CrashReporting methods
+
+### ⚡ Performance Improvements
+
+* **Discord:** Skip background over-the-air bundle update checks and downloads on launch since Venus always runs the packaged bundle
+* **Discord:** Build the startup bytecode prelude from multi-character strings and dense array ops, cutting startup prelude instructions by two-thirds
+* **Discord - Show hidden channels:** Cache PermissionStore's original permission check once instead of looking it up on every channel check
+* **Discord - Use your phone's font:** Skip parsing the settings JSON on startup when the font switch is off
+* **Discord - Use your phone's emojis:** Skip parsing the settings JSON on startup when the emoji switch is off
 
 ## [1.11.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.10.0...v1.11.0) (2026-10-13)
 
@@ -24,7 +41,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Translate messages:** A reply shows the message it quotes untranslated ([#51](https://github.com/VenusIsJaded/Venus-Patches/issues/51))
+* **Discord - Translate messages:** Fixed replies showing the quoted message untranslated instead of translating it like chat messages ([#51](https://github.com/VenusIsJaded/Venus-Patches/issues/51))
 
 ### 🔧 Improvements
 
@@ -66,7 +83,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Pastelize:** Color message text doesn't color the message a reply quotes ([#45](https://github.com/VenusIsJaded/Venus-Patches/issues/45))
+* **Discord - Pastelize:** Fixed Color message text leaving the quoted message in a reply uncolored instead of using that author's pastel color ([#45](https://github.com/VenusIsJaded/Venus-Patches/issues/45))
 
 ### 🔧 Improvements
 
@@ -80,20 +97,20 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Disable advertising identifiers:** AppsFlyer still reads your Google advertising ID itself
-* **Discord - QuickDelete:** Removing link previews keeps skipping the confirmation after QuickDelete is turned off
-* **Discord - NoDelete:** Typing 0 as the maximum saved messages jumps it back to 512
-* **Discord - NoDelete:** A saved file too big to read back can still be written
-* **Discord - NoDelete:** Servers you leave keep their kept messages and edit history forever
-* **Discord - Quest Completer:** Doesn't start until a reconnect when Discord connects before settings load
-* **Discord - Force system emojis:** Keycap emojis like 1️⃣ and #️⃣ keep Discord's picture
-* **Discord - Force system emojis:** Emojis don't match chat when saved settings can't be read
-* **Discord - Force system emojis:** Old emoji designs keep showing after a phone or emoji font update
-* **Discord - Force system font:** Reopen now restarts Discord with the old setting when it couldn't be saved
-* **Discord - Read All:** Shows "Nothing unread" when unread servers or DMs couldn't be cleared yet
-* **Discord - Message tap gestures:** Turning gestures off during a double-tap still opens the editor or replies
-* **Discord - Custom voice messages:** Cancelling an upload that's being converted deletes it instead
-* **Discord - FreeNitro:** Sticker or emoji names with `||`, `~~` or `#` turn link text into a spoiler, strikethrough or heading
+* **Discord - Disable advertising identifiers:** Fixed AppsFlyer still reading your Google advertising ID directly even with the patch enabled
+* **Discord - QuickDelete:** Fixed link preview removals still skipping the confirmation prompt after QuickDelete was turned off
+* **Discord - NoDelete:** Fixed typing 0 as the maximum saved messages immediately resetting the limit back to 512
+* **Discord - NoDelete:** Fixed NoDelete writing a saved messages file too large to read back on the next startup
+* **Discord - NoDelete:** Fixed kept messages and edit history from servers you left staying in memory and storage forever
+* **Discord - Quest Completer:** Fixed Quest Completer not starting until a reconnect when Discord connected before saved settings finished loading
+* **Discord - Force system emojis:** Fixed keycap emojis like 1️⃣ and #️⃣ still showing Discord's Twemoji images instead of your phone's emojis
+* **Discord - Force system emojis:** Fixed React Native emojis not matching native chat emojis when the saved settings file couldn't be read
+* **Discord - Force system emojis:** Fixed outdated cached emoji drawings continuing to show after a system or emoji font update
+* **Discord - Force system font:** Fixed tapping Reopen now restarting Discord before the new font setting finished saving, or when saving failed
+* **Discord - Read All:** Fixed Read All showing "Nothing unread" even when unread servers or DMs couldn't be cleared yet
+* **Discord - Message tap gestures:** Fixed turning gestures off mid-tap still opening the message editor or starting a reply
+* **Discord - Custom voice messages:** Fixed cancelling an audio upload while it was converting deleting the message instead of only stopping the conversion
+* **Discord - FreeNitro:** Fixed sticker or emoji names containing `||`, `~~` or `#` turning the sent link label into a spoiler, strikethrough or heading
 
 ### 🔧 Improvements
 
@@ -126,9 +143,9 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Message tap gestures:** Tapping your own message three times opens it for editing instead of deleting it
-* **Discord - Venus settings:** Options on a setting's page stay switchable while that setting is off
-* **Discord - NoDelete:** The maximum saved messages box can be edited while NoDelete is off
+* **Discord - Message tap gestures:** Fixed tapping your own message three times opening the message editor before the third tap arrived instead of deleting it
+* **Discord - Venus settings:** Fixed sub-options on a feature's page staying interactive while the feature's main switch was turned off
+* **Discord - NoDelete:** Fixed the maximum saved messages text box remaining editable while NoDelete was turned off
 
 ### 🔧 Improvements
 
@@ -147,10 +164,10 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord:** Passkeys and security keys show "RP ID cannot be validated" instead of explaining why they can't work in patched Discord ([#37](https://github.com/VenusIsJaded/Venus-Patches/issues/37))
-* **Discord - NoDelete:** Deleted messages stop saving after the saved file is damaged
-* **Discord - Venus settings:** About shows the wrong version
-* **Discord - Read All:** Error message starts with "Error:"
+* **Discord:** Fixed passkey and security key prompts failing with "RP ID cannot be validated" instead of explaining why Android blocks them in a re-signed APK ([#37](https://github.com/VenusIsJaded/Venus-Patches/issues/37))
+* **Discord - NoDelete:** Fixed deleted messages permanently stopping from saving on disk if the saved archive file became corrupted
+* **Discord - Venus settings:** Fixed the About page displaying an outdated Venus Patches version number
+* **Discord - Read All:** Fixed error toasts starting with a redundant "Error:" prefix
 
 ### ⚡ Performance Improvements
 
@@ -179,11 +196,11 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Read All:** The server list can come back from an older render
-* **Discord - Quest Completer:** A game stays unnamed after one dropped connection
-* **Discord - Quest Completer:** Being offline pauses a Quest for 6 hours
-* **Discord - Quest Completer:** Heartbeats continue after Discord stops counting a Quest
-* **Discord - ReviewDB:** The review menu's close button does nothing
+* **Discord - Read All:** Fixed the server list reusing stale props from an older render when the guild list data had not changed
+* **Discord - Quest Completer:** Fixed Play Quests leaving the game executable unnamed for the rest of the session if looking up the game failed once while offline
+* **Discord - Quest Completer:** Fixed a temporary network error when enrolling in a Quest pausing retries for 6 hours instead of retrying after a few minutes
+* **Discord - Quest Completer:** Fixed Quest Completer sending heartbeats forever when Discord stopped counting progress for a stuck Quest
+* **Discord - ReviewDB:** Fixed the close button on the review overflow menu not closing the action sheet
 
 ### ⚡ Performance Improvements
 
@@ -194,8 +211,8 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Quest Completer:** Play Quests stop with "HTTP 401" and never finish
-* **Discord - Quest Completer:** Activity Quests are refused the same way
+* **Discord - Quest Completer:** Fixed Play Quests failing with "HTTP 401" and never finishing because Discord's native interceptor overwrote the desktop User-Agent
+* **Discord - Quest Completer:** Fixed non-mobile Activity Quests being rejected with "HTTP 401" for the same reason
 
 ### 🔧 Improvements
 
@@ -218,8 +235,8 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - ReviewDB:** Refreshing reviews can drop another profile's reviews
-* **Discord - Hidden Channels:** Some locked channels don't show
+* **Discord - ReviewDB:** Fixed refreshing a profile's reviews evicting another open profile's cached reviews
+* **Discord - Hidden Channels:** Fixed some locked channels missing from the server channel list when their category was collapsed or empty
 
 ### 🔧 Improvements
 
@@ -244,9 +261,9 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - NoDelete:** Turning NoDelete off erases saved messages
-* **Discord - Read All:** One empty DM stops the other DMs from being marked as read
-* **Discord - JumpToTop:** The channel menu rebuilds every time it updates
+* **Discord - NoDelete:** Fixed turning NoDelete off wiping permanently saved deleted messages from disk
+* **Discord - Read All:** Fixed a single DM channel without a last message stopping the rest of your DMs from being marked as read
+* **Discord - JumpToTop:** Fixed the channel long-press action sheet remounting from scratch on every state update
 
 ### ⚡ Performance Improvements
 
@@ -258,10 +275,10 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Disable crash reporting:** Some crash reports can still be sent
-* **Discord - JumpToTop:** Missing on threads
-* **Discord - PlatformIndicators:** Missing in the voice panel
-* **Discord - ReviewDB:** Copy Text and review cards don't work
+* **Discord - Disable crash reporting:** Fixed native Sentry and CrashReporting methods still sending crash reports because of a wrong DEX return-value opcode
+* **Discord - JumpToTop:** Fixed the Jump to Top option not appearing in the long-press menu for threads and forum posts
+* **Discord - PlatformIndicators:** Fixed device icons not showing next to members inside the voice channel panel
+* **Discord - ReviewDB:** Fixed Copy Text and profile review cards failing to render on Discord 348.10
 
 ### ⚡ Performance Improvements
 
@@ -279,14 +296,14 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Pastelize:** Color message text turns messages blue and shows "usernameOnClick"
+* **Discord - Pastelize:** Fixed Color message text turning messages solid blue and printing literal "usernameOnClick" text in chat
 
 ## [1.3.5](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.4...v1.3.5) (2026-10-08)
 
 ### 🐛 Bug Fixes
 
-* **Discord - File size on picker:** Files just under 1 MB show as 1024 KB
-* **Discord - NoDelete:** Clearing the maximum box resets it to 512
+* **Discord - File size on picker:** Fixed files just under 1 MB rounding up to "1024 KB" instead of "1 MB"
+* **Discord - NoDelete:** Fixed backspacing the maximum saved messages input box immediately resetting it to 512 while typing
 
 ### 🔧 Improvements
 
@@ -302,7 +319,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord:** Adding Venus Patches as a Morphe source shows "The patch bundle could not be downloaded"
+* **Discord:** Fixed Morphe Manager failing to add Venus Patches as a source with "The patch bundle could not be downloaded"
 
 ### ⚡ Performance Improvements
 
@@ -318,7 +335,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Custom voice messages:** Some files fail with "Audio format changed during decoding"
+* **Discord - Custom voice messages:** Fixed audio files failing to convert into voice messages with "Audio format changed during decoding" when the decoder adjusted its output format
 
 ## [1.3.2](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.3.1...v1.3.2) (2026-10-06)
 
@@ -330,7 +347,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - PlatformIndicators:** "Rendered fewer hooks" errors when switching chats
+* **Discord - PlatformIndicators:** Fixed React crashing with "Rendered fewer hooks than expected" when switching between chats
 
 ## [1.3.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.9...v1.3.0) (2026-10-05)
 
@@ -340,7 +357,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - NoDelete:** The red outline only appears after reopening the chat
+* **Discord - NoDelete:** Fixed the red outline on deleted messages only appearing after leaving and reopening the chat
 
 ## [1.2.9](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.8...v1.2.9) (2026-10-05)
 
@@ -350,8 +367,8 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - NoDelete:** Your own deleted messages aren't kept
-* **Discord - ReviewDB:** Server reviews don't open
+* **Discord - NoDelete:** Fixed your own deleted messages disappearing instead of being kept in chat
+* **Discord - ReviewDB:** Fixed tapping Reviews in the server menu not opening the server's reviews sheet
 
 ## [1.2.8](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.7...v1.2.8) (2026-10-05)
 
@@ -361,7 +378,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord:** A cached Discord update can bypass the privacy options
+* **Discord:** Fixed a cached over-the-air Discord bundle update bypassing all Venus patches and privacy options
 
 ## [1.2.7](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.6...v1.2.7) (2026-10-05)
 
@@ -373,8 +390,8 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - ReviewDB:** Signing in doesn't work
-* **Discord - NoDelete:** Messages are out of order after deleting
+* **Discord - ReviewDB:** Fixed OAuth sign-in discarding the authorization token because Discord dismissed the modal before invoking the callback
+* **Discord - NoDelete:** Fixed kept deleted messages appearing out of chronological order in chat
 
 ## [1.2.5](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.4...v1.2.5) (2026-10-05)
 
@@ -390,25 +407,25 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord - Hidden Channels:** Popups open twice
+* **Discord - Hidden Channels:** Fixed tapping a locked channel opening two info popups one after another
 
 ## [1.2.3](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.2...v1.2.3) (2026-10-04)
 
 ### 🐛 Bug Fixes
 
-* **Discord - Hidden Channels:** Some channels show without their real names
+* **Discord - Hidden Channels:** Fixed locked channels showing placeholder text instead of their real channel names when Discord redacted the store
 
 ## [1.2.2](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.1...v1.2.2) (2026-10-04)
 
 ### 🐛 Bug Fixes
 
-* **Discord:** ReviewDB, Hidden Channels, PlatformIndicators and NoDelete don't match the originals
+* **Discord:** Fixed ReviewDB, Hidden Channels, PlatformIndicators and NoDelete missing UI elements and behavior from the original plugins
 
 ## [1.2.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.2.0...v1.2.1) (2026-10-04)
 
 ### 🐛 Bug Fixes
 
-* **Discord:** Pastelize, ReviewDB, Hidden Channels, PlatformIndicators and NoDelete don't work
+* **Discord:** Fixed Pastelize, ReviewDB, Hidden Channels, PlatformIndicators and NoDelete failing to activate on startup
 
 ## [1.2.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.1.1...v1.2.0) (2026-10-04)
 
@@ -438,7 +455,7 @@
 
 ### 🐛 Bug Fixes
 
-* **Discord:** Discord doesn't start after patching
+* **Discord:** Fixed Discord crashing or freezing on startup after patching because the runtime was loaded as a second JS bundle in Bridgeless mode
 
 ## 1.0.0-dev.1 (2026-10-03)
 

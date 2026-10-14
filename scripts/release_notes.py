@@ -19,7 +19,7 @@ REPO = "https://github.com/VenusIsJaded/Venus-Patches"
 SECTIONS = ["### ✨ New Features", "### 🐛 Bug Fixes", "### 🔧 Improvements",
             "### ⚡ Performance Improvements", "### 🚀 Updated App Support"]
 HEADING = re.compile(r"^## (?:\[(?P<linked>[^\]]+)\]\((?P<url>[^)]+)\)|(?P<bare>\S+)) \((?P<date>\d{4}-\d{2}-\d{2})\)$")
-BULLET = re.compile(r"^\* \*\*Discord(?: - [^*:]+)?:\*\* \S.*[^.]$")
+BULLET = re.compile(r"^\* \*\*Discord(?: - [^*:]+)?:\*\* (?P<desc>\S.*[^.])$")
 # Release-page leftovers that don't belong in notes (see AGENTS.md).
 BANNED = re.compile(r"good to know|sha-?256|^#+ install|wasn't published separately|checked by patching", re.I | re.M)
 
@@ -68,9 +68,12 @@ def check():
                 continue
             if not section:
                 raise SystemExit(f"CHANGELOG.md {version}: text outside a section: {line}")
-            if not BULLET.match(line):
+            bullet_match = BULLET.match(line)
+            if not bullet_match:
                 raise SystemExit(f"CHANGELOG.md {version}: write '* **Discord - Patch name:** Short change' "
                                  f"on one line, without a full stop: {line}")
+            if section == "### 🐛 Bug Fixes" and not bullet_match.group("desc").startswith("Fixed "):
+                raise SystemExit(f"CHANGELOG.md {version}: every bug fix must start with 'Fixed ': {line}")
             bullets += 1
         if not bullets:
             raise SystemExit(f"CHANGELOG.md {version}: no changes listed")
