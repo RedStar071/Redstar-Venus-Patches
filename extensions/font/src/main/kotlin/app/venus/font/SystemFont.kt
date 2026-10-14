@@ -47,8 +47,7 @@ object SystemFont {
         enabled = try {
             val file = File(context!!.filesDir, PREFS)
             if (Build.VERSION.SDK_INT < 28 || !file.isFile || file.length() > MAX_PREFS) false
-            else JSONObject(String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8))
-                .optBoolean("systemFont", false)
+            else savedOn(file)
         } catch (_: Throwable) { false }
     }
 
@@ -125,5 +124,18 @@ object SystemFont {
         // when drawn, but its own typeface, so the loader accepts it.
         if (made == Typeface.DEFAULT) made = Typeface.create(base, weight + 1, italic)
         return if (made == Typeface.DEFAULT) null else made
+    }
+
+    /**
+     * Whether the saved settings turn this on. Runs on Discord's main thread before the first screen:
+     * Venus writes them with JSON.stringify, so a file without `"systemFont":true` (the switch off, the
+     * common case) needs no JSON parsing. Anything else is parsed exactly as before.
+     */
+    private fun savedOn(file: File): Boolean {
+        val text = String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8)
+        // java.lang.String.indexOf: the host has no usable Kotlin text helpers.
+        val raw = text as java.lang.String
+        if (raw.indexOf("\"systemFont\":true") < 0 && raw.indexOf("\"systemFont\":\"") < 0) return false
+        return JSONObject(text).optBoolean("systemFont", false)
     }
 }

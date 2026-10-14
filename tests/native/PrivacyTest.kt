@@ -21,16 +21,40 @@ private data class Quad<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
 fun main(args: Array<String>) {
     val groups = listOf(HbcPrivacy.analytics, HbcPrivacy.telemetry, HbcPrivacy.crash)
     val natives = NativePrivacy.crash + NativePrivacy.telemetry + NativePrivacy.attribution + NativePrivacy.advertising
-    check(natives.size == 87 && natives.distinct().size == natives.size)
-    check(groups.flatten().size == 17 && groups.flatten().map { it.offset }.distinct().size == 17)
+    check(natives.size == 137 && natives.distinct().size == natives.size)
+    check(groups.flatten().size == 104 && groups.flatten().map { it.offset }.distinct().size == 104)
     check(HbcPrivacy.resolvedPromise.last() == 6.toByte())
+    // Cross-check every opcode constant against scripts/hbc/ops.txt (Hermes 250829098 BytecodeList.def)
+    // so an opcode number typo like LoadParam=52 (DivN) instead of 137 can never pass build validation.
+    val opsTable = File("scripts/hbc/ops.txt").readLines().associate { line ->
+        val parts = line.trim().split(Regex("\\s+"))
+        parts[1] to Pair(parts[0].toInt(), parts.drop(2))
+    }
+    val expectedOps = mapOf(
+        HbcPrivacy.OP_NEW_OBJECT to "NewObject",
+        HbcPrivacy.OP_GET_GLOBAL to "GetGlobalObject",
+        HbcPrivacy.OP_GET_BY_ID to "GetById",
+        HbcPrivacy.OP_TRY_GET_BY_ID to "TryGetById",
+        HbcPrivacy.OP_CALL1 to "Call1",
+        HbcPrivacy.OP_CALL2 to "Call2",
+        HbcPrivacy.OP_RET to "Ret",
+        HbcPrivacy.OP_LOAD_PARAM to "LoadParam",
+        HbcPrivacy.OP_LOAD_CONST_STRING to "LoadConstString",
+        HbcPrivacy.OP_LOAD_UNDEFINED to "LoadConstUndefined",
+        HbcPrivacy.OP_LOAD_FALSE to "LoadConstFalse",
+    )
+    for ((code, name) in expectedOps) {
+        check(opsTable[name]?.first == code) { "HBC98 opcode mismatch for $name: got $code, expected ${opsTable[name]?.first}" }
+    }
     // Every stub must decode into whole HBC98 instructions (1.3.6 used NewFastArray by mistake and misdecoded).
     fun hbcLength(op: Int) = when (op) {
         HbcPrivacy.OP_GET_GLOBAL, HbcPrivacy.OP_NEW_OBJECT, HbcPrivacy.OP_RET, HbcPrivacy.OP_LOAD_UNDEFINED, HbcPrivacy.OP_LOAD_FALSE -> 2
-        HbcPrivacy.OP_CALL1 -> 4; HbcPrivacy.OP_CALL2 -> 5; HbcPrivacy.OP_GET_BY_ID, HbcPrivacy.OP_TRY_GET_BY_ID -> 6
+        HbcPrivacy.OP_LOAD_PARAM -> 3
+        HbcPrivacy.OP_CALL1, HbcPrivacy.OP_LOAD_CONST_STRING -> 4; HbcPrivacy.OP_CALL2 -> 5; HbcPrivacy.OP_GET_BY_ID, HbcPrivacy.OP_TRY_GET_BY_ID -> 6
         else -> error("Unexpected opcode $op in privacy stub")
     }
-    for (stub in listOf(HbcPrivacy.resolvedPromise, HbcPrivacy.resolvedEmptyObject, HbcPrivacy.returnUndefined)) {
+    for (stub in listOf(HbcPrivacy.resolvedPromise, HbcPrivacy.resolvedEmptyObject, HbcPrivacy.returnUndefined,
+        HbcPrivacy.returnFalse, HbcPrivacy.returnEmptyObject, HbcPrivacy.returnEmptyString, HbcPrivacy.callParam2)) {
         var pc = 0; var last = -1
         while (pc < stub.size) { last = stub[pc].toInt() and 255; pc += hbcLength(last) }
         check(pc == stub.size && last == HbcPrivacy.OP_RET) { "Privacy stub does not decode to whole instructions" }
@@ -82,6 +106,17 @@ fun main(args: Array<String>) {
     val loaderPrefix = loader.implementation!!.instructions.take(5)
     check(loaderPrefix.mapNotNull { ((it as? ReferenceInstruction)?.reference as? StringReference)?.string } == listOf("assets://index.android.bundle"))
     check(loaderPrefix.mapNotNull { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.name } == listOf("createAssetLoader"))
+    // Launch OTA checks return no Future; a check with a callback runs Discord's own code unchanged.
+    val otaMethod = methods.single { it.definingClass == BUNDLE_UPDATER && it.name == "checkForUpdate" && it.parameterTypes.size == 2 }
+    val otaUntouched = otaMethod.implementation!!.instructions.map { it.opcode }
+    val ota = MutableMethod(otaMethod)
+    skipLaunchOtaChecks(ota)
+    val otaGuarded = ota.implementation!!.instructions.toList()
+    check(ota.implementation!!.registerCount == otaMethod.implementation!!.registerCount)
+    check(otaGuarded.size == otaUntouched.size + OTA_GUARD_SIZE) { "OTA guard is ${otaGuarded.size - otaUntouched.size} instructions" }
+    check(otaGuarded.drop(OTA_GUARD_SIZE).map { it.opcode } == otaUntouched) { "Discord's own OTA code changed" }
+    check(otaGuarded.take(OTA_GUARD_SIZE).map { it.opcode } == listOf(Opcode.IF_NEZ, Opcode.CONST_4, Opcode.RETURN_OBJECT, Opcode.NOP))
+    check((otaGuarded[0] as OneRegisterInstruction).registerA == ota.implementation!!.registerCount - 1) { "OTA guard must test the callback" }
     // Quest Completer's User-Agent guard, assembled on Discord's real interceptor (a detached fixture, not a Patcher run).
     val interceptorMethod = methods.single { it.definingClass == USER_AGENT_INTERCEPTOR && it.name == "intercept" }
     val untouched = interceptorMethod.implementation!!.instructions.map { it.opcode }
@@ -445,7 +480,7 @@ fun main(args: Array<String>) {
             check(calls.single().definingClass == "Ljava/lang/Throwable;" && calls.single().name == "toString")
         } else check(calls.isEmpty())
     }
-    println("PASS: 17 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 87 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge (getSize, fileExists, readAsset); no APK patched")
+    println("PASS: 104 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 137 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge (getSize, fileExists, readAsset); no APK patched")
 }
 
 
@@ -459,9 +494,14 @@ private fun checkHermesSelections(original: ByteArray, groups: List<List<HbcPriv
         check(header.getInt(large) == target.offset && header.getInt(large + 12) == target.size)
         check(original[large + 36].toInt() and 0xc8 == 0) // Normal, no exception handler.
         val firstPointerRegister = header.getInt(large + 20) + header.getInt(large + 24)
-        val lowestUsedRegister = if (target.name == "startRecordingAnalyticsEvents") 1 else 6
-        check(firstPointerRegister <= lowestUsedRegister) { "Stub uses a non-GC-visible register" }
-        check(header.getInt(large + 28) >= if (target.name == "send") 10 else if (target.promise) 9 else lowestUsedRegister + 1)
+        val lowestUsedRegister = when (target.name) {
+            "startRecordingAnalyticsEvents" -> 1
+            "trackCrash" -> 8
+            "scheduleHeartbeatTracking", "recordLateComponentLayout" -> 7
+            else -> 6
+        }
+        check(firstPointerRegister <= lowestUsedRegister) { "Stub uses a non-GC-visible register: ${target.name} #${target.id}" }
+        check(header.getInt(large + 28) >= if (target.name == "send") 10 else if (target.promise) 9 else if (target.name == "timeRequire") 8 else lowestUsedRegister + 1)
         if (target.promise) check(original[large + 32].toInt() and 255 >= 2)
     }
     for (selection in 1..7) {

@@ -38,6 +38,9 @@ DEPENDENCIES = {
     "r8.jar": (
         "https://storage.googleapis.com/r8-releases/raw/8.12.22/r8.jar",
         "f18a6d1d7b37b7c9c8fbbcb5fd65b62f18bf7ce8f5be8e623b72648e282d964e"),
+    "hermes-compiler.tgz": (
+        "https://registry.npmjs.org/hermes-compiler/-/hermes-compiler-250829098.0.19.tgz",
+        "839af099f0926b5ebbd738ba54764a3f40e35dfc3aac91babf56f8eb7c69280e"),
 }
 
 
@@ -70,6 +73,9 @@ def tools():
     # Read one known tool file; never extract arbitrary npm archive paths.
     with tarfile.open(TOOLS / "terser.tgz") as archive:
         (TOOLS / "terser.js").write_bytes(archive.extractfile("package/dist/bundle.min.js").read())
+    with tarfile.open(TOOLS / "hermes-compiler.tgz") as archive:
+        (TOOLS / "hermesc").write_bytes(archive.extractfile("package/hermesc/linux64-bin/hermesc").read())
+    (TOOLS / "hermesc").chmod(0o755)
     # Always extract the pinned compiler, not an arbitrary previously installed version.
     with zipfile.ZipFile(TOOLS / "kotlin24.zip") as compiler:
         for entry in compiler.infolist():
@@ -108,7 +114,12 @@ context.Terser.minify(source, {compress:false, mangle:false,
     BUILD.mkdir(parents=True, exist_ok=True)
     output = BUILD / "bootstrap.js"
     output.write_text(content)
-    print(f"Prelude characters: {len(source.read_text())} -> {len(content)}", flush=True)
+    # Precompile/verify the compacted Venus runtime against Hermes HBC98 (250829098.0.19).
+    precompile = BUILD / "bootstrap.precompile.js"
+    precompile.write_text(content.replace("/*__FEATURES__*/", "globalThis.__venusFeatures"))
+    hbc_output = BUILD / "bootstrap.hbc"
+    run(TOOLS / "hermesc", "-emit-binary", "-O", "-g0", "-w", f"-out={hbc_output}", precompile)
+    print(f"Prelude characters: {len(source.read_text())} -> {len(content)} (HBC98: {hbc_output.stat().st_size} bytes)", flush=True)
     return output
 
 

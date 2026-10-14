@@ -21,7 +21,7 @@
     if (features.platformIndicators) selectModules([4877, 4855, 1378, 2051, 10603, 10371, 12845, 15667, 9108, 13649, 12602]);
     if (features.reviewDB) selectModules([12627, 13521, 13987, 8510, 5997, 6621, 1378, 585]);
     if (features.readAll) selectModules([15929]);
-    if (features.quests) selectModules([585, 7120]);
+    if (features.quests) selectModules([585, 7120, 13174]);
     if (features.hideGift) selectModules([11609, 11817]);
     if (features.hideQuestDock) selectModules([14608, 14700]);
     if (features.systemEmoji) selectModules([6552]);
@@ -31,9 +31,12 @@
     if (features.youBarSettings) selectModules([16032]);
     if (features.splitMessages) selectModules([1086, 1378, 2051, 6880, 8602]);
     if (features.translate) selectModules([585, 1378, 7378, 11023]);
+    if (features.userNotif) selectModules([585, 1378, 2051, 2073, 4482, 4877, 13174]);
+    if (features.accountSwitcher) selectModules([1378, 11800, 11801, 11802, 16032]);
+    if (features.appIcons) selectModules([1378, 4491, 8621, 13528, 15065, 15066, 16750, 17096]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2115]);
-    const revision = "1.11.0";
+    const revision = "1.12.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;
@@ -46,7 +49,9 @@
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
-        translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false, language:"auto" };
+        translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false,
+        userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
+        accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, language:"auto" };
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
     const listeners = new Set();
     const dirty = new Set();
@@ -187,7 +192,10 @@
     // Emojis are the same: the native side reads the saved setting once at launch, and so does this.
     let emojiInUse = false;
     function settingsSnapshot() {
-        return JSON.stringify(features.reviewDB && reviewToken && reviewAccount ? Object.assign({}, settings, {reviewAuth:{account:reviewAccount, token:reviewToken}}) : settings);
+        const extra = {};
+        if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
+        if (features.userNotif && userNotif.ids.size) extra.userNotifIds = Array.from(userNotif.ids);
+        return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
     }
     function save() {
         if (!files || status.storage === "loading") return;
@@ -267,6 +275,10 @@
         notify(key);
         if (features.translate && key === "translate" && value) translateRestore();
         if (features.translate && featureFor(key) === "translate") later(translateChanged, 0);
+        if (features.userNotif && key === "userNotifPush" && value && status.storage !== "loading" && status.storage !== "waiting") later(() => userNotifRequestPermissions(false), 0);
+        if (features.userNotif && featureFor(key) === "userNotif") userNotifSync();
+        if (features.accountSwitcher && featureFor(key) === "accountSwitcher") accountSwitcherSync();
+        if (features.quests || features.userNotif) backgroundSync();
         return true;
     }
     function initFiles(module) {
@@ -297,15 +309,22 @@
                 // Restore a saved ReviewDB sign-in (a ReviewDB token, never the Discord token).
                 if (features.reviewDB && !reviewToken && auth && typeof auth.token === "string" && auth.token.length <= 8192 &&
                     typeof auth.account === "string" && /^\d{17,20}$/.test(auth.account)) { reviewToken = auth.token; reviewAccount = auth.account; }
+                if (features.userNotif && !userNotif.dirty && Array.isArray(loaded.userNotifIds)) {
+                    userNotif.ids.clear();
+                    loaded.userNotifIds.slice(0, USER_NOTIF_MAX_IDS).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) userNotif.ids.add(id); });
+                }
             }
             status.storage = "ready";
             fontInUse = settings.systemFont;
             emojiInUse = settings.systemEmoji;
             if (!enabled("picker")) clearSizes();
             // Persist edits made while the asynchronous restore was in flight.
-            if (dirty.size) save();
+            if (dirty.size || features.userNotif && userNotif.dirty) save();
             restoreDeleted();
             if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
+            if (features.userNotif) userNotifSync();
+            if (features.accountSwitcher) accountSwitcherSync();
+            if (features.quests || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
             i18n.shownIn = uiLanguage(); loadLanguage(i18n.shownIn);
@@ -585,7 +604,7 @@
 
     // Native setting nodes use Discord's own themed rows, navigation and back stack.
     let SettingsList;
-    const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : key;
+    const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : key;
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
         const entry = { settings: keys };
@@ -617,7 +636,7 @@
         validUser:[5405, "AtIcon"], copyBios:[4780, "CopyIcon"], reviewDB:[7358, "ThumbsUpIcon"], readAll:[15161, "DoubleCheckmarkIcon"],
         hiddenChannels:[5410, "LockIcon"], dashless:[15125, "HashmarkIcon"], systemFont:[15207, "LettersIcon"], systemEmoji:[8719, "ChatSmileIcon"],
         hideGift:[10528, "GiftIcon"], hideCall:[7309, "PhoneCallIcon"], youBarSettings:[6799, "SettingsIcon"], quests:[14519, "QuestsIcon"],
-        hideQuestDock:[6384, "EyeSlashIcon"]};
+        hideQuestDock:[6384, "EyeSlashIcon"], userNotif:[9044, "BellIcon"], accountSwitcher:[5404, "GroupIcon"], appIcons:[5375, "AppsIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -806,6 +825,8 @@
         toggle("people", "validUser", "Fix unknown mentions", "@unknown-user mentions are looked up and show the person's name.");
         toggle("people", "copyBios", "Copy profile bios", "Hold a bio to select and copy its text. Links still work.");
         withOptions("people", "reviewDB", "VENUS_REVIEWDB", "User and server reviews", "Read and write reviews on profiles and servers, from the community ReviewDB service.", "Reviews", ReviewSettings);
+        withOptions("people", "userNotif", "VENUS_USERNOTIF", "User activity notifications", "Shows a notice when chosen friends or users change status, start typing or send a message.", "Activity notifications", UserNotifSettings);
+        withOptions("people", "accountSwitcher", "VENUS_ACCOUNTSWITCHER", "Account switcher", "Switch between multiple Discord accounts from the You tab, your profile bar or Settings.", "Account switcher", AccountSwitcherSettings);
         // Servers
         withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button under Direct Messages that marks everything as read. Hold it to choose what.", "Read all", ReadAllSettings);
         toggle("servers", "hiddenChannels", "Show hidden channels", "Channels you can't open appear with a lock. Only their name and dates show, not messages.");
@@ -816,6 +837,7 @@
         toggle("appearance", "hideGift", "Hide the gift button", "Removes the Nitro gift button from the message bar.");
         toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles. Message fills the space.");
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus, next to the notifications bell.");
+        toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon in Settings without Nitro.");
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background. You still claim the rewards.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar. Quests still work.");
@@ -962,8 +984,10 @@
     }
     function catalogEligibility(orig, self, args) {
         const user = currentUser(), feature = args[0];
-        if (!nativeCapabilities && enabled("emojis") && user && args[1] && args[1].id === user.id &&
-            (feature === emojiCatalog.EMOJIS_EVERYWHERE || feature === emojiCatalog.ANIMATED_EMOJIS)) return true;
+        if (!nativeCapabilities && user && args[1] && args[1].id === user.id && emojiCatalog) {
+            if (enabled("emojis") && (feature === emojiCatalog.EMOJIS_EVERYWHERE || feature === emojiCatalog.ANIMATED_EMOJIS)) return true;
+            if (enabled("appIcons") && feature === emojiCatalog.APP_ICONS) return true;
+        }
         return orig.apply(self, args);
     }
     function premiumOverride(key, setting) {
@@ -1432,10 +1456,11 @@
         if (!event) return orig.apply(self, args);
         if (features.hiddenChannels) channelMetadataEvent(event);
         if (event.type === "LOGOUT") { clearDeleted(false); edits.clear(); archiveRestored = false; clearReviewAuth(); }
-        if (features.noDelete && RESTORE_EVENTS.has(event.type)) Promise.resolve().then(restoreDeleted);
+        if (!features.noDelete) return orig.apply(self, args);
+        if (RESTORE_EVENTS.has(event.type)) Promise.resolve().then(restoreDeleted);
         // Views are keyed by the store's own ChannelMessages identity, so unrelated events
         // (typing, presence, reactions) no longer force a re-merge and re-sort of every chat.
-        if (event.type === "CHANNEL_DELETE") forgetChannels(new Set([event.channel && event.channel.id || event.channelId || event.id]));
+        if (event.type === "CHANNEL_DELETE" && (deleted.size || edits.size)) forgetChannels(new Set([event.channel && event.channel.id || event.channelId || event.id]));
         // Leaving a server (not an outage, which says unavailable) used to keep its kept messages and edit history
         // in memory and in the saved file for good, where nothing could ever show or remove them.
         if (event.type === "GUILD_DELETE" && event.guild && event.guild.id && !event.guild.unavailable && (deleted.size || edits.size)) {
@@ -2419,11 +2444,27 @@
         if (waiting.length && !quest.enrolling && !blocked) questEnroll(waiting[0]);
         if (!quest.running && ready.length) questRun(ready[0]);
     }
-    // Accepting one at a time, a few seconds apart. A refusal or captcha leaves that quest alone for hours.
+    // Accepting one at a time, a few seconds apart. Includes Discord's own QuestDataUtils (7116) ad decision and
+    // sealed metadata fields (matching _enrollInQuest in 9765) so the enrollment body is identical to a manual tap.
+    function questEnrollBody(id) {
+        const body = {location:QUEST_HOME_MOBILE};
+        const data = global.__r && global.__r(7116);
+        try {
+            const decision = data && typeof data.getAdDecisionData === "function" ? data.getAdDecisionData(id, QUEST_HOME_MOBILE) : null;
+            if (decision && typeof decision === "object") Object.assign(body, decision);
+        } catch (_) {}
+        let meta = null, traffic = null;
+        try { if (data && typeof data.getAdMetadataSealed === "function") meta = data.getAdMetadataSealed(QUEST_HOME_MOBILE, id); } catch (_) {}
+        try { if (data && typeof data.getAdTrafficMetadataSealed === "function") traffic = data.getAdTrafficMetadataSealed(QUEST_HOME_MOBILE, id); } catch (_) {}
+        body.metadata_sealed = meta != null ? meta : null;
+        body.traffic_metadata_sealed = traffic != null ? traffic : null;
+        return body;
+    }
     function questEnroll(item) {
         const generation = quest.generation, id = item.id;
         quest.enrolling = true;
-        questRequest("/quests/" + id + "/enroll", {location:QUEST_HOME_MOBILE}).then(response => {
+        backgroundSync();
+        questRequest("/quests/" + id + "/enroll", questEnrollBody(id)).then(response => {
             if (generation !== quest.generation) return;
             const status = questUserStatus(response && response.body);
             if (!status || !questDispatch({type:"QUESTS_ENROLL_SUCCESS", enrolledQuestUserStatus:status})) questsFetch(true);
@@ -2438,6 +2479,7 @@
         }).then(() => {
             if (generation !== quest.generation) return;
             quest.enrolling = false;
+            backgroundSync();
             questsSchedule(3000 + Math.floor(Math.random() * 2000));
         });
     }
@@ -2445,6 +2487,7 @@
     function questRun(item) {
         const task = questTask(item), entry = {id:item.id, task, generation:quest.generation, name:questName(item)};
         quest.running = entry;
+        backgroundSync();
         notify("quests");
         const work = task.kind === "video" ? questVideo(entry, item) : task.kind === "play" ? questPlay(entry) : questActivity(entry);
         work.then(done => {
@@ -2459,7 +2502,7 @@
             quest.skip.set(entry.id, Date.now() + Math.max(wait, QUEST_RETRY_MS));
             questStatus("Couldn't finish {name}: {problem}", true, {name:entry.name, problem:String(error && error.message || error)});
         }).then(() => {
-            if (quest.running === entry) { quest.running = null; notify("quests"); }
+            if (quest.running === entry) { quest.running = null; backgroundSync(); notify("quests"); }
             if (entry.generation === quest.generation) questsSchedule(2000 + Math.floor(Math.random() * 2000));
         });
     }
@@ -2469,14 +2512,21 @@
         if (body && body.quest_id) questDispatch({type:"QUESTS_USER_STATUS_UPDATE", user_status:body});
         return !!(body && body.completed_at);
     }
+    function questOptimisticProgress(id, taskType, progress) {
+        const update = inspectedExport(9765, "updateOptimisticProgress");
+        try { if (typeof update === "function") update(id, taskType, progress); } catch (_) {}
+    }
     async function questVideo(entry, item) {
         const enrolled = questTime(item.userStatus && item.userStatus.enrolledAt), target = entry.task.target;
         if (!Number.isFinite(enrolled)) throw new Error("no accepted time");
         let done = questProgress(item, entry.task.type), completed = false;
         while (questActive(entry) && done < target) {
-            const allowed = (Date.now() - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, next = Math.min(target, done + QUEST_VIDEO_STEP);
+            const step = 6 + Math.random() * 2;
+            const allowed = (Date.now() - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, next = Math.min(target, done + step);
             if (allowed < next) { await questSleep(Math.max(1000, Math.ceil((next - allowed) * 1000))); continue; }
-            const response = await questRequest("/quests/" + entry.id + "/video-progress", {timestamp:Math.min(target, next + Math.random())});
+            const timestamp = next < target ? Math.min(target, next + Math.random() * 0.5) : target;
+            questOptimisticProgress(entry.id, entry.task.type, timestamp);
+            const response = await questRequest("/quests/" + entry.id + "/video-progress", {timestamp});
             if (!questActive(entry)) return false;
             completed = questVideoStatus(response);
             done = next;
@@ -2484,7 +2534,10 @@
             await questSleep(1000 + Math.floor(Math.random() * 500));
         }
         if (!questActive(entry)) return false;
-        if (!completed) completed = questVideoStatus(await questRequest("/quests/" + entry.id + "/video-progress", {timestamp:target}));
+        if (!completed) {
+            questOptimisticProgress(entry.id, entry.task.type, target);
+            completed = questVideoStatus(await questRequest("/quests/" + entry.id + "/video-progress", {timestamp:target}));
+        }
         return completed;
     }
     // The executable_path desktop reports for a running game: the last two parts of its lowercase path, the way
@@ -2588,6 +2641,7 @@
             if (quest.refetchTimer !== undefined) global.clearTimeout(quest.refetchTimer);
         }
         quest.scanTimer = undefined; quest.refetchTimer = undefined;
+        backgroundSync();
     }
     function questsReset() { questsStop(); quest.completed = 0; quest.last = ""; quest.error = ""; notify("quests"); }
     function questsConnected(event) {
@@ -2619,6 +2673,7 @@
             quest.generation++; quest.running = null; quest.enrolling = false;
             if (quest.scanTimer !== undefined && global.clearTimeout) global.clearTimeout(quest.scanTimer);
             quest.scanTimer = undefined;
+            backgroundSync();
         }
         questsSchedule(1000);
     }
@@ -2710,27 +2765,29 @@
     function messageRow(orig, self, args) {
         const result = orig.apply(self,args), row = args[0];
         if (!result || !row || row.rowType !== 1 || !result.message) return result;
+        const pastelOn = enabled("pastelize"), translateOn = enabled("translate"), noDeleteOn = enabled("noDelete");
         let message = result.message;
-        if (enabled("pastelize")) message = pastelMessage(message,row.message);
+        if (pastelOn) message = pastelMessage(message,row.message);
         if (features.pastelize && message.referencedMessage && message.referencedMessage.message) {
             const reply = pastelReply(message.referencedMessage.message);
             if (reply !== message.referencedMessage.message) message = Object.assign({},message,{referencedMessage:Object.assign({},message.referencedMessage,{message:reply})});
         }
         let next = message === result.message ? result : Object.assign({},result,{message});
+        if (!translateOn && !features.translate && !(noDeleteOn && (edits.size || deleted.size))) return next;
         const source = row.message || message;
         const channelId = source.channel_id || source.channelId || message.channelId;
         const id = source.id || message.id;
         // Before edit history, so the crossed-out old versions above it stay as they were written.
-        if (enabled("translate")) {
+        if (translateOn) {
             let shown = translateRow(next.message, source, channelId, id);
             if (shown.referencedMessage) shown = translateReply(shown, source, channelId, id);
             if (shown !== next.message) next = Object.assign({},next,{message:shown});
         } else if (features.translate) translateSeen(source, channelId, id, null);
-        if (edits.size && enabled("noDelete")) {
+        if (edits.size && noDeleteOn) {
             const shown = withEditHistory(next.message, channelId, id);
             if (shown !== next.message) next = Object.assign({},next,{message:shown});
         }
-        const bucket = deleted.size && enabled("noDelete") && deletedByChannel.get(channelId);
+        const bucket = deleted.size && noDeleteOn && deletedByChannel.get(channelId);
         if (bucket && bucket.has(deletedKey(channelId,id)) && RN && typeof RN.processColor === "function") {
             // Native row highlight schema from RowGeneratorConstants (7379). No injected notice, altered
             // message content, or AutoMod state. Only retained local rows are tinted.
@@ -3383,6 +3440,72 @@
         useSettings("hideGift");
         return enabled("hideGift") && props && props.shouldShowGiftButton ? Object.assign({}, props, {shouldShowGiftButton:false}) : props;
     }
+    // Unlock app icons: lets you pick any Discord app icon in Settings -> App Icon without Nitro, stops
+    // AppIconPremiumManager (17096) from resetting the icon on app state changes, and removes the "Unlock all
+    // icons with Nitro" upsell button and "Nitro" section heading on the App Icon screen (15065 / 15066).
+    function appIconObject(icon) {
+        if (!enabled("appIcons") || !icon || typeof icon !== "object" || !icon.isPremium) return icon;
+        return Object.assign({}, icon, {isPremium:false});
+    }
+    function appIconsList(orig, self, args) {
+        const list = orig.apply(self, args);
+        return enabled("appIcons") && Array.isArray(list) ? list.map(appIconObject) : list;
+    }
+    function hookAppIconConstants(exports) {
+        if (!exports) return exports;
+        exports = hookExport(exports, "getIconById", (orig, self, args) => appIconObject(orig.apply(self, args)));
+        exports = hookExport(exports, "getIcons", appIconsList);
+        exports = hookExport(exports, "getOfficialAlternateIcons", appIconsList);
+        return hookExport(exports, "getLimitedAlternateIcons", appIconsList);
+    }
+    function hookAppIconPremiumManager(exports) {
+        const mgr = exports && exports.default;
+        if (!mgr) return exports;
+        let patched = hookExport(mgr, "validateAndResetIfNeeded", function (orig, self, args) {
+            return enabled("appIcons") ? Promise.resolve() : orig.apply(self, args);
+        });
+        patched = hookExport(patched, "resetIcon", function (orig, self, args) {
+            if (enabled("appIcons")) return;
+            return orig.apply(self, args);
+        });
+        return replaceValue(exports, "default", patched);
+    }
+    function withoutAppIconUpsell(node, depth) {
+        if (!node || typeof node !== "object" || depth > 8) return node;
+        if (Array.isArray(node)) {
+            let changed = false;
+            const out = [];
+            for (let i = 0; i < node.length; i++) {
+                const child = withoutAppIconUpsell(node[i], depth + 1);
+                if (child !== node[i]) changed = true;
+                if (child !== null) out.push(child);
+            }
+            return changed ? out : node;
+        }
+        if (typeof node.type === "function" && (node.type.name === "AppIconRows" || node.type.displayName === "AppIconRows")) {
+            try { return withoutAppIconUpsell(node.type(node.props || {}), depth + 1); } catch (_) {}
+        }
+        if (!node.props) return node;
+        const UpsellButton = inspectedExport(9421, "default");
+        if (UpsellButton && (node.type === UpsellButton || node.type && node.type.type === UpsellButton)) return null;
+        if (typeof node.props.text === "string" && typeof node.props.onPress === "function" &&
+            node.type !== (inspectedExport(5916, "TableRow") || null)) return null;
+        let props = node.props;
+        // AppIconRows (15066) sets title="Nitro" on the alternate icons TableRowGroup when !hasNitro.
+        if (typeof props.title === "string" && /nitro/i.test(props.title))
+            props = Object.assign({}, props, {title:undefined});
+        const children = props.children, next = withoutAppIconUpsell(children, depth + 1);
+        if (next !== children) {
+            if (next === null || Array.isArray(next) && !next.length && props.style && !props.label && !props.icon) return null;
+            props = Object.assign({}, props, {children:next});
+        }
+        return props === node.props ? node : React.cloneElement(node, props);
+    }
+    function appIconsScreen(orig, self, args) {
+        useSettings("appIcons");
+        const rendered = orig.apply(self, args);
+        return enabled("appIcons") && React ? withoutAppIconUpsell(rendered, 0) : rendered;
+    }
     // Hide call button: UserProfileContactButtons (12696) draws Message and Call side by side, each in a
     // flex:1 slot, or as icon buttons next to a friend button. Its disableCalls prop only greys Call out, so
     // the Call button and the slot it sat in are left out of what it renders. Message's slot then takes the
@@ -3642,6 +3765,448 @@
         }
     }
 
+    // User activity notifications (based on UserNotif by cywrx and coder.gg): shows a toast when chosen friends or
+    // people by user ID change status, start typing or send a message. Friends can be watched all at once or picked
+    // one by one from the friend picker, and non-friends who share a server can be added by user ID as a backup.
+    // Leaving the app on Android normally closes Discord's Gateway socket (GatewayConnectionStore 5590 ->
+    // GatewaySocketSingleton 13174 socket.close(true)) and lets Android suspend timers. While a Quest is running or
+    // background push notifications are enabled, keep the socket open and hold Discord's ForegroundServiceManager
+    // (7179) wake lock so Quests finish and activity notifications arrive outside the app.
+    const BACKGROUND_SERVICE_KEY = "venus-background";
+    const bgKeepAlive = {active:false, title:"", content:"", socketHooked:false};
+    function isAppActive() {
+        const store = inspectedExport(1986, "default");
+        try {
+            if (store && typeof store.getState === "function") return store.getState() === "active";
+        } catch (_) {}
+        try {
+            const state = RN && RN.AppState && RN.AppState.currentState;
+            if (typeof state === "string" && state) return state === "active";
+        } catch (_) {}
+        return true;
+    }
+    function userNotifHasTargets() {
+        return !!(enabled("userNotif") && (settings.userNotifStatus || settings.userNotifMessages || settings.userNotifTyping) &&
+            (settings.userNotifFriends || userNotif.ids.size > 0));
+    }
+    function backgroundNeeded() {
+        const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
+        const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
+        return questBusy || pushListening;
+    }
+    function backgroundSync() {
+        const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
+        const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
+        const needed = questBusy || pushListening;
+        const pause = inspectedExport(13212, "default");
+        try { if (needed && pause && typeof pause.setIsPaused === "function") pause.setIsPaused(false); } catch (_) {}
+        const fg = inspectedExport(7179, "default");
+        if (!needed) {
+            if (!bgKeepAlive.active) return;
+            bgKeepAlive.active = false; bgKeepAlive.title = ""; bgKeepAlive.content = "";
+            try { if (fg && typeof fg.removeServiceHandler === "function") fg.removeServiceHandler(BACKGROUND_SERVICE_KEY); } catch (_) {}
+            return;
+        }
+        const title = tr("Venus Patches");
+        const content = questBusy && quest.running ? tr("Now: {name}.", {name:quest.running.name}) :
+            questBusy ? tr("Quest Completer") : tr("Activity notifications");
+        if (bgKeepAlive.active && bgKeepAlive.title === title && bgKeepAlive.content === content) return;
+        bgKeepAlive.active = true; bgKeepAlive.title = title; bgKeepAlive.content = content;
+        try {
+            if (fg && typeof fg.updateServiceHandler === "function")
+                fg.updateServiceHandler(BACKGROUND_SERVICE_KEY, {title, content, priority:2, type:0, usesGateway:true});
+        } catch (_) {}
+    }
+    function hookGatewaySocket(exports) {
+        const socket = exports && exports.socket;
+        if (!socket || typeof socket.close !== "function" || bgKeepAlive.socketHooked) return exports;
+        bgKeepAlive.socketHooked = true;
+        const origClose = socket.close;
+        replaceValue(socket, "close", function (clean) {
+            if (clean === true && !isAppActive() && backgroundNeeded()) {
+                const pause = inspectedExport(13212, "default");
+                try { if (pause && typeof pause.setIsPaused === "function") pause.setIsPaused(false); } catch (_) {}
+                return;
+            }
+            return origClose.apply(this, arguments);
+        });
+        return exports;
+    }
+    const USER_NOTIF_MAX_IDS = 500, USER_NOTIF_COOLDOWN_MS = 8000;
+    const USER_NOTIF_EVENTS = ["PRESENCE_UPDATES", "PRESENCE_UPDATE", "MESSAGE_CREATE", "TYPING_START", "CONNECTION_OPEN", "LOGOUT"];
+    const userNotif = {dispatcher:null, subscribed:false, relationships:null, guilds:null, ids:new Set(), dirty:false,
+        statuses:new Map(), cooldowns:new Map(), shown:0, last:null, permissionGranted:null};
+    function userNotifNativePerm() {
+        const native = RN && RN.NativeModules;
+        return native && (native.NativePermissionManager || native.RTNNativePermissionManager) || null;
+    }
+    function userNotifRequestPermissions(showFeedback) {
+        const ui = reviewUI(), pushMod = inspectedExport(8741, "default"), perm = userNotifNativePerm();
+        const openSystemSettings = () => {
+            try { if (pushMod && typeof pushMod.openNotificationSettings === "function") { pushMod.openNotificationSettings(); return; } } catch (_) {}
+            try { if (perm && typeof perm.openSettings === "function") perm.openSettings(); } catch (_) {}
+        };
+        const askEnableInSystem = () => {
+            userNotif.permissionGranted = false; notify("userNotif");
+            confirmAction("Allow Discord notifications?",
+                "Android notifications are turned off for Discord. Enable them in system settings to receive push notifications outside the app.",
+                "Open settings", openSystemSettings);
+        };
+        const checkStatus = () => {
+            if (perm && typeof perm.getNotificationAuthorizationStatus === "function") {
+                return Promise.resolve().then(() => perm.getNotificationAuthorizationStatus()).then(code => {
+                    const ok = code === 2 || code === "authorized" || code === true;
+                    userNotif.permissionGranted = ok; notify("userNotif");
+                    if (!ok) askEnableInSystem();
+                    else if (showFeedback) reviewToast(ui, "Notification permission granted");
+                    return ok;
+                }, () => true);
+            }
+            return Promise.resolve(true);
+        };
+        if (perm && typeof perm.requestNotificationAuthorization === "function") {
+            return Promise.resolve().then(() => perm.requestNotificationAuthorization()).then(() => checkStatus(), () => checkStatus());
+        }
+        const permsAndroid = RN && RN.PermissionsAndroid;
+        if (permsAndroid && typeof permsAndroid.request === "function") {
+            const postNotif = permsAndroid.PERMISSIONS && permsAndroid.PERMISSIONS.POST_NOTIFICATIONS || "android.permission.POST_NOTIFICATIONS";
+            return Promise.resolve().then(() => permsAndroid.request(postNotif)).then(res => {
+                const granted = !res || res === "granted" || (permsAndroid.RESULTS && res === permsAndroid.RESULTS.GRANTED);
+                userNotif.permissionGranted = granted; notify("userNotif");
+                if (!granted) askEnableInSystem();
+                else if (showFeedback) reviewToast(ui, "Notification permission granted");
+                return granted;
+            }, () => checkStatus());
+        }
+        return checkStatus();
+    }
+    function userNotifPushSend(content) {
+        if (!settings.userNotifPush || isAppActive()) return;
+        const pushMod = inspectedExport(8741, "default");
+        try {
+            if (pushMod && typeof pushMod.presentLocalNotification === "function")
+                pushMod.presentLocalNotification({alertTitle:tr("Activity notifications"), alertBody:content});
+        } catch (_) {}
+    }
+    function userNotifFriendIds() {
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        try {
+            const list = store && typeof store.getFriendIDs === "function" ? store.getFriendIDs() : null;
+            return Array.isArray(list) ? list.filter(id => typeof id === "string" && /^\d{17,20}$/.test(id)) : [];
+        } catch (_) { return []; }
+    }
+    function userNotifIsFriend(id) {
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        try {
+            if (store && typeof store.isFriend === "function") return !!store.isFriend(id);
+            if (store && typeof store.getFriendIDs === "function") {
+                const list = store.getFriendIDs();
+                return Array.isArray(list) && list.includes(id);
+            }
+        } catch (_) {}
+        return false;
+    }
+    function userNotifWatched(id) {
+        if (typeof id !== "string" || !/^\d{17,20}$/.test(id)) return false;
+        const me = currentUser();
+        if (me && me.id === id) return false;
+        return userNotif.ids.has(id) || !!(settings.userNotifFriends && userNotifIsFriend(id));
+    }
+    function userNotifPersonName(id, fallbackUser) {
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        try {
+            const nick = store && typeof store.getNickname === "function" && store.getNickname(id);
+            if (typeof nick === "string" && nick.trim()) return nick.trim();
+        } catch (_) {}
+        let user = fallbackUser;
+        try { if ((!user || !user.username && !user.globalName && !user.global_name) && userStore) user = userStore.getUser(id) || user; } catch (_) {}
+        const name = user && (user.globalName || user.global_name || user.username);
+        return typeof name === "string" && name.trim() ? name.trim() : id;
+    }
+    function userNotifStatusName(statusValue) {
+        return statusValue === "online" ? tr("Online") : statusValue === "idle" ? tr("Idle") :
+            statusValue === "dnd" ? tr("Do Not Disturb") : tr("Offline");
+    }
+    function userNotifPlace(channelId, guildId) {
+        const channel = channelStore && channelId ? channelStore.getChannel(channelId) : null;
+        const gId = guildId || channel && (channel.guild_id || channel.guildId);
+        const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2073, "default"));
+        const guild = guilds && gId && typeof guilds.getGuild === "function" ? guilds.getGuild(gId) : null;
+        const cName = channel && typeof channel.name === "string" && channel.name.trim() ? channel.name.trim() : "";
+        const gName = guild && typeof guild.name === "string" && guild.name.trim() ? guild.name.trim() : "";
+        const isDm = channel && (channel.type === 1 || channel.type === 3);
+        return {isDm:!!isDm, cName, gName};
+    }
+    function userNotifAllowed(id, kind) {
+        const now = Date.now(), key = id + ":" + kind, prev = userNotif.cooldowns.get(key) || 0;
+        if (now - prev < USER_NOTIF_COOLDOWN_MS) return false;
+        if (userNotif.cooldowns.size >= 500) userNotif.cooldowns.delete(userNotif.cooldowns.keys().next().value);
+        userNotif.cooldowns.set(key, now);
+        return true;
+    }
+    function userNotifShow(text, vars) {
+        userNotif.shown++;
+        userNotif.last = {text, vars};
+        const content = tr(text, vars);
+        const ui = reviewUI(), Icon = venusIcon(9044, "BellIcon");
+        try {
+            if (ui.toasts && typeof ui.toasts.open === "function")
+                ui.toasts.open({key:"venus-user-notif:" + userNotif.shown, content, IconComponent:Icon});
+        } catch (_) {}
+        userNotifPushSend(content);
+        notify("userNotif");
+    }
+    function userNotifSeedStatuses() {
+        if (!presenceStore || typeof presenceStore.getStatus !== "function") return;
+        const ids = new Set(userNotif.ids);
+        if (settings.userNotifFriends) userNotifFriendIds().forEach(id => ids.add(id));
+        ids.forEach(id => {
+            if (userNotif.statuses.has(id)) return;
+            try {
+                const current = presenceStore.getStatus(id);
+                if (typeof current === "string" && current) userNotif.statuses.set(id, current);
+            } catch (_) {}
+        });
+    }
+    function userNotifPresence(update) {
+        if (!update || !enabled("userNotif") || !settings.userNotifStatus) return;
+        const user = update.user, id = user && user.id || update.userId;
+        const nextStatus = typeof update.status === "string" ? update.status : "";
+        if (!id || !nextStatus || !userNotifWatched(id)) return;
+        let prev = userNotif.statuses.get(id);
+        if (prev === undefined && presenceStore && typeof presenceStore.getStatus === "function") {
+            try {
+                const stored = presenceStore.getStatus(id);
+                if (typeof stored === "string" && stored && stored !== nextStatus) prev = stored;
+            } catch (_) {}
+        }
+        if (userNotif.statuses.size >= 2000 && !userNotif.statuses.has(id))
+            userNotif.statuses.delete(userNotif.statuses.keys().next().value);
+        userNotif.statuses.set(id, nextStatus);
+        if (!prev || prev === nextStatus || !userNotifAllowed(id, "status:" + nextStatus)) return;
+        userNotifShow("{name} is now {status}", {name:userNotifPersonName(id, user), status:userNotifStatusName(nextStatus)});
+    }
+    function userNotifMessage(event) {
+        if (!enabled("userNotif") || !settings.userNotifMessages || !event || event.optimistic) return;
+        const message = event.message;
+        if (!message || message.state === "SENDING") return;
+        const author = message.author, id = author && author.id;
+        if (!id || !userNotifWatched(id) || !userNotifAllowed(id, "message")) return;
+        const name = userNotifPersonName(id, author);
+        const place = userNotifPlace(message.channel_id || message.channelId || event.channelId, message.guild_id || message.guildId || event.guildId);
+        if (place.isDm) userNotifShow("{name} sent you a DM", {name});
+        else if (place.cName && place.gName) userNotifShow("{name} sent a message in #{channel} ({server})", {name, channel:place.cName, server:place.gName});
+        else if (place.cName) userNotifShow("{name} sent a message in #{channel}", {name, channel:place.cName});
+        else userNotifShow("{name} sent a message", {name});
+    }
+    function userNotifTyping(event) {
+        if (!enabled("userNotif") || !settings.userNotifTyping || !event) return;
+        const id = event.userId || event.user && event.user.id;
+        if (!id || !userNotifWatched(id) || !userNotifAllowed(id, "typing")) return;
+        const name = userNotifPersonName(id, event.user);
+        const place = userNotifPlace(event.channelId || event.channel_id, event.guildId || event.guild_id);
+        if (place.isDm) userNotifShow("{name} is typing in your DM", {name});
+        else if (place.cName && place.gName) userNotifShow("{name} is typing in #{channel} ({server})", {name, channel:place.cName, server:place.gName});
+        else if (place.cName) userNotifShow("{name} is typing in #{channel}", {name, channel:place.cName});
+        else userNotifShow("{name} is typing", {name});
+    }
+    function userNotifEvent(event) {
+        if (!event || !enabled("userNotif")) return;
+        if (event.type === "PRESENCE_UPDATES" && Array.isArray(event.updates)) {
+            for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
+        } else if (event.type === "PRESENCE_UPDATE") userNotifPresence(event);
+        else if (event.type === "MESSAGE_CREATE") userNotifMessage(event);
+        else if (event.type === "TYPING_START") userNotifTyping(event);
+        else if (event.type === "CONNECTION_OPEN") { userNotif.statuses.clear(); userNotifSeedStatuses(); }
+        else if (event.type === "LOGOUT") { userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif"); }
+    }
+    function userNotifSync() {
+        const d = userNotif.dispatcher;
+        if (!d || typeof d.subscribe !== "function") return;
+        const active = enabled("userNotif");
+        if (active && !userNotif.subscribed) {
+            userNotif.subscribed = true;
+            userNotifSeedStatuses();
+            USER_NOTIF_EVENTS.forEach(type => d.subscribe(type, userNotifEvent));
+        } else if (!active && userNotif.subscribed) {
+            userNotif.subscribed = false;
+            if (typeof d.unsubscribe === "function") USER_NOTIF_EVENTS.forEach(type => d.unsubscribe(type, userNotifEvent));
+            userNotif.statuses.clear(); userNotif.cooldowns.clear();
+        } else if (active) userNotifSeedStatuses();
+    }
+    function userNotifInit(d) {
+        if (userNotif.dispatcher || !d || typeof d.subscribe !== "function") return;
+        userNotif.dispatcher = d;
+        userNotifSync();
+    }
+    function userNotifSetId(id, wanted) {
+        if (typeof id !== "string" || !/^\d{17,20}$/.test(id)) return false;
+        if (wanted) {
+            if (userNotif.ids.has(id)) return true;
+            if (userNotif.ids.size >= USER_NOTIF_MAX_IDS) userNotif.ids.delete(userNotif.ids.values().next().value);
+            userNotif.ids.add(id);
+            if (presenceStore && typeof presenceStore.getStatus === "function") {
+                try { const s = presenceStore.getStatus(id); if (typeof s === "string" && s) userNotif.statuses.set(id, s); } catch (_) {}
+            }
+        } else if (!userNotif.ids.delete(id)) return true;
+        userNotif.dirty = true;
+        save();
+        backgroundSync();
+        notify("userNotif");
+        return true;
+    }
+    function userNotifClearIds() {
+        if (!userNotif.ids.size && settings.userNotifFriends) return;
+        userNotif.ids.clear();
+        userNotif.dirty = true;
+        if (!settings.userNotifFriends) { settings.userNotifFriends = true; dirty.add("userNotifFriends"); }
+        save();
+        backgroundSync();
+        notify("userNotif");
+        reviewToast(reviewUI(), "People list reset");
+    }
+    function userNotifAvatar(user) {
+        if (!user || !RN || !RN.Image) return undefined;
+        let uri = null;
+        const avatars = inspectedExport(1403, "default");
+        try { if (avatars && typeof avatars.getUserAvatarURL === "function") uri = avatars.getUserAvatarURL(user, false, 64); } catch (_) {}
+        if ((typeof uri !== "string" || !/^https?:\/\//.test(uri)) && typeof user.id === "string" && typeof user.avatar === "string" && user.avatar)
+            uri = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=64";
+        return typeof uri === "string" && /^https?:\/\//.test(uri) ? el(RN.Image, {source:{uri}, style:{width:32, height:32, borderRadius:16}}) : undefined;
+    }
+    function userNotifSummary() {
+        if (!enabled("userNotif")) return tr("Turned off. Switch it on in Features to start.");
+        const friends = userNotifFriendIds(), friendSet = new Set(friends);
+        let pickedFriends = 0, otherPeople = 0;
+        userNotif.ids.forEach(id => { if (friendSet.has(id)) pickedFriends++; else otherPeople++; });
+        const watchedFriends = settings.userNotifFriends ? friends.length : pickedFriends;
+        const total = watchedFriends + otherPeople;
+        const who = !total ? tr("No one chosen yet. Turn on All friends or pick people below.") :
+            settings.userNotifFriends && !otherPeople ? (friends.length ? pl(friends.length, "Watching {n} friend.", "Watching all {n} friends.") : tr("Watching all friends.")) :
+            pl(total, "Watching {n} person.", "Watching {n} people.");
+        const countLine = userNotif.shown ? pl(userNotif.shown, "Shown {n} notification since Discord opened.", "Shown {n} notifications since Discord opened.") :
+            tr("No notifications shown yet since Discord opened.");
+        const lines = [who + " " + countLine];
+        if (userNotif.last) lines.push(tr("Last: {name}", {name:tr(userNotif.last.text, userNotif.last.vars)}));
+        return lines.join("\n");
+    }
+    function UserNotifSettings() {
+        useSettings("userNotif");
+        const ui = reviewUI();
+        const [query, setQuery] = React.useState(""), [idDraft, setIdDraft] = React.useState(""), [, redraw] = React.useState(0);
+        React.useEffect(() => {
+            const stores = [userStore, presenceStore, userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"))].filter(Boolean);
+            const wake = () => redraw(n => n + 1);
+            stores.forEach(s => { try { if (typeof s.addChangeListener === "function") s.addChangeListener(wake); } catch (_) {} });
+            return () => stores.forEach(s => { try { if (typeof s.removeChangeListener === "function") s.removeChangeListener(wake); } catch (_) {} });
+        }, []);
+        if (!React || !RN) return null;
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Row = ui.TableRow;
+        const CheckboxRow = inspectedExport(5913, "TableCheckboxRow"), SearchField = inspectedExport(6472, "SearchField");
+        const on = enabled("userNotif"), allFriends = !!settings.userNotifFriends;
+        const friends = userNotifFriendIds(), friendSet = new Set(friends);
+        const friendEntries = friends.map(id => {
+            let user = null, st = "offline";
+            try { if (userStore) user = userStore.getUser(id); } catch (_) {}
+            try { if (presenceStore && typeof presenceStore.getStatus === "function") st = presenceStore.getStatus(id) || "offline"; } catch (_) {}
+            const name = userNotifPersonName(id, user), username = user && user.username || "";
+            return {id, user, name, username, status:st};
+        }).sort((a, b) => {
+            const aPicked = allFriends || userNotif.ids.has(a.id), bPicked = allFriends || userNotif.ids.has(b.id);
+            if (aPicked !== bPicked) return aPicked ? -1 : 1;
+            const aOnline = a.status && a.status !== "offline", bOnline = b.status && b.status !== "offline";
+            if (aOnline !== bOnline) return aOnline ? -1 : 1;
+            return a.name.localeCompare(b.name);
+        });
+        const searchText = typeof query === "string" ? query : "", cleanQuery = searchText.trim().toLowerCase(), idText = typeof idDraft === "string" ? idDraft : "";
+        const filteredFriends = cleanQuery ? friendEntries.filter(f => f.name.toLowerCase().includes(cleanQuery) || f.username.toLowerCase().includes(cleanQuery) || f.id.includes(cleanQuery)) : friendEntries;
+        const shownFriends = filteredFriends.slice(0, 60);
+        const customIds = [];
+        userNotif.ids.forEach(id => { if (!friendSet.has(id)) customIds.push(id); });
+        let pickedFriendsCount = 0;
+        userNotif.ids.forEach(id => { if (friendSet.has(id)) pickedFriendsCount++; });
+        const toggleFriend = id => {
+            if (!on) return;
+            if (allFriends) {
+                userNotif.ids.clear();
+                friends.forEach(fId => { if (fId !== id && userNotif.ids.size < USER_NOTIF_MAX_IDS) userNotif.ids.add(fId); });
+                customIds.forEach(cId => { if (userNotif.ids.size < USER_NOTIF_MAX_IDS) userNotif.ids.add(cId); });
+                userNotif.dirty = true;
+                setSetting("userNotifFriends", false);
+                return;
+            }
+            userNotifSetId(id, !userNotif.ids.has(id));
+        };
+        const friendRow = entry => {
+            const checked = allFriends || userNotif.ids.has(entry.id);
+            const sub = (entry.username && entry.username !== entry.name ? "@" + entry.username + " \u00b7 " : "") + userNotifStatusName(entry.status);
+            const avatar = userNotifAvatar(entry.user);
+            if (CheckboxRow) return el(CheckboxRow, {key:entry.id, label:entry.name, subLabel:sub, icon:avatar, checked, disabled:!on, onPress:() => toggleFriend(entry.id)});
+            return Row ? el(Row, {key:entry.id, label:(checked ? "\u2713 " : "") + entry.name, subLabel:sub, icon:avatar, disabled:!on, onPress:() => toggleFriend(entry.id)}) : null;
+        };
+        const searchBox = friends.length > 5 ? (SearchField ? el(RN.View, {key:"search", style:{paddingHorizontal:12, paddingTop:8, paddingBottom:4}},
+            el(SearchField, {placeholder:tr("Search friends"), value:searchText, onChange:text => setQuery(String(text || "")), isDisabled:!on})) :
+            ui.TextInput ? el(RN.View, {key:"search", style:{paddingHorizontal:12, paddingTop:8, paddingBottom:4}},
+                el(ui.TextInput, {placeholder:tr("Search friends"), value:searchText, onChange:text => setQuery(String(text || "")), isDisabled:!on, editable:on})) : null) : null;
+        const friendPickerSub = allFriends ? (friends.length ? pl(friends.length, "All {n} friend selected. Tap a friend to pick individually.", "All {n} friends selected. Tap a friend to pick individually.") : tr("Every friend on your Discord friends list.")) :
+            pickedFriendsCount ? pl(pickedFriendsCount, "{n} friend selected.", "{n} friends selected.") : tr("Tap friends below to watch them.");
+        const friendRows = !friends.length ? [Row ? el(Row, {key:"empty", label:tr("No friends found"), subLabel:tr("Open your friends list once if Discord hasn't loaded it yet."), disabled:true}) : null] :
+            !shownFriends.length ? [Row ? el(Row, {key:"none", label:tr("No matching friends"), disabled:true}) : null] :
+            shownFriends.map(friendRow);
+        if (filteredFriends.length > shownFriends.length && Row)
+            friendRows.push(el(Row, {key:"more", label:tr("Search to see {n} more", {n:filteredFriends.length - shownFriends.length}), disabled:true}));
+        const onIdText = text => setIdDraft(String(text || "").replace(/[^0-9]/g, "").slice(0, 20));
+        const validDraft = /^\d{17,20}$/.test(idText);
+        const addById = () => {
+            if (!on || !validDraft) return;
+            const me = currentUser();
+            if (me && me.id === idText) { reviewToast(ui, "That's your own user ID"); return; }
+            userNotifSetId(idText, true);
+            const getUser = inspectedExport(7630, "getUser");
+            if (!knownUser(idText) && typeof getUser === "function") try { Promise.resolve(getUser(idText)).catch(() => {}); } catch (_) {}
+            setIdDraft("");
+        };
+        const idInputProps = {value:idText, keyboardType:"number-pad", maxLength:20, placeholder:tr("17 to 20 digit user ID"),
+            onSubmitEditing:addById, returnKeyType:"done", editable:on, isDisabled:!on};
+        const idInput = ui.TextInput ? el(ui.TextInput, Object.assign({label:tr("Add by user ID"), onChange:onIdText}, idInputProps)) :
+            el(RN.TextInput, Object.assign({onChangeText:onIdText, style:{fontSize:16, padding:12}}, idInputProps));
+        const customRows = customIds.map(id => {
+            let user = null, st = null;
+            try { if (userStore) user = userStore.getUser(id); } catch (_) {}
+            try { if (presenceStore && typeof presenceStore.getStatus === "function") st = presenceStore.getStatus(id); } catch (_) {}
+            const name = userNotifPersonName(id, user);
+            const sub = (name !== id ? id + " \u00b7 " : "") + (st ? userNotifStatusName(st) + " \u00b7 " : "") + tr("Tap to remove");
+            return Row ? el(Row, {key:"id:" + id, label:name, subLabel:sub, icon:userNotifAvatar(user), disabled:!on, onPress:() => userNotifSetId(id, false)}) : null;
+        });
+        const groups = [
+            statusCard("status", userNotifSummary()),
+            el(Group, {key:"events", title:tr("Notify me when they")},
+                switchRow(Switch, "userNotifStatus", "Change status", "Online, Idle, Do Not Disturb or Offline."),
+                switchRow(Switch, "userNotifMessages", "Send a message", "In DMs or in any server channel your client receives."),
+                switchRow(Switch, "userNotifTyping", "Start typing", "In DMs or in a channel you have open.")),
+            el(Group, {key:"push", title:tr("Outside Discord")},
+                switchRow(Switch, "userNotifPush", "Push notifications outside Discord", "Sends a phone notification when you leave the app. Keeps Discord connected in the background, which can use extra battery."),
+                settings.userNotifPush && userNotif.permissionGranted === false && Row ?
+                    el(Row, {key:"perm", label:tr("Allow notification permission"), subLabel:tr("Android notifications are turned off for Discord. Tap to check or open system settings."),
+                        disabled:!on, onPress:() => userNotifRequestPermissions(true)}) : null),
+            el(Group, {key:"friends", title:tr("Friends")},
+                switchRow(Switch, "userNotifFriends", "All friends", friendPickerSub),
+                searchBox,
+                friendRows),
+            el(Group, {key:"ids", title:tr("Other people (by user ID)")},
+                el(RN.View, {key:"input", style:{padding:12, gap:8}}, idInput),
+                Row ? el(Row, {key:"add", label:tr("Add user ID"), subLabel:tr("Backup for non-friends who share a server with you."),
+                    disabled:!on || !validDraft, onPress:addById}) : null,
+                customRows),
+            el(Group, {key:"manage", title:tr("Manage")},
+                actionRow(ui, "reset", "Reset chosen people",
+                    userNotif.ids.size || !allFriends ? tr("Switches All friends back on and clears {count}.", {count:pl(userNotif.ids.size, "{n} chosen person", "{n} chosen people")}) : "Using the default (All friends).",
+                    () => confirmAction("Reset chosen people?", "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.", "Reset", userNotifClearIds),
+                    !userNotif.ids.size && allFriends, true)),
+            footnote("note", "Notifications appear as banners while Discord is open, and as system notifications outside the app when Push notifications outside Discord is on. Keeping Discord connected in the background can use extra battery. For non-friends, Discord only sends status, typing and messages from servers you share with them.")];
+        return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
+    }
+
     // Settings button on the profile bar ("You bar"), next to the notifications bell. Same button Discord uses for
     // its own bar buttons (YouBarButton 16031), with Discord's settings icon, opening Discord's own settings.
     let youBarParts = null;
@@ -3670,7 +4235,255 @@
     }
     function youBarButtons(orig, self, args) {
         // Always the same shape, so switching it on or off never remounts the bell.
-        return el(React.Fragment, null, orig.apply(self, args), el(YouBarSettingsButton, {hasNameplate:args[0] && args[0].hasNameplate}));
+        const nameplate = args[0] && args[0].hasNameplate;
+        const children = [orig.apply(self, args)];
+        if (features.accountSwitcher) children.push(el(YouBarAccountSwitcherButton, {hasNameplate:nameplate}));
+        if (features.youBarSettings) children.push(el(YouBarSettingsButton, {hasNameplate:nameplate}));
+        return el.apply(null, [React.Fragment, null].concat(children));
+    }
+
+    // Account switcher: unlocks Discord's built-in mobile multi-account engine (MultiAccountStore 11800,
+    // MultiAccountActionCreators 11804, YouAccountActionSheet 16009 and ManageAccountsModal 16013), which Discord
+    // hides behind isStaffFromRawUser (11802) on mobile. Also places an optional button on the bottom profile bar
+    // (YouBarNotificationsButton 16032 / YouBarButton 16031).
+    const ACCOUNT_SWITCHER_DEFAULT_LIMIT = 5, ACCOUNT_SWITCHER_RAISED_LIMIT = 50;
+    const accountSwitcher = {store:null, origUsers:null, origValidUsers:null, realMaxAccounts:ACCOUNT_SWITCHER_DEFAULT_LIMIT,
+        youBarParts:null};
+    function multiAccountLimit() {
+        return enabled("accountSwitcher") ?
+            ACCOUNT_SWITCHER_RAISED_LIMIT : accountSwitcher.realMaxAccounts;
+    }
+    function multiAccountConstants(exports) {
+        if (!exports || typeof exports !== "object") return;
+        for (const key of ["MAX_ACCOUNTS", "MAX_PUSH_SYNC_ACCOUNTS"]) {
+            const desc = Object.getOwnPropertyDescriptor(exports, key);
+            if (!desc || !desc.configurable) continue;
+            if (typeof desc.value === "number" && desc.value > 0) accountSwitcher.realMaxAccounts = desc.value;
+            Object.defineProperty(exports, key, {get:multiAccountLimit, enumerable:desc.enumerable, configurable:true});
+        }
+    }
+    function accountSwitcherCurrentEntry() {
+        const me = currentUser();
+        if (!me || !me.id) return null;
+        const statuses = inspectedExport(11800, "MultiAccountTokenStatus");
+        const validStatus = statuses && typeof statuses.VALID === "number" ? statuses.VALID : 2;
+        return {id:me.id, avatar:me.avatar || null, username:me.username || "", discriminator:me.discriminator || "0", tokenStatus:validStatus};
+    }
+    function accountSwitcherWithCurrent(list, validOnly) {
+        const base = Array.isArray(list) ? list : [];
+        if (!enabled("accountSwitcher")) return base;
+        const entry = accountSwitcherCurrentEntry();
+        if (!entry) return base;
+        const statuses = inspectedExport(11800, "MultiAccountTokenStatus");
+        const invalidStatus = statuses && typeof statuses.INVALID === "number" ? statuses.INVALID : 0;
+        const filtered = validOnly ? base.filter(u => u && u.tokenStatus !== invalidStatus) : base;
+        if (filtered.some(u => u && u.id === entry.id)) return filtered;
+        return [entry].concat(filtered);
+    }
+    function accountSwitcherStore() {
+        return accountSwitcher.store || (accountSwitcher.store = inspectedExport(11800, "default"));
+    }
+    function accountSwitcherUsers() {
+        const store = accountSwitcherStore();
+        let list = [];
+        try {
+            if (store && typeof store.getUsers === "function") list = store.getUsers() || [];
+            else if (accountSwitcher.origUsers) list = accountSwitcher.origUsers() || [];
+        } catch (_) {}
+        return accountSwitcherWithCurrent(list, false);
+    }
+    function accountSwitcherSync() {
+        const store = accountSwitcherStore();
+        if (enabled("accountSwitcher")) {
+            const me = currentUser();
+            const rawTokenMod = global.__r && global.__r(1112);
+            const tokenMgr = rawTokenMod && typeof rawTokenMod.setToken === "function" ? rawTokenMod :
+                rawTokenMod && rawTokenMod.default && typeof rawTokenMod.default.setToken === "function" ? rawTokenMod.default : null;
+            try {
+                if (me && me.id && tokenMgr && typeof tokenMgr.getToken === "function" && typeof tokenMgr.setToken === "function") {
+                    const activeToken = tokenMgr.getToken();
+                    if (typeof activeToken === "string" && activeToken && !tokenMgr.getToken(me.id))
+                        tokenMgr.setToken(activeToken, me.id);
+                }
+            } catch (_) {}
+            try {
+                if (store && typeof store.initialize === "function" && typeof store.getState === "function") {
+                    const state = store.getState() || {};
+                    const users = accountSwitcherWithCurrent(state.users, false);
+                    store.initialize({users, canUseMultiAccountMobile:true});
+                }
+            } catch (_) {}
+        }
+        try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
+        notify("accountSwitcher");
+    }
+    function hookMultiAccountStore(exports) {
+        const store = exports && exports.default;
+        if (!store) return exports;
+        accountSwitcher.store = store;
+        if (!accountSwitcher.origUsers && typeof store.getUsers === "function")
+            accountSwitcher.origUsers = store.getUsers.bind(store);
+        if (!accountSwitcher.origValidUsers && typeof store.getValidUsers === "function")
+            accountSwitcher.origValidUsers = store.getValidUsers.bind(store);
+        let patched = hookExport(store, "getCanUseMultiAccountMobile", function (orig, self, args) {
+            return enabled("accountSwitcher") ? true : orig.apply(self, args);
+        });
+        patched = hookExport(patched, "getUsers", function (orig, self, args) {
+            const res = orig.apply(self, args);
+            return enabled("accountSwitcher") ? accountSwitcherWithCurrent(res, false) : res;
+        });
+        patched = hookExport(patched, "getValidUsers", function (orig, self, args) {
+            const res = orig.apply(self, args);
+            return enabled("accountSwitcher") ? accountSwitcherWithCurrent(res, true) : res;
+        });
+        patched = hookExport(patched, "getHasLoggedInAccounts", function (orig, self, args) {
+            const res = orig.apply(self, args);
+            return enabled("accountSwitcher") ? (res || accountSwitcherUsers().length > 0) : res;
+        });
+        const out = replaceValue(exports, "default", patched);
+        if (enabled("accountSwitcher")) accountSwitcherSync();
+        return out;
+    }
+    function hookIsStaffForMultiAccount(exports) {
+        if (!exports) return exports;
+        const wrap = function (orig, self, args) {
+            const res = orig.apply(self, args);
+            if (res || !enabled("accountSwitcher")) return res;
+            const user = args[0], me = currentUser();
+            if (!me || (user && user.id === me.id)) return true;
+            const store = accountSwitcherStore();
+            try { if (store && typeof store.getCanUseMultiAccountMobile === "function" && !store.getCanUseMultiAccountMobile()) return true; } catch (_) {}
+            return res;
+        };
+        if (typeof exports.default === "function") exports = hookExport(exports, "default", wrap);
+        if (typeof exports.isStaffFromRawUser === "function") exports = hookExport(exports, "isStaffFromRawUser", wrap);
+        return exports;
+    }
+    function openAccountSwitcherSheet() {
+        accountSwitcherSync();
+        const showSheet = inspectedExport(16007, "showYouAccountActionSheet");
+        try { if (typeof showSheet === "function") { showSheet(false); return; } } catch (_) {}
+        openManageAccounts();
+    }
+    function openManageAccounts(screen) {
+        accountSwitcherSync();
+        if (!screen) {
+            const screens = inspectedExport(16014, "ManageAccountsScreens") || inspectedExport(16014, "ManageAccountsModalRoutes");
+            screen = screens && screens.MANAGE_ACCOUNTS || "manage_accounts";
+        }
+        const openModal = inspectedExport(16012, "default");
+        try { if (typeof openModal === "function") { openModal(screen); return; } } catch (_) {}
+    }
+    function openAddAccountModal() {
+        const screens = inspectedExport(16014, "ManageAccountsScreens") || inspectedExport(16014, "ManageAccountsModalRoutes");
+        const loginRoute = screens && screens.LOGIN || "login";
+        openManageAccounts(loginRoute);
+    }
+    function switchToAccount(userId) {
+        if (typeof userId !== "string" || !userId) return;
+        const me = currentUser();
+        if (me && me.id === userId) return;
+        accountSwitcherSync();
+        const rawActions = global.__r && global.__r(11804);
+        const actions = rawActions && typeof rawActions.switchAccount === "function" ? rawActions : rawActions && rawActions.default;
+        const locs = inspectedExport(11801, "MultiAccountSwitchLocation");
+        const location = locs && (locs.MANAGE_ACCOUNTS_MODAL || locs.YOU_ACCOUNT_ACTION_SHEET) || "manage_accounts_modal";
+        try {
+            if (actions && typeof actions.switchAccount === "function") {
+                actions.switchAccount(userId, undefined, location);
+                return;
+            }
+        } catch (_) {}
+    }
+    function removeSavedAccount(userId) {
+        if (typeof userId !== "string" || !userId) return;
+        const me = currentUser();
+        if (me && me.id === userId) return;
+        const rawActions = global.__r && global.__r(11804);
+        const actions = rawActions && typeof rawActions.removeAccount === "function" ? rawActions : rawActions && rawActions.default;
+        try { if (actions && typeof actions.removeAccount === "function") actions.removeAccount(userId); } catch (_) {}
+        notify("accountSwitcher");
+    }
+    function YouBarAccountSwitcherButton(props) {
+        useSettings("accountSwitcher");
+        useSettings("accountSwitcherYouBar");
+        if (!enabled("accountSwitcher") || !settings.accountSwitcherYouBar || !RN) return null;
+        if (!accountSwitcher.youBarParts) {
+            const Button = inspectedExport(16031, "default"), Icon = inspectedExport(5404, "GroupIcon") || inspectedExport(10420, "UserCircleIcon");
+            if (!Button || !Icon) return null;
+            const size = inspectedExport(14615, "YOU_BAR_BUTTON_ICON_SIZE") || 20;
+            accountSwitcher.youBarParts = {Button, Icon, style:{width:size, height:size}};
+        }
+        const nameplate = !!(props && props.hasNameplate);
+        return el(accountSwitcher.youBarParts.Button, {hasNameplate:nameplate, hasBadge:false,
+            accessibilityLabel:tr("Switch accounts"), onPress:openAccountSwitcherSheet, onLongPress:() => openManageAccounts(),
+            icon:el(accountSwitcher.youBarParts.Icon, {size:"custom", style:accountSwitcher.youBarParts.style, color:nameplate ? "white" : undefined})});
+    }
+    function accountSwitcherSummary() {
+        if (!enabled("accountSwitcher")) return tr("Turned off. Switch it on in Features to start.");
+        const accounts = accountSwitcherUsers();
+        const me = currentUser();
+        const limit = multiAccountLimit();
+        const countText = accounts.length ? pl(accounts.length, "{n} account saved (up to {max}).", "{n} accounts saved (up to {max}).", {max:limit}) :
+            tr("No accounts saved yet (up to {max}).", {max:limit});
+        const activeName = me && (me.globalName || me.global_name || me.username);
+        return activeName ? countText + "\n" + tr("Signed in as {name}.", {name:activeName}) : countText;
+    }
+    function AccountSwitcherSettings() {
+        useSettings("accountSwitcher");
+        const [, forceUpdate] = React.useState(0);
+        const ui = reviewUI();
+        React.useEffect(() => {
+            accountSwitcherSync();
+            const validate = inspectedExport(11804, "validateMultiAccountTokens");
+            try { if (enabled("accountSwitcher") && typeof validate === "function") validate(); } catch (_) {}
+            const wake = () => forceUpdate(n => n + 1);
+            const stores = [userStore, accountSwitcherStore()].filter(Boolean);
+            stores.forEach(s => { try { if (typeof s.addChangeListener === "function") s.addChangeListener(wake); } catch (_) {} });
+            return () => stores.forEach(s => { try { if (typeof s.removeChangeListener === "function") s.removeChangeListener(wake); } catch (_) {} });
+        }, []);
+        if (!React || !RN) return null;
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Row = ui.TableRow;
+        const on = enabled("accountSwitcher");
+        const me = currentUser(), myId = me && me.id;
+        const accounts = accountSwitcherUsers();
+        const statuses = inspectedExport(11800, "MultiAccountTokenStatus");
+        const invalidStatus = statuses && typeof statuses.INVALID === "number" ? statuses.INVALID : 0;
+        const validatingStatus = statuses && typeof statuses.VALIDATING === "number" ? statuses.VALIDATING : 1;
+        const accountRows = accounts.length ? accounts.map(acc => {
+            if (!acc || !acc.id || !Row) return null;
+            const active = myId && acc.id === myId;
+            const fullUser = (active ? me : userStore && userStore.getUser(acc.id)) || acc;
+            const displayName = fullUser && (fullUser.globalName || fullUser.global_name || fullUser.username) || acc.username || acc.id;
+            const handle = acc.username && acc.username !== displayName ? "@" + acc.username + " \u00b7 " : "";
+            const statusText = active ? tr("Active account") :
+                acc.tokenStatus === invalidStatus ? tr("Session expired \u00b7 Tap to sign in again") :
+                acc.tokenStatus === validatingStatus ? tr("Checking session...") : tr("Tap to switch");
+            return el(Row, {key:"acc:" + acc.id, label:(active ? "\u2713 " : "") + displayName, subLabel:handle + statusText,
+                icon:userNotifAvatar(fullUser), disabled:!on,
+                onPress:() => {
+                    if (active) { openAccountSwitcherSheet(); return; }
+                    if (acc.tokenStatus === invalidStatus) { openAddAccountModal(); return; }
+                    switchToAccount(acc.id);
+                },
+                onLongPress:!active ? () => confirmAction("Remove account?",
+                    tr("Remove {name} from this phone's account switcher? You can add it again anytime.", {name:displayName}),
+                    "Remove", () => removeSavedAccount(acc.id)) : undefined});
+        }) : [Row ? el(Row, {key:"empty", label:tr("No saved accounts yet"), subLabel:tr("Tap Add account below to sign in to another account."), disabled:true}) : null];
+        const groups = [
+            statusCard("status", accountSwitcherSummary()),
+            el(Group, {key:"accounts", title:tr("Accounts")},
+                accountRows,
+                Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."),
+                    arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
+                Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."),
+                    arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
+                Row ? el(Row, {key:"sheet", label:tr("Open quick switcher"), subLabel:tr("Opens the account & status sheet."),
+                    arrow:true, disabled:!on, onPress:openAccountSwitcherSheet}) : null),
+            el(Group, {key:"shortcuts", title:tr("Shortcuts")},
+                switchRow(Switch, "accountSwitcherYouBar", "Button on the profile bar", "Shows a Switch accounts button next to the notifications bell on the bottom bar.")),
+            footnote("note", "You can also switch accounts anytime by tapping your avatar on the You tab or holding the You tab in the bottom navigation bar. Hold a non-active account above to remove it.")];
+        return settingsBody(ui, groups);
     }
 
     // Send messages longer than the limit (based on SplitLargeMessages by sunnie): the message box accepts
@@ -4266,23 +5079,32 @@
         reviewToast(reviewUI(), "Saved translations cleared");
     }
     function activatePlugins(id, exports) {
-        if ((features.validUser || features.splitMessages || features.translate) && id === 1378 && exports && exports.default) userStore = exports.default;
+        if ((features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons) && id === 1378 && exports && exports.default) userStore = exports.default;
         if (id === 2115 && exports && exports.default && !localeStore) {
             localeStore = exports.default;
             // Following Discord's language: switching it there switches Venus too.
             try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
                 if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); } }); } catch (_) {}
         }
+        if (features.appIcons && id === 8621) return hookAppIconConstants(exports);
+        if (features.appIcons && id === 17096) return hookAppIconPremiumManager(exports);
+        if (features.appIcons && (id === 15065 || id === 15066 || id === 16750)) return hookComponent(exports, appIconsScreen);
+        if (features.accountSwitcher && id === 11800) return hookMultiAccountStore(exports);
+        if (features.accountSwitcher && id === 11802) return hookIsStaffForMultiAccount(exports);
+        if (features.userNotif && id === 585 && exports && exports.default) userNotifInit(exports.default);
+        if (features.userNotif && id === 4482 && exports && exports.default) userNotif.relationships = exports.default;
+        if (features.userNotif && id === 2073 && exports && exports.default) userNotif.guilds = exports.default;
+        if ((features.quests || features.userNotif) && id === 13174) return hookGatewaySocket(exports);
         if (features.translate && id === 585 && exports && exports.default) translateInit(exports.default);
         if (features.translate && id === 11023) return hookComponent(exports, translateSheet);
         if (features.splitMessages && id === 8602) return maxLengthModule(exports);
-        if (features.youBarSettings && id === 16032) return hookComponent(exports, youBarButtons);
+        if ((features.youBarSettings || features.accountSwitcher) && id === 16032) return hookComponent(exports, youBarButtons);
         if (features.validUser && id === 585 && exports && exports.default) validInit(exports.default);
         // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
         if (features.pastelize && id === 1252) pastelHash = typeof exports === "function" ? exports : exports.default;
         if (features.pastelize && id === 2111) guildMembers = exports.default;
         if ((features.pastelize || features.noDelete || features.translate) && id === 7378 && exports.default && exports.default.prototype) hookExport(exports.default.prototype,"generate",messageRow);
-        if (features.platformIndicators && id === 4877) presenceStore = exports.default;
+        if ((features.platformIndicators || features.userNotif) && id === 4877) presenceStore = exports.default;
         if (features.platformIndicators && id === 4855) sessionsStore = exports.default;
         if (features.platformIndicators && id === 10603) {
             displayNameType=exports.DisplayName;
@@ -4421,11 +5243,11 @@
             msgActions = actions;
             return replaceValue(exports, "default", actions);
         }
-        if (!features.freeNitro) return exports;
+        if (!features.freeNitro && !features.appIcons) return exports;
         if (id === 1378) userStore = exports.default;
         if (id === 13528) { emojiCatalog = exports; return hookExport(exports, "canUserUse", catalogEligibility); }
-        if (id === 5772) emojiStore = exports.default;
-        if (id === 5815) stickerStore = exports.default;
+        if (features.freeNitro && id === 5772) emojiStore = exports.default;
+        if (features.freeNitro && id === 5815) stickerStore = exports.default;
         if (id === 4491) {
             // The pinned build exports the capabilities on a default singleton;
             // named aliases are not used by its picker. Hook the inspected object.
@@ -4434,14 +5256,21 @@
                 premiumOriginal[key] = typeof capabilities[key] === "function" ? capabilities[key].bind(capabilities) : undefined;
                 capabilities = hookExport(capabilities, key, premiumOverride(key, setting));
             }
-            patchCapability("canUseEmojisEverywhere", "emojis");
-            patchCapability("canUseAnimatedEmojis", "emojis");
-            // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
-            premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+            if (features.freeNitro) {
+                patchCapability("canUseEmojisEverywhere", "emojis");
+                patchCapability("canUseAnimatedEmojis", "emojis");
+                // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
+                premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+            }
+            if (features.appIcons) {
+                patchCapability("canUsePremiumAppIcons", "appIcons");
+                if (typeof exports.canUsePremiumAppIcons === "function" && exports.default)
+                    exports = hookExport(exports, "canUsePremiumAppIcons", premiumOverride("canUsePremiumAppIcons", "appIcons"));
+            }
             if (exports.default) exports = replaceValue(exports, "default", capabilities);
             else exports = capabilities;
         }
-        if (id === 6756) {
+        if (features.freeNitro && id === 6756) {
             stickerRules = exports;
             exports = hookExport(exports, "getStickerSendability", sendability);
             exports = hookExport(exports, "isSendableSticker", sendableSticker);
@@ -4537,7 +5366,9 @@
     function decorateDefine(define) {
         if (typeof define !== "function") return define;
         return function (factory, id, dependencies) {
-            if ((id !== 120 && !targetModules.has(id)) || typeof factory !== "function") return define.apply(this, arguments);
+            // Runs for all ~17.7k modules at startup: no arguments copy for the ones Venus leaves alone.
+            if ((id !== 120 && !targetModules.has(id)) || typeof factory !== "function")
+                return arguments.length === 3 ? define.call(this, factory, id, dependencies) : define.apply(this, arguments);
             const args = Array.from(arguments);
             args[0] = function () {
                 const factoryArgs = Array.from(arguments);
@@ -4551,6 +5382,7 @@
                 if (module && module.exports) {
                     // Before anything reads them: DraftStore keeps its length cap from the moment it loads.
                     if (features.splitMessages && id === 1086) { try { lengthConstants(module.exports); } catch (_) {} }
+                    if (features.accountSwitcher && id === 11801) { try { multiAccountConstants(module.exports); } catch (_) {} }
                     if (id === 120) {
                         const initialize = module.exports.default;
                         let initializing = false;
@@ -4574,10 +5406,18 @@
             return define.apply(this, args);
         };
     }
+    // Discord's bundle reads global __d once per module (~17.7k times at startup). Once Metro has set it,
+    // it's a plain value again, so those reads aren't getter calls. Setting it again still decorates it.
+    function holdDefine(value) {
+        Object.defineProperty(global, "__d", { configurable: true, enumerable: true,
+            get: () => value, set: next => { defineValue(decorateDefine(next)); } });
+    }
+    function defineValue(value) {
+        Object.defineProperty(global, "__d", { configurable: true, enumerable: true, writable: true, value });
+    }
     const existing = global.__d;
-    let define = decorateDefine(existing);
-    Object.defineProperty(global, "__d", { configurable: true, enumerable: true,
-        get: () => define, set: value => { define = decorateDefine(value); } });
+    if (typeof existing === "function") defineValue(decorateDefine(existing));
+    else holdDefine(existing);
     // Local diagnostics/test API; not a network endpoint and no client-mod globals.
     global.__venusPatches = Object.freeze({ revision, settings, features, status, setSetting, formatSize, getSize });
 })(globalThis);

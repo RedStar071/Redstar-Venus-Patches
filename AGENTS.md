@@ -79,8 +79,129 @@ gh release create v1.6.1 patches/build/libs/patches-1.6.1.mpp --title "1.6.1" --
 2. Nothing to write for `patches-bundle.json`: its `description` is this version's `CHANGELOG.md` sections,
    which Morphe shows when its cached `CHANGELOG.md` doesn't list the new release yet. Never replace it with a sentence.
 3. Add the `CHANGELOG.md` entry at the top, as above.
-4. Precompile the Venus runtime to Hermes bytecode (HBC98) for every release and update, then run `python3 scripts/build.py` and `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`. Never ship a release or update with an uncompiled runtime.
+4. `python3 scripts/build.py` (which compacts `bootstrap.js`, verifies HBC98 syntax/bytecode compilation when `hermesc` is present, compiles all extensions and patches, and runs `runtime.test.cjs`, `PcmToolsTestKt` and `PrivacyTestKt`), then `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`.
 5. Update `README.md` if a feature or setting changed.
+
+## How the Venus runtime is compiled & injected (HBC98 architecture)
+
+Discord on Android runs React Native in **Bridgeless mode** (`com.facebook.react.runtime.ReactInstance`).
+In Bridgeless mode, calling `ReactInstance.loadJSBundle` twice (for example, loading a separate `bootstrap.hbc` file before `assets/index.android.bundle`) is **unsafe**: the first `loadJSBundle` call triggers `ReactHostImpl`'s completion callback early, marking the React instance ready and flushing queued native module calls before Discord's own bundle has registered `AppRegistry` or `RCTDeviceEventEmitter`.
+
+Instead, Venus uses **single-bundle HBC98 bytecode injection** (`HbcPrelude.kt`) combined with **in-place HBC98 function stubbing** (`HbcPrivacy.kt`):
+
+1. **Build time (`scripts/build.py` + `hermesc`)**:
+   - `scripts/build.py` parses and compacts `patches/src/main/resources/venus/bootstrap.js` with Terser (`compress: false, mangle: false, ascii_only: true`) into `patches/build/bootstrap.js`, and validates it with `hermesc -emit-binary` (HBC98 / `250829098.0.19`) so syntax and Hermes compatibility are guaranteed before packaging `bootstrap.js` into the `.mpp`.
+2. **Patch time inside Morphe Manager (`HbcPrelude.kt` & `HbcPrivacy.kt`)**:
+   - Because each user selects their own set of Morphe patches in Morphe Manager, the `/*__FEATURES__*/` configuration object in `bootstrap.js` is only known when Morphe patches the APK on the user's phone.
+   - `HbcPrelude.inject` embeds the user's `/*__FEATURES__*/` JSON into the compacted `bootstrap.js`, decomposes the script into existing ASCII strings from `index.android.bundle`'s string table using dynamic programming (minimum bytecode bytes), and emits **native HBC98 bytecode instructions** (`NewArray`, `LoadConstString`/`LoadConstStringLongIndex`, `DefineOwnInDenseArray`/`DefineOwnInDenseArrayL`, `Call2 Array.prototype.join`, `Call2 eval`) directly at the top of global function `#0` in `assets/index.android.bundle`.
+   - `HbcPrivacy.apply` overwrites 104 pinned analytics, telemetry, and crash-reporting HBC98 functions in-place with 4-to-23-byte register-safe HBC98 stubs (`returnUndefined`, `returnFalse`, `returnEmptyObject`, `returnEmptyString`, `callParam2`, `resolvedPromise`, `resolvedEmptyObject`).
+
+## Upgrading to a new Discord Android version
+
+Every Discord version upgrade touches four layers that are pinned to the exact APK and `assets/index.android.bundle`:
+1. **Supported version string** (`348.10 - Stable`) in `DiscordPatches.kt`.
+2. **HBC98 bundle & global `#0` constants** in `HbcPrelude.kt` and `HbcPrivacy.kt`.
+3. **Metro module IDs** in `patches/src/main/resources/venus/bootstrap.js` (and `tests/runtime.test.cjs`).
+4. **Pinned HBC98 privacy targets (104 functions)** in `HbcPrivacy.kt` and **pinned native DEX methods (137 methods)** in `PrivacyPatches.kt`.
+
+Follow this step-by-step checklist whenever upgrading the supported Discord version:
+
+### Step 1: Extract the new `.apkm`
+
+```bash
+mkdir -p work/new
+unzip -p Discord-NEW.apkm base.apk > work/new/base.apk
+unzip -o work/new/base.apk assets/index.android.bundle -d work/new
+```
+
+Verify that the Hermes bytecode version in `work/new/assets/index.android.bundle` is still HBC98 (`version = 98` at byte offset 8):
+```bash
+python3 -c "import struct; b=open('work/new/assets/index.android.bundle','rb').read(32); print('HBC version:', struct.unpack_from('<I', b, 8)[0])"
+```
+
+### Step 2: Run the automated HBC porting audit (`scripts/hbc/port_check.py`)
+
+```bash
+python3 scripts/hbc/port_check.py work/new/assets/index.android.bundle
+```
+
+`port_check.py` inspects the new bundle and outputs three sections:
+
+1. **Section 1 — Bundle & Global Function Constants**:
+   - Copy `ORIGINAL_SHA256` into `HbcPrivacy.kt`.
+   - Copy `FUNCTION_COUNT`, `GLOBAL_OFFSET`, `GLOBAL_SIZE`, `GLOBAL_SHA256`, `JOIN_ID`, and `EVAL_ID` into `HbcPrelude.kt`.
+   - Copy `PROMISE_ID`, `RESOLVE_ID`, and `EMPTY_ID` into `HbcPrivacy.kt`.
+   - Check `Global #0 frame=..., reads=..., flags=...`:
+     - Verify global `#0` still has `flags == 0x12` (compact header, no exception handlers) and `frame >= 4` so `R_ARR=0, R_TMP=1, R_FN=2, R_THIS=3` fit inside its existing frame without modifying the 12-byte header.
+
+2. **Section 2 — Bootstrap Metro Module Verification**:
+   - Checks all Metro modules hooked (`holdDefine` / `onDefine`) or demand-loaded (`inspectedExport` / `global.__r`) in `bootstrap.js`.
+   - Discord embeds source file paths (`fileFinishedImporting(moduleId, "path/to/File.tsx")`) in almost every module. If any module ID shifted in the new version, `port_check.py` prints `[MOVED/CHECK]` along with `candidate_in_new_bundle=<new_id>`.
+   - For any shifted or newly added module ID:
+     - Inspect the candidate with `B.show(new_id)` and `B.exports(new_id)` using `scripts/hbc/hbc.py`.
+     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/348.10-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js` and `tests/runtime.test.cjs`.
+     - Also check the icon module IDs in `FEATURE_ICONS` inside `bootstrap.js`:
+       ```bash
+       python3 -c "
+       import sys, re; sys.path.insert(0,'scripts/hbc'); from hbc import Bundle
+       B = Bundle('work/new/assets/index.android.bundle')
+       js = open('patches/src/main/resources/venus/bootstrap.js').read()
+       for name, mid in re.findall(r'(\w+):\s*\[(\d+),\s*\"(\w+)\"\]', js): pass
+       for m, prop in re.findall(r'\[(\d+),\s*\"(\w+)\"\]', js):
+           mid = int(m)
+           if prop not in B.strs(mid):
+               cands = [k for k, p in B.paths().items() if p.endswith('/' + prop + '.tsx')]
+               print(f'Icon {prop} moved from {mid} -> {cands}')
+       "
+       ```
+
+3. **Section 3 — HbcPrivacy Target Verification**:
+   - Checks all 104 pinned HBC98 functions across `analytics` (48), `telemetry` (40), and `crash` (16).
+   - Regenerate the Kotlin `Target(...)` lists with `--locate`:
+     ```bash
+     python3 scripts/hbc/privacy_targets.py work/new/assets/index.android.bundle --locate
+     ```
+   - For the 3 anonymous/unnamed targets (`#17776` `__timingFunction` in `metroRequire`, `#80849` `MetricReporter.send`, `#111344` `Rust Poller.send`), locate them if their function IDs shifted:
+     - `__timingFunction` (`#17776` in 348.10): disassemble global `#0` (`B.h.dis(B.h.func(0))[:150]`) and look for `PutByIdLoose ... '__timingFunction'` right after `CreateClosure`.
+     - `MetricReporter.send` (`#80849` in 348.10): check `B.tree(mid)` of `MetricReporter.tsx` and its dependencies for the `send` method.
+     - `Poller.send` (`#111344` in 348.10): search `B.fnmods('send')` for the module referencing `'NativePollerModule'` or crash reporting.
+   - **Critical safety invariants for every `HbcPrivacy` target**:
+     - Must have an expanded header (`flags & 0x20 != 0`) so its 32-bit `offset` and `size` live in the 40-byte large header.
+     - Must NOT have exception handlers or generator/async flags (`flags & 0xc8 == 0`), because Hermes puts a `uint32 excCount` trailer immediately after `offset + size` when `hasExceptionHandler` (`0x40`) is set.
+     - If stubbed with `returnEmptyObject`, `callParam2`, `resolvedPromise`, or `resolvedEmptyObject`, its `firstPointerRegister` (`num + nonptr` in the expanded header) must be `<= lowestRegisterWrittenByStub` (`0` for `returnEmptyObject`/`callParam2`, `0` for `resolvedPromise`/`resolvedEmptyObject` which write `r0, r1, r2`), and `frame` must be large enough for the stub's registers. (`PrivacyTest.kt` automatically enforces all of these invariants against the real APK!)
+   - Update the `returnEmptyObjectIds` (`expandEventProperties`, `getLocation`), `returnFalseIds` (`shouldCollectMetrics`, `isTracing`, `shouldRun`, `isZoomedExperimentEnabled`, `isJankScreenReportingEnabled`, `isNavigationTTIEnabled`), `callParam2Ids` (`__timingFunction`, `timeRequire`), and `resolvedEmptyObjectIds` (`track`, `send`) sets in `HbcPrivacy.kt` and `tests/native/PrivacyTest.kt` with the new function IDs.
+
+### Step 3: Verify Native DEX Fingerprints & Guard Targets (`PrivacyPatches.kt` & `DiscordPatches.kt`)
+
+Compile and run `PrivacyTestKt` against the new `base.apk`:
+
+```bash
+VENUS_ORIGINAL_APK=/home/user/webapp/work/new/base.apk python3 scripts/build.py
+```
+
+- `PrivacyTestKt` loads every `classes*.dex` from `VENUS_ORIGINAL_APK` via Morphe's DEX parser (`MultiDexFileReader`), verifies all 104 HBC targets against `assets/index.android.bundle`, cross-checks every HBC98 opcode constant against `scripts/hbc/ops.txt`, and checks that all **137 native DEX method targets** in `PrivacyPatches.kt` (`crash`, `telemetry`, `advertising`, `attribution`) exist with exact matching parameter types, return types, register counts (`registerCount - paramSlotCount >= requiredTempRegs`), and expected opcodes.
+- Also check `DiscordPatches.kt` native methods (`BundleUpdater.checkForUpdateAndReload`, `BundleUpdaterManager.checkForUpdateAndReload`, `ChatEventHandler`, `ReactNativeFontManager`, `EmojiTextView`, `TTIMetrics`, `MobileVoiceOverlay`, `SavedLocales`):
+  - If any DEX class or method signature changed in the new Discord APK, use `tests/native/DexInspect.kt` to inspect the updated class/method descriptors in `work/new/base.apk`:
+    ```bash
+    work/tools/kotlinc/bin/kotlinc -cp work/tools/morphe.jar tests/native/DexInspect.kt -d /tmp/dexinspect.jar
+    java -cp /tmp/dexinspect.jar:work/tools/morphe.jar DexInspectKt work/new/base.apk "Sentry"
+    ```
+
+### Step 4: End-to-End Patch & Bytecode Verification (`HbcPreludeTest.kt` & `VerifyApk.kt`)
+
+1. Bump the version string in `DiscordPatches.kt` (`compatibleWith("com.discord"("NEW_VERSION - Stable"))`) and `README.md`.
+2. Run the full build and test suite with `VENUS_ORIGINAL_APK` set:
+   ```bash
+   VENUS_ORIGINAL_APK=/home/user/webapp/work/new/base.apk python3 scripts/build.py
+   ```
+3. Run `HbcPreludeTestKt` to verify that `HbcPrelude.inject` + `HbcPrivacy.apply` commute cleanly on the new bundle and that every relocated/stubbed instruction disassembles without error:
+   ```bash
+   work/tools/kotlinc/bin/kotlinc -no-stdlib -no-reflect -Xfriend-paths=patches/build/classes.jar \
+     -cp patches/build/classes.jar:work/tools/morphe.jar tests/native/HbcPreludeTest.kt -d patches/build/hbc-prelude-tests.jar
+   java -Xmx512m -cp patches/build/hbc-prelude-tests.jar:patches/build/classes.jar:work/tools/morphe.jar \
+     app.venus.patches.HbcPreludeTestKt work/new/assets/index.android.bundle patches/build/bootstrap.js
+   ```
+4. Patch the full `base.apk` using Morphe CLI (`work/tools/morphe.jar`) and run `VerifyApk.kt` to confirm every patch applies with zero warnings or errors.
 
 ## Settings design
 
@@ -145,3 +266,4 @@ gestures").
 - Update `README.md` (features table) and the tests in `tests/runtime.test.cjs` whenever a
   title, group or option changes. The Features list test checks title and description length and that each icon
   is unique.
+- **Always keep both the module map file (`scripts/hbc/348.10-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.

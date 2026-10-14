@@ -40,6 +40,8 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Fix unknown mentions | @unknown-user mentions show the person's name |
 | | Copy profile bios | Hold a bio to select and copy it |
 | | User and server reviews | Read and write reviews, from ReviewDB |
+| | User activity notifications | Shows a notice when chosen friends or users change status, start typing or send a message |
+| | Account switcher | Switch between up to 50 Discord accounts from the profile bar or Venus settings |
 | **Servers** | Read all button | Marks servers, DMs or both as read in one tap |
 | | Show hidden channels | Channels you can't open appear with a lock |
 | | Spaces in channel names | "general chat" instead of "general-chat" |
@@ -48,6 +50,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide the gift button | Removes the Nitro gift button from the message bar |
 | | Hide the call button | Removes Call from people's profiles |
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
+| | Unlock app icons | Use any Discord app icon in Settings without Nitro |
 | **Quests** | Complete Quests automatically | Finishes video, Play and Activity Quests in the background |
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 

@@ -475,7 +475,7 @@ test('conversion disabled has no codec bridge calls for audio uploads', async ()
     await upload.reactNativeCompressAndExtractData();assert.equal(calls,0);
 });
 
-const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true, validUser:true, youBarSettings:true, splitMessages:true, translate:true};
+const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true, validUser:true, youBarSettings:true, splitMessages:true, translate:true, userNotif:true, accountSwitcher:true, appIcons:true};
 function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
@@ -1960,8 +1960,8 @@ test('Features list is grouped, plugin names are gone and every row says what it
     const rows=settingsRows(b);
     assert.deepEqual(rows.map(([label])=>label),['Messages','Sending','People','Servers','Appearance','Quests']);
     const titles=rows.flatMap(([,list])=>list);
-    assert.equal(titles.length,26);assert.equal(new Set(titles).size,26);
-    assert.ok(titles.includes('Double-tap to reply'));assert.ok(titles.includes('Send Nitro stickers and emojis as links'));
+    assert.equal(titles.length,29);assert.equal(new Set(titles).size,29);
+    assert.ok(titles.includes('Double-tap to reply'));assert.ok(titles.includes('Send Nitro stickers and emojis as links'));assert.ok(titles.includes('Unlock app icons'));
     for (const old of ['CopyBios','Dashless','FavouriteAnything','FreeNitro','Hidden Channels','JumpToTop','No typing','NoDelete','Pastelize',
         'PlatformIndicators','QuickDelete','Read All','Quest Completer','ReviewDB','Custom voice messages','File size on picker'])
         assert.ok(!titles.some(title=>title.includes(old)),'plugin name '+old+' still shown');
@@ -1972,7 +1972,7 @@ test('Features list is grouped, plugin names are gone and every row says what it
         const row=b.registry[id], text=row.useDescription && row.useDescription();
         assert.ok(text && text.length<=130,'missing or long description: '+id);assert.equal(typeof row.IconComponent,'function',id);
     }
-    assert.equal(new Set(ids.map(id=>b.registry[id].IconComponent)).size,26,'each feature has its own icon');
+    assert.equal(new Set(ids.map(id=>b.registry[id].IconComponent)).size,29,'each feature has its own icon');
     for (const [,list] of rows) for (const title of list) assert.ok(title.length<=40,'too long for one row: '+title);
     assert.match(b.registry.VENUS_VERSION.useTitle(),/^Venus Patches \d/);
 });
@@ -1988,7 +1988,7 @@ test('About shows the version, features on, status and links',()=>{
     const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
     assert.deepEqual(JSON.parse(JSON.stringify(general.sections)),[{label:'Venus Patches',settings:['VENUS_VERSION','VENUS_STATUS']},
         {label:'Links',settings:['VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']}]);
-    assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 26 features on/);
+    assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 29 features on/);
     b.api.setSetting('dashless',false);const before=Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]);
     b.api.setSetting('dashless',true);assert.equal(Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]),before+1);
     assert.equal(b.registry.VENUS_STATUS.useTitle(),'Status');
@@ -2003,7 +2003,7 @@ test('settings with more options have a switch and a separate button to their pa
     b.context.__r=id=>({6622:{FormSwitch},6631:{ChevronSmallRightIcon},1491:{useStackNavigation:()=>navigation},
         14239:{onRouteSettingOnPress:({navigation:nav,screen})=>nav.navigate(screen.route)}}[id]||null);
     const pages={VENUS_PASTELIZE:'pastelize',VENUS_FREENITRO:'freeNitro',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_TRANSLATE:'translate',
-        VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests',VENUS_GESTURES:'gestures'};
+        VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests',VENUS_GESTURES:'gestures',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher'};
     for (const [page,key] of Object.entries(pages)) {
         const row=b.registry[page+'_ROW'];
         assert.equal(row.type,'pressable');assert.equal(row.parent,'VENUS_PLUGINS');assert.equal(row.unsearchable,true);
@@ -2375,12 +2375,14 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         progress.set(id, value);
         return Promise.resolve({body:{quest_id:id, completed_at:value >= target ? 'now' : null, progress:{[type]:{value}}}});
     }};
-    let fetches = 0;
+    let fetches = 0; const optimistic = [];
     const native = {1283:{HTTP:http, encodeProperties:value => Buffer.from(JSON.stringify(value)).toString('base64')},
         1348:{getSuperProperties:() => ({os:'Android', system_locale:'en-GB'})},
+        7116:{getAdDecisionData:() => ({decision_id:null, is_targeted:false}), getAdMetadataSealed:() => null, getAdTrafficMetadataSealed:() => null},
         7127:{questUserStatusFromServer:body => ({questId:body.quest_id, enrolledAt:body.enrolled_at ? new Date(body.enrolled_at) : null,
             completedAt:body.completed_at || null, progress:body.progress || {}})},
-        9765:{fetchCurrentQuests:() => { fetches++; return Promise.resolve(); }},
+        9765:{fetchCurrentQuests:() => { fetches++; return Promise.resolve(); },
+            updateOptimisticProgress:(id, type, val) => { optimistic.push([id, type, val]); }},
         2051:{default:{getSortedPrivateChannels:() => [{id:'dm1'}]}},
         4531:{default:{open:value => ui.push('toast ' + value.content)}}, 5205:{default:{show:() => ui.push('alert')}},
         4694:{pushModal:() => ui.push('modal')}};
@@ -2402,7 +2404,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         await flush(); await flush();
     }
     function connect(id = 'me') { (subs.get('CONNECTION_OPEN') || []).forEach(fn => fn({type:'CONNECTION_OPEN', user:{id}})); }
-    return {...b, map, requests, events, ui, subs, run, connect, timers, http,
+    return {...b, map, requests, events, ui, subs, run, connect, timers, http, optimistic,
         get fetches() { return fetches; }, get clock() { return clock; }, advance(ms) { clock += ms; }};
 }
 const QUEST_T0 = 1_800_000_000_000;
@@ -2416,11 +2418,15 @@ test('Quest Completer accepts and completes a new video Quest in the background 
     const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 30)]});
     b.connect(); await b.run();
     const enroll = b.requests.find(r => r.url === '/quests/q1/enroll');
-    assert.ok(enroll, 'accepted the quest'); assert.equal(enroll.body.location, 12);
+    assert.ok(enroll, 'accepted the quest');
+    assert.deepEqual(JSON.parse(JSON.stringify(enroll.body)), {location:12, decision_id:null, is_targeted:false, metadata_sealed:null, traffic_metadata_sealed:null},
+        'enroll body matches Discord _enrollInQuest (9765) with QuestDataUtils (7116) ad decision and sealed metadata');
     assert.ok(b.events.some(e => e.type === 'QUESTS_ENROLL_SUCCESS'), 'QuestStore learns it was accepted');
     const video = b.requests.filter(r => r.url === '/quests/q1/video-progress');
     assert.ok(video.length >= 4, 'reports progress in steps, not one jump');
     assert.equal(video.at(-1).body.timestamp, 30);
+    assert.equal(b.optimistic.length, video.length, 'updates local optimistic video progress on each step like VideoQuestPlayer');
+    assert.equal(b.optimistic.at(-1)[2], 30);
     assert.ok(b.map.get('q1').userStatus.completedAt, 'completed');
     assert.deepEqual(b.ui, [], 'no toast, alert, modal or captcha screen');
 });
@@ -3488,3 +3494,372 @@ test('every language file has every Venus text and keeps its {placeholders}',()=
         assert.ok(Object.keys(pack.strings).length>=300,code+' is complete');
     }
 });
+
+function userNotifHarness({friends=['111111111111111111','222222222222222222'], statuses={'111111111111111111':'online','222222222222222222':'offline','333333333333333333':'online'}, disk=null}={}) {
+    const b=boot({userNotif:true});const {React,RN}=reactHarness(b);
+    let clock=1_800_000_000_000;
+    b.context.__clock=()=>clock;vm.runInContext('Date.now=function(){return __clock();}',b.context);
+    const toasts=[], subs={}, writes=[];let saved=disk;
+    const users={'111111111111111111':{id:'111111111111111111',username:'alice',globalName:'Alice',avatar:'a1'},
+        '222222222222222222':{id:'222222222222222222',username:'bob',globalName:'Bob'},
+        '333333333333333333':{id:'333333333333333333',username:'stranger',globalName:'Stranger'}};
+    const channels={'dm1':{id:'dm1',type:1},'ch1':{id:'ch1',type:0,name:'general',guild_id:'g1'}};
+    const guilds={'g1':{id:'g1',name:'Venus Hub'}};
+    const dispatcher={
+        subscribe(type,fn){(subs[type]||(subs[type]=[])).push(fn);},
+        unsubscribe(type,fn){if(subs[type])subs[type]=subs[type].filter(f=>f!==fn);},
+        dispatch(event){(subs[event.type]||[]).slice().forEach(fn=>fn(event));}
+    };
+    b.load({default:native({fileExists:async()=>saved!==null,readFile:async()=>saved||'{}',writeFile:async(d,n,t)=>{writes.push([n,t]);saved=t;}})});
+    b.load({default:{getCurrentUser:()=>({id:'999999999999999999'}),getUser:id=>users[id],addChangeListener(){},removeChangeListener(){}}},null,1378);
+    b.load({default:{getChannel:id=>channels[id]}},null,2051);
+    b.load({default:{getGuild:id=>guilds[id]}},null,2073);
+    b.load({default:{getFriendIDs:()=>friends,isFriend:id=>friends.includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4482);
+    b.load({default:{getStatus:id=>statuses[id],addChangeListener(){},removeChangeListener(){}}},null,4877);
+    b.load({default:dispatcher},null,585);
+    function TableCheckboxRow(props){return {type:TableCheckboxRow,props};}
+    function SearchField(props){return {type:SearchField,props};}
+    b.context.__r=id=>({4531:{default:{open:t=>toasts.push(t.content)}},5916:{TableRow:'Row'},5997:{TableRowGroup:'Group'},
+        6621:{TableSwitchRow:'Switch'},5913:{TableCheckboxRow},6472:{SearchField},9044:{BellIcon(){}}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    return {...b,React,RN,toasts,subs,dispatcher,users,statuses,registry,TableCheckboxRow,SearchField,writes,getSaved:()=>saved,advance:ms=>{clock+=ms;}};
+}
+test('User activity notifications watches friends and custom user IDs for status, typing and messages with cooldowns',async()=>{
+    const b=userNotifHarness();await flush();await flush();
+    assert.equal(Object.keys(b.subs).length,0,'unsubscribed while switched off');
+    b.api.setSetting('userNotif',true);
+    assert.ok(b.subs.PRESENCE_UPDATES && b.subs.PRESENCE_UPDATES.length===1,'subscribed once enabled');
+    // Same status as seeded from PresenceStore: no false notification.
+    b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'online'}]});
+    assert.deepEqual(b.toasts,[]);
+    // Friend changes status -> uses friend nickname.
+    b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'dnd'}]});
+    assert.equal(b.toasts.at(-1),'Ally is now Do Not Disturb');
+    // Cooldown suppresses duplicate status change within 8s.
+    b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'online'}]});
+    b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'dnd'}]});
+    assert.equal(b.toasts.length,2);
+    // Typing in DM and server channel.
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
+    assert.equal(b.toasts.at(-1),'Bob is typing in your DM');
+    b.advance(9000);
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'ch1'});
+    assert.equal(b.toasts.at(-1),'Bob is typing in #general (Venus Hub)');
+    // Message in server channel and DM; own messages and optimistic sends are ignored.
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'ch1',message:{id:'m1',channel_id:'ch1',author:{id:'111111111111111111'}}});
+    assert.equal(b.toasts.at(-1),'Ally sent a message in #general (Venus Hub)');
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',optimistic:true,channelId:'dm1',message:{id:'m2',author:{id:'222222222222222222'}}});
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'dm1',message:{id:'m3',author:{id:'999999999999999999'}}});
+    assert.equal(b.toasts.length,5,'optimistic and own messages ignored');
+    // Stranger is ignored until added by User ID backup.
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'ch1',message:{id:'m4',author:{id:'333333333333333333'}}});
+    assert.equal(b.toasts.length,5);
+    // Turning off unsubscribes cleanly.
+    b.api.setSetting('userNotif',false);
+    assert.equal(b.subs.PRESENCE_UPDATES.length,0);
+});
+test('User activity notifications friend picker and user ID backup persist and work for strangers',async()=>{
+    const b=userNotifHarness();await flush();await flush();
+    b.api.setSetting('userNotif',true);
+    const page=()=>pageNodes(b.registry.VENUS_USERNOTIF.screen.getComponent()());
+    // Both friends start checked when All friends is on.
+    let checks=page().filter(n=>n.type===b.TableCheckboxRow);
+    assert.equal(checks.length,2);assert.ok(checks.every(c=>c.props.checked===true));
+    // Tapping Alice unchecks her, switches All friends off, and keeps Bob checked.
+    checks.find(c=>c.props.label==='Ally').props.onPress();
+    assert.equal(b.api.settings.userNotifFriends,false);
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'111111111111111111',channelId:'dm1'});
+    assert.equal(b.toasts.length,0,'unchecked friend is no longer watched');
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
+    assert.equal(b.toasts.at(-1),'Bob is typing in your DM');
+    // Add a non-friend stranger via the User ID backup input.
+    let draft='';
+    const withDraft=()=>{let strCalls=0;b.React.useState=init=>{if(init===''&&++strCalls===2)return [draft,v=>{draft=v;}];return [init,()=>{}];};return page();};
+    let inputs=withDraft().filter(n=>n.props&&n.props.keyboardType==='number-pad');
+    assert.equal(inputs.length,1);
+    (inputs[0].props.onChange||inputs[0].props.onChangeText)('333333333333333333');
+    const addRow=withDraft().find(n=>n.type==='Row'&&n.props.label==='Add user ID');
+    assert.equal(addRow.props.disabled,false);
+    addRow.props.onPress();await flush();await flush();
+    // Stranger now triggers notifications in shared server and persists in venus-patches.json.
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'ch1',message:{id:'m5',channel_id:'ch1',author:{id:'333333333333333333'}}});
+    assert.equal(b.toasts.at(-1),'Stranger sent a message in #general (Venus Hub)');
+    const saved=JSON.parse(b.getSaved());
+    assert.deepEqual(saved.userNotifIds,['222222222222222222','333333333333333333']);
+    // Restoring in a new session keeps those watched IDs.
+    const restored=userNotifHarness({disk:b.getSaved()});await flush();await flush();
+    assert.equal(restored.api.settings.userNotifFriends,false);
+    restored.dispatcher.dispatch({type:'TYPING_START',userId:'333333333333333333',channelId:'ch1'});
+    assert.equal(restored.toasts.at(-1),'Stranger is typing in #general (Venus Hub)');
+});
+test('User activity notifications push option requests permissions, sends local notifications in background and keeps Gateway open',async()=>{
+    const b=userNotifHarness();await flush();await flush();
+    let appState='active', authRequested=0, authStatus=2, settingsOpened=0, socketCloses=0, pausedState=null;
+    const localPushes=[], fgActive=new Map(), alerts=[];
+    b.RN.NativeModules={NativePermissionManager:{
+        requestNotificationAuthorization:async()=>{authRequested++;return 'authorized';},
+        getNotificationAuthorizationStatus:async()=>authStatus,
+        openSettings:()=>{settingsOpened++;}
+    }};
+    const socket={close(clean){socketCloses++;}};
+    b.load({socket},null,13174);
+    const origR=b.context.__r;
+    b.context.__r=id=>({
+        1986:{default:{getState:()=>appState}},
+        7179:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
+        8741:{default:{presentLocalNotification:n=>localPushes.push(n),openNotificationSettings:()=>{settingsOpened++;}}},
+        13212:{default:{setIsPaused:v=>{pausedState=v;}}},
+        5205:{default:{show:a=>alerts.push(a)}}
+    }[id]||origR(id));
+    b.api.setSetting('userNotif',true);
+    assert.equal(fgActive.size,0,'foreground service idle while push is off');
+    // Enabling userNotifPush requests notification permission and activates background keep-alive.
+    b.api.setSetting('userNotifPush',true);await flush();await flush();
+    assert.equal(authRequested,1,'permission requested when turning on push notifications');
+    assert.ok(fgActive.has('venus-background'),'foreground service started while watching in background');
+    // Foreground notification: toast shown, no system push notification.
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
+    assert.equal(b.toasts.length,1);
+    assert.equal(localPushes.length,0,'no local push while app is active');
+    // Leaving the app: Gateway socket.close(true) is blocked and local push notification is sent.
+    appState='background';
+    socket.close(true);
+    assert.equal(socketCloses,0,'Gateway background close is prevented while push keep-alive is active');
+    assert.equal(pausedState,false,'Gateway socket pause cleared');
+    b.advance(9000);
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
+    assert.equal(localPushes.length,1,'system push notification sent while in background');
+    assert.equal(localPushes[0].alertTitle,'Activity notifications');
+    assert.equal(localPushes[0].alertBody,'Bob is typing in your DM');
+    // If Android notifications are disabled in system settings, prompts user to open settings.
+    authStatus=1;
+    b.api.setSetting('userNotifPush',false);
+    assert.equal(fgActive.size,0,'foreground service removed when push turned off');
+    socket.close(true);
+    assert.equal(socketCloses,1,'Gateway background close allowed once idle');
+    b.api.setSetting('userNotifPush',true);await flush();await flush();
+    assert.equal(alerts.length,1,'prompts when Android notifications are disabled');
+    alerts[0].onConfirm();
+    assert.equal(settingsOpened,1,'opens system notification settings on confirm');
+});
+test('Quest Completer keeps Gateway open and holds foreground service while completing a Quest in background',async()=>{
+    const b=boot({quests:true});
+    const timers=[];let nextId=1;
+    b.context.setTimeout=(fn,ms)=>{const id=nextId++;timers.push({id,fn,ms});return id;};
+    b.context.clearTimeout=id=>{const i=timers.findIndex(t=>t.id===id);if(i>=0)timers.splice(i,1);};
+    let appState='background', socketCloses=0;
+    const fgActive=new Map(), requests=[];
+    const socket={close(clean){socketCloses++;}};
+    b.load({socket},null,13174);
+    const questItem={
+        id:'q1',
+        config:{expiresAt:'2099-01-01T00:00:00.000Z',messages:{questName:'Background Quest'},taskConfigV2:{tasks:{WATCH_VIDEO_ON_MOBILE:{target:5}}}},
+        userStatus:{enrolledAt:'2020-01-01T00:00:00.000Z',completedAt:null,progress:{WATCH_VIDEO_ON_MOBILE:{value:0}}}
+    };
+    const store={quests:new Map([['q1',questItem]]),getQuest:id=>id==='q1'?questItem:null,addChangeListener(){}};
+    b.load({default:store},null,7120);
+    b.load({default:{subscribe(){},dispatch(){}}},null,585);
+    b.load({default:native({fileExists:async()=>false,readFile:async()=>'{}',writeFile:async()=>{}})});
+    let resolveProgress;
+    b.context.__r=id=>({
+        1986:{default:{getState:()=>appState}},
+        7179:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
+        13212:{default:{setIsPaused(){}}},
+        7120:{default:store},
+        1283:{HTTP:{post:req=>{requests.push(req);return new Promise(r=>{resolveProgress=r;});}}}
+    }[id]||null);
+    await flush();await flush();
+    b.api.setSetting('quests',true);
+    // Run the initial scan timer (at most 5 steps, since questsRefetchLoop re-schedules itself every 30 min).
+    for (let i=0;i<5 && timers.length;i++) timers.shift().fn();
+    await flush();
+    assert.equal(requests.length,1,'Quest progress request started');
+    assert.ok(fgActive.has('venus-background'),'Foreground service active while Quest is running');
+    // Leaving the app while Quest is running must not close the Gateway socket.
+    socket.close(true);
+    assert.equal(socketCloses,0,'Gateway close(true) blocked while Quest is running in background');
+    // Finish the Quest -> foreground service is released and Gateway can close normally when idle.
+    resolveProgress({ok:true,status:200,body:{quest_id:'q1',completed_at:'2026-10-14T00:00:00.000Z'}});
+    await flush();await flush();await flush();
+    assert.equal(fgActive.size,0,'Foreground service stopped once Quest finishes');
+    socket.close(true);
+    assert.equal(socketCloses,1,'Gateway close(true) allowed after Quest finishes');
+});
+
+test('Account switcher unlocks MultiAccountStore, seeds active token, raises limit, and injects You bar button',()=>{
+    const b=boot({accountSwitcher:true,youBarSettings:true});const {React,RN}=reactHarness(b);React.Fragment='Fragment';
+    const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
+    // 11801 Constants: MAX_ACCOUNTS is automatically 50 while accountSwitcher is enabled, and 5 when turned off.
+    const constants=b.load({MAX_ACCOUNTS:5,MAX_PUSH_SYNC_ACCOUNTS:5,SWITCH_ACCOUNTS_MODAL_KEY:'switch-accounts-modal',MultiAccountSwitchLocation:{YOU_ACCOUNT_ACTION_SHEET:'you_account_action_sheet'}},null,11801);
+    assert.equal(constants.MAX_ACCOUNTS,5,'stock limit 5 while Account switcher is off');
+    b.api.setSetting('accountSwitcher',true);
+    assert.equal(constants.MAX_ACCOUNTS,50,'limit automatically raised to 50 when Account switcher is enabled');
+
+    // 11802 Staff check and 11800 MultiAccountStore + 1112 TokenManager seeding.
+    const staffMod=b.load({isStaffFromRawUser:()=>false},null,11802);
+    assert.equal(staffMod.isStaffFromRawUser({id:'111',flags:0}),true,'staff gate bypassed while Account switcher is enabled');
+
+    const storedTokens=new Map();
+    const tokenManager={
+        getToken:id=>id?storedTokens.get(id):'active-user-token',
+        setToken:(tok,id)=>{if(id)storedTokens.set(id,tok);}
+    };
+    const me={id:'111',username:'venus_main',discriminator:'0',avatar:'av1',email:'main@example.com',phone:null};
+    const alt={id:'222',username:'venus_alt',discriminator:'0',avatar:'av2'};
+    b.load({default:{getCurrentUser:()=>me,getUser:id=>id==='111'?me:id==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},null,1378);
+
+    let storeState={users:[],canUseMultiAccountMobile:false};
+    const multiStore={
+        getCanUseMultiAccountMobile:()=>storeState.canUseMultiAccountMobile,
+        getHasLoggedInAccounts:()=>storeState.users.length>0,
+        getUsers:()=>storeState.users,
+        getValidUsers:()=>storeState.users.filter(u=>u.tokenStatus===2),
+        getIsValidatingUsers:()=>false,
+        initialize:s=>{storeState={users:Array.isArray(s?.users)?s.users:[],canUseMultiAccountMobile:!!s?.canUseMultiAccountMobile};},
+        emitChange(){},
+        addChangeListener(){},
+        removeChangeListener(){}
+    };
+    const sheetCalls=[],modalCalls=[],switched=[],removed=[];
+    function YouBarButton(props){return {type:YouBarButton,props};}
+    function GroupIcon(props){return {type:GroupIcon,props};}
+    function SettingsIcon(props){return {type:SettingsIcon,props};}
+    b.context.__r=id=>({
+        1112:{default:tokenManager},
+        1378:{default:{getCurrentUser:()=>me,getUser:uid=>uid==='111'?me:uid==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},
+        5404:{GroupIcon},
+        6799:{SettingsIcon},
+        11800:{default:multiStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},
+        11801:constants,
+        11804:{default:{
+            validateMultiAccountTokens(){},
+            switchAccount:(uid,cb,loc)=>switched.push([uid,loc]),
+            removeAccount:uid=>removed.push(uid)
+        }},
+        14615:{YOU_BAR_BUTTON_ICON_SIZE:20},
+        16007:{showYouAccountActionSheet:arg=>sheetCalls.push(arg)},
+        16012:{default:route=>modalCalls.push(route)},
+        16014:{ManageAccountsModalRoutes:{MANAGE_ACCOUNTS:'manage_accounts',LOGIN:'login'}},
+        16031:{default:YouBarButton},
+        5916:{TableRow:'Row'},5997:{TableRowGroup:'Group'},6621:{TableSwitchRow:'Switch'},5280:{Stack:'Stack'},5918:{Card:'Card'}
+    }[id]||null);
+
+    b.load({default:multiStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
+    assert.equal(multiStore.getCanUseMultiAccountMobile(),true,'MultiAccountStore unlocked');
+    assert.equal(storedTokens.get('111'),'active-user-token','active user token seeded into TokenManager by userId');
+    assert.equal(multiStore.getUsers().length,1,'current user seeded into MultiAccountStore');
+    assert.equal(multiStore.getUsers()[0].id,'111');
+
+    // YouBarNotificationsButton (16032): YouBarAccountSwitcherButton starts on by default and can be toggled with accountSwitcherYouBar.
+    function Bell(){return 'bell';}
+    const barMod=b.load({default:{$$typeof:Symbol.for('react.memo'),type:Bell,compare:null}},null,16032);
+    const barTree=barMod.default.type({hasNameplate:false});
+    const swComp=barTree.props.children[1];
+    const barBtn=swComp.type(swComp.props);
+    assert.equal(barBtn.type,YouBarButton,'You bar button starts on by default');
+    assert.equal(barBtn.props.accessibilityLabel,'Switch accounts');
+    barBtn.props.onPress();
+    assert.deepEqual(sheetCalls,[false],'tapping You bar button opens quick switcher sheet');
+    barBtn.props.onLongPress();
+    assert.deepEqual(modalCalls,['manage_accounts'],'long-pressing You bar button opens Manage Accounts modal');
+    b.api.setSetting('accountSwitcherYouBar',false);
+    assert.equal(swComp.type(swComp.props),null,'You bar button hides when accountSwitcherYouBar is turned off');
+
+    // AccountSwitcherSettings page: shows saved accounts, switches on tap, removes on long-press, and opens Add/Manage modals.
+    storeState.users.push({id:'222',username:'venus_alt',discriminator:'0',avatar:'av2',tokenStatus:2});
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    const page=()=>pageNodes(registry.VENUS_ACCOUNTSWITCHER.screen.getComponent()());
+    const altRow=page().find(n=>n.type==='Row'&&n.props.label==='venus_alt');
+    assert.ok(altRow,'saved secondary account listed in settings');
+    altRow.props.onPress();
+    assert.equal(switched.length,1);assert.equal(switched[0][0],'222');
+    altRow.props.onLongPress();
+    assert.equal(alerts.length,1,'long-pressing secondary account prompts to remove');
+    alerts[0][2].find(btn=>btn.text==='Remove').onPress();
+    assert.deepEqual(removed,['222']);
+
+    const addRow=page().find(n=>n.type==='Row'&&n.props.label==='Add account');
+    addRow.props.onPress();
+    assert.equal(modalCalls.at(-1),'login','Add account opens native login modal');
+});
+
+test('Unlock app icons marks all alternate icons non-premium, blocks background reset, and strips the Nitro upsell button and header',()=>{
+    const b=boot({appIcons:true});const {React,RN}=reactHarness(b);
+    const me={id:'me',premiumType:null};
+    b.load({default:{getCurrentUser:()=>me}},null,1378);
+    const appIconsProduct={};
+    const catalog=b.load({APP_ICONS:appIconsProduct,canUserUse:(feat,u)=>u?.premiumType===2},null,13528);
+    const premium=b.load({default:{canUsePremiumAppIcons:u=>u?.premiumType===2},canUsePremiumAppIcons:u=>u?.premiumType===2},null,4491);
+
+    const defaultIcon=Object.freeze({id:'Default',name:'Default',isPremium:false});
+    const officialIcons=Object.freeze([Object.freeze({id:'BrandInverted',name:'Blurple Twilight',isPremium:true}),Object.freeze({id:'Manga',name:'Manga',isPremium:true})]);
+    const limitedIcons=Object.freeze([Object.freeze({id:' Pirate',name:'Pirate',isPremium:true})]);
+    const allIcons=Object.freeze([defaultIcon,...officialIcons,...limitedIcons]);
+    const constants=b.load({
+        getDefaultIcon:()=>defaultIcon,
+        getOfficialAlternateIcons:()=>officialIcons,
+        getLimitedAlternateIcons:()=>limitedIcons,
+        getIcons:()=>allIcons,
+        getIconById:id=>allIcons.find(i=>i.id===id)
+    },null,8621);
+
+    let resetCalls=0,validateCalls=0;
+    const managerObj={
+        validateAndResetIfNeeded(){validateCalls++;},
+        resetIcon(reason){resetCalls++;}
+    };
+    const managerMod=b.load({default:managerObj},null,17096);
+
+    function NitroUpsellButton(props){return {type:NitroUpsellButton,props};}
+    function TableRowGroup(props){return {type:TableRowGroup,props};}
+    b.context.__r=id=>({9421:{NitroUpsellButton,default:NitroUpsellButton},5997:{TableRowGroup}}[id]||null);
+
+    const rowsMod=b.load({default:function AppIconRows(){
+        return React.createElement(RN.View,null,
+            React.createElement(TableRowGroup,null,'default-row'),
+            React.createElement(TableRowGroup,{title:'Nitro'},'alt-rows')
+        );
+    }},null,15066);
+    const screenMod=b.load({default:function UserSettingsAppIcons(){
+        return React.createElement(RN.View,{style:{flex:1}},
+            React.createElement('ScrollView',null,rowsMod.default({})),
+            React.createElement(RN.View,{style:{paddingHorizontal:16}},
+                React.createElement(NitroUpsellButton,{text:'Unlock all icons with Nitro'})
+            )
+        );
+    }},null,15065);
+
+    // Starts off: icons require Nitro and upsell is rendered.
+    assert.equal(b.api.settings.appIcons,false);
+    assert.equal(constants.getOfficialAlternateIcons()[0].isPremium,true);
+    assert.equal(constants.getIconById('Manga').isPremium,true);
+    assert.equal(premium.default.canUsePremiumAppIcons(me),false);
+    assert.equal(catalog.canUserUse(appIconsProduct,me),false);
+    let tree=screenMod.default({});
+    assert.ok(pageNodes(tree).some(n=>n.type===NitroUpsellButton),'Nitro upsell button present while off');
+    assert.ok(pageNodes(tree).some(n=>n.type===TableRowGroup&&n.props.title==='Nitro'),'Nitro group title present while off');
+
+    // Turn Unlock app icons on: all icons report isPremium:false, reset is blocked, and Nitro upsell + header are removed.
+    b.api.setSetting('appIcons',true);
+    assert.equal(constants.getOfficialAlternateIcons().every(i=>i.isPremium===false),true,'official alternate icons unlocked');
+    assert.equal(constants.getLimitedAlternateIcons().every(i=>i.isPremium===false),true,'limited icons unlocked');
+    assert.equal(constants.getIcons().every(i=>i.isPremium===false),true,'all icons unlocked');
+    assert.equal(constants.getIconById('BrandInverted').isPremium,false,'getIconById unlocked');
+    assert.equal(officialIcons[0].isPremium,true,'original icon constant objects not mutated');
+    assert.equal(premium.default.canUsePremiumAppIcons(me),true);
+    assert.equal(premium.canUsePremiumAppIcons(me),true);
+    assert.equal(catalog.canUserUse(appIconsProduct,me),true);
+
+    managerMod.default.validateAndResetIfNeeded();
+    managerMod.default.resetIcon('PREMIUM_LOST');
+    assert.equal(validateCalls,0,'validateAndResetIfNeeded suppressed while appIcons is on');
+    assert.equal(resetCalls,0,'resetIcon(PREMIUM_LOST) suppressed while appIcons is on');
+
+    tree=screenMod.default({});
+    assert.equal(pageNodes(tree).some(n=>n.type===NitroUpsellButton),false,'"Unlock all icons with Nitro" upsell button removed');
+    assert.equal(tree.props.children.filter(Boolean).length,1,'upsell button container removed');
+    const groups=pageNodes(tree).filter(n=>n.type===TableRowGroup);
+    assert.equal(groups.length,2);
+    assert.equal(groups.every(g=>!g.props.title),true,'"Nitro" lock header removed from alternate icons group');
+});
+
