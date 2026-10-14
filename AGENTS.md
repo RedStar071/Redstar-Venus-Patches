@@ -22,11 +22,12 @@ Every release, old or new, uses exactly this shape:
 
 ### 🐛 Bug Fixes
 
-* **Discord - Message tap gestures:** Tapping your own message three times opens it for editing instead of deleting it ([#12](https://github.com/VenusIsJaded/Venus-Patches/issues/12))
+* **Discord - Message tap gestures:** Fixed tapping your own message three times opening the editor instead of deleting it ([#12](https://github.com/VenusIsJaded/Venus-Patches/issues/12))
 
 ### 🔧 Improvements
 
 * **Discord - Venus settings:** Clearer setting descriptions
+* **Discord - Disable analytics:** Also block session heartbeats, search tracking and impression events
 
 ### ⚡ Performance Improvements
 
@@ -44,19 +45,25 @@ Rules:
 - **Sections:** only the five above, in that order, each at most once. Leave out empty ones.
 - **Bullets:** `* **Discord:** …` for the whole app, or `* **Discord - <Morphe patch name>:** …` for one patch.
   Use the patch name as it shows in Morphe (`NoDelete`, `Pastelize`, `Message tap gestures`, `Venus settings`…).
-  One line, sentence case, no full stop, about 4–14 words.
-- **Fixes describe the bug** as the user saw it ("Read all's error message starts with \"Error:\""), not the fix.
+  One line, sentence case, no full stop, concise and informative (around 5–22 words).
+- **Bug fixes always start with `Fixed` and give clear detail:** every bullet under `### 🐛 Bug Fixes` must begin
+  with `Fixed …` and clearly explain both what went wrong and what it prevented or caused (for example,
+  `Fixed tapping your own message three times opening the editor instead of deleting it`), so readers never have
+  to guess whether the behavior was a bug that was fixed or an intentional change.
 - Link an issue only when one exists: ` ([#37](https://github.com/VenusIsJaded/Venus-Patches/issues/37))`.
 - **Never include:** "Good to know", "Install" or "How to update" sections, SHA-256 sums, test or patch-check
   results, notes about versions that weren't published or numbers that changed, internal module IDs, or
   "your settings carry over". Explanations belong in `README.md`, not in release notes.
-- Keep each bullet short, but **list every change a user can see**: every new feature, every bug fixed (including
-  settings that misbehaved) and every general change (wording, layout, defaults) under 🔧 Improvements.
-  Don't drop a visible change to make the notes shorter. Merge only near-identical changes.
-- A new feature means a minor version (1.6.0 → 1.7.0). Fixes and improvements only mean a patch version.
-- Only list changes users can see. Internal work (docs, scripts, these notes) isn't mentioned.
-- Compare with the **previous release**, not with earlier commits. A bug or slowdown in something new in this
-  release was never seen by users, so it isn't a fix: the feature is simply listed under ✨ New Features.
+- **Include every meaningful change:** list every new feature, every bug fix (including privacy leaks, background
+  disconnects, or settings that misbehaved), general improvements and **privacy additions** under 🔧 Improvements,
+  and **startup, patching, memory, or runtime speedups** under ⚡ Performance Improvements. Don't omit privacy
+  coverage additions or performance work as "internal": users care about what tracking is stopped and how fast
+  Discord starts and runs. Only leave out repo-only chores (docs, test scripts, CI config).
+- A new feature means a minor version (1.6.0 → 1.7.0). Fixes, privacy additions, and performance improvements
+  mean a patch version.
+- Compare with the **previous release**, not with earlier commits. A bug in a brand-new feature added in the same
+  release was never seen by users, so don't list it as a separate bug fix; however, privacy additions, fixes to
+  existing patches, and app/startup performance improvements shipped in the release should always be listed.
 
 ## The GitHub release
 
