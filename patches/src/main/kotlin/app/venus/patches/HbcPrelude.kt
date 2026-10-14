@@ -15,12 +15,14 @@ internal object HbcPrelude {
     const val GLOBAL_SHA256 = "2194f87abbb4382c4c4a8955501fe2d6db1f1d74702ff7b8fc87200d5196c74a"
     const val JOIN_ID = 153
     const val EVAL_ID = 34544
+    /** Longest existing string reused as one prelude piece; longer ones barely shorten the prelude. */
+    const val MAX_PIECE = 64
     data class Result(val prefixSize: Int, val originalCodeSize: Int, val codeOffset: Int)
     private fun hash(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes)
         .joinToString("") { "%02x".format(it) }
 
     fun inject(file: File, source: String): Result {
-        // No fixed size cap. Each character becomes one string load and one array store, and every
+        // No fixed size cap. Each piece becomes one string load and one array store, and every
         // field that records the result (function size, exception range, jump, file length) is 32-bit.
         require(source.isNotEmpty()) { "Empty bootstrap" }
         var result: Result
@@ -56,24 +58,61 @@ internal object HbcPrelude {
             val table = 128L + intAt(40).toLong() * 12 + intAt(44).toLong() * 4 + intAt(48).toLong() * 4
             val count = intAt(52)
             val storage = table + count.toLong() * 4 + intAt(56).toLong() * 8
-            // First one-character ASCII string for each character the prelude uses. Read the
-            // entry table in one go and stop once every needed character is found: the same IDs
-            // as a full scan (first match wins), without ~338k tiny seeks while patching on a phone.
-            val needed = HashSet<Char>().apply { source.forEach { add(it) } }
-            val chars = HashMap<Char, Int>()
+            // Every short ASCII string already in the bundle (first ID wins), from two bulk reads
+            // instead of one seek per entry. The prelude is rebuilt from the longest of these at
+            // each position: ~74k pieces instead of ~210k single characters, so every Discord start
+            // runs about a third of the string loads, array stores and join work.
             val entries = ByteArray(count * 4).also { raf.seek(table); raf.readFully(it) }
             val words = java.nio.ByteBuffer.wrap(entries).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            var id = 0
-            while (id < count && chars.size < needed.size) {
+            val storageSize = intAt(60)
+            val storageBytes = ByteArray(storageSize).also { raf.seek(storage); raf.readFully(it) }
+            val pieces = HashMap<String, Int>()
+            var longest = 1
+            for (id in 0 until count) {
                 val entry = words.getInt(id * 4)
-                if (entry ushr 24 == 1 && entry and 1 == 0) {
-                    raf.seek(storage + ((entry ushr 1) and 0x7fffff))
-                    val character = raf.readUnsignedByte().toChar()
-                    if (character in needed) chars.putIfAbsent(character, id)
-                }
-                id++
+                val length = entry ushr 24
+                if (entry and 1 != 0 || length == 0 || length == 255 || length > MAX_PIECE) continue
+                val start = (entry ushr 1) and 0x7fffff
+                if (start + length > storageSize) continue
+                var ascii = true
+                for (k in start until start + length) if (storageBytes[k] < 0) { ascii = false; break }
+                if (!ascii) continue
+                val text = String(storageBytes, start, length, Charsets.ISO_8859_1)
+                if (pieces.putIfAbsent(text, id) == null && length > longest) longest = length
             }
-            require(source.all { it in chars }) { "Bootstrap contains unsupported characters" }
+            // Minimum-byte piece selection (dynamic programming) over existing ASCII strings:
+            // joined in order, the pieces are exactly the source, using the fewest pieces and
+            // preferring 16-bit string IDs (LoadConstString) over 32-bit ones when tied.
+            val n = source.length
+            val cost = IntArray(n + 1) { Int.MAX_VALUE / 2 }
+            val nextLen = IntArray(n)
+            val nextId = IntArray(n)
+            cost[n] = 0
+            for (i in n - 1 downTo 0) {
+                val maxLen = minOf(longest, n - i)
+                var bestCost = Int.MAX_VALUE / 2
+                var bestLen = 0
+                var bestId = -1
+                for (len in 1..maxLen) {
+                    val id = pieces[source.substring(i, i + len)] ?: continue
+                    val stepCost = (if (id < 65536) 4 else 6) + 5 + cost[i + len]
+                    if (stepCost < bestCost) {
+                        bestCost = stepCost
+                        bestLen = len
+                        bestId = id
+                    }
+                }
+                require(bestId >= 0) { "Bootstrap contains unsupported characters" }
+                cost[i] = bestCost
+                nextLen[i] = bestLen
+                nextId[i] = bestId
+            }
+            val parts = ArrayList<Int>()
+            var position = 0
+            while (position < n) {
+                parts.add(nextId[position])
+                position += nextLen[position]
+            }
             val prefix = ByteArrayOutputStream()
             fun emit(vararg bytes: Int) { for (byte in bytes) prefix.write(byte) }
             fun u32(value: Int) { for (shift in 0..24 step 8) prefix.write(value ushr shift) }
@@ -82,13 +121,16 @@ internal object HbcPrelude {
                 else { emit(145, register); u32(id) }
             }
             // An array + join is linear-time and reuses existing literal strings. No string table changes.
+            // DefineOwnInDenseArray / DefineOwnInDenseArrayL write directly to the pre-allocated dense
+            // storage (0..65534) instead of going through JSObject::defineOwnProperty on every piece.
             emit(61, 10) // GetGlobalObject r10
-            val initialCapacity = minOf(source.length, 65535)
+            val initialCapacity = minOf(parts.size, 65535)
             emit(8, 11, initialCapacity and 255, initialCapacity ushr 8) // NewArray r11
-            source.forEachIndexed { index, character ->
-                string(12, chars.getValue(character))
-                if (index < 256) emit(88, 11, 12, index) // DefineOwnByIndex
-                else { emit(89, 11, 12); u32(index) }
+            parts.forEachIndexed { index, piece ->
+                string(12, piece)
+                if (index < 256) emit(90, 11, 12, index) // DefineOwnInDenseArray
+                else if (index < initialCapacity) emit(91, 11, 12, index and 255, index ushr 8) // DefineOwnInDenseArrayL
+                else { emit(89, 11, 12); u32(index) } // DefineOwnByIndexL
             }
             // Cache slots are per function. Never reuse the original global's 0..24 caches.
             emit(69, 12, 11, reads, JOIN_ID and 255, JOIN_ID ushr 8) // GetById join

@@ -1,3 +1,18 @@
+## [1.12.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.11.0...v1.12.0) (2026-10-14)
+
+### ✨ New Features
+
+* **Discord:** Add `Unlock app icons` patch
+* **Discord - Unlock app icons:** Use any Discord app icon in Settings without Nitro, and hide the Nitro upsell button
+* **Discord:** Add `Account switcher` patch
+* **Discord - Account switcher:** Switch between up to 50 Discord accounts from a profile bar button or Venus settings
+* **Discord:** Add `User activity notifications` patch
+* **Discord - User activity notifications:** Show a notice when chosen friends or user IDs change status, start typing or send a message, inside or outside Discord
+
+### 🐛 Bug Fixes
+
+* **Discord - Complete Quests automatically:** Keep completing Quests in the background when you leave Discord
+
 ## [1.11.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.10.0...v1.11.0) (2026-10-13)
 
 ### ✨ New Features

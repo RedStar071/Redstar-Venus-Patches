@@ -1,8 +1,8 @@
 {
-  "created_at": "2026-10-13T18:20:36",
-  "description": "### \u2728 New Features\n\n* **Discord - Venus settings:** Venus settings in 30 languages, including Russian ([#50](https://github.com/VenusIsJaded/Venus-Patches/issues/50))\n* **Discord - Venus settings:** Pick the settings language in Language, or follow Discord's\n* **Discord - Translate messages:** Translate only the messages you pick, from the hold menu ([#50](https://github.com/VenusIsJaded/Venus-Patches/issues/50))\n* **Discord - Translate messages:** Hold a message to show its original, or translate your own\n\n### \ud83d\udc1b Bug Fixes\n\n* **Discord - Translate messages:** A reply shows the message it quotes untranslated ([#51](https://github.com/VenusIsJaded/Venus-Patches/issues/51))\n\n### \ud83d\udd27 Improvements\n\n* **Discord - Translate messages:** \"Translated from\" names the language in the settings language\n",
-  "download_url": "https://github.com/VenusIsJaded/Venus-Patches/releases/download/v1.11.0/patches-1.11.0.mpp",
-  "page_url": "https://github.com/VenusIsJaded/Venus-Patches/releases/tag/v1.11.0",
+  "created_at": "2026-10-14T21:54:08",
+  "description": "### \u2728 New Features\n\n* **Discord:** Add `Unlock app icons` patch\n* **Discord - Unlock app icons:** Use any Discord app icon in Settings without Nitro, and hide the Nitro upsell button\n* **Discord:** Add `Account switcher` patch\n* **Discord - Account switcher:** Switch between up to 50 Discord accounts from a profile bar button or Venus settings\n* **Discord:** Add `User activity notifications` patch\n* **Discord - User activity notifications:** Show a notice when chosen friends or user IDs change status, start typing or send a message, inside or outside Discord\n\n### \ud83d\udc1b Bug Fixes\n\n* **Discord - Complete Quests automatically:** Keep completing Quests in the background when you leave Discord\n",
+  "download_url": "https://github.com/VenusIsJaded/Venus-Patches/releases/download/v1.12.0/patches-1.12.0.mpp",
+  "page_url": "https://github.com/VenusIsJaded/Venus-Patches/releases/tag/v1.12.0",
   "signature_download_url": "",
-  "version": "1.11.0"
+  "version": "1.12.0"
 }

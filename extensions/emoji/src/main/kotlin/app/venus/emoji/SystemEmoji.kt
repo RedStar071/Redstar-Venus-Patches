@@ -48,8 +48,7 @@ object SystemEmoji {
             val file = File(context!!.filesDir, PREFS)
             // Starts off, like every Venus setting: no saved settings yet, or none for this switch, means off.
             val on = file.isFile && file.length() <= MAX_PREFS &&
-                JSONObject(String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8))
-                    .optBoolean("systemEmoji", false)
+                savedOn(file)
             if (!on) false else {
                 // One folder per emoji font: after a system or emoji font update the old drawings were shown forever.
                 // Folders for an older font are removed, so the cache never holds two sets.
@@ -169,5 +168,18 @@ object SystemEmoji {
             bitmap.recycle()
         }
         return "file://" + file.absolutePath
+    }
+
+    /**
+     * Whether the saved settings turn this on. Runs on Discord's main thread before the first screen:
+     * Venus writes them with JSON.stringify, so a file without `"systemEmoji":true` (the switch off, the
+     * common case) needs no JSON parsing. Anything else is parsed exactly as before.
+     */
+    private fun savedOn(file: File): Boolean {
+        val text = String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8)
+        // java.lang.String.indexOf: the host has no usable Kotlin text helpers.
+        val raw = text as java.lang.String
+        if (raw.indexOf("\"systemEmoji\":true") < 0 && raw.indexOf("\"systemEmoji\":\"") < 0) return false
+        return JSONObject(text).optBoolean("systemEmoji", false)
     }
 }

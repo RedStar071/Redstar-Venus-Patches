@@ -72,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -109,7 +109,41 @@ internal val packagedDiscordBundle = bytecodePatch {
         if (loader.returnType != "Lcom/facebook/react/bridge/JSBundleLoader;")
             throw PatchException("Asset loader factory ABI changed")
         pinPackagedDiscordBundle(method)
+        skipLaunchOtaChecks(Fingerprint(
+            definingClass = BUNDLE_UPDATER,
+            name = "checkForUpdate",
+            returnType = "Ljava/util/concurrent/Future;",
+            parameters = listOf("I", "Lkotlin/jvm/functions/Function0;")
+        ).method)
     }
+}
+
+internal const val BUNDLE_UPDATER = "Lcom/discord/bundle_updater/BundleUpdater;"
+/** Instructions [skipLaunchOtaChecks] adds before Discord's own code, counting the nop its label lands on. */
+internal const val OTA_GUARD_SIZE = 4
+
+/**
+ * Discord checks for an over-the-air JS bundle every time an activity opens, and after a crash it blocks
+ * the first screen until that check (and any download) finishes. Venus always runs the packaged bundle
+ * (see [pinPackagedDiscordBundle]), so those bundles were downloaded, unpacked and stored for nothing,
+ * using network, disk and CPU while Discord starts. Launch checks pass no callback: they now return no
+ * Future, which every caller already handles (Discord does the same while a check is running). A check
+ * with a callback, such as the developer "check for update and reload" action, runs unchanged.
+ * 5 registers, 3 of them parameters: v0 is free.
+ */
+internal fun skipLaunchOtaChecks(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val implementation = method.implementation ?: throw PatchException("OTA check has no code")
+    if (method.definingClass != BUNDLE_UPDATER || method.parameterTypes.map { it.toString() } != listOf("I", "Lkotlin/jvm/functions/Function0;") ||
+        method.returnType != "Ljava/util/concurrent/Future;" || implementation.registerCount - 3 < 1)
+        throw PatchException("BundleUpdater.checkForUpdate ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        if-nez p2, :venus_ota_check
+        const/4 v0, 0x0
+        return-object v0
+        :venus_ota_check
+        nop
+    """)
 }
 
 
@@ -642,6 +676,18 @@ val splitLargeMessages = bundledPlugin("splitMessages", "Send long messages",
 @Suppress("unused")
 val translateMessages = bundledPlugin("translate", "Translate messages",
     "Messages in other languages show in yours. Their text is sent to Google Translate, without your account.")
+
+@Suppress("unused")
+val userActivityNotifications = bundledPlugin("userNotif", "User activity notifications",
+    "Shows a notice when chosen friends or users change status, start typing or send a message. Based on UserNotif by cywrx and coder.gg.")
+
+@Suppress("unused")
+val accountSwitcher = bundledPlugin("accountSwitcher", "Account switcher",
+    "Switch between multiple Discord accounts from the You tab, your profile bar or Settings.")
+
+@Suppress("unused")
+val unlockAppIcons = bundledPlugin("appIcons", "Unlock app icons",
+    "Use any Discord app icon in Settings without Nitro.")
 
 internal const val USER_AGENT_INTERCEPTOR = "Lcom/discord/client_info/ClientUserAgent\$DiscordUserAgentInterceptor;"
 /** The start of the Windows desktop User-Agent that Quest Completer sends Play and Activity heartbeats with. */
