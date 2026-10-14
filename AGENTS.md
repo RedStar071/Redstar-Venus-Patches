@@ -79,7 +79,7 @@ gh release create v1.6.1 patches/build/libs/patches-1.6.1.mpp --title "1.6.1" --
 2. Nothing to write for `patches-bundle.json`: its `description` is this version's `CHANGELOG.md` sections,
    which Morphe shows when its cached `CHANGELOG.md` doesn't list the new release yet. Never replace it with a sentence.
 3. Add the `CHANGELOG.md` entry at the top, as above.
-4. `python3 scripts/build.py`, then `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`.
+4. Precompile the Venus runtime to Hermes bytecode (HBC98) for every release and update, then run `python3 scripts/build.py` and `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`. Never ship a release or update with an uncompiled runtime.
 5. Update `README.md` if a feature or setting changed.
 
 ## Settings design
