@@ -4965,3 +4965,23 @@ test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it
     shown[0].onCancel();
     b.api.setSetting('hiddenChannelsMenu', false); row().props.onPress(); assert.equal(shown.length, 1, 'with the menu off, nothing opens');
 });
+test('Device indicators preview follows every option, and tapping it changes Alex\'s devices', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    let demo = 0; React.useState = init => typeof init === 'number' ? [demo, v => { demo = typeof v === 'function' ? v(demo) : v; }] : [init, () => {}];
+    b.api.setSetting('platformIndicators', true);
+    const preview = () => { const n = pageNodes(b.registry.VENUS_PLATFORMINDICATORS.screen.getComponent()()).find(x => x.type && x.type.name === 'PlatformPreview'); return pageNodes(n.type(n.props)); };
+    // Each place's icons are its own popIn, keyed by the place.
+    const places = () => preview().filter(n => n.type && n.type.name === 'PopIn').map(n => n.props.key.split(':')[0]);
+    assert.deepEqual(places(), ['piDmHeader', 'piUserList', 'piProfile']);
+    b.api.setSetting('piDmHeader', false); assert.deepEqual(places(), ['piUserList', 'piProfile']);
+    b.api.setSetting('piUserList', false); assert.deepEqual(places(), ['piProfile']);
+    b.api.setSetting('piProfile', false); assert.deepEqual(places(), []);
+    b.api.setSetting('piProfile', true);
+    // On a phone only, the avatar shows Discord's phone badge unless Hide the phone badge is on.
+    const phone = () => preview().some(n => n.props && n.props.style && n.props.style.borderRadius === 2);
+    preview().find(n => n.props && n.props.accessibilityHint === "Tap to change Alex's devices").props.onPress();
+    assert.equal(demo, 1, 'tap changes devices');
+    assert.equal(phone(), false, 'hidden by default');
+    b.api.setSetting('piHideMobile', false); assert.equal(phone(), true, 'phone badge shows when not hidden');
+    b.api.setSetting('platformIndicators', false); assert.deepEqual(places(), [], 'no icons while off');
+});

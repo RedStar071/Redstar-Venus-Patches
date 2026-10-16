@@ -3416,24 +3416,51 @@
             footnote("note","Each person always gets the same color, on every device.")];
         return settingsBody(ui,groups);
     }
-    // Device indicators: a name with the icons next to it, then where they show.
+    // Device indicators: each place the icons can show (a DM's header, the member list, a profile, an avatar), drawn the
+    // way Discord draws it and following its own switch. Tap Alex to change what Alex is on and see the icons follow.
+    const PLATFORM_DEMO = [{desktop:"online", mobile:"idle"}, {mobile:"online"}, {desktop:"dnd", web:"dnd"}, {embedded:"online", desktop:"idle"}];
+    function PlatformPreview(props) {
+        useSettings("platformIndicators");
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [demo, setDemo] = React.useState(0);
+        const on = props.on, clients = PLATFORM_DEMO[demo % PLATFORM_DEMO.length];
+        const status = clients.desktop || clients.mobile || clients.web || clients.embedded || "offline";
+        const mobileOnly = !!clients.mobile && Object.keys(clients).length === 1;
+        const badges = place => on && settings[place] ? popIn(place + ":" + demo, el(RN.View, {style:{flexDirection:"row", gap:2, alignItems:"center"}},
+            Object.keys(clients).map(platform => el(RN.View, {key:platform, accessible:true, accessibilityLabel:tr(PLATFORM_LABELS[platform]) + ": " + tr(PLATFORM_STATUS[clients[platform]])},
+                el(PlatformPng, {platform, color:PLATFORM_COLORS[clients[platform]]}))))) : null;
+        // Discord's avatar: a status dot, or a small phone instead when the only device is a phone (unless hidden).
+        const avatar = size => {
+            const phone = mobileOnly && !(on && settings.piHideMobile), dot = Math.round(size * 0.34);
+            return el(RN.View, {style:{width:size, height:size}},
+                el(RN.View, {style:{width:size, height:size, borderRadius:size / 2, backgroundColor:"#3ba55c", alignItems:"center", justifyContent:"center"}},
+                    el(RN.Text, {style:{color:"#ffffff", fontWeight:"700", fontSize:Math.round(size * 0.42)}}, "A")),
+                el(RN.View, {style:{position:"absolute", right:-2, bottom:-2, padding:2, borderRadius:8, backgroundColor:s.chat.backgroundColor}},
+                    phone ? el(RN.View, {style:{width:dot * 0.75, height:dot * 1.15, borderRadius:2, backgroundColor:STATUS_HEX[status]}}) :
+                        el(RN.View, {style:{width:dot, height:dot, borderRadius:dot / 2, backgroundColor:STATUS_HEX[status]}})));
+        };
+        const label = text => el(RN.Text, {style:[s.muted, {fontSize:11, fontWeight:"700", letterSpacing:0.4, marginBottom:6}]}, tr(text).toUpperCase());
+        const place = (key, title, child) => el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:8, opacity:on && settings[key] === false ? 0.55 : 1}}, label(title), child);
+        const name = (size, place) => el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
+            el(RN.Text, {style:[s.name, {fontSize:size}]}, "Alex"), badges(place));
+        return el(Press, {key:"preview", onPress:() => { if (on) { animateLayout(); setDemo(n => n + 1); } }, accessibilityRole:"button",
+            accessibilityHint:tr("Tap to change Alex's devices")},
+            chatPreview(s, "preview", "Device indicators preview", [
+                place("piDmHeader", "In DMs", el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10}}, avatar(24), name(16, "piDmHeader"))),
+                place("piUserList", "In lists", el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10}}, avatar(32),
+                    el(RN.View, {style:{flex:1}}, name(15, "piUserList"), el(RN.Text, {style:s.muted}, tr(PLATFORM_STATUS[status] || "Online"))))),
+                place("piProfile", "On profiles", el(RN.View, {style:{gap:4}}, avatar(48), name(20, "piProfile"))),
+                on ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, el(RN.Text, {style:s.muted}, tr("Tap to change Alex's devices"))) : null]));
+    }
     function PlatformSettings() {
         useSettings("platformIndicators");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("platformIndicators"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
-        const icon=(platform,status) => el(RN.View,{key:platform,accessible:true,accessibilityLabel:tr(PLATFORM_LABELS[platform])+": "+tr(PLATFORM_STATUS[status])},
-            el(PlatformPng,{platform,color:PLATFORM_COLORS[status]}));
-        const badges=el(RN.View,{style:{flexDirection:"row",gap:2,alignItems:"center"}},icon("desktop","online"),icon("mobile","idle"));
+        const on=enabled("platformIndicators"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const places=[settings.piDmHeader && tr("In DMs"),settings.piUserList && tr("In lists"),settings.piProfile && tr("On profiles")].filter(Boolean);
         const groups=[
             on ? statusCard("status",places.length ? places.join(" \u00b7 ") : "Turn on at least one place below.",
                 {title:tr("Device indicators"),IconComponent:venusIcon(14470,"LaptopPhoneIcon")}) : offCard("status",venusIcon(14470,"LaptopPhoneIcon")),
-            chatPreview(s,"preview","Device indicators preview",[
-                previewMessage(s,"msg","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.Text,{style:s.text},tr("On my laptop, phone in my pocket.")),{badges:on ? badges : null}),
-                el(RN.View,{key:"legend",style:{paddingHorizontal:16,paddingTop:4,flexDirection:"row",flexWrap:"wrap",gap:12}},
-                    [["online","Online"],["idle","Idle"],["dnd","Do Not Disturb"]].map(([status,label]) => el(RN.View,{key:status,style:{flexDirection:"row",alignItems:"center",gap:4}},
-                        el(RN.View,{style:{width:8,height:8,borderRadius:4,backgroundColor:PLATFORM_COLORS[status]}}),el(RN.Text,{style:s.muted},tr(label)))))]),
+            el(PlatformPreview,{key:"preview",on}),
             el(Group,{key:"where",title:tr("Show icons")},
                 switchRow(Switch,"piDmHeader","In DMs","Next to the name at the top of a DM.",rowIcon(6503,"EnvelopeIcon")),
                 switchRow(Switch,"piUserList","In lists","Member list, friends, DM list and voice channels.",rowIcon(5404,"GroupIcon")),
