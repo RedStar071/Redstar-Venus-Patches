@@ -3766,11 +3766,12 @@
                 statusCard("status",authenticated ? "You can read, write, delete and report reviews." : "You can read reviews. Sign in to write your own.",
                     {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in..." : "Reading reviews"),
                         IconComponent:venusIcon(7358,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
+            // One row: the action you can take now. The status card already says whether you're signed in.
             el(Group,{key:"auth",title:tr("Account")},
-                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : authenticated ? "Signed in to ReviewDB" : "Sign in to ReviewDB"),icon:rowIcon(6374,"KeyIcon"),
-                    arrow:true,disabled:!on || authenticated || pending,onPress:authenticateReviews,subLabel:reviewAuthError || (authenticated ? undefined : tr("Needed to post, delete or report reviews. Never uses your Discord token."))}),
-                el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9348,"DoorExitIcon"),variant:authenticated ? "danger" : undefined,disabled:!authenticated,onPress:clearReviewAuth,
-                    subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")})),
+                authenticated ? el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9348,"DoorExitIcon"),variant:"danger",onPress:clearReviewAuth,
+                    subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")}) :
+                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : "Sign in to ReviewDB"),icon:rowIcon(6374,"KeyIcon"),
+                    arrow:true,disabled:!on || pending,onPress:authenticateReviews,subLabel:reviewAuthError || tr("Needed to post, delete or report reviews. Never uses your Discord token.")})),
             el(Group,{key:"settings",title:tr("Display")},
                 switchRow(Switch,"reviewWarning","Show the be-respectful note","ReviewDB's reminder to be kind, shown above reviews.",rowIcon(8699,"ShieldIcon"))),
             footnote("note","Reviews come from manti.vendicated.dev. Opening reviews sends that profile's or server's ID to ReviewDB.")];
@@ -3787,23 +3788,15 @@
                 el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}}),
                 previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))))]);
     }
+    const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {
         useSettings();
         const ui=reviewUI();
-        const [draft,setDraft]=React.useState(String(settings.noDeleteLimit));
-        // Follow the saved value when preferences finish loading after the page opened.
-        React.useEffect(() => { setDraft(String(settings.noDeleteLimit)); },[settings.noDeleteLimit]);
         if (!React || !RN) return null;
         const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
-        // An emptied field keeps the current maximum instead of silently resetting it to 512.
-        const commit=() => { if (draft) setSetting("noDeleteLimit",draft); setDraft(String(settings.noDeleteLimit)); };
-        const onText=text => setDraft(String(text).replace(/[^0-9]/g,"").slice(0,4));
-        const inputProps={value:draft,keyboardType:"number-pad",maxLength:4,placeholder:"512",onBlur:commit,onSubmitEditing:commit,returnKeyType:"done",
-            // Read-only while NoDelete is off, like the switches above it.
-            editable:!!settings.noDelete,isDisabled:!settings.noDelete};
-        // Discord's TextInput reports text via onChange(text); RN's via onChangeText.
-        const input=ui.TextInput ? el(ui.TextInput,Object.assign({label:tr("Keep up to"),onChange:onText},inputProps)) :
-            el(RN.TextInput,Object.assign({onChangeText:onText,style:{fontSize:16,padding:12}},inputProps));
+        // How many to keep is a choice of four, not a number to type. A number saved by an older version shows
+        // as the closest choice and stays as it is until you pick another.
+        const limit=settings.noDeleteLimit, nearest=NODELETE_LIMITS.reduce((best,n) => Math.abs(n-limit)<Math.abs(best-limit) ? n : best,NODELETE_LIMITS[0]);
         const kept=deleted.size, changed=edits.size;
         const summary=!settings.noDelete ? "Turned off. Switch it on in Features to start." :
             kept || changed ? tr(settings.noDeleteSave ? "{deleted} and {edited} kept, saved on this phone." : "{deleted} and {edited} kept until Discord restarts.",
@@ -3815,11 +3808,15 @@
             el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits}),
             el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(9829,"PencilIcon"))),
             el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.",rowIcon(4782,"DownloadIcon"))),
-            el(Group,{key:"limit",title:tr("Limit"),description:tr("From 1 to {max}. When full, the oldest is removed first.",{max:MAX_DELETED})},el(RN.View,{style:{padding:12,gap:8}},input)),
+            el(RN.View,{key:"limit",style:{gap:8}},
+                groupTitle("title","Keep up to"),
+                venusSegmented({key:"choice",value:nearest,disabled:!settings.noDelete,onChange:value => setSetting("noDeleteLimit",value),
+                    items:NODELETE_LIMITS.map(n => ({value:n,label:String(n)}))}),
+                footnote("hint","When it's full, the oldest is removed first.")),
             el(Group,{key:"clear",title:tr("Manage")},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
                 () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),!kept && !changed,true)),
             footnote("note","Delete a kept message again to hide just that one.")];
-        return settingsBody(ui,groups,{keyboardShouldPersistTaps:"handled"});
+        return settingsBody(ui,groups);
         function toggle(key,label,subLabel,icon) { return switchRow(Switch,key,label,subLabel,icon); }
     }
     // Clear kept messages: every kept deletion leaves chat and the saved file, and so does edit history.
@@ -5279,7 +5276,7 @@
             const fullUser = (active ? me : userStore && userStore.getUser(acc.id)) || acc;
             const displayName = fullUser && (fullUser.globalName || fullUser.global_name || fullUser.username) || acc.username || acc.id;
             const handle = acc.username && acc.username !== displayName ? "@" + acc.username + " \u00b7 " : "";
-            const statusText = active ? tr("Active account") :
+            const statusText = active ? tr("Active account \u00b7 Tap for the quick switcher") :
                 acc.tokenStatus === invalidStatus ? tr("Session expired \u00b7 Tap to sign in again") :
                 acc.tokenStatus === validatingStatus ? tr("Checking session...") : tr("Tap to switch");
             return el(Row, {key:"acc:" + acc.id, label:displayName, subLabel:handle + statusText,
@@ -5304,11 +5301,10 @@
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
                 Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(6799, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
-                Row ? el(Row, {key:"sheet", label:tr("Open quick switcher"), subLabel:tr("Opens the account & status sheet."), icon:rowIcon(11519, "ArrowsUpDownIcon"),
-                    arrow:true, disabled:!on, onPress:openAccountSwitcherSheet}) : null),
+                null),
             el(Group, {key:"shortcuts", title:tr("Shortcuts")},
                 switchRow(Switch, "accountSwitcherYouBar", "Button on the profile bar", "Shows a Switch accounts button next to the notifications bell on the bottom bar.", rowIcon(10420, "UserCircleIcon"))),
-            footnote("note", "You can also switch accounts anytime by tapping your avatar on the You tab or holding the You tab in the bottom navigation bar. Hold a non-active account above to remove it.")];
+            footnote("note", "Tap your avatar on the You tab, or hold the You tab, to switch from anywhere. Hold an account above to remove it.")];
         return settingsBody(ui, groups);
     }
 
@@ -6716,8 +6712,10 @@
             editable:on && !customThemes.installing,
             isDisabled:!on || customThemes.installing
         };
-        const urlInput = ui.TextInput ? el(ui.TextInput, Object.assign({label:tr("Theme JSON link"), onChange:setUrlDraft}, inputProps)) :
-            el(RN.TextInput, Object.assign({onChangeText:setUrlDraft, style:{fontSize:16, padding:12}}, inputProps));
+        // One field and one button: Paste while the box is empty, Install once it has a link.
+        const empty = !urlDraft.trim();
+        const urlInput = inputWithButton(ui, "input", Object.assign({label:tr("Theme JSON link")}, inputProps), text => setUrlDraft(String(text || "")),
+            customThemes.installing ? "Installing..." : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || customThemes.installing : !canInstall);
         const themeRows = customThemes.list.length ? customThemes.list.map(item => {
             if (!item || !Row) return null;
             const isSelected = customThemes.active === item.id;
@@ -6743,14 +6741,8 @@
                 IconComponent:venusIcon(14887, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
                 offCard("status", venusIcon(14887, "EyeDropperIcon")),
             el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
-            el(Group, {key:"install", title:tr("Add from link")},
-                el(RN.View, {key:"input", style:{padding:12, gap:8}}, urlInput),
-                Row ? el(Row, {key:"add", label:tr(customThemes.installing ? "Installing theme..." : "Install theme"), icon:rowIcon(4782, "DownloadIcon"),
-                    subLabel:tr("Downloads the theme once and keeps it on this phone."),
-                    disabled:!canInstall, onPress:onInstall}) : null,
-                Row ? el(Row, {key:"paste", label:tr("Paste link from clipboard"), icon:rowIcon(4780, "CopyIcon"),
-                    subLabel:tr("Fills the box above with the link on your clipboard."),
-                    disabled:!on || customThemes.installing, onPress:onPaste}) : null,
+            el(Group, {key:"install", title:tr("Add from link"), description:tr("Downloads the theme once and keeps it on this phone.")},
+                el(RN.View, {key:"input", style:{padding:12}}, urlInput),
                 Row ? el(Row, {key:"browse", label:tr("Browse Revenge themes"), icon:rowIcon(8041, "LinkExternalSmallIcon"),
                     subLabel:"plugins-list.pages.dev/Themes",
                     arrow:true, onPress:() => openLink("https://plugins-list.pages.dev/Themes/")}) : null),

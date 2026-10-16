@@ -1514,7 +1514,8 @@ test('ReviewDB settings: Account and Settings groups with native rows',()=>{
     const b=reviewHarness();b.api.setSetting('reviewDB',true);const tree=b.Settings();
     assert.deepEqual(walkElements(tree,n=>n.type==='RowGroup').map(n=>n.props.title),['Account','Display']);
     const login=walkElements(tree,n=>n.props.label==='Sign in to ReviewDB')[0];assert.equal(login.type,'NativeRow');assert.equal(login.props.arrow,true);assert.equal(login.props.disabled,false);
-    const logout=walkElements(tree,n=>n.props.label==='Sign out of ReviewDB')[0];assert.equal(logout.props.disabled,true);assert.match(logout.props.subLabel,/Authorized Apps/);
+    // One row: the action you can take now, never a greyed-out opposite.
+    assert.equal(walkElements(tree,n=>n.props.label==='Sign out of ReviewDB').length,0,'no disabled sign-out row while signed out');
     // The main switch lives on the Settings list row, not repeated on its page.
     assert.deepEqual(walkElements(tree,n=>n.type==='SwitchRow').map(n=>n.props.label),['Show the be-respectful note']);
     assert.equal(walkElements(tree,n=>n.type==='Stack')[0].props.spacing,24);
@@ -1526,7 +1527,9 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
     props.dismissOAuthModal();assert.deepEqual(b.popped,['oauth2-authorize']);
     props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=a%2Bb'});await flush();await flush();
     assert.equal(b.requests[0][0],'https://manti.vendicated.dev/api/reviewdb/auth?code=a%2Bb&returnType=json&clientMod=vendetta');
-    assert.equal(b.popped.length,1);assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,1);
+    assert.equal(b.popped.length,1);assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB').length,1);
+    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign in to ReviewDB').length,0,'sign-in row replaced by sign-out');
+    assert.match(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB')[0].props.subLabel,/Authorized Apps/);
     assert.equal(b.toasts.at(-1).content,'Signed in to ReviewDB');
     // Like Discord's own toasts, Venus's carry an icon for what just happened.
     assert.equal(typeof b.toasts.at(-1).IconComponent,'function','sign-in toast has an icon');
@@ -1537,7 +1540,7 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
 test('ReviewDB sign-in survives disabling the plugin and logs out explicitly, and stays signed in',async()=>{
     const b=reviewHarness();const props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=x'});await flush();await flush();
     b.api.setSetting('reviewDB',false);b.api.setSetting('reviewDB',true);
-    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,1);
+    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB').length,1);
     walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB')[0].props.onPress();
     assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign in to ReviewDB').length,1);
 });
@@ -1549,7 +1552,7 @@ test('ReviewDB cancellation, malformed redirects and account switches never sign
     let resolve;b.context.fetch=()=>new Promise(done=>{resolve=done;});
     props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=late'});await flush();
     b.account.id='222222222222222222';resolve({ok:true,json:async()=>({success:true,token:'must-not-survive'})});await flush();await flush();
-    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,0);
+    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB').length,0);
 });
 test('ReviewDB profile section renders directly after the profile note card directly beneath it',async()=>{
     const b=reviewHarness();assert.equal(b.note({userId:'222222222222222222'}).props.children[0],b.noteOriginal);
@@ -2344,9 +2347,15 @@ test('option page switches are greyed out while their main switch is off',()=>{
     b.api.setSetting('noDelete',false);assert.deepEqual(rows('VENUS_NODELETE').map(n=>n.props.disabled),[true,true]);
     b.api.setSetting('noDelete',true);assert.deepEqual(rows('VENUS_NODELETE').map(n=>n.props.disabled),[false,false]);
     assert.match(row('VENUS_NODELETE','noDeleteEdits').props.subLabel,/before it was edited/);
-    const input=()=>{let found;(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);
-        if(n.props&&n.props.keyboardType==='number-pad')found=n;walk(n.props&&n.props.children);})(b.registry.VENUS_NODELETE.screen.getComponent()());return found;};
-    assert.equal(input().props.editable,true);b.api.setSetting('noDelete',false);assert.equal(input().props.editable,false,'the maximum box is read-only too');
+    // How many to keep is a segmented choice now, greyed out with the switches.
+    const tabs=()=>pageNodes(b.registry.VENUS_NODELETE.screen.getComponent()()).filter(n=>n.props&&n.props.accessibilityRole==='tab');
+    assert.deepEqual(tabs().map(n=>n.props.accessibilityLabel),['100','512','1000','5000']);
+    assert.equal(tabs().find(n=>n.props.accessibilityState.selected).props.accessibilityLabel,'512','default 512 is chosen');
+    tabs().find(n=>n.props.accessibilityLabel==='1000').props.onPress();assert.equal(b.api.settings.noDeleteLimit,1000);
+    // A number an older version saved shows as the closest choice and isn't changed until you pick another.
+    b.api.setSetting('noDeleteLimit',90);assert.equal(tabs().find(n=>n.props.accessibilityState.selected).props.accessibilityLabel,'100');
+    assert.equal(b.api.settings.noDeleteLimit,90);
+    b.api.setSetting('noDelete',false);assert.ok(tabs().every(n=>n.props.disabled),'the choice is greyed out too');
 });
 test('Read All mode persists and an invalid saved mode falls back to Servers',async()=>{
     const b=boot(allFeatures);
@@ -4522,12 +4531,16 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
         React.useState = init => typeof init === 'string' ? [draft, v => { draft = v; }] : [init, () => {}];
         return page();
     };
-    const pasteRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Paste link from clipboard');
-    pasteRow.props.onPress();
+    // One field and one button beside it: Paste while the box is empty, Install once it holds a link.
+    const button = () => withDraft().find(n => n.props && n.props.accessibilityRole === 'button' && /^(Paste|Install)$/.test(n.props.accessibilityLabel));
+    assert.equal(withDraft().filter(n => n.type === 'Row' && /Install theme|Paste link/.test(n.props.label)).length, 0, 'no separate Install and Paste rows');
+    assert.equal(button().props.accessibilityLabel, 'Paste');
+    button().props.onPress();
     await flush(); await flush();
     assert.equal(draft, 'https://github.com/rose-pine/discord-mobile/blob/main/rosepinemoon.json', 'clipboard link pasted into draft');
 
-    const installRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Install theme');
+    const installRow = button();
+    assert.equal(installRow.props.accessibilityLabel, 'Install');
     assert.equal(installRow.props.disabled, false);
     installRow.props.onPress();
     await flush(); await flush(); await flush();
