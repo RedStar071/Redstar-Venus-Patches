@@ -1,3 +1,16 @@
+## [1.14.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.13.0...v1.14.0) (2026-10-16)
+
+### ✨ New Features
+
+* **Discord - Show hidden channels:** Add an option to turn off the locked-channel menu, so tapping a locked channel does nothing ([#62](https://github.com/VenusIsJaded/Venus-Patches/issues/62))
+
+### 🐛 Bug Fixes
+
+* **Discord - Account switcher:** Fixed every added account disappearing after Discord was closed in the background for a while and reopened ([#63](https://github.com/VenusIsJaded/Venus-Patches/issues/63))
+* **Discord - Show hidden channels:** Fixed scrolling past a locked channel showing its menu even though you never tapped it ([#62](https://github.com/VenusIsJaded/Venus-Patches/issues/62))
+* **Discord - Show hidden channels:** Fixed opening a server or Discord showing the menu of a locked channel you had last tapped there
+* **Discord - Show hidden channels:** Fixed a locked channel listed above the real ones being picked as the server's first channel
+
 ## [1.13.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.12.0...v1.13.0) (2026-10-16)
 
 ### ✨ New Features

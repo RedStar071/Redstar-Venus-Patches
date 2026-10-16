@@ -42,6 +42,7 @@ BOOTSTRAP_MODULES = [
     (1491, 'design/components/Navigator/native/useNavigation.native.tsx', ['useNavigation', 'useNativeStackNavigation', 'useStackNavigation'], 'useStackNavigation'),
     (1986, 'stores/native/AppStateStore.tsx', ['default'], 'AppStateStore'),
     (2051, 'stores/ChannelStore.tsx', ['Basic', 'Full', 'default'], 'ChannelStore'),
+    (2102, 'stores/SelectedChannelStore.tsx', ['default', 'findFirstVoiceChannelId', 'handleConnectionOpen'], 'SelectedChannelStore (Hidden channels never opens a locked channel by itself)'),
     (2073, 'stores/GuildStore.tsx', ['default'], 'GuildStore'),
     (2111, 'stores/GuildMemberStore.tsx', ['GUILD', 'USER', 'default'], 'GuildMemberStore'),
     (2115, 'modules/user_settings/LocaleStore.tsx', ['default'], 'LocaleStore'),
