@@ -4913,7 +4913,9 @@ function hookHost(b, React, node) {
         i = r = e = 0;
         const tree = node.type(node.props);
         effects.forEach(x => { if (x.pending) { x.pending = false; if (typeof x.cleanup === 'function') x.cleanup(); x.cleanup = x.fn(); } });
-        return pageNodes(tree);
+        // The Watch / Try it switch is its own small component (no hooks of its own besides theme styles): draw it inline.
+        const nodes = pageNodes(tree);
+        return nodes.concat(...nodes.filter(n => n.type && n.type.name === 'PreviewToggle').map(n => pageNodes(n.type(n.props))));
     }
     // Runs timers one at a time (each may add the next), re-rendering after each, up to n steps.
     function run(n) { for (let k = 0; k < n && timers.length; k++) { const t = timers.shift(); t.fn(); render(); } }

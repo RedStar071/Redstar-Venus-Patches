@@ -3184,8 +3184,11 @@
     const PREVIEW_TOGGLE_DARK = {wrap:{flexDirection:"row", alignSelf:"flex-end", padding:3, gap:3, borderRadius:16, backgroundColor:"#1e1f22", marginHorizontal:12, marginBottom:4},
         on:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13, backgroundColor:"#4e5058"},
         off:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13}};
-    // The small Watch / Try it switch at the top of a preview, in Discord's segmented-control colors.
-    function previewToggle(mode, setMode) {
+    // The small Watch / Try it switch at the top of a preview, in Discord's segmented-control colors. Its own component,
+    // so a preview can show it only while the feature is on without changing the preview's hooks.
+    function previewToggle(mode, setMode) { return el(PreviewToggle, {key:"toggle", mode, setMode}); }
+    function PreviewToggle(props) {
+        const mode = props.mode, setMode = props.setMode;
         const s = useThemed("previewToggle", c => ({wrap:Object.assign({}, PREVIEW_TOGGLE_DARK.wrap, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND}),
             on:Object.assign({}, PREVIEW_TOGGLE_DARK.on, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}), off:PREVIEW_TOGGLE_DARK.off}), PREVIEW_TOGGLE_DARK);
         const Text = inspectedExport(4833, "Text"), Press = RN.Pressable || RN.View;
@@ -3519,8 +3522,8 @@
         const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
         const [state, setState] = React.useState(blank), watching = on && kinds.length > 0 && mode === "watch";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
-        const box = useThemed("nitroInput", c => ({marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20,
-            backgroundColor:c.BACKGROUND_MOD_NORMAL}), {marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"});
+        const box = useThemed("nitroInput", c => ({input:{marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20,
+            backgroundColor:c.BACKGROUND_MOD_NORMAL}}), {input:{marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"}});
         useDemo(watching, () => {
             const steps = [[0, () => setState(blank)]];
             if (settings.emojis) {
@@ -3540,7 +3543,7 @@
             item ? el(RN.View, {key:"msg:" + kind}, popIn("msg:" + kind, previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"),
                 el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}}, el(NitroArt, {key:kind, kind, item, play:state.pick}))))) : null,
             item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2}}, el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:sent}))) : null,
-            watching ? el(RN.View, {key:"input", style:box}, el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, state.draft || tr("Message {channel}", {channel:"#general"}))) : null,
+            watching ? el(RN.View, {key:"input", style:box.input}, el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, state.draft || tr("Message {channel}", {channel:"#general"}))) : null,
             previewCaption(s, watching ? state.caption : on ? hint : "")];
         const preview = chatPreview(s, "preview", "Nitro link preview", body);
         return el(RN.View, {key:"preview"}, on && kinds.length ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
