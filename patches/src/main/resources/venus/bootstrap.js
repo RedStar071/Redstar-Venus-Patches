@@ -3399,45 +3399,68 @@
     function count(n,word) { return pl(n,"{n} "+word,"{n} "+word+"s"); }
     // Settings page: Discord's own radio list (TableRadioGroup 5995 / TableRadioRow 5994).
     // Hidden channels: one choice, whether tapping a locked channel shows its details or does nothing.
-    // The locked channel in the preview: pressable like a real row, and it gives a small shake when tapping does nothing.
-    let hiddenNudgeFn = null;
-    function hiddenNudge() { if (hiddenNudgeFn) hiddenNudgeFn(); }
+    // The locked channel in the preview: pressable like a real row, and it gives a small shake when tapping does nothing
+    // (each time props.shake goes up).
     function HiddenPreviewRow(props) {
         const A = motion(), ref = React.useRef(null), Press = RN.Pressable || RN.View;
         if (!ref.current && A) ref.current = new A.Value(0);
         React.useEffect(() => {
-            hiddenNudgeFn = () => {
-                const value = ref.current;
-                if (!value || reduceMotion || typeof A.sequence !== "function") return;
-                value.setValue(0);
-                A.sequence([1, -1, 1, 0].map(to => A.timing(value, {toValue:to, duration:60, useNativeDriver:true}))).start();
-            };
-            return () => { hiddenNudgeFn = null; };
-        }, []);
+            const value = ref.current;
+            if (!props.shake || !value || reduceMotion || typeof A.sequence !== "function") return undefined;
+            value.setValue(0);
+            const run = A.sequence([1, -1, 1, 0].map(to => A.timing(value, {toValue:to, duration:60, useNativeDriver:true})));
+            run.start();
+            return () => run.stop();
+        }, [props.shake]);
         const row = {flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7};
         const style = ref.current ? [row, {transform:[{translateX:ref.current.interpolate({inputRange:[-1, 1], outputRange:[-6, 6]})}]}] : row;
         return el(Press, {onPress:props.onPress, accessibilityRole:"button", accessibilityLabel:props.label + ", " + tr("locked")},
-            el(ref.current ? A.View : RN.View, {style}, props.children));
+            el(ref.current ? A.View : RN.View, {style}, props.children), props.ripple || null);
+    }
+    // A few channels the way Discord's list shows them: muted names, and the locked one with Discord's own # and lock
+    // icon. Watch: the list scrolls past it (nothing opens), then a tap shows its details, or a shake when they're off.
+    // Try it: tap it yourself and Discord's real details dialog opens.
+    const HIDDEN_SAMPLE = {id:"1180000000000000000", guild_id:"1", type:0, name:"staff-only", lastMessageId:"1290000000000000000"};
+    function HiddenChannelsPreview(props) {
+        useSettings("hiddenChannels");
+        const s = useChatPreviewStyles(), [mode, setMode] = usePreviewMode(), on = props.on, menu = settings.hiddenChannelsMenu;
+        const Hash = venusIcon(15125, "HashmarkIcon"), TextLock = venusIcon(5393, "TextLockIcon");
+        const blank = {shake:0, pulse:null, card:false, scroll:0, caption:""};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const shake = () => update(st => ({shake:st.shake + 1}));
+        useDemo(watching, () => [[0, () => setState(blank)],
+            [700, () => { animateLayout(); update({scroll:1, caption:tr("Scrolling past a locked channel opens nothing")}); }],
+            [1400, () => { animateLayout(); update({scroll:0}); }],
+            [900, () => update(st => ({pulse:{who:"locked", id:st.shake + ":" + Date.now()}}))],
+            [200, () => { if (menu) { animateLayout(); update({card:true, caption:tr("Tap it: see when it was made and last used")}); }
+                else { shake(); update({caption:tr("Tap it: nothing happens, the details are off")}); } }],
+            [2600, () => { animateLayout(); update({card:false}); }], [500, () => {}]], [menu]);
+        const tapLocked = () => { if (!on || watching) return; if (menu) showHidden(HIDDEN_SAMPLE); else shake(); };
+        const channel = (name, locked) => el(locked ? HiddenPreviewRow : RN.View, locked ?
+            {key:name, onPress:tapLocked, label:name, shake:state.shake, ripple:tapRipple(state.pulse, "locked", {right:40, top:2})} :
+            {key:name, style:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7}},
+            el(locked ? TextLock : Hash, {size:"sm", color:s.muted.color}), el(RN.Text, {style:[s.text, {flex:1, color:s.muted.color}], numberOfLines:1}, name));
+        // The same details the dialog shows, drawn inside the preview while it plays.
+        const card = watching && state.card ? el(RN.View, {key:"card", style:{marginHorizontal:12, marginTop:4, padding:12, gap:8, borderRadius:12,
+            backgroundColor:"#4e505833"}}, popIn("card", el(RN.Text, {style:[s.name, {fontSize:15}]}, tr("Locked channel"))),
+            hiddenDetails(HIDDEN_SAMPLE).map(([label, stamp]) => el(RN.View, {key:label},
+                el(RN.Text, {style:[s.muted, {fontSize:11, fontWeight:"700"}]}, label.toUpperCase()), el(RN.Text, {style:s.text}, stamp.relative)))) : null;
+        const list = [channel("general", false), on ? channel("staff-only", true) : null, channel("memes", false)];
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            chatPreview(s, "preview", "Hidden channels preview", [
+                el(RN.View, {key:"list", style:state.scroll ? {transform:[{translateY:-10}], opacity:0.8} : null}, list), card,
+                on ? previewCaption(s, watching ? state.caption : tr(menu ? "Tap staff-only to try it." : "Tap staff-only: nothing happens.")) : null]));
     }
     function HiddenChannelsSettings() {
         useSettings("hiddenChannels");
         const ui=reviewUI();
         if (!React || !RN) return null;
         const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5410,"LockIcon");
-        const s=useChatPreviewStyles(), Hash=venusIcon(15125,"HashmarkIcon"), TextLock=venusIcon(5393,"TextLockIcon");
-        // A few channels the way Discord's list shows them: muted names, and the locked one with Discord's own
-        // # and lock icon. Tap it to try what tapping a real one does.
-        const sample={id:"1180000000000000000",guild_id:"1",type:0,name:"staff-only",lastMessageId:"1290000000000000000"};
-        const tapLocked=() => { if (!on) return; if (settings.hiddenChannelsMenu) showHidden(sample); else hiddenNudge(); };
-        const channel=(name,locked) => el(locked ? HiddenPreviewRow : RN.View,locked ? {key:name,onPress:tapLocked,label:name} :
-            {key:name,style:{flexDirection:"row",alignItems:"center",gap:8,paddingHorizontal:16,paddingVertical:7}},
-            el(locked ? TextLock : Hash,{size:"sm",color:s.muted.color}),el(RN.Text,{style:[s.text,{flex:1,color:s.muted.color}],numberOfLines:1},name));
         const groups=[
             on ? statusCard("status",settings.hiddenChannelsMenu ? "Tap a locked channel to see when it was made and last used." :
                 "Locked channels are listed, and tapping one does nothing.",{title:tr("Showing hidden channels"),IconComponent:lock}) : offCard("status",lock),
-            chatPreview(s,"preview","Hidden channels preview",[channel("general",false),on ? channel("staff-only",true) : null,channel("memes",false),
-                on ? el(RN.View,{key:"hint",style:{paddingHorizontal:16,paddingTop:4}},el(RN.Text,{style:s.muted},
-                    tr(settings.hiddenChannelsMenu ? "Tap staff-only to try it." : "Tap staff-only: nothing happens."))) : null]),
+            el(HiddenChannelsPreview,{key:"preview",on}),
             el(Group,{key:"tap",title:tr("When you tap a locked channel")},
                 switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4788,"CircleInformationIcon"))),
             footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];

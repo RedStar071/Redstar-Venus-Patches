@@ -4964,11 +4964,28 @@ test('the Tap gestures preview plays a story: reply to Sam, regret it, triple-ta
     assert.ok(seen2.has('Double-tap: you edit your message') && !seen2.has('Message deleted'));
 });
 test('Hidden channels preview lists the locked channel only while it is on', () => {
-    const b = settingsHarness(); reactHarness(b);
+    const b = settingsHarness(); const {React} = reactHarness(b);
     const names = on => { b.api.setSetting('hiddenChannels', on);
-        return pageNodes(b.registry.VENUS_HIDDENCHANNELS.screen.getComponent()()).filter(n => n.type === 'Text' && /^[a-z-]+$/.test(n.props.children)).map(n => n.props.children); };
+        const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+        return host.render().filter(n => n.type === 'Text' && /^[a-z-]+$/.test(n.props.children)).map(n => n.props.children); };
     assert.deepEqual(names(true), ['general', 'staff-only', 'memes']);
     assert.deepEqual(names(false), ['general', 'memes']);
+});
+test('Hidden channels preview plays: scrolling past opens nothing, a tap shows the details or shakes', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('hiddenChannels', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+    host.render(); const seen = new Set(); let ripple = false;
+    for (let k = 0; k < 8; k++) { host.run(1); host.texts().forEach(t => seen.add(t)); if (host.render().find(n => n.type && n.type.name === 'HiddenPreviewRow').props.ripple) ripple = true; }
+    for (const t of ['Scrolling past a locked channel opens nothing', 'Tap it: see when it was made and last used', 'Locked channel', 'LAST MESSAGE']) assert.ok(seen.has(t), 'shows: ' + t);
+    assert.ok(ripple, 'the tap shows where it lands');
+    b.api.setSetting('hiddenChannelsMenu', false);
+    const off = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+    off.render(); const seen2 = new Set(); let shook = 0;
+    for (let k = 0; k < 8; k++) { off.run(1); off.texts().forEach(t => seen2.add(t));
+        const row = off.render().find(n => n.type && n.type.name === 'HiddenPreviewRow'); shook = Math.max(shook, row.props.shake); }
+    assert.ok(seen2.has('Tap it: nothing happens, the details are off') && !seen2.has('Locked channel'));
+    assert.equal(shook, 1, 'the row shakes instead');
 });
 test('the Features entry says how many are on', () => {
     const b = settingsHarness();
@@ -4991,17 +5008,18 @@ test('Message highlights preview glows only the highlight you just changed, neve
 });
 test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
     const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];
-    b.context.__r = id => ({5205:{default:{show:o => shown.push(o)}}, 4833:{Text(){}}}[id] || null);
-    b.api.setSetting('hiddenChannels', true);
-    const row = () => pageNodes(b.registry.VENUS_HIDDENCHANNELS.screen.getComponent()()).find(n => n.type && n.type.name === 'HiddenPreviewRow');
-    const icon = row().props.children[0];
-    assert.equal(icon.type, b.context.__r ? icon.type : null);
     b.context.__r = id => ({5393:{TextLockIcon:'TL'}, 5205:{default:{show:o => shown.push(o)}}, 4833:{Text(){}}}[id] || null);
+    b.api.setSetting('hiddenChannels', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    const row = () => host.render().find(n => n.type && n.type.name === 'HiddenPreviewRow');
+    const icon = row().props.children[0];
     assert.equal(icon.type({size:'sm'}).type, 'TL', 'the # with a small lock, not a separate big lock');
     row().props.onPress(); assert.equal(shown.length, 1, 'opens the same details Discord shows for a locked channel');
     assert.equal(shown[0].confirmText, 'View Anyway');
     shown[0].onCancel();
     b.api.setSetting('hiddenChannelsMenu', false); row().props.onPress(); assert.equal(shown.length, 1, 'with the menu off, nothing opens');
+    assert.equal(row().props.shake, 1, 'it shakes instead');
 });
 test('Device indicators preview follows every option, and tapping it changes Alex\'s devices', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
