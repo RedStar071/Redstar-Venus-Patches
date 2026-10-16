@@ -5003,3 +5003,24 @@ test('Nitro preview shows Discord\'s own Wumpus as the emoji or sticker, never a
     b.api.setSetting('stickers', false); assert.equal(art(), 'modules_guilds_bar_native_images_wumpus_wave', 'only the emoji once stickers are off');
     assert.equal(read, 0, 'never reads your servers\' emojis or stickers');
 });
+test('Deleted messages and Pastel names previews can be tried by tapping', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    let st; React.useState = init => { if (typeof init === 'object' && init) { if (!st) st = init; return [st, v => { st = typeof v === 'function' ? v(st) : v; }]; } return [init, () => {}]; };
+    b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
+    const preview = () => { const n = pageNodes(b.registry.VENUS_NODELETE.screen.getComponent()()).find(x => x.type && x.type.name === 'NoDeletePreview'); return pageNodes(n.type(n.props)); };
+    const tap = hint => preview().find(n => n.props && n.props.accessibilityHint === hint).props.onPress();
+    tap('Tap to delete it'); assert.equal(st.deleted, true, 'stays, outlined');
+    assert.ok(preview().some(n => n.props && n.props.accessibilityHint === 'Tap to bring it back'));
+    tap('Tap to edit it'); tap('Tap to edit it');
+    const faded = preview().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length;
+    assert.equal(faded, 2, 'both earlier versions stay above it');
+    b.api.setSetting('noDeleteEdits', false);
+    assert.equal(preview().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
+    // Pastel names: tap for new people.
+    let round = 0; React.useState = init => typeof init === 'number' ? [round, v => { round = typeof v === 'function' ? v(round) : v; }] : [init, () => {}];
+    b.api.setSetting('pastelize', true);
+    const names = () => pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()()).filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children);
+    assert.deepEqual(names(), ['Alex', 'Sam', 'Jordan']);
+    pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()()).find(n => n.props && n.props.accessibilityHint === 'Tap for new people').props.onPress();
+    assert.deepEqual(names(), ['Riley', 'Morgan', 'Casey']);
+});

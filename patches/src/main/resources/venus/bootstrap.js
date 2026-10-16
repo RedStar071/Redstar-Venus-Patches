@@ -3436,21 +3436,26 @@
         return settingsBody(ui,groups);
     }
     // Pastel names: a few names in their own pastel color, the way they'll show in chat.
+    const PASTEL_CAST = [["Alex","Sam","Jordan"],["Riley","Morgan","Casey"],["Taylor","Jamie","Avery"],["Quinn","Rowan","Skyler"]];
     function PastelSettings() {
         useSettings("pastelize");
         const ui=reviewUI();
         if (!React || !RN) return null;
         const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
         const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
-        const people=[["Alex","#3ba55c",tr("Has anyone tried the new update?"),null],["Sam","#eb459e",tr("Yes, it looks great!"),"#e67e22"],["Jordan","#faa61a",tr("Same here.")]];
+        // Tap the preview for new people: everyone gets their own color, always the same one for the same name.
+        const [round,setRound]=React.useState(0), cast=PASTEL_CAST[round % PASTEL_CAST.length];
+        const people=[[cast[0],"#3ba55c",tr("Has anyone tried the new update?"),null],[cast[1],"#eb459e",tr("Yes, it looks great!"),"#e67e22"],[cast[2],"#faa61a",tr("Same here.")]];
         const groups=[
             on ? statusCard("status",settings.pastelAll ? "Every name has its own pastel color, even with a role color." : "Names without a role color get their own pastel color.",
                 {title:tr("Pastel names"),IconComponent:venusIcon(14795,"PaintPaletteIcon")}) : offCard("status",venusIcon(14795,"PaintPaletteIcon")),
-            chatPreview(s,"preview","Pastel names preview",people.map(([who,avatar,text,role],i) => {
-                const name=role && !settings.pastelAll ? role : tint(who+i,0.75,0.6,s.name.color);
-                const body=settings.pastelContent && !(role && !settings.pastelAll) ? tint(who+i,0.85,0.75,null) : null;
-                return previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name});
-            })),
+            el(RN.Pressable || RN.View,{key:"preview",onPress:() => { if (on) { animateLayout(); setRound(n => n+1); } },accessibilityRole:"button",accessibilityHint:tr("Tap for new people")},
+                chatPreview(s,"preview","Pastel names preview",people.map(([who,avatar,text,role],i) => {
+                    const name=role && !settings.pastelAll ? role : tint(who,0.75,0.6,s.name.color);
+                    const body=settings.pastelContent && !(role && !settings.pastelAll) ? tint(who,0.85,0.75,null) : null;
+                    return previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),
+                        el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name});
+                }).concat(on ? [el(RN.View,{key:"hint",style:{paddingHorizontal:16,paddingTop:2}},el(RN.Text,{style:s.muted},tr("Tap for new people")))] : []))),
             el(Group,{key:"colors",title:tr("Colors")},
                 switchRow(Switch,"pastelAll","Replace role colors","Every name uses its pastel color, even with a role color.",rowIcon(10398,"CrownIcon")),
                 switchRow(Switch,"pastelContent","Color message text","What people write is colored too, in a lighter shade of their name.",rowIcon(5395,"TextIcon"))),
@@ -4004,16 +4009,27 @@
             footnote("note","Reviews come from manti.vendicated.dev. Opening reviews sends that profile's or server's ID to ReviewDB.")];
         return settingsBody(ui,groups);
     }
+    // Try it: tap Sam's message to delete it (it stays, outlined), tap Alex's to edit it (the old text stays above).
+    // Follows Show edit history and your Message highlights colors.
     function NoDeletePreview(props) {
-        const s=useChatPreviewStyles(), red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
-        const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2;
+        const s=useChatPreviewStyles(), Press=RN.Pressable || RN.View, [state,setState]=React.useState({deleted:false,edits:0});
+        const red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
+        const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2, on=!!props.on;
+        const versions=[tr("See you at 6"),tr("See you at 7"),tr("See you at 8")];
+        const edit=() => { if (!on) return; animateLayout(); setState(st => ({deleted:st.deleted,edits:st.edits>=2 ? 0 : st.edits+1})); };
+        const remove=() => { if (!on) return; animateLayout(); setState(st => ({deleted:!st.deleted,edits:st.edits})); };
+        const history=props.edits ? versions.slice(0,state.edits) : [];
         return chatPreview(s,"preview","Deleted messages preview",[
-            props.edits ? previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
-                el(RN.Text,{style:s.faded},tr("See you at 6")),
-                el(RN.Text,{style:s.text},tr("See you at 7"),el(RN.Text,{style:s.muted}," "+tr("(edited)"))))) : null,
-            el(RN.View,{key:"deleted",style:{backgroundColor:red+"1a"}},
-                el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}}),
-                previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))))]);
+            el(Press,{key:"edited",onPress:edit,accessibilityRole:"button",accessibilityHint:tr("Tap to edit it")},
+                previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
+                    history.map((text,i) => popIn("old:"+i,el(RN.Text,{style:s.faded},text))),
+                    el(RN.Text,{style:s.text},versions[state.edits],state.edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null)))),
+            el(Press,{key:"deleted",onPress:remove,accessibilityRole:"button",accessibilityHint:tr(state.deleted ? "Tap to bring it back" : "Tap to delete it")},
+                el(RN.View,{style:state.deleted ? {backgroundColor:red+"1a"} : null},
+                    state.deleted ? popIn("bar",el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}})) : null,
+                    previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))))),
+            on ? el(RN.View,{key:"hint",style:{paddingHorizontal:16,paddingTop:2}},el(RN.Text,{style:s.muted},
+                tr(props.edits ? "Try it: tap Sam's message to delete it, or Alex's to edit it." : "Try it: tap Sam's message to delete it."))) : null]);
     }
     const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {
@@ -4032,7 +4048,7 @@
         const groups=[
             settings.noDelete ? statusCard("status",summary,{title:kept || changed ? pl(kept+changed,"{n} message kept","{n} messages kept") : tr("Keeping deleted messages"),
                 IconComponent:venusIcon(4791,"TrashIcon")}) : offCard("status",venusIcon(4791,"TrashIcon")),
-            el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits}),
+            el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits,on:!!settings.noDelete}),
             el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(9829,"PencilIcon"))),
             el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.",rowIcon(4782,"DownloadIcon"))),
             el(RN.View,{key:"limit",style:{gap:8}},
