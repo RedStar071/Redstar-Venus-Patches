@@ -251,19 +251,60 @@ every screen follows these rules. Follow them for every new feature and every ch
 
 ### Option pages
 
-Build pages from the shared helpers in `bootstrap.js`, in this order:
+Every option page shares one look, set by the User activity notifications and Message highlights pages in 1.12.0:
+calm, roomy and visual, built from Discord's own components so it feels like part of the app. Follow it for every
+new page and every change to an existing one. `tests/runtime.test.cjs` ("every option page renders in the shared
+design") renders each page on and off and fails when a page breaks the rules below.
 
-1. `statusCard`: one or two plain lines of live status, when the feature has any ("3 deleted messages and 1
-   edited message kept until Discord restarts."). When the feature is off it says "Turned off. Switch it on in
-   Features to start."
-2. Groups of `switchRow`s with short group titles (Display, Storage, Limit…). Use `radioGroup` for a choice of
-   one, never check-marked rows.
-3. `actionRow` under **Manage** for one-time actions, like clearing what the feature saved. A destructive action
-   uses the danger style, is disabled when there's nothing to act on, and always asks first with `confirmAction`.
-4. `footnote`: muted small text for anything else worth knowing. Keep it to a sentence or two.
+**Page order, top to bottom**
 
-The page's switches grey out while the main switch is off. The page title is short ("Deleted messages", "Tap
-gestures").
+1. **Status card** (`statusCard(key, text, {title, IconComponent, leading})`): a bold title that says the state in
+   a few words ("Watching all 12 friends", "Signed in as Venus", "3 Quests done"), the details under it in muted
+   text, and the feature's own icon in a round badge on the left. Use `leading` for something more personal than an
+   icon when there is one: the watched people's `avatarPile`, your avatar, a theme's `themeSwatch`. When the feature
+   is off, use `offCard(key, Icon)` ("Turned off" / "Switch it on in Features to start.").
+2. **A live preview**, when the feature changes how something looks: a small chat surface built with
+   `chatPreview` + `previewMessage` that follows the settings below it as you change them (bar width and colors,
+   edit history, pastel names, device icons, translation notes, link style). Previews use plain sample people and
+   text, never real messages, and only the theme tokens from `useChatPreviewStyles`.
+3. **Choices**, each group with a short title:
+   - a choice of 2–4 short values (widths, who to watch): `venusSegmented` under a `groupTitle`;
+   - a choice of one with explanations: `radioGroup`, every choice with a `rowIcon` (4th item);
+   - on/off options: `switchRow(Switch, key, label, subLabel, rowIcon(id, "NameIcon"))`;
+   - colors: a row of round swatches plus an "Any color" swatch that opens Discord's color picker
+     (`showCustomColorPickerActionSheet` 14140), with a hex box only as a fallback;
+   - people: rows with `avatarBubble` (status dot when known) and a trailing ✕ (`XSmallIcon`) to remove; never a
+     list of IDs or "Tap to remove" text;
+   - a text box with an action: `inputWithButton` (Discord's `Button` beside the field), never a separate
+     "Add"/"Use" row under it.
+4. **Manage**: `actionRow`s for one-time actions (clear, reset). Destructive ones use the danger style, are
+   disabled (or hidden) when there's nothing to act on, and always ask first with `confirmAction`. A page that has
+   options that can drift from the defaults gets "Reset to defaults".
+5. **Footnote**: one or two muted sentences, only for what isn't obvious from the page.
+
+**Rules**
+
+- **Every switch and radio row has its own Discord icon** (`rowIcon`, a design-system icon module that exports
+  exactly that name; check it with `scripts/hbc` and add it to `port_check.py` and the module map). Pick an icon
+  that shows what the row does, not the feature's icon again. The Language list is the only exception.
+- **Colors come from Discord's theme tokens through `useThemed(name, c => styles, darkFallback)`** (createStyles),
+  never `ui.colors.X` straight in a style: those are token objects, not colors, and silently fall back. Each style
+  set gets a unique name, and the fallback is Discord's dark theme. Status colors use `STATUS_HEX`.
+- **Text uses Discord's `Text` (4833) variants**: titles `text-md/semibold` + `text-strong`, details
+  `text-sm/medium` + `text-muted`. Cards are 16 radius, 16 horizontal padding, with `CARD_BACKGROUND_DEFAULT`.
+- **Show, don't list**: summarize long lists (an avatar pile with "12 friends" rather than 12 checkboxes) and only
+  expand them when the user chose to pick one by one. Never use "✓ " in front of a label to show a choice; use a
+  radio, a segmented control, a check icon in `trailing`, or a ring around a swatch.
+- **Nothing on the page is useless**: hide rows that can't do anything right now (Manage with nothing to reset),
+  and keep switches greyed out while the main switch is off.
+- Helpers called from a page render (`VenusStatusCard`, `venusSegmented`, `highlightPreview`…) are plain
+  functions called directly, not components, so the page stays one render tree; components with their own hooks
+  (`HighlightPreview`-style previews that use `useSettings`) are created with `el`.
+- Pages whose options are also native setting nodes (Nitro links, Pastel names, Device indicators) keep those
+  nodes for Discord's settings search and pass `{page, sections}` to `withOptions`, so the designed page is shown.
+- Every new text goes through `tr()`/`pl()` and gets added to all 30 language files.
+
+The page title is short ("Deleted messages", "Tap gestures").
 
 ### Keeping everything in step
 
@@ -274,3 +315,12 @@ gestures").
   title, group or option changes. The Features list test checks title and description length and that each icon
   is unique.
 - **Always keep both the module map file (`scripts/hbc/348.10-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
+
+## Workflow for bug fixes, optimizations, and GitHub Actions `.mpp` artifacts
+
+- **For every bug or issue:** immediately find the root cause and implement a fix, then **immediately commit and push that fix to the pull request** before moving on to the next issue.
+- **For every optimization:** implement the optimization, benchmark it on a real Hermes VM, and **immediately commit and push that optimization to the pull request** before moving on to the next one.
+- Never batch unrelated fixes or optimizations into a single giant end-of-session commit; each fix or optimization should land in the pull request as soon as it is verified.
+- **GitHub Actions precompiled `.mpp` (`venus-patches-mpp` artifact):**
+  - `.github/workflows/main.yml` automatically builds, tests, and packages `patches/build/libs/patches-<version>.mpp` (along with `SHA256SUMS` and `bootstrap.hbc`) on every `push` to `main`, every `pull_request` targeting `main`, and on tag pushes (`v*`), uploading them as the `venus-patches-mpp` workflow artifact.
+  - When testing a PR or publishing a release, prefer the prebuilt `.mpp` artifact produced by the GitHub Actions workflow (`venus-patches-mpp`), or let the tag workflow publish the `.mpp` directly to the GitHub Release, so the exact CI-verified `.mpp` is used.

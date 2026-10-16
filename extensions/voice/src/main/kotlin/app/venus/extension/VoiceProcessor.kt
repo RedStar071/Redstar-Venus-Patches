@@ -211,7 +211,7 @@ object VoiceProcessor {
             }
             var inputDone = false
             var decodedDone = false
-            var resampler: PcmResampler? = if (pcmSource != null) PcmResampler(pcmSource.rate, pcmSource.channels, true) else null
+            var resampler: PcmResampler? = if (pcmSource != null) PcmResampler(pcmSource.rate, pcmSource.channels, false) else null
             val decodedInfo = MediaCodec.BufferInfo()
             if (pcmSource != null) {
                 while (true) {
@@ -225,8 +225,9 @@ object VoiceProcessor {
             while (!decodedDone) {
                 checkActive()
                 val activeDecoder = checkNotNull(decoder) { "Audio decoder unavailable" }
+                var fedInput = false
                 if (!inputDone) {
-                    val index = activeDecoder.dequeueInputBuffer(10000)
+                    val index = activeDecoder.dequeueInputBuffer(0)
                     if (index >= 0) {
                         val buffer = activeDecoder.getInputBuffer(index)!!
                         buffer.clear()
@@ -241,9 +242,10 @@ object VoiceProcessor {
                             // boolean: mixed Unit/Boolean branches generate the renamed Unit.INSTANCE.
                             inputDone = false
                         }
+                        fedInput = true
                     }
                 }
-                val index = activeDecoder.dequeueOutputBuffer(decodedInfo, 10000)
+                val index = activeDecoder.dequeueOutputBuffer(decodedInfo, if (fedInput) 0 else 10000)
                 if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     // HE-AAC/SBR, some Opus/Vorbis and vendor decoders announce a provisional layout and
                     // then the real one. Continue on the same 48 kHz output clock instead of failing.

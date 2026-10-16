@@ -233,6 +233,23 @@ fun main(args: Array<String>) {
     for (field in replyGuard.mapNotNull { (it as? ReferenceInstruction)?.reference as? FieldReference })
         check(dexClasses.any { c -> c.type == field.definingClass && c.fields.any { it.name == field.name && it.type == field.type } }) { "Unresolved reply guard field $field" }
     checkBranches(reply, "Reply guard")
+    // Message highlights (#60): assembled on Discord's real HighlightedMessageDrawer.drawHighlight (a detached fixture).
+    val gutterMethod = methods.single { it.definingClass == HIGHLIGHT_DRAWER && it.name == "drawHighlight" && it.parameterTypes.size == 4 }
+    val gutterOriginal = gutterMethod.implementation!!.instructions.map { it.opcode }
+    val gutter = MutableMethod(gutterMethod)
+    scaleMessageGutterWidth(gutter)
+    val gutterCode = gutter.implementation!!.instructions.toList()
+    check(gutter.implementation!!.registerCount == gutterMethod.implementation!!.registerCount) { "Gutter guard changed the register count" }
+    check(gutterCode.size == gutterOriginal.size + MESSAGE_GUTTER_GUARD_SIZE) { "Gutter guard is ${gutterCode.size - gutterOriginal.size} instructions" }
+    check(gutterCode.drop(MESSAGE_GUTTER_GUARD_SIZE).map { it.opcode } == gutterOriginal) { "Discord's own drawHighlight code changed" }
+    check(gutterCode[MESSAGE_GUTTER_GUARD_SIZE - 1].opcode == Opcode.NOP)
+    val gutterGuard = gutterCode.take(MESSAGE_GUTTER_GUARD_SIZE)
+    for (instruction in gutterGuard) if (instruction is OneRegisterInstruction && instruction.opcode != Opcode.IF_EQZ && instruction.opcode != Opcode.IF_NEZ)
+        check(instruction.registerA in 0..2) { "Gutter guard writes outside v0-v2" }
+    for (field in gutterGuard.mapNotNull { (it as? ReferenceInstruction)?.reference as? FieldReference })
+        check(dexClasses.any { c -> c.type == field.definingClass && c.fields.any { it.name == field.name && it.type == field.type } }) { "Unresolved gutter guard field $field" }
+    checkBranches(gutter, "Gutter guard")
+    check(try { scaleMessageGutterWidth(gutter); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second gutter guard was accepted" }
     // Passkey hint: assembled on Discord's one security key reject (a detached fixture, not a Patcher run).
     val rejectMethod = methods.single { it.definingClass == SECURITY_KEY_MODULE && it.name == "reject" &&
         it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/Throwable;") }

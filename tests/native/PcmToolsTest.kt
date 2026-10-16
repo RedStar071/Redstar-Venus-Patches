@@ -76,15 +76,15 @@ private fun pcmFileChecks(): Int {
     for(bits in listOf(8,16,24,32)) for(little in listOf(true,false)) {
         val source=checkNotNull(PcmFileInput.open(ByteArrayInputStream(wav(bits,false,little))))
         check(source.rate==48000 && source.channels==1)
-        val pcm=checkNotNull(source.readFrames());for(value in listOf(-0.5f,0f,0.5f))check(abs(pcm.float-value)<0.000001f)
+        val pcm=checkNotNull(source.readFrames());for(value in listOf(-16384,0,16384))check(abs(pcm.short.toInt()-value)<=256)
         check(source.readFrames()==null);checks++
     }
     for(bits in listOf(32,64)) for(little in listOf(true,false)) {
         val source=checkNotNull(PcmFileInput.open(ByteArrayInputStream(wav(bits,true,little))))
-        val pcm=source.readFrames()!!;for(value in listOf(-0.5f,0f,0.5f))check(pcm.float==value);checks++
+        val pcm=source.readFrames()!!;for(value in listOf(-16384,0,16384))check(pcm.short.toInt()==value);checks++
     }
     for(floating in listOf(true,false)) {
-        val source=checkNotNull(PcmFileInput.open(ByteArrayInputStream(wav(32,floating,true,true))));check(source.readFrames()!!.float==-0.5f);checks++
+        val source=checkNotNull(PcmFileInput.open(ByteArrayInputStream(wav(32,floating,true,true))));check(source.readFrames()!!.short.toInt()==-16384);checks++
     }
     fun aiff(codec:String,bits:Int=16):ByteArray {
         val comm=ByteBuffer.allocate(if(codec=="AIFF")18 else 22).order(ByteOrder.BIG_ENDIAN)
@@ -99,12 +99,12 @@ private fun pcmFileChecks(): Int {
     }
     for((codec,bits) in listOf("AIFF" to 16,"NONE" to 16,"twos" to 16,"sowt" to 16,"fl32" to 32,"fl64" to 64)) {
         val source=checkNotNull(PcmFileInput.open(ByteArrayInputStream(aiff(codec,bits))))
-        check(source.rate==48000);val pcm=source.readFrames()!!;for(value in listOf(-0.5f,0f,0.5f))check(pcm.float==value);checks++
+        check(source.rate==48000);val pcm=source.readFrames()!!;for(value in listOf(-16384,0,16384))check(pcm.short.toInt()==value);checks++
     }
     check(PcmFileInput.open(ByteArrayInputStream("not a pcm container".toByteArray()))==null);checks++
     // A cut-off file keeps every complete frame (here 2 of 3) instead of failing.
     val truncated=wav(16,false,true).dropLast(1).toByteArray()
-    val reader=PcmFileInput.open(ByteArrayInputStream(truncated))!!;check(reader.readFrames()!!.remaining()==8);check(reader.readFrames()==null);checks++
+    val reader=PcmFileInput.open(ByteArrayInputStream(truncated))!!;check(reader.readFrames()!!.remaining()==4);check(reader.readFrames()==null);checks++
     // Streaming writers leave RIFF/data sizes at 0 or 0xFFFFFFFF; RF64 uses a ds64 chunk. Read to EOF.
     for(kind in listOf("zero","max","rf64")){
         val unsized=wav(16,false,true)
@@ -112,7 +112,7 @@ private fun pcmFileChecks(): Int {
         val dataAt=unsized.size-6-4;ByteBuffer.wrap(unsized).order(ByteOrder.LITTLE_ENDIAN).putInt(dataAt,if(kind=="zero")0 else -1)
         if(kind!="rf64")ByteBuffer.wrap(unsized).order(ByteOrder.LITTLE_ENDIAN).putInt(4,if(kind=="zero")0 else -1)
         val streamed=checkNotNull(PcmFileInput.open(ByteArrayInputStream(unsized)))
-        val pcm=streamed.readFrames()!!;check(pcm.remaining()==12){"unsized $kind"};for(value in listOf(-0.5f,0f,0.5f))check(abs(pcm.float-value)<0.0001f)
+        val pcm=streamed.readFrames()!!;check(pcm.remaining()==6){"unsized $kind"};for(value in listOf(-16384,0,16384))check(pcm.short.toInt()==value)
         check(streamed.readFrames()==null);checks++
     }
     // G.711: ITU reference points and WAV format tags 6/7.
@@ -123,8 +123,15 @@ private fun pcmFileChecks(): Int {
         val fmtAt=String(g,Charsets.ISO_8859_1).indexOf("fmt ")+8
         o.putShort(fmtAt,tag.toShort());o.putInt(fmtAt+8,48000);o.putShort(fmtAt+12,1);o.putShort(fmtAt+14,8)
         val dataAt=String(g,Charsets.ISO_8859_1).indexOf("data")+4;o.putInt(dataAt,6);g[dataAt+4]=code.toByte()
-        val src=checkNotNull(PcmFileInput.open(ByteArrayInputStream(g)));check(abs(src.readFrames()!!.float-expected/32768f)<0.00001f);checks++
+        val src=checkNotNull(PcmFileInput.open(ByteArrayInputStream(g)));check(src.readFrames()!!.short.toInt()==expected);checks++
     }
+    // 16-bit WAV -> PcmResampler fast path preserves -32768..32767 bit-exactly without float scaling loss.
+    val fullRangeWav=wav(16,false,true)
+    val dataPos=String(fullRangeWav,Charsets.ISO_8859_1).indexOf("data")+8
+    ByteBuffer.wrap(fullRangeWav,dataPos,6).order(ByteOrder.LITTLE_ENDIAN).putShort(Short.MIN_VALUE).putShort(0).putShort(Short.MAX_VALUE)
+    val wavSrc=checkNotNull(PcmFileInput.open(ByteArrayInputStream(fullRangeWav)))
+    val wavOut=PcmResampler(wavSrc.rate,wavSrc.channels,false).convert(wavSrc.readFrames()!!)
+    check(wavOut.contentEquals(fullRangeWav.copyOfRange(dataPos,dataPos+6)));checks++
     // ADPCM/GSM/MP3-in-WAV are not rejected: they are handed to Android's MediaExtractor (null).
     val adpcm=wav(16,false,true);ByteBuffer.wrap(adpcm).order(ByteOrder.LITTLE_ENDIAN).putShort(String(adpcm,Charsets.ISO_8859_1).indexOf("fmt ")+8,2)
     check(PcmFileInput.open(ByteArrayInputStream(adpcm))==null);checks++

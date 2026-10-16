@@ -25,6 +25,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | Group | Feature | What it does |
 | --- | --- | --- |
 | **Messages** | Keep deleted messages | Deleted messages stay in chat, outlined in red, and edited messages show what they said before |
+| | Message highlights | Change the left bar thickness and highlight colors for replies, mentions and deleted messages |
 | | Translate messages | Messages in other languages show in yours, automatically or only the ones you pick |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
 | | Skip delete confirmation | Messages and link previews are removed with no "Are you sure?" |
@@ -51,6 +52,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide the call button | Removes Call from people's profiles |
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
+| | Custom themes | Install and switch color themes from links, compiled into Discord's color table with no lag |
 | **Quests** | Complete Quests automatically | Finishes video, Play and Activity Quests in the background |
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 

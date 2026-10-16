@@ -12,6 +12,7 @@ test('Hermes native eval retains hook and concurrent size callback captures',
     {skip: !process.env.HERMES_BIN}, () => {
         const path = require('node:path');
         const {spawnSync} = require('node:child_process');
+        fs.mkdirSync(path.resolve('work'), {recursive: true});
         const directory = fs.mkdtempSync(path.resolve('work/hermes-eval-'));
         const fixture = path.join(directory, 'probe.js');
         const source = raw.replace('/*__FEATURES__*/', '{picker:true,voice:true}');
@@ -26,6 +27,8 @@ function load(id, exports) {
     return module.exports;
 }
 load(120, {default:function(){}}).default();
+__venusPatches.setSetting('picker', true);
+__venusPatches.setSetting('voice', true);
 var providers = [];
 var registry = {
     registerComponent:function(name, provider) {
@@ -304,6 +307,68 @@ test('toggle off between serialization and sending removes custom voice metadata
     assert.equal(b.received[0][0].body.flags,undefined);
     assert.equal(b.received[0][0].body.attachments[0].waveform,undefined);
 });
+test('toggle off between conversion and serialization strips upload voice metadata', async () => {
+    const b=await voiceHarness(); b.api.setSetting('voice',false);
+    const latePayload=b.serializer.getAttachmentPayload(b.audio);
+    assert.equal(latePayload.duration_secs,undefined);
+    assert.equal(latePayload.waveform,undefined);
+    b.http.post({url:'/channels/1/messages',body:{attachments:[latePayload]}});
+    assert.equal(b.received[0][0].body.flags,undefined);
+    assert.equal(b.received[0][0].body.attachments[0].duration_secs,undefined);
+    assert.equal(b.received[0][0].body.attachments[0].waveform,undefined);
+});
+test('announcement channels and scheduled messages set voice flag or strip custom metadata', async () => {
+    const b=await voiceHarness();
+    for (const url of ['/channels/123/messages/announcement','/users/@me/scheduled-messages']) {
+        b.http.post({url,body:{attachments:[b.payload]}});
+        assert.equal(b.received.at(-1)[0].body.flags,8192);
+        b.http.post({url,body:{content:'caption',attachments:[b.payload]}});
+        const withText=b.received.at(-1)[0].body;
+        assert.equal(withText.flags,undefined);
+        assert.equal(withText.attachments[0].duration_secs,undefined);
+        assert.equal(withText.attachments[0].waveform,undefined);
+    }
+    for (const extra of [{components:[{type:1}]},{activity:{type:1}},{shared_client_theme:{}},{content_inventory_entry:{}},{message_reference:{type:1}}]) {
+        b.http.post({url:'/channels/123/messages',body:{attachments:[b.payload],...extra}});
+        const sent=b.received.at(-1)[0].body;
+        assert.equal(sent.flags,undefined);
+        assert.equal(sent.attachments[0].duration_secs,undefined);
+        assert.equal(sent.attachments[0].waveform,undefined);
+    }
+    b.http.post({url:'/channels/123/messages',body:{attachments:[b.payload],message_reference:{type:0,message_id:'9'}}});
+    assert.equal(b.received.at(-1)[0].body.flags,8192);
+});
+test('CloudUpload completion and draft removal release converted temp files and update compression size', async () => {
+    const b=boot(); b.api.setSetting('voice',true); const commands=[];
+    b.load({default:native({getSize:request => {
+        const command=JSON.parse(request.slice('venus-voice-v1:'.length)); commands.push(command);
+        return command.action==='prepare' ? Promise.resolve(JSON.stringify({
+            uri:'file:///cache/job.ogg',filename:'voice-message.ogg',mimeType:'audio/ogg',size:4096,durationSecs:3.5,waveform:'AQID'
+        })) : Promise.resolve('ok');
+    }})});
+    class CloudUpload {
+        constructor(){this.item={uri:'content://audio',mimeType:'audio/mp3'};this.mimeType='audio/mp3';this.uploadAnalytics={};}
+        reactNativeCompressAndExtractData(){return Promise.resolve(this);}
+        removeFromMsgDraft(){this._cancel();}
+        _cancel(){this.cancelled=true;}
+        handleComplete(){this.completed=true;}
+        handleError(){this.errored=true;}
+    }
+    b.load({CloudUpload});
+    const first=new CloudUpload();
+    await first.reactNativeCompressAndExtractData();
+    assert.equal(first.currentSize,4096);
+    assert.equal(first.postCompressionSize,4096);
+    assert.equal(first.uploadAnalytics.convertedMimeType,'audio/ogg');
+    first.handleComplete();
+    first.handleComplete();
+    assert.equal(commands.filter(c => c.action==='release').length,1);
+    const second=new CloudUpload();
+    await second.reactNativeCompressAndExtractData();
+    second.removeFromMsgDraft();
+    assert.equal(second.cancelled,true);
+    assert.equal(commands.filter(c => c.action==='release').length,2);
+});
 test('unrelated HTTP traffic is untouched', async () => {
     const b=await voiceHarness();
     const request={url:'/users/@me',body:{attachments:[b.payload]}};
@@ -475,14 +540,14 @@ test('conversion disabled has no codec bridge calls for audio uploads', async ()
     await upload.reactNativeCompressAndExtractData();assert.equal(calls,0);
 });
 
-const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true, validUser:true, youBarSettings:true, splitMessages:true, translate:true, userNotif:true, accountSwitcher:true, appIcons:true};
+const allFeatures = {picker:true, voice:true, copyBios:true, dashless:true, favouriteAnything:true, freeNitro:true, noTyping:true, quickDelete:true, noDelete:true, jumpToTop:true, hiddenChannels:true, pastelize:true, platformIndicators:true, reviewDB:true, readAll:true, quests:true, systemFont:true, systemEmoji:true, hideGift:true, hideQuestDock:true, gestures:true, hideCall:true, validUser:true, youBarSettings:true, splitMessages:true, translate:true, userNotif:true, accountSwitcher:true, appIcons:true, customThemes:true, messageHighlight:true};
 function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
         cloneElement(node, props) {return {...node, props:{...node.props,...props}};},
         useState:() => [0, () => {}], useEffect() {},
     };
-    const RN = {View:'View', Text:'Text', Modal:'Modal', Pressable:'Pressable'};
+    const RN = {View:'View', Text:'Text', Image:'Image', Modal:'Modal', Pressable:'Pressable'};
     b.load(React, null, 19); b.load(RN, null, 17);
     return {React,RN};
 }
@@ -529,8 +594,11 @@ test('native registry adds authorless About, Settings and option-page routes wit
     for (const key of ['VENUS_GENERAL','VENUS_PLUGINS','VENUS_FREENITRO']) {
         assert.equal(b.registry[key].type,'route'); assert.equal(b.registry[key].screen.route,key);
         const screen=b.registry[key].screen.getComponent();assert.equal(screen,b.registry[key].screen.getComponent());
-        assert.equal(screen().type,b.SettingsList);
+        if (key!=='VENUS_FREENITRO') assert.equal(screen().type,b.SettingsList);
     }
+    // Nitro links is a designed page with a preview; its options stay real setting nodes for Discord's search.
+    const nitro=pageNodes(b.registry.VENUS_FREENITRO.screen.getComponent()());
+    assert.ok(nitro.some(n=>n.props&&n.props.accessibilityLabel==='Nitro link preview'));
     assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
     assert.equal(b.registry.VENUS_STICKERS.parent,'VENUS_FREENITRO');
     for (const value of Object.values(b.registry)) assert.equal(value.authors,undefined);
@@ -586,12 +654,63 @@ test('CopyBios clones frozen text nodes while preserving links, handlers and non
     b.api.setSetting('copyBios',false);assert.equal(bio.default({}),tree);
 });
 test('Dashless changes only display labels and leaves messages, channel models and DM names untouched', () => {
-    const b=boot(allFeatures);const label=b.load({default:channel=>channel.name},null,4990);
+    const b=boot(allFeatures);const label=b.load({default:channel=>channel.name,computeChannelName:channel=>channel.name},null,4990);
     const channel=Object.freeze({type:0,name:'hello-world'});
     assert.equal(label.default(channel),'hello world');assert.equal(channel.name,'hello-world');
+    for (const type of [0, 5, 6, 14, 15, 16, 21]) {
+        assert.equal(label.computeChannelName({type,name:'slug-channel-name'}),'slug channel name');
+    }
     assert.equal(label.default({type:1,name:'user-name'}),'user-name');
     assert.equal(label.default({type:2,name:'voice-room'}),'voice-room');
+    assert.equal(label.default({type:3,name:'group-dm'}),'group-dm');
+    assert.equal(label.default({type:4,name:'CATEGORY-NAME'}),'CATEGORY-NAME');
+    assert.equal(label.default({type:11,name:'thread-title'}),'thread-title');
+    assert.equal(label.default({type:13,name:'stage-room'}),'stage-room');
+    assert.equal(label.computeChannelName({type:0,name:'general'}),'general');
     b.api.setSetting('dashless',false);assert.equal(label.default(channel),'hello-world');
+});
+test('Dashless formats cross-server channel mentions, preserves #slug-name typing and emits live store updates on toggle', () => {
+    const b=boot(allFeatures);const {React}=reactHarness(b);
+    let effectRegistered=false,stateUpdated=false,emitted=0;
+    React.useState=init=>[typeof init==='function'?init():init,()=>{stateUpdated=true;}];
+    React.useEffect=fn=>{effectRegistered=true;fn();};
+    const channelsById={'100':Object.freeze({id:'100',type:0,name:'general-chat'}),'200':Object.freeze({id:'200',type:2,name:'voice-lounge'})};
+    b.load({default:{getChannel:id=>channelsById[id]||null,emitChange(){emitted++;}}},null,2051);
+    const label=b.load({default:ch=>ch.name,computeChannelName:ch=>ch.name},null,4990);
+    const mentionRule=b.load({getChannel:(id,mentionChannels)=>{
+        const found=mentionChannels&&mentionChannels.find(c=>c.id===id);
+        return found?Object.freeze({type:found.type,id:found.id,guild_id:found.guild_id,name:found.name}):null;
+    }},null,5314);
+    const parserMod=b.load({
+        default:{createParserState:()=>({channels:[{id:'100',text:label.computeChannelName(channelsById['100'])},{id:'200',text:'voice-lounge'}]})},
+        createParserState:()=>({channels:[{id:'100',text:label.computeChannelName(channelsById['100'])},{id:'200',text:'voice-lounge'}]})
+    },null,7099);
+
+    // 1. Cross-server channel mention (not in local ChannelStore, resolved via message.mention_channels)
+    const crossMention=mentionRule.getChannel('999',[{id:'999',guild_id:'g2',type:5,name:'patch-notes'}]);
+    assert.equal(crossMention.name,'patch notes');
+    const voiceMention=mentionRule.getChannel('998',[{id:'998',guild_id:'g2',type:2,name:'voice-chat'}]);
+    assert.equal(voiceMention.name,'voice-chat');
+
+    // 2. MessageParser.createParserState retains both dashless display name and raw hyphenated slug for #channel-name typing
+    const state=parserMod.createParserState();
+    assert.deepEqual(JSON.parse(JSON.stringify(state.channels)),[
+        {id:'100',text:'general chat'},
+        {id:'200',text:'voice-lounge'},
+        {id:'100',text:'general-chat'}
+    ]);
+    const defaultState=parserMod.default.createParserState();
+    assert.equal(defaultState.channels.length,3);
+
+    // 3. useChannelName (4990.default) subscribes to dashless setting and toggling dashless emits ChannelStore change
+    assert.equal(label.default(channelsById['100']),'general chat');
+    assert.equal(effectRegistered,true);
+    b.api.setSetting('dashless',false);
+    assert.equal(emitted,1);
+    assert.equal(stateUpdated,true);
+    assert.equal(label.default(channelsById['100']),'general-chat');
+    assert.equal(mentionRule.getChannel('999',[{id:'999',guild_id:'g2',type:5,name:'patch-notes'}]).name,'patch-notes');
+    assert.deepEqual(JSON.parse(JSON.stringify(parserMod.createParserState().channels)),[{id:'100',text:'general-chat'},{id:'200',text:'voice-lounge'}]);
 });
 test('FavouriteAnything preserves memo metadata and original source objects', () => {
     const b=boot(allFeatures);const memo=Object.freeze({$$typeof:Symbol.for('react.memo'),type:props=>props,compare:()=>true});
@@ -933,24 +1052,24 @@ test('Hidden Channels cache refreshes replaced records and parent metadata witho
     assert.equal(next.SELECTABLE.find(e=>e.channel.id==='hidden').channel.topic,'updated');
     b.channels.cat={...b.channels.cat,name:'new parent'};assert.notEqual(b.store.getChannels('g'),next);
 });
-test('JumpToTop adds native-style action-sheet rows without mutating frozen trees and closes on press', () => {
-    const b=boot(allFeatures);const {React}=reactHarness(b);const jumps=[];let closed=0;
-    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6880);
-    const row=Object.freeze(React.createElement('ActionSheetRow',{label:'Mute',onPress:()=>{},icon:'old'}));
-    const group=Object.freeze(React.createElement('Group',{children:Object.freeze([row])}));
-    const sheet=b.load({default:()=>group},null,9804).default;
-    const result=sheet({thread:{id:'99',type:11},onClose:()=>closed++});
-    assert.equal(group.props.children.length,1);assert.equal(result.props.children.length,2);
-    assert.equal(result.props.children[0].props.label,'Jump to top');result.props.children[0].props.onPress();
-    assert.equal(jumps[0].messageId,'99');assert.equal(closed,1);
-    b.api.setSetting('jumpToTop',false);assert.equal(sheet({thread:{id:'99',type:11}}),group);
+test('JumpToTop does not wrap channel, DM, thread or forum long-press action sheets', () => {
+    const b=boot(allFeatures);const factory=()=>{};
+    for (const id of [9804,10418,15746]) {
+        b.context.__d(factory,id,[]);assert.equal(b.factories.get(id),factory);
+    }
 });
-test('connected channel action sheets preserve memo tags when injecting JumpToTop', () => {
-    const b=boot(allFeatures);const {React}=reactHarness(b);b.load({default:{jumpToMessage:()=>{}}},null,6880);
-    const memo=Object.freeze({$$typeof:Symbol.for('react.memo'),type:()=>React.createElement('Group',{children:[React.createElement('Row',{label:'Mute',onPress:()=>{}})]}),compare:null});
-    const wrapper=b.load({default:()=>React.createElement(memo,{channel:{id:'100',type:0}})},null,10418).default;
-    const tree=wrapper({channel:{id:'100',type:0}});assert.equal(tree.type.$$typeof,Symbol.for('react.memo'));
-    assert.equal(tree.type.type(tree.props).props.children[0].props.label,'Jump to top');assert.equal(tree.type.compare,null);
+test('JumpToTop passes returnMessageId so Jump to Present appears at the top and hides in empty chats', () => {
+    const b=boot({jumpToTop:true});reactHarness(b);const jumps=[];
+    let msgs={ready:true,hasMoreBefore:false,length:5,last:()=>({id:'999'})};
+    b.load({default:{getMessages:()=>msgs}},null,5057);
+    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6880);
+    b.load({default:'NativeFloatingButton'},null,11643);b.load({default:'NativeArrow'},null,11644);
+    const component=b.load({default:()=>null},null,11642).default;
+    const btn=component({channelId:'123',screenIndex:0});
+    btn.props.children.props.children.props.onPress();
+    assert.equal(jumps[0].returnMessageId,'999');
+    msgs={ready:true,hasMoreBefore:false,length:0,last:()=>undefined};
+    assert.equal(component({channelId:'123',screenIndex:0}),null);
 });
 
 test('prototype Flux methods are shadowed on the same live instance, preserving private dispatch state', () => {
@@ -1960,8 +2079,9 @@ test('Features list is grouped, plugin names are gone and every row says what it
     const rows=settingsRows(b);
     assert.deepEqual(rows.map(([label])=>label),['Messages','Sending','People','Servers','Appearance','Quests']);
     const titles=rows.flatMap(([,list])=>list);
-    assert.equal(titles.length,29);assert.equal(new Set(titles).size,29);
+    assert.equal(titles.length,31);assert.equal(new Set(titles).size,31);
     assert.ok(titles.includes('Double-tap to reply'));assert.ok(titles.includes('Send Nitro stickers and emojis as links'));assert.ok(titles.includes('Unlock app icons'));
+    assert.ok(titles.includes('Custom themes'));assert.ok(titles.includes('Message highlights'));
     for (const old of ['CopyBios','Dashless','FavouriteAnything','FreeNitro','Hidden Channels','JumpToTop','No typing','NoDelete','Pastelize',
         'PlatformIndicators','QuickDelete','Read All','Quest Completer','ReviewDB','Custom voice messages','File size on picker'])
         assert.ok(!titles.some(title=>title.includes(old)),'plugin name '+old+' still shown');
@@ -1972,7 +2092,7 @@ test('Features list is grouped, plugin names are gone and every row says what it
         const row=b.registry[id], text=row.useDescription && row.useDescription();
         assert.ok(text && text.length<=130,'missing or long description: '+id);assert.equal(typeof row.IconComponent,'function',id);
     }
-    assert.equal(new Set(ids.map(id=>b.registry[id].IconComponent)).size,29,'each feature has its own icon');
+    assert.equal(new Set(ids.map(id=>b.registry[id].IconComponent)).size,31,'each feature has its own icon');
     for (const [,list] of rows) for (const title of list) assert.ok(title.length<=40,'too long for one row: '+title);
     assert.match(b.registry.VENUS_VERSION.useTitle(),/^Venus Patches \d/);
 });
@@ -1988,7 +2108,7 @@ test('About shows the version, features on, status and links',()=>{
     const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
     assert.deepEqual(JSON.parse(JSON.stringify(general.sections)),[{label:'Venus Patches',settings:['VENUS_VERSION','VENUS_STATUS']},
         {label:'Links',settings:['VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']}]);
-    assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 29 features on/);
+    assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 31 features on/);
     b.api.setSetting('dashless',false);const before=Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]);
     b.api.setSetting('dashless',true);assert.equal(Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]),before+1);
     assert.equal(b.registry.VENUS_STATUS.useTitle(),'Status');
@@ -2019,8 +2139,14 @@ test('settings with more options have a switch and a separate button to their pa
         row.onPress();assert.equal(navigated.at(-1),page);
     }
     assert.equal(b.registry.VENUS_PASTELALL.parent,'VENUS_PASTELIZE');assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
-    const pastel=b.registry.VENUS_PASTELIZE.screen.getComponent()().props.node;
-    assert.equal(JSON.stringify(pastel.sections.map(x=>x.settings)),JSON.stringify([['VENUS_PASTELALL','VENUS_PASTELCONTENT']]));
+    // Pastel names draws its own page (switches + a preview); the option nodes still exist for search.
+    function TableSwitchRow(){}
+    const prev=b.context.__r;b.context.__r=id=>id===6621?{TableSwitchRow}:prev(id);
+    const pastel=pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()());
+    assert.deepEqual(pastel.filter(n=>n.type===TableSwitchRow).map(n=>n.props.key),['pastelAll','pastelContent']);
+    assert.ok(pastel.some(n=>n.props&&n.props.accessibilityLabel==='Pastel names preview'));
+    pastel.find(n=>n.type===TableSwitchRow&&n.props.key==='pastelAll').props.onValueChange(false);assert.equal(b.api.settings.pastelAll,false);
+    assert.equal(b.registry.VENUS_PASTELCONTENT.parent,'VENUS_PASTELIZE');
 });
 test('emoji and sticker links have one main switch on the Settings list',()=>{
     const b=nitroHarness();
@@ -2233,17 +2359,6 @@ test('NoDelete limit edits that change nothing do not rewrite settings',async()=
     const b=boot(allFeatures);const writes=[];b.load({default:native({writeFile:async(d,n,t)=>writes.push(n)})});await flush();await flush();
     b.api.setSetting('noDelete',true);await flush();await flush();const n=writes.length;
     b.api.setSetting('noDeleteLimit','512');await flush();await flush();assert.equal(writes.length,n);
-});
-test('JumpToTop connected sheets keep one stable component type across renders',()=>{
-    const b=boot(allFeatures);const {React}=reactHarness(b);b.load({default:{jumpToMessage:()=>{}}},null,6880);
-    const inner=props=>React.createElement('Group',{children:[React.createElement('Row',{label:'Mute',onPress:()=>{}})]});
-    const wrapper=b.load({default:props=>React.createElement(inner,{channel:props.channel})},null,10418).default;
-    const first=wrapper({channel:{id:'100',type:0}}),second=wrapper({channel:{id:'100',type:0}});
-    assert.equal(first.type,second.type,'a new type each render remounts the sheet');
-    const tree=first.type(first.props);assert.equal(tree.props.children[0].props.label,'Jump to top');
-    assert.equal(Object.keys(first.props).includes('__venusJumpSheet'),true);
-    let seen;const spy=b.load({default:()=>React.createElement(props=>{seen=props;return null;},{a:1})},null,9804).default;
-    const t=spy({channel:{id:'1',type:0}});t.type(t.props);assert.equal('__venusJumpSheet' in seen,false);
 });
 test('Hidden Channels asks the real permission store once and keeps canBasicChannel separate',()=>{
     const b=boot(allFeatures);let can=0,basic=0;const VIEW={bit:1};
@@ -2830,8 +2945,70 @@ test('Message tap gestures: a message you can\'t edit gets a reply, and the reac
     const g=gestureHarness();g.api.setSetting('gestures',true);g.api.setSetting('gestureTripleDelete',false);
     g.tap({id:'4',author:{id:'me'},state:'SENDING'});assert.deepEqual(g.calls.at(-1),['reply','4','message_swipe']);
     const nudge=g.load({DoubleTapEmojiEditNudge:()=>'tip'},null,11105);assert.equal(nudge.DoubleTapEmojiEditNudge(),null);
+    const toast=g.load({maybeShowDoubleTapReminderToast:()=>'toast'},null,9652);assert.equal(toast.maybeShowDoubleTapReminderToast(),undefined);
+    const banner=g.load({DoubleTapToReactChatInputBanner:()=>'banner'},null,11666);assert.equal(banner.DoubleTapToReactChatInputBanner(),null);
     g.api.setSetting('gestures',false);assert.equal(nudge.DoubleTapEmojiEditNudge(),'tip');
+    assert.equal(toast.maybeShowDoubleTapReminderToast(),'toast');
+    assert.equal(banner.DoubleTapToReactChatInputBanner(),'banner');
     const off=boot({});const untouched={handleAddDefaultDoubleTapReaction(){return 'react';}};assert.equal(off.load(untouched,null,7414).handleAddDefaultDoubleTapReaction,untouched.handleAddDefaultDoubleTapReaction);
+});
+test('Message tap gestures: passes chatInputRef & invertible, checks canReplyToMessage, triggers haptic feedback, and never triple-deletes unsent messages',()=>{
+    const b=boot({gestures:true});b.api.setSetting('gestures',true);
+    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1378);
+    const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push(fn);return timers.length;};b.context.clearTimeout=id=>{timers[id-1]=null;};
+    let canReply=true,haptics=0,keyboardOpened=0;
+    const chatInputRef={current:{openSystemKeyboard(){keyboardOpened++;}}};
+    const replyPayloads=[],editCalls=[],deletedIds=[];
+    const modules={
+        4802:{triggerHapticFeedback:t=>{haptics++;assert.equal(t,0);},HapticFeedbackTypes:{IMPACT_LIGHT:0}},
+        4803:{default:{IMPACT_LIGHT:0}},
+        7422:{canReplyToMessage:(c,m)=>canReply&&m.state!=='SENDING'},
+        11047:{default:o=>{replyPayloads.push(o);if(o.chatInputRef&&o.chatInputRef.current)o.chatInputRef.current.openSystemKeyboard();}},
+        11032:{handleEdit:(m,c,ref,source,inv)=>{editCalls.push({m,c,ref,source,inv});if(ref&&ref.current)ref.current.openSystemKeyboard();}},
+        11120:{default:(m,uid)=>m.author.id===uid&&m.state==='SENT'},
+        6880:{default:{deleteMessage:(c,id)=>{deletedIds.push(id);return Promise.resolve();}}}
+    };
+    b.context.__r=id=>modules[id];
+    const utils=b.load({handleAddDefaultDoubleTapReaction(){return 'react';}},null,7414);
+    class MessagesHandlers {
+        constructor(){this.handleTapMessage=()=>'tap';this.handleDoubleTapMessage=e=>utils.handleAddDefaultDoubleTapReaction(e.message,e.channel);}
+        get params(){return {chatInputRef,selectedChannelId:'c1'};}
+    }
+    const Wrapped=b.load({MessagesHandlers},null,10905).MessagesHandlers;
+    const handlers=new Wrapped();
+    const channel={id:'c1'};
+    const theirs={id:'10',author:{id:'other'},state:'SENT'};
+    const mine={id:'20',author:{id:'me'},state:'SENT'};
+    const sending={id:'30',author:{id:'me'},state:'SENDING'};
+
+    // 1. Reply passes chatInputRef + invertible:true and triggers haptic feedback
+    handlers.handleDoubleTapMessage({message:theirs,channel});
+    assert.equal(replyPayloads.length,1);
+    assert.equal(replyPayloads[0].chatInputRef,chatInputRef);
+    assert.equal(replyPayloads[0].invertible,true);
+    assert.equal(keyboardOpened,1);
+    assert.equal(haptics,1);
+
+    // 2. Edit passes chatInputRef + invertible:true after triple-tap window and triggers haptic feedback
+    handlers.handleDoubleTapMessage({message:mine,channel});
+    timers.splice(0).forEach(fn=>fn&&fn());
+    assert.equal(editCalls.length,1);
+    assert.equal(editCalls[0].ref,chatInputRef);
+    assert.equal(editCalls[0].inv,true);
+    assert.equal(keyboardOpened,2);
+    assert.equal(haptics,2);
+
+    // 3. canReplyToMessage guard blocks replies in read-only/archived channels or to non-replyable messages
+    canReply=false;
+    handlers.handleDoubleTapMessage({message:theirs,channel});
+    assert.equal(replyPayloads.length,1,'blocked by canReplyToMessage');
+    canReply=true;
+
+    // 4. Unsent/failed messages (state !== "SENT") do not wait for triple-tap or call deleteMessage
+    handlers.handleDoubleTapMessage({message:sending,channel});
+    assert.equal(timers.length,0,'unsent message does not arm triple-delete timer');
+    handlers.handleDoubleTapMessage({message:sending,channel});
+    assert.equal(deletedIds.length,0,'unsent message is never deleted via API');
 });
 test('Hide call button removes Call from profiles, and Message takes the whole row',()=>{
     const b=boot({hideCall:true});const {React,RN}=reactHarness(b);
@@ -3059,10 +3236,22 @@ test('Fix unknown mentions looks up unknown people automatically and redraws the
     assert.deepEqual(b.asked,['22222222222222222','33333333333333333','44444444444444444'],'only unknown people, once each');
     const updates=b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE');
     assert.equal(updates.length,2);assert.equal(updates[0].message.content,message.content+'\u200b');
+    assert.notEqual(updates[0].message.embeds,message.embeds,'embeds cloned on temp update');
+    assert.deepEqual(updates[0].message.embeds,message.embeds);
     assert.equal(updates[1].message.content,message.content);assert.equal(updates[1].message.id,'m1');
+    assert.notEqual(updates[1].message.embeds,message.embeds,'embeds cloned on restore');
+    assert.notEqual(updates[1].message.components,message.components,'components cloned on restore');
+    // Embed-only message (empty content) also clones embeds/components so MessageStore sees a new array reference.
+    const embedOnly={id:'m_embed',channel_id:'c',content:'',embeds:[{description:'<@77777777777777777>'}]};
+    b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'c',message:embedOnly});
+    await b.run();
+    const embedUpdate=b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE'&&e.message.id==='m_embed');
+    assert.equal(embedUpdate.length,1);
+    assert.notEqual(embedUpdate[0].message.embeds,embedOnly.embeds,'embed-only redraw clones embeds array');
+    assert.deepEqual(embedUpdate[0].message.embeds,embedOnly.embeds);
     // Its own redraw isn't checked again, and the same people are never asked for twice.
     b.dispatcher.dispatch({type:'LOAD_MESSAGES_SUCCESS',channelId:'c',messages:[{id:'m2',content:'<@22222222222222222>'}]});
-    await b.run();assert.equal(b.asked.length,3);
+    await b.run();assert.equal(b.asked.length,4);
 });
 test('Fix unknown mentions marks deleted accounts and retries other errors later',async()=>{
     const b=validHarness();
@@ -3082,8 +3271,15 @@ test('Fix unknown mentions does nothing while switched off',async()=>{
 });
 test('profile bar gets a settings button next to the notifications bell',()=>{
     const b=boot({youBarSettings:true});const {React}=reactHarness(b);React.Fragment='Fragment';
-    function YouBarButton(){} function SettingsIcon(){} const opened=[];
-    b.context.__r=id=>({16031:{default:YouBarButton},6799:{SettingsIcon},14615:{YOU_BAR_BUTTON_ICON_SIZE:20},6801:{openUserSettings:options=>opened.push(options)}})[id];
+    function YouBarButton(){} function SettingsIcon(){} function SettingsList(props){return {type:SettingsList,props};}
+    const opened=[];
+    const registryMod={SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}};
+    const listMod={SettingsList};
+    b.context.__r=id=>{
+        if (id===14130) return b.load(registryMod,null,14130);
+        if (id===14236) return b.load(listMod,null,14236);
+        return ({16031:{default:YouBarButton},6799:{SettingsIcon},14615:{YOU_BAR_BUTTON_ICON_SIZE:20},6801:{openUserSettings:options=>opened.push(options)}})[id];
+    };
     function Bell(){return 'bell';}
     const memo={$$typeof:Symbol.for('react.memo'),type:Bell,compare:null};
     const exports=b.load({default:memo},null,16032);
@@ -3093,8 +3289,16 @@ test('profile bar gets a settings button next to the notifications bell',()=>{
     const extra=tree.props.children[1];const button=extra.type(extra.props);
     assert.equal(button.type,YouBarButton);assert.equal(button.props.accessibilityLabel,'Venus settings');
     assert.equal(button.props.icon.type,SettingsIcon);assert.equal(button.props.hasNameplate,true);
-    button.props.onPress();assert.equal(opened.length,1);assert.equal(opened[0],undefined,'no Venus page yet: Discord\'s settings');
-    b.context.__venusPatches.status.menu=true;button.props.onPress();assert.deepEqual(JSON.parse(JSON.stringify(opened[1])),{screen:'VENUS_PLUGINS'},'opens Venus settings, not Discord\'s');
+    // Even on first tap after restart (before Discord Settings was ever opened), openSettings() lazily
+    // initializes 14130 (SettingsRendererConfig) and 14236 (SettingListRenderer) so it opens VENUS_PLUGINS
+    // directly instead of Discord account settings or a blank black screen (#58).
+    assert.equal(b.context.__venusPatches.status.menu,false,'settings menu not yet loaded before first tap');
+    button.props.onPress();
+    assert.equal(b.context.__venusPatches.status.menu,true,'14130 initialized on first tap (#58)');
+    assert.equal(opened.length,1);
+    assert.deepEqual(JSON.parse(JSON.stringify(opened[0])),{screen:'VENUS_PLUGINS'},'opens Venus settings on first tap after restart (#58)');
+    const pluginsScreen=registryMod.SETTING_RENDERER_CONFIG.VENUS_PLUGINS.screen.getComponent()();
+    assert.ok(pluginsScreen && pluginsScreen.type===SettingsList,'VenusSettingsPage renders SettingsList instead of null black screen (#58)');
     b.api.setSetting('youBarSettings',false);assert.equal(extra.type(extra.props),null);
     const again=exports.default.type({});assert.equal(again.type,'Fragment','same shape when off, so the bell never remounts');
 });
@@ -3128,9 +3332,73 @@ test('short messages, premium limits and the off switch are left alone',async()=
     const b=splitHarness(true);const msg={content:'x'.repeat(3500)};
     b.actions.sendMessage('c',msg);await b.run();assert.equal(b.sent.length,1);assert.equal(b.sent[0][1],msg);
     b.api.setSetting('splitMessages',false);
-    assert.equal(b.length.getMaxMessageLength(),4000);assert.equal(b.constants.MAX_MESSAGE_LENGTH,2000);
+    assert.equal(b.length.getMaxMessageLength(),4000);
+    assert.equal(b.constants.MAX_MESSAGE_LENGTH,1<<30,'Constants (1086) keeps SPLIT_UNLIMITED while features.splitMessages is built in so DraftStore (5201) never truncates drafts at startup');
     const big={content:'y '.repeat(5000)};b.actions.sendMessage('c',big);await b.run();assert.equal(b.sent.at(-1)[1],big);
     const off=boot({});const stock={MAX_MESSAGE_LENGTH:2000};assert.equal(off.load(stock,null,1086).MAX_MESSAGE_LENGTH,2000);
+});
+test('Send long messages: restores real limit when 8602 captured SPLIT_UNLIMITED at startup, preserves tts/flags/allowedMentions, bypasses slowmode when permitted, and stops on error or toggle off',async()=>{
+    const b=boot({splitMessages:true});
+    // Simulate startup before venus-patches.json finishes loading: features.splitMessages is true, but settings.splitMessages is still false when 1086 and 8602 load!
+    b.api.setSetting('splitMessages',false);
+    const constants=b.load({MAX_MESSAGE_LENGTH:2000,MAX_MESSAGE_LENGTH_PREMIUM:4000},null,1086);
+    assert.equal(constants.MAX_MESSAGE_LENGTH,1<<30,'DraftStore and 8602 capture SPLIT_UNLIMITED even before settings finish loading');
+    let isPremium=false;
+    b.load({default:{getCurrentUser:()=>({id:'me',premiumType:isPremium?2:0}),getUser(){}}},null,1378);
+    // 8602 captures constants.MAX_MESSAGE_LENGTH / MAX_MESSAGE_LENGTH_PREMIUM in its closure at factory time:
+    const capturedNormal=constants.MAX_MESSAGE_LENGTH, capturedPremium=constants.MAX_MESSAGE_LENGTH_PREMIUM;
+    const length=b.load({default:()=>isPremium?capturedPremium:capturedNormal,getMaxMessageLength:()=>isPremium?capturedPremium:capturedNormal},null,8602);
+    assert.equal(length.getMaxMessageLength(),2000,'returns real 2000 limit when splitMessages setting is off even though 8602 captured SPLIT_UNLIMITED');
+    isPremium=true;
+    assert.equal(length.getMaxMessageLength(),4000,'returns real 4000 premium limit when splitMessages setting is off');
+    isPremium=false;
+    b.api.setSetting('splitMessages',true);
+    assert.equal(length.getMaxMessageLength(),1<<30,'returns SPLIT_UNLIMITED once splitMessages is enabled');
+
+    // Verify slowmode bypass, preserved options/tts, scheduledTimestamp guard, and failure/cancellation abort:
+    const waits=[];const timers=[];
+    b.context.setTimeout=(fn,ms)=>{waits.push(ms);timers.push(fn);return timers.length;};
+    const run=async()=>{for (let i=0;i<50;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();};
+    b.load({default:{getChannel:()=>null,getBasicChannel:id=>id==='slow'?{id:'slow',rateLimitPerUser:30}:null}},null,2051);
+    let canBypass=true;
+    b.context.__r=id=>id===7105?{canBypassSlowmode:()=>canBypass}:null;
+    const sent=[];let failFirst=false;
+    const actions=b.load({default:{sendMessage(ch,msg,wait,opts){
+        sent.push([ch,msg,wait,opts]);
+        return Promise.resolve(failFirst && sent.length===1 ? {ok:false,hasErr:true} : {ok:true,hasErr:false});
+    }}},null,6880).default;
+
+    const longText='a'.repeat(1500)+'\n'+'b'.repeat(1500);
+    // 1. Scheduled messages are not split:
+    actions.sendMessage('slow',{content:longText,tts:true},true,{scheduledTimestamp:123456789});
+    await run();
+    assert.equal(sent.length,1,'scheduled messages are never split into immediate follow-ups');
+    sent.length=0;waits.length=0;
+
+    // 2. Slowmode bypassed when user has BYPASS_SLOWMODE, and tts/waitForReady/flags/allowedMentions/location preserved:
+    actions.sendMessage('slow',{content:longText,tts:true,invalidEmojis:['e1'],validNonShortcutEmojis:['e2']},false,
+        {location:'chat_input',flags:4096,allowedMentions:{parse:[]},eagerDispatch:false,doNotNotifyOnError:true,messageReference:{message_id:'r1'}});
+    await run();
+    assert.equal(sent.length,2);
+    assert.equal(waits[0],1000,'uses 1000ms gap instead of 30500ms when canBypassSlowmode is true');
+    assert.equal(sent[1][1].tts,true,'preserves tts on follow-up chunks');
+    assert.equal(sent[1][2],false,'preserves waitForReady on follow-up chunks');
+    assert.deepEqual(JSON.parse(JSON.stringify(sent[1][3])),{location:'chat_input',flags:4096,allowedMentions:{parse:[]},eagerDispatch:false,doNotNotifyOnError:true},
+        'preserves flags, allowedMentions, location, eagerDispatch, and doNotNotifyOnError while stripping messageReference');
+    sent.length=0;waits.length=0;
+
+    // 3. When canBypassSlowmode is false, uses slowmode delay (even from basic channel record):
+    canBypass=false;
+    actions.sendMessage('slow',{content:longText,tts:false},true,{});
+    await run();
+    assert.equal(waits[0],30500,'respects rateLimitPerUser from basic channel record when not bypassing slowmode');
+    sent.length=0;waits.length=0;
+
+    // 4. If chunk 1 resolves with {hasErr: true}, follow-up chunks abort:
+    failFirst=true;
+    actions.sendMessage('slow',{content:longText,tts:false},true,{});
+    await run();
+    assert.equal(sent.length,1,'aborts follow-up chunks when chunk 1 fails with hasErr: true');
 });
 test('the three new switches sit in their groups',()=>{
     const rows=Object.fromEntries(settingsRows(settingsHarness()));
@@ -3153,7 +3421,8 @@ function translateHarness({answer, locale='en-US', system='de-DE', on=true}={}) 
         return {ok:true,status:200,json:async()=>result};
     };
     b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1378);
-    b.load({default:{locale,systemLocale:system}},null,2115);
+    const localeStore={locale,systemLocale:system,listeners:[],addChangeListener(fn){this.listeners.push(fn);}};
+    b.load({default:localeStore},null,2115);
     const dispatched=[];const subs={};
     b.load({default:{dispatch(e){dispatched.push(e);},subscribe(t,fn){(subs[t]||(subs[t]=[])).push(fn);}}},null,585);
     class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);
@@ -3162,7 +3431,7 @@ function translateHarness({answer, locale='en-US', system='de-DE', on=true}={}) 
     const run=async()=>{for (let i=0;i<40;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();await flush();};
     const row=(id,content,raw,author='them')=>new Rows().generate({rowType:1,message:{id,channel_id:'c',content:raw,author:{id:author}},
         result:{message:{id,channelId:'c',authorId:author,content}}}).message;
-    return {...b,React,requests,dispatched,subs,run,row,timers,setReply:fn=>{reply=fn;}};
+    return {...b,React,Rows,localeStore,requests,dispatched,subs,run,row,timers,setReply:fn=>{reply=fn;}};
 }
 const T=text=>({type:'text',content:text});
 test('Translate messages translates other languages in batches and keeps mentions, emojis and formatting',async()=>{
@@ -3205,6 +3474,10 @@ test('Translate messages follows Discord\'s or the phone\'s language, and the no
     const b=translateHarness({locale:'zh-TW',system:'pt-BR'});
     b.row('1',[T('hola amigo')],'hola amigo');await b.run();
     assert.match(b.requests[0].url,/tl=zh-TW$/);
+    b.dispatched.length=0;
+    b.localeStore.locale='fr-FR';b.localeStore.listeners.forEach(fn=>fn());await b.run();
+    assert.ok(b.dispatched.some(e=>e.type==='MESSAGE_UPDATE'&&e.message.id==='1'),'changing Discord\'s language redraws messages when Translate into is Discord\'s language');
+    b.row('1',[T('hola amigo')],'hola amigo');await b.run();assert.match(b.requests.at(-1).url,/tl=fr$/);
     b.api.setSetting('translateTarget','phone');assert.equal(b.api.settings.translateTarget,'phone');
     assert.equal(b.api.setSetting('translateTarget','klingon'),false);
     await b.run();
@@ -3368,7 +3641,6 @@ function replyRow(b, quoted) {
 }
 test('a reply shows the message it quotes translated, like that message in chat (#51)',async()=>{
     const b=translateHarness();
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);b.Rows=Rows;
     const quoted={id:'q1',authorId:'them',content:[T('hola amigo')]};
     assert.equal(replyRow(b,quoted).referencedMessage.message.content,quoted.content,'as written until it is translated');
     await b.run();
@@ -3382,6 +3654,26 @@ test('a reply shows the message it quotes translated, like that message in chat 
     // Your own quoted message stays as you wrote it.
     const mine={id:'q2',authorId:'me',content:[T('hola perro')]};replyRow(b,mine);await b.run();
     assert.equal(b.requests.length,1,'own messages are never sent');
+    // Switching off or toggling a quoted message redraws the reply even when the reply itself is your own message or in your language.
+    const b2=translateHarness({answer:texts=>texts.map(t=>t==='good morning everyone'?[t,'en']:[t.replace(/hola/g,'hello').replace(/amigo/g,'friend'),'es'])});
+    const englishReply=(id,author,q)=>new b2.Rows().generate({rowType:1,message:{id,channel_id:'c',content:'good morning everyone',author:{id:author},messageReference:{message_id:q.id}},
+        result:{message:{id,channelId:'c',authorId:author,content:[T('good morning everyone')],referencedMessage:{state:'LOADED',message:q}}}}).message;
+    englishReply('r-en','them',quoted);
+    englishReply('r-me','me',quoted);
+    await b2.run();
+    b2.dispatched.length=0;
+    b2.api.setSetting('translate',false);await b2.run();
+    const redrawnOff=new Set(b2.dispatched.filter(e=>e.type==='MESSAGE_UPDATE').map(e=>e.message.id));
+    assert.ok(redrawnOff.has('r-en'),'English reply quoting a translated message is redrawn when switched off');
+    assert.ok(redrawnOff.has('r-me'),'own reply quoting a translated message is redrawn when switched off');
+    // Manual mode: holding the quoted message and tapping Translate redraws the reply that quotes it.
+    b2.api.setSetting('translate',true);b2.api.setSetting('translateMode','manual');await b2.run();
+    const unquoted={id:'q3',authorId:'them',content:[T('hola amigo')]};
+    englishReply('r-man','me',unquoted);
+    b2.dispatched.length=0;
+    const sheet=b2.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',key:'copy',props:{label:'Copy Text',onPress(){}}}]}};}},null,11023);
+    sheet.default({message:{id:'q3',channel_id:'c',content:'hola amigo',author:{id:'them'}}}).props.children[1].props.onPress();
+    assert.ok(b2.dispatched.some(e=>e.type==='MESSAGE_UPDATE'&&e.message.id==='r-man'),'toggling a quoted message in manual mode redraws the reply');
 });
 test('Only when you ask: nothing is sent until you tap Translate in the hold menu, and Show original undoes it (#50)',async()=>{
     const b=translateHarness();b.api.setSetting('translateMode','manual');await b.run();
@@ -3428,6 +3720,21 @@ test('your own message can be translated from the hold menu, and a message in yo
     b.row('e',[T('good morning everyone')],'good morning everyone');await b.run();
     b.row('e',[T('good morning everyone')],'good morning everyone');await b.run();
     assert.deepEqual(toasts,['This message is already in your language']);
+    // Forwarded messages (messageSnapshots with outer content === "") show Translate in the hold menu and redraw via message_snapshots.
+    b.api.setSetting('translateMode','auto');await b.run();
+    const forwarded={id:'f1',channel_id:'c',content:'',author:{id:'them'},messageSnapshots:[{message:{content:'hola amigo',timestamp:'2026-01-01T00:00:00.000Z'},moderatorReport:null}],
+        getContentMessage(){return this.messageSnapshots[0].message;}};
+    const forwardRow=()=>new b.Rows().generate({rowType:1,message:forwarded,result:{message:{id:'f1',channelId:'c',authorId:'them',content:[T('hola amigo')]}}}).message;
+    assert.equal(label(forwarded),'Show original','forwarded message with inner text gets hold menu item');
+    assert.equal(forwardRow().content[0].content,'hello amigo','forwarded message is translated');
+    b.dispatched.length=0;
+    sheet.default({message:forwarded}).props.children[1].props.onPress();await b.run();
+    const snapUpdates=b.dispatched.filter(e=>e.type==='MESSAGE_UPDATE'&&e.message.id==='f1');
+    assert.equal(snapUpdates.length,2,'forwarded message is redrawn via MESSAGE_UPDATE');
+    assert.equal(snapUpdates[0].message.message_snapshots[0].message.content,'hola amigo\u200b');
+    assert.equal(snapUpdates[1].message.message_snapshots[0].message.content,'hola amigo');
+    assert.equal('content' in snapUpdates[0].message,false,'outer empty content is never overwritten with a zero-width space');
+    assert.equal(forwardRow().content[0].content,'hola amigo','Show original restores forwarded message');
 });
 function languageHarness({locale='en-US', packs={}}={}) {
     const b=settingsHarness();const reads=[];
@@ -3504,7 +3811,9 @@ function userNotifHarness({friends=['111111111111111111','222222222222222222'], 
         '222222222222222222':{id:'222222222222222222',username:'bob',globalName:'Bob'},
         '333333333333333333':{id:'333333333333333333',username:'stranger',globalName:'Stranger'}};
     const channels={'dm1':{id:'dm1',type:1},'ch1':{id:'ch1',type:0,name:'general',guild_id:'g1'}};
-    const guilds={'g1':{id:'g1',name:'Venus Hub'}};
+    const basicChannels={'ch_basic':{id:'ch_basic',type:0,name:'lounge',guild_id:'444444444444444444'}};
+    const guilds={'g1':{id:'g1',name:'Venus Hub'},'444444444444444444':{id:'444444444444444444',name:'Lazy Guild'}};
+    const subscribedGuilds=[];
     const dispatcher={
         subscribe(type,fn){(subs[type]||(subs[type]=[])).push(fn);},
         unsubscribe(type,fn){if(subs[type])subs[type]=subs[type].filter(f=>f!==fn);},
@@ -3512,17 +3821,18 @@ function userNotifHarness({friends=['111111111111111111','222222222222222222'], 
     };
     b.load({default:native({fileExists:async()=>saved!==null,readFile:async()=>saved||'{}',writeFile:async(d,n,t)=>{writes.push([n,t]);saved=t;}})});
     b.load({default:{getCurrentUser:()=>({id:'999999999999999999'}),getUser:id=>users[id],addChangeListener(){},removeChangeListener(){}}},null,1378);
-    b.load({default:{getChannel:id=>channels[id]}},null,2051);
-    b.load({default:{getGuild:id=>guilds[id]}},null,2073);
+    b.load({default:{getChannel:id=>channels[id],getBasicChannel:id=>basicChannels[id]}},null,2051);
+    b.load({default:{getGuild:id=>guilds[id],getGuildIds:()=>Object.keys(guilds)}},null,2073);
     b.load({default:{getFriendIDs:()=>friends,isFriend:id=>friends.includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4482);
     b.load({default:{getStatus:id=>statuses[id],addChangeListener(){},removeChangeListener(){}}},null,4877);
     b.load({default:dispatcher},null,585);
     function TableCheckboxRow(props){return {type:TableCheckboxRow,props};}
     function SearchField(props){return {type:SearchField,props};}
     b.context.__r=id=>({4531:{default:{open:t=>toasts.push(t.content)}},5916:{TableRow:'Row'},5997:{TableRowGroup:'Group'},
-        6621:{TableSwitchRow:'Switch'},5913:{TableCheckboxRow},6472:{SearchField},9044:{BellIcon(){}}}[id]||null);
+        6621:{TableSwitchRow:'Switch'},5913:{TableCheckboxRow},6472:{SearchField},9044:{BellIcon(){}},
+        6731:{subscribeGuild:gid=>subscribedGuilds.push(gid)}}[id]||null);
     const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
-    return {...b,React,RN,toasts,subs,dispatcher,users,statuses,registry,TableCheckboxRow,SearchField,writes,getSaved:()=>saved,advance:ms=>{clock+=ms;}};
+    return {...b,React,RN,toasts,subs,dispatcher,users,statuses,subscribedGuilds,registry,TableCheckboxRow,SearchField,writes,getSaved:()=>saved,advance:ms=>{clock+=ms;}};
 }
 test('User activity notifications watches friends and custom user IDs for status, typing and messages with cooldowns',async()=>{
     const b=userNotifHarness();await flush();await flush();
@@ -3539,21 +3849,41 @@ test('User activity notifications watches friends and custom user IDs for status
     b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'online'}]});
     b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'dnd'}]});
     assert.equal(b.toasts.length,2);
-    // Typing in DM and server channel.
-    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
+    // CONNECTION_OPEN followed by CONNECTION_OPEN_SUPPLEMENTAL seeds initial presences without false alerts,
+    // and an unseeded user whose PresenceStore already updated to 'online' before subscriber ran still triggers a notification.
+    b.statuses['111111111111111111']='offline';
+    b.dispatcher.dispatch({type:'CONNECTION_OPEN'});
+    b.statuses['111111111111111111']='online';
+    b.dispatcher.dispatch({type:'CONNECTION_OPEN_SUPPLEMENTAL'});
+    b.advance(9000);
+    b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'online'}]});
+    assert.equal(b.toasts.length,2,'no false online notification after CONNECTION_OPEN_SUPPLEMENTAL');
+    // Unseeded friend whose PresenceStore already updated before subscriber ran:
+    b.users['555555555555555555']={id:'555555555555555555',username:'eve',globalName:'Eve'};
+    b.load({default:{getFriendIDs:()=>['111111111111111111','222222222222222222','555555555555555555'],isFriend:id=>['111111111111111111','222222222222222222','555555555555555555'].includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4482);
+    // Simulate unseeded status transition where PresenceStore updated to 'online' before subscriber ran:
+    b.statuses['555555555555555555']='online';
+    b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'555555555555555555'},status:'online'}]});
+    assert.equal(b.toasts.at(-1),'Eve is now Online');
+    // Typing in DM (both cached and uncached DM channels) and server channels (including getBasicChannel lazy cache).
+    assert.ok(b.subscribedGuilds.includes('444444444444444444'),'subscribes guilds for typing/activity events when enabled');
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'uncached_dm'});
     assert.equal(b.toasts.at(-1),'Bob is typing in your DM');
     b.advance(9000);
     b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'ch1'});
     assert.equal(b.toasts.at(-1),'Bob is typing in #general (Venus Hub)');
+    b.advance(9000);
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'ch_basic',guildId:'444444444444444444'});
+    assert.equal(b.toasts.at(-1),'Bob is typing in #lounge (Lazy Guild)');
     // Message in server channel and DM; own messages and optimistic sends are ignored.
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'ch1',message:{id:'m1',channel_id:'ch1',author:{id:'111111111111111111'}}});
     assert.equal(b.toasts.at(-1),'Ally sent a message in #general (Venus Hub)');
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',optimistic:true,channelId:'dm1',message:{id:'m2',author:{id:'222222222222222222'}}});
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'dm1',message:{id:'m3',author:{id:'999999999999999999'}}});
-    assert.equal(b.toasts.length,5,'optimistic and own messages ignored');
+    assert.equal(b.toasts.length,7,'optimistic and own messages ignored');
     // Stranger is ignored until added by User ID backup.
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'ch1',message:{id:'m4',author:{id:'333333333333333333'}}});
-    assert.equal(b.toasts.length,5);
+    assert.equal(b.toasts.length,7);
     // Turning off unsubscribes cleanly.
     b.api.setSetting('userNotif',false);
     assert.equal(b.subs.PRESENCE_UPDATES.length,0);
@@ -3562,12 +3892,21 @@ test('User activity notifications friend picker and user ID backup persist and w
     const b=userNotifHarness();await flush();await flush();
     b.api.setSetting('userNotif',true);
     const page=()=>pageNodes(b.registry.VENUS_USERNOTIF.screen.getComponent()());
-    // Both friends start checked when All friends is on.
-    let checks=page().filter(n=>n.type===b.TableCheckboxRow);
-    assert.equal(checks.length,2);assert.ok(checks.every(c=>c.props.checked===true));
-    // Tapping Alice unchecks her, switches All friends off, and keeps Bob checked.
-    checks.find(c=>c.props.label==='Ally').props.onPress();
+    // All friends: one summary row with an avatar pile instead of a wall of checkboxes, and the segmented choice.
+    assert.equal(page().filter(n=>n.type===b.TableCheckboxRow).length,0,'no checklist while watching all friends');
+    assert.ok(page().some(n=>n.type==='Row'&&n.props.label==='2 friends'),'all-friends summary row');
+    const tab=label=>page().find(n=>n.props&&n.props.accessibilityRole==='tab'&&n.props.accessibilityLabel===label);
+    assert.equal(tab('All friends').props.accessibilityState.selected,true);
+    // "People I pick" keeps everyone who was watched ticked, so nothing goes quiet by surprise.
+    tab('People I pick').props.onPress();
     assert.equal(b.api.settings.userNotifFriends,false);
+    let checks=page().filter(n=>n.type===b.TableCheckboxRow);
+    assert.equal(checks.length,2);assert.ok(checks.every(c=>c.props.checked===true),'both friends stay picked');
+    // Friend rows show the avatar with a status dot.
+    assert.ok(checks[0].props.icon,'avatar with status');
+    // Unticking Alice keeps Bob.
+    checks.find(c=>c.props.label==='Ally').props.onPress();
+    assert.equal(page().filter(n=>n.type===b.TableCheckboxRow&&n.props.checked).length,1);
     b.dispatcher.dispatch({type:'TYPING_START',userId:'111111111111111111',channelId:'dm1'});
     assert.equal(b.toasts.length,0,'unchecked friend is no longer watched');
     b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
@@ -3578,9 +3917,9 @@ test('User activity notifications friend picker and user ID backup persist and w
     let inputs=withDraft().filter(n=>n.props&&n.props.keyboardType==='number-pad');
     assert.equal(inputs.length,1);
     (inputs[0].props.onChange||inputs[0].props.onChangeText)('333333333333333333');
-    const addRow=withDraft().find(n=>n.type==='Row'&&n.props.label==='Add user ID');
-    assert.equal(addRow.props.disabled,false);
-    addRow.props.onPress();await flush();await flush();
+    const addButton=withDraft().find(n=>n.props&&n.props.accessibilityRole==='button'&&n.props.accessibilityLabel==='Add');
+    assert.equal(addButton.props.disabled,false);
+    addButton.props.onPress();await flush();await flush();
     // Stranger now triggers notifications in shared server and persists in venus-patches.json.
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',channelId:'ch1',message:{id:'m5',channel_id:'ch1',author:{id:'333333333333333333'}}});
     assert.equal(b.toasts.at(-1),'Stranger sent a message in #general (Venus Hub)');
@@ -3591,6 +3930,18 @@ test('User activity notifications friend picker and user ID backup persist and w
     assert.equal(restored.api.settings.userNotifFriends,false);
     restored.dispatcher.dispatch({type:'TYPING_START',userId:'333333333333333333',channelId:'ch1'});
     assert.equal(restored.toasts.at(-1),'Stranger is typing in #general (Venus Hub)');
+    // Resetting the people list turns All friends back on and re-seeds friend statuses so an unchanged online status doesn't false-fire.
+    restored.api.setSetting('userNotif',true);
+    restored.RN.Alert={alert:(t,m,btns)=>btns.find(x=>x.text==='Reset').onPress()};
+    const resetPage=()=>pageNodes(restored.registry.VENUS_USERNOTIF.screen.getComponent()());
+    const resetRow=resetPage().find(n=>n.type==='Row'&&n.props.label==='Reset chosen people');
+    assert.ok(resetRow && !resetRow.props.disabled);
+    const toastsBefore=restored.toasts.length;
+    resetRow.props.onPress();
+    assert.equal(restored.api.settings.userNotifFriends,true,'Reset watched people turns All friends back on');
+    assert.equal(restored.toasts.at(-1),'People list reset');
+    restored.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'111111111111111111'},status:'online'}]});
+    assert.equal(restored.toasts.length,toastsBefore+1,'no false status alert for friend already online when reset');
 });
 test('User activity notifications push option requests permissions, sends local notifications in background and keeps Gateway open',async()=>{
     const b=userNotifHarness();await flush();await flush();
@@ -3603,12 +3954,13 @@ test('User activity notifications push option requests permissions, sends local 
     }};
     const socket={close(clean){socketCloses++;}};
     b.load({socket},null,13174);
+    const pauseMod=b.load({setIsPaused:v=>{pausedState=v;},getIsPaused:()=>pausedState},null,13212);
     const origR=b.context.__r;
     b.context.__r=id=>({
         1986:{default:{getState:()=>appState}},
         7179:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
         8741:{default:{presentLocalNotification:n=>localPushes.push(n),openNotificationSettings:()=>{settingsOpened++;}}},
-        13212:{default:{setIsPaused:v=>{pausedState=v;}}},
+        13212:pauseMod,
         5205:{default:{show:a=>alerts.push(a)}}
     }[id]||origR(id));
     b.api.setSetting('userNotif',true);
@@ -3621,16 +3973,24 @@ test('User activity notifications push option requests permissions, sends local 
     b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
     assert.equal(b.toasts.length,1);
     assert.equal(localPushes.length,0,'no local push while app is active');
-    // Leaving the app: Gateway socket.close(true) is blocked and local push notification is sent.
+    // Leaving the app: Gateway socket.close(true) and headless setIsPaused(true) are blocked and local push notification is sent.
     appState='background';
     socket.close(true);
     assert.equal(socketCloses,0,'Gateway background close is prevented while push keep-alive is active');
-    assert.equal(pausedState,false,'Gateway socket pause cleared');
+    assert.equal(pausedState,false,'Gateway socket pause cleared via named PauseGatewaySocket export');
+    pauseMod.setIsPaused(true);
+    assert.equal(pausedState,false,'headless FCM task setIsPaused(true) is intercepted while background keep-alive is active');
+    assert.equal(pauseMod.getIsPaused(),false,'getIsPaused() reports false while background keep-alive is active');
     b.advance(9000);
     b.dispatcher.dispatch({type:'TYPING_START',userId:'222222222222222222',channelId:'dm1'});
     assert.equal(localPushes.length,1,'system push notification sent while in background');
     assert.equal(localPushes[0].alertTitle,'Activity notifications');
     assert.equal(localPushes[0].alertBody,'Bob is typing in your DM');
+    assert.equal(localPushes[0].channelId,'venus-user-notif');
+    assert.equal(localPushes[0].messageId,'2');
+    b.dispatcher.dispatch({type:'TYPING_START',userId:'111111111111111111',channelId:'dm1'});
+    assert.equal(localPushes.length,2);
+    assert.notEqual(localPushes[0].messageId,localPushes[1].messageId,'each push notification gets a distinct messageId so Android does not overwrite previous notifications');
     // If Android notifications are disabled in system settings, prompts user to open settings.
     authStatus=1;
     b.api.setSetting('userNotifPush',false);
@@ -3689,11 +4049,14 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
 test('Account switcher unlocks MultiAccountStore, seeds active token, raises limit, and injects You bar button',()=>{
     const b=boot({accountSwitcher:true,youBarSettings:true});const {React,RN}=reactHarness(b);React.Fragment='Fragment';
     const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
-    // 11801 Constants: MAX_ACCOUNTS is automatically 50 while accountSwitcher is enabled, and 5 when turned off.
+    // 11801 Constants: MAX_ACCOUNTS is raised to 50 as soon as 11801 loads (even before venus-patches.json finishes
+    // restoring settings.accountSwitcher) because MultiAccountStore (11800) caches MAX_ACCOUNTS once at module factory
+    // evaluation time and would otherwise splice >5 accounts on CONNECTION_OPEN (#59).
     const constants=b.load({MAX_ACCOUNTS:5,MAX_PUSH_SYNC_ACCOUNTS:5,SWITCH_ACCOUNTS_MODAL_KEY:'switch-accounts-modal',MultiAccountSwitchLocation:{YOU_ACCOUNT_ACTION_SHEET:'you_account_action_sheet'}},null,11801);
-    assert.equal(constants.MAX_ACCOUNTS,5,'stock limit 5 while Account switcher is off');
+    assert.equal(constants.MAX_ACCOUNTS,50,'limit raised to 50 at module load time so MultiAccountStore never caches 5 (#59)');
+    assert.equal(constants.MAX_PUSH_SYNC_ACCOUNTS,50,'push sync limit raised to 50 at module load time (#59)');
     b.api.setSetting('accountSwitcher',true);
-    assert.equal(constants.MAX_ACCOUNTS,50,'limit automatically raised to 50 when Account switcher is enabled');
+    assert.equal(constants.MAX_ACCOUNTS,50,'limit remains 50 when Account switcher is enabled');
 
     // 11802 Staff check and 11800 MultiAccountStore + 1112 TokenManager seeding.
     const staffMod=b.load({isStaffFromRawUser:()=>false},null,11802);
@@ -3769,6 +4132,8 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     storeState.users.push({id:'222',username:'venus_alt',discriminator:'0',avatar:'av2',tokenStatus:2});
     const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
     const page=()=>pageNodes(registry.VENUS_ACCOUNTSWITCHER.screen.getComponent()());
+    const statusText=page().find(n=>n.type===RN.Text&&typeof n.props.children==='string'&&n.props.children.includes('accounts saved'));
+    assert.ok(statusText && statusText.props.children.includes('(up to 50)'),'pl() interpolates {max} in account switcher status card');
     const altRow=page().find(n=>n.type==='Row'&&n.props.label==='venus_alt');
     assert.ok(altRow,'saved secondary account listed in settings');
     altRow.props.onPress();
@@ -3781,6 +4146,28 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     const addRow=page().find(n=>n.type==='Row'&&n.props.label==='Add account');
     addRow.props.onPress();
     assert.equal(modalCalls.at(-1),'login','Add account opens native login modal');
+
+    // Uninitialized PersistedStore (store._isInitialized === false): accountSwitcherSync calls initializeIfNeeded()
+    // before reading state.users so persisted accounts (>5 accounts) are never overwritten by an empty pre-init array (#59).
+    let persistedLoaded=false, persistedSaved=0;
+    const savedSixAccounts=[1,2,3,4,5,6].map(n=>({id:'u'+n,username:'user'+n,discriminator:'0',avatar:null,tokenStatus:2}));
+    const lazyStore={
+        _isInitialized:false,
+        state:{users:[],canUseMultiAccountMobile:false},
+        initializeIfNeeded(){this._isInitialized=true;this.state={users:savedSixAccounts.slice(),canUseMultiAccountMobile:true};persistedLoaded=true;},
+        getState(){return this.state;},
+        getUsers(){return this.state.users;},
+        getValidUsers(){return this.state.users.filter(u=>u.tokenStatus===2);},
+        getCanUseMultiAccountMobile(){return this.state.canUseMultiAccountMobile;},
+        getHasLoggedInAccounts(){return this.state.users.length>0;},
+        initialize(s){this.state={users:Array.isArray(s?.users)?s.users:[],canUseMultiAccountMobile:!!s?.canUseMultiAccountMobile};},
+        asyncPersist(){persistedSaved++;},
+        emitChange(){}
+    };
+    b.load({default:lazyStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
+    assert.equal(persistedLoaded,true,'initializeIfNeeded called before syncing state (#59)');
+    assert.ok(persistedSaved>=1,'asyncPersist called after syncing current user (#59)');
+    assert.equal(lazyStore.state.users.length,7,'all 6 persisted accounts + active account preserved without 5-account truncation (#59)');
 });
 
 test('Unlock app icons marks all alternate icons non-premium, blocks background reset, and strips the Nitro upsell button and header',()=>{
@@ -3863,3 +4250,466 @@ test('Unlock app icons marks all alternate icons non-premium, blocks background 
     assert.equal(groups.every(g=>!g.props.title),true,'"Nitro" lock header removed from alternate icons group');
 });
 
+test('Custom themes installs Revenge JSON themes via links, compiles colors into RawColors & SemanticColors in place, invalidates ThemeContext key, and restores stock colors when turned off (#57)', async () => {
+    const b = boot({customThemes:true});
+    const {React, RN} = reactHarness(b);
+    const writes = [], toasts = [], alerts = [];
+    let savedThemesFile = null;
+    RN.Alert = {alert:(...args) => alerts.push(args)};
+    b.load({default:native({
+        fileExists: async p => p.endsWith('venus-themes.json') && savedThemesFile !== null,
+        readFile: async p => p.endsWith('venus-themes.json') && savedThemesFile ? savedThemesFile : '{}',
+        writeFile: async (dir, name, text) => { writes.push([name, text]); if (name === 'venus-themes.json') savedThemesFile = text; }
+    })});
+
+    const rawColorsTable = {
+        NEUTRAL_86: '#313338',
+        NEUTRAL_79: '#2b2d31',
+        NEUTRAL_92: '#1e1f22',
+        NEUTRAL_5: '#dbdee1',
+        NEUTRAL_2: '#f2f3f5',
+        NEUTRAL_29: '#949ba4',
+        BLURPLE_50: '#5865f2',
+        PRIMARY_600: '#313338',
+        BRAND_500: '#5865f2'
+    };
+    const semanticColorsTable = {
+        BACKGROUND_BASE_LOWER: {
+            category: 'background',
+            dark: {raw:'NEUTRAL_86', opacity:1},
+            darker: {raw:'NEUTRAL_69', opacity:1},
+            light: {raw:'NEUTRAL_2', opacity:1},
+            midnight: {raw:'NEUTRAL_100', opacity:1}
+        },
+        BACKGROUND_BASE_LOW: {
+            category: 'background',
+            dark: {raw:'NEUTRAL_82', opacity:1},
+            darker: {raw:'NEUTRAL_66', opacity:1},
+            light: {raw:'NEUTRAL_2', opacity:1},
+            midnight: {raw:'NEUTRAL_100', opacity:1}
+        },
+        BACKGROUND_SURFACE_HIGH: {
+            category: 'background',
+            dark: {raw:'NEUTRAL_79', opacity:1},
+            darker: {raw:'NEUTRAL_64', opacity:1},
+            light: {raw:'NEUTRAL_1', opacity:1},
+            midnight: {raw:'NEUTRAL_96', opacity:1}
+        },
+        TEXT_DEFAULT: {
+            category: 'text',
+            dark: {raw:'NEUTRAL_5', opacity:1},
+            darker: {raw:'NEUTRAL_4', opacity:1},
+            light: {raw:'NEUTRAL_72', opacity:1},
+            midnight: {raw:'NEUTRAL_12', opacity:1}
+        },
+        TEXT_STRONG: {
+            category: 'text',
+            dark: {raw:'NEUTRAL_2', opacity:1},
+            darker: {raw:'NEUTRAL_1', opacity:1},
+            light: {raw:'NEUTRAL_76', opacity:1},
+            midnight: {raw:'NEUTRAL_10', opacity:1}
+        },
+        MESSAGE_MENTIONED_BACKGROUND_DEFAULT: {
+            category: 'background',
+            dark: {raw:'OPACITY_YELLOW_8', opacity:0.08},
+            darker: {raw:'OPACITY_YELLOW_8', opacity:0.08},
+            light: {raw:'OPACITY_YELLOW_8', opacity:0.08},
+            midnight: {raw:'OPACITY_YELLOW_8', opacity:0.08}
+        },
+        CHANNEL_BACKGROUND_DEFAULT: {
+            category: 'background',
+            dark: {raw:'NEUTRAL_86', opacity:1},
+            darker: {raw:'NEUTRAL_69', opacity:1},
+            light: {raw:'NEUTRAL_2', opacity:1},
+            midnight: {raw:'NEUTRAL_100', opacity:1}
+        },
+        STATUS_ONLINE: {
+            category: 'status',
+            dark: {raw:'GREEN_360', opacity:1},
+            darker: {raw:'GREEN_360', opacity:1},
+            light: {raw:'GREEN_360', opacity:1},
+            midnight: {raw:'GREEN_360', opacity:1}
+        },
+        ICON_STATUS_DND: {
+            category: 'status',
+            dark: {raw:'RED_400', opacity:1},
+            darker: {raw:'RED_400', opacity:1},
+            light: {raw:'RED_400', opacity:1},
+            midnight: {raw:'RED_400', opacity:1}
+        },
+        MOBILE_CHAT_NEW_MESSAGE_BORDER: {
+            category: 'border',
+            dark: {raw:'RED_400', opacity:1},
+            darker: {raw:'RED_400', opacity:1},
+            light: {raw:'RED_400', opacity:1},
+            midnight: {raw:'RED_400', opacity:1}
+        }
+    };
+    rawColorsTable.GREEN_360 = '#23a55a';
+    rawColorsTable.RED_400 = '#f23f43';
+    b.load({_private:{RawColors:rawColorsTable}}, null, 592);
+    b.load({_private:{SemanticColors:semanticColorsTable}}, null, 590);
+    let themeStoreChanges = 0;
+    const themeStore = {theme:'dark', emitChange(){ themeStoreChanges++; }};
+    b.load({default:themeStore}, null, 1194);
+    const themeCtxMod = b.load({
+        FALLBACK_THEME_CONTEXT_VALUE: {key:'{"theme":"dark","flags":0}'},
+        createThemedContext(ctx) {
+            return Object.assign({}, ctx, {key:JSON.stringify(ctx)});
+        }
+    }, null, 4551);
+    const chatWrapperMod = b.load({
+        default: function ChatViewWrapper(props) {
+            return React.createElement(RN.View, {testID:'chat-wrapper'}, props && props.children);
+        }
+    }, null, 9542);
+
+    const fetchedUrls = [];
+    const rosePineTheme = {
+        name: 'Rose Pine Moon',
+        description: 'Soho vibes for the classy minimalist',
+        authors: [{name:'Moodle'}],
+        spec: 2,
+        rawColors: {
+            PRIMARY_600: '#232136',
+            PRIMARY_100: '#e0def4',
+            BRAND_500: '#3e8fb0'
+        },
+        semanticColors: {
+            BACKGROUND_PRIMARY: ['#232136', '#faf4ed', '#191724'],
+            BACKGROUND_SECONDARY: ['2a273f'],
+            TEXT_NORMAL: ['rgba(224, 222, 244, 1)'],
+            HEADER_PRIMARY: ['hsl(35, 88%, 72%)'],
+            BACKGROUND_MENTIONED: ['#f6c17733']
+        },
+        background: {
+            url: 'https://example.com/wallpaper.png',
+            alpha: 0.75,
+            blur: 0.2,
+            color: '#191724'
+        },
+        plus: {
+            version: 0,
+            mentionLineColor: '#ebbcba',
+            unreadBadgeColor: '#eb6f92',
+            icons: {
+                StatusOnline: '#9ccfd8',
+                StatusDND: ['#eb6f92']
+            }
+        }
+    };
+    b.context.fetch = async url => {
+        fetchedUrls.push(url);
+        return {ok:true, status:200, text:async () => JSON.stringify(rosePineTheme)};
+    };
+    b.context.__r = id => ({
+        590: {_private:{SemanticColors:semanticColorsTable}},
+        592: {_private:{RawColors:rawColorsTable}},
+        1194: {default:themeStore},
+        4551: themeCtxMod,
+        4531: {default:{open:t => toasts.push(t.content)}},
+        5916: {TableRow:'Row'},
+        5997: {TableRowGroup:'Group'},
+        6621: {TableSwitchRow:'Switch'},
+        6021: {TextInput:'Input'},
+        5280: {Stack:'Stack'},
+        5918: {Card:'Card'},
+        6614: {Clipboard:{getString:async () => 'https://github.com/rose-pine/discord-mobile/blob/main/rosepinemoon.json'}}
+    }[id] || null);
+
+    await flush(); await flush();
+    assert.equal(b.api.settings.customThemes, false, 'customThemes starts off');
+    assert.equal(themeCtxMod.createThemedContext({theme:'dark'}).key, '{"theme":"dark"}', 'stock ThemeContext key untouched before any theme change');
+
+    b.api.setSetting('customThemes', true);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const page = () => pageNodes(registry.VENUS_CUSTOMTHEMES.screen.getComponent()());
+
+    // Paste link from clipboard and install via GitHub blob -> raw.githubusercontent.com normalization.
+    let draft = '';
+    const withDraft = () => {
+        React.useState = init => typeof init === 'string' ? [draft, v => { draft = v; }] : [init, () => {}];
+        return page();
+    };
+    const pasteRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Paste link from clipboard');
+    pasteRow.props.onPress();
+    await flush(); await flush();
+    assert.equal(draft, 'https://github.com/rose-pine/discord-mobile/blob/main/rosepinemoon.json', 'clipboard link pasted into draft');
+
+    const installRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Install theme');
+    assert.equal(installRow.props.disabled, false);
+    installRow.props.onPress();
+    await flush(); await flush(); await flush();
+
+    assert.deepEqual(fetchedUrls, ['https://raw.githubusercontent.com/rose-pine/discord-mobile/main/rosepinemoon.json'], 'GitHub blob URL normalized to raw URL');
+    assert.equal(toasts.at(-1), 'Applied Rose Pine Moon');
+    assert.ok(themeStoreChanges >= 1, 'ThemeStore.emitChange() called to refresh UI');
+
+    // Verify in-place token compilation: BACKGROUND_PRIMARY -> BACKGROUND_BASE_LOWER, TEXT_NORMAL -> TEXT_DEFAULT, etc.
+    const darkRawKey = semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw;
+    const lightRawKey = semanticColorsTable.BACKGROUND_BASE_LOWER.light.raw;
+    const midnightRawKey = semanticColorsTable.BACKGROUND_BASE_LOWER.midnight.raw;
+    assert.equal(rawColorsTable[darkRawKey], '#232136', 'dark BACKGROUND_BASE_LOWER compiled in-place');
+    assert.equal(rawColorsTable[lightRawKey], '#faf4ed', 'light BACKGROUND_BASE_LOWER compiled in-place');
+    assert.equal(rawColorsTable[midnightRawKey], '#191724', 'midnight BACKGROUND_BASE_LOWER compiled in-place');
+    assert.equal(rawColorsTable[semanticColorsTable.BACKGROUND_BASE_LOW.dark.raw], '#2a273f', '6-digit hex without leading # parsed cleanly');
+    assert.equal(rawColorsTable[semanticColorsTable.TEXT_DEFAULT.dark.raw], '#e0def4', 'rgba() color parsed and bridged to TEXT_DEFAULT');
+    assert.equal(rawColorsTable[semanticColorsTable.TEXT_STRONG.dark.raw], '#f6c279', 'hsl() color parsed and bridged to TEXT_STRONG');
+    assert.equal(rawColorsTable[semanticColorsTable.MESSAGE_MENTIONED_BACKGROUND_DEFAULT.dark.raw], '#f6c177', '8-digit hex color separated into 6-digit hex + opacity');
+    assert.equal(semanticColorsTable.MESSAGE_MENTIONED_BACKGROUND_DEFAULT.dark.opacity, 0.2, '8-digit hex alpha (#33 = 0.2) stored on semantic slot opacity');
+    assert.equal(rawColorsTable.BLURPLE_50, '#3e8fb0', 'BRAND_500 bridged to BLURPLE_50');
+    assert.equal(rawColorsTable.GREEN_360, '#9ccfd8', 'plus.icons.StatusOnline compiled into GREEN_360');
+    assert.equal(rawColorsTable[semanticColorsTable.ICON_STATUS_DND.dark.raw], '#eb6f92', 'plus.icons.StatusDND compiled into ICON_STATUS_DND');
+    assert.equal(rawColorsTable[semanticColorsTable.MOBILE_CHAT_NEW_MESSAGE_BORDER.dark.raw], '#eb6f92', 'plus.unreadBadgeColor compiled into MOBILE_CHAT_NEW_MESSAGE_BORDER');
+    assert.equal(semanticColorsTable.CHANNEL_BACKGROUND_DEFAULT.dark.opacity, 0.75, 'background.alpha applied to chat surface token when wallpaper is active');
+    assert.match(themeCtxMod.createThemedContext({theme:'dark'}).key, /^\{.*\}#v\d+$/, 'ThemeContext key bumped with revision suffix to invalidate style caches once');
+    assert.match(themeCtxMod.FALLBACK_THEME_CONTEXT_VALUE.key, /^\{.*\}#v\d+$/, 'FALLBACK_THEME_CONTEXT_VALUE.key also bumped so createLegacyClassComponentStyles invalidates cache');
+
+    // ChatViewWrapper (9542) renders the static RN.Image wallpaper behind chat when customThemesBackground is on.
+    let chatTree = chatWrapperMod.default({children:'messages'});
+    const bgImg = pageNodes(chatTree).find(n => n.type === RN.Image);
+    assert.ok(bgImg, 'static RN.Image wallpaper rendered behind ChatViewWrapper');
+    assert.equal(bgImg.props.source.uri, 'https://example.com/wallpaper.png');
+    assert.equal(bgImg.props.blurRadius, 5, 'blur:0.2 scaled to blurRadius:5');
+
+    // Toggling customThemesBackground off hides the wallpaper and restores opaque chat surfaces.
+    b.api.setSetting('customThemesBackground', false);
+    assert.equal(semanticColorsTable.CHANNEL_BACKGROUND_DEFAULT.dark.opacity, 1, 'chat surface opacity restored to 1 when background image is turned off');
+    chatTree = chatWrapperMod.default({children:'messages'});
+    assert.equal(pageNodes(chatTree).some(n => n.type === RN.Image), false, 'wallpaper hidden when customThemesBackground is off');
+    b.api.setSetting('customThemesBackground', true);
+
+    // Turning customThemes off restores Discord's original RawColors and SemanticColors in-place.
+    b.api.setSetting('customThemes', false);
+    assert.equal(semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw, 'NEUTRAL_86', 'original SemanticColors slot restored when turned off');
+    assert.equal(rawColorsTable.NEUTRAL_86, '#313338', 'original RawColors entry restored when turned off');
+    assert.equal(rawColorsTable.BLURPLE_50, '#5865f2', 'original BLURPLE_50 restored when turned off');
+    assert.equal(Object.keys(rawColorsTable).some(k => k.startsWith('__VENUS_')), false, 'synthetic keys cleaned up when turned off');
+
+    // Turning customThemes back on re-applies the saved theme from venus-themes.json.
+    b.api.setSetting('customThemes', true);
+    assert.equal(rawColorsTable[semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw], '#232136', 'theme re-applied when turned back on');
+
+    // Tapping the active theme row toggles it off; long-pressing removes it.
+    const themeRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Rose Pine Moon' && n.props.trailing);
+    assert.ok(themeRow, 'installed theme listed as active');
+    themeRow.props.onPress();
+    assert.equal(semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw, 'NEUTRAL_86', 'tapping active theme deselects it and restores stock colors');
+    themeRow.props.onLongPress();
+    alerts.at(-1)[2].find(btn => btn.text === 'Remove').onPress();
+    assert.equal(toasts.at(-1), 'Removed Rose Pine Moon');
+});
+
+test('Read All clears lurking, guest and event-only servers, >20 unread DMs, and skips message requests',()=>{
+    const b=readAllHarness({unreadGuilds:['g1','g_lurk','g_guest'],dms:Array.from({length:20},(_,i)=>'d'+(i+1))});
+    const prev=b.context.__r;
+    const allDms=Array.from({length:25},(_,i)=>'d'+(i+1)).concat(['req_dm','spam_dm','read_dm']);
+    const unreadDms=new Set(Array.from({length:25},(_,i)=>'d'+(i+1)).concat(['req_dm','spam_dm']));
+    b.context.__r=id=>{
+        if (id===4473) return {default:{lurkingGuildIds:()=>['g_lurk']}};
+        if (id===2073) return {default:{getGuildIds:()=>['g1','g2','g3','g4','g_guest','g_event']}};
+        if (id===5019) return {ReadStateTypes:{CHANNEL:0,GUILD_EVENT:1}};
+        if (id===4852) return {default:{
+            lastMessageId:ch=>'m-'+ch,
+            hasUnread:(targetId,type)=>type===1&&targetId==='g_event',
+            hasUnreadOrMentions:ch=>unreadDms.has(ch)
+        }};
+        if (id===6640) return {default:{getPrivateChannelIds:()=>allDms}};
+        if (id===13384) return {filterOutMessageRequestsAndSpamById:ids=>ids.filter(ch=>ch!=='req_dm'&&ch!=='spam_dm')};
+        return prev(id);
+    };
+    b.api.setSetting('readAllMode','both');
+    pressReadAll(b);
+    assert.equal(JSON.stringify(b.calls.guilds),JSON.stringify([[['g1','g_lurk','g_guest','g_event'],'guild list']]),'lurking, guest and event-unread servers included');
+    assert.equal(b.calls.acks.length,1,'single bulkAck batch for 25 DMs');
+    assert.equal(b.calls.acks[0].length,25,'all 25 unread DMs included beyond the 20-DM cap, excluding message requests/spam and already-read DMs');
+    assert.equal(b.calls.toasts.at(-1),'Marked 4 servers and 25 DMs as read');
+});
+
+test('Read All reports an error when read state stores have not loaded yet and retries createStyles once tokens load',()=>{
+    const b=readAllHarness();
+    const prev=b.context.__r;
+    let tokensReady=false,createStylesCalls=0;
+    b.context.__r=id=>{
+        if (id===7054||id===13299||id===6640) return null;
+        if (id===588) return tokensReady?{default:{colors:{BACKGROUND_MOD_NORMAL:'#111',BACKGROUND_MOD_STRONG:'#222',TEXT_DEFAULT:'#fff'}}}:null;
+        if (id===4837) return {createStyles:spec=>{createStylesCalls++;return ()=>spec;}};
+        return prev(id);
+    };
+    pressReadAll(b);
+    assert.match(b.calls.toasts.at(-1),/^Couldn't mark as read: Discord's read states haven't loaded yet/);
+    b.api.setSetting('readAllMode','dms');
+    pressReadAll(b);
+    assert.match(b.calls.toasts.at(-1),/^Couldn't mark as read: Discord's read states haven't loaded yet/);
+    // ReadAllButton retries createStyles once theme tokens become available.
+    const buttonNode=findReadAll(b.props().listDataProps.renderItem(6,0));
+    buttonNode.type(buttonNode.props);
+    assert.equal(createStylesCalls,0,'tokens not ready yet');
+    tokensReady=true;
+    const rendered=buttonNode.type(buttonNode.props);
+    assert.equal(createStylesCalls,1,'createStyles called once tokens are ready');
+    assert.equal(rendered.props.children.props.style({pressed:false})[1].backgroundColor,'#111');
+});
+
+test('Message highlights customizes left bar thickness and reply/mention & deleted colors with live preview in settings (#60)', async () => {
+    const b = boot({messageHighlight:true, noDelete:true});
+    const {React, RN} = reactHarness(b);
+    RN.processColor = str => {
+        const clean = str.replace(/^#/, '');
+        if (clean.length === 6) return (0xff000000 | parseInt(clean, 16)) >>> 0;
+        if (clean.length === 8) {
+            const rgb = parseInt(clean.slice(0, 6), 16);
+            const a = parseInt(clean.slice(6, 8), 16);
+            return ((a << 24) | rgb) >>> 0;
+        }
+        return 0;
+    };
+    const dispatched = [];
+    const flux = b.load({default:{dispatch(e){ dispatched.push(e); }}}, null, 585).default;
+    b.load({default:{getCurrentUser:() => ({id:'me_123', username:'fariz70', globalName:'FaRiz70', avatar:'av_hash'})}}, null, 1378);
+    b.load({default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}}, null, 1403);
+    const liveMessages = new Map();
+    b.load({default:{getMessage:(ch, id) => liveMessages.get(ch + ':' + id)}}, null, 5057);
+
+    // Hook MessageRowGenerator.prototype.generate (7378)
+    class MessageRowGenerator {
+        generate(row) {
+            return row.result;
+        }
+    }
+    b.load({default:MessageRowGenerator}, null, 7378);
+    const gen = new MessageRowGenerator();
+
+    // 1. Default settings: messageHighlight starts off, options default to thickness 2 (4 dp) and default colors
+    assert.equal(b.api.settings.messageHighlight, false);
+    assert.equal(b.api.settings.messageHighlightThickness, 2);
+    assert.equal(b.api.settings.messageHighlightPingColor, 'default');
+    assert.equal(b.api.settings.messageHighlightDeletedColor, 'default');
+    b.api.setSetting('messageHighlight', true);
+
+    // Mention row with stock backgroundHighlight encodes multiplier 2 into gutterColor alpha (256 - 2 = 254 = 0xfe)
+    const stockYellowGutter = RN.processColor('#f0b232') | 0;
+    const stockYellowBg = RN.processColor('#f0b2321a') | 0;
+    const mentionSource = {id:'m_ping', channel_id:'c1', content:'hey @FaRiz70', mentioned:true};
+    liveMessages.set('c1:m_ping', mentionSource);
+    let pingRow = gen.generate({
+        rowType:1,
+        message:mentionSource,
+        result:{message:{id:'m_ping', channelId:'c1'}, backgroundHighlight:{backgroundColor:stockYellowBg, gutterColor:stockYellowGutter}}
+    });
+    assert.equal((pingRow.backgroundHighlight.gutterColor >>> 24) & 0xff, 254, '2x thickness encoded as alpha 254');
+    assert.equal(pingRow.backgroundHighlight.gutterColor & 0x00ffffff, 0xf0b232, 'stock yellow RGB preserved');
+
+    // 2. Custom ping color ('cyan' -> #00a8fc) and thickness 4 (8 dp -> alpha 252)
+    b.api.setSetting('messageHighlightThickness', 4);
+    b.api.setSetting('messageHighlightPingColor', 'cyan');
+    assert.ok(dispatched.some(e => e.type === 'MESSAGE_UPDATE' && e.message.id === 'm_ping'), 'live MESSAGE_UPDATE dispatched to redraw cached rows');
+    pingRow = gen.generate({
+        rowType:1,
+        message:{id:'m_reply', channel_id:'c1', content:'replying', referenced_message:{author:{id:'me_123'}}},
+        result:{message:{id:'m_reply', channelId:'c1'}}
+    });
+    assert.equal((pingRow.backgroundHighlight.gutterColor >>> 24) & 0xff, 252, '4x thickness encoded as alpha 252');
+    assert.equal(pingRow.backgroundHighlight.gutterColor & 0x00ffffff, 0x00a8fc, 'cyan RGB applied to reply row');
+
+    // 3. Deleted message row with custom hex color ('#9b59b6')
+    b.api.setSetting('noDelete', true);
+    b.api.setSetting('messageHighlightDeletedColor', '#9b59b6');
+    liveMessages.set('c1:m_del', {id:'m_del', channel_id:'c1', content:'deleted text', state:'SENT'});
+    flux.dispatch({type:'MESSAGE_DELETE', channelId:'c1', id:'m_del'});
+    const delRow = gen.generate({
+        rowType:1,
+        message:{id:'m_del', channel_id:'c1', content:'deleted text'},
+        result:{message:{id:'m_del', channelId:'c1'}}
+    });
+    assert.equal((delRow.backgroundHighlight.gutterColor >>> 24) & 0xff, 252, '4x thickness encoded on deleted row');
+    assert.equal(delRow.backgroundHighlight.gutterColor & 0x00ffffff, 0x9b59b6, 'custom purple RGB applied to deleted row');
+
+    // 4. Settings UI renders accurate Discord reply + deleted message preview card, thickness radio group, and visual color swatches + custom hex inputs
+    b.context.__r = id => ({
+        1403: {default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}},
+        5916: {TableRow:'Row'},
+        5997: {TableRowGroup:'Group'},
+        5995: {TableRadioGroup:'RadioGroup'},
+        5994: {TableRadioRow:'RadioRow'},
+        6021: {TextInput:'Input'},
+        5280: {Stack:'Stack'}
+    }[id] || null);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const page = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()());
+    const nodes = page();
+    const preview = nodes.find(n => n.props && n.props.accessibilityLabel === 'Message highlight preview');
+    assert.ok(preview, 'live reply & deleted message preview card rendered');
+    const avatarImages = nodes.filter(n => n.type === RN.Image && n.props.source && n.props.source.uri && n.props.source.uri.includes('av_hash'));
+    assert.equal(avatarImages.length, 2, 'renders both 16dp reply avatar and 40dp main avatar using user avatar URL');
+    const mentionPillText = nodes.find(n => n.type === RN.Text && n.props.children === '@FaRiz70' && n.props.style && n.props.style.color === '#c9cdfb');
+    assert.ok(mentionPillText, 'renders authentic Discord blurple mention pill for @user');
+
+    // Swatch rows (one per highlight) allow 1-tap preset selection, with a check on the chosen one.
+    const swatches = label => page().filter(n => n.type === RN.Pressable && n.props.accessibilityRole === 'radio' && n.props.accessibilityLabel === label);
+    assert.equal(swatches('Purple').length, 2, 'swatches rendered for replies & mentions and for kept deleted messages');
+    assert.equal(swatches('Any color').length, 2, 'an any-color swatch for each highlight');
+    swatches('Blurple')[0].props.onPress();
+    assert.equal(b.api.settings.messageHighlightPingColor, 'blurple', 'tapping Blurple swatch updates ping color immediately');
+    assert.equal(swatches('Blurple')[0].props.accessibilityState.selected, true);
+
+    // Bar width is a segmented choice.
+    page().find(n => n.props && n.props.accessibilityRole === 'tab' && n.props.accessibilityLabel === '6 dp').props.onPress();
+    assert.equal(b.api.settings.messageHighlightThickness, 3);
+
+    // Any color opens Discord's color picker (14140) with the presets suggested; its pick is saved as hex.
+    const picks = [];
+    const prevR = b.context.__r;
+    b.context.__r = id => id === 14140 ? {default:opts => picks.push(opts)} : prevR(id);
+    swatches('Any color')[0].props.onPress();
+    assert.equal(picks.length, 1, 'native color picker opened');
+    assert.ok(picks[0].suggestedColors.includes('#5865f2'));
+    picks[0].onSelect(0x12abef);
+    assert.equal(b.api.settings.messageHighlightPingColor, '#12abef', 'picked color applied to ping color');
+
+    // Without the picker, a hex box opens instead.
+    b.context.__r = prevR;
+    let target = '', draft = '#ff5500';
+    React.useState = init => init === '' ? (React.useState.n = (React.useState.n || 0) + 1) % 2 ? [draft, v => { draft = v; }] : [target, v => { target = v; }] : [init, () => {}];
+    React.useState.n = 0; swatches('Any color')[1].props.onPress();
+    assert.equal(target, 'messageHighlightDeletedColor', 'hex box opens for the deleted color');
+    assert.equal(draft, '#9b59b6', 'hex box starts from the current custom color');
+    draft = '#ff5500';
+    React.useState.n = 0; const use = page().find(n => n.props && n.props.accessibilityLabel === 'Use');
+    assert.ok(use && !use.props.disabled); use.props.onPress();
+    assert.equal(b.api.settings.messageHighlightDeletedColor, '#ff5500', 'typed hex applied to deleted color');
+
+    // Reset to defaults.
+    React.useState = init => [init, () => {}];
+    const reset = page().find(n => n.type === 'Row' && n.props.label === 'Reset to defaults');
+    assert.equal(reset.props.disabled, false); reset.props.onPress();
+    assert.equal(b.api.settings.messageHighlightThickness, 2);
+    assert.equal(b.api.settings.messageHighlightPingColor, 'default');
+    assert.equal(b.api.settings.messageHighlightDeletedColor, 'default');
+});
+
+
+
+
+
+test('every option page renders in the shared design: status card first, row icons, and no crash on or off',()=>{
+    const b=settingsHarness();const {React}=reactHarness(b);React.useState=init=>[init,()=>{}];
+    function TableSwitchRow(){} function TableRowGroup(){} function TableRadioGroup(){} function TableRadioRow(){} function TableRowIcon(){} function Text(){}
+    b.context.__r=id=>({6621:{TableSwitchRow},5997:{TableRowGroup},5995:{TableRadioGroup},5994:{TableRadioRow},5922:{TableRowIcon},4833:{Text},5916:{TableRow:'Row'},
+        1378:{default:{getCurrentUser:()=>({id:'1',username:'me'}),getUser:()=>null}}}[id]||null);
+    const pages={VENUS_NODELETE:'noDelete',VENUS_MESSAGEHIGHLIGHT:'messageHighlight',VENUS_TRANSLATE:'translate',VENUS_GESTURES:'gestures',VENUS_FREENITRO:'freeNitro',
+        VENUS_PASTELIZE:'pastelize',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_REVIEWDB:'reviewDB',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',
+        VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_LANGUAGE:null};
+    for (const on of [true,false]) for (const [id,key] of Object.entries(pages)) {
+        if (key) b.api.setSetting(key,on);
+        const nodes=pageNodes(b.registry[id].screen.getComponent()());
+        assert.ok(nodes.length>3,id+' renders');
+        // The Language list is the exception: 30 names in their own words read best without icons.
+        if (id!=='VENUS_LANGUAGE') for (const row of nodes.filter(n=>n.type===TableSwitchRow||n.type===TableRadioRow))
+            assert.equal(row.props.icon&&row.props.icon.type,TableRowIcon,id+': '+row.props.label+' has a row icon');
+        if (id==='VENUS_MESSAGEHIGHLIGHT') continue;
+        const titles=nodes.filter(n=>n.type===Text&&n.props.variant==='text-md/semibold').map(n=>n.props.children);
+        assert.ok(titles.length,id+' starts with a titled status card');
+        if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
+    }
+});

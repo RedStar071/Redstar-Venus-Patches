@@ -2,6 +2,8 @@
 
 ### ✨ New Features
 
+* **Discord:** Add `Message highlights` patch ([#60](https://github.com/VenusIsJaded/Venus-Patches/issues/60))
+* **Discord - Message highlights:** Change the left bar width and highlight colors for replies, mentions and deleted messages, with a live chat preview and any-color picker ([#60](https://github.com/VenusIsJaded/Venus-Patches/issues/60))
 * **Discord:** Add `Unlock app icons` patch
 * **Discord - Unlock app icons:** Use any Discord app icon in Settings without Nitro, and hide the Nitro upsell button
 * **Discord:** Add `Account switcher` patch
@@ -18,6 +20,7 @@
 
 ### 🔧 Improvements
 
+* **Discord - Venus settings:** Redesign every option page with a status card, Discord's row icons and live previews of what each feature changes
 * **Discord - Disable analytics:** Expand analytics blocking to 48 Hermes bytecode functions, including ad/Quest tracking and voice stats
 * **Discord - Disable telemetry and touch logging:** Expand telemetry blocking to 40 Hermes bytecode functions and 46 native Android methods
 * **Discord - Disable crash reporting:** Expand crash reporting blocking to 16 Hermes bytecode functions and 45 native Sentry and CrashReporting methods
