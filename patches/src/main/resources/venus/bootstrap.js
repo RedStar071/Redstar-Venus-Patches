@@ -2467,49 +2467,45 @@
         return enabled("gestures") ? null : orig.apply(self, args);
     }
     // Watch: Sam asks, you double-tap to reply and say you're in, Sam says it's at 6 AM, you regret it and triple-tap
-    // your message away. Try it: a small chat you can double- and triple-tap yourself. Both follow your choices below.
+    // your message away. Try it: the same chat, with a tip pointing at what to tap next. Both follow your choices below.
     const GESTURE_TAP_MS = 300;
     function GesturePreview(props) {
         useSettings("gestures");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
-        const blank = {mode:null, target:null, gone:false, mine:true, late:false, draft:"", pulse:null, caption:""};
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
+        const blank = {mode:null, target:null, gone:false, mine:true, late:false, draft:"", pulse:null, done:{}};
         const [state, setState] = React.useState(blank), taps = React.useRef({who:null, count:0, at:0, timer:undefined});
-        const box = useThemed("gestureBox", c => ({bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:12, paddingVertical:8,
-            backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopLeftRadius:12, borderTopRightRadius:12, marginHorizontal:12, marginTop:8},
-            input:{marginHorizontal:12, marginBottom:4, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:c.BACKGROUND_MOD_NORMAL}}),
-            {bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:12, paddingVertical:8, backgroundColor:"#4e505833",
-                borderTopLeftRadius:12, borderTopRightRadius:12, marginHorizontal:12, marginTop:8},
-             input:{marginHorizontal:12, marginBottom:4, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"}});
         React.useEffect(() => () => { const t = taps.current; if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer); }, []);
         const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete, watching = on && mode === "watch";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const pulse = who => update(st => ({pulse:{who, id:(st.pulse ? st.pulse.n + 1 : 1) + ":" + who, n:st.pulse ? st.pulse.n + 1 : 1}}));
         // The story, built from your settings: what a double-tap on your own message does, and whether triple-tap deletes.
-        useDemo(watching, () => {
-            const steps = [[0, () => setState(blank)], [900, () => update({mine:false, caption:tr("Sam asks a question")})]];
-            steps.push([700, () => pulse("theirs")], [160, () => pulse("theirs")],
-                [80, () => { animateLayout(); update({mode:"reply", target:"theirs", caption:tr("Double-tap: you reply to Sam")}); }]);
-            typeSteps(tr("I'm in!"), text => update({draft:text}), 85).forEach(step => steps.push(step));
-            steps.push([450, () => { animateLayout(); update({mode:null, target:null, draft:"", mine:true, caption:tr("You said yes")}); }],
-                [1300, () => { animateLayout(); update({late:true, caption:tr("...then Sam says it's at 6 AM")}); }]);
-            if (triple) steps.push([1500, () => pulse("mine")], [150, () => pulse("mine")], [150, () => pulse("mine")],
-                [120, () => { animateLayout(); gestureHaptic(); update({mode:"deleted", target:"mine", gone:true, caption:tr("Triple-tap: you delete your message")}); }],
-                [2200, () => {}]);
-            else steps.push([1500, () => pulse("mine")], [160, () => pulse("mine")],
-                [100, () => { animateLayout(); update({mode:own ? "edit" : "reply", target:"mine", caption:tr(own ? "Double-tap: you edit your message" : "Double-tap: you reply to yourself")}); }],
-                [2200, () => {}]);
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(Object.assign({}, blank, {mine:false})), tr("Sam asks if anyone wants to play")],
+                [1200, () => pulse("theirs"), tr("You double-tap Sam's message")], [200, () => pulse("theirs")],
+                [500, () => { animateLayout(); gestureHaptic(); update({mode:"reply", target:"theirs"}); }, tr("A reply to Sam opens, ready to type")]];
+            typeSteps(tr("I'm in!"), text => update({draft:text}), 110).forEach(step => steps.push(step));
+            steps.push([600, () => { animateLayout(); update({mode:null, target:null, draft:"", mine:true}); }, tr("You send it")],
+                [1200, () => { animateLayout(); update({late:true}); }, tr("Then Sam says it starts at 6 AM")]);
+            if (triple) steps.push([1000, () => pulse("mine"), tr("You change your mind and tap your message three times")],
+                [220, () => pulse("mine")], [220, () => pulse("mine")],
+                [500, () => { animateLayout(); gestureHaptic(); update({mode:"deleted", target:"mine", gone:true}); }, tr("It's deleted at once, with no question")],
+                [1500, () => {}]);
+            else steps.push([1000, () => pulse("mine"), tr("You double-tap your own message")], [200, () => pulse("mine")],
+                [500, () => { animateLayout(); update({mode:own ? "edit" : "reply", target:"mine", draft:own ? tr("I'm in!") : ""}); },
+                    tr(own ? "It opens for editing, so you can fix it" : "A reply to your own message opens")], [1500, () => {}]);
             return steps;
         }, [own, triple]);
         const act = (who, count) => {
             if (!on || watching) return;
             if (who === "mine" && count >= 3 && triple) {
-                animateLayout(); gestureHaptic(); update({mode:"deleted", target:"mine", gone:true});
-                later(() => { animateLayout(); update(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : {}); }, 1800, false);
+                animateLayout(); gestureHaptic(); update(st => ({mode:"deleted", target:"mine", gone:true, done:Object.assign({}, st.done, {del:true})}));
+                later(() => { animateLayout(); update(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : {}); }, 2200, false);
                 return;
             }
             if (count < 2) return;
             animateLayout(); gestureHaptic();
-            update({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false});
+            update(st => ({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false,
+                done:Object.assign({}, st.done, who === "mine" ? {own:true} : {reply:true})}));
         };
         // Same rule as in chat: a third tap soon after a double-tap deletes your own message instead.
         const tap = who => {
@@ -2522,31 +2518,35 @@
             if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
         };
         const switchMode = value => { setMode(value); setState(blank); };
-        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon"), X = venusIcon(5940, "XSmallIcon");
+        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon");
+        // Try it: a tip under the message to tap next, step by step, until you've tried everything your options allow.
+        const done = state.done, next = !on || watching ? null : !done.reply ? ["theirs", tr("Double-tap Sam's message to reply")] :
+            !done.own ? ["mine", tr(own ? "Now double-tap your message to edit it" : "Now double-tap your message to reply to it")] :
+            triple && !done.del ? ["mine", tr("Now tap your message three times to delete it")] : null;
         const picked = who => state.target === who && state.mode !== "deleted";
-        const message = (who, name, color, time, text) => el(Press, {key:who, onPress:() => tap(who), accessibilityRole:"button",
-            accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
-            el(RN.View, {style:picked(who) ? {backgroundColor:"#f0b2321a"} : null},
-                picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#f0b232"}}) : null,
-                previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who)));
+        const message = (who, name, color, time, text) => el(RN.View, {key:who},
+            el(Press, {onPress:() => tap(who), accessibilityRole:"button",
+                accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
+                el(RN.View, {style:picked(who) ? {backgroundColor:"#f0b2321a"} : null},
+                    picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#f0b232"}}) : null,
+                    previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who))),
+            next && next[0] === who ? previewTip(k, next[1]) : null);
         const showMine = watching ? state.mine && !state.gone : !state.gone;
-        const bar = state.mode === "deleted" ? [Trash, tr("Message deleted")] : state.mode === "edit" ? [Pencil, tr("Editing message")] :
-            state.mode === "reply" ? [Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"})] : null;
-        const inputText = state.draft ? state.draft : state.mode === "edit" ? tr("I'm in!") :
-            on && !watching ? tr(triple ? "Try it: double-tap a message, or triple-tap yours" : "Try it: double-tap a message") : tr("Message {channel}", {channel:"#general"});
+        const close = watching ? null : () => { animateLayout(); update({mode:null, target:null, gone:false, draft:""}); };
+        const bar = state.mode === "deleted" ? previewBar(k, s, Trash, tr("Message deleted"), null) :
+            state.mode === "edit" ? previewBar(k, s, Pencil, tr("Editing message"), close) :
+            state.mode === "reply" ? previewBar(k, s, Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close) : null;
+        const allDone = on && !watching && !next && done.reply;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
-            chatPreview(s, "chat", "Tap gestures preview", [
+            previewScreen(s, "chat", "Tap gestures preview", [
                 message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
                 showMine ? message("mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("I'm in!")) : null,
                 watching && state.late ? el(RN.View, {key:"late"}, popIn("late", previewMessage(s, "late", "Sam", "#eb459e", tr("Today at 4:03 PM"),
                     el(RN.Text, {style:s.text}, tr("Great, it starts at 6 AM!"))))) : null,
-                bar ? el(RN.View, {key:"bar", style:box.bar},
-                    popIn("icon:" + state.mode, el(bar[0], {size:"xs"})), el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, bar[1]),
-                    state.mode !== "deleted" && !watching ? el(Press, {onPress:() => { animateLayout(); update({mode:null, target:null, gone:false}); }, accessibilityRole:"button",
-                        accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}}, el(X, {size:"xs"})) : null) : null,
-                el(RN.View, {key:"input", style:bar ? [box.input, {borderTopLeftRadius:0, borderTopRightRadius:0, marginTop:0}] : [box.input, {marginTop:8}]},
-                    el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, inputText)),
-                watching ? previewCaption(s, state.caption) : null]));
+                allDone ? previewTip(k, tr("That's everything. Double-tap again any time.")) : null],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, previewInput(k, s, {bar, text:state.draft, placeholder:tr("Message {channel}", {channel:"#general"})}),
+                    watching ? storyStrip(k, s, story) : null)}));
     }
     function GestureSettings() {
         useSettings("gestures");

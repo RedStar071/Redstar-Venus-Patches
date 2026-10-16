@@ -4922,7 +4922,13 @@ function hookHost(b, React, node) {
     return {render, run, timers, texts:() => render().filter(x => typeof x.props.children === 'string').map(x => x.props.children)};
 }
 function previewNode(b, id, name) { return pageNodes(b.registry[id].screen.getComponent()()).find(n => n.type && n.type.name === name); }
-test('the Tap gestures preview can be tried: double-tap replies or edits, triple-tap deletes your own', () => {
+// The caption shown by the player strip, its step badge (2/5) and time (0:03 / 0:24).
+function strip(host) {
+    const nodes = host.render(), texts = nodes.filter(n => typeof n.props.children === 'string').map(n => n.props.children);
+    return {step:texts.find(t => /^\d+\/\d+$/.test(t)), time:texts.find(t => /^\d+:\d\d \/ \d+:\d\d$/.test(t)),
+        button:label => nodes.find(n => n.props && n.props.accessibilityLabel === label)};
+}
+test('the Tap gestures preview can be tried: a tip shows what to tap next, double-tap replies or edits, triple-tap deletes', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     let clock = 1000; b.context.__clock = () => clock; vm.runInContext('Date.now=function(){return __clock();}', b.context);
     b.api.setSetting('gestures', true);
@@ -4930,42 +4936,76 @@ test('the Tap gestures preview can be tried: double-tap replies or edits, triple
     host.render();
     host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress();
     host.timers.length = 0;
-    const press = who => { host.render().find(n => n.props && n.props.accessibilityRole === 'button' && n.props.key === who).props.onPress(); clock += 100; };
-    assert.ok(host.texts().includes('Try it: double-tap a message, or triple-tap yours'));
-    press('theirs'); assert.ok(!host.texts().includes('Replying to Sam'), 'one tap does nothing');
-    press('theirs'); assert.ok(host.texts().includes('Replying to Sam'));
+    // Find the pressable of each message by the message key it wraps.
+    const msg = who => host.render().find(n => n.props && n.props.key === who && n.props.children && pageNodes(n.props.children).some(c => c.props && c.props.accessibilityRole === 'button'));
+    const tap = who => { pageNodes(msg(who).props.children).find(c => c.props && c.props.accessibilityRole === 'button').props.onPress(); clock += 100; };
+    assert.ok(host.texts().includes("Double-tap Sam's message to reply"), 'a tip says what to try first');
+    assert.ok(!host.render().some(n => n.props && n.props.accessibilityLabel === 'Pause'), 'no player in Try it');
+    tap('theirs'); assert.ok(!host.texts().includes('Replying to Sam'), 'one tap does nothing');
+    tap('theirs'); assert.ok(host.texts().includes('Replying to Sam'));
+    assert.ok(host.texts().includes('Now double-tap your message to edit it'), 'then the next thing to try');
     // Your own: a double-tap waits a moment for a third tap, then edits.
-    press('mine'); press('mine'); assert.ok(!host.texts().includes('Editing message'), 'waits for a possible third tap');
+    tap('mine'); tap('mine'); assert.ok(!host.texts().includes('Editing message'), 'waits for a possible third tap');
     host.run(1); assert.ok(host.texts().includes('Editing message'));
+    assert.ok(host.texts().includes('Now tap your message three times to delete it'));
     // A third tap deletes it, and it comes back a moment later.
-    clock += 2000; press('mine'); press('mine'); press('mine');
+    clock += 2000; tap('mine'); tap('mine'); tap('mine');
     assert.ok(host.texts().includes('Message deleted')); assert.ok(!host.texts().includes("I'm in!"), 'gone from the chat');
+    assert.ok(host.texts().includes("That's everything. Double-tap again any time."));
     host.run(1); assert.ok(host.texts().includes("I'm in!"), 'back again');
     b.api.setSetting('gestureOwn', 'reply'); b.api.setSetting('gestureTripleDelete', false); clock += 2000;
-    press('mine'); press('mine'); assert.ok(host.texts().includes('Replying to You'));
+    tap('mine'); tap('mine'); assert.ok(host.texts().includes('Replying to You'));
 });
-test('the Tap gestures preview plays a story: reply to Sam, regret it, triple-tap your message away', () => {
+// Runs a Watch story once through and returns how long each caption stayed up (ms), plus everything it showed.
+function storyTimes(host, max = 300) {
+    let now = 0, cap = null, from = 0; const times = [], seen = new Set();
+    host.render();
+    for (let k = 0; k < max; k++) {
+        const t = host.timers[0]; if (!t) break; now += t.ms; host.run(1);
+        const nodes = host.render(), texts = nodes.filter(n => typeof n.props.children === 'string').map(n => n.props.children); texts.forEach(x => seen.add(x));
+        const capNode = nodes.find(n => n.type && n.type.name === 'PopIn' && /^cap:/.test(n.props.key)), c = capNode ? capNode.props.key.slice(4) : null;
+        if (c !== cap) { if (cap) times.push([cap, now - from]); cap = c; from = now; }
+        if (/^0:00 \//.test(texts.find(x => / \/ /.test(x)) || '') && k > 2) break;
+    }
+    return {times, seen};
+}
+test('Watch plays like a short video: each caption stays up long enough to read, with its step, the time, pause and start over', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('gestures', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
     host.render();
-    const seen = new Set(), drafts = new Set(); let ripples = 0;
-    for (let k = 0; k < 40 && !seen.has('Message deleted'); k++) { host.run(1); host.texts().forEach(t => seen.add(t));
+    // Follow the clock: how long each caption stays on screen.
+    let now = 0; const shownAt = new Map(), seen = new Set(), steps = new Set(), drafts = new Set(); let ripples = 0, prev = null, total = null;
+    for (let k = 0; k < 120; k++) {
+        const t = host.timers[0]; if (!t) break; now += t.ms; host.run(1);
+        const st = strip(host); const cap = host.texts().find(x => /^(Sam asks|You double-tap|A reply to Sam|You send it|Then Sam says|You change your mind|It's deleted)/.test(x));
+        host.texts().forEach(x => seen.add(x)); if (st.step) steps.add(st.step); if (!total && st.time) total = st.time.split(' / ')[1];
+        if (cap && cap !== prev) { if (prev) shownAt.set(prev, now - shownAt.get(prev)); shownAt.set(cap, now); prev = cap; }
         if (host.render().some(n => n.type && n.type.name === 'TapRipple')) ripples++;
-        const input = host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children); input.forEach(t => drafts.add(t)); }
-    for (const t of ['Replying to Sam', 'Double-tap: you reply to Sam', 'Great, it starts at 6 AM!', 'Triple-tap: you delete your message', 'Message deleted']) assert.ok(seen.has(t), 'shows: ' + t);
-    assert.ok(drafts.has('I'), 'types the reply letter by letter');
-    assert.ok(ripples >= 5, 'a tap ripple shows for each tap: ' + ripples);
-    assert.ok(!host.texts().includes("I'm in!"), 'the regretted message is gone');
-    // It loops back to the start.
-    for (let k = 0; k < 5; k++) host.run(1);
-    assert.ok(host.texts().includes('Anyone up for a game later?'));
+        host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).forEach(n => drafts.add(n.props.children));
+        if (seen.has('Message deleted') && k > 40) break;
+    }
+    for (const t of ["Sam asks if anyone wants to play", "You double-tap Sam's message", 'A reply to Sam opens, ready to type', 'You send it',
+        'Then Sam says it starts at 6 AM', 'You change your mind and tap your message three times', "It's deleted at once, with no question",
+        'Replying to Sam', 'Great, it starts at 6 AM!', 'Message deleted']) assert.ok(seen.has(t), 'shows: ' + t);
+    for (const [cap, ms] of shownAt) if (typeof ms === 'number' && ms < 1e9 && ms > 0) assert.ok(ms >= 2400, cap + ' stays up ' + ms + ' ms');
+    assert.ok(drafts.has('I'), 'types the reply letter by letter'); assert.ok(ripples >= 5, 'a ripple for each tap: ' + ripples);
+    assert.ok(steps.has('1/7') && steps.has('7/7'), 'shows which step of how many: ' + [...steps]);
+    assert.match(total, /^0:[1-5]\d$/, 'about half a minute long: ' + total);
+    // Pause stops time; Play goes on; Start over goes back to 0:00.
+    const before = strip(host).time; strip(host).button('Pause').props.onPress(); host.render();
+    assert.equal(host.timers.length, 0, 'paused: nothing runs'); assert.equal(strip(host).time, before);
+    assert.ok(strip(host).button('Play')); strip(host).button('Play').props.onPress(); host.render(); assert.ok(host.timers.length > 0);
+    strip(host).button('Start over').props.onPress(); host.render(); assert.match(strip(host).time, /^0:00 \//);
+    // Every caption, through one whole loop, stays up long enough to read.
+    const run = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview')));
+    assert.equal(run.times.length, 7); for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
     // Without triple-tap, the story ends by editing instead.
     b.api.setSetting('gestureTripleDelete', false);
     const again = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
     again.render(); const seen2 = new Set();
-    for (let k = 0; k < 40 && !seen2.has('Editing message'); k++) { again.run(1); again.texts().forEach(t => seen2.add(t)); }
-    assert.ok(seen2.has('Double-tap: you edit your message') && !seen2.has('Message deleted'));
+    for (let k = 0; k < 120 && !seen2.has('Editing message'); k++) { again.run(1); again.texts().forEach(t => seen2.add(t)); }
+    assert.ok(seen2.has('It opens for editing, so you can fix it') && !seen2.has('Message deleted'));
 });
 test('Hidden channels preview lists the locked channel only while it is on', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
