@@ -4924,28 +4924,38 @@
         } catch (_) {}
         return accountSwitcherWithCurrent(list, false);
     }
+    // Discord's saved data (Storage 510/511) is read asynchronously at startup. Until it has loaded, the saved
+    // account list and tokens look empty, so nothing may be written yet.
+    function accountSwitcherStorageReady() {
+        const storage = inspectedExport(510, "Storage");
+        return !storage || storage.hasLoaded !== false;
+    }
     function accountSwitcherSync() {
         const store = accountSwitcherStore();
-        if (enabled("accountSwitcher")) {
-            const me = currentUser();
+        // MultiAccountStore is a PersistedStore: initializeIfNeeded() reads the saved list once and then never again.
+        // Calling it (or initialize + asyncPersist) before Discord loaded its storage and signed in, as happens on a
+        // cold start, read an empty list and saved it over every account (#63). Only Discord initializes the store;
+        // Venus adds the signed-in account afterwards, and only when it is missing.
+        const me = enabled("accountSwitcher") ? currentUser() : null;
+        if (me && me.id && accountSwitcherStorageReady()) {
             const rawTokenMod = global.__r && global.__r(1112);
             const tokenMgr = rawTokenMod && typeof rawTokenMod.setToken === "function" ? rawTokenMod :
                 rawTokenMod && rawTokenMod.default && typeof rawTokenMod.default.setToken === "function" ? rawTokenMod.default : null;
             try {
-                if (me && me.id && tokenMgr && typeof tokenMgr.getToken === "function" && typeof tokenMgr.setToken === "function") {
+                if (tokenMgr && typeof tokenMgr.getToken === "function") {
                     const activeToken = tokenMgr.getToken();
                     if (typeof activeToken === "string" && activeToken && !tokenMgr.getToken(me.id))
                         tokenMgr.setToken(activeToken, me.id);
                 }
             } catch (_) {}
             try {
-                if (store && typeof store.initializeIfNeeded === "function") store.initializeIfNeeded();
-                if (store && typeof store.initialize === "function" && typeof store.getState === "function" &&
-                    (store._isInitialized !== false)) {
+                if (store && store._isInitialized !== false && typeof store.initialize === "function" && typeof store.getState === "function") {
                     const state = store.getState() || {};
-                    const users = accountSwitcherWithCurrent(state.users, false);
-                    store.initialize({users, canUseMultiAccountMobile:true});
-                    if (typeof store.asyncPersist === "function") store.asyncPersist();
+                    const saved = Array.isArray(state.users) ? state.users : [];
+                    if (!saved.some(u => u && u.id === me.id)) {
+                        store.initialize(Object.assign({}, state, {users:accountSwitcherWithCurrent(saved, false), canUseMultiAccountMobile:true}));
+                        if (typeof store.asyncPersist === "function") store.asyncPersist();
+                    }
                 }
             } catch (_) {}
         }

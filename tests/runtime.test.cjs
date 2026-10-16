@@ -4156,14 +4156,13 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     addRow.props.onPress();
     assert.equal(modalCalls.at(-1),'login','Add account opens native login modal');
 
-    // Uninitialized PersistedStore (store._isInitialized === false): accountSwitcherSync calls initializeIfNeeded()
-    // before reading state.users so persisted accounts (>5 accounts) are never overwritten by an empty pre-init array (#59).
-    let persistedLoaded=false, persistedSaved=0;
+    // Initialized PersistedStore with more than 5 saved accounts: the active account is added without truncation (#59).
+    let persistedSaved=0;
     const savedSixAccounts=[1,2,3,4,5,6].map(n=>({id:'u'+n,username:'user'+n,discriminator:'0',avatar:null,tokenStatus:2}));
-    const lazyStore={
-        _isInitialized:false,
-        state:{users:[],canUseMultiAccountMobile:false},
-        initializeIfNeeded(){this._isInitialized=true;this.state={users:savedSixAccounts.slice(),canUseMultiAccountMobile:true};persistedLoaded=true;},
+    const fullStore={
+        _isInitialized:true,
+        state:{users:savedSixAccounts.slice(),canUseMultiAccountMobile:true},
+        initializeIfNeeded(){throw new Error('Venus must never initialize MultiAccountStore itself (#63)');},
         getState(){return this.state;},
         getUsers(){return this.state.users;},
         getValidUsers(){return this.state.users.filter(u=>u.tokenStatus===2);},
@@ -4173,10 +4172,45 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
         asyncPersist(){persistedSaved++;},
         emitChange(){}
     };
-    b.load({default:lazyStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
-    assert.equal(persistedLoaded,true,'initializeIfNeeded called before syncing state (#59)');
-    assert.ok(persistedSaved>=1,'asyncPersist called after syncing current user (#59)');
-    assert.equal(lazyStore.state.users.length,7,'all 6 persisted accounts + active account preserved without 5-account truncation (#59)');
+    b.load({default:fullStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
+    assert.ok(persistedSaved>=1,'asyncPersist called after adding the current user (#59)');
+    assert.equal(fullStore.state.users.length,7,'all 6 persisted accounts + active account preserved without 5-account truncation (#59)');
+    const savesBefore=persistedSaved;b.api.setSetting('accountSwitcherYouBar',true);
+    assert.equal(persistedSaved,savesBefore,'nothing is rewritten when the active account is already saved');
+});
+
+test('Account switcher never wipes saved accounts on a cold start before Discord loaded its storage (#63)',()=>{
+    const b=boot({accountSwitcher:true});reactHarness(b);
+    b.api.setSetting('accountSwitcher',true);
+    const saved=[{id:'111',username:'main',discriminator:'0',avatar:null,tokenStatus:2},{id:'222',username:'alt',discriminator:'0',avatar:null,tokenStatus:2},{id:'333',username:'alt2',discriminator:'0',avatar:null,tokenStatus:2}];
+    const storage={hasLoaded:false,data:{}};
+    let writes=0,initializedEarly=false;
+    // Behaves like Discord's PersistedStore: initializeIfNeeded reads storage exactly once.
+    const store={
+        _isInitialized:false,users:[],
+        initializeIfNeeded(){if(this._isInitialized)return;this._isInitialized=true;if(!storage.hasLoaded)initializedEarly=true;this.users=(storage.data.MultiAccountStore||{users:[]}).users.slice();},
+        initialize(s){this.users=s&&Array.isArray(s.users)?s.users:[];},
+        getState(){return {users:this.users,canUseMultiAccountMobile:false};},
+        getUsers(){return this.users;},getValidUsers(){return this.users;},getCanUseMultiAccountMobile(){return false;},getHasLoggedInAccounts(){return this.users.length>0;},
+        asyncPersist(){writes++;storage.data.MultiAccountStore={users:this.users.slice()};},
+        emitChange(){}
+    };
+    let me=null;
+    b.context.__r=id=>({510:{Storage:storage},1112:{default:{getToken:()=>null,setToken(){}}},
+        1378:{default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},
+        11800:{default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}}}[id]||null);
+    b.load({default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},null,1378);
+    const patched=b.load({default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800).default;
+    // Venus's own settings finish loading while Discord's storage is still being read.
+    me={id:'111',username:'main'};
+    b.api.setSetting('accountSwitcherYouBar',false);
+    assert.equal(initializedEarly,false,'MultiAccountStore is not read before Discord loaded its storage');
+    assert.equal(writes,0,'nothing is saved before Discord loaded its storage');
+    // Discord finishes loading and initializes the store itself.
+    storage.data.MultiAccountStore={users:saved.slice()};storage.hasLoaded=true;store.initializeIfNeeded();
+    b.api.setSetting('accountSwitcherYouBar',true);
+    assert.deepEqual(patched.getUsers().map(u=>u.id),['111','222','333'],'all three saved accounts survive the restart');
+    assert.equal(writes,0,'the saved list is not rewritten when the active account is already in it');
 });
 
 test('Unlock app icons marks all alternate icons non-premium, blocks background reset, and strips the Nitro upsell button and header',()=>{
