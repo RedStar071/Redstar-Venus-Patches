@@ -4985,25 +4985,21 @@ test('Device indicators preview follows every option, and tapping it changes Ale
     b.api.setSetting('piHideMobile', false); assert.equal(phone(), true, 'phone badge shows when not hidden');
     b.api.setSetting('platformIndicators', false); assert.deepEqual(places(), [], 'no icons while off');
 });
-test('Nitro preview shows a real emoji or sticker from your servers as it looks in chat, and tapping tries another', () => {
+test('Nitro preview shows Discord\'s own Wumpus as the emoji or sticker, never anything from your servers', () => {
     const b = nitroHarness(); const {React} = reactHarness(b);
     let pick = 0; React.useState = init => typeof init === 'number' ? [pick, v => { pick = typeof v === 'function' ? v(pick) : v; }] : [init, () => {}];
-    b.load({default:{getCustomEmojiById:() => null, getGuilds:() => ({g1:{emojis:[{id:'111', name:'blobwave', animated:true}, {id:'222', name:'pepe'}]}})}}, null, 5772);
-    b.load({default:{getStickerById:() => null, getAllGuildStickers:() => new Map([['g1', [{id:'333', name:'wumpus', format_type:1}, {id:'444', name:'lottie', format_type:3}]]])}}, null, 5815);
+    let read = 0; b.load({default:{getCustomEmojiById:() => null, getGuilds:() => { read++; return {}; }}}, null, 5772);
     const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
     b.api.setSetting('freeNitro', true);
     const preview = () => { const n = pageNodes(registry.VENUS_FREENITRO.screen.getComponent()()).find(x => x.type && x.type.name === 'NitroPreview');
-        const ref = {current:null}; React.useRef = () => ref; return pageNodes(n.type(n.props)); };
-    const images = () => preview().filter(n => n.type === 'Image').map(n => n.props.source.uri);
-    const linkText = () => preview().filter(n => n.type === 'Text' && /^Sent as /.test(n.props.children)).map(n => n.props.children)[0];
-    // The image itself, not a link: an animated emoji from your own server comes first.
-    assert.deepEqual(images(), ['https://cdn.discordapp.com/emojis/111.gif?size=96&quality=lossless']);
-    assert.equal(linkText(), 'Sent as [blobwave](\u2026)');
-    preview().find(n => n.props && n.props.accessibilityHint === 'Tap to try another one').props.onPress();
-    assert.deepEqual(images(), ['https://media.discordapp.net/stickers/333.png?size=160'], 'then a sticker');
-    b.api.setSetting('hyperlinks', false);
-    assert.equal(linkText(), 'Sent as https://media.discordapp.net/stickers/333.png', 'long link when Short links is off');
-    b.api.setSetting('stickers', false); pick = 1;
-    assert.deepEqual(images(), ['https://cdn.discordapp.com/emojis/222.webp?size=96&quality=lossless'], 'only emojis once stickers are off');
-    assert.ok(!images().some(u => u.includes('444')), 'never a Lottie sticker, which has no image link');
+        return pageNodes(n.type(n.props)); };
+    const art = () => { const n = preview().find(x => x.type && x.type.name === 'NitroArt'); return pageNodes(n.type(n.props)).find(x => x.type === 'Image').props.source.uri; };
+    const sent = () => preview().find(n => n.type === 'Text' && /^Sent as /.test(n.props.children)).props.children;
+    assert.equal(art(), 'modules_guilds_bar_native_images_wumpus_wave', 'an image bundled in Discord, shown as chat shows it');
+    assert.equal(sent(), 'Sent as [wumpus_wave](\u2026)');
+    preview().find(n => n.props && /^Tap to/.test(n.props.accessibilityHint || '')).props.onPress();
+    assert.equal(art(), 'images_native_gifting_wumpus_box_premium120', 'tap: the sticker');
+    b.api.setSetting('hyperlinks', false); assert.match(sent(), /^Sent as https:\/\/media\.discordapp\.net\/stickers\//);
+    b.api.setSetting('stickers', false); assert.equal(art(), 'modules_guilds_bar_native_images_wumpus_wave', 'only the emoji once stickers are off');
+    assert.equal(read, 0, 'never reads your servers\' emojis or stickers');
 });

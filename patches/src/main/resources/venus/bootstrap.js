@@ -3371,55 +3371,50 @@
         return settingsBody(ui,groups);
     }
     // Nitro stickers and emojis: what a sent emoji looks like with each link style, then the switches.
-    // Your own servers' emojis and stickers that need Nitro to use everywhere (animated emojis, and stickers), for the
-    // preview. Read from Discord's stores at draw time; nothing is fetched, and the list is capped so it stays cheap.
-    function nitroSamples() {
-        const out = {emojis:[], stickers:[]};
-        try {
-            const guilds = emojiStore && typeof emojiStore.getGuilds === "function" ? emojiStore.getGuilds() : null;
-            if (guilds) for (const id of Object.keys(guilds)) {
-                const list = guilds[id] && guilds[id].emojis;
-                if (Array.isArray(list)) for (const emoji of list) {
-                    if (emoji && emoji.id && emoji.available !== false && emoji.name) out.emojis.push({id:emoji.id, name:emoji.name, animated:!!emoji.animated});
-                    if (out.emojis.length >= 60) break;
-                }
-                if (out.emojis.length >= 60) break;
-            }
-        } catch (_) {}
-        try {
-            const all = stickerStore && typeof stickerStore.getAllGuildStickers === "function" ? stickerStore.getAllGuildStickers() : null;
-            if (all && typeof all.forEach === "function") all.forEach(list => {
-                if (Array.isArray(list)) for (const sticker of list) if (out.stickers.length < 30 && sticker && /^\d+$/.test(sticker.id) && [1, 2, 4].includes(sticker.format_type) && sticker.available !== false)
-                    out.stickers.push({id:sticker.id, name:sticker.name, gif:sticker.format_type === 4});
-            });
-        } catch (_) {}
-        // Animated ones first: they're what you most often can't send without Nitro.
-        out.emojis.sort((a, b) => (b.animated ? 1 : 0) - (a.animated ? 1 : 0));
-        return out;
+    // The preview's emoji and sticker are Discord's own Wumpus art, shipped inside the app (drawable resources, loaded by
+    // name like Discord's own images), so nothing is read from your servers and nothing is downloaded.
+    const NITRO_SAMPLES = {emoji:{name:"wumpus_wave", res:"modules_guilds_bar_native_images_wumpus_wave", size:48, glyph:"\ud83d\udc4b"},
+        sticker:{name:"Wumpus Surprise", res:"images_native_gifting_wumpus_box_premium120", size:140, glyph:"\ud83c\udf81"}};
+    // Each one moves the way an animated emoji or sticker does: the emoji waves, the sticker hops. Tap to play it again.
+    function NitroArt(props) {
+        const A = motion(), ref = React.useRef(null), [failed, setFailed] = React.useState(false), item = props.item;
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || reduceMotion || typeof A.sequence !== "function") return undefined;
+            value.setValue(0);
+            const run = props.kind === "emoji" ?
+                A.sequence([0.6, -0.6, 0.6, -0.6, 0].map(to => A.timing(value, {toValue:to, duration:130, useNativeDriver:true}))) :
+                A.sequence([A.timing(value, {toValue:1, duration:170, easing:easeOut(), useNativeDriver:true}),
+                    A.spring(value, {toValue:0, speed:14, bounciness:14, useNativeDriver:true})]);
+            run.start();
+            return () => run.stop();
+        }, [props.kind, props.play]);
+        const motionStyle = !ref.current ? null : props.kind === "emoji" ?
+            {transform:[{rotate:ref.current.interpolate({inputRange:[-1, 1], outputRange:["-18deg", "18deg"]})}]} :
+            {transform:[{translateY:ref.current.interpolate({inputRange:[0, 1], outputRange:[0, -14]})},
+                {scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[1, 1.06]})}]};
+        const art = !failed && RN.Image ? el(RN.Image, {source:{uri:item.res, width:item.size, height:item.size}, style:{width:item.size, height:item.size},
+            resizeMode:"contain", accessibilityLabel:item.name, onError:() => setFailed(true)}) :
+            el(RN.Text, {style:{fontSize:Math.round(item.size * 0.75), lineHeight:item.size}}, item.glyph);
+        return el(ref.current ? A.View : RN.View, {style:motionStyle}, art);
     }
-    const emojiUri = emoji => "https://cdn.discordapp.com/emojis/" + emoji.id + (emoji.animated ? ".gif" : ".webp") + "?size=96&quality=lossless";
-    const stickerUri = sticker => "https://media.discordapp.net/stickers/" + sticker.id + (sticker.gif ? ".gif" : ".png") + "?size=160";
-    // The message as everyone sees it: just the emoji or sticker, the way Discord shows a link to one. Tap to try another.
+    // The message as everyone sees it: just the emoji or sticker, the way chat shows a link to one. Tap to switch.
     function NitroPreview(props) {
         useSettings("freeNitro");
         const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [pick, setPick] = React.useState(0);
-        const samples = React.useRef(null);
-        if (!samples.current) samples.current = nitroSamples();
-        const {emojis, stickers} = samples.current;
         const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
-        const kind = kinds.length ? kinds[pick % kinds.length] : "emoji";
-        const list = kind === "sticker" ? stickers : emojis, item = list.length ? list[Math.floor(pick / Math.max(1, kinds.length)) % list.length] : null;
-        const uri = item ? (kind === "sticker" ? stickerUri(item) : emojiUri(item)) : null, size = kind === "sticker" ? 120 : 48;
-        const image = uri && RN.Image ? popIn("img:" + uri, el(RN.Image, {source:{uri}, style:{width:size, height:size}, resizeMode:"contain",
-            accessibilityLabel:item.name})) : el(RN.Text, {style:{fontSize:kind === "sticker" ? 72 : 40}}, kind === "sticker" ? "\ud83e\udd73" : "\ud83c\udf89");
-        const sent = item ? (settings.hyperlinks ? "[" + item.name + "](\u2026)" : uri.replace(/\?.*$/, "")) : null;
-        return el(Press, {key:"preview", onPress:() => { if (list.length > 1 || kinds.length > 1) setPick(n => n + 1); }, accessibilityRole:"button",
-            accessibilityHint:tr("Tap to try another one")},
+        const kind = kinds.length ? kinds[pick % kinds.length] : "emoji", item = NITRO_SAMPLES[kind];
+        const link = kind === "emoji" ? "https://cdn.discordapp.com/emojis/\u2026.gif" : "https://media.discordapp.net/stickers/\u2026.png";
+        const sent = settings.hyperlinks ? "[" + item.name + "](\u2026)" : link;
+        return el(Press, {key:"preview", onPress:() => setPick(n => n + 1), accessibilityRole:"button",
+            accessibilityHint:tr(kinds.length > 1 ? "Tap to switch between an emoji and a sticker" : "Tap to play it again")},
             chatPreview(s, "preview", "Nitro link preview", [
-                previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{gap:6, alignItems:"flex-start"}}, image)),
+                previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}},
+                    el(NitroArt, {key:kind, kind, item, play:pick}))),
                 el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2, gap:2}},
-                    el(RN.Text, {style:s.muted, numberOfLines:1}, item ? tr("Sent as {link}", {link:sent}) : tr("Emojis and stickers from your servers show here once Discord has loaded them.")),
-                    item && (list.length > 1 || kinds.length > 1) ? el(RN.Text, {style:s.muted}, tr("Tap to try another one")) : null)]));
+                    el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:sent})),
+                    el(RN.Text, {style:s.muted}, tr(kinds.length > 1 ? "Tap to switch between an emoji and a sticker" : "Tap to play it again")))]));
     }
     function FreeNitroSettings() {
         useSettings("freeNitro");
