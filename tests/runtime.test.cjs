@@ -5053,31 +5053,32 @@ test('Message highlights preview glows only the highlight you just changed, neve
     b.api.setSetting('messageHighlightThickness', 3);
     assert.deepEqual(fresh(), [true, true], 'a new width shows on both');
 });
-test('Message highlights preview plays: Sam\'s reply lights up as it arrives, Alex\'s deleted message stays highlighted', () => {
+test('Message highlights preview plays at a readable pace: Sam\'s reply lights up as it arrives, Alex\'s deleted message stays highlighted', () => {
     const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
     b.api.setSetting('messageHighlight', true);
     const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
     const node = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview');
     const host = hookHost(b, React, node());
-    host.render();
     const glows = () => host.render().filter(n => n.type && n.type.name === 'HighlightGlow');
-    host.run(1); assert.equal(glows().length, 0, 'starts with just your question');
-    host.run(1); assert.deepEqual(glows().map(n => n.props.fresh), [true], 'the reply glows as it arrives');
-    const keyOf = () => glows().map(n => n.props.key);
-    host.run(1); assert.equal(glows().length, 1, 'Alex\'s message arrives plain'); const replyGlow = keyOf()[0];
-    host.run(2); assert.deepEqual(glows().map(n => n.props.fresh), [true, true], 'deleted: it lights up in the deleted color');
-    assert.equal(keyOf()[0], replyGlow, 'the reply\'s glow isn\'t replayed');
-    const seen = new Set(); [0, 1, 2, 3, 4, 5].forEach(() => { host.run(1); host.texts().forEach(t => seen.add(t)); });
-    for (const t of ['You ask a question', "Sam replies to you: it's highlighted", 'Alex sends a message...', '...and deletes it: it stays, highlighted']) assert.ok(seen.has(t), 'shows: ' + t);
-    // Try it: tap a highlighted message and it lights up again.
+    let counts = new Set(), both = false; const orig = host.run;
+    host.run = n => { orig(n); const g = glows(); counts.add(g.length); if (g.length === 2 && g.every(x => x.props.fresh)) both = true; };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['You ask everyone a question', "Sam replies and mentions you, so it's highlighted in your reply color", 'Alex sends a message',
+        'Alex deletes it: it stays, highlighted in your deleted color', 'Change the colors or the bar width below to see them here'])
+        assert.ok(caps.includes(t), 'caption: ' + t + ' / ' + caps.join(' | '));
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(counts.has(0) && counts.has(1) && counts.has(2), 'messages arrive one by one: ' + [...counts]); assert.ok(both, 'the deleted one lights up too');
+    // Try it: tap a highlighted message and it lights up again; a tip says what to try next.
     const t = hookHost(b, React, node()); t.render();
-    t.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); t.timers.length = 0; t.render();
+    t.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); t.timers.length = 0;
     const tg = () => t.render().filter(n => n.type && n.type.name === 'HighlightGlow');
     assert.ok(tg().every(n => !n.props.fresh), 'nothing glows when you switch to Try it');
+    assert.ok(t.texts().includes('Tap a highlighted message to see it light up again'));
     const before = tg()[0].props.key;
     t.render().find(n => n.props && n.props.key === 'reply' && n.props.onPress).props.onPress('reply');
     assert.deepEqual(tg().map(n => n.props.fresh), [true, false]); assert.notEqual(tg()[0].props.key, before, 'a new glow plays');
     assert.ok(t.render().some(n => n.type && n.type.name === 'TapRipple'));
+    assert.ok(t.texts().includes('Now change a color or the bar width below: it glows here'));
 });
 test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
     const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];

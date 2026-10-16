@@ -7601,36 +7601,39 @@
             props.deleted && count >= 3 ? message("deleted", props.pending ? null : props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
                 el(RN.View, {style:{flex:1}}, header("Alex", tr("Today at 4:05 PM")),
                     el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null,
-            props.caption ? previewCaption(s, props.caption) : null);
+            props.tip || null, props.caption ? previewCaption(s, props.caption) : null, props.footer || null);
     }
     // Watch: you ask, Sam replies and mentions you (it lights up as it arrives), Alex sends a message and deletes it
-    // (it stays, in your deleted color). Try it: change the options below and the highlight you changed glows; tap a
-    // highlighted message to see it light up again.
+    // (it stays, in your deleted color). Try it: tap a highlighted message to see it light up again, or change the
+    // colors and width below; the one you changed glows.
     function HighlightPreview(props) {
         useSettings("messageHighlight");
-        const [mode, setMode] = usePreviewMode(), on = props.on, watching = on && mode === "watch", hasDeleted = !!props.deleted;
-        const blank = {count:3, pending:false, beats:{reply:0, deleted:0}, pulse:null, caption:""};
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode();
+        const on = props.on, watching = on && mode === "watch", hasDeleted = !!props.deleted;
+        const blank = {count:3, pending:false, beats:{reply:0, deleted:0}, pulse:null, tried:false};
         const [state, setState] = React.useState(blank);
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const beat = key => update(st => ({beats:Object.assign({}, st.beats, {[key]:st.beats[key] + 1})}));
-        useDemo(watching, () => {
-            const steps = [[0, () => setState(st => Object.assign({}, blank, {count:1, beats:st.beats, caption:tr("You ask a question")}))],
-                [1400, () => { animateLayout(); update({count:2, caption:tr("Sam replies to you: it's highlighted")}); beat("reply"); }]];
-            if (hasDeleted) steps.push([2000, () => { animateLayout(); update({count:3, pending:true, caption:tr("Alex sends a message...")}); }],
-                [1300, () => update({pulse:{who:"deleted", id:"del:" + Date.now()}})],
-                [150, () => { animateLayout(); update({pending:false, caption:tr("...and deletes it: it stays, highlighted")}); beat("deleted"); }]);
-            steps.push([2800, () => {}]);
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(st => Object.assign({}, blank, {count:1, beats:st.beats})), tr("You ask everyone a question")],
+                [1200, () => { animateLayout(); update({count:2}); beat("reply"); }, tr("Sam replies and mentions you, so it's highlighted in your reply color")]];
+            if (hasDeleted) steps.push([1400, () => { animateLayout(); update({count:3, pending:true}); }, tr("Alex sends a message")],
+                [1300, () => update({pulse:{who:"deleted", id:"del" + Date.now()}})],
+                [400, () => { animateLayout(); update({pending:false}); beat("deleted"); }, tr("Alex deletes it: it stays, highlighted in your deleted color")]);
+            steps.push([600, () => {}, tr("Change the colors or the bar width below to see them here")], [800, () => {}]);
             return steps;
         }, [hasDeleted]);
         // A message glows when its beat goes up (it arrived, or you tapped it), or when you change its color or the width:
         // each beat is a new glow, which plays once when it appears, so drawing the page again never replays it.
         const beats = state.beats, given = props.fresh || {};
         const fresh = {reply:!!given.reply || beats.reply > 0, deleted:!!given.deleted || beats.deleted > 0};
-        const tapped = key => { if (!on || watching) return; update(st => ({pulse:{who:key, id:key + ":" + st.beats[key]}})); beat(key); };
-        const caption = watching ? state.caption : on ? tr("Tap a highlighted message to see it light up again") : "";
+        const tapped = key => { if (!on || watching) return; update(st => ({tried:true, pulse:{who:key, id:key + ":" + st.beats[key]}})); beat(key); };
+        const tip = on && !watching ? previewTip(k, state.tried ? tr("Now change a color or the bar width below: it glows here") :
+            tr("Tap a highlighted message to see it light up again")) : null;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(st => Object.assign({}, blank, {beats:st.beats})); }) : null,
             highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, deleted:props.deleted, fresh,
-                count:watching ? state.count : 3, pending:watching && state.pending, beats, caption,
+                count:watching ? state.count : 3, pending:watching && state.pending, beats, tip,
+                footer:watching ? storyStrip(k, s, story) : null,
                 onPress:watching ? null : tapped, ripple:key => tapRipple(state.pulse, key)}));
     }
     // One highlight's colors: its name and current color, then a row of swatches and a last one for any color.
