@@ -5012,23 +5012,25 @@ test('Hidden channels preview lists the locked channel only while it is on', () 
     const names = on => { b.api.setSetting('hiddenChannels', on);
         const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
         return host.render().filter(n => n.type === 'Text' && /^[a-z-]+$/.test(n.props.children)).map(n => n.props.children); };
-    assert.deepEqual(names(true), ['general', 'staff-only', 'memes']);
-    assert.deepEqual(names(false), ['general', 'memes']);
+    assert.deepEqual(names(true), ['general', 'staff-only', 'memes', 'clips']);
+    assert.deepEqual(names(false), ['general', 'memes', 'clips']);
 });
-test('Hidden channels preview plays: scrolling past opens nothing, a tap shows the details or shakes', () => {
+test('Hidden channels preview plays at a readable pace: scrolling past opens nothing, a tap opens Discord\'s dialog or does nothing', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('hiddenChannels', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
-    host.render(); const seen = new Set(); let ripple = false;
-    for (let k = 0; k < 8; k++) { host.run(1); host.texts().forEach(t => seen.add(t)); if (host.render().find(n => n.type && n.type.name === 'HiddenPreviewRow').props.ripple) ripple = true; }
-    for (const t of ['Scrolling past a locked channel opens nothing', 'Tap it: see when it was made and last used', 'Locked channel', 'LAST MESSAGE']) assert.ok(seen.has(t), 'shows: ' + t);
+    let ripple = false; const orig = host.run; host.run = n => { orig(n); if (host.render().find(x => x.type && x.type.name === 'HiddenPreviewRow').props.ripple) ripple = true; };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['Locked channels show in the list with a lock, like staff-only here', 'Scrolling past it, or opening the server, opens nothing',
+        'Only a tap on it opens its details', 'You see when it was made and last used. View Anyway would open it']) assert.ok(caps.includes(t), 'caption: ' + t);
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    for (const t of ['Game Night', 'TEXT CHANNELS', 'Locked channel', 'LAST MESSAGE', 'View Anyway', 'Cancel']) assert.ok(run.seen.has(t), 'shows: ' + t);
     assert.ok(ripple, 'the tap shows where it lands');
     b.api.setSetting('hiddenChannelsMenu', false);
     const off = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
-    off.render(); const seen2 = new Set(); let shook = 0;
-    for (let k = 0; k < 8; k++) { off.run(1); off.texts().forEach(t => seen2.add(t));
-        const row = off.render().find(n => n.type && n.type.name === 'HiddenPreviewRow'); shook = Math.max(shook, row.props.shake); }
-    assert.ok(seen2.has('Tap it: nothing happens, the details are off') && !seen2.has('Locked channel'));
+    let shook = 0; const o2 = off.run; off.run = n => { o2(n); shook = Math.max(shook, off.render().find(x => x.type && x.type.name === 'HiddenPreviewRow').props.shake); };
+    const r2 = storyTimes(off);
+    assert.ok(r2.times.some(([c]) => c === 'Nothing happens: you turned its details off') && !r2.seen.has('Locked channel'));
     assert.equal(shook, 1, 'the row shakes instead');
 });
 test('the Features entry says how many are on', () => {

@@ -3600,40 +3600,53 @@
         return el(Press, {onPress:props.onPress, accessibilityRole:"button", accessibilityLabel:props.label + ", " + tr("locked")},
             el(ref.current ? A.View : RN.View, {style}, props.children), props.ripple || null);
     }
-    // A few channels the way Discord's list shows them: muted names, and the locked one with Discord's own # and lock
-    // icon. Watch: the list scrolls past it (nothing opens), then a tap shows its details, or a shake when they're off.
-    // Try it: tap it yourself and Discord's real details dialog opens.
+    // A server's channel list the way Discord draws it: the server name, a category and its channels, the locked one with
+    // Discord's own # and lock icon. Watch: scrolling past it opens nothing, then a tap opens its details in Discord's
+    // dialog (or nothing at all, when details are off). Try it: tap it yourself and Discord's real dialog opens.
     const HIDDEN_SAMPLE = {id:"1180000000000000000", guild_id:"1", type:0, name:"staff-only", lastMessageId:"1290000000000000000"};
     function HiddenChannelsPreview(props) {
         useSettings("hiddenChannels");
-        const s = useChatPreviewStyles(), [mode, setMode] = usePreviewMode(), on = props.on, menu = settings.hiddenChannelsMenu;
-        const Hash = venusIcon(15125, "HashmarkIcon"), TextLock = venusIcon(5393, "TextLockIcon");
-        const blank = {shake:0, pulse:null, card:false, scroll:0, caption:""};
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on, menu = settings.hiddenChannelsMenu;
+        const Hash = venusIcon(15125, "HashmarkIcon"), TextLock = venusIcon(5393, "TextLockIcon"), Down = venusIcon(10604, "ChevronSmallDownIcon");
+        const blank = {shake:0, pulse:null, card:false, scroll:0, tried:false};
         const [state, setState] = React.useState(blank), watching = on && mode === "watch";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const shake = () => update(st => ({shake:st.shake + 1}));
-        useDemo(watching, () => [[0, () => setState(blank)],
-            [700, () => { animateLayout(); update({scroll:1, caption:tr("Scrolling past a locked channel opens nothing")}); }],
+        const story = useStory(watching, () => [[0, () => setState(blank), tr("Locked channels show in the list with a lock, like staff-only here")],
+            [1200, () => { animateLayout(); update({scroll:1}); }, tr("Scrolling past it, or opening the server, opens nothing")],
             [1400, () => { animateLayout(); update({scroll:0}); }],
-            [900, () => update(st => ({pulse:{who:"locked", id:st.shake + ":" + Date.now()}}))],
-            [200, () => { if (menu) { animateLayout(); update({card:true, caption:tr("Tap it: see when it was made and last used")}); }
-                else { shake(); update({caption:tr("Tap it: nothing happens, the details are off")}); } }],
-            [2600, () => { animateLayout(); update({card:false}); }], [500, () => {}]], [menu]);
-        const tapLocked = () => { if (!on || watching) return; if (menu) showHidden(HIDDEN_SAMPLE); else shake(); };
-        const channel = (name, locked) => el(locked ? HiddenPreviewRow : RN.View, locked ?
+            [1000, () => update(st => ({pulse:{who:"locked", id:"tap" + st.shake}})), tr(menu ? "Only a tap on it opens its details" : "You tap it")],
+            [400, () => { if (menu) { animateLayout(); update({card:true}); } else shake(); },
+                menu ? tr("You see when it was made and last used. View Anyway would open it") : tr("Nothing happens: you turned its details off")],
+            [3000, () => { animateLayout(); update({card:false}); }], [600, () => {}]], [menu]);
+        const tapLocked = () => { if (!on || watching) return; update({tried:true}); if (menu) showHidden(HIDDEN_SAMPLE); else shake(); };
+        const channel = (name, locked, selected) => el(locked ? HiddenPreviewRow : RN.View, locked ?
             {key:name, onPress:tapLocked, label:name, shake:state.shake, ripple:tapRipple(state.pulse, "locked", {right:40, top:2})} :
-            {key:name, style:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7}},
-            el(locked ? TextLock : Hash, {size:"sm", color:s.muted.color}), el(RN.Text, {style:[s.text, {flex:1, color:s.muted.color}], numberOfLines:1}, name));
-        // The same details the dialog shows, drawn inside the preview while it plays.
-        const card = watching && state.card ? el(RN.View, {key:"card", style:{marginHorizontal:12, marginTop:4, padding:12, gap:8, borderRadius:12,
-            backgroundColor:"#4e505833"}}, popIn("card", el(RN.Text, {style:[s.name, {fontSize:15}]}, tr("Locked channel"))),
-            hiddenDetails(HIDDEN_SAMPLE).map(([label, stamp]) => el(RN.View, {key:label},
-                el(RN.Text, {style:[s.muted, {fontSize:11, fontWeight:"700"}]}, label.toUpperCase()), el(RN.Text, {style:s.text}, stamp.relative)))) : null;
-        const list = [channel("general", false), on ? channel("staff-only", true) : null, channel("memes", false)];
+            {key:name, style:[{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7, marginHorizontal:8, borderRadius:8},
+                selected ? k.selected : null]},
+            el(locked ? TextLock : Hash, {size:"sm", color:selected ? s.name.color : k.channel.color}),
+            el(RN.Text, {style:[s.text, {flex:1, color:selected ? s.name.color : k.channel.color, fontWeight:selected ? "600" : "500"}], numberOfLines:1}, name));
+        // Discord's alert, drawn inside the preview while it plays: a title, the details and its two buttons.
+        const button = (text, brand) => el(RN.View, {key:text, style:[brand ? k.brand : k.secondary, {borderRadius:20, paddingVertical:10, alignItems:"center"}]},
+            el(RN.Text, {style:[brand ? k.brandText : k.secondaryText, {fontWeight:"600"}]}, text));
+        const card = watching && state.card ? el(RN.View, {key:"card", style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"center", padding:16}]},
+            popIn("card", el(RN.View, {style:k.modal},
+                el(RN.Text, {style:[s.name, {fontSize:18, fontWeight:"700", textAlign:"center"}]}, tr("Locked channel")),
+                hiddenDetails(HIDDEN_SAMPLE).map(([label, stamp]) => el(RN.View, {key:label},
+                    el(RN.Text, {style:[s.muted, {fontSize:11, fontWeight:"700"}]}, label.toUpperCase()), el(RN.Text, {style:s.text}, stamp.relative))),
+                button(tr("View Anyway"), true), button(tr("Cancel"), false)))) : null;
+        const list = el(RN.View, {key:"list", style:{paddingVertical:6, transform:state.scroll ? [{translateY:-14}] : []}},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:16, paddingVertical:6}},
+                el(Down, {size:"xs", color:k.category.color}), el(RN.Text, {style:k.category}, tr("Text channels").toUpperCase())),
+            channel("general", false, true), on ? channel("staff-only", true) : null, channel("memes", false), channel("clips", false));
+        const tip = on && !watching ? previewTip(k, !state.tried ? tr(menu ? "Tap staff-only to see its details" : "Tap staff-only: nothing will open") :
+            tr(menu ? "That's the dialog you'll see in Discord" : "Tapping a locked channel now does nothing")) : null;
+        const server = el(RN.View, {key:"server", style:[k.header, {height:52}]},
+            el(RN.Text, {style:[k.title, {flex:1, fontSize:17}], numberOfLines:1}, tr("Game Night")),
+            el(venusIcon(7364, "MoreHorizontalIcon"), {size:"md", color:k.icon.color}));
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
-            chatPreview(s, "preview", "Hidden channels preview", [
-                el(RN.View, {key:"list", style:state.scroll ? {transform:[{translateY:-10}], opacity:0.8} : null}, list), card,
-                on ? previewCaption(s, watching ? state.caption : tr(menu ? "Tap {channel} to try it." : "Tap {channel}: nothing happens.", {channel:"staff-only"})) : null]));
+            previewScreen(s, "preview", "Hidden channels preview", [el(RN.View, {key:"body", style:{minHeight:210, overflow:"hidden"}}, list, card), tip],
+                {header:server, footer:watching ? storyStrip(k, s, story) : null}));
     }
     function HiddenChannelsSettings() {
         useSettings("hiddenChannels");
