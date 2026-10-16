@@ -3796,32 +3796,40 @@
     // Pastel names: a few names in their own pastel color, the way they'll show in chat.
     const PASTEL_CAST = [["Alex","Sam","Jordan"],["Riley","Morgan","Casey"],["Taylor","Jamie","Avery"],["Quinn","Rowan","Skyler"]];
     // Watch: people post one at a time and each name fills in with its own color; then a new group arrives.
-    // Try it: tap for new people. Everyone gets their own color, always the same one for the same name.
+    // Try it: tap New people. Everyone gets their own color, always the same one for the same name.
     function PastelPreview(props) {
         useSettings("pastelize");
-        const s=useChatPreviewStyles(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode(), on=props.on;
-        const [state,setState]=React.useState({round:0,shown:3,painted:3,caption:""}), watching=on && mode==="watch";
+        const s=useChatPreviewStyles(), k=usePreviewChrome(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode(), on=props.on;
+        const [state,setState]=React.useState({round:0,shown:3,painted:3,taps:0}), watching=on && mode==="watch";
         const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
-        useDemo(watching,() => {
-            const steps=[[0,() => setState(st => ({round:st.round,shown:0,painted:0,caption:""}))]];
-            [0,1,2].forEach(i => steps.push([i ? 1000 : 500,() => { animateLayout(); update({shown:i+1}); }],
-                [450,() => update({painted:i+1,caption:tr(i===1 && !settings.pastelAll ? "A role color stays as it is" : "Each person gets their own color")})]));
-            steps.push([2200,() => update({caption:tr("The same name always gets the same color")})],[1800,() => { animateLayout(); update(st => ({round:st.round+1,shown:0,painted:0})); }]);
+        const story=useStory(watching,() => {
+            const steps=[[0,() => setState(st => ({round:st.round,shown:0,painted:0,taps:0})),tr("People post in the chat")]];
+            [0,1,2].forEach(i => steps.push([i ? 900 : 600,() => { animateLayout(); update({shown:i+1}); }],
+                [500,() => update({painted:i+1}),i===0 ? tr("Each name gets its own soft color") :
+                    i===1 ? (settings.pastelAll ? tr("Even names with a role color get a pastel one") : tr("A name with a role color keeps it")) : null]));
+            steps.push([1200,() => {},tr("The same name always gets the same color, on every phone")],
+                [1500,() => { animateLayout(); update(st => ({round:st.round+1,shown:0,painted:0})); }]);
             return steps;
-        },[settings.pastelAll]);
+        },[settings.pastelAll,settings.pastelContent]);
         const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
         const cast=PASTEL_CAST[state.round % PASTEL_CAST.length], shown=watching ? state.shown : 3, painted=watching ? state.painted : 3;
         const people=[[cast[0],"#3ba55c",tr("Has anyone tried the new update?"),null],[cast[1],"#eb459e",tr("Yes, it looks great!"),"#e67e22"],[cast[2],"#faa61a",tr("Same here.")]];
-        const preview=chatPreview(s,"preview","Pastel names preview",people.slice(0,shown).map(([who,avatar,text,role],i) => {
+        const chat=people.slice(0,shown).map(([who,avatar,text,role],i) => {
             const plain=i>=painted, kept=role && !settings.pastelAll;
             const name=kept ? role : plain ? s.name.color : tint(who,0.75,0.6,s.name.color);
             const body=!plain && settings.pastelContent && !kept ? tint(who,0.85,0.75,null) : null;
             return el(RN.View,{key:state.round+":"+who},popIn("msg:"+state.round+":"+who,previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),
                 el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name})));
-        }).concat(on ? [previewCaption(s,watching ? state.caption : tr("Tap for new people"))] : []));
-        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(st => ({round:st.round,shown:3,painted:3,caption:""})); }) : null,
-            watching ? preview : el(Press,{key:"press",onPress:() => { if (on) { animateLayout(); update(st => ({round:st.round+1})); } },accessibilityRole:"button",
-                accessibilityHint:tr("Tap for new people")},preview));
+        });
+        const shuffle=() => { if (on) { animateLayout(); update(st => ({round:st.round+1,taps:st.taps+1})); } };
+        const tryBar=on && !watching ? el(RN.View,{key:"try",style:[k.strip,{padding:12,gap:10}]},
+            previewTip(k,state.taps ? tr("New names, new colors. The same name always gets the same one") : tr("Tap New people to see more colors"),"down"),
+            el(Press,{onPress:shuffle,accessibilityRole:"button",accessibilityHint:tr("Tap for new people"),
+                style:[k.secondary,{borderRadius:20,paddingVertical:10,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:8}]},
+                el(venusIcon(11106,"RetryIcon"),{size:"sm",color:k.secondaryText.color}),el(RN.Text,{style:[k.secondaryText,{fontWeight:"600"}]},tr("New people")))) : null;
+        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(st => ({round:st.round,shown:3,painted:3,taps:0})); }) : null,
+            previewScreen(s,"preview","Pastel names preview",[el(RN.View,{key:"chat",style:{minHeight:watching ? 200 : 0}},chat)],
+                {header:previewHeader(k,{title:"general"}),footer:el(RN.View,{key:"foot"},tryBar,watching ? storyStrip(k,s,story) : null)}));
     }
     function PastelSettings() {
         useSettings("pastelize");
@@ -4451,40 +4459,45 @@
     // Try it: tap Sam's message to delete it (it stays, outlined), tap Alex's to edit it (the old text stays above).
     // Follows Show edit history and your Message highlights colors.
     // Watch: Alex edits a message twice and the earlier versions stay above it, then Sam deletes one and it stays,
-    // outlined in red. Try it: tap Alex's message to edit it, Sam's to delete it.
+    // outlined. Try it: tap Alex's message to edit it, Sam's to delete it, with a tip on what to try next.
     function NoDeletePreview(props) {
-        const s=useChatPreviewStyles(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode();
-        const blank={deleted:false,edits:0,pulse:null,caption:""};
+        const s=useChatPreviewStyles(), k=usePreviewChrome(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode();
+        const blank={deleted:false,edits:0,pulse:null,tried:{}};
         const [state,setState]=React.useState(blank), on=!!props.on, watching=on && mode==="watch";
         const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
         const red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
         const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2;
         const versions=[tr("See you at 6"),tr("See you at 7"),tr("See you at 8")];
         const pulse=who => update(st => ({pulse:{who,id:who+":"+st.edits+":"+st.deleted}}));
-        const editCaption=tr(props.edits ? "Alex edits it: the old version stays" : "Alex edits it");
-        useDemo(watching,() => [[0,() => setState(blank)],
-            [1300,() => update({caption:tr("Alex sent a message")})],
-            [900,() => pulse("edited")],[150,() => { animateLayout(); update({edits:1,caption:editCaption}); }],
-            [1600,() => pulse("edited")],[150,() => { animateLayout(); update({edits:2}); }],
-            [1600,() => pulse("deleted")],[150,() => { animateLayout(); update({deleted:true,caption:tr("Sam deletes his: it stays, outlined")}); }],
-            [2800,() => {}]],[props.edits]);
-        const edit=() => { if (!on || watching) return; animateLayout(); update(st => ({edits:st.edits>=2 ? 0 : st.edits+1})); };
-        const remove=() => { if (!on || watching) return; animateLayout(); update(st => ({deleted:!st.deleted})); };
+        const story=useStory(watching,() => [[0,() => setState(blank),tr("Alex says when to meet")],
+            [1400,() => pulse("edited"),tr("Alex edits it to 7")],[400,() => { animateLayout(); update({edits:1}); },
+                props.edits ? tr("The old text stays above it, crossed out") : tr("It shows (edited), like in Discord")],
+            [1400,() => pulse("edited"),tr("And edits it again to 8")],[400,() => { animateLayout(); update({edits:2}); }],
+            [1400,() => pulse("deleted"),tr("Sam deletes a message")],
+            [400,() => { animateLayout(); update({deleted:true}); },tr("It stays for you, outlined, so you can still read it")],
+            [1200,() => {}]],[props.edits]);
+        const edit=() => { if (!on || watching) return; animateLayout(); update(st => ({edits:st.edits>=2 ? 0 : st.edits+1,tried:Object.assign({},st.tried,{edit:true})})); };
+        const remove=() => { if (!on || watching) return; animateLayout(); update(st => ({deleted:!st.deleted,tried:Object.assign({},st.tried,st.deleted ? {back:true} : {del:true})})); };
         const history=props.edits ? versions.slice(0,state.edits) : [];
+        const tried=state.tried, next=!on || watching ? null : !tried.edit ? ["edited",tr("Tap Alex's message to edit it")] :
+            !tried.del ? ["deleted",tr("Now tap Sam's message to delete it")] : !tried.back ? ["deleted",tr("Tap it again to bring it back")] : null;
+        const tip=who => next && next[0]===who ? previewTip(k,next[1]) : null;
         return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(blank); }) : null,
-            chatPreview(s,"preview","Deleted messages preview",[
+            previewScreen(s,"preview","Deleted messages preview",[
             el(Press,{key:"edited",onPress:edit,accessibilityRole:"button",accessibilityHint:tr("Tap to edit it")},
                 previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
                     history.map((text,i) => popIn("old:"+i,el(RN.Text,{style:s.faded},text))),
                     el(RN.Text,{style:s.text},versions[state.edits],state.edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null))),
                 tapRipple(state.pulse,"edited")),
+            tip("edited"),
             el(Press,{key:"deleted",onPress:remove,accessibilityRole:"button",accessibilityHint:tr(state.deleted ? "Tap to bring it back" : "Tap to delete it")},
                 el(RN.View,{style:state.deleted ? {backgroundColor:red+"1a"} : null},
                     state.deleted ? popIn("bar",el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}})) : null,
                     previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))),
                     tapRipple(state.pulse,"deleted"))),
-            on ? previewCaption(s,watching ? state.caption :
-                tr(props.edits ? "Try it: tap Sam's message to delete it, or Alex's to edit it." : "Try it: tap Sam's message to delete it.")) : null]));
+            tip("deleted")],
+            {header:previewHeader(k,{title:"general"}),footer:el(RN.View,{key:"foot"},previewInput(k,s,{placeholder:tr("Message {channel}",{channel:"#general"})}),
+                watching ? storyStrip(k,s,story) : null)}));
     }
     const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {

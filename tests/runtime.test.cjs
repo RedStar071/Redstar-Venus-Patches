@@ -5185,35 +5185,37 @@ test('Nitro preview plays at a readable pace: open the picker, pick the locked e
     const none = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
     assert.ok(!none.render().some(n => n.props && n.props.accessibilityLabel === 'Watch')); assert.equal(none.timers.length, 0);
 });
-test('Deleted messages preview plays: Alex edits twice and the old versions stay, Sam deletes and it stays', () => {
+test('Deleted messages preview plays at a readable pace: Alex edits twice and the old versions stay, Sam deletes and it stays', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
-    host.render(); const seen = new Set(); let most = 0, outlined = false, ripples = 0;
-    for (let k = 0; k < 9; k++) { host.run(1); host.texts().forEach(t => seen.add(t)); const nodes = host.render();
-        most = Math.max(most, nodes.filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length);
-        if (nodes.some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar')) outlined = true;
-        if (nodes.some(n => n.type && n.type.name === 'TapRipple')) ripples++; }
-    for (const t of ['Alex edits it: the old version stays', 'Sam deletes his: it stays, outlined']) assert.ok(seen.has(t), 'shows: ' + t);
+    let most = 0, outlined = false, ripples = 0;
+    const orig = host.run; host.run = n => { orig(n); const nodes = host.render();
+        most = Math.max(most, nodes.filter(x => x.type && x.type.name === 'PopIn' && /^old:/.test(x.props.key)).length);
+        if (nodes.some(x => x.type && x.type.name === 'PopIn' && x.props.key === 'bar')) outlined = true;
+        if (nodes.some(x => x.type && x.type.name === 'TapRipple')) ripples++; };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['Alex says when to meet', 'Alex edits it to 7', 'The old text stays above it, crossed out', 'And edits it again to 8',
+        'Sam deletes a message', 'It stays for you, outlined, so you can still read it']) assert.ok(caps.includes(t), 'caption: ' + t);
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
     assert.equal(most, 2, 'both earlier versions show'); assert.ok(outlined); assert.ok(ripples >= 3);
     b.api.setSetting('noDeleteEdits', false);
-    const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
-    plain.render(); const seen2 = new Set(); let old2 = 0;
-    for (let k = 0; k < 9; k++) { plain.run(1); plain.texts().forEach(t => seen2.add(t)); old2 += plain.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length; }
-    assert.ok(seen2.has('Alex edits it') && old2 === 0, 'without edit history, only the new version shows');
+    const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview')); let old2 = 0;
+    const o2 = plain.run; plain.run = n => { o2(n); old2 += plain.render().filter(x => x.type && x.type.name === 'PopIn' && /^old:/.test(x.props.key)).length; };
+    const r2 = storyTimes(plain);
+    assert.ok(r2.times.some(([c]) => c === 'It shows (edited), like in Discord') && old2 === 0, 'without edit history, only the new version shows');
 });
-test('Pastel names preview plays: people post one by one and each name fills in with its color', () => {
+test('Pastel names preview plays at a readable pace: people post one by one and each name fills in with its color', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('pastelize', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
-    host.render();
-    const names = () => host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children);
-    host.run(1); assert.deepEqual(names(), [], 'starts empty');
-    const counts = [], seen = new Set();
-    for (let k = 0; k < 8; k++) { host.run(1); counts.push(names().length); host.texts().forEach(t => seen.add(t)); }
-    assert.deepEqual(counts.slice(0, 6), [1, 1, 2, 2, 3, 3], 'one at a time');
-    for (const t of ['Each person gets their own color', 'A role color stays as it is', 'The same name always gets the same color']) assert.ok(seen.has(t), 'shows: ' + t);
-    host.run(2); assert.equal(names()[0], 'Riley', 'then a new group');
+    const names = () => host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1 && n.props.children !== 'general').map(n => n.props.children);
+    const counts = []; const orig = host.run; host.run = n => { orig(n); counts.push(names().length); };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['People post in the chat', 'Each name gets its own soft color', 'A name with a role color keeps it',
+        'The same name always gets the same color, on every phone']) assert.ok(caps.includes(t), 'caption: ' + t);
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(counts.includes(1) && counts.includes(2) && counts.includes(3), 'one at a time: ' + counts);
 });
 test('Translate preview plays your choice at a readable pace (on its own, or Hold and Translate in the menu); Try it guides you', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
@@ -5239,26 +5241,28 @@ test('Translate preview plays your choice at a readable pace (on its own, or Hol
     host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to show the original').props.onPress();
     assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && !host.texts().includes('Tap Show original to go back'));
 });
-test('Deleted messages and Pastel names previews can be tried by tapping', () => {
+test('Deleted messages and Pastel names previews can be tried, with a tip on what to tap next', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
     host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
-    let node = previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'); const preview = () => host.render();
-    const tap = hint => preview().find(n => n.props && n.props.accessibilityHint === hint).props.onPress();
-    tap('Tap to delete it'); assert.ok(preview().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'), 'stays, outlined');
-    assert.ok(preview().some(n => n.props && n.props.accessibilityHint === 'Tap to bring it back'));
+    const tap = hint => host.render().find(n => n.props && n.props.accessibilityHint === hint).props.onPress();
+    assert.ok(host.texts().includes("Tap Alex's message to edit it"));
     tap('Tap to edit it'); tap('Tap to edit it');
-    const faded = preview().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length;
-    assert.equal(faded, 2, 'both earlier versions stay above it');
-    b.api.setSetting('noDeleteEdits', false); node = previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview');
-    assert.equal(pageNodes(hookHost(b, React, node).render()).filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
-    // Pastel names: tap for new people.
+    assert.equal(host.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 2, 'both earlier versions stay above it');
+    assert.ok(host.texts().includes("Now tap Sam's message to delete it"));
+    tap('Tap to delete it'); assert.ok(host.render().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'), 'stays, outlined');
+    assert.ok(host.texts().includes('Tap it again to bring it back'));
+    tap('Tap to bring it back'); assert.ok(!host.render().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'));
+    b.api.setSetting('noDeleteEdits', false);
+    const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    assert.equal(plain.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
     b.api.setSetting('pastelize', true);
     const pastel = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
     pastel.render(); pastel.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); pastel.timers.length = 0;
-    const names = () => pastel.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children);
-    assert.deepEqual(names(), ['Alex', 'Sam', 'Jordan']);
+    const names = () => pastel.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1 && n.props.children !== 'general').map(n => n.props.children);
+    assert.deepEqual(names(), ['Alex', 'Sam', 'Jordan']); assert.ok(pastel.texts().includes('Tap New people to see more colors'));
     pastel.render().find(n => n.props && n.props.accessibilityHint === 'Tap for new people').props.onPress();
     assert.deepEqual(names(), ['Riley', 'Morgan', 'Casey']);
+    assert.ok(pastel.texts().includes('New names, new colors. The same name always gets the same one'));
 });
