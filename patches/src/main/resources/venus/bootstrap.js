@@ -3145,23 +3145,6 @@
         const [mode, setMode] = React.useState(previewModeChoice);
         return [mode, value => { previewModeChoice = value; animateLayout(); setMode(value); }];
     }
-    // A demo is a list of [wait ms, step] pairs that runs in order, then starts over. It restarts when deps change
-    // (your choices below the preview), stops when you switch to Try it, and its timers end with the page.
-    function useDemo(active, steps, deps) {
-        React.useEffect(() => {
-            if (!active) return undefined;
-            const list = steps();
-            let cancelled = false, timer, i = 0;
-            const next = () => {
-                if (cancelled || !list.length) return;
-                if (i >= list.length) i = 0;
-                const [wait, step] = list[i++];
-                timer = later(() => { timer = undefined; if (cancelled) return; try { step(); } catch (_) {} next(); }, wait, false);
-            };
-            next();
-            return () => { cancelled = true; if (timer !== undefined && global.clearTimeout) global.clearTimeout(timer); };
-        }, [active].concat(deps || []));
-    }
     // Steps that type text into a preview's message box one letter at a time.
     function typeSteps(text, set, ms) { return Array.from(text).map((_, i) => [ms || 70, () => set(text.slice(0, i + 1))]); }
     // Where the demo's finger taps: a soft circle that grows and fades once each time it mounts (key it on the tap).
@@ -3496,9 +3479,6 @@
                     extra && extra.badges ? extra.badges : null,
                     el(RN.Text, {style:s.muted}, time)),
                 body));
-    }
-    function chatPreview(s, key, label, children) {
-        return el(RN.View, {key, style:s.chat, accessible:true, accessibilityLabel:tr(label)}, children);
     }
     // Discord's own icon in a settings row (TableRowIcon 5922), the way its own settings pages show them.
     function rowIcon(id,name) {
