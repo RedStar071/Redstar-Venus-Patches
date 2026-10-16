@@ -598,7 +598,7 @@ test('native registry adds authorless About, Settings and option-page routes wit
     }
     // Nitro links is a designed page with a preview; its options stay real setting nodes for Discord's search.
     const nitro=pageNodes(b.registry.VENUS_FREENITRO.screen.getComponent()());
-    assert.ok(nitro.some(n=>n.props&&n.props.accessibilityLabel==='Nitro link preview'));
+    assert.ok(nitro.some(n=>n.type&&n.type.name==='NitroPreview'));
     assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
     assert.equal(b.registry.VENUS_STICKERS.parent,'VENUS_FREENITRO');
     for (const value of Object.values(b.registry)) assert.equal(value.authors,undefined);
@@ -4984,4 +4984,26 @@ test('Device indicators preview follows every option, and tapping it changes Ale
     assert.equal(phone(), false, 'hidden by default');
     b.api.setSetting('piHideMobile', false); assert.equal(phone(), true, 'phone badge shows when not hidden');
     b.api.setSetting('platformIndicators', false); assert.deepEqual(places(), [], 'no icons while off');
+});
+test('Nitro preview shows a real emoji or sticker from your servers as it looks in chat, and tapping tries another', () => {
+    const b = nitroHarness(); const {React} = reactHarness(b);
+    let pick = 0; React.useState = init => typeof init === 'number' ? [pick, v => { pick = typeof v === 'function' ? v(pick) : v; }] : [init, () => {}];
+    b.load({default:{getCustomEmojiById:() => null, getGuilds:() => ({g1:{emojis:[{id:'111', name:'blobwave', animated:true}, {id:'222', name:'pepe'}]}})}}, null, 5772);
+    b.load({default:{getStickerById:() => null, getAllGuildStickers:() => new Map([['g1', [{id:'333', name:'wumpus', format_type:1}, {id:'444', name:'lottie', format_type:3}]]])}}, null, 5815);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    b.api.setSetting('freeNitro', true);
+    const preview = () => { const n = pageNodes(registry.VENUS_FREENITRO.screen.getComponent()()).find(x => x.type && x.type.name === 'NitroPreview');
+        const ref = {current:null}; React.useRef = () => ref; return pageNodes(n.type(n.props)); };
+    const images = () => preview().filter(n => n.type === 'Image').map(n => n.props.source.uri);
+    const linkText = () => preview().filter(n => n.type === 'Text' && /^Sent as /.test(n.props.children)).map(n => n.props.children)[0];
+    // The image itself, not a link: an animated emoji from your own server comes first.
+    assert.deepEqual(images(), ['https://cdn.discordapp.com/emojis/111.gif?size=96&quality=lossless']);
+    assert.equal(linkText(), 'Sent as [blobwave](\u2026)');
+    preview().find(n => n.props && n.props.accessibilityHint === 'Tap to try another one').props.onPress();
+    assert.deepEqual(images(), ['https://media.discordapp.net/stickers/333.png?size=160'], 'then a sticker');
+    b.api.setSetting('hyperlinks', false);
+    assert.equal(linkText(), 'Sent as https://media.discordapp.net/stickers/333.png', 'long link when Short links is off');
+    b.api.setSetting('stickers', false); pick = 1;
+    assert.deepEqual(images(), ['https://cdn.discordapp.com/emojis/222.webp?size=96&quality=lossless'], 'only emojis once stickers are off');
+    assert.ok(!images().some(u => u.includes('444')), 'never a Lottie sticker, which has no image link');
 });

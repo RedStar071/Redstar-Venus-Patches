@@ -883,7 +883,7 @@
         withOptions("sending", "freeNitro", "VENUS_FREENITRO", "Send Nitro stickers and emojis as links", "Stickers and emojis you'd need Nitro for are sent as a link, which shows up in chat as the sticker or emoji image.", "Nitro stickers and emojis",
             () => ({page:FreeNitroSettings, sections:[section("Send as links", [option("emojis", "Emojis", "Emojis from other servers, and animated emojis.", "VENUS_FREENITRO"),
                 option("stickers", "Stickers", "Stickers from other servers. Animated ones may not move.", "VENUS_FREENITRO")]),
-             section("Link style", [option("hyperlinks", "Short links", "The link shows as the emoji or sticker's name instead of a long web address.", "VENUS_FREENITRO")])]}));
+             section("Link style", [option("hyperlinks", "Short links", "In chat it looks the same either way. Short links only change what's copied or quoted.", "VENUS_FREENITRO")])]}));
         toggle("sending", "voice", "Send audio as voice messages", "An audio file sent on its own becomes a real voice message, with a waveform. Needs Android 10 or newer.");
         toggle("sending", "splitMessages", "Send long messages", "Type past the character limit. Long messages are sent in parts, split between lines or words.");
         toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing. You still see when they are.");
@@ -3371,26 +3371,72 @@
         return settingsBody(ui,groups);
     }
     // Nitro stickers and emojis: what a sent emoji looks like with each link style, then the switches.
+    // Your own servers' emojis and stickers that need Nitro to use everywhere (animated emojis, and stickers), for the
+    // preview. Read from Discord's stores at draw time; nothing is fetched, and the list is capped so it stays cheap.
+    function nitroSamples() {
+        const out = {emojis:[], stickers:[]};
+        try {
+            const guilds = emojiStore && typeof emojiStore.getGuilds === "function" ? emojiStore.getGuilds() : null;
+            if (guilds) for (const id of Object.keys(guilds)) {
+                const list = guilds[id] && guilds[id].emojis;
+                if (Array.isArray(list)) for (const emoji of list) {
+                    if (emoji && emoji.id && emoji.available !== false && emoji.name) out.emojis.push({id:emoji.id, name:emoji.name, animated:!!emoji.animated});
+                    if (out.emojis.length >= 60) break;
+                }
+                if (out.emojis.length >= 60) break;
+            }
+        } catch (_) {}
+        try {
+            const all = stickerStore && typeof stickerStore.getAllGuildStickers === "function" ? stickerStore.getAllGuildStickers() : null;
+            if (all && typeof all.forEach === "function") all.forEach(list => {
+                if (Array.isArray(list)) for (const sticker of list) if (out.stickers.length < 30 && sticker && /^\d+$/.test(sticker.id) && [1, 2, 4].includes(sticker.format_type) && sticker.available !== false)
+                    out.stickers.push({id:sticker.id, name:sticker.name, gif:sticker.format_type === 4});
+            });
+        } catch (_) {}
+        // Animated ones first: they're what you most often can't send without Nitro.
+        out.emojis.sort((a, b) => (b.animated ? 1 : 0) - (a.animated ? 1 : 0));
+        return out;
+    }
+    const emojiUri = emoji => "https://cdn.discordapp.com/emojis/" + emoji.id + (emoji.animated ? ".gif" : ".webp") + "?size=96&quality=lossless";
+    const stickerUri = sticker => "https://media.discordapp.net/stickers/" + sticker.id + (sticker.gif ? ".gif" : ".png") + "?size=160";
+    // The message as everyone sees it: just the emoji or sticker, the way Discord shows a link to one. Tap to try another.
+    function NitroPreview(props) {
+        useSettings("freeNitro");
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [pick, setPick] = React.useState(0);
+        const samples = React.useRef(null);
+        if (!samples.current) samples.current = nitroSamples();
+        const {emojis, stickers} = samples.current;
+        const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
+        const kind = kinds.length ? kinds[pick % kinds.length] : "emoji";
+        const list = kind === "sticker" ? stickers : emojis, item = list.length ? list[Math.floor(pick / Math.max(1, kinds.length)) % list.length] : null;
+        const uri = item ? (kind === "sticker" ? stickerUri(item) : emojiUri(item)) : null, size = kind === "sticker" ? 120 : 48;
+        const image = uri && RN.Image ? popIn("img:" + uri, el(RN.Image, {source:{uri}, style:{width:size, height:size}, resizeMode:"contain",
+            accessibilityLabel:item.name})) : el(RN.Text, {style:{fontSize:kind === "sticker" ? 72 : 40}}, kind === "sticker" ? "\ud83e\udd73" : "\ud83c\udf89");
+        const sent = item ? (settings.hyperlinks ? "[" + item.name + "](\u2026)" : uri.replace(/\?.*$/, "")) : null;
+        return el(Press, {key:"preview", onPress:() => { if (list.length > 1 || kinds.length > 1) setPick(n => n + 1); }, accessibilityRole:"button",
+            accessibilityHint:tr("Tap to try another one")},
+            chatPreview(s, "preview", "Nitro link preview", [
+                previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{gap:6, alignItems:"flex-start"}}, image)),
+                el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2, gap:2}},
+                    el(RN.Text, {style:s.muted, numberOfLines:1}, item ? tr("Sent as {link}", {link:sent}) : tr("Emojis and stickers from your servers show here once Discord has loaded them.")),
+                    item && (list.length > 1 || kinds.length > 1) ? el(RN.Text, {style:s.muted}, tr("Tap to try another one")) : null)]));
+    }
     function FreeNitroSettings() {
         useSettings("freeNitro");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("freeNitro"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
-        const link=useThemed("nitroLink",c => ({link:{color:c.TEXT_LINK || c.TEXT_BRAND,fontSize:15}}),{link:{color:"#00a8fc",fontSize:15}});
+        const on=enabled("freeNitro"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const sends=settings.emojis && settings.stickers ? "Nitro emojis and stickers you send become links that show up as the image." :
             settings.emojis ? "Nitro emojis you send become links that show up as the image." : settings.stickers ? "Nitro stickers you send become links that show up as the image." : "";
         const groups=[
             on ? statusCard("status",sends || "Turn on emojis or stickers below.",
                 {title:tr("Sending as links"),IconComponent:venusIcon(8119,"NitroWheelIcon")}) : offCard("status",venusIcon(8119,"NitroWheelIcon")),
-            chatPreview(s,"preview","Nitro link preview",previewMessage(s,"msg",tr("You"),"#5865f2",tr("Today at 4:01 PM"),el(RN.View,{style:{gap:6}},
-                el(RN.Text,{style:link.link,numberOfLines:1},settings.hyperlinks ? "partyblob" : "https://cdn.discordapp.com/emojis/1234567890.webp?size=48"),
-                el(RN.View,{style:{width:48,height:48,borderRadius:8,backgroundColor:"#eb459e33",alignItems:"center",justifyContent:"center"}},
-                    el(RN.Text,{style:{fontSize:30}},"\ud83c\udf89"))))),
+            el(NitroPreview,{key:"preview"}),
             el(Group,{key:"send",title:tr("Send as links")},
                 switchRow(Switch,"emojis","Emojis","Emojis from other servers, and animated emojis.",rowIcon(8719,"ChatSmileIcon")),
                 switchRow(Switch,"stickers","Stickers","Stickers from other servers. Animated ones may not move.",rowIcon(11937,"StickerIcon"))),
             el(Group,{key:"style",title:tr("Link style")},
-                switchRow(Switch,"hyperlinks","Short links","The link shows as the emoji or sticker's name instead of a long web address.",rowIcon(4776,"LinkIcon"))),
+                switchRow(Switch,"hyperlinks","Short links","In chat it looks the same either way. Short links only change what's copied or quoted.",rowIcon(4776,"LinkIcon"))),
             footnote("note","Everyone sees the image, but it's a link, not a real Nitro emoji or sticker.")];
         return settingsBody(ui,groups);
     }
