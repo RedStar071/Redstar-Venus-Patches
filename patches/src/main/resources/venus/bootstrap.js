@@ -4150,25 +4150,41 @@
     }
     // Try it: tap Sam's message to delete it (it stays, outlined), tap Alex's to edit it (the old text stays above).
     // Follows Show edit history and your Message highlights colors.
+    // Watch: Alex edits a message twice and the earlier versions stay above it, then Sam deletes one and it stays,
+    // outlined in red. Try it: tap Alex's message to edit it, Sam's to delete it.
     function NoDeletePreview(props) {
-        const s=useChatPreviewStyles(), Press=RN.Pressable || RN.View, [state,setState]=React.useState({deleted:false,edits:0});
+        const s=useChatPreviewStyles(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode();
+        const blank={deleted:false,edits:0,pulse:null,caption:""};
+        const [state,setState]=React.useState(blank), on=!!props.on, watching=on && mode==="watch";
+        const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
         const red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
-        const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2, on=!!props.on;
+        const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2;
         const versions=[tr("See you at 6"),tr("See you at 7"),tr("See you at 8")];
-        const edit=() => { if (!on) return; animateLayout(); setState(st => ({deleted:st.deleted,edits:st.edits>=2 ? 0 : st.edits+1})); };
-        const remove=() => { if (!on) return; animateLayout(); setState(st => ({deleted:!st.deleted,edits:st.edits})); };
+        const pulse=who => update(st => ({pulse:{who,id:who+":"+st.edits+":"+st.deleted}}));
+        const editCaption=tr(props.edits ? "Alex edits it: the old version stays" : "Alex edits it");
+        useDemo(watching,() => [[0,() => setState(blank)],
+            [1300,() => update({caption:tr("Alex sent a message")})],
+            [900,() => pulse("edited")],[150,() => { animateLayout(); update({edits:1,caption:editCaption}); }],
+            [1600,() => pulse("edited")],[150,() => { animateLayout(); update({edits:2}); }],
+            [1600,() => pulse("deleted")],[150,() => { animateLayout(); update({deleted:true,caption:tr("Sam deletes his: it stays, outlined in red")}); }],
+            [2800,() => {}]],[props.edits]);
+        const edit=() => { if (!on || watching) return; animateLayout(); update(st => ({edits:st.edits>=2 ? 0 : st.edits+1})); };
+        const remove=() => { if (!on || watching) return; animateLayout(); update(st => ({deleted:!st.deleted})); };
         const history=props.edits ? versions.slice(0,state.edits) : [];
-        return chatPreview(s,"preview","Deleted messages preview",[
+        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(blank); }) : null,
+            chatPreview(s,"preview","Deleted messages preview",[
             el(Press,{key:"edited",onPress:edit,accessibilityRole:"button",accessibilityHint:tr("Tap to edit it")},
                 previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
                     history.map((text,i) => popIn("old:"+i,el(RN.Text,{style:s.faded},text))),
-                    el(RN.Text,{style:s.text},versions[state.edits],state.edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null)))),
+                    el(RN.Text,{style:s.text},versions[state.edits],state.edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null))),
+                tapRipple(state.pulse,"edited")),
             el(Press,{key:"deleted",onPress:remove,accessibilityRole:"button",accessibilityHint:tr(state.deleted ? "Tap to bring it back" : "Tap to delete it")},
                 el(RN.View,{style:state.deleted ? {backgroundColor:red+"1a"} : null},
                     state.deleted ? popIn("bar",el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}})) : null,
-                    previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))))),
-            on ? el(RN.View,{key:"hint",style:{paddingHorizontal:16,paddingTop:2}},el(RN.Text,{style:s.muted},
-                tr(props.edits ? "Try it: tap Sam's message to delete it, or Alex's to edit it." : "Try it: tap Sam's message to delete it."))) : null]);
+                    previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))),
+                    tapRipple(state.pulse,"deleted"))),
+            on ? previewCaption(s,watching ? state.caption :
+                tr(props.edits ? "Try it: tap Sam's message to delete it, or Alex's to edit it." : "Try it: tap Sam's message to delete it.")) : null]));
     }
     const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {

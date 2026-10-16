@@ -5093,19 +5093,37 @@ test('Nitro preview plays: you type the emoji and send it, then send a sticker',
     const none = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
     assert.ok(!none.render().some(n => n.props && n.props.accessibilityLabel === 'Watch')); assert.equal(none.timers.length, 0);
 });
+test('Deleted messages preview plays: Alex edits twice and the old versions stay, Sam deletes and it stays', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    host.render(); const seen = new Set(); let most = 0, outlined = false, ripples = 0;
+    for (let k = 0; k < 9; k++) { host.run(1); host.texts().forEach(t => seen.add(t)); const nodes = host.render();
+        most = Math.max(most, nodes.filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length);
+        if (nodes.some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar')) outlined = true;
+        if (nodes.some(n => n.type && n.type.name === 'TapRipple')) ripples++; }
+    for (const t of ['Alex edits it: the old version stays', 'Sam deletes his: it stays, outlined in red']) assert.ok(seen.has(t), 'shows: ' + t);
+    assert.equal(most, 2, 'both earlier versions show'); assert.ok(outlined); assert.ok(ripples >= 3);
+    b.api.setSetting('noDeleteEdits', false);
+    const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    plain.render(); const seen2 = new Set(); let old2 = 0;
+    for (let k = 0; k < 9; k++) { plain.run(1); plain.texts().forEach(t => seen2.add(t)); old2 += plain.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length; }
+    assert.ok(seen2.has('Alex edits it') && old2 === 0, 'without edit history, only the new version shows');
+});
 test('Deleted messages and Pastel names previews can be tried by tapping', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
-    let st; React.useState = init => { if (typeof init === 'object' && init) { if (!st) st = init; return [st, v => { st = typeof v === 'function' ? v(st) : v; }]; } return [init, () => {}]; };
     b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
-    const preview = () => { const n = pageNodes(b.registry.VENUS_NODELETE.screen.getComponent()()).find(x => x.type && x.type.name === 'NoDeletePreview'); return pageNodes(n.type(n.props)); };
+    const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    let node = previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'); const preview = () => host.render();
     const tap = hint => preview().find(n => n.props && n.props.accessibilityHint === hint).props.onPress();
-    tap('Tap to delete it'); assert.equal(st.deleted, true, 'stays, outlined');
+    tap('Tap to delete it'); assert.ok(preview().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'), 'stays, outlined');
     assert.ok(preview().some(n => n.props && n.props.accessibilityHint === 'Tap to bring it back'));
     tap('Tap to edit it'); tap('Tap to edit it');
     const faded = preview().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length;
     assert.equal(faded, 2, 'both earlier versions stay above it');
-    b.api.setSetting('noDeleteEdits', false);
-    assert.equal(preview().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
+    b.api.setSetting('noDeleteEdits', false); node = previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview');
+    assert.equal(pageNodes(hookHost(b, React, node).render()).filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
     // Pastel names: tap for new people.
     let round = 0; React.useState = init => typeof init === 'number' ? [round, v => { round = typeof v === 'function' ? v(round) : v; }] : [init, () => {}];
     b.api.setSetting('pastelize', true);
