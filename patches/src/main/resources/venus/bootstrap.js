@@ -6602,27 +6602,44 @@
             (waiting ? " " + tr("{n} waiting.", {n:waiting}) : "");
     }
     // A message in Spanish shown the way Translate messages shows it, following the Display switches.
-    // Watch: Lucía writes in Spanish and it turns into your language, on its own or after you hold it and tap
-    // Translate (whichever you chose below). Try it: tap the message to switch between the original and the translation.
+    // Watch: Lucía writes in Spanish and it turns into your language, on its own, or after you hold it and tap Translate
+    // in Discord's message menu (whichever you chose below). Try it: tap Translate or Show original under the message.
     const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
+    // A message's long-press menu, the way Discord draws it: a sheet with quick reactions and a list of actions.
+    function previewSheet(k, s, rows, pulse) {
+        const Press = RN.Pressable || RN.View;
+        return el(RN.View, {key:"sheet", style:[k.sheet, {marginTop:6}]},
+            el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66", marginBottom:8}}),
+            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-around", paddingHorizontal:12, paddingBottom:8}},
+                ["\ud83d\udc4d", "\u2764\ufe0f", "\ud83d\ude02", "\ud83d\ude2e"].map(e => el(RN.View, {key:e, style:[k.round, {width:44, height:44, borderRadius:22}]}, el(RN.Text, {style:{fontSize:20}}, e)))),
+            el(RN.View, {style:[k.sheetRow, {marginHorizontal:12, marginBottom:8, borderRadius:16, overflow:"hidden"}]},
+                rows.map(([key, Icon, label, onPress], i) => el(Press, {key, onPress, accessibilityRole:onPress ? "button" : undefined,
+                    style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:"#ffffff0d"} : null]},
+                    el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {fontSize:15, fontWeight:"500"}]}, label), tapRipple(pulse, key, {left:8, top:7})))));
+    }
     function TranslatePreview(props) {
         useSettings("translate");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = !!props.on;
-        const blank = {shown:true, done:true, busy:false, menu:false, pulse:null, caption:""};
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = !!props.on;
+        const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null, tried:{}};
         const [state, setState] = React.useState(blank), watching = on && mode === "watch", manual = settings.translateMode === "manual";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
-        useDemo(watching, () => {
-            const steps = [[0, () => setState({shown:false, done:false, busy:false, menu:false, pulse:null, caption:""})],
-                [500, () => { animateLayout(); update({shown:true, caption:tr("Luc\u00eda writes in Spanish")}); }]];
-            if (manual) steps.push([1500, () => update({pulse:{who:"msg", id:"hold:" + Date.now()}})],
-                [350, () => { animateLayout(); update({menu:true, caption:tr("Hold it and tap Translate")}); }],
-                [1100, () => update({pulse:{who:"menu", id:"tap:" + Date.now()}})], [150, () => { animateLayout(); update({menu:false, busy:true}); }]);
-            else steps.push([1300, () => update({busy:true, caption:tr("It's translated on its own")})]);
-            steps.push([800, () => { animateLayout(); update({busy:false, done:true, caption:tr("Now it's in {language}", {language:languageName(localeCode(settings.translateTarget === "phone" ? "phone" : "discord"))})}); }],
-                [3000, () => {}]);
+        const target = languageName(localeCode(settings.translateTarget === "phone" ? "phone" : "discord"));
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(Object.assign({}, blank, {shown:false}))],
+                [700, () => { animateLayout(); update({shown:true}); }, tr("Luc\u00eda writes in Spanish")]];
+            if (manual) steps.push([1400, () => update({pulse:{who:"msg", id:"hold"}, held:true}), tr("You hold the message to open its menu")],
+                [700, () => { animateLayout(); update({menu:true}); }],
+                [1800, () => update({pulse:{who:"translate", id:"tap"}}), tr("And tap Translate")],
+                [600, () => { animateLayout(); update({menu:false, held:false, busy:true}); }]);
+            else steps.push([1400, () => update({busy:true}), tr("Venus sees it's not in {language} and translates it on its own", {language:target})]);
+            steps.push([1600, () => { animateLayout(); update({busy:false, done:true}); }, tr("Now it reads in {language}", {language:target})]);
+            if (settings.translateNote || settings.translateOriginal) steps.push([300, () => {},
+                tr(settings.translateOriginal ? "The note under it says what it was in, with the original quoted below" : "The small note under it says what language it was in")]);
+            steps.push([800, () => {}]);
             return steps;
-        }, [manual]);
+        }, [manual, settings.translateNote, settings.translateOriginal, target]);
         const translated = on ? state.done : true;
+        const Lang = venusIcon(14958, "LanguageIcon");
         const body = !state.shown ? null : state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
                 el(RN.Text, {style:[s.muted, {marginTop:2}]}, tr("Translating\u2026"))) :
             !translated ? el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE) : el(RN.View, null,
@@ -6630,17 +6647,23 @@
                 settings.translateNote ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
                 settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
-        const menu = watching && state.menu ? el(RN.View, {key:"menu", style:{alignSelf:"flex-start", marginLeft:68, marginTop:2, paddingHorizontal:12, paddingVertical:7,
-            borderRadius:10, backgroundColor:"#4e505866", flexDirection:"row", alignItems:"center", gap:6}},
-            popIn("menu", el(venusIcon(14958, "LanguageIcon"), {size:"xs"})), el(RN.Text, {style:s.text}, tr("Translate")), tapRipple(state.pulse, "menu", {right:-6, top:-4})) : null;
-        const message = state.shown ? el(RN.View, {key:"msg"}, popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)),
-            tapRipple(state.pulse, "msg")) : null;
-        const hint = tr(state.done ? "Tap to show the original" : "Tap to translate it");
-        const preview = chatPreview(s, "preview", "Translation preview", [message, menu,
-            on ? previewCaption(s, watching ? state.caption : hint) : null]);
+        const toggle = () => { if (!on || watching) return; animateLayout(); update(st => ({done:!st.done, tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})})); };
+        const message = state.shown ? el(RN.View, {key:"msg", style:state.held ? k.selected : null},
+            popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg")) : null;
+        // Try it: the action you'd find in the message's menu, as a button under the message, with a tip on what to try.
+        const tryButton = on && !watching ? el(RN.View, {key:"try", style:{paddingHorizontal:16, paddingTop:2, paddingBottom:6, flexDirection:"row"}},
+            el(Press, {onPress:toggle, accessibilityRole:"button", accessibilityHint:tr(state.done ? "Tap to show the original" : "Tap to translate it"),
+                style:[k.secondary, {flexDirection:"row", alignItems:"center", gap:6, borderRadius:16, paddingHorizontal:12, paddingVertical:7, marginLeft:52}]},
+                el(Lang, {size:"xs", color:k.secondaryText.color}), el(RN.Text, {style:[k.secondaryText, {fontWeight:"600", fontSize:13}]}, tr(state.done ? "Show original" : "Translate")))) : null;
+        const tip = on && !watching ? previewTip(k, !state.tried.tr ? tr(manual ? "In chat you'd hold the message and tap Translate. Try it here" :
+            "In chat this happens on its own. Tap Translate to see it") : !state.tried.back ? tr("Tap Show original to go back") : null) : null;
+        const sheet = watching && state.menu ? previewSheet(k, s, [["reply", venusIcon(11108, "ArrowAngleLeftUpIcon"), tr("Reply")],
+            ["translate", Lang, tr("Translate")], ["copy", venusIcon(4780, "CopyIcon"), tr("Copy Text")]], state.pulse) : null;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
-            watching ? preview : el(Press, {key:"press", onPress:() => { if (on) { animateLayout(); update(st => ({done:!st.done})); } }, accessibilityRole:"button",
-                accessibilityHint:on ? hint : undefined}, preview));
+            previewScreen(s, "preview", "Translation preview", [message, tryButton, tip, sheet],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
+                    watching ? storyStrip(k, s, story) : null)}));
     }
     function TranslateSettings() {
         useSettings("translate");

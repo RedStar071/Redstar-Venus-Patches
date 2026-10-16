@@ -5208,25 +5208,29 @@ test('Pastel names preview plays: people post one by one and each name fills in 
     for (const t of ['Each person gets their own color', 'A role color stays as it is', 'The same name always gets the same color']) assert.ok(seen.has(t), 'shows: ' + t);
     host.run(2); assert.equal(names()[0], 'Riley', 'then a new group');
 });
-test('Translate preview plays your choice: translated on its own, or after Hold and Translate; Try it switches', () => {
+test('Translate preview plays your choice at a readable pace (on its own, or Hold and Translate in the menu); Try it guides you', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('translate', true);
-    const play = () => { const host = hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview'));
-        host.render(); const seen = new Set(); for (let k = 0; k < 9; k++) { host.run(1); host.texts().forEach(t => seen.add(t)); } return seen; };
-    const auto = play();
-    for (const t of ['Lucía writes in Spanish', "It's translated on its own", 'Translating…', "Hi everyone! Who's coming tonight?"]) assert.ok(auto.has(t), 'shows: ' + t);
-    assert.ok([...auto].some(t => /^Now it's in /.test(t)) && !auto.has('Hold it and tap Translate'));
+    const play = () => storyTimes(hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview')));
+    const auto = play(), caps = auto.times.map(x => x[0]);
+    assert.ok(caps.includes('Lucía writes in Spanish') && caps.some(c => /translates it on its own$/.test(c)) && caps.some(c => /^Now it reads in /.test(c)), caps.join(' | '));
+    assert.ok(caps.includes('The small note under it says what language it was in'));
+    for (const [cap, ms] of auto.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(auto.seen.has('Translating…') && auto.seen.has("Hi everyone! Who's coming tonight?"));
     b.api.setSetting('translateMode', 'manual');
-    const manual = play();
-    assert.ok(manual.has('Hold it and tap Translate') && manual.has('Translate') && !manual.has("It's translated on its own"));
-    // Try it: tap to switch between the translation and the original.
+    const manual = play(), mcaps = manual.times.map(x => x[0]);
+    assert.ok(mcaps.includes('You hold the message to open its menu') && mcaps.includes('And tap Translate'), mcaps.join(' | '));
+    assert.ok(manual.seen.has('Reply') && manual.seen.has('Copy Text'), 'Discord\'s message menu shows');
+    for (const [cap, ms] of manual.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    // Try it: a tip, then tap Translate / Show original under the message.
     const host = hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview'));
     host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
-    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?"));
-    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to show the original').props.onPress();
-    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && host.texts().includes('Tap to translate it'));
+    assert.ok(host.texts().includes("In chat you'd hold the message and tap Translate. Try it here"));
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?"), 'starts in Spanish');
     host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to translate it').props.onPress();
-    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?"));
+    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?") && host.texts().includes('Tap Show original to go back'));
+    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to show the original').props.onPress();
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && !host.texts().includes('Tap Show original to go back'));
 });
 test('Deleted messages and Pastel names previews can be tried by tapping', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
