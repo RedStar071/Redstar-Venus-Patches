@@ -275,7 +275,7 @@ design") renders each page on and off and fails when a page breaks the rules bel
    text, and the feature's own icon in a round badge on the left. Use `leading` for something more personal than an
    icon when there is one: the watched people's `avatarPile`, your avatar, a theme's `themeSwatch`. When the feature
    is off, use `offCard(key, Icon)` ("Turned off" / "Switch it on in Features to start.").
-2. **A live preview**, when the feature changes how something looks: a small chat surface built with
+2. **A live preview**, when the feature changes how something looks or what a gesture does: a small chat surface built with
    `chatPreview` + `previewMessage` that follows the settings below it as you change them (bar width and colors,
    edit history, pastel names, device icons, translation notes, link style). Previews use plain sample people and
    text, never real messages, and only the theme tokens from `useChatPreviewStyles`.
@@ -315,6 +315,20 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Pages whose options are also native setting nodes (Nitro links, Pastel names, Device indicators) keep those
   nodes for Discord's settings search and pass `{page, sections}` to `withOptions`, so the designed page is shown.
 - Every new text goes through `tr()`/`pl()` and gets added to all 30 language files.
+
+**Motion** (since 1.14.0)
+
+- `settingsBody` wraps each group in `VenusReveal`: groups rise in one after another when a page opens. Don't add a
+  second entrance animation of your own.
+- Something that's picked (a swatch's check, the theme or account in use, a status badge) goes through
+  `popIn(key, child)`. Key it on what was picked, so it pops again only when the choice changes.
+- `switchRow` and `venusSegmented` call `animateLayout()` before changing a setting, so rows that appear or move
+  ease into place. Call it yourself before any other setting change that adds or removes rows.
+- `venusSegmented` slides its pill (`SegmentedSlider`); `VenusProgress` is the bar for anything with progress.
+- Opacity, position and scale animate on the native driver only. Width (`VenusProgress`) is the one exception.
+- Every animation checks `motion()` and `reduceMotion`. Without `Animated`, or with Android's Remove animations on,
+  everything shows at once. Never make anything depend on an animation finishing.
+- Motion confirms what you did. Never loop it on its own, except inside a preview that demonstrates a gesture.
 
 The page title is short ("Deleted messages", "Tap gestures").
 

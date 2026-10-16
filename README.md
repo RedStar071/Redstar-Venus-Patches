@@ -58,7 +58,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 
 **Language** sets the language Venus settings are shown in. It follows Discord's language until you pick another one. 30 languages are included, among them Russian, Ukrainian, German, Spanish, French, Portuguese, Polish, Turkish, Japanese, Korean and Chinese. Counts use each language's plural forms. Corrections are welcome on GitHub ([`patches/src/main/resources/venus/i18n`](patches/src/main/resources/venus/i18n)).
 
-**About** shows your version, how many features are on, whether your settings are saved, and links to what's new and to report a problem.
+**About** shows your version, how many features are on (in total and per group), whether everything is working, and links to what's new and to report a problem. Venus settings animate gently as you use them, and follow Android's **Remove animations** setting.
 
 ### Privacy options
 
