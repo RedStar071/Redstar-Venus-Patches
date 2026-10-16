@@ -2466,13 +2466,14 @@
         if (React) useSettings("gestures");
         return enabled("gestures") ? null : orig.apply(self, args);
     }
-    // A small chat you can try the gestures in: double-tap Sam's message to reply, double-tap yours to edit or reply,
-    // triple-tap yours to delete it. The message box under it shows what happened, the way Discord's does.
+    // Watch: Sam asks, you double-tap to reply and say you're in, Sam says it's at 6 AM, you regret it and triple-tap
+    // your message away. Try it: a small chat you can double- and triple-tap yourself. Both follow your choices below.
     const GESTURE_TAP_MS = 300;
     function GesturePreview(props) {
         useSettings("gestures");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View;
-        const [state, setState] = React.useState({mode:null, target:null, gone:false}), taps = React.useRef({who:null, count:0, at:0, timer:undefined});
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
+        const blank = {mode:null, target:null, gone:false, mine:true, late:false, draft:"", pulse:null, caption:""};
+        const [state, setState] = React.useState(blank), taps = React.useRef({who:null, count:0, at:0, timer:undefined});
         const box = useThemed("gestureBox", c => ({bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:12, paddingVertical:8,
             backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopLeftRadius:12, borderTopRightRadius:12, marginHorizontal:12, marginTop:8},
             input:{marginHorizontal:12, marginBottom:4, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:c.BACKGROUND_MOD_NORMAL}}),
@@ -2480,20 +2481,39 @@
                 borderTopLeftRadius:12, borderTopRightRadius:12, marginHorizontal:12, marginTop:8},
              input:{marginHorizontal:12, marginBottom:4, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"}});
         React.useEffect(() => () => { const t = taps.current; if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer); }, []);
-        const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete;
+        const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete, watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const pulse = who => update(st => ({pulse:{who, id:(st.pulse ? st.pulse.n + 1 : 1) + ":" + who, n:st.pulse ? st.pulse.n + 1 : 1}}));
+        // The story, built from your settings: what a double-tap on your own message does, and whether triple-tap deletes.
+        useDemo(watching, () => {
+            const steps = [[0, () => setState(blank)], [900, () => update({mine:false, caption:tr("Sam asks a question")})]];
+            steps.push([700, () => pulse("theirs")], [160, () => pulse("theirs")],
+                [80, () => { animateLayout(); update({mode:"reply", target:"theirs", caption:tr("Double-tap: you reply to Sam")}); }]);
+            typeSteps(tr("I'm in!"), text => update({draft:text}), 85).forEach(step => steps.push(step));
+            steps.push([450, () => { animateLayout(); update({mode:null, target:null, draft:"", mine:true, caption:tr("You said yes")}); }],
+                [1300, () => { animateLayout(); update({late:true, caption:tr("...then Sam says it's at 6 AM")}); }]);
+            if (triple) steps.push([1500, () => pulse("mine")], [150, () => pulse("mine")], [150, () => pulse("mine")],
+                [120, () => { animateLayout(); gestureHaptic(); update({mode:"deleted", target:"mine", gone:true, caption:tr("Triple-tap: you delete your message")}); }],
+                [2200, () => {}]);
+            else steps.push([1500, () => pulse("mine")], [160, () => pulse("mine")],
+                [100, () => { animateLayout(); update({mode:own ? "edit" : "reply", target:"mine", caption:tr(own ? "Double-tap: you edit your message" : "Double-tap: you reply to yourself")}); }],
+                [2200, () => {}]);
+            return steps;
+        }, [own, triple]);
         const act = (who, count) => {
-            if (!on) return;
+            if (!on || watching) return;
             if (who === "mine" && count >= 3 && triple) {
-                animateLayout(); gestureHaptic(); setState({mode:"deleted", target:"mine", gone:true});
-                later(() => { animateLayout(); setState(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : st); }, 1800, false);
+                animateLayout(); gestureHaptic(); update({mode:"deleted", target:"mine", gone:true});
+                later(() => { animateLayout(); update(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : {}); }, 1800, false);
                 return;
             }
             if (count < 2) return;
             animateLayout(); gestureHaptic();
-            setState({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false});
+            update({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false});
         };
         // Same rule as in chat: a third tap soon after a double-tap deletes your own message instead.
         const tap = who => {
+            if (watching) return;
             const t = taps.current, now = Date.now();
             t.count = t.who === who && now - t.at < GESTURE_TAP_MS * 2 ? t.count + 1 : 1; t.who = who; t.at = now;
             if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer);
@@ -2501,26 +2521,32 @@
             if (t.count >= 3 || (t.count === 2 && !waitForThird)) { const n = t.count; t.count = 0; act(who, n); return; }
             if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
         };
+        const switchMode = value => { setMode(value); setState(blank); };
         const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon"), X = venusIcon(5940, "XSmallIcon");
         const picked = who => state.target === who && state.mode !== "deleted";
         const message = (who, name, color, time, text) => el(Press, {key:who, onPress:() => tap(who), accessibilityRole:"button",
             accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
             el(RN.View, {style:picked(who) ? {backgroundColor:"#f0b2321a"} : null},
                 picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#f0b232"}}) : null,
-                previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text))));
-        const mineGone = state.gone;
+                previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who)));
+        const showMine = watching ? state.mine && !state.gone : !state.gone;
         const bar = state.mode === "deleted" ? [Trash, tr("Message deleted")] : state.mode === "edit" ? [Pencil, tr("Editing message")] :
             state.mode === "reply" ? [Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"})] : null;
-        return chatPreview(s, "preview", "Tap gestures preview", [
-            message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
-            mineGone ? null : message("mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("I'm in!")),
-            bar ? el(RN.View, {key:"bar", style:box.bar},
-                popIn("icon:" + state.mode, el(bar[0], {size:"xs"})), el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, bar[1]),
-                state.mode !== "deleted" ? el(Press, {onPress:() => { animateLayout(); setState({mode:null, target:null, gone:false}); }, accessibilityRole:"button",
-                    accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}}, el(X, {size:"xs"})) : null) : null,
-            el(RN.View, {key:"input", style:bar ? [box.input, {borderTopLeftRadius:0, borderTopRightRadius:0, marginTop:0}] : [box.input, {marginTop:8}]},
-                el(RN.Text, {style:s.muted, numberOfLines:1}, state.mode === "edit" ? tr("I'm in!") :
-                    on ? tr(triple ? "Try it: double-tap a message, or triple-tap yours" : "Try it: double-tap a message") : tr("Message #general")))]);
+        const inputText = state.draft ? state.draft : state.mode === "edit" ? tr("I'm in!") :
+            on && !watching ? tr(triple ? "Try it: double-tap a message, or triple-tap yours" : "Try it: double-tap a message") : tr("Message #general");
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
+            chatPreview(s, "chat", "Tap gestures preview", [
+                message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
+                showMine ? message("mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("I'm in!")) : null,
+                watching && state.late ? el(RN.View, {key:"late"}, popIn("late", previewMessage(s, "late", "Sam", "#eb459e", tr("Today at 4:03 PM"),
+                    el(RN.Text, {style:s.text}, tr("Great, it starts at 6 AM!"))))) : null,
+                bar ? el(RN.View, {key:"bar", style:box.bar},
+                    popIn("icon:" + state.mode, el(bar[0], {size:"xs"})), el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, bar[1]),
+                    state.mode !== "deleted" && !watching ? el(Press, {onPress:() => { animateLayout(); update({mode:null, target:null, gone:false}); }, accessibilityRole:"button",
+                        accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}}, el(X, {size:"xs"})) : null) : null,
+                el(RN.View, {key:"input", style:bar ? [box.input, {borderTopLeftRadius:0, borderTopRightRadius:0, marginTop:0}] : [box.input, {marginTop:8}]},
+                    el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, inputText)),
+                watching ? previewCaption(s, state.caption) : null]));
     }
     function GestureSettings() {
         useSettings("gestures");
@@ -3112,6 +3138,68 @@
         return ref.current ? el(A.View, {style:ref.current.style, pointerEvents:"none"}, props.children) : props.children;
     }
     function popIn(key, child) { return child ? el(PopIn, {key}, child) : child; }
+    // Every preview can be watched or tried. Watch plays a short story of the feature on a loop; Try it lets you tap the
+    // preview yourself. The choice is shared by every page until Discord restarts, so you only pick it once.
+    let previewModeChoice = "watch";
+    function usePreviewMode() {
+        const [mode, setMode] = React.useState(previewModeChoice);
+        return [mode, value => { previewModeChoice = value; animateLayout(); setMode(value); }];
+    }
+    // A demo is a list of [wait ms, step] pairs that runs in order, then starts over. It restarts when deps change
+    // (your choices below the preview), stops when you switch to Try it, and its timers end with the page.
+    function useDemo(active, steps, deps) {
+        React.useEffect(() => {
+            if (!active) return undefined;
+            const list = steps();
+            let cancelled = false, timer, i = 0;
+            const next = () => {
+                if (cancelled || !list.length) return;
+                if (i >= list.length) i = 0;
+                const [wait, step] = list[i++];
+                timer = later(() => { timer = undefined; if (cancelled) return; try { step(); } catch (_) {} next(); }, wait, false);
+            };
+            next();
+            return () => { cancelled = true; if (timer !== undefined && global.clearTimeout) global.clearTimeout(timer); };
+        }, [active].concat(deps || []));
+    }
+    // Steps that type text into a preview's message box one letter at a time.
+    function typeSteps(text, set, ms) { return Array.from(text).map((_, i) => [ms || 70, () => set(text.slice(0, i + 1))]); }
+    // Where the demo's finger taps: a soft circle that grows and fades once each time it mounts (key it on the tap).
+    function TapRipple(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || reduceMotion) return undefined;
+            const run = A.timing(value, {toValue:1, duration:420, easing:easeOut(), useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, []);
+        const base = Object.assign({position:"absolute", width:34, height:34, borderRadius:17, backgroundColor:"#ffffff"}, props.at || {right:22, top:14});
+        if (!ref.current) return el(RN.View, {pointerEvents:"none", style:[base, {opacity:0.25}]});
+        return el(A.View, {pointerEvents:"none", style:[base, {opacity:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.45, 0]}),
+            transform:[{scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.5, 1.7]})}]}]});
+    }
+    function tapRipple(pulse, who, at) { return pulse && pulse.who === who ? el(TapRipple, {key:"tap:" + pulse.id, at}) : null; }
+    const PREVIEW_TOGGLE_DARK = {wrap:{flexDirection:"row", alignSelf:"flex-end", padding:3, gap:3, borderRadius:16, backgroundColor:"#1e1f22", marginHorizontal:12, marginBottom:4},
+        on:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13, backgroundColor:"#4e5058"},
+        off:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13}};
+    // The small Watch / Try it switch at the top of a preview, in Discord's segmented-control colors.
+    function previewToggle(mode, setMode) {
+        const s = useThemed("previewToggle", c => ({wrap:Object.assign({}, PREVIEW_TOGGLE_DARK.wrap, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND}),
+            on:Object.assign({}, PREVIEW_TOGGLE_DARK.on, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}), off:PREVIEW_TOGGLE_DARK.off}), PREVIEW_TOGGLE_DARK);
+        const Text = inspectedExport(4833, "Text"), Press = RN.Pressable || RN.View;
+        const pill = (value, label, Icon) => el(Press, {key:value, style:mode === value ? s.on : s.off, accessibilityRole:"button", accessibilityLabel:tr(label),
+            accessibilityState:{selected:mode === value}, onPress:() => { if (mode !== value) setMode(value); }, hitSlop:{top:6, bottom:6, left:4, right:4}},
+            el(Icon, {size:"xxs", color:mode === value ? undefined : "#949ba4"}),
+            Text ? el(Text, {variant:"text-xs/semibold", color:mode === value ? "interactive-text-active" : "text-muted"}, tr(label)) :
+                el(RN.Text, {style:{fontSize:12, fontWeight:"600", color:mode === value ? "#ffffff" : "#949ba4"}}, tr(label)));
+        return el(RN.View, {key:"toggle", style:s.wrap}, pill("watch", "Watch", venusIcon(7726, "PlayIcon")), pill("try", "Try it", venusIcon(9370, "HandRequestSpeakIcon")));
+    }
+    // A muted line under a preview: what's happening in Watch, what to tap in Try it.
+    function previewCaption(s, text) {
+        return text ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, popIn("cap:" + text, el(RN.Text, {style:s.muted}, text))) : null;
+    }
     // Shared by every option page: Discord's spacing and scrolling, with each group revealed in turn.
     function settingsBody(ui,groups,scroll) {
         const shown=groups.map((group,i) => group && typeof group==="object" ?

@@ -4894,36 +4894,74 @@ test('Read all shows a check for a moment after it clears something, and its lab
     timers.splice(0).forEach(fn => fn());
     assert.equal(render().props.children.type, 'Text', 'back to its label');
 });
+// Renders one component again and again with real hook order: state slots, refs and effects (run after each render,
+// with deps), and fake timers you can run. Enough to test a preview's Watch and Try it modes end to end.
+function hookHost(b, React, node) {
+    const slots = [], refs = [], effects = [], timers = [];
+    let i = 0, r = 0, e = 0, id = 0;
+    b.context.setTimeout = (fn, ms) => { const t = {fn, ms, id:++id}; timers.push(t); return t.id; };
+    b.context.clearTimeout = tid => { const k = timers.findIndex(t => t.id === tid); if (k >= 0) timers.splice(k, 1); };
+    React.useState = init => { const k = i++; if (!(k in slots)) slots[k] = typeof init === 'function' ? init() : init;
+        return [slots[k], v => { slots[k] = typeof v === 'function' ? v(slots[k]) : v; }]; };
+    React.useRef = v => { const k = r++; if (!(k in refs)) refs[k] = {current:v}; return refs[k]; };
+    React.useEffect = (fn, deps) => { const k = e++; const old = effects[k];
+        const changed = !old || !deps || !old.deps || deps.length !== old.deps.length || deps.some((d, j) => d !== old.deps[j]);
+        if (changed) effects[k] = {fn, deps, pending:true, cleanup:old && old.cleanup}; };
+    function render() {
+        i = r = e = 0;
+        const tree = node.type(node.props);
+        effects.forEach(x => { if (x.pending) { x.pending = false; if (typeof x.cleanup === 'function') x.cleanup(); x.cleanup = x.fn(); } });
+        return pageNodes(tree);
+    }
+    // Runs timers one at a time (each may add the next), re-rendering after each, up to n steps.
+    function run(n) { for (let k = 0; k < n && timers.length; k++) { const t = timers.shift(); t.fn(); render(); } }
+    return {render, run, timers, texts:() => render().filter(x => typeof x.props.children === 'string').map(x => x.props.children)};
+}
+function previewNode(b, id, name) { return pageNodes(b.registry[id].screen.getComponent()()).find(n => n.type && n.type.name === name); }
 test('the Tap gestures preview can be tried: double-tap replies or edits, triple-tap deletes your own', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     let clock = 1000; b.context.__clock = () => clock; vm.runInContext('Date.now=function(){return __clock();}', b.context);
-    const timers = []; b.context.setTimeout = fn => { timers.push(fn); return timers.length; }; b.context.clearTimeout = () => {};
-    let state; const refs = [];
-    React.useState = init => { if (state === undefined) state = init; return [state, v => { state = typeof v === 'function' ? v(state) : v; }]; };
-    let r = 0; React.useRef = v => { const i = r++; if (!(i in refs)) refs[i] = {current:v}; return refs[i]; };
     b.api.setSetting('gestures', true);
-    const node = pageNodes(b.registry.VENUS_GESTURES.screen.getComponent()()).find(n => n.type && n.type.name === 'GesturePreview');
-    const render = () => { r = 0; return pageNodes(node.type(node.props)); };
-    const texts = () => render().filter(n => typeof n.props.children === 'string').map(n => n.props.children);
-    const press = who => { render().find(n => n.props && n.props.accessibilityRole === 'button' && n.props.key === who).props.onPress(); clock += 100; };
-    assert.ok(texts().includes('Try it: double-tap a message, or triple-tap yours'));
-    // Someone else's message: a double-tap replies straight away.
-    press('theirs'); assert.ok(!texts().includes('Replying to Sam'), 'one tap does nothing');
-    press('theirs'); assert.ok(texts().includes('Replying to Sam'));
+    const host = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
+    host.render();
+    host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress();
+    host.timers.length = 0;
+    const press = who => { host.render().find(n => n.props && n.props.accessibilityRole === 'button' && n.props.key === who).props.onPress(); clock += 100; };
+    assert.ok(host.texts().includes('Try it: double-tap a message, or triple-tap yours'));
+    press('theirs'); assert.ok(!host.texts().includes('Replying to Sam'), 'one tap does nothing');
+    press('theirs'); assert.ok(host.texts().includes('Replying to Sam'));
     // Your own: a double-tap waits a moment for a third tap, then edits.
-    press('mine'); press('mine'); assert.ok(!texts().includes('Editing message'), 'waits for a possible third tap');
-    timers.splice(0).forEach(fn => fn()); assert.ok(texts().includes('Editing message'));
+    press('mine'); press('mine'); assert.ok(!host.texts().includes('Editing message'), 'waits for a possible third tap');
+    host.run(1); assert.ok(host.texts().includes('Editing message'));
     // A third tap deletes it, and it comes back a moment later.
     clock += 2000; press('mine'); press('mine'); press('mine');
-    assert.ok(texts().includes('Message deleted')); assert.ok(!texts().includes("I'm in!"), 'gone from the chat');
-    timers.splice(0).forEach(fn => fn()); assert.ok(texts().includes("I'm in!"), 'back again');
-    // Reply instead of edit, and no triple-tap: a double-tap on yours replies at once.
+    assert.ok(host.texts().includes('Message deleted')); assert.ok(!host.texts().includes("I'm in!"), 'gone from the chat');
+    host.run(1); assert.ok(host.texts().includes("I'm in!"), 'back again');
     b.api.setSetting('gestureOwn', 'reply'); b.api.setSetting('gestureTripleDelete', false); clock += 2000;
-    press('mine'); press('mine'); assert.ok(texts().includes('Replying to You'));
-    // Off: nothing happens.
-    b.api.setSetting('gestures', false); state = {mode:null, target:null, gone:false}; clock += 2000;
-    const off = pageNodes(b.registry.VENUS_GESTURES.screen.getComponent()()).find(n => n.type && n.type.name === 'GesturePreview');
-    node.props = off.props; press('theirs'); press('theirs'); assert.ok(!texts().includes('Replying to Sam'));
+    press('mine'); press('mine'); assert.ok(host.texts().includes('Replying to You'));
+});
+test('the Tap gestures preview plays a story: reply to Sam, regret it, triple-tap your message away', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('gestures', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
+    host.render();
+    const seen = new Set(), drafts = new Set(); let ripples = 0;
+    for (let k = 0; k < 40 && !seen.has('Message deleted'); k++) { host.run(1); host.texts().forEach(t => seen.add(t));
+        if (host.render().some(n => n.type && n.type.name === 'TapRipple')) ripples++;
+        const input = host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children); input.forEach(t => drafts.add(t)); }
+    for (const t of ['Replying to Sam', 'Double-tap: you reply to Sam', 'Great, it starts at 6 AM!', 'Triple-tap: you delete your message', 'Message deleted']) assert.ok(seen.has(t), 'shows: ' + t);
+    assert.ok(drafts.has('I'), 'types the reply letter by letter');
+    assert.ok(ripples >= 5, 'a tap ripple shows for each tap: ' + ripples);
+    assert.ok(!host.texts().includes("I'm in!"), 'the regretted message is gone');
+    // It loops back to the start.
+    for (let k = 0; k < 5; k++) host.run(1);
+    assert.ok(host.texts().includes('Anyone up for a game later?'));
+    // Without triple-tap, the story ends by editing instead.
+    b.api.setSetting('gestureTripleDelete', false);
+    const again = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
+    again.render(); const seen2 = new Set();
+    for (let k = 0; k < 40 && !seen2.has('Editing message'); k++) { again.run(1); again.texts().forEach(t => seen2.add(t)); }
+    assert.ok(seen2.has('Double-tap: you edit your message') && !seen2.has('Message deleted'));
 });
 test('Hidden channels preview lists the locked channel only while it is on', () => {
     const b = settingsHarness(); reactHarness(b);
