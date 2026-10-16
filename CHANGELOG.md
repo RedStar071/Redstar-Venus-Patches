@@ -20,15 +20,17 @@
 * **Discord - Venus settings:** About is a designed page with the version, a features-on bar, a count per group and a working status
 * **Discord - Venus settings:** The Features entry shows how many features are on, like "5 of 31 turned on"
 * **Discord - Complete Quests automatically:** The status card shows the running Quest's progress bar and about how many minutes are left
-* **Discord - Venus settings:** Every preview has Watch and Try it: Watch plays a short story of the feature that follows your options, Try it lets you tap the preview yourself
+* **Discord - Venus settings:** Every preview looks like the part of Discord it changes (a channel's header and message bar, menus, the member list, profiles) and has Watch and Try it
+* **Discord - Venus settings:** Watch plays like a short video: each step stays up long enough to read, with its number, a progress bar, the time, pause and start over
+* **Discord - Venus settings:** Try it shows a tip with what to tap next until you've tried everything
 * **Discord - Double-tap to reply:** The preview shows you double-tapping to reply to Sam, regretting it and triple-tapping your message away, or editing it when triple-tap is off
-* **Discord - Show hidden channels:** Its page has a channel list preview with Discord's locked-channel icon; tap the locked channel to see what a real tap does
-* **Discord - Send Nitro stickers and emojis as links:** The preview shows the emoji or sticker the way chat shows it, using Discord's own Wumpus art and never your servers' emojis or stickers
-* **Discord - Show device indicators:** The preview shows a DM header, a list and a profile, each following its own switch and Hide the phone badge
+* **Discord - Show hidden channels:** The preview is a server's channel list with Discord's locked-channel icon; a tap opens the same details dialog as in chat
+* **Discord - Send Nitro stickers and emojis as links:** The preview sends Discord's own Wumpus emoji and sticker from the picker, never your servers' emojis or stickers
+* **Discord - Show device indicators:** The preview shows the icons in a DM, the member list and a profile, each following its own switch and Hide the phone badge
 * **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving; tap a highlighted message to see it again
-* **Discord - Keep deleted messages:** Tap the preview to edit or delete a message and see what's kept
-* **Discord - Pastel name colors:** Tap the preview for new people and their colors
-* **Discord - Translate messages:** Tap the preview to switch between the original and the translation; Watch follows Automatically or Only when you ask
+* **Discord - Keep deleted messages:** The preview shows edits keeping their old text and a deleted message staying, outlined
+* **Discord - Pastel name colors:** The preview shows names filling in with their colors, with New people for more
+* **Discord - Translate messages:** The preview follows Automatically or Only when you ask, with Discord's message menu, and Try it switches to the original and back
 * **Discord - Read all button:** The button shows a check for a moment after it marks something as read
 * **Discord - Keep deleted messages:** How many deleted messages to keep is a choice of 100, 512, 1000 or 5000 instead of a number to type
 * **Discord - Custom themes:** One link box with a Paste or Install button replaces the separate Install and Paste rows

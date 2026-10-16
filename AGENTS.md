@@ -280,11 +280,16 @@ design") renders each page on and off and fails when a page breaks the rules bel
    edit history, pastel names, device icons, translation notes, link style). Previews use plain sample people and
    text, never real messages, and only the theme tokens from `useChatPreviewStyles`.
    Every preview is a component with **Watch and Try it** (`previewToggle(mode, setMode)` from `usePreviewMode()`,
-   shown only while the feature is on). Watch plays a short story of the feature on a loop with `useDemo(active,
-   () => [[waitMs, step], …], deps)`: build the steps from the settings below, so the story follows them (no
-   triple-tap, no delete scene), and show what happens in a `previewCaption`. Taps it makes show a `tapRipple`,
-   typing uses `typeSteps`. Try it lets you tap the preview yourself and says what to tap in the caption. Use sample
-   art bundled in Discord (the Wumpus drawables) or plain sample people, never anything from your servers.
+   shown only while the feature is on), drawn as the part of Discord it changes: `previewScreen` with
+   `previewHeader` (channel header), `previewInput` (message bar) and `previewBar` (reply/edit bar), or that screen's
+   own layout (member list, profile, channel list, message menu, dialog), using `usePreviewChrome()` tokens.
+   - Watch is `useStory(active, () => [[waitMs, step, caption?], …], deps)` with `storyStrip(k, s, story)` under the
+     preview. Each caption says in plain words what happens and stays up at least `readMs` (2.4–5 s); the strip shows
+     the step number, a progress bar, the time and pause / start over. Build the steps from the settings below
+     (no triple-tap, no delete scene), show the finger with `tapRipple` and type with `typeSteps`.
+   - Try it lets you tap the preview yourself. A `previewTip` (Discord's brand tooltip) says what to tap next, step by
+     step, until everything your options allow has been tried.
+   - Use sample art bundled in Discord (the Wumpus drawables) or plain sample people, never anything from your servers.
 3. **Choices**, each group with a short title:
    - a choice of 2–4 short values (widths, who to watch): `venusSegmented` under a `groupTitle`;
    - a choice of one with explanations: `radioGroup`, every choice with a `rowIcon` (4th item);
@@ -334,7 +339,7 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Opacity, position and scale animate on the native driver only. Width (`VenusProgress`) is the one exception.
 - Every animation checks `motion()` and `reduceMotion`. Without `Animated`, or with Android's Remove animations on,
   everything shows at once. Never make anything depend on an animation finishing.
-- Motion confirms what you did. Never loop it on its own, except a preview's Watch story (`useDemo`), whose timers
+- Motion confirms what you did. Never loop it on its own, except a preview's Watch story (`useStory`), whose timers
   stop when you switch to Try it or leave the page.
 
 The page title is short ("Deleted messages", "Tap gestures").
