@@ -6888,6 +6888,20 @@
             return true;
         } catch (_) { return false; }
     }
+    // Keyed on the color and width, so it mounts again only when one of them changes. It glows only when the page
+    // says that highlight just changed (props.fresh), never on the page's first draw.
+    function HighlightGlow(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) ref.current = new A.Value(props.fresh && !reduceMotion ? 1 : 0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || !props.fresh || reduceMotion) return undefined;
+            const run = A.timing(value, {toValue:0, duration:900, easing:easeOut(), useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, []);
+        return ref.current ? el(A.View, {pointerEvents:"none", style:{position:"absolute", left:0, right:0, top:0, bottom:0, backgroundColor:props.hex + "40", opacity:ref.current}}) : null;
+    }
     function highlightPreview(props) {
         const s = useThemed("highlightPreview", c => ({chat:Object.assign({}, HIGHLIGHT_DARK.chat, {backgroundColor:c.CHANNEL_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOWER, borderColor:c.BORDER_SUBTLE}),
             name:Object.assign({}, HIGHLIGHT_DARK.name, {color:c.TEXT_STRONG}), text:Object.assign({}, HIGHLIGHT_DARK.text, {color:c.TEXT_DEFAULT}),
@@ -6902,7 +6916,9 @@
             el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, char));
         const header = (name, time) => el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", gap:6, marginBottom:2}},
             el(RN.Text, {style:s.name, numberOfLines:1}, name), el(RN.Text, {style:s.muted}, time));
+        // A highlight that just changed glows once, like a new mention arriving, then settles to its normal tint.
         const message = (key, hex, children) => el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
+            hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
             hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children);
         const question = tr("Did everyone see the new update?");
         return el(RN.View, {key:props.key, style:s.chat, accessible:true, accessibilityLabel:tr("Message highlight preview")},
@@ -6952,12 +6968,17 @@
         useSettings("messageHighlight");
         const ui = reviewUI();
         const [hexDraft, setHexDraft] = React.useState(""), [hexTarget, setHexTarget] = React.useState("");
+        // What the preview last showed, so only the highlight you just changed glows.
+        const shown = React.useRef(null);
         if (!React || !RN) return null;
         const s = useThemed("highlightCard", c => ({card:Object.assign({}, HIGHLIGHT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
             divider:{height:1, backgroundColor:c.BORDER_SUBTLE}}), HIGHLIGHT_DARK);
         const on = enabled("messageHighlight"), showDeleted = !!features.noDelete;
         const pingHex = on ? highlightColorHex(settings.messageHighlightPingColor, "#f0b232") : "#f0b232";
         const delHex = on ? highlightColorHex(settings.messageHighlightDeletedColor, "#f23f43") : "#f23f43";
+        const barWidth = (on ? settings.messageHighlightThickness : 1) * 2, last = shown.current;
+        const fresh = last ? {reply:last.ping !== pingHex || last.bar !== barWidth, deleted:last.deleted !== delHex || last.bar !== barWidth} : null;
+        shown.current = {ping:pingHex, deleted:delHex, bar:barWidth};
         const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightDeletedColor !== "default";
         const resetAll = () => {
             setSetting("messageHighlightThickness", 2); setSetting("messageHighlightPingColor", "default"); setSetting("messageHighlightDeletedColor", "default");
@@ -6974,7 +6995,7 @@
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
             on ? null : offCard("status", venusIcon(16122, "PaintbrushThinIcon")),
-            highlightPreview({key:"preview", me:currentUser(), bar:(on ? settings.messageHighlightThickness : 1) * 2, ping:pingHex, deleted:showDeleted ? delHex : null}),
+            highlightPreview({key:"preview", me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
                 venusSegmented({key:"choice", value:settings.messageHighlightThickness, disabled:!on, onChange:value => setSetting("messageHighlightThickness", value),

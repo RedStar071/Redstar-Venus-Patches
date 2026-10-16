@@ -545,7 +545,7 @@ function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
         cloneElement(node, props) {return {...node, props:{...node.props,...props}};},
-        useState:() => [0, () => {}], useEffect() {},
+        useState:() => [0, () => {}], useEffect() {}, useRef:value => ({current:value}),
     };
     const RN = {View:'View', Text:'Text', Image:'Image', Modal:'Modal', Pressable:'Pressable'};
     b.load(React, null, 19); b.load(RN, null, 17);
@@ -4912,4 +4912,17 @@ test('the Features entry says how many are on', () => {
     const on = () => { const m = /^(\d+) of 31 turned on$/.exec(b.registry.VENUS_PLUGINS.useDescription()); assert.ok(m); return Number(m[1]); };
     b.api.setSetting('dashless', false); const before = on();
     b.api.setSetting('dashless', true); assert.equal(on(), before + 1);
+});
+test('Message highlights preview glows only the highlight you just changed, never on first open', () => {
+    const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
+    const ref = {current:null}; React.useRef = () => ref; React.useState = init => [init, () => {}];
+    b.api.setSetting('messageHighlight', true);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const glows = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).filter(n => n.type && n.type.name === 'HighlightGlow');
+    assert.deepEqual(glows().map(n => n.props.fresh), [false, false], 'nothing glows when the page opens');
+    b.api.setSetting('messageHighlightPingColor', 'pink');
+    assert.deepEqual(glows().map(n => n.props.fresh), [true, false], 'only replies and mentions');
+    assert.deepEqual(glows().map(n => n.props.fresh), [false, false], 'and only once');
+    b.api.setSetting('messageHighlightThickness', 3);
+    assert.deepEqual(glows().map(n => n.props.fresh), [true, true], 'a new width shows on both');
 });
