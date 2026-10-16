@@ -10,7 +10,7 @@
 * **Discord - Show hidden channels:** Fixed scrolling past a locked channel showing its menu even though you never tapped it ([#62](https://github.com/VenusIsJaded/Venus-Patches/issues/62))
 * **Discord - Show hidden channels:** Fixed opening a server or Discord showing the menu of a locked channel you had last tapped there
 * **Discord - Show hidden channels:** Fixed a locked channel listed above the real ones being picked as the server's first channel
-* **Discord - Show hidden channels:** Fixed a locked channel's details showing a second, larger lock beside Discord's own locked-channel icon
+* **Discord - Show hidden channels:** Fixed locked channels in the channel list showing an extra large lock beside Discord's own lock icon
 
 ### 🔧 Improvements
 
@@ -20,13 +20,13 @@
 * **Discord - Venus settings:** About is a designed page with the version, a features-on bar, a count per group and a working status
 * **Discord - Venus settings:** The Features entry shows how many features are on, like "5 of 31 turned on"
 * **Discord - Complete Quests automatically:** The status card shows the running Quest's progress bar and about how many minutes are left
-* **Discord - Venus settings:** Every preview looks like the part of Discord it changes (a channel's header and message bar, menus, the member list, profiles) and has Watch and Try it
-* **Discord - Venus settings:** Watch plays like a short video: each step stays up long enough to read, with its number, a progress bar, the time, pause and start over
-* **Discord - Venus settings:** Try it shows a tip with what to tap next until you've tried everything
-* **Discord - Double-tap to reply:** The preview shows you double-tapping to reply to Sam, regretting it and triple-tapping your message away, or editing it when triple-tap is off
+* **Discord - Venus settings:** Every preview looks like the part of Discord it changes, with its header, message bar and menus
+* **Discord - Venus settings:** Previews can be watched like a short video, with readable steps, a progress bar, pause and start over
+* **Discord - Venus settings:** Try it on a preview shows a tip with what to tap next until you've tried everything
+* **Discord - Double-tap to reply:** The preview shows a double-tap reply, then triple-tapping your message away, or editing it
 * **Discord - Show hidden channels:** The preview is a server's channel list with Discord's locked-channel icon; a tap opens the same details dialog as in chat
 * **Discord - Send Nitro stickers and emojis as links:** The preview sends Discord's own Wumpus emoji and sticker from the picker, never your servers' emojis or stickers
-* **Discord - Show device indicators:** The preview shows the icons in a DM, the member list and a profile, each following its own switch and Hide the phone badge
+* **Discord - Show device indicators:** The preview shows the icons in a DM, the member list and a profile, following your switches
 * **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving; tap a highlighted message to see it again
 * **Discord - Keep deleted messages:** The preview shows edits keeping their old text and a deleted message staying, outlined
 * **Discord - Pastel name colors:** The preview shows names filling in with their colors, with New people for more
