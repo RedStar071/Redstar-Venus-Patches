@@ -3567,25 +3567,43 @@
     }
     // Pastel names: a few names in their own pastel color, the way they'll show in chat.
     const PASTEL_CAST = [["Alex","Sam","Jordan"],["Riley","Morgan","Casey"],["Taylor","Jamie","Avery"],["Quinn","Rowan","Skyler"]];
+    // Watch: people post one at a time and each name fills in with its own color; then a new group arrives.
+    // Try it: tap for new people. Everyone gets their own color, always the same one for the same name.
+    function PastelPreview(props) {
+        useSettings("pastelize");
+        const s=useChatPreviewStyles(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode(), on=props.on;
+        const [state,setState]=React.useState({round:0,shown:3,painted:3,caption:""}), watching=on && mode==="watch";
+        const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
+        useDemo(watching,() => {
+            const steps=[[0,() => setState(st => ({round:st.round,shown:0,painted:0,caption:""}))]];
+            [0,1,2].forEach(i => steps.push([i ? 1000 : 500,() => { animateLayout(); update({shown:i+1}); }],
+                [450,() => update({painted:i+1,caption:tr(i===1 && !settings.pastelAll ? "A role color stays as it is" : "Each person gets their own color")})]));
+            steps.push([2200,() => update({caption:tr("The same name always gets the same color")})],[1800,() => { animateLayout(); update(st => ({round:st.round+1,shown:0,painted:0})); }]);
+            return steps;
+        },[settings.pastelAll]);
+        const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
+        const cast=PASTEL_CAST[state.round % PASTEL_CAST.length], shown=watching ? state.shown : 3, painted=watching ? state.painted : 3;
+        const people=[[cast[0],"#3ba55c",tr("Has anyone tried the new update?"),null],[cast[1],"#eb459e",tr("Yes, it looks great!"),"#e67e22"],[cast[2],"#faa61a",tr("Same here.")]];
+        const preview=chatPreview(s,"preview","Pastel names preview",people.slice(0,shown).map(([who,avatar,text,role],i) => {
+            const plain=i>=painted, kept=role && !settings.pastelAll;
+            const name=kept ? role : plain ? s.name.color : tint(who,0.75,0.6,s.name.color);
+            const body=!plain && settings.pastelContent && !kept ? tint(who,0.85,0.75,null) : null;
+            return el(RN.View,{key:state.round+":"+who},popIn("msg:"+state.round+":"+who,previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),
+                el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name})));
+        }).concat(on ? [previewCaption(s,watching ? state.caption : tr("Tap for new people"))] : []));
+        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(st => ({round:st.round,shown:3,painted:3,caption:""})); }) : null,
+            watching ? preview : el(Press,{key:"press",onPress:() => { if (on) { animateLayout(); update(st => ({round:st.round+1})); } },accessibilityRole:"button",
+                accessibilityHint:tr("Tap for new people")},preview));
+    }
     function PastelSettings() {
         useSettings("pastelize");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
-        const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
-        // Tap the preview for new people: everyone gets their own color, always the same one for the same name.
-        const [round,setRound]=React.useState(0), cast=PASTEL_CAST[round % PASTEL_CAST.length];
-        const people=[[cast[0],"#3ba55c",tr("Has anyone tried the new update?"),null],[cast[1],"#eb459e",tr("Yes, it looks great!"),"#e67e22"],[cast[2],"#faa61a",tr("Same here.")]];
+        const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const groups=[
             on ? statusCard("status",settings.pastelAll ? "Every name has its own pastel color, even with a role color." : "Names without a role color get their own pastel color.",
                 {title:tr("Pastel names"),IconComponent:venusIcon(14795,"PaintPaletteIcon")}) : offCard("status",venusIcon(14795,"PaintPaletteIcon")),
-            el(RN.Pressable || RN.View,{key:"preview",onPress:() => { if (on) { animateLayout(); setRound(n => n+1); } },accessibilityRole:"button",accessibilityHint:tr("Tap for new people")},
-                chatPreview(s,"preview","Pastel names preview",people.map(([who,avatar,text,role],i) => {
-                    const name=role && !settings.pastelAll ? role : tint(who,0.75,0.6,s.name.color);
-                    const body=settings.pastelContent && !(role && !settings.pastelAll) ? tint(who,0.85,0.75,null) : null;
-                    return previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),
-                        el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name});
-                }).concat(on ? [el(RN.View,{key:"hint",style:{paddingHorizontal:16,paddingTop:2}},el(RN.Text,{style:s.muted},tr("Tap for new people")))] : []))),
+            el(PastelPreview,{key:"preview",on}),
             el(Group,{key:"colors",title:tr("Colors")},
                 switchRow(Switch,"pastelAll","Replace role colors","Every name uses its pastel color, even with a role color.",rowIcon(10398,"CrownIcon")),
                 switchRow(Switch,"pastelContent","Color message text","What people write is colored too, in a lighter shade of their name.",rowIcon(5395,"TextIcon"))),

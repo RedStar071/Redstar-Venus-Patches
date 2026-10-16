@@ -2214,7 +2214,7 @@ test('settings with more options have a switch and a separate button to their pa
     const prev=b.context.__r;b.context.__r=id=>id===6621?{TableSwitchRow}:prev(id);
     const pastel=pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()());
     assert.deepEqual(pastel.filter(n=>n.type===TableSwitchRow).map(n=>n.props.key),['pastelAll','pastelContent']);
-    assert.ok(pastel.some(n=>n.props&&n.props.accessibilityLabel==='Pastel names preview'));
+    assert.ok(pastel.some(n=>n.type&&n.type.name==='PastelPreview'));
     pastel.find(n=>n.type===TableSwitchRow&&n.props.key==='pastelAll').props.onValueChange(false);assert.equal(b.api.settings.pastelAll,false);
     assert.equal(b.registry.VENUS_PASTELCONTENT.parent,'VENUS_PASTELIZE');
 });
@@ -5110,6 +5110,19 @@ test('Deleted messages preview plays: Alex edits twice and the old versions stay
     for (let k = 0; k < 9; k++) { plain.run(1); plain.texts().forEach(t => seen2.add(t)); old2 += plain.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length; }
     assert.ok(seen2.has('Alex edits it') && old2 === 0, 'without edit history, only the new version shows');
 });
+test('Pastel names preview plays: people post one by one and each name fills in with its color', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('pastelize', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
+    host.render();
+    const names = () => host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children);
+    host.run(1); assert.deepEqual(names(), [], 'starts empty');
+    const counts = [], seen = new Set();
+    for (let k = 0; k < 8; k++) { host.run(1); counts.push(names().length); host.texts().forEach(t => seen.add(t)); }
+    assert.deepEqual(counts.slice(0, 6), [1, 1, 2, 2, 3, 3], 'one at a time');
+    for (const t of ['Each person gets their own color', 'A role color stays as it is', 'The same name always gets the same color']) assert.ok(seen.has(t), 'shows: ' + t);
+    host.run(2); assert.equal(names()[0], 'Riley', 'then a new group');
+});
 test('Deleted messages and Pastel names previews can be tried by tapping', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
@@ -5125,10 +5138,11 @@ test('Deleted messages and Pastel names previews can be tried by tapping', () =>
     b.api.setSetting('noDeleteEdits', false); node = previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview');
     assert.equal(pageNodes(hookHost(b, React, node).render()).filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
     // Pastel names: tap for new people.
-    let round = 0; React.useState = init => typeof init === 'number' ? [round, v => { round = typeof v === 'function' ? v(round) : v; }] : [init, () => {}];
     b.api.setSetting('pastelize', true);
-    const names = () => pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()()).filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children);
+    const pastel = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
+    pastel.render(); pastel.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); pastel.timers.length = 0;
+    const names = () => pastel.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).map(n => n.props.children);
     assert.deepEqual(names(), ['Alex', 'Sam', 'Jordan']);
-    pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()()).find(n => n.props && n.props.accessibilityHint === 'Tap for new people').props.onPress();
+    pastel.render().find(n => n.props && n.props.accessibilityHint === 'Tap for new people').props.onPress();
     assert.deepEqual(names(), ['Riley', 'Morgan', 'Casey']);
 });
