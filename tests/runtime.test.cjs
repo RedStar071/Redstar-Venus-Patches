@@ -5092,40 +5092,54 @@ test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it
     b.api.setSetting('hiddenChannelsMenu', false); row().props.onPress(); assert.equal(shown.length, 1, 'with the menu off, nothing opens');
     assert.equal(row().props.shake, 1, 'it shakes instead');
 });
-test('Device indicators preview follows every option, and tapping it changes Alex\'s devices', () => {
+test('Device indicators preview shows the real screens around the icons, follows every option, and Try it guides you', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('platformIndicators', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
     host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
-    const preview = () => host.render();
-    // Each place's icons are its own popIn, keyed by the place.
-    const places = () => preview().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)).map(n => n.props.key.split(':')[0]);
-    assert.deepEqual(places(), ['piDmHeader', 'piUserList', 'piProfile']);
-    b.api.setSetting('piDmHeader', false); assert.deepEqual(places(), ['piUserList', 'piProfile']);
-    b.api.setSetting('piUserList', false); assert.deepEqual(places(), ['piProfile']);
-    b.api.setSetting('piProfile', false); assert.deepEqual(places(), []);
+    const nodes = () => { const n = host.render(); return n.concat(...n.filter(x => x.type && x.type.name === 'PreviewSegmented').map(x => pageNodes(x.props.items.map(i => ({type:'Tab', props:{label:i.label, onPress:() => x.props.onChange(i.value)}}))))); };
+    const icons = () => nodes().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)).map(n => n.props.key.split(':')[0]);
+    const pick = label => nodes().find(n => n.type === 'Tab' && n.props.label === label).props.onPress();
+    const texts = () => host.texts();
+    // A DM: Discord's header with Alex, the chat and the message bar; the icons sit next to the name.
+    assert.deepEqual(icons(), ['piDmHeader']);
+    assert.ok(texts().includes('Are you coming to the game tonight?') && texts().includes('Message @Alex'));
+    assert.ok(texts().includes("Tap Change Alex's devices and watch the icons change"), 'a tip says what to try');
+    // Members: Discord's Online header, Alex and two others, each with their own icons.
+    pick('Members'); assert.deepEqual(icons(), ['piUserList', 'piUserList', 'piUserList']);
+    assert.ok(texts().some(t => /^ONLINE — 3$/.test(t)) && texts().includes('Riley'));
+    // Profile: the name, a Message button.
+    pick('Profile'); assert.deepEqual(icons(), ['piProfile']); assert.ok(texts().includes('Message'));
+    // Each screen follows its own switch, and says when it's off.
+    b.api.setSetting('piProfile', false); assert.deepEqual(icons(), []); assert.ok(texts().includes('Off in your options: no icons here'));
     b.api.setSetting('piProfile', true);
-    // On a phone only, the avatar shows Discord's phone badge unless Hide the phone badge is on.
-    const phone = () => preview().some(n => n.props && n.props.style && n.props.style.borderRadius === 2);
-    preview().find(n => n.props && n.props.accessibilityHint === "Tap to change Alex's devices").props.onPress();
-    assert.deepEqual(places(), ['piProfile']); assert.match(preview().find(n => n.type && n.type.name === 'PopIn').props.key, /:1$/, 'tap changes devices');
+    // Change Alex's devices: on a phone only, the avatar shows Discord's phone badge unless Hide the phone badge is on.
+    const phone = () => nodes().some(n => n.props && n.props.style && n.props.style.borderRadius === 2);
+    const change = () => nodes().find(n => n.props && n.props.accessibilityHint === "Tap to change Alex's devices").props.onPress();
+    assert.match(texts().find(t => /^Alex is on: /.test(t)), /Desktop \(Online\), Mobile \(Idle\)/);
+    change(); assert.equal(texts().find(t => /^Alex is on: /.test(t)), 'Alex is on: Mobile (Online)');
     assert.equal(phone(), false, 'hidden by default');
     b.api.setSetting('piHideMobile', false); assert.equal(phone(), true, 'phone badge shows when not hidden');
+    assert.ok(!texts().includes("Tap Change Alex's devices and watch the icons change"), 'the tip moves on');
     b.api.setSetting('platformIndicators', false);
     const off = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
     assert.deepEqual(off.render().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)), [], 'no icons while off');
 });
-test('Device indicators preview plays: Alex moves between devices and the icons follow', () => {
+test('Device indicators preview plays: from a DM to the member list to a profile, as Alex changes devices', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('platformIndicators', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
-    host.render(); const seen = new Set(), demos = new Set(); let ripples = 0;
-    for (let k = 0; k < 9; k++) { host.run(1); host.texts().forEach(t => seen.add(t));
-        const nodes = host.render(); if (nodes.some(n => n.type && n.type.name === 'TapRipple')) ripples++;
-        nodes.filter(n => n.type && n.type.name === 'PopIn' && /^piDmHeader:/.test(n.props.key)).forEach(n => demos.add(n.props.key)); }
-    for (const t of ['Alex is on a computer and a phone', 'Alex is only on a phone', 'Alex is on a computer and the web', 'Alex is on a console and a computer']) assert.ok(seen.has(t), 'shows: ' + t);
-    assert.equal(demos.size, 4, 'the icons change each time'); assert.ok(ripples >= 3, 'a tap on Alex each time');
-    assert.ok(!seen.has("Tap to change Alex's devices"), 'no tap hint while it plays');
+    const run = storyTimes(host);
+    for (const t of ["In a DM, Alex's devices show next to their name at the top: a computer and a phone", 'Alex is only on a phone now',
+        "In the member list, everyone's devices show next to their name", 'Alex switches to a computer and the web, on Do Not Disturb',
+        'On a profile, they show next to the name', 'Then to a console and a computer'])
+        assert.ok(run.times.some(([c]) => c === t), 'caption: ' + t + ' / ' + run.times.map(x => x[0]));
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(run.seen.has('Message @Alex') && run.seen.has('Riley') && run.seen.has('Message'), 'all three screens show');
+    // A screen whose switch is off says so.
+    b.api.setSetting('piUserList', false);
+    const off = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview')));
+    assert.ok(off.times.some(([c]) => c === "Here they're off in your options, so nothing shows"));
 });
 test('Nitro preview shows Discord\'s own Wumpus as the emoji or sticker, never anything from your servers', () => {
     const b = nitroHarness(); const {React} = reactHarness(b);

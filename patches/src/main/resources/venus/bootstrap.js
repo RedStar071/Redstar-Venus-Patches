@@ -3793,49 +3793,103 @@
             footnote("note","Each person always gets the same color, on every device.")];
         return settingsBody(ui,groups);
     }
-    // Device indicators: each place the icons can show (a DM's header, the member list, a profile, an avatar), drawn the
-    // way Discord draws it and following its own switch. Tap Alex to change what Alex is on and see the icons follow.
-    // Watch: Alex moves between devices on its own, and each place's icons follow.
+    // Device indicators: the icons shown where Discord shows them, inside the screen around them: a DM's header, the
+    // member list and a profile, each following its own switch. Watch: Alex moves between devices while the preview
+    // goes from the DM to the member list to the profile. Try it: pick the screen, then change Alex's devices.
     const PLATFORM_DEMO = [{desktop:"online", mobile:"idle"}, {mobile:"online"}, {desktop:"dnd", web:"dnd"}, {embedded:"online", desktop:"idle"}];
-    const PLATFORM_DEMO_CAPTIONS = ["Alex is on a computer and a phone", "Alex is only on a phone", "Alex is on a computer and the web", "Alex is on a console and a computer"];
+    const PLATFORM_SCREENS = [["piDmHeader"], ["piUserList"], ["piProfile"]];
+    const PLATFORM_PEOPLE = [["Sam", "#eb459e", {desktop:"online"}], ["Riley", "#faa61a", {mobile:"online"}]];
+    // Discord's segmented control inside a preview, as its own component so its theme hook only runs while it's shown.
+    function PreviewSegmented(props) { return venusSegmented(props); }
     function PlatformPreview(props) {
         useSettings("platformIndicators");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
-        const [state, setState] = React.useState({demo:0, pulse:null, caption:""}), demo = state.demo, on = props.on, watching = on && mode === "watch";
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
+        const blank = {demo:0, screen:"piDmHeader", pulse:null, tried:{}};
+        const [state, setState] = React.useState(blank), demo = state.demo, on = props.on, watching = on && mode === "watch";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
-        useDemo(watching, () => [[0, () => setState({demo:0, pulse:null, caption:tr(PLATFORM_DEMO_CAPTIONS[0])})]].concat(
-            [1, 2, 3, 0].reduce((steps, next) => steps.concat([[2200, () => update(st => ({pulse:{who:"alex", id:"p" + next + ":" + st.demo}}))],
-                [180, () => { animateLayout(); update({demo:next, caption:tr(PLATFORM_DEMO_CAPTIONS[next])}); }]]), [])), []);
+        const shown = key => on && settings[key];
+        // Where each screen is, and what it says when its switch is off.
+        const where = key => tr(key === "piDmHeader" ? "In a DM, Alex's devices show next to their name at the top: a computer and a phone" :
+            key === "piUserList" ? "In the member list, everyone's devices show next to their name" : "On a profile, they show next to the name");
+        const offHere = () => tr("Here they're off in your options, so nothing shows");
+        const story = useStory(watching, () => {
+            const steps = [];
+            const go = (screen, demoAt, caption) => steps.push([steps.length ? 600 : 0, () => { animateLayout(); update({screen, demo:demoAt, pulse:null}); }, caption]);
+            const change = (next, caption) => steps.push([900, () => update(st => ({pulse:{who:"alex", id:"p" + next + ":" + st.screen}}))],
+                [300, () => { animateLayout(); update({demo:next}); }, caption]);
+            go("piDmHeader", 0, settings.piDmHeader ? where("piDmHeader") : offHere());
+            change(1, tr(settings.piHideMobile ? "Alex is only on a phone now" : "Alex is only on a phone now, so their avatar shows a phone"));
+            go("piUserList", 1, settings.piUserList ? where("piUserList") : offHere());
+            change(2, tr("Alex switches to a computer and the web, on Do Not Disturb"));
+            go("piProfile", 2, settings.piProfile ? where("piProfile") : offHere());
+            change(3, tr("Then to a console and a computer"));
+            steps.push([600, () => {}]);
+            return steps;
+        }, [settings.piDmHeader, settings.piUserList, settings.piProfile, settings.piHideMobile]);
         const clients = PLATFORM_DEMO[demo % PLATFORM_DEMO.length];
-        const status = clients.desktop || clients.mobile || clients.web || clients.embedded || "offline";
-        const mobileOnly = !!clients.mobile && Object.keys(clients).length === 1;
-        const badges = place => on && settings[place] ? popIn(place + ":" + demo, el(RN.View, {style:{flexDirection:"row", gap:2, alignItems:"center"}},
-            Object.keys(clients).map(platform => el(RN.View, {key:platform, accessible:true, accessibilityLabel:tr(PLATFORM_LABELS[platform]) + ": " + tr(PLATFORM_STATUS[clients[platform]])},
-                el(PlatformPng, {platform, color:PLATFORM_COLORS[clients[platform]]}))))) : null;
+        const statusOf = c => c.desktop || c.mobile || c.web || c.embedded || "offline";
+        const icons = (place, c, keyed) => shown(place) ? popIn(place + ":" + (keyed || "") + demo, el(RN.View, {style:{flexDirection:"row", gap:2, alignItems:"center"}},
+            Object.keys(c).map(platform => el(RN.View, {key:platform, accessible:true, accessibilityLabel:tr(PLATFORM_LABELS[platform]) + ": " + tr(PLATFORM_STATUS[c[platform]])},
+                el(PlatformPng, {platform, color:PLATFORM_COLORS[c[platform]]}))))) : null;
         // Discord's avatar: a status dot, or a small phone instead when the only device is a phone (unless hidden).
-        const avatar = size => {
-            const phone = mobileOnly && !(on && settings.piHideMobile), dot = Math.round(size * 0.34);
+        const avatar = (letter, color, c, size, ring) => {
+            const mobileOnly = !!c.mobile && Object.keys(c).length === 1, phone = mobileOnly && !(on && settings.piHideMobile), dot = Math.round(size * 0.3);
             return el(RN.View, {style:{width:size, height:size}},
-                el(RN.View, {style:{width:size, height:size, borderRadius:size / 2, backgroundColor:"#3ba55c", alignItems:"center", justifyContent:"center"}},
-                    el(RN.Text, {style:{color:"#ffffff", fontWeight:"700", fontSize:Math.round(size * 0.42)}}, "A")),
-                el(RN.View, {style:{position:"absolute", right:-2, bottom:-2, padding:2, borderRadius:8, backgroundColor:s.chat.backgroundColor}},
-                    phone ? el(RN.View, {style:{width:dot * 0.75, height:dot * 1.15, borderRadius:2, backgroundColor:STATUS_HEX[status]}}) :
-                        el(RN.View, {style:{width:dot, height:dot, borderRadius:dot / 2, backgroundColor:STATUS_HEX[status]}})));
+                el(RN.View, {style:{width:size, height:size, borderRadius:size / 2, backgroundColor:color, alignItems:"center", justifyContent:"center"}},
+                    el(RN.Text, {style:{color:"#ffffff", fontWeight:"700", fontSize:Math.round(size * 0.42)}}, letter)),
+                el(RN.View, {style:{position:"absolute", right:-2, bottom:-2, padding:Math.max(2, Math.round(size / 24)), borderRadius:size, backgroundColor:ring || s.chat.backgroundColor}},
+                    phone ? el(RN.View, {style:{width:Math.round(dot * 0.72), height:Math.round(dot * 1.1), borderRadius:2, backgroundColor:STATUS_HEX[statusOf(c)]}}) :
+                        el(RN.View, {style:{width:dot, height:dot, borderRadius:dot / 2, backgroundColor:STATUS_HEX[statusOf(c)]}})));
         };
-        const label = text => el(RN.Text, {style:[s.muted, {fontSize:11, fontWeight:"700", letterSpacing:0.4, marginBottom:6}]}, tr(text).toUpperCase());
-        const place = (key, title, child) => el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:8, opacity:on && settings[key] === false ? 0.55 : 1}}, label(title), child);
-        const name = (size, place) => el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
-            el(RN.Text, {style:[s.name, {fontSize:size}]}, "Alex"), badges(place));
-        const preview = chatPreview(s, "preview", "Device indicators preview", [
-                place("piDmHeader", "In DMs", el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10}}, avatar(24), name(16, "piDmHeader"))),
-                place("piUserList", "In lists", el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10}}, avatar(32),
-                    el(RN.View, {style:{flex:1}}, name(15, "piUserList"), el(RN.Text, {style:s.muted}, tr(PLATFORM_STATUS[status] || "Online"))))),
-                place("piProfile", "On profiles", el(RN.View, {style:{gap:4}}, avatar(48), name(20, "piProfile"))),
-                tapRipple(state.pulse, "alex", {left:24, top:30}),
-                on ? previewCaption(s, watching ? state.caption : tr("Tap to change Alex's devices")) : null]);
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState({demo:0, pulse:null, caption:""}); }) : null,
-            watching ? preview : el(Press, {key:"press", onPress:() => { if (on) { animateLayout(); update(st => ({demo:st.demo + 1})); } }, accessibilityRole:"button",
-                accessibilityHint:tr("Tap to change Alex's devices")}, preview));
+        const ripple = tapRipple(state.pulse, "alex", {left:12, top:4});
+        const screen = state.screen, Text = RN.Text;
+        // A DM with Alex: Discord's header with the icons next to the name, a short chat and the message bar.
+        const dm = () => [
+            el(RN.View, {key:"msgs", style:{paddingTop:4}},
+                previewMessage(s, "a1", "Alex", "#3ba55c", tr("Today at 4:01 PM"), el(Text, {style:s.text}, tr("Are you coming to the game tonight?"))),
+                previewMessage(s, "a2", tr("You"), "#5865f2", tr("Today at 4:02 PM"), el(Text, {style:s.text}, tr("Yes, see you there!")))),
+            previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"@Alex"})})];
+        const dmHeader = () => el(RN.View, {key:"hd"}, previewHeader(k, {title:"Alex", leading:avatar("A", "#3ba55c", clients, 24, k.header.backgroundColor),
+            badges:icons("piDmHeader", clients), icons:[[7309, "PhoneCallIcon"], [10976, "VideoIcon"]]}), ripple);
+        // The member list: Discord's "Online — 3" header and a row per person, status under the name.
+        const memberRow = (name, color, c, alex) => el(RN.View, {key:name, style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:6},
+            alex ? {marginHorizontal:8, paddingHorizontal:8, borderRadius:8} : null, alex && watching ? k.selected : null]},
+            avatar(name.slice(0, 1), color, c, 32), el(RN.View, {style:{flex:1}},
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}}, el(Text, {style:[s.name, {fontSize:15}], numberOfLines:1}, name), icons("piUserList", c, name)),
+                el(Text, {style:s.muted}, tr(PLATFORM_STATUS[statusOf(c)] || "Online"))), alex ? ripple : null);
+        const list = () => [el(RN.View, {key:"members", style:{paddingTop:6, paddingBottom:8}},
+            el(Text, {style:[k.category, {paddingHorizontal:16, paddingBottom:6}]}, tr("Online").toUpperCase() + " \u2014 3"),
+            memberRow("Alex", "#3ba55c", clients, true), PLATFORM_PEOPLE.map(([n, color, c]) => memberRow(n, color, c, false)))];
+        // A profile: Discord's banner, the avatar overlapping it, the name with the icons and a Message button.
+        const profile = () => [el(RN.View, {key:"profile"},
+            el(RN.View, {style:{height:64, backgroundColor:"#2d7d46"}}),
+            el(RN.View, {style:{paddingHorizontal:16, marginTop:-36, gap:8, paddingBottom:12}},
+                el(RN.View, {style:{alignSelf:"flex-start", padding:4, borderRadius:44, backgroundColor:s.chat.backgroundColor}}, avatar("A", "#3ba55c", clients, 72), ripple),
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8}}, el(Text, {style:[s.name, {fontSize:22, fontWeight:"800"}]}, "Alex"), icons("piProfile", clients)),
+                el(Text, {style:s.muted}, "alex"),
+                el(RN.View, {style:[k.brand, {borderRadius:20, paddingVertical:10, alignItems:"center", flexDirection:"row", justifyContent:"center", gap:8}]},
+                    el(venusIcon(5386, "ChatIcon"), {size:"sm", color:k.brandText.color}), el(Text, {style:[k.brandText, {fontWeight:"600"}]}, tr("Message")))))];
+        const body = screen === "piDmHeader" ? dm() : screen === "piUserList" ? list() : profile();
+        const header = screen === "piDmHeader" ? dmHeader() : screen === "piUserList" ? previewHeader(k, {title:"general"}) : null;
+        const off = on && !settings[screen] ? el(RN.View, {key:"off", style:{marginHorizontal:12, marginBottom:8, padding:10, borderRadius:8, backgroundColor:"#4e505833"}},
+            el(Text, {style:[s.muted, {fontSize:13}]}, tr("Off in your options: no icons here"))) : null;
+        // Try it: pick the screen, then change what Alex is on. A tip says what Alex is on right now.
+        const now = Object.keys(clients).map(platform => tr(PLATFORM_LABELS[platform]) + " (" + tr(PLATFORM_STATUS[clients[platform]]) + ")").join(", ");
+        const tryBar = on && !watching ? el(RN.View, {key:"try", style:[k.strip, {padding:12, gap:10}]},
+            el(PreviewSegmented, {key:"platformScreen", value:screen, onChange:value => update(st => ({screen:value, tried:Object.assign({}, st.tried, {[value]:true})})),
+                items:PLATFORM_SCREENS.map(([key]) => ({value:key, label:tr(key === "piDmHeader" ? "DM" : key === "piUserList" ? "Members" : "Profile")}))}),
+            el(Press, {onPress:() => { animateLayout(); update(st => ({demo:st.demo + 1, pulse:{who:"alex", id:"t" + (st.demo + 1)}, tried:Object.assign({}, st.tried, {devices:true})})); },
+                accessibilityRole:"button", accessibilityHint:tr("Tap to change Alex's devices"),
+                style:[k.secondary, {borderRadius:20, paddingVertical:10, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8}]},
+                el(venusIcon(14470, "LaptopPhoneIcon"), {size:"sm", color:k.secondaryText.color}),
+                el(Text, {style:[k.secondaryText, {fontWeight:"600"}]}, tr("Change Alex's devices"))),
+            el(Text, {style:[s.muted, {fontSize:13}]}, tr("Alex is on: {devices}", {devices:now}))) : null;
+        const tip = on && !watching ? previewTip(k, !state.tried.devices ? tr("Tap Change Alex's devices and watch the icons change") :
+            Object.keys(state.tried).length < 3 ? tr("Now pick another screen to see the icons there") : null, "down") : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Device indicators preview", [el(RN.View, {key:"screen:" + screen, style:{minHeight:236}}, popIn("screen:" + screen,
+                el(RN.View, null, body))), off],
+                {header, footer:el(RN.View, {key:"foot"}, tip, tryBar, watching ? storyStrip(k, s, story) : null)}));
     }
     function PlatformSettings() {
         useSettings("platformIndicators");

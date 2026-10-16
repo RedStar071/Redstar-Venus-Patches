@@ -47,9 +47,6 @@ for (const table of ['PLATFORM_LABELS', 'PLATFORM_STATUS']) {
 }
 const hidden = /const HIDDEN_CHANNEL = "([^"]+)", HIDDEN_CATEGORY = "([^"]+)"/.exec(source);
 if (hidden) { found.add(hidden[1]); found.add(hidden[2]); }
-// Device indicators' Watch captions, read by tr() from their table.
-const captions = /const PLATFORM_DEMO_CAPTIONS = \[([^\]]*)\]/.exec(source);
-if (captions) for (const match of captions[1].matchAll(/"([^"]+)"/g)) found.add(match[1]);
 // Status texts aboutText() picks between.
 for (const value of ["Kept deleted messages are saved on this phone.", "Kept deleted messages couldn't be saved.", "Saved deleted messages couldn't be loaded."]) found.add(value);
 process.stdout.write(JSON.stringify(Array.from(found).sort(), null, 1));
