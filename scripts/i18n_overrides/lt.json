@@ -456,6 +456,7 @@
  },
  "Triple-tap": "Trigubas bakstelėjimas",
  "Triple-tap to delete": "Trigubas bakstelėjimas ištrinti",
+ "Try it": "Išbandyti",
  "Trying again in {n} s.": "Bandykite dar kartą po {n} s.",
  "Turkish": "turkų",
  "Turned off. Switch it on in Features to start.": "Išjungta. Įjunkite skiltyje Funkcijos, kad pradėtumėte.",
@@ -482,6 +483,7 @@
  "Vietnamese": "vietnamiečių",
  "View Anyway": "Vis tiek peržiūrėti",
  "Waiting for new Quests.": "Laukiama naujų Quest užduočių.",
+ "Watch": "Žiūrėti",
  "Watching all friends.": "Stebimi visi draugai.",
  "Watching all {n} friends.": {
   "few": "Stebimi visi {n} draugai.",
@@ -516,6 +518,7 @@
  "by {author}": "pateikė {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "ką tik",
+ "locked": "užrakinta",
  "{count} kept on this phone, so chats you reopen show them at once.": "Šiame telefone išsaugota: {count}. Iš naujo atidaryti pokalbiai juos rodo iškart.",
  "{deleted} and {edited} kept until Discord restarts.": "Išsaugota iki Discord paleidimo iš naujo: {deleted} ir {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Išsaugota šiame telefone: {deleted} ir {edited}.",

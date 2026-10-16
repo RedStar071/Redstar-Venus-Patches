@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Τριπλό πάτημα",
  "Triple-tap to delete": "Τριπλό πάτημα για διαγραφή",
+ "Try it": "Δοκίμασε",
  "Trying again in {n} s.": "Δοκίμασε ξανά σε {n} δευτ.",
  "Turkish": "Τουρκικά",
  "Turned off. Switch it on in Features to start.": "Ανενεργό. Ενεργοποίησέ το στις Λειτουργίες για να ξεκινήσεις.",
@@ -474,6 +475,7 @@
  "Vietnamese": "Βιετναμικά",
  "View Anyway": "Προβολή ούτως ή άλλως",
  "Waiting for new Quests.": "Αναμονή για νέα Quests.",
+ "Watch": "Προβολή",
  "Watching all friends.": "Παρακολούθηση όλων των φίλων.",
  "Watching all {n} friends.": {
   "one": "Παρακολούθηση {n} φίλου.",
@@ -506,6 +508,7 @@
  "by {author}": "από {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "μόλις τώρα",
+ "locked": "κλειδωμένο",
  "{count} kept on this phone, so chats you reopen show them at once.": "Διατηρούνται σε αυτό το τηλέφωνο: {count}. Οι συνομιλίες που ανοίγεις ξανά τα δείχνουν αμέσως.",
  "{deleted} and {edited} kept until Discord restarts.": "Διατηρούνται μέχρι την επανεκκίνηση του Discord: {deleted} και {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Διατηρούνται σε αυτό το τηλέφωνο: {deleted} και {edited}.",

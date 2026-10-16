@@ -4184,7 +4184,7 @@
             [1300,() => update({caption:tr("Alex sent a message")})],
             [900,() => pulse("edited")],[150,() => { animateLayout(); update({edits:1,caption:editCaption}); }],
             [1600,() => pulse("edited")],[150,() => { animateLayout(); update({edits:2}); }],
-            [1600,() => pulse("deleted")],[150,() => { animateLayout(); update({deleted:true,caption:tr("Sam deletes his: it stays, outlined in red")}); }],
+            [1600,() => pulse("deleted")],[150,() => { animateLayout(); update({deleted:true,caption:tr("Sam deletes his: it stays, outlined")}); }],
             [2800,() => {}]],[props.edits]);
         const edit=() => { if (!on || watching) return; animateLayout(); update(st => ({edits:st.edits>=2 ? 0 : st.edits+1})); };
         const remove=() => { if (!on || watching) return; animateLayout(); update(st => ({deleted:!st.deleted})); };

@@ -448,6 +448,7 @@
  },
  "Triple-tap": "तीन बार टैप",
  "Triple-tap to delete": "हटाने के लिए तीन बार टैप करें",
+ "Try it": "आज़माएँ",
  "Trying again in {n} s.": "{n} सेकंड में फिर कोशिश करें।",
  "Turkish": "तुर्की",
  "Turned off. Switch it on in Features to start.": "बंद है। शुरू करने के लिए फ़ीचर में इसे चालू करें।",
@@ -474,6 +475,7 @@
  "Vietnamese": "वियतनामी",
  "View Anyway": "फिर भी देखें",
  "Waiting for new Quests.": "नए Quest का इंतज़ार है।",
+ "Watch": "देखें",
  "Watching all friends.": "सभी दोस्तों पर नज़र रखी जा रही है।",
  "Watching all {n} friends.": {
   "one": "{n} दोस्त पर नज़र रखी जा रही है।",
@@ -506,6 +508,7 @@
  "by {author}": "{author} द्वारा",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "अभी-अभी",
+ "locked": "लॉक",
  "{count} kept on this phone, so chats you reopen show them at once.": "इस फ़ोन पर रखे गए: {count}। दोबारा खोली गई चैट इन्हें तुरंत दिखाती हैं।",
  "{deleted} and {edited} kept until Discord restarts.": "Discord रीस्टार्ट होने तक रखे गए: {deleted} और {edited}।",
  "{deleted} and {edited} kept, saved on this phone.": "इस फ़ोन पर रखे गए: {deleted} और {edited}।",

@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Tredobbelt tryk",
  "Triple-tap to delete": "Tryk tre gange for at slette",
+ "Try it": "Prøv",
  "Trying again in {n} s.": "Prøv igen om {n} s.",
  "Turkish": "tyrkisk",
  "Turned off. Switch it on in Features to start.": "Fra. Slå det til under Funktioner for at begynde.",
@@ -474,6 +475,7 @@
  "Vietnamese": "vietnamesisk",
  "View Anyway": "Vis alligevel",
  "Waiting for new Quests.": "Venter på nye Quests.",
+ "Watch": "Se",
  "Watching all friends.": "Holder øje med alle venner.",
  "Watching all {n} friends.": {
   "one": "Holder øje med {n} ven.",
@@ -506,6 +508,7 @@
  "by {author}": "af {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "lige nu",
+ "locked": "låst",
  "{count} kept on this phone, so chats you reopen show them at once.": "{count} gemt på denne telefon, så chats, du åbner igen, viser dem med det samme.",
  "{deleted} and {edited} kept until Discord restarts.": "{deleted} og {edited} gemt, indtil Discord genstarter.",
  "{deleted} and {edited} kept, saved on this phone.": "{deleted} og {edited} gemt på denne telefon.",

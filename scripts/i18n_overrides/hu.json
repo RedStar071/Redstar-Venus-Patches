@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Hármas koppintás",
  "Triple-tap to delete": "Törlés hármas koppintással",
+ "Try it": "Kipróbálom",
  "Trying again in {n} s.": "Próbáld újra {n} mp múlva.",
  "Turkish": "török",
  "Turned off. Switch it on in Features to start.": "Kikapcsolva. Kapcsold be a Funkciók között a kezdéshez.",
@@ -474,6 +475,7 @@
  "Vietnamese": "vietnámi",
  "View Anyway": "Megtekintés mégis",
  "Waiting for new Quests.": "Várakozás új Questekre.",
+ "Watch": "Megnézem",
  "Watching all friends.": "Minden ismerős figyelve.",
  "Watching all {n} friends.": {
   "one": "{n} ismerős figyelve.",
@@ -506,6 +508,7 @@
  "by {author}": "írta: {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "épp most",
+ "locked": "zárolt",
  "{count} kept on this phone, so chats you reopen show them at once.": "{count} megőrizve ezen a telefonon, így az újra megnyitott csevegések azonnal mutatják őket.",
  "{deleted} and {edited} kept until Discord restarts.": "{deleted} és {edited} megőrizve a Discord újraindításáig.",
  "{deleted} and {edited} kept, saved on this phone.": "{deleted} és {edited} megőrizve, ezen a telefonon tárolva.",

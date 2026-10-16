@@ -5131,7 +5131,7 @@ test('Deleted messages preview plays: Alex edits twice and the old versions stay
         most = Math.max(most, nodes.filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length);
         if (nodes.some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar')) outlined = true;
         if (nodes.some(n => n.type && n.type.name === 'TapRipple')) ripples++; }
-    for (const t of ['Alex edits it: the old version stays', 'Sam deletes his: it stays, outlined in red']) assert.ok(seen.has(t), 'shows: ' + t);
+    for (const t of ['Alex edits it: the old version stays', 'Sam deletes his: it stays, outlined']) assert.ok(seen.has(t), 'shows: ' + t);
     assert.equal(most, 2, 'both earlier versions show'); assert.ok(outlined); assert.ok(ripples >= 3);
     b.api.setSetting('noDeleteEdits', false);
     const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));

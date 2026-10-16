@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Üçlü dokunma",
  "Triple-tap to delete": "Silmek için üç kez dokun",
+ "Try it": "Dene",
  "Trying again in {n} s.": "{n} sn sonra tekrar dene.",
  "Turkish": "Türkçe",
  "Turned off. Switch it on in Features to start.": "Kapalı. Başlamak için Özellikler'den aç.",
@@ -474,6 +475,7 @@
  "Vietnamese": "Vietnamca",
  "View Anyway": "Yine de görüntüle",
  "Waiting for new Quests.": "Yeni Görevler bekleniyor.",
+ "Watch": "İzle",
  "Watching all friends.": "Tüm arkadaşlar takip ediliyor.",
  "Watching all {n} friends.": {
   "one": "{n} arkadaş takip ediliyor.",
@@ -506,6 +508,7 @@
  "by {author}": "yazan {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "az önce",
+ "locked": "kilitli",
  "{count} kept on this phone, so chats you reopen show them at once.": "Bu telefonda saklanan: {count}. Yeniden açtığın sohbetler bunları hemen gösterir.",
  "{deleted} and {edited} kept until Discord restarts.": "Discord yeniden başlayana kadar saklanan: {deleted} ve {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Bu telefonda saklanan: {deleted} ve {edited}.",

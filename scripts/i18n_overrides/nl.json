@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Driemaal tikken",
  "Triple-tap to delete": "Driemaal tikken om te verwijderen",
+ "Try it": "Uitproberen",
  "Trying again in {n} s.": "Probeer het over {n} s opnieuw.",
  "Turkish": "Turks",
  "Turned off. Switch it on in Features to start.": "Uit. Zet het aan bij Functies om te beginnen.",
@@ -474,6 +475,7 @@
  "Vietnamese": "Vietnamees",
  "View Anyway": "Toch bekijken",
  "Waiting for new Quests.": "Wachten op nieuwe Quests.",
+ "Watch": "Bekijken",
  "Watching all friends.": "Volgt alle vrienden.",
  "Watching all {n} friends.": {
   "one": "Volgt {n} vriend.",
@@ -506,6 +508,7 @@
  "by {author}": "door {author}",
  "https://.../theme.json": "https://.../thema.json",
  "just now": "zojuist",
+ "locked": "vergrendeld",
  "{count} kept on this phone, so chats you reopen show them at once.": "{count} bewaard op deze telefoon, dus chats die je opnieuw opent, tonen ze meteen.",
  "{deleted} and {edited} kept until Discord restarts.": "{deleted} en {edited} bewaard tot Discord opnieuw start.",
  "{deleted} and {edited} kept, saved on this phone.": "{deleted} en {edited} bewaard, opgeslagen op deze telefoon.",

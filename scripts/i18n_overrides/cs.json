@@ -456,6 +456,7 @@
  },
  "Triple-tap": "Trojité klepnutí",
  "Triple-tap to delete": "Smazat trojitým klepnutím",
+ "Try it": "Vyzkoušet",
  "Trying again in {n} s.": "Zkuste to znovu za {n} s.",
  "Turkish": "turečtina",
  "Turned off. Switch it on in Features to start.": "Vypnuto. Zapněte to ve Funkcích.",
@@ -482,6 +483,7 @@
  "Vietnamese": "vietnamština",
  "View Anyway": "Přesto zobrazit",
  "Waiting for new Quests.": "Čeká se na nové Questy.",
+ "Watch": "Sledovat",
  "Watching all friends.": "Sledováni všichni přátelé.",
  "Watching all {n} friends.": {
   "few": "Sledováni všichni {n} přátelé.",
@@ -516,6 +518,7 @@
  "by {author}": "podle {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "právě teď",
+ "locked": "zamčeno",
  "{count} kept on this phone, so chats you reopen show them at once.": "V tomto telefonu uchováno: {count}. Znovu otevřené chaty je ukážou hned.",
  "{deleted} and {edited} kept until Discord restarts.": "Uchováno do restartu Discordu: {deleted} a {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Uchováno v tomto telefonu: {deleted} a {edited}.",

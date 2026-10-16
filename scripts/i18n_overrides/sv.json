@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Trippeltryck",
  "Triple-tap to delete": "Trippeltryck för att ta bort",
+ "Try it": "Testa",
  "Trying again in {n} s.": "Försök igen om {n} s.",
  "Turkish": "turkiska",
  "Turned off. Switch it on in Features to start.": "Av. Slå på det i Funktioner för att börja.",
@@ -474,6 +475,7 @@
  "Vietnamese": "vietnamesiska",
  "View Anyway": "Visa ändå",
  "Waiting for new Quests.": "Väntar på nya Quests.",
+ "Watch": "Titta",
  "Watching all friends.": "Bevakar alla vänner.",
  "Watching all {n} friends.": {
   "one": "Bevakar {n} vän.",
@@ -506,6 +508,7 @@
  "by {author}": "av {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "just nu",
+ "locked": "låst",
  "{count} kept on this phone, so chats you reopen show them at once.": "{count} sparade på den här telefonen, så chattar du öppnar igen visar dem direkt.",
  "{deleted} and {edited} kept until Discord restarts.": "{deleted} och {edited} sparade tills Discord startas om.",
  "{deleted} and {edited} kept, saved on this phone.": "{deleted} och {edited} sparade, lagrade på den här telefonen.",

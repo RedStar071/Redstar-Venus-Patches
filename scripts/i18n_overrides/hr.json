@@ -456,6 +456,7 @@
  },
  "Triple-tap": "Trostruki dodir",
  "Triple-tap to delete": "Trostruki dodir za brisanje",
+ "Try it": "Isprobaj",
  "Trying again in {n} s.": "Pokušajte ponovno za {n} s.",
  "Turkish": "turski",
  "Turned off. Switch it on in Features to start.": "Isključeno. Uključite u Značajkama za početak.",
@@ -482,6 +483,7 @@
  "Vietnamese": "vijetnamski",
  "View Anyway": "Svejedno prikaži",
  "Waiting for new Quests.": "Čeka se na nove Questove.",
+ "Watch": "Gledaj",
  "Watching all friends.": "Prate se svi prijatelji.",
  "Watching all {n} friends.": {
   "few": "Prate se sva {n} prijatelja.",
@@ -516,6 +518,7 @@
  "by {author}": "autor {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "upravo sada",
+ "locked": "zaključano",
  "{count} kept on this phone, so chats you reopen show them at once.": "Sačuvano na ovom telefonu: {count}. Razgovori koje ponovno otvorite odmah ih prikazuju.",
  "{deleted} and {edited} kept until Discord restarts.": "Sačuvano do ponovnog pokretanja Discorda: {deleted} i {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Sačuvano na ovom telefonu: {deleted} i {edited}.",

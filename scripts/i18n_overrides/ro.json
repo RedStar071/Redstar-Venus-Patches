@@ -456,6 +456,7 @@
  },
  "Triple-tap": "Atingere triplă",
  "Triple-tap to delete": "Atingere triplă pentru ștergere",
+ "Try it": "Încearcă",
  "Trying again in {n} s.": "Reîncearcă peste {n} s.",
  "Turkish": "turcă",
  "Turned off. Switch it on in Features to start.": "Dezactivat. Activează-l din Funcții pentru a începe.",
@@ -482,6 +483,7 @@
  "Vietnamese": "vietnameză",
  "View Anyway": "Vezi oricum",
  "Waiting for new Quests.": "Se așteaptă Quest-uri noi.",
+ "Watch": "Urmărește",
  "Watching all friends.": "Se urmăresc toți prietenii.",
  "Watching all {n} friends.": {
   "few": "Se urmăresc toți cei {n} prieteni.",
@@ -516,6 +518,7 @@
  "by {author}": "de {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "chiar acum",
+ "locked": "blocat",
  "{count} kept on this phone, so chats you reopen show them at once.": "Păstrate pe acest telefon: {count}. Chaturile redeschise le arată imediat.",
  "{deleted} and {edited} kept until Discord restarts.": "Păstrate până la repornirea Discord: {deleted} și {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Păstrate pe acest telefon: {deleted} și {edited}.",

@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Toque triplo",
  "Triple-tap to delete": "Toque triplo para excluir",
+ "Try it": "Experimentar",
  "Trying again in {n} s.": "Tentando de novo em {n} s.",
  "Turkish": "turco",
  "Turned off. Switch it on in Features to start.": "Desligado. Ative em Recursos para começar.",
@@ -474,6 +475,7 @@
  "Vietnamese": "vietnamita",
  "View Anyway": "Ver mesmo assim",
  "Waiting for new Quests.": "Aguardando novas missões.",
+ "Watch": "Assistir",
  "Watching all friends.": "Acompanhando todos os amigos.",
  "Watching all {n} friends.": {
   "one": "Acompanhando {n} amigo.",
@@ -506,6 +508,7 @@
  "by {author}": "por {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "agora mesmo",
+ "locked": "bloqueado",
  "{count} kept on this phone, so chats you reopen show them at once.": "{count} neste celular, para que os chats reabertos as mostrem na hora.",
  "{deleted} and {edited} kept until Discord restarts.": "{deleted} e {edited} mantidas até o Discord reiniciar.",
  "{deleted} and {edited} kept, saved on this phone.": "{deleted} e {edited} mantidas, salvas neste celular.",

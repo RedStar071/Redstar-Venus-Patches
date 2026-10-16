@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Kolmoisnapautus",
  "Triple-tap to delete": "Poista kolmoisnapautuksella",
+ "Try it": "Kokeile",
  "Trying again in {n} s.": "Yritä uudelleen {n} s kuluttua.",
  "Turkish": "turkki",
  "Turned off. Switch it on in Features to start.": "Pois päältä. Ota se käyttöön kohdassa Ominaisuudet aloittaaksesi.",
@@ -474,6 +475,7 @@
  "Vietnamese": "vietnam",
  "View Anyway": "Näytä silti",
  "Waiting for new Quests.": "Odotetaan uusia Questeja.",
+ "Watch": "Katso",
  "Watching all friends.": "Seurataan kaikkia kavereita.",
  "Watching all {n} friends.": {
   "one": "Seurataan {n} kaveria.",
@@ -506,6 +508,7 @@
  "by {author}": "tekijä {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "juuri nyt",
+ "locked": "lukittu",
  "{count} kept on this phone, so chats you reopen show them at once.": "{count} säilytetty tässä puhelimessa, joten uudelleen avatut keskustelut näyttävät ne heti.",
  "{deleted} and {edited} kept until Discord restarts.": "{deleted} ja {edited} säilytetty, kunnes Discord käynnistyy uudelleen.",
  "{deleted} and {edited} kept, saved on this phone.": "{deleted} ja {edited} säilytetty tässä puhelimessa.",

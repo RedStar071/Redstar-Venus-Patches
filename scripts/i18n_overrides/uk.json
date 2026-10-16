@@ -457,6 +457,7 @@
  },
  "Triple-tap": "Потрійний дотик",
  "Triple-tap to delete": "Потрійний дотик для видалення",
+ "Try it": "Спробувати",
  "Trying again in {n} s.": "Нова спроба через {n} с.",
  "Turkish": "турецька",
  "Turned off. Switch it on in Features to start.": "Вимкнено. Увімкніть у розділі «Функції», щоб почати.",
@@ -483,6 +484,7 @@
  "Vietnamese": "вʼєтнамська",
  "View Anyway": "Усе одно відкрити",
  "Waiting for new Quests.": "Чекаємо на нові завдання.",
+ "Watch": "Дивитися",
  "Watching all friends.": "Відстежуються всі друзі.",
  "Watching all {n} friends.": {
   "few": "Відстежуються всі {n} друзі.",
@@ -517,6 +519,7 @@
  "by {author}": "від {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "щойно",
+ "locked": "закритий",
  "{count} kept on this phone, so chats you reopen show them at once.": "Збережено на телефоні: {count}. У знову відкритих чатах вони видні одразу.",
  "{deleted} and {edited} kept until Discord restarts.": "Збережено до перезапуску Discord: {deleted}, {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Збережено на цьому телефоні: {deleted}, {edited}.",

@@ -472,6 +472,7 @@
  },
  "Triple-tap": "Тройное касание",
  "Triple-tap to delete": "Тройное касание для удаления",
+ "Try it": "Попробовать",
  "Trying again in {n} s.": "Новая попытка через {n} с.",
  "Turkish": "турецкий",
  "Turned off. Switch it on in Features to start.": "Выключено. Включите в разделе «Функции», чтобы начать.",
@@ -499,6 +500,7 @@
  "Vietnamese": "вьетнамский",
  "View Anyway": "Всё равно открыть",
  "Waiting for new Quests.": "Ждём новые задания.",
+ "Watch": "Смотреть",
  "Watching all friends.": "Отслеживаются все друзья.",
  "Watching all {n} friends.": {
   "few": "Отслеживаются все {n} друга.",
@@ -535,6 +537,7 @@
  "by {author}": "по {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "только что",
+ "locked": "закрыт",
  "{count} kept on this phone, so chats you reopen show them at once.": "Сохранено на телефоне: {count}. В открытых снова чатах они видны сразу.",
  "{deleted} and {edited} kept until Discord restarts.": "Сохранено до перезапуска Discord: {deleted}, {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Сохранено на этом телефоне: {deleted}, {edited}.",

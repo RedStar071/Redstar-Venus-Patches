@@ -448,6 +448,7 @@
  },
  "Triple-tap": "Трикратно докосване",
  "Triple-tap to delete": "Трикратно докосване за изтриване",
+ "Try it": "Опитай",
  "Trying again in {n} s.": "Опитайте пак след {n} сек.",
  "Turkish": "турски",
  "Turned off. Switch it on in Features to start.": "Изключено. Включете го от Функции, за да започнете.",
@@ -474,6 +475,7 @@
  "Vietnamese": "виетнамски",
  "View Anyway": "Преглед въпреки това",
  "Waiting for new Quests.": "Изчакване на нови Quest мисии.",
+ "Watch": "Гледай",
  "Watching all friends.": "Следят се всички приятели.",
  "Watching all {n} friends.": {
   "one": "Следи се {n} приятел.",
@@ -506,6 +508,7 @@
  "by {author}": "от {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "току-що",
+ "locked": "заключен",
  "{count} kept on this phone, so chats you reopen show them at once.": "Запазени на този телефон: {count}. Чатовете, които отворите отново, ги показват веднага.",
  "{deleted} and {edited} kept until Discord restarts.": "Запазени до рестартиране на Discord: {deleted} и {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Запазени на този телефон: {deleted} и {edited}.",
