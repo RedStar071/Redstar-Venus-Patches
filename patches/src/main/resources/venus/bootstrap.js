@@ -919,7 +919,7 @@
         next[P].useDescription = function () {
             useSettings();
             const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
-            return tr("{on} of {total} on", {on:keys.filter(key => settings[key]).length, total:keys.length});
+            return tr("{on} of {total} turned on", {on:keys.filter(key => settings[key]).length, total:keys.length});
         };
         // Language: the language Venus settings are shown in, Discord's own by default.
         route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(14958, "LanguageIcon", icon));
@@ -3186,9 +3186,14 @@
         const ui=reviewUI();
         if (!React || !RN) return null;
         const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5410,"LockIcon");
+        const s=useChatPreviewStyles(), Hash=venusIcon(15125,"HashmarkIcon");
+        // A few channels the way the list shows them: the locked one appears (faded, with a lock) only while it's on.
+        const channel=(name,locked) => el(RN.View,{key:name,style:{flexDirection:"row",alignItems:"center",gap:8,paddingHorizontal:16,paddingVertical:7,opacity:locked ? 0.6 : 1}},
+            el(Hash,{size:"sm"}),el(RN.Text,{style:[s.text,{flex:1}],numberOfLines:1},name),locked ? popIn("lock",el(lock,{size:"xs"})) : null);
         const groups=[
             on ? statusCard("status",settings.hiddenChannelsMenu ? "Tap a locked channel to see when it was made and last used." :
                 "Locked channels are listed, and tapping one does nothing.",{title:tr("Showing hidden channels"),IconComponent:lock}) : offCard("status",lock),
+            chatPreview(s,"preview","Hidden channels preview",[channel("general",false),on ? channel("staff-only",true) : null,channel("memes",false)]),
             el(Group,{key:"tap",title:tr("When you tap a locked channel")},
                 switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4788,"CircleInformationIcon"))),
             footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];
@@ -5281,7 +5286,7 @@
                 acc.tokenStatus === validatingStatus ? tr("Checking session...") : tr("Tap to switch");
             return el(Row, {key:"acc:" + acc.id, label:displayName, subLabel:handle + statusText,
                 icon:avatarBubble(fullUser, 32, active ? "online" : acc.tokenStatus === invalidStatus ? "dnd" : null), disabled:!on,
-                trailing:active ? el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"}) : undefined,
+                trailing:active ? popIn("on:" + acc.id, el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
                 onPress:() => {
                     if (active) { openAccountSwitcherSheet(); return; }
                     if (acc.tokenStatus === invalidStatus) { openAddAccountModal(); return; }
@@ -6722,13 +6727,14 @@
             const byLine = item.authors ? tr("by {author}", {author:item.authors}) + " \u00b7 " : "";
             const descLine = item.description ? item.description + " \u00b7 " : "";
             const bgBadge = item.background && item.background.url ? tr("Background image") + " \u00b7 " : "";
-            const stateLine = isSelected ? tr("Active \u00b7 Tap to turn off") : tr("Tap to apply");
+            // The footnote says what a tap does; each row only says what's different about it.
+            const stateLine = isSelected ? tr("In use") : "";
             return el(Row, {
                 key:"theme:" + item.id,
                 label:item.name,
                 icon:themeSwatch(item),
-                trailing:isSelected ? el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"}) : undefined,
-                subLabel:byLine + descLine + bgBadge + stateLine,
+                trailing:isSelected ? popIn("on:" + item.id, el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
+                subLabel:(byLine + descLine + bgBadge + stateLine).replace(/ \u00b7 $/, "") || undefined,
                 disabled:!on || customThemes.installing,
                 onPress:() => customThemesSelect(item.id),
                 onLongPress:() => confirmAction("Remove theme?",
