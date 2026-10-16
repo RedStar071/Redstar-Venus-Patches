@@ -3707,40 +3707,72 @@
         return el(ref.current ? A.View : RN.View, {style:motionStyle}, art);
     }
     // The message as everyone sees it: just the emoji or sticker, the way chat shows a link to one.
-    // Watch: you type :wumpus_wave:, it's sent and shows as the emoji, then you send a sticker. Try it: tap to switch.
+    // Watch: you open the emoji picker, pick a Nitro emoji (it would normally be locked), it's sent and everyone sees it;
+    // then the same with a sticker. Try it: send one yourself from the picker.
+    function NitroPicker(props) {
+        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Lock = venusIcon(5410, "LockIcon");
+        const kinds = props.kinds, tab = props.tab, item = NITRO_SAMPLES[tab];
+        const tabPill = kind => el(Press, {key:kind, onPress:() => props.onTab && props.onTab(kind), accessibilityRole:"tab", accessibilityState:{selected:tab === kind},
+            style:[{paddingHorizontal:14, paddingVertical:6, borderRadius:16}, tab === kind ? k.secondary : null]},
+            el(RN.Text, {style:[tab === kind ? k.secondaryText : s.muted, {fontWeight:"600", fontSize:13}]}, tr(kind === "emoji" ? "Emojis" : "Stickers")));
+        const plain = kind => kind === "emoji" ? ["\ud83d\ude00", "\ud83d\ude02", "\ud83d\udc4d", "\ud83c\udf89"] : [];
+        return el(RN.View, {key:"picker", style:[k.sheet, {borderTopLeftRadius:12, borderTopRightRadius:12, paddingHorizontal:12, gap:8, paddingBottom:10}]},
+            el(RN.View, {style:{flexDirection:"row", gap:6, alignSelf:"center"}}, kinds.map(tabPill)),
+            el(RN.Text, {style:[k.category, {marginTop:2}]}, tr("Game Night").toUpperCase()),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10, flexWrap:"wrap"}},
+                plain(tab).map(e => el(RN.Text, {key:e, style:{fontSize:28}}, e)),
+                el(Press, {key:"nitro", onPress:props.onPick, accessibilityRole:"button", accessibilityLabel:item.name, accessibilityHint:tr("Tap to send it"),
+                    style:[{padding:4, borderRadius:10}, props.highlight ? k.selected : null]},
+                    el(RN.View, {style:{width:tab === "emoji" ? 36 : 72, height:tab === "emoji" ? 36 : 72}},
+                        RN.Image ? el(RN.Image, {source:{uri:item.res, width:tab === "emoji" ? 36 : 72, height:tab === "emoji" ? 36 : 72},
+                            style:{width:tab === "emoji" ? 36 : 72, height:tab === "emoji" ? 36 : 72}, resizeMode:"contain"}) : null,
+                        el(RN.View, {style:[k.brand, {position:"absolute", right:-4, bottom:-4, width:18, height:18, borderRadius:9, alignItems:"center", justifyContent:"center"}]},
+                            el(Lock, {size:"xxs", color:k.brandText.color}))),
+                    tapRipple(props.pulse, "pick", {left:0, top:0}))));
+    }
     function NitroPreview(props) {
         useSettings("freeNitro");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = props.on;
-        const blank = {pick:0, draft:"", sent:null, caption:""};
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on, Press = RN.Pressable || RN.View;
+        const blank = {pick:0, sent:[], picker:null, pulse:null, tried:{}};
         const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
         const [state, setState] = React.useState(blank), watching = on && kinds.length > 0 && mode === "watch";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
-        const box = useThemed("nitroInput", c => ({input:{marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20,
-            backgroundColor:c.BACKGROUND_MOD_NORMAL}}), {input:{marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"}});
-        useDemo(watching, () => {
+        const send = kind => update(st => ({picker:null, pulse:null, pick:st.pick + 1, sent:st.sent.concat([kind]).slice(-2), tried:Object.assign({}, st.tried, {[kind]:true})}));
+        const link = settings.hyperlinks ? tr("a short link") : tr("a link");
+        const story = useStory(watching, () => {
             const steps = [[0, () => setState(blank)]];
-            if (settings.emojis) {
-                steps.push([600, () => update({caption:tr("You type a Nitro emoji")})]);
-                typeSteps(":" + NITRO_SAMPLES.emoji.name + ":", text => update({draft:text}), 75).forEach(step => steps.push(step));
-                steps.push([500, () => { animateLayout(); update(st => ({draft:"", sent:"emoji", pick:st.pick + 1, caption:tr("Everyone sees the emoji")})); }], [2200, () => {}]);
-            }
-            if (settings.stickers) steps.push([300, () => update({caption:tr("You send a Nitro sticker")})],
-                [900, () => { animateLayout(); update(st => ({sent:"sticker", pick:st.pick + 1, caption:tr("Everyone sees the sticker")})); }], [2600, () => {}]);
+            kinds.forEach((kind, i) => {
+                steps.push([i ? 600 : 900, () => update({pulse:{who:"plus", id:kind}}), tr(kind === "emoji" ? "You open the emoji picker" : i ? "Then you open the sticker picker" : "You open the sticker picker")],
+                    [400, () => { animateLayout(); update({picker:kind}); }],
+                    [1400, () => update({pulse:{who:"pick", id:"p" + kind}}), tr(kind === "emoji" ? "You pick a Nitro emoji from another server. The lock means it needs Nitro" :
+                        "You pick a Nitro sticker. It would need Nitro too")],
+                    [500, () => { animateLayout(); send(kind); }, tr(kind === "emoji" ? "Venus sends it as {link}, and everyone sees the emoji" : "It's sent as {link} too, and everyone sees the sticker", {link})],
+                    [1200, () => {}]);
+            });
             return steps;
-        }, [settings.emojis, settings.stickers]);
-        const kind = watching ? state.sent : kinds.length ? kinds[state.pick % kinds.length] : "emoji", item = kind && NITRO_SAMPLES[kind];
-        const link = kind === "emoji" ? "https://cdn.discordapp.com/emojis/\u2026.gif" : "https://media.discordapp.net/stickers/\u2026.png";
-        const sent = item && (settings.hyperlinks ? "[" + item.name + "](\u2026)" : link);
-        const hint = tr(kinds.length > 1 ? "Tap to switch between an emoji and a sticker" : "Tap to play it again");
-        const body = [
-            item ? el(RN.View, {key:"msg:" + kind}, popIn("msg:" + kind, previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"),
-                el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}}, el(NitroArt, {key:kind, kind, item, play:state.pick}))))) : null,
-            item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2}}, el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:sent}))) : null,
-            watching ? el(RN.View, {key:"input", style:box.input}, el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, state.draft || tr("Message {channel}", {channel:"#general"}))) : null,
-            previewCaption(s, watching ? state.caption : on ? hint : "")];
-        const preview = chatPreview(s, "preview", "Nitro link preview", body);
+        }, [settings.emojis, settings.stickers, settings.hyperlinks]);
+        // Try it: the picker is open under the chat; tap the locked one to send it. Tabs switch between emojis and stickers.
+        const tab = watching ? state.picker : on && kinds.length ? (state.picker || kinds[0]) : null;
+        const messages = state.sent.map((kind, i) => el(RN.View, {key:"msg" + state.pick + ":" + i}, popIn("msg" + i + kind + state.pick,
+            previewMessage(s, "m" + i, tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}},
+                el(NitroArt, {key:kind, kind, item:NITRO_SAMPLES[kind], play:state.pick}))))));
+        const sample = state.sent.length || watching ? null : el(RN.View, {key:"empty", style:{paddingHorizontal:16, paddingVertical:20}},
+            el(RN.Text, {style:[s.muted, {textAlign:"center"}]}, tr("Nothing sent yet")));
+        const last = state.sent[state.sent.length - 1], item = last && NITRO_SAMPLES[last];
+        const sentAs = item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingBottom:4}},
+            el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:settings.hyperlinks ? "[" + item.name + "](\u2026)" :
+                last === "emoji" ? "https://cdn.discordapp.com/emojis/\u2026.gif" : "https://media.discordapp.net/stickers/\u2026.png"}))) : null;
+        const picker = tab ? el(NitroPicker, {key:"picker", k, s, kinds:watching ? [tab] : kinds, tab, pulse:state.pulse, highlight:watching && state.pulse && state.pulse.who === "pick",
+            onTab:watching ? null : kind => update({picker:kind}), onPick:watching ? null : () => { animateLayout(); send(tab); }}) : null;
+        const remaining = kinds.filter(kind => !state.tried[kind]);
+        const tip = on && !watching && kinds.length ? previewTip(k, remaining.length === kinds.length ? tr("Tap the locked one below to send it without Nitro") :
+            remaining.length ? tr("Now try a sticker: tap Stickers, then the locked one") : tr("That's how everyone sees it. You can send more"), "down") : null;
+        const plusRipple = el(RN.View, {key:"plus", style:{position:"absolute", left:8, bottom:8, width:40, height:40}}, tapRipple(state.pulse, "plus", {left:3, top:3}));
         return el(RN.View, {key:"preview"}, on && kinds.length ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
-            watching ? preview : el(Press, {key:"press", onPress:() => { if (on) update(st => ({pick:st.pick + 1})); }, accessibilityRole:"button", accessibilityHint:hint}, preview));
+            previewScreen(s, "preview", "Nitro link preview", [el(RN.View, {key:"chat", style:{minHeight:watching ? 150 : 110}}, messages.length ? messages : sample), sentAs],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, tip, el(RN.View, null, previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}), plusRipple),
+                    picker, watching ? storyStrip(k, s, story) : null)}));
     }
     function FreeNitroSettings() {
         useSettings("freeNitro");

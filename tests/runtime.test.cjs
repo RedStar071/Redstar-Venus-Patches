@@ -4915,7 +4915,7 @@ function hookHost(b, React, node) {
         effects.forEach(x => { if (x.pending) { x.pending = false; if (typeof x.cleanup === 'function') x.cleanup(); x.cleanup = x.fn(); } });
         // The Watch / Try it switch is its own small component (no hooks of its own besides theme styles): draw it inline.
         const nodes = pageNodes(tree);
-        return nodes.concat(...nodes.filter(n => n.type && n.type.name === 'PreviewToggle').map(n => pageNodes(n.type(n.props))));
+        return nodes.concat(...nodes.filter(n => n.type && ['PreviewToggle', 'NitroPicker'].includes(n.type.name)).map(n => pageNodes(n.type(n.props))));
     }
     // Runs timers one at a time (each may add the next), re-rendering after each, up to n steps.
     function run(n) { for (let k = 0; k < n && timers.length; k++) { const t = timers.shift(); t.fn(); render(); } }
@@ -5143,7 +5143,7 @@ test('Device indicators preview plays: from a DM to the member list to a profile
     const off = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview')));
     assert.ok(off.times.some(([c]) => c === "Here they're off in your options, so nothing shows"));
 });
-test('Nitro preview shows Discord\'s own Wumpus as the emoji or sticker, never anything from your servers', () => {
+test('Nitro preview shows Discord\'s own Wumpus, sent from Discord\'s picker; Try it guides you through an emoji and a sticker', () => {
     const b = nitroHarness(); const {React} = reactHarness(b);
     let read = 0; b.load({default:{getCustomEmojiById:() => null, getGuilds:() => { read++; return {}; }}}, null, 5772);
     const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
@@ -5151,30 +5151,35 @@ test('Nitro preview shows Discord\'s own Wumpus as the emoji or sticker, never a
     const node = pageNodes(registry.VENUS_FREENITRO.screen.getComponent()()).find(x => x.type && x.type.name === 'NitroPreview');
     const host = hookHost(b, React, node);
     host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
-    const art = () => { const n = host.render().find(x => x.type && x.type.name === 'NitroArt'); return pageNodes(n.type(n.props)).find(x => x.type === 'Image').props.source.uri; };
+    const arts = () => host.render().filter(x => x.type && x.type.name === 'NitroArt').map(n => pageNodes(n.type(n.props)).find(x => x.type === 'Image').props.source.uri);
     const sent = () => host.texts().find(t => /^Sent as /.test(t));
-    assert.equal(art(), 'modules_guilds_bar_native_images_wumpus_wave', 'an image bundled in Discord, shown as chat shows it');
+    const send = () => host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to send it').props.onPress();
+    assert.ok(host.texts().includes('Nothing sent yet') && host.texts().includes('Tap the locked one below to send it without Nitro'));
+    assert.equal(host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to send it').props.accessibilityLabel, 'wumpus_wave', 'the picker has the Nitro emoji');
+    send(); assert.deepEqual(arts(), ['modules_guilds_bar_native_images_wumpus_wave'], 'an image bundled in Discord, shown as chat shows it');
     assert.equal(sent(), 'Sent as [wumpus_wave](\u2026)');
-    host.render().find(n => n.props && /^Tap to/.test(n.props.accessibilityHint || '')).props.onPress();
-    assert.equal(art(), 'images_native_gifting_wumpus_box_premium120', 'tap: the sticker');
+    assert.ok(host.texts().includes('Now try a sticker: tap Stickers, then the locked one'));
+    host.render().find(n => n.props && n.props.accessibilityRole === 'tab' && n.props.key === 'sticker').props.onPress(); send();
+    assert.deepEqual(arts(), ['modules_guilds_bar_native_images_wumpus_wave', 'images_native_gifting_wumpus_box_premium120'], 'then the sticker');
+    assert.ok(host.texts().includes("That's how everyone sees it. You can send more"));
     b.api.setSetting('hyperlinks', false); assert.match(sent(), /^Sent as https:\/\/media\.discordapp\.net\/stickers\//);
-    b.api.setSetting('stickers', false); assert.equal(art(), 'modules_guilds_bar_native_images_wumpus_wave', 'only the emoji once stickers are off');
     assert.equal(read, 0, 'never reads your servers\' emojis or stickers');
 });
-test('Nitro preview plays: you type the emoji and send it, then send a sticker', () => {
+test('Nitro preview plays at a readable pace: open the picker, pick the locked emoji, everyone sees it; then a sticker', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('freeNitro', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
-    host.render(); const seen = new Set(), arts = new Set();
-    for (let k = 0; k < 30; k++) { host.run(1); host.texts().forEach(t => seen.add(t));
-        host.render().filter(n => n.type && n.type.name === 'NitroArt').forEach(n => arts.add(n.props.kind)); }
-    for (const t of ['You type a Nitro emoji', ':wumpus', ':wumpus_wave:', 'Everyone sees the emoji', 'You send a Nitro sticker', 'Everyone sees the sticker']) assert.ok(seen.has(t), 'shows: ' + t);
-    assert.deepEqual([...arts].sort(), ['emoji', 'sticker']);
-    // With only stickers on, it skips the typing.
+    const kinds = new Set(); const orig = host.run; host.run = n => { orig(n); host.render().filter(x => x.type && x.type.name === 'NitroArt').forEach(x => kinds.add(x.props.kind)); };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['You open the emoji picker', 'You pick a Nitro emoji from another server. The lock means it needs Nitro',
+        'Venus sends it as a short link, and everyone sees the emoji', 'Then you open the sticker picker', "It's sent as a short link too, and everyone sees the sticker"])
+        assert.ok(caps.includes(t), 'caption: ' + t + ' / ' + caps.join(' | '));
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.deepEqual([...kinds].sort(), ['emoji', 'sticker']);
+    // With only stickers on, it skips the emoji.
     b.api.setSetting('emojis', false);
-    const only = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
-    only.render(); const seen2 = new Set(); for (let k = 0; k < 6; k++) { only.run(1); only.texts().forEach(t => seen2.add(t)); }
-    assert.ok(seen2.has('Everyone sees the sticker') && !seen2.has('You type a Nitro emoji'));
+    const only = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview')));
+    assert.ok(!only.times.some(([c]) => c === 'You open the emoji picker') && only.times.some(([c]) => /sticker/.test(c)));
     // Both off: no toggle, nothing plays.
     b.api.setSetting('stickers', false);
     const none = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
