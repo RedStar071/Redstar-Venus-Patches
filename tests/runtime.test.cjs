@@ -5023,11 +5023,12 @@ test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it
 });
 test('Device indicators preview follows every option, and tapping it changes Alex\'s devices', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
-    let demo = 0; React.useState = init => typeof init === 'number' ? [demo, v => { demo = typeof v === 'function' ? v(demo) : v; }] : [init, () => {}];
     b.api.setSetting('platformIndicators', true);
-    const preview = () => { const n = pageNodes(b.registry.VENUS_PLATFORMINDICATORS.screen.getComponent()()).find(x => x.type && x.type.name === 'PlatformPreview'); return pageNodes(n.type(n.props)); };
+    const host = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    const preview = () => host.render();
     // Each place's icons are its own popIn, keyed by the place.
-    const places = () => preview().filter(n => n.type && n.type.name === 'PopIn').map(n => n.props.key.split(':')[0]);
+    const places = () => preview().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)).map(n => n.props.key.split(':')[0]);
     assert.deepEqual(places(), ['piDmHeader', 'piUserList', 'piProfile']);
     b.api.setSetting('piDmHeader', false); assert.deepEqual(places(), ['piUserList', 'piProfile']);
     b.api.setSetting('piUserList', false); assert.deepEqual(places(), ['piProfile']);
@@ -5036,10 +5037,24 @@ test('Device indicators preview follows every option, and tapping it changes Ale
     // On a phone only, the avatar shows Discord's phone badge unless Hide the phone badge is on.
     const phone = () => preview().some(n => n.props && n.props.style && n.props.style.borderRadius === 2);
     preview().find(n => n.props && n.props.accessibilityHint === "Tap to change Alex's devices").props.onPress();
-    assert.equal(demo, 1, 'tap changes devices');
+    assert.deepEqual(places(), ['piProfile']); assert.match(preview().find(n => n.type && n.type.name === 'PopIn').props.key, /:1$/, 'tap changes devices');
     assert.equal(phone(), false, 'hidden by default');
     b.api.setSetting('piHideMobile', false); assert.equal(phone(), true, 'phone badge shows when not hidden');
-    b.api.setSetting('platformIndicators', false); assert.deepEqual(places(), [], 'no icons while off');
+    b.api.setSetting('platformIndicators', false);
+    const off = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
+    assert.deepEqual(off.render().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)), [], 'no icons while off');
+});
+test('Device indicators preview plays: Alex moves between devices and the icons follow', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('platformIndicators', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
+    host.render(); const seen = new Set(), demos = new Set(); let ripples = 0;
+    for (let k = 0; k < 9; k++) { host.run(1); host.texts().forEach(t => seen.add(t));
+        const nodes = host.render(); if (nodes.some(n => n.type && n.type.name === 'TapRipple')) ripples++;
+        nodes.filter(n => n.type && n.type.name === 'PopIn' && /^piDmHeader:/.test(n.props.key)).forEach(n => demos.add(n.props.key)); }
+    for (const t of ['Alex is on a computer and a phone', 'Alex is only on a phone', 'Alex is on a computer and the web', 'Alex is on a console and a computer']) assert.ok(seen.has(t), 'shows: ' + t);
+    assert.equal(demos.size, 4, 'the icons change each time'); assert.ok(ripples >= 3, 'a tap on Alex each time');
+    assert.ok(!seen.has("Tap to change Alex's devices"), 'no tap hint while it plays');
 });
 test('Nitro preview shows Discord\'s own Wumpus as the emoji or sticker, never anything from your servers', () => {
     const b = nitroHarness(); const {React} = reactHarness(b);

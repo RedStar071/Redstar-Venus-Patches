@@ -3594,11 +3594,18 @@
     }
     // Device indicators: each place the icons can show (a DM's header, the member list, a profile, an avatar), drawn the
     // way Discord draws it and following its own switch. Tap Alex to change what Alex is on and see the icons follow.
+    // Watch: Alex moves between devices on its own, and each place's icons follow.
     const PLATFORM_DEMO = [{desktop:"online", mobile:"idle"}, {mobile:"online"}, {desktop:"dnd", web:"dnd"}, {embedded:"online", desktop:"idle"}];
+    const PLATFORM_DEMO_CAPTIONS = ["Alex is on a computer and a phone", "Alex is only on a phone", "Alex is on a computer and the web", "Alex is on a console and a computer"];
     function PlatformPreview(props) {
         useSettings("platformIndicators");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [demo, setDemo] = React.useState(0);
-        const on = props.on, clients = PLATFORM_DEMO[demo % PLATFORM_DEMO.length];
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
+        const [state, setState] = React.useState({demo:0, pulse:null, caption:""}), demo = state.demo, on = props.on, watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        useDemo(watching, () => [[0, () => setState({demo:0, pulse:null, caption:tr(PLATFORM_DEMO_CAPTIONS[0])})]].concat(
+            [1, 2, 3, 0].reduce((steps, next) => steps.concat([[2200, () => update(st => ({pulse:{who:"alex", id:"p" + next + ":" + st.demo}}))],
+                [180, () => { animateLayout(); update({demo:next, caption:tr(PLATFORM_DEMO_CAPTIONS[next])}); }]]), [])), []);
+        const clients = PLATFORM_DEMO[demo % PLATFORM_DEMO.length];
         const status = clients.desktop || clients.mobile || clients.web || clients.embedded || "offline";
         const mobileOnly = !!clients.mobile && Object.keys(clients).length === 1;
         const badges = place => on && settings[place] ? popIn(place + ":" + demo, el(RN.View, {style:{flexDirection:"row", gap:2, alignItems:"center"}},
@@ -3618,14 +3625,16 @@
         const place = (key, title, child) => el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:8, opacity:on && settings[key] === false ? 0.55 : 1}}, label(title), child);
         const name = (size, place) => el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
             el(RN.Text, {style:[s.name, {fontSize:size}]}, "Alex"), badges(place));
-        return el(Press, {key:"preview", onPress:() => { if (on) { animateLayout(); setDemo(n => n + 1); } }, accessibilityRole:"button",
-            accessibilityHint:tr("Tap to change Alex's devices")},
-            chatPreview(s, "preview", "Device indicators preview", [
+        const preview = chatPreview(s, "preview", "Device indicators preview", [
                 place("piDmHeader", "In DMs", el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10}}, avatar(24), name(16, "piDmHeader"))),
                 place("piUserList", "In lists", el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10}}, avatar(32),
                     el(RN.View, {style:{flex:1}}, name(15, "piUserList"), el(RN.Text, {style:s.muted}, tr(PLATFORM_STATUS[status] || "Online"))))),
                 place("piProfile", "On profiles", el(RN.View, {style:{gap:4}}, avatar(48), name(20, "piProfile"))),
-                on ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, el(RN.Text, {style:s.muted}, tr("Tap to change Alex's devices"))) : null]));
+                tapRipple(state.pulse, "alex", {left:24, top:30}),
+                on ? previewCaption(s, watching ? state.caption : tr("Tap to change Alex's devices")) : null]);
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState({demo:0, pulse:null, caption:""}); }) : null,
+            watching ? preview : el(Press, {key:"press", onPress:() => { if (on) { animateLayout(); update(st => ({demo:st.demo + 1})); } }, accessibilityRole:"button",
+                accessibilityHint:tr("Tap to change Alex's devices")}, preview));
     }
     function PlatformSettings() {
         useSettings("platformIndicators");
