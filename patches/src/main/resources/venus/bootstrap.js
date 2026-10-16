@@ -2257,6 +2257,7 @@
             const done=guilds ? " ("+pl(guilds,"{n} server was marked as read","{n} servers were marked as read")+")" : "";
             reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(error && error.message || error)})+done,venusIcon(6026,"CircleXIcon")); return;
         }
+        if (guilds || dms) readAllDone();
         const parts=[];
         if (guilds) parts.push(pl(guilds,"{n} server","{n} servers"));
         if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
@@ -2276,8 +2277,16 @@
     const READ_ALL_PRESSED_SCALE = {transform:[{scale:0.96}]}, READ_ALL_TEXT_BASE = {fontSize:11,fontWeight:"700",includeFontPadding:false};
     const READ_ALL_FALLBACK_STYLES = {pill:{backgroundColor:"#4e505899"},pressed:{backgroundColor:"#4e5058"},text:{color:"#dbdee1"}};
     function readAllPress() { readAll(settings.readAllMode); }
+    // For a moment after it clears something, the pill shows a check instead of its label, then goes back.
+    let readAllDoneUntil=0, readAllDoneTimer;
+    function readAllDone() {
+        readAllDoneUntil=Date.now()+1400; notify("readAll");
+        if (readAllDoneTimer!==undefined && global.clearTimeout) global.clearTimeout(readAllDoneTimer);
+        readAllDoneTimer=later(() => { readAllDoneTimer=undefined; readAllDoneUntil=0; notify("readAll"); },1450,false);
+    }
     function ReadAllButton() {
-        const ui=reviewUI();
+        useSettings("readAll");
+        const ui=reviewUI(), done=readAllDoneUntil>Date.now();
         // Discord's semantic tokens, so the pill follows light, dark and custom themes.
         if (!readAllStylesTried) {
             const c=ui.colors;
@@ -2292,11 +2301,12 @@
         if (readAllStyleHook) try { styles=readAllStyleHook(); } catch (_) {}
         styles=styles || READ_ALL_FALLBACK_STYLES;
         return el(RN.View,{style:READ_ALL_OUTER_STYLE},
-            el(RN.Pressable,{accessibilityRole:"button",accessibilityHint:tr("Hold to choose"),
+            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Read all"),accessibilityHint:tr("Hold to choose"),
                 hitSlop:6,onPress:readAllPress,onLongPress:readAllChooser,delayLongPress:350,
                 style:({pressed}) => [READ_ALL_PILL_BASE,styles.pill,
                     pressed ? styles.pressed : null,pressed ? READ_ALL_PRESSED_SCALE : null]},
-                el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
+                done ? popIn("done",el(venusIcon(6555,"CheckmarkSmallIcon"),{size:"xs",color:styles.text && styles.text.color})) :
+                    el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
     }
     function readAllBarProps(orig, self, args) {
         const result=orig.apply(self,args);
@@ -2458,6 +2468,35 @@
         if (React) useSettings("gestures");
         return enabled("gestures") ? null : orig.apply(self, args);
     }
+    // Two messages and what a double-tap on each does, with a ripple that taps them in turn.
+    function GesturePreview(props) {
+        useSettings("gestures");
+        const s = useChatPreviewStyles(), A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || reduceMotion || typeof A.loop !== "function" || typeof A.sequence !== "function") return undefined;
+            const tap = () => A.sequence([A.timing(value, {toValue:1, duration:220, useNativeDriver:true}), A.timing(value, {toValue:0, duration:220, useNativeDriver:true})]);
+            const run = A.loop(A.sequence([A.delay(900), tap(), A.delay(90), tap(), A.delay(1600)]));
+            run.start();
+            return () => run.stop();
+        }, []);
+        const own = settings.gestureOwn === "edit", on = props.on;
+        const ripple = ref.current && on ? el(A.View, {pointerEvents:"none", style:{position:"absolute", right:20, top:18, width:28, height:28, borderRadius:14,
+            backgroundColor:"#ffffff", opacity:ref.current.interpolate({inputRange:[0, 1], outputRange:[0, 0.35]}),
+            transform:[{scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.6, 1.4]})}]}}) : null;
+        const result = (Icon, text) => el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6, marginTop:4}},
+            el(Icon, {size:"xs"}), el(RN.Text, {style:s.muted}, text));
+        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon");
+        return chatPreview(s, "preview", "Tap gestures preview", [
+            el(RN.View, {key:"theirs"}, previewMessage(s, "theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), el(RN.View, null,
+                el(RN.Text, {style:s.text}, tr("Anyone up for a game later?")),
+                on ? result(Reply, tr("Double-tap: reply")) : null)), ripple),
+            previewMessage(s, "mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), el(RN.View, null,
+                el(RN.Text, {style:s.text}, tr("I'm in!")),
+                on ? result(own ? Pencil : Reply, tr(own ? "Double-tap: edit" : "Double-tap: reply")) : null,
+                on && settings.gestureTripleDelete ? result(Trash, tr("Triple-tap: delete")) : null))]);
+    }
     function GestureSettings() {
         useSettings("gestures");
         const ui = reviewUI();
@@ -2467,6 +2506,7 @@
             on ? statusCard("status", settings.gestureTripleDelete ? "Double-tap replies. Triple-tap your own message deletes it." :
                 settings.gestureOwn === "edit" ? "Double-tap replies, or edits your own message." : "Double-tap any message to reply to it.",
                 {title:tr("Double-tap to reply"), IconComponent:venusIcon(8216, "ReactionIcon")}) : offCard("status", venusIcon(8216, "ReactionIcon")),
+            el(GesturePreview, {key:"preview", on}),
             radioGroup(ui, "own", "Double-tap your own message", "gestureOwn", on, [
                 ["edit", "Edit it", "Opens it for editing, when Discord lets you.", rowIcon(9829, "PencilIcon")],
                 ["reply", "Reply to it", "Same as someone else's message.", rowIcon(11108, "ArrowAngleLeftUpIcon")]]),

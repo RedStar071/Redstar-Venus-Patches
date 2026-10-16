@@ -4826,3 +4826,90 @@ test('every option page renders in the shared design: status card first, row ico
         if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
     }
 });
+
+// UI motion and feedback (1.15.0): every page still renders without Animated, and with it each group rises in.
+function animatedHarness(b, RN) {
+    const runs = [];
+    class Value { constructor(v) { this.v = v; } setValue(v) { this.v = v; } interpolate(c) { return {interpolated:c, from:this}; } }
+    const animation = (kind, value, config) => ({start(){ runs.push({kind, value, config}); value.v = config.toValue; }, stop(){}});
+    RN.Animated = {Value, View:'AnimatedView', timing:(v, c) => animation('timing', v, c), spring:(v, c) => animation('spring', v, c),
+        sequence:list => ({start(){ runs.push({kind:'sequence', list}); }, stop(){}}), loop:a => ({start(){ runs.push({kind:'loop'}); }, stop(){}}), delay:ms => ({ms})};
+    let layout = 0; RN.LayoutAnimation = {Presets:{easeInEaseOut:'ease'}, create:() => 'custom', configureNext:() => { layout++; }};
+    b.load(RN, null, 17);
+    return {runs, get layout() { return layout; }};
+}
+test('option pages reveal their groups in turn on the native driver, and a switch eases the layout', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); const RN = {View:'View', Text:'Text', Image:'Image', Modal:'Modal', Pressable:'Pressable', ScrollView:'Scroll'};
+    const motion = animatedHarness(b, RN);
+    const effects = []; React.useEffect = fn => effects.push(fn); let ref; React.useRef = v => ({current:v}); React.useState = init => [init, () => {}];
+    function TableSwitchRow(){} b.context.__r = id => ({6621:{TableSwitchRow}}[id] || null);
+    b.api.setSetting('gestures', true);
+    const page = b.registry.VENUS_GESTURES.screen.getComponent()();
+    const reveals = pageNodes(page).filter(n => n.type && n.type.name === 'VenusReveal');
+    assert.ok(reveals.length >= 4, 'each group is wrapped');
+    assert.deepEqual(reveals.map(n => n.props.index), reveals.map((_, i) => i), 'in order, so they rise one after another');
+    // Render one reveal: it starts hidden and its effect times it in on the native driver, delayed by its place.
+    const second = reveals[1].type(reveals[1].props);
+    assert.equal(second.type, 'AnimatedView');
+    effects.splice(0).forEach(fn => fn());
+    const run = motion.runs.at(-1);
+    assert.equal(run.kind, 'timing'); assert.equal(run.config.useNativeDriver, true); assert.equal(run.config.delay, 45);
+    // A switch on the page eases the layout change it causes.
+    const row = pageNodes(page).find(n => n.type === TableSwitchRow);
+    const before = motion.layout; row.props.onValueChange(false); assert.equal(motion.layout, before + 1);
+});
+test('pages still render plainly when React Native has no Animated', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); React.useRef = v => ({current:v});
+    b.api.setSetting('quests', true);
+    const reveals = pageNodes(b.registry.VENUS_QUESTS.screen.getComponent()()).filter(n => n.type && n.type.name === 'VenusReveal');
+    const child = reveals[0].type(reveals[0].props);
+    assert.equal(child, reveals[0].props.children, 'no wrapper view without Animated');
+});
+test('the Quests status card shows the running Quest\'s progress and the minutes left', async () => {
+    const b = questHarness({quests:[playFixture('p1', 900, enrolledAgo(5))]});
+    const {React} = reactHarness(b); React.useRef = v => ({current:v});
+    b.connect();
+    // Run until the first heartbeat is answered, not to the end.
+    await b.run(30 * 1000);
+    b.load({SettingsList(){}},null,14236);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const nodes = pageNodes(registry.VENUS_QUESTS.screen.getComponent()());
+    const bar = nodes.find(n => n.type && n.type.name === 'VenusProgress');
+    assert.ok(bar, 'a progress bar while a Quest runs');
+    assert.ok(bar.props.value > 0 && bar.props.value < 1, 'part way: ' + bar.props.value);
+    assert.ok(nodes.some(n => typeof n.props.children === 'string' && /About 14 minutes left\./.test(n.props.children)), 'minutes left');
+    await b.run(30 * 60 * 1000);
+    const after = pageNodes(registry.VENUS_QUESTS.screen.getComponent()());
+    assert.equal(after.filter(n => n.type && n.type.name === 'VenusProgress').length, 0, 'no bar once nothing runs');
+});
+test('Read all shows a check for a moment after it clears something, and its label stays for screen readers', () => {
+    const b = readAllHarness(); const timers = []; b.context.setTimeout = (fn, ms) => { timers.push(fn); return timers.length; };
+    const render = () => { const button = findReadAll(b.props().listDataProps.renderItem(6,0)); return button.type(button.props).props.children; };
+    assert.equal(render().props.children.type, 'Text');
+    pressReadAll(b);
+    const pill = render();
+    assert.equal(pill.props.accessibilityLabel, 'Read all');
+    assert.equal(pill.props.children.type.name, 'PopIn', 'a check pops in');
+    timers.splice(0).forEach(fn => fn());
+    assert.equal(render().props.children.type, 'Text', 'back to its label');
+});
+test('Tap gestures and Hidden channels pages preview what they do', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); React.useRef = v => ({current:v});
+    b.api.setSetting('gestures', true);
+    const preview = pageNodes(b.registry.VENUS_GESTURES.screen.getComponent()()).find(n => n.type && n.type.name === 'GesturePreview');
+    const texts = () => pageNodes(preview.type(preview.props)).filter(n => typeof n.props.children === 'string').map(n => n.props.children);
+    assert.ok(texts().includes('Double-tap: edit')); assert.ok(texts().includes('Triple-tap: delete'));
+    b.api.setSetting('gestureOwn', 'reply'); b.api.setSetting('gestureTripleDelete', false);
+    assert.ok(!texts().includes('Double-tap: edit')); assert.ok(!texts().includes('Triple-tap: delete'));
+    b.api.setSetting('hiddenChannels', true);
+    const names = on => { b.api.setSetting('hiddenChannels', on);
+        return pageNodes(b.registry.VENUS_HIDDENCHANNELS.screen.getComponent()()).filter(n => n.type === 'Text' && /^[a-z-]+$/.test(n.props.children)).map(n => n.props.children); };
+    assert.deepEqual(names(true), ['general', 'staff-only', 'memes']);
+    assert.deepEqual(names(false), ['general', 'memes'], 'the locked channel only shows while it is on');
+});
+test('the Features entry says how many are on', () => {
+    const b = settingsHarness();
+    const on = () => { const m = /^(\d+) of 31 turned on$/.exec(b.registry.VENUS_PLUGINS.useDescription()); assert.ok(m); return Number(m[1]); };
+    b.api.setSetting('dashless', false); const before = on();
+    b.api.setSetting('dashless', true); assert.equal(on(), before + 1);
+});
