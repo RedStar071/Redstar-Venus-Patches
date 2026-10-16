@@ -6365,15 +6365,45 @@
             (waiting ? " " + tr("{n} waiting.", {n:waiting}) : "");
     }
     // A message in Spanish shown the way Translate messages shows it, following the Display switches.
+    // Watch: Lucía writes in Spanish and it turns into your language, on its own or after you hold it and tap
+    // Translate (whichever you chose below). Try it: tap the message to switch between the original and the translation.
+    const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
     function TranslatePreview(props) {
         useSettings("translate");
-        const s = useChatPreviewStyles();
-        return chatPreview(s, "preview", "Translation preview",
-            previewMessage(s, "msg", "Lucía", "#faa61a", tr("Today at 4:01 PM"), el(RN.View, null,
-                el(RN.Text, {style:s.text}, tr("Hi everyone! Who's coming tonight?")),
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = !!props.on;
+        const blank = {shown:true, done:true, busy:false, menu:false, pulse:null, caption:""};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch", manual = settings.translateMode === "manual";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        useDemo(watching, () => {
+            const steps = [[0, () => setState({shown:false, done:false, busy:false, menu:false, pulse:null, caption:""})],
+                [500, () => { animateLayout(); update({shown:true, caption:tr("Luc\u00eda writes in Spanish")}); }]];
+            if (manual) steps.push([1500, () => update({pulse:{who:"msg", id:"hold:" + Date.now()}})],
+                [350, () => { animateLayout(); update({menu:true, caption:tr("Hold it and tap Translate")}); }],
+                [1100, () => update({pulse:{who:"menu", id:"tap:" + Date.now()}})], [150, () => { animateLayout(); update({menu:false, busy:true}); }]);
+            else steps.push([1300, () => update({busy:true, caption:tr("It's translated on its own")})]);
+            steps.push([800, () => { animateLayout(); update({busy:false, done:true, caption:tr("Now it's in {language}", {language:languageName(localeCode(settings.translateTarget === "phone" ? "phone" : "discord"))})}); }],
+                [3000, () => {}]);
+            return steps;
+        }, [manual]);
+        const translated = on ? state.done : true;
+        const body = !state.shown ? null : state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
+                el(RN.Text, {style:[s.muted, {marginTop:2}]}, tr("Translating\u2026"))) :
+            !translated ? el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE) : el(RN.View, null,
+                popIn("tr", el(RN.Text, {style:s.text}, tr("Hi everyone! Who's coming tonight?"))),
                 settings.translateNote ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
-                settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?")) : null)));
+                settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
+        const menu = watching && state.menu ? el(RN.View, {key:"menu", style:{alignSelf:"flex-start", marginLeft:68, marginTop:2, paddingHorizontal:12, paddingVertical:7,
+            borderRadius:10, backgroundColor:"#4e505866", flexDirection:"row", alignItems:"center", gap:6}},
+            popIn("menu", el(venusIcon(14958, "LanguageIcon"), {size:"xs"})), el(RN.Text, {style:s.text}, tr("Translate")), tapRipple(state.pulse, "menu", {right:-6, top:-4})) : null;
+        const message = state.shown ? el(RN.View, {key:"msg"}, popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)),
+            tapRipple(state.pulse, "msg")) : null;
+        const hint = tr(state.done ? "Tap to show the original" : "Tap to translate it");
+        const preview = chatPreview(s, "preview", "Translation preview", [message, menu,
+            on ? previewCaption(s, watching ? state.caption : hint) : null]);
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            watching ? preview : el(Press, {key:"press", onPress:() => { if (on) { animateLayout(); update(st => ({done:!st.done})); } }, accessibilityRole:"button",
+                accessibilityHint:on ? hint : undefined}, preview));
     }
     function TranslateSettings() {
         useSettings("translate");
@@ -6385,7 +6415,7 @@
         const groups = [
             on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:name(settings.translateTarget === "phone" ? "phone" : "discord")}), IconComponent:venusIcon(14958, "LanguageIcon")}) :
                 offCard("status", venusIcon(14958, "LanguageIcon")),
-            el(TranslatePreview, {key:"preview"}),
+            el(TranslatePreview, {key:"preview", on}),
             radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(16292, "SparklesIcon")],
                 ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8216, "ReactionIcon")]]),
             radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(8719, "ChatSmileIcon")],

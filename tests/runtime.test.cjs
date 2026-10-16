@@ -5123,6 +5123,26 @@ test('Pastel names preview plays: people post one by one and each name fills in 
     for (const t of ['Each person gets their own color', 'A role color stays as it is', 'The same name always gets the same color']) assert.ok(seen.has(t), 'shows: ' + t);
     host.run(2); assert.equal(names()[0], 'Riley', 'then a new group');
 });
+test('Translate preview plays your choice: translated on its own, or after Hold and Translate; Try it switches', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('translate', true);
+    const play = () => { const host = hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview'));
+        host.render(); const seen = new Set(); for (let k = 0; k < 9; k++) { host.run(1); host.texts().forEach(t => seen.add(t)); } return seen; };
+    const auto = play();
+    for (const t of ['Lucía writes in Spanish', "It's translated on its own", 'Translating…', "Hi everyone! Who's coming tonight?"]) assert.ok(auto.has(t), 'shows: ' + t);
+    assert.ok([...auto].some(t => /^Now it's in /.test(t)) && !auto.has('Hold it and tap Translate'));
+    b.api.setSetting('translateMode', 'manual');
+    const manual = play();
+    assert.ok(manual.has('Hold it and tap Translate') && manual.has('Translate') && !manual.has("It's translated on its own"));
+    // Try it: tap to switch between the translation and the original.
+    const host = hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?"));
+    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to show the original').props.onPress();
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && host.texts().includes('Tap to translate it'));
+    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to translate it').props.onPress();
+    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?"));
+});
 test('Deleted messages and Pastel names previews can be tried by tapping', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
