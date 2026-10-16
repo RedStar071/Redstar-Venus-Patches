@@ -1481,7 +1481,9 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
     props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=a%2Bb'});await flush();await flush();
     assert.equal(b.requests[0][0],'https://manti.vendicated.dev/api/reviewdb/auth?code=a%2Bb&returnType=json&clientMod=vendetta');
     assert.equal(b.popped.length,1);assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,1);
-    assert.equal(b.toasts.at(-1).content,'Successfully authenticated with ReviewDB');
+    assert.equal(b.toasts.at(-1).content,'Signed in to ReviewDB');
+    // Like Discord's own toasts, Venus's carry an icon for what just happened.
+    assert.equal(typeof b.toasts.at(-1).IconComponent,'function','sign-in toast has an icon');
 });
 test('ReviewDB sign-in survives disabling the plugin and logs out explicitly, and stays signed in',async()=>{
     const b=reviewHarness();const props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=x'});await flush();await flush();
@@ -1939,7 +1941,11 @@ test('ReviewDB server fetch errors are visible and retry can recover to an empty
     const m=mountReviewElement(b,element);b.context.fetch=async()=>({ok:false,status:503,json:async()=>({message:'Service unavailable'})});
     m.render();m.effects.splice(0).forEach(fn=>fn());await flush();await flush();
     let tree=m.render();assert.match(JSON.stringify(tree),/Service unavailable/);
-    const retry=walkElements(tree,n=>n.props.accessibilityLabel==='Retry reviews')[0];assert.ok(retry);
+    let retry=walkElements(tree,n=>n.props.accessibilityLabel==='Retry reviews')[0];assert.ok(retry);
+    // With Discord's Button (5282) loaded, Retry is a real small secondary button, not bare text.
+    function Button(props){return {type:Button,props};}
+    b.native[5282]={Button};tree=m.render();retry=walkElements(tree,n=>n.props.accessibilityLabel==='Retry reviews')[0];
+    assert.equal(retry.type,Button);assert.equal(retry.props.variant,'secondary');assert.equal(retry.props.text,'Retry');
     b.context.fetch=async()=>({ok:true,json:async()=>({reviews:[]})});retry.props.onPress();m.render();m.effects.splice(0).forEach(fn=>fn());await flush();await flush();
     assert.match(JSON.stringify(m.render()),/No reviews yet/);
 });

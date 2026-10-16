@@ -805,7 +805,7 @@
                 screen: { route: key, getComponent: () => page } };
         }
         // About: the version and how many features are on, whether settings are saved, and where to get help.
-        next.VENUS_VERSION = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(16292, "SparklesIcon", icon),
+        next.VENUS_VERSION = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(8324, "TagIcon", icon),
             useTitle: () => "Venus Patches " + revision, useDescription: function () { useSettings(); return featureSummary(); } };
         next.VENUS_STATUS = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(4788, "CircleInformationIcon", icon),
             useTitle: () => { useLanguage(); return tr("Status"); }, useDescription: function () { useSettings(); return aboutText(); } };
@@ -2157,7 +2157,7 @@
         const parts=[];
         if (guilds) parts.push(pl(guilds,"{n} server","{n} servers"));
         if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
-        reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread");
+        reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread",venusIcon(15161,"DoubleCheckmarkIcon"));
     }
     // Holding the button: Discord's own action sheet with the three one-time choices.
     function readAllChooser() {
@@ -3554,8 +3554,9 @@
         return parts;
     }
     let reviewToastSeq = 0;
-    function reviewToast(ui,content) {
-        try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open({key:"venus-toast:" + (++reviewToastSeq),content:tr(content)}); } catch (_) {}
+    // Discord's own toasts carry an icon for what just happened; IconComponent is optional (venusIcon).
+    function reviewToast(ui,content,IconComponent) {
+        try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open(Object.assign({key:"venus-toast:" + (++reviewToastSeq),content:tr(content)},IconComponent ? {IconComponent} : null)); } catch (_) {}
     }
     function hideReviewSheet(ui,key) { try { if (ui.sheets && typeof ui.sheets.hideActionSheet==="function") ui.sheets.hideActionSheet(key); } catch (_) {} }
     // Styles from Discord's createStyles: semantic tokens resolve
@@ -3649,7 +3650,7 @@
         const events=Array.from(deleted.values());
         deleted.clear(); deletedByChannel.clear(); edits.clear(); invalidateDeleted();
         dispatchRemovals(events); persistDeleted(); notify("noDelete");
-        reviewToast(reviewUI(),"Kept messages cleared");
+        reviewToast(reviewUI(),"Kept messages cleared",venusIcon(4791,"TrashIcon"));
     }
     function authenticateReviews() {
         if (!enabled("reviewDB") || reviewAuthState==="exchanging") return;
@@ -3683,7 +3684,7 @@
                     if (!live()) return;
                     if (auth.success!==true || typeof auth.token!=="string" || !auth.token.trim() || auth.token.length>8192) throw new Error(auth.message || "ReviewDB did not return a token");
                     reviewToken=auth.token;reviewAccount=accountId;reviewAuthState="idle";reviewAuthError="";reviewCache.clear();
-                    save();notify("reviewDB");reviewToast(ui,"Successfully authenticated with ReviewDB");
+                    save();notify("reviewDB");reviewToast(ui,"Signed in to ReviewDB",venusIcon(4793,"CircleCheckIcon"));
                 }).catch(fail);
             }}}});
     }
@@ -3735,7 +3736,7 @@
         }
         const options=[{label:tr("Copy Text"),onPress:() => {
             try { (ui.clipboard || RN.Clipboard).setString(review.comment); } catch (_) {}
-            reviewToast(ui,"Copied Review Text");
+            reviewToast(ui,"Copied Review Text",venusIcon(4780,"CopyIcon"));
         }}];
         if (reviewAuth() && !system) {
             if (sender.discordID===me || owner===me || reviewAdmins.has(me)) options.push({label:tr("Delete Review"),isDestructive:true,
@@ -3820,7 +3821,7 @@
         const refetch=() => {reviewCache.delete(userId);reload(n => n+1);};
         const rows=error ? el(RN.View,{style:{gap:8}},
             el(RN.Text,{accessibilityRole:"alert",style:styles.text},tr("Couldn't load reviews: {problem}",{problem:error})),
-            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Retry reviews"),onPress:refetch,style:{padding:12}},el(RN.Text,{style:styles.text},tr("Retry")))) :
+            reviewRetry(refetch)) :
             reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},tr("Loading reviews...")) :
             !shown.length ? el(RN.Text,{style:styles.muted},tr("No reviews yet.")) :
             shown.map((review,index) => el(ReviewRow,{key:(review.id==null ? "" : String(review.id))+":"+index,review,owner:userId,ui,styles,refetch}));
@@ -3828,6 +3829,15 @@
             el(Card,props.standalone ? {accessibilityLabel:tr("Reviews")} : {title:tr("Reviews")},
                 el(RN.View,{style:{gap:8}},rows),
                 el(ReviewInput,{userId,ui,styles,refetch,shouldEdit:list.some(review => review.type!==3 && review.sender.discordID===me)})));
+    }
+    // Discord's own small secondary button (Button 5282), or a themed pill if it hasn't loaded.
+    function reviewRetry(onPress) {
+        const Button=inspectedExport(5282,"Button");
+        if (Button) return el(RN.View,{style:{alignSelf:"flex-start"}},
+            el(Button,{text:tr("Retry"),size:"sm",variant:"secondary",accessibilityLabel:tr("Retry reviews"),onPress}));
+        return el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Retry reviews"),onPress,
+            style:{alignSelf:"flex-start",paddingHorizontal:16,height:32,borderRadius:16,justifyContent:"center",backgroundColor:"#4e505899"}},
+            el(RN.Text,{style:{color:"#ffffff",fontWeight:"600"}},tr("Retry")));
     }
     function ReviewSheet(props) {
         const ui=reviewUI();
@@ -5795,7 +5805,7 @@
         translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear();
         if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         translateChanged(); notify("translate");
-        reviewToast(reviewUI(), "Saved translations cleared");
+        reviewToast(reviewUI(), "Saved translations cleared", venusIcon(4791, "TrashIcon"));
     }
 
     // Custom themes: installs Revenge / Vendetta JSON themes from links and compiles their rawColors,
@@ -6422,7 +6432,7 @@
             customThemes.error = "";
             customThemesPersist();
             customThemesApply();
-            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}));
+            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4793, "CircleCheckIcon"));
             if (typeof onDone === "function") onDone();
             return true;
         }).catch(err => {
@@ -6450,7 +6460,7 @@
         if (customThemes.active === id) customThemes.active = "";
         customThemesPersist();
         customThemesApply();
-        reviewToast(reviewUI(), tr("Removed {name}", {name:removed.name}));
+        reviewToast(reviewUI(), tr("Removed {name}", {name:removed.name}), venusIcon(4791, "TrashIcon"));
     }
     function customThemesClearAll() {
         customThemes.loaded = true;
@@ -6459,7 +6469,7 @@
         customThemes.error = "";
         customThemesPersist();
         customThemesApply();
-        reviewToast(reviewUI(), "Themes cleared");
+        reviewToast(reviewUI(), "Themes cleared", venusIcon(4791, "TrashIcon"));
     }
     function customThemesSummary() {
         if (!enabled("customThemes")) return tr("Turned off. Switch it on in Features to start.");

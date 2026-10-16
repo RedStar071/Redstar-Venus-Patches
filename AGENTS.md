@@ -213,7 +213,19 @@ VENUS_ORIGINAL_APK=/home/user/webapp/work/new/base.apk python3 scripts/build.py
 ## Settings design
 
 Venus settings should feel like part of Discord: simple, modern and calm, never a wall of switches. Since 1.10.0
-every screen follows these rules. Follow them for every new feature and every change to an existing one.
+every screen starts from these rules. Use them for every new feature and every change to an existing one.
+
+### These rules are a starting point, not a cage
+
+The layouts, page order and styling below are what the user likes, so start from them. They are suggestions, not
+fixed requirements. What the user wants most is the best-looking, easiest-to-use UI, and what they like won't always
+be what looks or works best. Use your own judgement: if you believe something would look better or be easier to use
+another way, do it that way, and say what you changed and why in the pull request. This covers the whole Venus UI
+inside Discord, not only the settings pages: chat additions, buttons, sheets, toasts, previews and the Features list.
+
+Change something only when it's genuinely better, though. Don't invent changes to look busy, and leave things alone when
+the current design already works. Wherever a rule here touches something other than looks (a name staying the same in
+Venus and Morphe, translations, tests, the module map), keep following it.
 
 ### Fewer, better settings
 
