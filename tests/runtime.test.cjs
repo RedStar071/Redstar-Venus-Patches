@@ -594,7 +594,7 @@ test('native registry adds authorless About, Settings and option-page routes wit
     for (const key of ['VENUS_GENERAL','VENUS_PLUGINS','VENUS_FREENITRO']) {
         assert.equal(b.registry[key].type,'route'); assert.equal(b.registry[key].screen.route,key);
         const screen=b.registry[key].screen.getComponent();assert.equal(screen,b.registry[key].screen.getComponent());
-        if (key!=='VENUS_FREENITRO') assert.equal(screen().type,b.SettingsList);
+        if (key==='VENUS_PLUGINS') assert.equal(screen().type,b.SettingsList);
     }
     // Nitro links is a designed page with a preview; its options stay real setting nodes for Discord's search.
     const nitro=pageNodes(b.registry.VENUS_FREENITRO.screen.getComponent()());
@@ -863,8 +863,8 @@ test('immutable function export hooks retain the Metro module marker and stock d
 
 test('attachment tools and all five ports live in Features, never About', () => {
     const b=settingsHarness();
-    const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
-    assert.deepEqual(Array.from(general.sections,s=>s.label),['Venus Patches','Links']);
+    assert.deepEqual(Object.keys(b.registry).filter(id=>b.registry[id].parent==='VENUS_GENERAL'),
+        ['VENUS_VERSION','VENUS_STATUS','VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']);
     for (const id of ['PICKER','VOICE','NOTYPING','NODELETE','JUMPTOTOP','HIDDENCHANNELS','QUICKDELETE'])
         assert.equal(b.registry['VENUS_'+id].parent,'VENUS_PLUGINS');
     for (const key of ['quickDelete','noDelete','hiddenChannels']) assert.equal(b.api.settings[key],false);
@@ -2165,9 +2165,18 @@ test('row icons are Discord\'s own, loaded when drawn, with a fallback',()=>{
 });
 test('About shows the version, features on, status and links',()=>{
     const b=settingsHarness();const opened=[];
-    const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
-    assert.deepEqual(JSON.parse(JSON.stringify(general.sections)),[{label:'Venus Patches',settings:['VENUS_VERSION','VENUS_STATUS']},
-        {label:'Links',settings:['VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']}]);
+    // About is a designed page: the version up top, features on with a bar and a chip per group, a status line, and links.
+    function Text(){} function TableRow(){}
+    b.context.__r=id=>({4833:{Text},5916:{TableRow}}[id]||null);
+    const about=()=>pageNodes(b.registry.VENUS_GENERAL.screen.getComponent()());
+    const texts=()=>about().filter(n=>n.type===Text).map(n=>n.props.children);
+    assert.ok(texts().some(t=>/^Venus Patches \d/.test(t)),'version in the header');
+    assert.ok(texts().includes('For Discord 348.10'));
+    assert.ok(about().some(n=>n.type&&n.type.name==='VenusProgress'&&n.props.value>=0&&n.props.value<=1),'a bar for features on');
+    assert.ok(about().some(n=>n.props&&/^Messages: \d+\/\d+$/.test(n.props.accessibilityLabel||'')),'a chip per group');
+    assert.deepEqual(about().filter(n=>n.type===TableRow).map(n=>n.props.label),["What's new",'Report a problem','Source code']);
+    // The native rows stay, so Discord's settings search still finds them.
+    for (const id of ['VENUS_VERSION','VENUS_STATUS','VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']) assert.equal(b.registry[id].parent,'VENUS_GENERAL');
     assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 31 features on/);
     b.api.setSetting('dashless',false);const before=Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]);
     b.api.setSetting('dashless',true);assert.equal(Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]),before+1);

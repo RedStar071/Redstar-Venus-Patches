@@ -820,12 +820,16 @@
         link("VENUS_LINK_SOURCE", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8041, "LinkExternalSmallIcon");
         route("VENUS_GENERAL", "About", [section("Venus Patches", ["VENUS_VERSION", "VENUS_STATUS"]), section("Links", links)], undefined,
             venusIcon(4788, "CircleInformationIcon", icon));
+        // The nodes above stay for Discord's settings search; the page itself is the designed About page.
+        next.VENUS_GENERAL.screen.getComponent = () => AboutSettings;
         // The features list: each row says what it does, grouped by where you'll notice it.
         const P = "VENUS_PLUGINS";
         const groups = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
         const iconFor = key => { const found = FEATURE_ICONS[key]; return found ? venusIcon(found[0], found[1], icon) : icon; };
+        featureGroups = groups.keys = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
         function toggle(group, key, title, hint) {
             if (!features[key]) return;
+            groups.keys[group].push(key);
             const id = "VENUS_" + key.toUpperCase(); groups[group].push(id);
             next[id] = settingNode(key, title, hint, P);
             next[id].IconComponent = iconFor(key);
@@ -835,6 +839,7 @@
         const navigators = new Map();
         function withOptions(group, key, id, title, hint, pageTitle, page) {
             if (!features[key]) return;
+            groups.keys[group].push(key);
             // Option pages are built only for patched settings, so unpatched ones leave no nodes behind.
             if (typeof page === "function" && !page.prototype) page = page();
             if (page && page.sections && page.page) { route(id, pageTitle, page.sections, P, iconFor(key)); const Page = page.page; next[id].screen.getComponent = () => Page; }
@@ -927,6 +932,66 @@
         next.VENUS_LANGUAGE.useDescription = function () { useLanguage(); return languageLabel(settings.language); };
         status.menu = true;
         return next;
+    }
+    // Which patched features sit in which group of the Features list, for the About page.
+    let featureGroups = null;
+    const FEATURE_GROUPS = [["messages", "Messages", 5386, "ChatIcon"], ["sending", "Sending", 4778, "SendMessageIcon"], ["people", "People", 4532, "FriendsIcon"],
+        ["servers", "Servers", 8584, "ServerIcon"], ["appearance", "Appearance", 14795, "PaintPaletteIcon"], ["quests", "Quests", 14519, "QuestsIcon"]];
+    // Is Venus working? One word and a colored dot, the way Discord shows a status.
+    function aboutHealth() {
+        const storage = status.storage;
+        if (storage === "ready" || storage === "saved") return status.archive === "save failed" || status.archive === "restore failed" || status.audioError ? "idle" : "online";
+        if (storage === "waiting" || storage === "loading") return "idle";
+        return "dnd";
+    }
+    const ABOUT_DARK = {hero:{backgroundColor:"#2b2d31", borderRadius:16, padding:20, alignItems:"center", gap:6},
+        logo:{width:64, height:64, borderRadius:32, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2", marginBottom:6},
+        chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"},
+        card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:10}};
+    // About: who you're running, how much of it is on, whether it's healthy, and where to go next.
+    function AboutSettings() {
+        useSettings();
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const s = useThemed("about", c => ({hero:Object.assign({}, ABOUT_DARK.hero, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            logo:Object.assign({}, ABOUT_DARK.logo, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
+            chip:Object.assign({}, ABOUT_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            card:Object.assign({}, ABOUT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT})}), ABOUT_DARK);
+        const Text = inspectedExport(4833, "Text"), Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
+        const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]), on = keys.filter(key => settings[key]).length;
+        const health = aboutHealth(), Sparkles = venusIcon(16292, "SparklesIcon");
+        const chips = FEATURE_GROUPS.map(([group, label, id, name]) => {
+            const list = featureGroups && featureGroups[group] || [];
+            if (!list.length) return null;
+            const count = list.filter(key => settings[key]).length;
+            return el(RN.View, {key:group, style:[s.chip, {opacity:count ? 1 : 0.6}], accessible:true, accessibilityLabel:tr(label) + ": " + count + "/" + list.length},
+                el(venusIcon(id, name), {size:"xs"}), text(tr(label) + " " + count + "/" + list.length, "text-xs/semibold", count ? "text-strong" : "text-muted", {color:"#dbdee1", fontSize:12}));
+        });
+        const linkRow = (key, label, sub, url, id, name) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true, onPress:() => openLink(url)}) : null;
+        const groups = [
+            el(RN.View, {key:"hero", style:s.hero, accessible:true},
+                popIn("logo", el(RN.View, {style:s.logo}, el(Sparkles, {size:"lg", color:"#ffffff"}))),
+                text("Venus Patches " + revision, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
+                text(tr("For Discord {version}", {version:"348.10"}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+            el(RN.View, {key:"features", style:s.card},
+                el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", justifyContent:"space-between"}},
+                    text(keys.length ? pl(on, "{n} feature on", "{n} features on") : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    keys.length ? text(tr("of {total}", {total:keys.length}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:13}) : null),
+                keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
+                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:4}}, chips)),
+            el(RN.View, {key:"status", style:[s.card, {flexDirection:"row", alignItems:"center", gap:14}]},
+                el(RN.View, {style:{width:12, height:12, borderRadius:6, backgroundColor:STATUS_HEX[health]}}),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    text(tr(health === "online" ? "Everything's working" : health === "idle" ? (status.storage === "waiting" || status.storage === "loading" ? "Getting ready" : "Working, with a note") : "Something needs a look"),
+                        "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    text(aboutText(), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
+            el(Group, {key:"links", title:tr("Links")},
+                linkRow("changes", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16292, "SparklesIcon"),
+                linkRow("issues", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15329, "BugIcon"),
+                linkRow("source", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8041, "LinkExternalSmallIcon")),
+            footnote("note", "Nothing is tracked, and everything works offline except the features that say they use a service.")];
+        return settingsBody(ui, groups);
     }
     function languageLabel(code) {
         if (code === "auto") { const shown = UI_LANGUAGES.find(entry => entry[0] === uiLanguage()); return tr("Same as Discord ({language})", {language:shown ? shown[1] : "English"}); }
