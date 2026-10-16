@@ -915,6 +915,12 @@
         const sections = [section("Messages", groups.messages), section("Sending", groups.sending), section("People", groups.people),
             section("Servers", groups.servers), section("Appearance", groups.appearance), section("Quests", groups.quests)].filter(entry => entry.settings.length);
         route(P, "Features", sections, undefined, venusIcon(14478, "PuzzlePieceIcon", icon));
+        // "5 of 26 on", right on the entry, so you see at a glance what Venus is doing before opening it.
+        next[P].useDescription = function () {
+            useSettings();
+            const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
+            return tr("{on} of {total} on", {on:keys.filter(key => settings[key]).length, total:keys.length});
+        };
         // Language: the language Venus settings are shown in, Discord's own by default.
         route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(14958, "LanguageIcon", icon));
         next.VENUS_LANGUAGE.screen.getComponent = () => LanguageSettings;
@@ -2697,6 +2703,13 @@
         });
     }
     // Mirrors the server's answer into QuestStore, so Discord's own Quest screens stay right.
+    // How far the running Quest is, for the progress bar on the Quests page. Only that page listens.
+    function questProgressed(entry, value) {
+        const n = Number(value);
+        if (!Number.isFinite(n) || quest.running !== entry) return;
+        entry.progress = Math.max(0, Math.min(entry.task.target, n));
+        notify("quests");
+    }
     function questVideoStatus(response) {
         const body = response && response.body;
         if (body && body.quest_id) questDispatch({type:"QUESTS_USER_STATUS_UPDATE", user_status:body});
@@ -2710,6 +2723,7 @@
         const enrolled = questTime(item.userStatus && item.userStatus.enrolledAt), target = entry.task.target;
         if (!Number.isFinite(enrolled)) throw new Error("no accepted time");
         let done = questProgress(item, entry.task.type), completed = false;
+        questProgressed(entry, done);
         while (questActive(entry) && done < target) {
             const step = 6 + Math.random() * 2;
             const allowed = (Date.now() - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, next = Math.min(target, done + step);
@@ -2720,6 +2734,7 @@
             if (!questActive(entry)) return false;
             completed = questVideoStatus(response);
             done = next;
+            questProgressed(entry, done);
             if (completed) break;
             await questSleep(1000 + Math.floor(Math.random() * 500));
         }
@@ -2781,6 +2796,7 @@
         while (questActive(entry)) {
             const beat = await questHeartbeat(entry, desktop);
             if (!questActive(entry)) return false;
+            questProgressed(entry, beat.value);
             if (beat.completed || beat.value >= target) return true;
             // A Quest Discord stops counting used to get a heartbeat every minute for as long as Discord stayed open.
             if (beat.value > best) { best = beat.value; stalled = 0; }
@@ -2870,10 +2886,18 @@
     function questStatusText() {
         if (!enabled("quests")) return "Turned off. Switch it on in Features to start.";
         const lines = [quest.completed ? pl(quest.completed, "Completed {n} Quest since Discord opened.", "Completed {n} Quests since Discord opened.") : tr("Waiting for new Quests.")];
-        if (quest.running) lines.push(tr("Now: {name}.", {name:quest.running.name}));
+        if (quest.running) {
+            const share = questShare(), left = share != null ? Math.ceil((quest.running.task.target - quest.running.progress) / 60) : 0;
+            lines.push(tr("Now: {name}.", {name:quest.running.name}) + (share != null && left > 0 ? " " + pl(left, "About {n} minute left.", "About {n} minutes left.") : ""));
+        }
         if (quest.last) lines.push(tr("Last: {name}", {name:tr(quest.last.text, quest.last.vars)}));
         if (quest.error) lines.push(tr(quest.error.text, quest.error.vars));
         return lines.join("\n");
+    }
+    // The running Quest's progress, 0 to 1, or null before its first report.
+    function questShare() {
+        const entry = quest.running, target = entry && entry.task && entry.task.target;
+        return entry && target > 0 && typeof entry.progress === "number" ? entry.progress / target : null;
     }
     function questStatusTitle() {
         if (quest.error) return tr("Something went wrong");
@@ -2890,7 +2914,8 @@
         const toggle = (key, label, subLabel, icon) => switchRow(Switch, key, label, subLabel, icon);
         const groups = [
             on ? statusCard("status", questStatusText(), {title:questStatusTitle(), IconComponent:venusIcon(quest.error ? 11840 : quest.running ? 10968 : 14519,
-                quest.error ? "ChatWarningIcon" : quest.running ? "TimerIcon" : "QuestsIcon")}) : offCard("status", venusIcon(14519, "QuestsIcon")),
+                quest.error ? "ChatWarningIcon" : quest.running ? "TimerIcon" : "QuestsIcon"),
+                footer:questShare() != null ? el(VenusProgress, {key:"progress:" + quest.running.id, value:questShare()}) : null}) : offCard("status", venusIcon(14519, "QuestsIcon")),
             el(Group, {key:"types", title:tr("Quests to complete")},
                 toggle("questsVideo", "Video Quests", "Reported as watched at normal speed, without playing the video.", rowIcon(10976, "VideoIcon")),
                 toggle("questsPlay", "Play Quests", "Play time counts without installing or opening the game.", rowIcon(8532, "GameControllerIcon")),
@@ -2900,16 +2925,76 @@
             footnote("note", "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.")];
         return settingsBody(ui, groups);
     }
-    // Shared by the Read All, ReviewDB and NoDelete pages: Discord's spacing, scrolling and switch rows.
+    // Motion, from React Native's own Animated and LayoutAnimation. Opacity, position and scale run on the native
+    // driver, so nothing extra runs in JS while a page animates. Without them, or with Android's "Remove animations"
+    // on, everything simply shows at once.
+    let reduceMotion = false, reduceMotionAsked = false;
+    function motion() {
+        const A = RN && RN.Animated;
+        if (!A || typeof A.timing !== "function" || typeof A.Value !== "function") return null;
+        if (!reduceMotionAsked) {
+            reduceMotionAsked = true;
+            const info = RN.AccessibilityInfo;
+            try { if (info && typeof info.isReduceMotionEnabled === "function") Promise.resolve(info.isReduceMotionEnabled()).then(on => { reduceMotion = !!on; }, () => {}); } catch (_) {}
+            try { if (info && typeof info.addEventListener === "function") info.addEventListener("reduceMotionChanged", on => { reduceMotion = !!on; }); } catch (_) {}
+        }
+        return A;
+    }
+    // The next layout change on screen eases into place instead of jumping: rows that appear, a bar that widens.
+    function animateLayout() {
+        const animate = RN && RN.LayoutAnimation;
+        if (reduceMotion || !animate || typeof animate.configureNext !== "function") return;
+        try { animate.configureNext(typeof animate.create === "function" ? animate.create(200, "easeInEaseOut", "opacity") : animate.Presets.easeInEaseOut); } catch (_) {}
+    }
+    function easeOut() { const E = RN && RN.Easing; try { return E && E.out && E.cubic ? E.out(E.cubic) : undefined; } catch (_) { return undefined; } }
+    // An option page's groups rise into place one after another when the page opens, and a row group that
+    // appears later (Manage, a hex box) fades in the same way.
+    function VenusReveal(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) {
+            const value = new A.Value(reduceMotion ? 1 : 0);
+            ref.current = {value, style:{opacity:value, transform:[{translateY:value.interpolate({inputRange:[0, 1], outputRange:[14, 0]})}]}};
+        }
+        React.useEffect(() => {
+            const state = ref.current;
+            if (!state || reduceMotion) return undefined;
+            const run = A.timing(state.value, {toValue:1, duration:280, delay:Math.min(props.index || 0, 6) * 45, easing:easeOut(), useNativeDriver:true});
+            run.start();
+            return () => { run.stop(); state.value.setValue(1); };
+        }, []);
+        return ref.current ? el(A.View, {style:ref.current.style}, props.children) : props.children;
+    }
+    // A check mark or choice that pops in with a small spring when it's picked.
+    function PopIn(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) {
+            const value = new A.Value(reduceMotion ? 1 : 0);
+            ref.current = {value, style:{opacity:value.interpolate({inputRange:[0, 1], outputRange:[0, 1], extrapolate:"clamp"}),
+                transform:[{scale:value.interpolate({inputRange:[0, 1], outputRange:[0.4, 1]})}]}};
+        }
+        React.useEffect(() => {
+            const state = ref.current;
+            if (!state || reduceMotion || typeof A.spring !== "function") { if (state) state.value.setValue(1); return undefined; }
+            const run = A.spring(state.value, {toValue:1, speed:20, bounciness:12, useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, []);
+        return ref.current ? el(A.View, {style:ref.current.style, pointerEvents:"none"}, props.children) : props.children;
+    }
+    function popIn(key, child) { return child ? el(PopIn, {key}, child) : child; }
+    // Shared by every option page: Discord's spacing and scrolling, with each group revealed in turn.
     function settingsBody(ui,groups,scroll) {
-        const body=ui.Stack ? el(ui.Stack,{style:{paddingVertical:24,paddingHorizontal:12},spacing:24},groups) :
-            el(RN.View,{style:{paddingVertical:24,paddingHorizontal:12,gap:24}},groups);
+        const shown=groups.map((group,i) => group && typeof group==="object" ?
+            el(VenusReveal,{key:group.key != null ? group.key : group.props && group.props.key != null ? group.props.key : "group"+i,index:i},group) : group);
+        const body=ui.Stack ? el(ui.Stack,{style:{paddingVertical:24,paddingHorizontal:12},spacing:24},shown) :
+            el(RN.View,{style:{paddingVertical:24,paddingHorizontal:12,gap:24}},shown);
         return RN.ScrollView ? el(RN.ScrollView,scroll || null,body) : body;
     }
     // Greyed out while the main switch is off, like the options on the Settings list.
     function switchRow(Switch,key,label,subLabel,icon) {
         const owner=featureFor(key);
-        return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],onValueChange:value=>setSetting(key,value)}) : null;
+        return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],
+            onValueChange:value => { animateLayout(); setSetting(key,value); }}) : null;
     }
     // One choice from a few: Discord's radio list (TableRadioGroup 5995 / TableRadioRow 5994), or check-marked rows.
     // Each choice may carry a fourth item, its row icon (rowIcon), like Discord's own radio lists.
@@ -2953,10 +3038,33 @@
         const Text = inspectedExport(4833, "Text"), Icon = props.IconComponent, title = props.title, body = props.body;
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
         return el(RN.View, {key:props.key, style:s.card, accessible:true},
-            props.leading || (Icon ? el(RN.View, {style:s.badge}, el(Icon, {size:"md"})) : null),
+            // The badge pops in when the page opens, and again whenever the card's state (its title) changes.
+            popIn("badge:" + (title || ""), props.leading || (Icon ? el(RN.View, {style:s.badge}, el(Icon, {size:"md"})) : null)),
             el(RN.View, {style:{flex:1, gap:2}},
                 title ? line(title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}) : null,
-                body ? line(body, "text-sm/medium", title ? "text-muted" : "text-default", {color:title ? "#949ba4" : "#dbdee1", fontSize:14}) : null));
+                body ? line(body, "text-sm/medium", title ? "text-muted" : "text-default", {color:title ? "#949ba4" : "#dbdee1", fontSize:14}) : null,
+                props.footer || null));
+    }
+    // A thin rounded progress bar in the theme's brand color that glides to each new value.
+    function VenusProgress(props) {
+        const s = useThemed("progress", c => ({track:{height:6, borderRadius:3, overflow:"hidden", backgroundColor:c.BACKGROUND_MOD_STRONG || c.BACKGROUND_MOD_NORMAL},
+            fill:{height:6, borderRadius:3, backgroundColor:c.BACKGROUND_BRAND || c.TEXT_BRAND}}),
+            {track:{height:6, borderRadius:3, overflow:"hidden", backgroundColor:"#4e505899"}, fill:{height:6, borderRadius:3, backgroundColor:"#5865f2"}});
+        const A = motion(), ref = React.useRef(null), share = Math.max(0, Math.min(1, Number(props.value) || 0));
+        if (!ref.current && A) ref.current = new A.Value(reduceMotion ? share : 0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value) return undefined;
+            if (reduceMotion) { value.setValue(share); return undefined; }
+            // Width can't run on the native driver; it's one small view, animated once per Quest update.
+            const run = A.timing(value, {toValue:share, duration:600, easing:easeOut(), useNativeDriver:false});
+            run.start();
+            return () => run.stop();
+        }, [share]);
+        const width = ref.current ? ref.current.interpolate({inputRange:[0, 1], outputRange:["0%", "100%"]}) : Math.round(share * 100) + "%";
+        return el(RN.View, {key:props.key, style:[s.track, {marginTop:8}], accessible:true, accessibilityRole:"progressbar",
+            accessibilityValue:{min:0, max:100, now:Math.round(share * 100)}},
+            el(ref.current ? A.View : RN.View, {style:[s.fill, {width}]}));
     }
     // A rounded card with live status, in the theme's card colors. extra: {title, IconComponent, leading}.
     function statusCard(key,text,extra) {
@@ -3002,17 +3110,41 @@
         return Title ? el(Title,{key,title:tr(title)}) : el(RN.View,{key,style:{paddingHorizontal:16}},
             Text ? el(Text,{variant:"text-sm/semibold",color:"text-muted"},tr(title)) : el(RN.Text,{style:{color:"#949ba4",fontSize:13,fontWeight:"600"}},tr(title)));
     }
+    // The chosen pill of a segmented control, as one view that slides between choices with a soft spring.
+    // It measures the track once; until then the pills draw their own background, so nothing ever flickers.
+    const segmentMeasured = new Map();
+    function SegmentedSlider(props) {
+        const A = motion(), [width, setWidth] = React.useState(segmentMeasured.get(props.slot) || 0), ref = React.useRef(null);
+        if (!ref.current) ref.current = {x:new A.Value(0), placed:false};
+        const state = ref.current, pill = width ? (width - 4 * (props.count - 1)) / props.count : 0, target = props.index * (pill + 4);
+        React.useEffect(() => {
+            if (!pill) return undefined;
+            if (!state.placed || reduceMotion || typeof A.spring !== "function") { state.placed = true; state.x.setValue(target); return undefined; }
+            const run = A.spring(state.x, {toValue:target, speed:18, bounciness:6, useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, [target, pill]);
+        return el(RN.View, {pointerEvents:"none", style:{position:"absolute", left:4, right:4, top:4, bottom:4},
+            onLayout:event => { const w = event && event.nativeEvent && event.nativeEvent.layout && event.nativeEvent.layout.width;
+                if (w && Math.abs(w - width) > 0.5) { segmentMeasured.set(props.slot, w); setWidth(w); } }},
+            pill ? el(A.View, {style:{position:"absolute", top:0, bottom:0, left:0, width:pill, borderRadius:20, backgroundColor:props.color,
+                transform:[{translateX:state.x}]}}) : null);
+    }
     // A choice of two to four, drawn like Discord's segmented control (its MOBILE_SEGMENTED_CONTROL tokens).
     function venusSegmented(props) {
         const index=Math.max(0,props.items.findIndex(item => item.value===props.value));
-        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) props.onChange(item.value); };
+        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { animateLayout(); props.onChange(item.value); } };
         const pill={flex:1,paddingVertical:9,borderRadius:20,alignItems:"center"};
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
             on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill}),
             {wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:"#1e1f22"},on:Object.assign({},pill,{backgroundColor:"#4e5058"}),off:pill});
         const Text=inspectedExport(4833,"Text"), Press=RN.Pressable || RN.View;
+        // Once its slider has measured the track, the chosen pill slides to the new choice instead of jumping.
+        const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
+        const indicator=s.on && s.on.backgroundColor;
         return el(RN.View,{key:props.key,style:[s.wrap,{opacity:props.disabled ? 0.5 : 1}],accessibilityRole:"tablist"},
-            props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
+            motion() ? el(SegmentedSlider,{key:"slider",slot,index,count:props.items.length,color:indicator}) : null,
+            props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index && !sliding ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
                 accessibilityState:{selected:i===index,disabled:!!props.disabled},disabled:!!props.disabled,onPress:() => pick(i)},
                 Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted"},item.label) :
                     el(RN.Text,{style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600"}},item.label))));
@@ -6712,8 +6844,8 @@
                 Text ? el(Text, {variant:"text-sm/medium", color:"text-muted"}, activeName) : el(RN.Text, {style:{color:"#949ba4", fontSize:13}}, activeName)),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center"}, accessibilityRole:"radiogroup"},
                 props.choices.map(([choice, label, hex]) => swatch(choice, tr(label), hex, value === choice, () => { if (on) setSetting(props.setting, choice); },
-                    value === choice ? tick(hex) : null)),
-                swatch("custom", tr("Any color"), custom ? value : null, custom, pickAny, custom ? tick(value) : el(Dropper, {size:"xs"}))));
+                    value === choice ? popIn("tick:" + choice, tick(hex)) : null)),
+                swatch("custom", tr("Any color"), custom ? value : null, custom, pickAny, custom ? popIn("tick:" + value, tick(value)) : el(Dropper, {size:"xs"}))));
     }
     function MessageHighlightSettings() {
         useSettings("messageHighlight");
