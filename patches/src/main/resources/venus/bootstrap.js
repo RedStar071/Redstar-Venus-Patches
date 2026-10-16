@@ -3199,6 +3199,186 @@
                 el(RN.Text, {style:{fontSize:12, fontWeight:"600", color:mode === value ? "#ffffff" : "#949ba4"}}, tr(label)));
         return el(RN.View, {key:"toggle", style:s.wrap}, pill("watch", "Watch", venusIcon(7726, "PlayIcon")), pill("try", "Try it", venusIcon(9370, "HandRequestSpeakIcon")));
     }
+    // Watch plays like a short video: a story is a list of [wait ms, step, caption?]. Each caption stays up long enough
+    // to read (storyPlan stretches the wait before the next one), the clock ticks once a second, and a bar under the
+    // preview shows where it is, how long it is, and lets you pause or start over. It loops, and starts over when the
+    // options below change. Its timers end when you switch to Try it or leave the page.
+    function readMs(text) { return Math.max(2400, Math.min(5000, 1500 + 55 * String(text || "").length)); }
+    function storyPlan(list) {
+        const out = list.filter(Boolean).map(step => step.slice());
+        let last = null, since = 0;
+        out.forEach(step => {
+            if (step[2] && last !== null && since + step[0] < readMs(last)) step[0] += readMs(last) - since - step[0];
+            if (step[2]) { last = step[2]; since = 0; } else since += step[0];
+        });
+        if (last !== null && since < readMs(last)) out.push([readMs(last) - since, () => {}]);
+        return out;
+    }
+    function useStory(active, build, deps) {
+        const [view, setView] = React.useState({t:0, total:0, caption:"", chapter:0, chapters:[], playing:true, segment:null});
+        const control = React.useRef({});
+        React.useEffect(() => {
+            if (!active) return undefined;
+            const plan = storyPlan(build()), at = [];
+            let sum = 0;
+            plan.forEach(step => { sum += step[0]; at.push(sum); });
+            const total = sum, chapters = plan.map((step, i) => step[2] ? at[i] : null).filter(x => x !== null);
+            const st = {i:0, t:0, timer:undefined, cancelled:false, paused:false, caption:"", chapter:0, seg:0};
+            const show = segment => setView({t:st.t, total, caption:st.caption, chapter:st.chapter, chapters, playing:!st.paused, segment});
+            const stop = () => { if (st.timer !== undefined && global.clearTimeout) global.clearTimeout(st.timer); st.timer = undefined; };
+            const schedule = () => {
+                if (st.cancelled || st.paused) return;
+                const due = st.i < at.length ? at[st.i] : total, target = Math.min(due, Math.floor(st.t / 1000) * 1000 + 1000);
+                const wait = Math.max(0, target - st.t);
+                show({from:st.t, to:target, ms:wait, id:++st.seg});
+                st.timer = later(() => {
+                    st.timer = undefined;
+                    if (st.cancelled) return;
+                    st.t = target;
+                    while (st.i < plan.length && at[st.i] <= st.t) {
+                        const step = plan[st.i++];
+                        if (step[2]) { st.caption = step[2]; st.chapter++; }
+                        try { step[1](); } catch (_) {}
+                    }
+                    if (st.i >= plan.length) { st.i = 0; st.t = 0; st.caption = ""; st.chapter = 0; }
+                    schedule();
+                }, wait, false);
+            };
+            control.current = {
+                pause() { if (st.paused) return; st.paused = true; stop(); show(null); },
+                play() { if (!st.paused) return; st.paused = false; schedule(); },
+                replay() { stop(); st.i = 0; st.t = 0; st.caption = ""; st.chapter = 0; st.paused = false; schedule(); }
+            };
+            schedule();
+            return () => { st.cancelled = true; stop(); control.current = {}; };
+        }, [active].concat(deps || []));
+        return Object.assign({}, view, {pause:() => control.current.pause && control.current.pause(),
+            play:() => control.current.play && control.current.play(), replay:() => control.current.replay && control.current.replay()});
+    }
+    function clockText(ms) { const sec = Math.round(ms / 1000); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+    const PREVIEW_CHROME_DARK = {
+        header:{flexDirection:"row", alignItems:"center", gap:10, paddingHorizontal:12, height:48, borderBottomWidth:1, borderBottomColor:"#ffffff0f"},
+        title:{color:"#f2f3f5", fontSize:16, fontWeight:"700"}, sub:{color:"#949ba4", fontSize:12}, icon:{color:"#b5bac1"}, iconMuted:{color:"#80848e"},
+        inputRow:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingTop:6, paddingBottom:8},
+        round:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
+        pill:{flex:1, minHeight:40, borderRadius:20, paddingHorizontal:14, flexDirection:"row", alignItems:"center", gap:8, backgroundColor:"#2b2d31"},
+        send:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:8, backgroundColor:"#4e505826"},
+        brand:{backgroundColor:"#5865f2"}, brandText:{color:"#ffffff"},
+        secondary:{backgroundColor:"#4e505899"}, secondaryText:{color:"#f2f3f5"},
+        sheet:{backgroundColor:"#232428", borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, paddingBottom:4},
+        sheetRow:{backgroundColor:"#2b2d31"}, modal:{backgroundColor:"#313338", borderRadius:16, padding:16, gap:12}, scrim:{backgroundColor:"#000000a6"},
+        strip:{backgroundColor:"#4e50581a", borderTopWidth:1, borderTopColor:"#ffffff0f"}, track:{backgroundColor:"#4e505899"}, fill:{backgroundColor:"#5865f2"},
+        mention:{backgroundColor:"#5865f23d", color:"#c9cdfb"}, category:{color:"#949ba4", fontSize:12, fontWeight:"700", letterSpacing:0.3},
+        channel:{color:"#949ba4"}, selected:{backgroundColor:"#4e505866"}, card:{backgroundColor:"#2b2d31"}};
+    function usePreviewChrome() {
+        return useThemed("previewChrome", c => ({
+            header:Object.assign({}, PREVIEW_CHROME_DARK.header, {borderBottomColor:c.MOBILE_HEADER_BORDER || c.BORDER_SUBTLE}),
+            title:Object.assign({}, PREVIEW_CHROME_DARK.title, {color:c.MOBILE_TEXT_HEADING_PRIMARY || c.TEXT_STRONG}),
+            sub:Object.assign({}, PREVIEW_CHROME_DARK.sub, {color:c.TEXT_MUTED}),
+            icon:{color:c.MOBILE_HEADER_ICON_DEFAULT || c.INTERACTIVE_ICON_DEFAULT}, iconMuted:{color:c.ICON_MUTED},
+            inputRow:PREVIEW_CHROME_DARK.inputRow,
+            round:Object.assign({}, PREVIEW_CHROME_DARK.round, {backgroundColor:c.CHAT_INPUT_ACTION_BUTTON_BACKGROUND || c.BACKGROUND_MOD_SUBTLE}),
+            pill:Object.assign({}, PREVIEW_CHROME_DARK.pill, {backgroundColor:c.REDESIGN_CHAT_INPUT_BACKGROUND || c.CHAT_INPUT_BACKGROUND}),
+            send:Object.assign({}, PREVIEW_CHROME_DARK.send, {backgroundColor:c.CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND || c.BACKGROUND_BRAND}),
+            bar:Object.assign({}, PREVIEW_CHROME_DARK.bar, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            brand:{backgroundColor:c.BACKGROUND_BRAND}, brandText:{color:c.CONTROL_BRAND_FOREGROUND_NEW || c.WHITE || "#ffffff"},
+            secondary:{backgroundColor:c.CONTROL_SECONDARY_BACKGROUND_DEFAULT}, secondaryText:{color:c.CONTROL_SECONDARY_TEXT_DEFAULT},
+            sheet:Object.assign({}, PREVIEW_CHROME_DARK.sheet, {backgroundColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW}),
+            sheetRow:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}, modal:Object.assign({}, PREVIEW_CHROME_DARK.modal, {backgroundColor:c.MODAL_BACKGROUND}),
+            scrim:{backgroundColor:c.BACKGROUND_SCRIM}, strip:Object.assign({}, PREVIEW_CHROME_DARK.strip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_SUBTLE}),
+            track:{backgroundColor:c.PROGRESSBAR_TRACK_BACKGROUND || c.BACKGROUND_MOD_STRONG}, fill:{backgroundColor:c.PROGRESSBAR_INDICATOR_BACKGROUND || c.BACKGROUND_BRAND},
+            mention:{backgroundColor:c.MENTION_BACKGROUND, color:c.MENTION_FOREGROUND},
+            category:Object.assign({}, PREVIEW_CHROME_DARK.category, {color:c.TEXT_MUTED}), channel:{color:c.CHANNELS_DEFAULT || c.TEXT_MUTED},
+            selected:{backgroundColor:c.MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED || c.BACKGROUND_MOD_NORMAL}, card:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}}),
+            PREVIEW_CHROME_DARK);
+    }
+    // Discord's channel header: back arrow, the channel (or person) and the icons on the right.
+    function previewHeader(k, props) {
+        const Back = venusIcon(5937, "ArrowLargeLeftIcon"), Hash = venusIcon(15125, "HashmarkIcon");
+        return el(RN.View, {key:"header", style:k.header},
+            el(Back, {size:"md", color:k.icon.color}),
+            props.leading || el(Hash, {size:"md", color:k.iconMuted.color}),
+            el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:6}},
+                el(RN.Text, {style:k.title, numberOfLines:1}, props.title), props.badges || null),
+            (props.icons || [[6473, "MagnifyingGlassIcon"], [5404, "GroupIcon"]]).map(([id, name]) => el(venusIcon(id, name), {key:name, size:"md", color:k.icon.color})));
+    }
+    // Discord's message bar: the + button, the text pill with its emoji button, then the mic, or Send once there's text.
+    function previewInput(k, s, props) {
+        const Plus = venusIcon(10455, "PlusLargeIcon"), Smile = venusIcon(8216, "ReactionIcon"), Mic = venusIcon(9461, "MicrophoneIcon"),
+            Send = venusIcon(4778, "SendMessageIcon"), text = props.text || "";
+        return el(RN.View, {key:"input"}, props.bar || null, props.above || null,
+            el(RN.View, {style:k.inputRow},
+                el(RN.View, {style:k.round}, el(Plus, {size:"sm", color:k.icon.color})),
+                el(RN.View, {style:k.pill}, el(RN.Text, {style:[text ? s.text : s.muted, {flex:1, fontSize:15}], numberOfLines:1}, text || props.placeholder),
+                    el(Smile, {size:"sm", color:k.icon.color})),
+                text ? popIn("send", el(RN.View, {style:k.send}, el(Send, {size:"sm", color:k.brandText.color}))) :
+                    el(RN.View, {style:k.round}, el(Mic, {size:"sm", color:k.icon.color}))));
+    }
+    // The bar above the message box while replying or editing, like Discord's: an icon, what it is, and a close button.
+    function previewBar(k, s, Icon, text, onClose, key) {
+        const X = venusIcon(5940, "XSmallIcon"), Press = RN.Pressable || RN.View;
+        return el(RN.View, {key:key || "bar", style:k.bar}, popIn("icon:" + text, el(Icon, {size:"xs", color:k.icon.color})),
+            el(RN.Text, {style:[s.muted, {flex:1, fontSize:13}], numberOfLines:1}, text),
+            onClose ? el(Press, {onPress:onClose, accessibilityRole:"button", accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}},
+                el(X, {size:"xs", color:k.icon.color})) : null);
+    }
+    // A Discord tooltip pointing at what to tap in Try it: the brand color, white text and a small arrow.
+    function previewTip(k, text, side) {
+        if (!text) return null;
+        const down = side === "down";
+        return el(RN.View, {key:"tip", style:{alignItems:"flex-start", paddingHorizontal:16, paddingTop:down ? 0 : 6, paddingBottom:down ? 6 : 0}},
+            popIn("tip:" + text, el(RN.View, null,
+                down ? null : el(RN.View, {style:[k.brand, {width:10, height:10, marginLeft:22, marginBottom:-5, transform:[{rotate:"45deg"}]}]}),
+                el(RN.View, {style:[k.brand, {borderRadius:8, paddingHorizontal:12, paddingVertical:8, maxWidth:300}]},
+                    el(RN.Text, {style:[k.brandText, {fontSize:14, fontWeight:"600"}]}, text)),
+                down ? el(RN.View, {style:[k.brand, {width:10, height:10, marginLeft:22, marginTop:-5, transform:[{rotate:"45deg"}]}]}) : null)));
+    }
+    // A preview's surface: Discord's chat colors, its header on top, and Watch's player strip at the bottom.
+    function previewScreen(s, key, label, children, extra) {
+        return el(RN.View, {key, style:[s.chat, {paddingVertical:0}], accessible:false, accessibilityLabel:tr(label)},
+            extra && extra.header || null, el(RN.View, {style:{paddingVertical:4}}, children), extra && extra.footer || null);
+    }
+    // The progress bar of the player: glides from one tick to the next, stops where it is while paused.
+    function StoryTrack(props) {
+        const A = motion(), ref = React.useRef(null), story = props.story, k = props.k, total = story.total || 1;
+        if (!ref.current && A) ref.current = new A.Value(0);
+        const seg = story.segment;
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || !seg) return undefined;
+            value.setValue(seg.from / total);
+            if (reduceMotion || typeof A.timing !== "function") { value.setValue(seg.to / total); return undefined; }
+            const run = A.timing(value, {toValue:seg.to / total, duration:seg.ms, useNativeDriver:false});
+            run.start();
+            return () => run.stop();
+        }, [seg && seg.id]);
+        const width = ref.current ? ref.current.interpolate({inputRange:[0, 1], outputRange:["0%", "100%"]}) : Math.round(story.t / total * 100) + "%";
+        return el(RN.View, {style:[k.track, {flex:1, height:4, borderRadius:2, overflow:"hidden"}], accessible:true, accessibilityRole:"progressbar",
+            accessibilityValue:{min:0, max:Math.round(total / 1000), now:Math.round(story.t / 1000)}},
+            el(ref.current ? A.View : RN.View, {style:[k.fill, {position:"absolute", left:0, top:0, bottom:0, width}]}),
+            story.chapters.map((at, i) => i ? el(RN.View, {key:"c" + i, style:{position:"absolute", top:0, bottom:0, width:2,
+                left:(at / total * 100) + "%", backgroundColor:"#00000059"}}) : null));
+    }
+    // What Watch is showing (step 2 of 5), and the player: pause or play, the bar, the time, start over.
+    function storyStrip(k, s, story) {
+        const Press = RN.Pressable || RN.View, Play = venusIcon(7726, "PlayIcon"), Pause = venusIcon(7728, "PauseIcon"), Again = venusIcon(11106, "RetryIcon");
+        const button = (key, Icon, label, onPress) => el(Press, {key, onPress, accessibilityRole:"button", accessibilityLabel:tr(label),
+            hitSlop:{top:10, bottom:10, left:10, right:10}, style:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"}},
+            el(Icon, {size:"xs", color:k.icon.color}));
+        const steps = story.chapters.length;
+        return el(RN.View, {key:"strip", style:[k.strip, {paddingHorizontal:12, paddingTop:10, paddingBottom:8, gap:8}]},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"flex-start", gap:8, minHeight:40}},
+                steps ? el(RN.View, {style:[k.secondary, {borderRadius:8, paddingHorizontal:6, paddingVertical:2, marginTop:1}]},
+                    el(RN.Text, {style:[k.secondaryText, {fontSize:12, fontWeight:"700"}]}, Math.max(1, story.chapter) + "/" + steps)) : null,
+                el(RN.View, {style:{flex:1}}, story.caption ? popIn("cap:" + story.caption,
+                    el(RN.Text, {style:[s.text, {fontSize:14, lineHeight:20}]}, story.caption)) : null)),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
+                story.playing ? button("pause", Pause, "Pause", story.pause) : button("play", Play, "Play", story.play),
+                el(StoryTrack, {story, k}),
+                el(RN.Text, {style:[s.muted, {fontSize:12, minWidth:72, textAlign:"right"}]}, clockText(story.t) + " / " + clockText(story.total)),
+                button("again", Again, "Start over", story.replay)));
+    }
     // A muted line under a preview: what's happening in Watch, what to tap in Try it.
     function previewCaption(s, text) {
         return text ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, popIn("cap:" + text, el(RN.Text, {style:s.muted}, text))) : null;
