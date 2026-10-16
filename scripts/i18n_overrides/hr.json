@@ -26,8 +26,8 @@
  "All friends": "Svi prijatelji",
  "All {n} friend selected. Tap a friend to pick individually.": "Odabran je {n} prijatelj. Dodirnite prijatelja za pojedinačni odabir.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Odabran je {n} prijatelj. Dodirnite prijatelja za pojedinačni odabir.",
   "few": "Odabrana su sva {n} prijatelja. Dodirnite prijatelja za pojedinačni odabir.",
+  "one": "Odabran je {n} prijatelj. Dodirnite prijatelja za pojedinačni odabir.",
   "other": "Odabrano je svih {n} prijatelja. Dodirnite prijatelja za pojedinačni odabir."
  },
  "Allow Discord notifications?": "Dopustiti Discord obavijesti?",
@@ -73,8 +73,8 @@
  "Completed {name}.": "Dovršeno: {name}.",
  "Completed {n} Quest since Discord opened.": "Od otvaranja Discorda dovršen je {n} Quest.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "Od otvaranja Discorda dovršen je {n} Quest.",
   "few": "Od otvaranja Discorda dovršena su {n} Questa.",
+  "one": "Od otvaranja Discorda dovršen je {n} Quest.",
   "other": "Od otvaranja Discorda dovršeno je {n} Questova."
  },
  "Console": "Konzola",
@@ -174,11 +174,14 @@
  "In DMs or in any server channel your client receives.": "U izravnim porukama ili u bilo kojem kanalu poslužitelja koji klijent prima.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "U razgovoru, reakcijama i biraču emojija. Discord se ponovno otvara da primijeni promjenu.",
  "In lists": "Na popisima",
+ "In use": "U upotrebi",
  "Indonesian": "indonezijski",
+ "Install": "Instaliraj",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Instalirajte i mijenjajte teme boja s poveznica, kompiliranih u tablicu boja Discord bez zastoja.",
  "Install theme": "Instalirajte temu",
  "Installed themes": "Instalirane teme",
  "Installing theme...": "Instaliranje teme...",
+ "Installing...": "Instaliranje...",
  "Irish": "irski",
  "It will be sent as a normal file instead.": "Umjesto toga šalje se kao obična datoteka.",
  "Italian": "talijanski",
@@ -284,6 +287,7 @@
  "Other people (by user ID)": "Druge osobe (prema korisničkom ID-u)",
  "Others won't see when you're typing. You still see when they are.": "Drugi ne vide kad tipkate. Vi i dalje vidite kad oni tipkaju.",
  "Outside Discord": "Izvan Discorda",
+ "Paste": "Zalijepi",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Gore zalijepite izravnu vezu na .json temu Revenge ili Vendetta.",
  "Paste link from clipboard": "Zalijepi vezu iz međuspremnika",
  "Pastel name colors": "Pastelne boje imena",
@@ -317,8 +321,8 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Uklanja promociju Questova iznad trake profila. Questovi i dalje rade.",
  "Removes {n} saved theme and restores Discord's default colors.": "Uklanja {n} spremljenu temu i vraća Discord zadane boje.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Uklanja {n} spremljenu temu i vraća zadane boje Discorda.",
   "few": "Uklanja {n} spremljene teme i vraća zadane boje Discorda.",
+  "one": "Uklanja {n} spremljenu temu i vraća zadane boje Discorda.",
   "other": "Uklanja {n} spremljenih tema i vraća zadane boje Discorda."
  },
  "Reopen now": "Ponovno otvori sada",
@@ -379,8 +383,8 @@
  "Show theme background image": "Prikaži pozadinsku sliku teme",
  "Shown {n} notification since Discord opened.": "Prikazana je {n} obavijest otkako je Discord otvoren.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Prikazana je {n} obavijest otkako je Discord otvoren.",
   "few": "Prikazane su {n} obavijesti otkako je Discord otvoren.",
+  "one": "Prikazana je {n} obavijest otkako je Discord otvoren.",
   "other": "Prikazano je {n} obavijesti otkako je Discord otvoren."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Prikazuje „general chat” umjesto „general-chat”. Mijenja samo izgled naziva.",
@@ -446,8 +450,8 @@
  "Translated from {language}. Original:": "Prevedeno s jezika: {language}. Izvornik:",
  "Translated {n} message since Discord opened.": "Od otvaranja Discorda prevedena je {n} poruka.",
  "Translated {n} messages since Discord opened.": {
-  "one": "Od otvaranja Discorda prevedena je {n} poruka.",
   "few": "Od otvaranja Discorda prevedene su {n} poruke.",
+  "one": "Od otvaranja Discorda prevedena je {n} poruka.",
   "other": "Od otvaranja Discorda prevedeno je {n} poruka."
  },
  "Triple-tap": "Trostruki dodir",
@@ -480,14 +484,14 @@
  "Waiting for new Quests.": "Čeka se na nove Questove.",
  "Watching all friends.": "Prate se svi prijatelji.",
  "Watching all {n} friends.": {
-  "one": "Prati se {n} prijatelj.",
   "few": "Prate se sva {n} prijatelja.",
+  "one": "Prati se {n} prijatelj.",
   "other": "Prati se svih {n} prijatelja."
  },
  "Watching {n} friend.": "Prati se {n} prijatelj.",
  "Watching {n} people.": {
-  "one": "Prati se {n} osoba.",
   "few": "Prate se {n} osobe.",
+  "one": "Prati se {n} osoba.",
   "other": "Prati se {n} osoba."
  },
  "Watching {n} person.": "Prati se {n} osoba.",
@@ -527,105 +531,105 @@
  "{name} sent you a DM": "{name} vam je poslao/la izravnu poruku",
  "{n} DM": "{n} izravna poruka",
  "{n} DMs": {
-  "one": "{n} izravna poruka",
   "few": "{n} izravne poruke",
+  "one": "{n} izravna poruka",
   "other": "{n} izravnih poruka"
  },
  "{n} account saved (up to {max}).": "{n} spremljen račun (do {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "{n} spremljen račun (do {max}).",
   "few": "{n} spremljena računa (do {max}).",
+  "one": "{n} spremljen račun (do {max}).",
   "other": "{n} spremljenih računa (do {max})."
  },
  "{n} chosen people": {
-  "one": "{n} odabranu osobu",
   "few": "{n} odabrane osobe",
+  "one": "{n} odabranu osobu",
   "other": "{n} odabranih osoba"
  },
  "{n} chosen person": "{n} odabranu osobu",
  "{n} color token": "{n} žeton u boji",
  "{n} color tokens": {
-  "one": "{n} žeton u boji",
   "few": "{n} žetona u boji",
+  "one": "{n} žeton u boji",
   "other": "{n} žetona u boji"
  },
  "{n} day": "{n} dan",
  "{n} days": {
-  "one": "{n} dan",
   "few": "{n} dana",
+  "one": "{n} dan",
   "other": "{n} dana"
  },
  "{n} deleted message": "{n} izbrisana poruka",
  "{n} deleted messages": {
-  "one": "{n} izbrisana poruka",
   "few": "{n} izbrisane poruke",
+  "one": "{n} izbrisana poruka",
   "other": "{n} izbrisanih poruka"
  },
  "{n} edited message": "{n} uređena poruka",
  "{n} edited messages": {
-  "one": "{n} uređena poruka",
   "few": "{n} uređene poruke",
+  "one": "{n} uređena poruka",
   "other": "{n} uređenih poruka"
  },
  "{n} friend selected.": "Odabran je {n} prijatelj.",
  "{n} friends selected.": {
-  "one": "Odabran je {n} prijatelj.",
   "few": "Odabrana su {n} prijatelja.",
+  "one": "Odabran je {n} prijatelj.",
   "other": "Odabrano je {n} prijatelja."
  },
  "{n} hour": "{n} sat",
  "{n} hours": {
-  "one": "{n} sat",
   "few": "{n} sata",
+  "one": "{n} sat",
   "other": "{n} sati"
  },
  "{n} minute": "{n} minutu",
  "{n} minutes": {
-  "one": "{n} minutu",
   "few": "{n} minute",
+  "one": "{n} minutu",
   "other": "{n} minuta"
  },
  "{n} month": "{n} mjesec",
  "{n} months": {
-  "one": "{n} mjesec",
   "few": "{n} mjeseca",
+  "one": "{n} mjesec",
   "other": "{n} mjeseci"
  },
  "{n} second ago": "prije {n} sekundu",
  "{n} seconds ago": {
-  "one": "prije {n} sekundu",
   "few": "prije {n} sekunde",
+  "one": "prije {n} sekundu",
   "other": "prije {n} sekundi"
  },
  "{n} server": "{n} server",
  "{n} server was marked as read": "{n} server označen je pročitanim",
  "{n} servers": {
-  "one": "{n} server",
   "few": "{n} servera",
+  "one": "{n} server",
   "other": "{n} servera"
  },
  "{n} servers were marked as read": {
-  "one": "{n} server označen je pročitanim",
   "few": "{n} servera označena su pročitanima",
+  "one": "{n} server označen je pročitanim",
   "other": "{n} servera označeno je pročitanima"
  },
  "{n} theme installed.": "Tema {n} instalirana.",
  "{n} themes installed.": {
-  "one": "{n} tema instalirana.",
   "few": "Instalirane {n} teme.",
+  "one": "{n} tema instalirana.",
   "other": "Instalirano {n} tema."
  },
  "{n} translation": "{n} prijevod",
  "{n} translations": {
-  "one": "{n} prijevod",
   "few": "{n} prijevoda",
+  "one": "{n} prijevod",
   "other": "{n} prijevoda"
  },
  "{n} waiting.": "Na čekanju: {n}.",
  "{n} year": "{n} godinu",
  "{n} years": {
-  "one": "{n} godinu",
   "few": "{n} godine",
+  "one": "{n} godinu",
   "other": "{n} godina"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Uključeno {on} od {total} značajki. Uključite ih ili isključite u Značajkama.",

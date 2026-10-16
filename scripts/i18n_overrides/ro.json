@@ -26,8 +26,8 @@
  "All friends": "Toți prietenii",
  "All {n} friend selected. Tap a friend to pick individually.": "{n} prieten selectat. Atinge un prieten pentru a alege individual.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "{n} prieten selectat. Atinge un prieten pentru a alege individual.",
   "few": "Toți cei {n} prieteni selectați. Atinge un prieten pentru a alege individual.",
+  "one": "{n} prieten selectat. Atinge un prieten pentru a alege individual.",
   "other": "Toți cei {n} de prieteni selectați. Atinge un prieten pentru a alege individual."
  },
  "Allow Discord notifications?": "Permiți notificările Discord?",
@@ -73,8 +73,8 @@
  "Completed {name}.": "Finalizat: {name}.",
  "Completed {n} Quest since Discord opened.": "{n} Quest finalizat de la deschiderea Discord.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "{n} Quest finalizat de la deschiderea Discord.",
   "few": "{n} Quest-uri finalizate de la deschiderea Discord.",
+  "one": "{n} Quest finalizat de la deschiderea Discord.",
   "other": "{n} de Quest-uri finalizate de la deschiderea Discord."
  },
  "Console": "Consolă",
@@ -174,11 +174,14 @@
  "In DMs or in any server channel your client receives.": "În mesaje directe sau în orice canal de server primit de client.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "În chat, reacții și selectorul de emoji. Discord se redeschide pentru a aplica schimbarea.",
  "In lists": "În liste",
+ "In use": "În uz",
  "Indonesian": "indoneziană",
+ "Install": "Instalează",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Instalați și comutați temele de culoare din linkuri, compilate în tabelul de culori al Discord fără întârziere.",
  "Install theme": "Instalați tema",
  "Installed themes": "Teme instalate",
  "Installing theme...": "Se instalează tema...",
+ "Installing...": "Se instalează...",
  "Irish": "irlandeză",
  "It will be sent as a normal file instead.": "Va fi trimis ca fișier obișnuit.",
  "Italian": "italiană",
@@ -284,6 +287,7 @@
  "Other people (by user ID)": "Alte persoane (după ID utilizator)",
  "Others won't see when you're typing. You still see when they are.": "Ceilalți nu văd când scrii. Tu vezi în continuare când scriu ei.",
  "Outside Discord": "În afara Discord",
+ "Paste": "Lipește",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Lipiți mai sus un link direct către o temă .json Revenge sau Vendetta.",
  "Paste link from clipboard": "Lipiți linkul din clipboard",
  "Pastel name colors": "Culori pastel pentru nume",
@@ -317,8 +321,8 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Elimină promovarea Quest de deasupra barei de profil. Quest-urile funcționează în continuare.",
  "Removes {n} saved theme and restores Discord's default colors.": "Elimină tema salvată {n} și restabilește culorile implicite ale Discord.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Elimină {n} temă salvată și restabilește culorile implicite ale Discord.",
   "few": "Elimină {n} teme salvate și restabilește culorile implicite ale Discord.",
+  "one": "Elimină {n} temă salvată și restabilește culorile implicite ale Discord.",
   "other": "Elimină {n} de teme salvate și restabilește culorile implicite ale Discord."
  },
  "Reopen now": "Redeschide acum",
@@ -379,8 +383,8 @@
  "Show theme background image": "Afișați imaginea de fundal a temei",
  "Shown {n} notification since Discord opened.": "S-a afișat {n} notificare de la deschiderea Discord.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "S-a afișat {n} notificare de la deschiderea Discord.",
   "few": "S-au afișat {n} notificări de la deschiderea Discord.",
+  "one": "S-a afișat {n} notificare de la deschiderea Discord.",
   "other": "S-au afișat {n} de notificări de la deschiderea Discord."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Afișează „general chat” în loc de „general-chat”. Schimbă doar aspectul numelor.",
@@ -446,8 +450,8 @@
  "Translated from {language}. Original:": "Tradus din limba: {language}. Original:",
  "Translated {n} message since Discord opened.": "{n} mesaj tradus de la deschiderea Discord.",
  "Translated {n} messages since Discord opened.": {
-  "one": "{n} mesaj tradus de la deschiderea Discord.",
   "few": "{n} mesaje traduse de la deschiderea Discord.",
+  "one": "{n} mesaj tradus de la deschiderea Discord.",
   "other": "{n} de mesaje traduse de la deschiderea Discord."
  },
  "Triple-tap": "Atingere triplă",
@@ -480,14 +484,14 @@
  "Waiting for new Quests.": "Se așteaptă Quest-uri noi.",
  "Watching all friends.": "Se urmăresc toți prietenii.",
  "Watching all {n} friends.": {
-  "one": "Se urmărește {n} prieten.",
   "few": "Se urmăresc toți cei {n} prieteni.",
+  "one": "Se urmărește {n} prieten.",
   "other": "Se urmăresc toți cei {n} de prieteni."
  },
  "Watching {n} friend.": "Se urmărește {n} prieten.",
  "Watching {n} people.": {
-  "one": "Se urmărește {n} persoană.",
   "few": "Se urmăresc {n} persoane.",
+  "one": "Se urmărește {n} persoană.",
   "other": "Se urmăresc {n} de persoane."
  },
  "Watching {n} person.": "Se urmărește {n} persoană.",
@@ -527,105 +531,105 @@
  "{name} sent you a DM": "{name} ți-a trimis un mesaj direct",
  "{n} DM": "{n} mesaj direct",
  "{n} DMs": {
-  "one": "{n} mesaj direct",
   "few": "{n} mesaje directe",
+  "one": "{n} mesaj direct",
   "other": "{n} de mesaje directe"
  },
  "{n} account saved (up to {max}).": "{n} cont salvat (până la {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "{n} cont salvat (până la {max}).",
   "few": "{n} conturi salvate (până la {max}).",
+  "one": "{n} cont salvat (până la {max}).",
   "other": "{n} de conturi salvate (până la {max})."
  },
  "{n} chosen people": {
-  "one": "{n} persoană aleasă",
   "few": "{n} persoane alese",
+  "one": "{n} persoană aleasă",
   "other": "{n} de persoane alese"
  },
  "{n} chosen person": "{n} persoană aleasă",
  "{n} color token": "{n} indicativ de culoare",
  "{n} color tokens": {
-  "one": "{n} jeton de culoare",
   "few": "{n} jetoane de culoare",
+  "one": "{n} jeton de culoare",
   "other": "{n} de jetoane de culoare"
  },
  "{n} day": "{n} zi",
  "{n} days": {
-  "one": "{n} zi",
   "few": "{n} zile",
+  "one": "{n} zi",
   "other": "{n} de zile"
  },
  "{n} deleted message": "{n} mesaj șters",
  "{n} deleted messages": {
-  "one": "{n} mesaj șters",
   "few": "{n} mesaje șterse",
+  "one": "{n} mesaj șters",
   "other": "{n} de mesaje șterse"
  },
  "{n} edited message": "{n} mesaj editat",
  "{n} edited messages": {
-  "one": "{n} mesaj editat",
   "few": "{n} mesaje editate",
+  "one": "{n} mesaj editat",
   "other": "{n} de mesaje editate"
  },
  "{n} friend selected.": "{n} prieten selectat.",
  "{n} friends selected.": {
-  "one": "{n} prieten selectat.",
   "few": "{n} prieteni selectați.",
+  "one": "{n} prieten selectat.",
   "other": "{n} de prieteni selectați."
  },
  "{n} hour": "{n} oră",
  "{n} hours": {
-  "one": "{n} oră",
   "few": "{n} ore",
+  "one": "{n} oră",
   "other": "{n} de ore"
  },
  "{n} minute": "{n} minut",
  "{n} minutes": {
-  "one": "{n} minut",
   "few": "{n} minute",
+  "one": "{n} minut",
   "other": "{n} de minute"
  },
  "{n} month": "{n} lună",
  "{n} months": {
-  "one": "{n} lună",
   "few": "{n} luni",
+  "one": "{n} lună",
   "other": "{n} de luni"
  },
  "{n} second ago": "acum {n} secundă",
  "{n} seconds ago": {
-  "one": "acum {n} secundă",
   "few": "acum {n} secunde",
+  "one": "acum {n} secundă",
   "other": "acum {n} de secunde"
  },
  "{n} server": "{n} server",
  "{n} server was marked as read": "{n} server a fost marcat drept citit",
  "{n} servers": {
-  "one": "{n} server",
   "few": "{n} servere",
+  "one": "{n} server",
   "other": "{n} de servere"
  },
  "{n} servers were marked as read": {
-  "one": "{n} server a fost marcat drept citit",
   "few": "{n} servere au fost marcate drept citite",
+  "one": "{n} server a fost marcat drept citit",
   "other": "{n} de servere au fost marcate drept citite"
  },
  "{n} theme installed.": "{n} tema instalată.",
  "{n} themes installed.": {
-  "one": "{n} temă instalată.",
   "few": "{n} teme instalate.",
+  "one": "{n} temă instalată.",
   "other": "{n} de teme instalate."
  },
  "{n} translation": "{n} traducere",
  "{n} translations": {
-  "one": "{n} traducere",
   "few": "{n} traduceri",
+  "one": "{n} traducere",
   "other": "{n} de traduceri"
  },
  "{n} waiting.": "În așteptare: {n}.",
  "{n} year": "{n} an",
  "{n} years": {
-  "one": "{n} an",
   "few": "{n} ani",
+  "one": "{n} an",
   "other": "{n} de ani"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "{on} din {total} funcții activate. Activează-le sau dezactivează-le din Funcții.",

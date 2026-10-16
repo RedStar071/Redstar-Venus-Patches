@@ -11,12 +11,18 @@
   "A shortcut to Venus, next to the notifications bell.": "Skrót do Venus obok dzwonka powiadomień.",
   "A small \"Translated from Spanish\" line under each translation.": "Mała linijka „Przetłumaczono z: hiszpański” pod każdym tłumaczeniem.",
   "About": "O Venus",
+  "About {n} minute left.": "Pozostało około {n} minuty.",
+  "About {n} minutes left.": {
+   "one": "Pozostała około {n} minuta.",
+   "few": "Zostały jakieś {n} minuty.",
+   "many": "Zostało około {n} minut.",
+   "other": "Zostało około {n} minut."
+  },
   "Accepts Quests you haven't started, one at a time. Off: only Quests you accept yourself.": "Przyjmuje po kolei misje, których jeszcze nie zacząłeś. Wył.: tylko misje przyjęte przez ciebie.",
   "Account": "Konto",
   "Account switcher": "Przełącznik kont",
   "Accounts": "Konta",
-  "Active account": "Aktywne konto",
-  "Active · Tap to turn off": "Aktywny · Kliknij, aby wyłączyć",
+  "Active account · Tap for the quick switcher": "Aktywne konto · Stuknij, aby przejść do szybkiego przełączania",
   "Activity notifications": "Powiadomienia o aktywności",
   "Activity time counts without starting the Activity.": "Czas aktywności się liczy bez uruchamiania aktywności.",
   "Add": "Dodać",
@@ -32,6 +38,7 @@
   "Android notifications are turned off for Discord. Enable them in system settings to receive push notifications outside the app.": "Powiadomienia Androida są wyłączone dla Discorda. Włącz je w ustawieniach systemowych, aby otrzymywać powiadomienia push poza aplikacją.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Powiadomienia Androida są wyłączone dla Discorda. Dotknij, aby sprawdzić lub otworzyć ustawienia systemowe.",
   "Any color": "Dowolny kolor",
+  "Anyone up for a game later?": "Ktoś chętny na mecz później?",
   "Appearance": "Wygląd",
   "Applied {name}": "Zastosowano {name}",
   "Arabic": "arabski",
@@ -71,9 +78,9 @@
   "Completed {name}.": "Ukończono: {name}.",
   "Completed {n} Quest since Discord opened.": "Ukończono {n} misję od otwarcia Discorda.",
   "Completed {n} Quests since Discord opened.": {
-   "one": "Ukończono {n} misję od otwarcia Discorda.",
    "few": "Ukończono {n} misje od otwarcia Discorda.",
-   "many": "Ukończono {n} misji od otwarcia Discorda."
+   "many": "Ukończono {n} misji od otwarcia Discorda.",
+   "one": "Ukończono {n} misję od otwarcia Discorda."
   },
   "Completing a Quest": "Ukończenie zadania",
   "Console": "Konsola",
@@ -100,10 +107,12 @@
   "Delete a kept message again to hide just that one.": "Usuń zachowaną wiadomość jeszcze raz, aby ukryć tylko ją.",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Usunięte i edytowane wiadomości zostają po zamknięciu Discorda. Zapisane tylko na tym telefonie, dla tego konta.",
   "Deleted messages": "Usunięte wiadomości",
+  "Deleted messages preview": "Podgląd usuniętych wiadomości",
   "Deleted messages stay in chat, outlined in red. Also shows what edited messages said before.": "Usunięte wiadomości zostają na czacie z czerwoną ramką. Widać też, co było w edytowanych wiadomościach.",
   "Desktop": "Komputer",
   "Desktop, mobile, web, console or VR icons next to names, colored by status.": "Ikony komputera, telefonu, przeglądarki, konsoli lub VR obok nazw, w kolorze statusu.",
   "Device indicators": "Wskaźniki urządzeń",
+  "Device indicators preview": "Podgląd wskaźników urządzenia",
   "Did everyone see the new update?": "Czy wszyscy widzieli nową aktualizację?",
   "Direct messages": "Wiadomości prywatne",
   "Discord account unavailable": "Konto Discord niedostępne",
@@ -123,6 +132,8 @@
   "Double-tap replies. Triple-tap your own message deletes it.": "Kliknij dwukrotnie odpowiedzi. Trzykrotne dotknięcie własnej wiadomości powoduje jej usunięcie.",
   "Double-tap to reply": "Dwukrotne stuknięcie, by odpowiedzieć",
   "Double-tap your own message": "Dwukrotne stuknięcie własnej wiadomości",
+  "Double-tap: edit": "Kliknij dwukrotnie: edytuj",
+  "Double-tap: reply": "Kliknij dwukrotnie: odpowiedz",
   "Double-tapping no longer adds a reaction. Hold a message to react instead.": "Dwukrotne stuknięcie nie dodaje już reakcji. Przytrzymaj wiadomość, aby zareagować.",
   "Downloads the theme once and keeps it on this phone.": "Pobiera motyw raz i zatrzymuje go na tym telefonie.",
   "Dutch": "niderlandzki",
@@ -143,15 +154,16 @@
   "Every name uses its pastel color, even with a role color.": "Każda nazwa ma swój pastelowy kolor, nawet z kolorem roli.",
   "Everyone on your friends list, new friends too.": "Wszyscy na Twojej liście znajomych, także nowi znajomi.",
   "Everyone sees the image, but it's a link, not a real Nitro emoji or sticker.": "Każdy widzi obraz, ale jest to link, a nie prawdziwy Nitro emoji lub naklejka.",
+  "Everything's working": "Wszystko działa",
   "Favourite any image or video": "Dodawaj dowolne obrazy i wideo do ulubionych",
   "Features": "Funkcje",
   "Filipino": "filipiński",
-  "Fills the box above with the link on your clipboard.": "Wypełnia powyższe pole linkiem w schowku.",
   "Finishes video, Play and Activity Quests in the background. You still claim the rewards.": "Wykonuje misje z wideo, grami i aktywnościami w tle. Nagrody odbierasz sam.",
   "Finnish": "fiński",
   "Fix unknown mentions": "Naprawiaj nieznane wzmianki",
   "Follows Discord's Language setting.": "Podąża za ustawieniem języka w Discordzie.",
   "Follows Discord's language. Pick one below to keep Venus in another.": "Podąża za językiem Discord. Wybierz jeden poniżej, aby zachować Venus w innym.",
+  "For Discord {version}": "Dla Discord {version}",
   "French": "francuski",
   "Friends": "Znajomi",
   "Friends · {n} picked": {
@@ -160,7 +172,6 @@
    "many": "Przyjaciele · {n} wybranych",
    "other": "Przyjaciele · {n} wybranych"
   },
-  "From 1 to {max}. When full, the oldest is removed first.": "Od 1 do {max}. Po zapełnieniu najstarsze są usuwane jako pierwsze.",
   "Galician": "galicyjski",
   "Georgian": "gruziński",
   "German": "niemiecki",
@@ -175,6 +186,8 @@
   "Hi everyone! Who's coming tonight?": "Cześć wszystkim! Kto przyjdzie dziś wieczorem?",
   "Hidden category (name unavailable)": "Ukryta kategoria (nazwa niedostępna)",
   "Hidden channel (name unavailable)": "Ukryty kanał (nazwa niedostępna)",
+  "Hidden channels": "Ukryte kanały",
+  "Hidden channels preview": "Podgląd ukrytych kanałów",
   "Hide the Quests banner": "Ukryj baner misji",
   "Hide the call button": "Ukryj przycisk połączenia",
   "Hide the gift button": "Ukryj przycisk prezentu",
@@ -187,6 +200,7 @@
   "Hold the button to pick just once, without changing this.": "Przytrzymaj przycisk, aby wybrać jednorazowo, bez zmiany tego ustawienia.",
   "Hold to choose": "Przytrzymaj, aby wybrać",
   "Hungarian": "węgierski",
+  "I'm in!": "jestem za!",
   "Icelandic": "islandzki",
   "Icons are colored by status on each device: desktop, mobile, web, console or VR.": "Ikony są kolorowane według stanu na każdym urządzeniu: komputerowym, mobilnym, internetowym, konsolowym lub VR.",
   "Idle": "Zaraz wracam",
@@ -195,11 +209,12 @@
   "In DMs or in any server channel your client receives.": "W wiadomościach prywatnych lub na dowolnym kanale serwera odbieranym przez klienta.",
   "In chat, reactions and the emoji picker. Discord reopens to apply it.": "Na czacie, w reakcjach i wyborze emoji. Discord uruchomi się ponownie, by to zastosować.",
   "In lists": "Na listach",
+  "In use": "W użyciu",
   "Indonesian": "indonezyjski",
+  "Install": "Zainstaluj",
   "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.": "Zainstaluj motywy kolorów z łącza i przełączaj się między nimi. Działa z motywami Revenge i Vendetta.",
-  "Install theme": "Zainstaluj motyw",
   "Installed themes": "Zainstalowane motywy",
-  "Installing theme...": "Instaluję motyw...",
+  "Installing...": "Instalowanie...",
   "Into {language}": "W {language}",
   "Irish": "irlandzki",
   "It will be sent as a normal file instead.": "Zostanie wysłany jako zwykły plik.",
@@ -226,14 +241,15 @@
   "Latin": "łaciński",
   "Latvian": "łotewski",
   "Left bar width": "Szerokość lewego paska",
-  "Limit": "Limit",
   "Link style": "Styl linków",
   "Links": "Linki",
   "Lithuanian": "litewski",
   "Loading reviews...": "Wczytywanie recenzji…",
   "Loading the language...": "Wczytywanie języka…",
+  "Loading your settings": "Ładowanie ustawień",
   "Loading your settings...": "Wczytywanie ustawień…",
   "Locked channel": "Zablokowany kanał",
+  "Locked channels are listed, and tapping one does nothing.": "Zablokowane kanały są na liście, a dotknięcie ich nic nie robi.",
   "Locked voice channel": "Zablokowany kanał głosowy",
   "Macedonian": "macedoński",
   "Malay": "malajski",
@@ -266,6 +282,7 @@
   "New Quests": "Nowe misje",
   "Next to the name at the top of a DM.": "Obok nazwy u góry wiadomości prywatnej.",
   "Next to the name on a profile.": "Obok nazwy w profilu.",
+  "Nitro link preview": "Nitro podgląd linku",
   "Nitro stickers and emojis": "Naklejki i emoji Nitro",
   "No": "Nie",
   "No accounts saved yet (up to {max}).": "Brak zapisanych kont (do {max}).",
@@ -283,6 +300,7 @@
   "No themes installed.": "Brak zainstalowanych motywów.",
   "Norwegian": "norweski",
   "Not loaded yet": "Jeszcze nie załadowano",
+  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nic nie jest śledzone i wszystko działa w trybie offline, z wyjątkiem funkcji informujących o korzystaniu z usługi.",
   "Nothing kept yet. Deleted messages will show here.": "Nic jeszcze nie zachowano. Tu pojawią się usunięte wiadomości.",
   "Nothing saved yet.": "Nic jeszcze nie zapisano.",
   "Nothing to notify about": "Nie ma o czym powiadamiać",
@@ -302,24 +320,24 @@
   "Online": "Dostępny",
   "Online, Idle, Do Not Disturb or Offline.": "Online, Zaraz wracam, Nie przeszkadzać lub Offline.",
   "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.": "Zmieniają się tylko ustawienia i komunikaty Venus. Język samego Discorda ustawisz w jego ustawieniach języka.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Otwiera go tylko dotknięcie: przewijanie, otwarcie serwera czy Discorda nigdy tego nie robi.",
   "Only messages on screen are sent to Google Translate, once each, without your Discord account. Hold a message to show its original, or translate your own.": "Do Google Translate trafiają tylko wiadomości na ekranie, każda raz, bez twojego konta Discord. Przytrzymaj wiadomość, aby zobaczyć oryginał lub przetłumaczyć własną.",
   "Only messages you choose are sent to Google Translate, once each, without your Discord account.": "Do Google Translate trafiają tylko wybrane przez ciebie wiadomości, każda raz, bez twojego konta Discord.",
   "Only when you ask": "Tylko na żądanie",
   "Oops, wrong chat. Deleting this.": "Ups, zły czat. Usuwanie tego.",
   "Open Discord's account manager to reorder or remove accounts.": "Otwórz menedżer kont Discorda, aby zmienić kolejność lub usunąć konta.",
-  "Open quick switcher": "Otwórz szybki przełącznik",
   "Open settings": "Otwórz ustawienia",
   "Open your friends list once if Discord hasn't loaded it yet.": "Otwórz listę znajomych raz, jeśli Discord jeszcze jej nie wczytał.",
   "Opens a new issue on GitHub.": "Otwiera nowe zgłoszenie na GitHub.",
   "Opens it for editing, when Discord lets you.": "Otwiera ją do edycji, gdy Discord na to pozwala.",
-  "Opens the account & status sheet.": "Otwiera panel kont i statusu.",
   "Orange": "Pomarańczowy",
   "Others won't see when you're typing. You still see when they are.": "Inni nie zobaczą, że piszesz. Ty nadal widzisz, kiedy oni piszą.",
   "Outside Discord": "Poza Discordem",
+  "Paste": "Wklej",
   "Paste a direct link to a Revenge or Vendetta .json theme below.": "Wklej poniżej bezpośredni link do motywu Revenge lub Vendetta .json.",
-  "Paste link from clipboard": "Wklej link ze schowka",
   "Pastel name colors": "Pastelowe kolory nazw",
   "Pastel names": "Pastelowe nazwy",
+  "Pastel names preview": "Podgląd pastelowych nazw",
   "People": "Ludzie",
   "People I pick": "Ludzie, których wybieram",
   "People list reset": "Zresetowano listę osób",
@@ -353,9 +371,9 @@
   "Removes the Quest promotion above your profile bar. Quests still work.": "Usuwa reklamę misji nad paskiem profilu. Misje nadal działają.",
   "Removes {n} saved theme and restores Discord's default colors.": "Usuwa zapisany motyw {n} i przywraca domyślne kolory Discord.",
   "Removes {n} saved themes and restores Discord's default colors.": {
-   "one": "Usuwa {n} zapisany motyw i przywraca domyślne kolory Discorda.",
    "few": "Usuwa {n} zapisane motywy i przywraca domyślne kolory Discorda.",
    "many": "Usuwa {n} zapisanych motywów i przywraca domyślne kolory Discorda.",
+   "one": "Usuwa {n} zapisany motyw i przywraca domyślne kolory Discorda.",
    "other": "Usuwa {n} zapisanych motywów i przywraca domyślne kolory Discorda."
   },
   "Reopen now": "Uruchom ponownie",
@@ -413,21 +431,24 @@
   "Show file sizes when attaching": "Rozmiar plików przy załączaniu",
   "Show hidden channels": "Pokazuj ukryte kanały",
   "Show icons": "Pokazuj ikony",
+  "Show its details": "Pokaż szczegóły",
   "Show original": "Pokaż oryginał",
   "Show the be-respectful note": "Pokazuj przypomnienie o szacunku",
   "Show the original language": "Pokazuj język oryginału",
   "Show the original text": "Pokazuj oryginalny tekst",
   "Show theme background image": "Pokaż obraz tła motywu",
+  "Showing hidden channels": "Pokazywanie ukrytych kanałów",
   "Shown {n} notification since Discord opened.": "Wyświetlono {n} powiadomienie od otwarcia Discorda.",
   "Shown {n} notifications since Discord opened.": {
-   "one": "Wyświetlono {n} powiadomienie od otwarcia Discorda.",
    "few": "Wyświetlono {n} powiadomienia od otwarcia Discorda.",
-   "many": "Wyświetlono {n} powiadomień od otwarcia Discorda."
+   "many": "Wyświetlono {n} powiadomień od otwarcia Discorda.",
+   "one": "Wyświetlono {n} powiadomienie od otwarcia Discorda."
   },
   "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Pokazuje „general chat” zamiast „general-chat”. Zmienia tylko wygląd nazw.",
   "Shows a Switch accounts button next to the notifications bell on the bottom bar.": "Pokazuje przycisk Przełącz konta obok dzwonka powiadomień na dolnym pasku.",
   "Shows a notice when chosen friends or users change status, start typing or send a message.": "Pokazuje powiadomienie, gdy wybrani znajomi lub użytkownicy zmienią status, zaczną pisać lub wyślą wiadomość.",
   "Shows the wallpaper behind chat, for themes that come with one.": "Pokazuje tapetę za czatem dla motywów, które są z nią powiązane.",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Pokazuje datę utworzenia, ostatnią wiadomość i ostatnie przypięcie, z opcją Wyświetl mimo to.",
   "Sign in to ReviewDB": "Zaloguj się do ReviewDB",
   "Sign in to ReviewDB in Venus settings to write a review.": "Aby napisać recenzję, zaloguj się do ReviewDB w ustawieniach Venus.",
   "Sign in to another Discord account on this phone.": "Zaloguj się na inne konto Discord na tym telefonie.",
@@ -459,13 +480,15 @@
   "Switches All friends back on and clears {count}.": "Ponownie włącza Wszyscy znajomi i czyści {count}.",
   "Tamil": "tamilski",
   "Tap Add account below to sign in to another account.": "Dotknij Dodaj konto poniżej, aby zalogować się na inne konto.",
+  "Tap a locked channel to see when it was made and last used.": "Dotknij zablokowanego kanału, aby zobaczyć, kiedy go utworzono i ostatnio używano.",
   "Tap gestures": "Gesty stuknięć",
+  "Tap gestures preview": "Kliknij podgląd gestów",
   "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Kliknij używany motyw, aby wrócić do kolorów Discord. Przytrzymaj motyw, aby go usunąć.",
   "Tap to add a review": "Stuknij, aby dodać recenzję",
-  "Tap to apply": "Kliknij, aby zastosować",
   "Tap to close server reviews.": "Stuknij, aby zamknąć recenzje serwera.",
   "Tap to edit your review": "Stuknij, aby edytować swoją recenzję",
   "Tap to switch": "Dotknij, aby przełączyć",
+  "Tap your avatar on the You tab, or hold the You tab, to switch from anywhere. Hold an account above to remove it.": "Aby przełączyć się z dowolnego miejsca, dotknij swojego awatara na karcie Ty lub przytrzymaj kartę Ty. Zatrzymaj konto powyżej, aby je usunąć.",
   "Tap your own message three times to delete it, with no confirmation. Never affects other people's messages.": "Stuknij trzy razy swoją wiadomość, aby usunąć ją bez potwierdzenia. Nigdy nie dotyczy cudzych wiadomości.",
   "Telugu": "telugu",
   "Thai": "tajski",
@@ -482,6 +505,7 @@
   "Themes cleared": "Tematy wyczyszczone",
   "This message is already in your language": "Ta wiadomość jest już w twoim języku",
   "Today at 4:01 PM": "Dziś o 16:01",
+  "Today at 4:02 PM": "Dziś o 16:02",
   "Today at 4:03 PM": "Dziś o 16:03",
   "Today at 4:05 PM": "Dziś o 16:05",
   "Translate": "Przetłumacz",
@@ -491,12 +515,14 @@
   "Translated from {language}. Original:": "Przetłumaczono z: {language}. Oryginał:",
   "Translated {n} message since Discord opened.": "Przetłumaczono {n} wiadomość od otwarcia Discorda.",
   "Translated {n} messages since Discord opened.": {
-   "one": "Przetłumaczono {n} wiadomość od otwarcia Discorda.",
    "few": "Przetłumaczono {n} wiadomości od otwarcia Discorda.",
-   "many": "Przetłumaczono {n} wiadomości od otwarcia Discorda."
+   "many": "Przetłumaczono {n} wiadomości od otwarcia Discorda.",
+   "one": "Przetłumaczono {n} wiadomość od otwarcia Discorda."
   },
+  "Translation preview": "Podgląd tłumaczenia",
   "Triple-tap": "Trzykrotne stuknięcie",
   "Triple-tap to delete": "Trzykrotne stuknięcie, by usunąć",
+  "Triple-tap: delete": "Trzykrotne dotknięcie: usuń",
   "Trying again in {n} s.": "Ponowna próba za {n} s.",
   "Turkish": "turecki",
   "Turn on at least one place below.": "Włącz przynajmniej jedno miejsce poniżej.",
@@ -547,14 +573,16 @@
   "What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.": "Co było w wiadomości przed edycją, wyblakłe i przekreślone nad nią. Do 10 wersji każdej.",
   "What people write is colored too, in a lighter shade of their name.": "To, co piszą ludzie, też jest kolorowane, jaśniejszym odcieniem ich nazwy.",
   "What's new": "Co nowego",
+  "When it's full, the oldest is removed first.": "Gdy się zapełni, najstarsze są usuwane jako pierwsze.",
   "When to translate": "Kiedy tłumaczyć",
   "When you tap Read all": "Po stuknięciu „Przeczytaj wszystko”",
+  "When you tap a locked channel": "Gdy dotkniesz zablokowanego kanału",
   "Who to watch": "Kogo oglądać",
+  "Working, see below": "Działa, patrz poniżej",
   "Yellow": "Żółty",
   "Yes": "Tak",
   "Yes, it looks great!": "Tak, wygląda świetnie!",
   "You": "Ty",
-  "You can also switch accounts anytime by tapping your avatar on the You tab or holding the You tab in the bottom navigation bar. Hold a non-active account above to remove it.": "Możesz też przełączać konta w dowolnej chwili, dotykając swojego awatara na karcie Ty lub przytrzymując kartę Ty na dolnym pasku. Przytrzymaj nieaktywne konto powyżej, aby je usunąć.",
   "You can read reviews. Sign in to write your own.": "Możesz przeczytać recenzje. Zaloguj się, aby napisać własny.",
   "You can read, write, delete and report reviews.": "Możesz czytać, pisać, usuwać i zgłaszać recenzje.",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nie masz uprawnień do wyświetlania tego kanału. Te informacje pochodzą z danych, które Discord już wysłał do twojego klienta.",
@@ -585,9 +613,9 @@
   "{name} sent you a DM": "{name} wysłał(a) Ci wiadomość prywatną",
   "{n} DM": "{n} wiadomość prywatna",
   "{n} DMs": {
-   "one": "{n} wiadomość prywatna",
    "few": "{n} wiadomości prywatne",
-   "many": "{n} wiadomości prywatnych"
+   "many": "{n} wiadomości prywatnych",
+   "one": "{n} wiadomość prywatna"
   },
   "{n} Quest done": "{n} Zadanie wykonane",
   "{n} Quests done": {
@@ -605,34 +633,34 @@
    "other": "{n} kont"
   },
   "{n} accounts saved (up to {max}).": {
-   "one": "Zapisano {n} konto (do {max}).",
    "few": "Zapisano {n} konta (do {max}).",
-   "many": "Zapisano {n} kont (do {max})."
+   "many": "Zapisano {n} kont (do {max}).",
+   "one": "Zapisano {n} konto (do {max})."
   },
   "{n} chosen people": {
-   "one": "{n} wybraną osobę",
    "few": "{n} wybrane osoby",
-   "many": "{n} wybranych osób"
+   "many": "{n} wybranych osób",
+   "one": "{n} wybraną osobę"
   },
   "{n} chosen person": "{n} wybraną osobę",
   "{n} day": "{n} dzień",
   "{n} days": {
-   "one": "{n} dzień",
    "few": "{n} dni",
-   "many": "{n} dni"
+   "many": "{n} dni",
+   "one": "{n} dzień"
   },
   "{n} deleted message": "{n} usunięta wiadomość",
   "{n} deleted messages": {
-   "one": "{n} usunięta wiadomość",
    "few": "{n} usunięte wiadomości",
-   "many": "{n} usuniętych wiadomości"
+   "many": "{n} usuniętych wiadomości",
+   "one": "{n} usunięta wiadomość"
   },
   "{n} dp": "{n} dp",
   "{n} edited message": "{n} edytowana wiadomość",
   "{n} edited messages": {
-   "one": "{n} edytowana wiadomość",
    "few": "{n} edytowane wiadomości",
-   "many": "{n} edytowanych wiadomości"
+   "many": "{n} edytowanych wiadomości",
+   "one": "{n} edytowana wiadomość"
   },
   "{n} friend": "{n} przyjaciel",
   "{n} friends": {
@@ -643,9 +671,9 @@
   },
   "{n} hour": "{n} godzinę",
   "{n} hours": {
-   "one": "{n} godzinę",
    "few": "{n} godziny",
-   "many": "{n} godzin"
+   "many": "{n} godzin",
+   "one": "{n} godzinę"
   },
   "{n} message kept": "Wiadomość {n} została zachowana",
   "{n} messages kept": {
@@ -656,63 +684,56 @@
   },
   "{n} minute": "{n} minutę",
   "{n} minutes": {
-   "one": "{n} minutę",
    "few": "{n} minuty",
-   "many": "{n} minut"
+   "many": "{n} minut",
+   "one": "{n} minutę"
   },
   "{n} month": "{n} miesiąc",
   "{n} months": {
-   "one": "{n} miesiąc",
    "few": "{n} miesiące",
-   "many": "{n} miesięcy"
+   "many": "{n} miesięcy",
+   "one": "{n} miesiąc"
   },
   "{n} second ago": "{n} sekundę temu",
   "{n} seconds ago": {
-   "one": "{n} sekundę temu",
    "few": "{n} sekundy temu",
-   "many": "{n} sekund temu"
+   "many": "{n} sekund temu",
+   "one": "{n} sekundę temu"
   },
   "{n} server": "{n} serwer",
   "{n} server was marked as read": "{n} serwer oznaczono jako przeczytany",
   "{n} servers": {
-   "one": "{n} serwer",
    "few": "{n} serwery",
-   "many": "{n} serwerów"
+   "many": "{n} serwerów",
+   "one": "{n} serwer"
   },
   "{n} servers were marked as read": {
-   "one": "{n} serwer oznaczono jako przeczytany",
    "few": "{n} serwery oznaczono jako przeczytane",
-   "many": "{n} serwerów oznaczono jako przeczytane"
+   "many": "{n} serwerów oznaczono jako przeczytane",
+   "one": "{n} serwer oznaczono jako przeczytany"
   },
   "{n} theme installed.": "Zainstalowano motyw {n}.",
   "{n} themes installed.": {
-   "one": "Zainstalowano {n} motyw.",
    "few": "Zainstalowano {n} motywy.",
    "many": "Zainstalowano {n} motywów.",
+   "one": "Zainstalowano {n} motyw.",
    "other": "Zainstalowano {n} motywów."
   },
   "{n} translation": "{n} tłumaczenie",
   "{n} translations": {
-   "one": "{n} tłumaczenie",
    "few": "{n} tłumaczenia",
-   "many": "{n} tłumaczeń"
+   "many": "{n} tłumaczeń",
+   "one": "{n} tłumaczenie"
   },
   "{n} waiting.": "W kolejce: {n}.",
   "{n} year": "{n} rok",
   "{n} years": {
-   "one": "{n} rok",
    "few": "{n} lata",
-   "many": "{n} lat"
+   "many": "{n} lat",
+   "one": "{n} rok"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Włączone funkcje: {on} z {total}. Włączaj i wyłączaj je w Funkcjach.",
-  "{time} ago": "{time} temu",
-  "Hidden channels": "Ukryte kanały",
-  "Showing hidden channels": "Pokazywanie ukrytych kanałów",
-  "Tap a locked channel to see when it was made and last used.": "Dotknij zablokowanego kanału, aby zobaczyć, kiedy go utworzono i ostatnio używano.",
-  "Locked channels are listed, and tapping one does nothing.": "Zablokowane kanały są na liście, a dotknięcie ich nic nie robi.",
-  "When you tap a locked channel": "Gdy dotkniesz zablokowanego kanału",
-  "Show its details": "Pokaż szczegóły",
-  "Shows when it was created, its last message and last pin, with View Anyway.": "Pokazuje datę utworzenia, ostatnią wiadomość i ostatnie przypięcie, z opcją Wyświetl mimo to.",
-  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Otwiera go tylko dotknięcie: przewijanie, otwarcie serwera czy Discorda nigdy tego nie robi."
+  "{on} of {total} turned on": "Włączono {on} z {total}",
+  "{time} ago": "{time} temu"
  }
 }

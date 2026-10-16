@@ -26,9 +26,9 @@
  "All friends": "Усі друзі",
  "All {n} friend selected. Tap a friend to pick individually.": "Вибрано {n} друга. Натисніть на друга, щоб вибрати окремо.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Вибрано {n} друга. Натисніть на друга, щоб вибрати окремо.",
   "few": "Вибрано всіх {n} друзів. Натисніть на друга, щоб вибрати окремо.",
-  "many": "Вибрано всіх {n} друзів. Натисніть на друга, щоб вибрати окремо."
+  "many": "Вибрано всіх {n} друзів. Натисніть на друга, щоб вибрати окремо.",
+  "one": "Вибрано {n} друга. Натисніть на друга, щоб вибрати окремо."
  },
  "Allow Discord notifications?": "Дозволити сповіщення Discord?",
  "Allow notification permission": "Надати дозвіл на сповіщення",
@@ -73,9 +73,9 @@
  "Completed {name}.": "Виконано: {name}.",
  "Completed {n} Quest since Discord opened.": "{n} завдання виконано, відколи відкрито Discord.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "{n} завдання виконано, відколи відкрито Discord.",
   "few": "{n} завдання виконано, відколи відкрито Discord.",
-  "many": "{n} завдань виконано, відколи відкрито Discord."
+  "many": "{n} завдань виконано, відколи відкрито Discord.",
+  "one": "{n} завдання виконано, відколи відкрито Discord."
  },
  "Console": "Консоль",
  "Copied Review Text": "Текст відгуку скопійовано",
@@ -174,11 +174,14 @@
  "In DMs or in any server channel your client receives.": "В ОП або в будь-якому каналі сервера, який отримує ваш клієнт.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "У чаті, реакціях і виборі емодзі. Discord перезапуститься, щоб застосувати.",
  "In lists": "У списках",
+ "In use": "Використовується",
  "Indonesian": "індонезійська",
+ "Install": "Встановити",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Встановлюйте та змінюйте колірні теми за посиланнями, зібраними в таблицю кольорів Discord без затримок.",
  "Install theme": "Встановити тему",
  "Installed themes": "Встановлені теми",
  "Installing theme...": "Встановлення теми...",
+ "Installing...": "Встановлення...",
  "Irish": "ірландська",
  "It will be sent as a normal file instead.": "Його буде надіслано як звичайний файл.",
  "Italian": "італійська",
@@ -284,6 +287,7 @@
  "Other people (by user ID)": "Інші люди (за ID користувача)",
  "Others won't see when you're typing. You still see when they are.": "Інші не бачитимуть, що ви друкуєте. Ви й далі бачите, коли друкують вони.",
  "Outside Discord": "Поза Discord",
+ "Paste": "Вставити",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Вставте вище пряме посилання на тему .json Revenge або Vendetta.",
  "Paste link from clipboard": "Вставити посилання з буфера обміну",
  "Pastel name colors": "Пастельні кольори імен",
@@ -317,9 +321,9 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Прибирає рекламу завдань над панеллю профілю. Завдання працюють і далі.",
  "Removes {n} saved theme and restores Discord's default colors.": "Видаляє збережену тему {n} та відновлює стандартні кольори Discord.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Видаляє {n} збережену тему та відновлює стандартні кольори Discord.",
   "few": "Видаляє {n} збережені теми та відновлює стандартні кольори Discord.",
   "many": "Видаляє {n} збережених тем і відновлює стандартні кольори Discord.",
+  "one": "Видаляє {n} збережену тему та відновлює стандартні кольори Discord.",
   "other": "Видаляє {n} збережених тем і відновлює стандартні кольори Discord."
  },
  "Reopen now": "Перезапустити",
@@ -380,9 +384,9 @@
  "Show theme background image": "Показати фонове зображення теми",
  "Shown {n} notification since Discord opened.": "Показано {n} сповіщення з моменту відкриття Discord.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Показано {n} сповіщення з моменту відкриття Discord.",
   "few": "Показано {n} сповіщення з моменту відкриття Discord.",
-  "many": "Показано {n} сповіщень з моменту відкриття Discord."
+  "many": "Показано {n} сповіщень з моменту відкриття Discord.",
+  "one": "Показано {n} сповіщення з моменту відкриття Discord."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Показує «general chat» замість «general-chat». Змінюється лише вигляд назв.",
  "Shows a Switch accounts button next to Settings at the top of the You tab.": "Показує кнопку перемикання акаунтів поруч із Налаштуваннями вгорі вкладки «Ви».",
@@ -447,9 +451,9 @@
  "Translated from {language}. Original:": "Перекладено з мови: {language}. Оригінал:",
  "Translated {n} message since Discord opened.": "{n} повідомлення перекладено, відколи відкрито Discord.",
  "Translated {n} messages since Discord opened.": {
-  "one": "{n} повідомлення перекладено, відколи відкрито Discord.",
   "few": "{n} повідомлення перекладено, відколи відкрито Discord.",
-  "many": "{n} повідомлень перекладено, відколи відкрито Discord."
+  "many": "{n} повідомлень перекладено, відколи відкрито Discord.",
+  "one": "{n} повідомлення перекладено, відколи відкрито Discord."
  },
  "Triple-tap": "Потрійний дотик",
  "Triple-tap to delete": "Потрійний дотик для видалення",
@@ -481,15 +485,15 @@
  "Waiting for new Quests.": "Чекаємо на нові завдання.",
  "Watching all friends.": "Відстежуються всі друзі.",
  "Watching all {n} friends.": {
-  "one": "Відстежується {n} друг.",
   "few": "Відстежуються всі {n} друзі.",
-  "many": "Відстежуються всі {n} друзів."
+  "many": "Відстежуються всі {n} друзів.",
+  "one": "Відстежується {n} друг."
  },
  "Watching {n} friend.": "Відстежується {n} друг.",
  "Watching {n} people.": {
-  "one": "Відстежується {n} людина.",
   "few": "Відстежуються {n} людини.",
-  "many": "Відстежуються {n} людей."
+  "many": "Відстежуються {n} людей.",
+  "one": "Відстежується {n} людина."
  },
  "Watching {n} person.": "Відстежується {n} людина.",
  "Web": "Браузер",
@@ -528,108 +532,108 @@
  "{name} sent you a DM": "{name} надіслав(-ла) вам ОП",
  "{n} DM": "{n} особисте",
  "{n} DMs": {
-  "one": "{n} особисте",
   "few": "{n} особисті",
-  "many": "{n} особистих"
+  "many": "{n} особистих",
+  "one": "{n} особисте"
  },
  "{n} account saved (up to {max}).": "Збережено {n} акаунт (до {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "Збережено {n} акаунт (до {max}).",
   "few": "Збережено {n} акаунти (до {max}).",
-  "many": "Збережено {n} акаунтів (до {max})."
+  "many": "Збережено {n} акаунтів (до {max}).",
+  "one": "Збережено {n} акаунт (до {max})."
  },
  "{n} chosen people": {
-  "one": "{n} вибрану людину",
   "few": "{n} вибраних людей",
-  "many": "{n} вибраних людей"
+  "many": "{n} вибраних людей",
+  "one": "{n} вибрану людину"
  },
  "{n} chosen person": "{n} вибрану людину",
  "{n} color token": "{n} маркер кольору",
  "{n} color tokens": {
-  "one": "{n} кольоровий жетон",
   "few": "{n} кольорові жетони",
   "many": "{n} кольорових жетонів",
+  "one": "{n} кольоровий жетон",
   "other": "{n} кольорових жетонів"
  },
  "{n} day": "{n} день",
  "{n} days": {
-  "one": "{n} день",
   "few": "{n} дні",
-  "many": "{n} днів"
+  "many": "{n} днів",
+  "one": "{n} день"
  },
  "{n} deleted message": "{n} видалене повідомлення",
  "{n} deleted messages": {
-  "one": "{n} видалене повідомлення",
   "few": "{n} видалені повідомлення",
-  "many": "{n} видалених повідомлень"
+  "many": "{n} видалених повідомлень",
+  "one": "{n} видалене повідомлення"
  },
  "{n} edited message": "{n} змінене повідомлення",
  "{n} edited messages": {
-  "one": "{n} змінене повідомлення",
   "few": "{n} змінені повідомлення",
-  "many": "{n} змінених повідомлень"
+  "many": "{n} змінених повідомлень",
+  "one": "{n} змінене повідомлення"
  },
  "{n} friend selected.": "Вибрано {n} друга.",
  "{n} friends selected.": {
-  "one": "Вибрано {n} друга.",
   "few": "Вибрано {n} друзів.",
-  "many": "Вибрано {n} друзів."
+  "many": "Вибрано {n} друзів.",
+  "one": "Вибрано {n} друга."
  },
  "{n} hour": "{n} годину",
  "{n} hours": {
-  "one": "{n} годину",
   "few": "{n} години",
-  "many": "{n} годин"
+  "many": "{n} годин",
+  "one": "{n} годину"
  },
  "{n} minute": "{n} хвилину",
  "{n} minutes": {
-  "one": "{n} хвилину",
   "few": "{n} хвилини",
-  "many": "{n} хвилин"
+  "many": "{n} хвилин",
+  "one": "{n} хвилину"
  },
  "{n} month": "{n} місяць",
  "{n} months": {
-  "one": "{n} місяць",
   "few": "{n} місяці",
-  "many": "{n} місяців"
+  "many": "{n} місяців",
+  "one": "{n} місяць"
  },
  "{n} second ago": "{n} секунду тому",
  "{n} seconds ago": {
-  "one": "{n} секунду тому",
   "few": "{n} секунди тому",
-  "many": "{n} секунд тому"
+  "many": "{n} секунд тому",
+  "one": "{n} секунду тому"
  },
  "{n} server": "{n} сервер",
  "{n} server was marked as read": "{n} сервер позначено як прочитаний",
  "{n} servers": {
-  "one": "{n} сервер",
   "few": "{n} сервери",
-  "many": "{n} серверів"
+  "many": "{n} серверів",
+  "one": "{n} сервер"
  },
  "{n} servers were marked as read": {
-  "one": "{n} сервер позначено як прочитаний",
   "few": "{n} сервери позначено як прочитані",
-  "many": "{n} серверів позначено як прочитані"
+  "many": "{n} серверів позначено як прочитані",
+  "one": "{n} сервер позначено як прочитаний"
  },
  "{n} theme installed.": "Тему {n} встановлено.",
  "{n} themes installed.": {
-  "one": "Встановлено {n} тему.",
   "few": "Встановлено {n} теми.",
   "many": "Встановлено {n} тем.",
+  "one": "Встановлено {n} тему.",
   "other": "Встановлено {n} тем."
  },
  "{n} translation": "{n} переклад",
  "{n} translations": {
-  "one": "{n} переклад",
   "few": "{n} переклади",
-  "many": "{n} перекладів"
+  "many": "{n} перекладів",
+  "one": "{n} переклад"
  },
  "{n} waiting.": "У черзі: {n}.",
  "{n} year": "{n} рік",
  "{n} years": {
-  "one": "{n} рік",
   "few": "{n} роки",
-  "many": "{n} років"
+  "many": "{n} років",
+  "one": "{n} рік"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Увімкнено функцій: {on} з {total}. Вмикайте й вимикайте їх у розділі «Функції».",
  "{time} ago": "{time} тому"

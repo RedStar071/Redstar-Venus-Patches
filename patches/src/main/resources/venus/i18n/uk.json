@@ -11,12 +11,18 @@
   "A shortcut to Venus, next to the notifications bell.": "Швидкий перехід до Venus біля дзвіночка сповіщень.",
   "A small \"Translated from Spanish\" line under each translation.": "Рядок «Перекладено з мови: іспанська» під кожним перекладом.",
   "About": "Про Venus",
+  "About {n} minute left.": "Залишилося приблизно {n} хвилини.",
+  "About {n} minutes left.": {
+   "one": "Залишилася приблизно {n} хвилина.",
+   "few": "Залишилося приблизно {n} хвилини.",
+   "many": "Залишилося близько {n} хвилин.",
+   "other": "Залишилося близько {n} хвилин."
+  },
   "Accepts Quests you haven't started, one at a time. Off: only Quests you accept yourself.": "Приймає завдання, які ви ще не почали, по одному. Вимк.: лише завдання, прийняті вами.",
   "Account": "Обліковий запис",
   "Account switcher": "Перемикач акаунтів",
   "Accounts": "Акаунти",
-  "Active account": "Активний акаунт",
-  "Active · Tap to turn off": "Активний · Натисніть, щоб вимкнути",
+  "Active account · Tap for the quick switcher": "Активний обліковий запис · Натисніть для швидкого перемикання",
   "Activity notifications": "Сповіщення про активність",
   "Activity time counts without starting the Activity.": "Час зараховується без запуску активності.",
   "Add": "додати",
@@ -32,6 +38,7 @@
   "Android notifications are turned off for Discord. Enable them in system settings to receive push notifications outside the app.": "Сповіщення Android для Discord вимкнено. Увімкніть їх у системних налаштуваннях, щоб отримувати push-сповіщення поза застосунком.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Сповіщення Android для Discord вимкнено. Торкніться, щоб перевірити або відкрити системні налаштування.",
   "Any color": "Будь-який колір",
+  "Anyone up for a game later?": "Хтось хоче пограти пізніше?",
   "Appearance": "Вигляд",
   "Applied {name}": "Застосовано {name}",
   "Arabic": "арабська",
@@ -71,9 +78,9 @@
   "Completed {name}.": "Виконано: {name}.",
   "Completed {n} Quest since Discord opened.": "{n} завдання виконано, відколи відкрито Discord.",
   "Completed {n} Quests since Discord opened.": {
-   "one": "{n} завдання виконано, відколи відкрито Discord.",
    "few": "{n} завдання виконано, відколи відкрито Discord.",
-   "many": "{n} завдань виконано, відколи відкрито Discord."
+   "many": "{n} завдань виконано, відколи відкрито Discord.",
+   "one": "{n} завдання виконано, відколи відкрито Discord."
   },
   "Completing a Quest": "Виконання квесту",
   "Console": "Консоль",
@@ -100,10 +107,12 @@
   "Delete a kept message again to hide just that one.": "Видаліть збережене повідомлення ще раз, щоб сховати лише його.",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Видалені й змінені повідомлення зберігаються після закриття Discord. Лише на цьому телефоні й для цього облікового запису.",
   "Deleted messages": "Видалені повідомлення",
+  "Deleted messages preview": "Попередній перегляд видалених повідомлень",
   "Deleted messages stay in chat, outlined in red. Also shows what edited messages said before.": "Видалені повідомлення лишаються в чаті з червоною рамкою. Також видно, що було в повідомленнях до змін.",
   "Desktop": "Комп'ютер",
   "Desktop, mobile, web, console or VR icons next to names, colored by status.": "Значки комп'ютера, телефона, браузера, консолі чи VR біля імен, у колір статусу.",
   "Device indicators": "Значки пристроїв",
+  "Device indicators preview": "Попередній перегляд індикаторів пристрою",
   "Did everyone see the new update?": "Чи всі бачили нове оновлення?",
   "Direct messages": "Особисті повідомлення",
   "Discord account unavailable": "Обліковий запис Discord недоступний",
@@ -123,6 +132,8 @@
   "Double-tap replies. Triple-tap your own message deletes it.": "Двічі торкніться відповідей. Тричі торкніться власного повідомлення, щоб видалити його.",
   "Double-tap to reply": "Подвійний дотик для відповіді",
   "Double-tap your own message": "Подвійний дотик до свого повідомлення",
+  "Double-tap: edit": "Двічі торкніться: редагувати",
+  "Double-tap: reply": "Двічі торкніться: відповідь",
   "Double-tapping no longer adds a reaction. Hold a message to react instead.": "Подвійний дотик більше не додає реакцію. Щоб відреагувати, утримуйте повідомлення.",
   "Downloads the theme once and keeps it on this phone.": "Завантажує тему один раз і зберігає її на цьому телефоні.",
   "Dutch": "нідерландська",
@@ -143,15 +154,16 @@
   "Every name uses its pastel color, even with a role color.": "Усі імена мають пастельний колір, навіть із кольором ролі.",
   "Everyone on your friends list, new friends too.": "Усі у вашому списку друзів, а також нові друзі.",
   "Everyone sees the image, but it's a link, not a real Nitro emoji or sticker.": "Усі бачать зображення, але це посилання, а не справжні Nitro смайли чи наклейки.",
+  "Everything's working": "все працює",
   "Favourite any image or video": "Додавати в обране будь-які фото й відео",
   "Features": "Функції",
   "Filipino": "філіппінська",
-  "Fills the box above with the link on your clipboard.": "Заповнює поле вище посиланням у буфері обміну.",
   "Finishes video, Play and Activity Quests in the background. You still claim the rewards.": "Виконує завдання з відео, іграми й активностями у фоні. Нагороди ви забираєте самі.",
   "Finnish": "фінська",
   "Fix unknown mentions": "Виправляти невідомі згадки",
   "Follows Discord's Language setting.": "Відповідає мові, вибраній у Discord.",
   "Follows Discord's language. Pick one below to keep Venus in another.": "Слідкує за мовою Discord. Виберіть один нижче, щоб зберегти Venus в іншому.",
+  "For Discord {version}": "Для Discord {version}",
   "French": "французька",
   "Friends": "Друзі",
   "Friends · {n} picked": {
@@ -160,7 +172,6 @@
    "many": "Друзі · Вибрано {n}",
    "other": "Друзі · Вибрано {n}"
   },
-  "From 1 to {max}. When full, the oldest is removed first.": "Від 1 до {max}. Коли місця немає, першими видаляються найстаріші.",
   "Galician": "галісійська",
   "Georgian": "грузинська",
   "German": "німецька",
@@ -175,6 +186,8 @@
   "Hi everyone! Who's coming tonight?": "Привіт всім! Хто прийде сьогодні ввечері?",
   "Hidden category (name unavailable)": "Прихована категорія (назва недоступна)",
   "Hidden channel (name unavailable)": "Прихований канал (назва недоступна)",
+  "Hidden channels": "Приховані канали",
+  "Hidden channels preview": "Попередній перегляд прихованих каналів",
   "Hide the Quests banner": "Сховати банер завдань",
   "Hide the call button": "Сховати кнопку дзвінка",
   "Hide the gift button": "Сховати кнопку подарунка",
@@ -187,6 +200,7 @@
   "Hold the button to pick just once, without changing this.": "Утримуйте кнопку, щоб вибрати один раз, не змінюючи це налаштування.",
   "Hold to choose": "Утримуйте, щоб вибрати",
   "Hungarian": "угорська",
+  "I'm in!": "я в!",
   "Icelandic": "ісландська",
   "Icons are colored by status on each device: desktop, mobile, web, console or VR.": "Піктограми забарвлені відповідно до статусу на кожному пристрої: робочому столі, мобільному пристрої, Інтернеті, консолі чи VR.",
   "Idle": "Неактивний",
@@ -195,11 +209,12 @@
   "In DMs or in any server channel your client receives.": "В ОП або в будь-якому каналі сервера, який отримує ваш клієнт.",
   "In chat, reactions and the emoji picker. Discord reopens to apply it.": "У чаті, реакціях і виборі емодзі. Discord перезапуститься, щоб застосувати.",
   "In lists": "У списках",
+  "In use": "Використовується",
   "Indonesian": "індонезійська",
+  "Install": "Встановити",
   "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.": "Встановіть кольорові теми за посиланням і перемикайтеся між ними. Працює з темами Revenge і Vendetta.",
-  "Install theme": "Встановити тему",
   "Installed themes": "Встановлені теми",
-  "Installing theme...": "Встановлення теми...",
+  "Installing...": "Встановлення...",
   "Into {language}": "В {language}",
   "Irish": "ірландська",
   "It will be sent as a normal file instead.": "Його буде надіслано як звичайний файл.",
@@ -226,14 +241,15 @@
   "Latin": "латинська",
   "Latvian": "латиська",
   "Left bar width": "Ширина лівої смуги",
-  "Limit": "Ліміт",
   "Link style": "Вигляд посилань",
   "Links": "Посилання",
   "Lithuanian": "литовська",
   "Loading reviews...": "Завантаження відгуків…",
   "Loading the language...": "Завантаження мови…",
+  "Loading your settings": "Завантаження налаштувань",
   "Loading your settings...": "Завантаження налаштувань…",
   "Locked channel": "Закритий канал",
+  "Locked channels are listed, and tapping one does nothing.": "Закриті канали є у списку, натискання на них нічого не робить.",
   "Locked voice channel": "Закритий голосовий канал",
   "Macedonian": "македонська",
   "Malay": "малайська",
@@ -266,6 +282,7 @@
   "New Quests": "Нові завдання",
   "Next to the name at the top of a DM.": "Біля імені вгорі особистого чату.",
   "Next to the name on a profile.": "Біля імені в профілі.",
+  "Nitro link preview": "Попередній перегляд посилання Nitro",
   "Nitro stickers and emojis": "Наліпки й емодзі Nitro",
   "No": "Ні",
   "No accounts saved yet (up to {max}).": "Збережених акаунтів ще немає (до {max}).",
@@ -283,6 +300,7 @@
   "No themes installed.": "Немає встановлених тем.",
   "Norwegian": "норвезька",
   "Not loaded yet": "Ще не завантажено",
+  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Нічого не відстежується, і все працює в автономному режимі, крім функцій, які вказують, що вони використовують службу.",
   "Nothing kept yet. Deleted messages will show here.": "Поки нічого не збережено. Тут з'являться видалені повідомлення.",
   "Nothing saved yet.": "Поки нічого не збережено.",
   "Nothing to notify about": "Нема про що повідомляти",
@@ -302,24 +320,24 @@
   "Online": "У мережі",
   "Online, Idle, Do Not Disturb or Offline.": "У мережі, Неактивний, Не турбувати або Не в мережі.",
   "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.": "Змінюються лише налаштування й повідомлення Venus. Мову самого Discord задають у його налаштуваннях мови.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Відкриває його лише натискання: прокручування, відкриття сервера чи Discord — ніколи.",
   "Only messages on screen are sent to Google Translate, once each, without your Discord account. Hold a message to show its original, or translate your own.": "У Google Translate надсилаються лише повідомлення на екрані, по одному разу, без вашого облікового запису Discord. Утримуйте повідомлення, щоб побачити оригінал або перекласти своє.",
   "Only messages you choose are sent to Google Translate, once each, without your Discord account.": "У Google Translate надсилаються лише вибрані вами повідомлення, по одному разу, без вашого облікового запису Discord.",
   "Only when you ask": "Лише на запит",
   "Oops, wrong chat. Deleting this.": "Ой, неправильний чат. Видалення цього.",
   "Open Discord's account manager to reorder or remove accounts.": "Відкрити менеджер акаунтів Discord для зміни порядку або видалення акаунтів.",
-  "Open quick switcher": "Відкрити швидкий перемикач",
   "Open settings": "Відкрити налаштування",
   "Open your friends list once if Discord hasn't loaded it yet.": "Відкрийте список друзів один раз, якщо Discord ще не завантажив його.",
   "Opens a new issue on GitHub.": "Відкриває нове issue на GitHub.",
   "Opens it for editing, when Discord lets you.": "Відкриває його для редагування, якщо Discord дозволяє.",
-  "Opens the account & status sheet.": "Відкриває панель акаунтів і статусу.",
   "Orange": "Помаранчевий",
   "Others won't see when you're typing. You still see when they are.": "Інші не бачитимуть, що ви друкуєте. Ви й далі бачите, коли друкують вони.",
   "Outside Discord": "Поза Discord",
+  "Paste": "Вставити",
   "Paste a direct link to a Revenge or Vendetta .json theme below.": "Вставте пряме посилання на тему Revenge або Vendetta .json нижче.",
-  "Paste link from clipboard": "Вставити посилання з буфера обміну",
   "Pastel name colors": "Пастельні кольори імен",
   "Pastel names": "Пастельні імена",
+  "Pastel names preview": "Попередній перегляд пастельних імен",
   "People": "Люди",
   "People I pick": "Люди, яких я вибираю",
   "People list reset": "Список людей скинуто",
@@ -353,9 +371,9 @@
   "Removes the Quest promotion above your profile bar. Quests still work.": "Прибирає рекламу завдань над панеллю профілю. Завдання працюють і далі.",
   "Removes {n} saved theme and restores Discord's default colors.": "Видаляє збережену тему {n} та відновлює стандартні кольори Discord.",
   "Removes {n} saved themes and restores Discord's default colors.": {
-   "one": "Видаляє {n} збережену тему та відновлює стандартні кольори Discord.",
    "few": "Видаляє {n} збережені теми та відновлює стандартні кольори Discord.",
    "many": "Видаляє {n} збережених тем і відновлює стандартні кольори Discord.",
+   "one": "Видаляє {n} збережену тему та відновлює стандартні кольори Discord.",
    "other": "Видаляє {n} збережених тем і відновлює стандартні кольори Discord."
   },
   "Reopen now": "Перезапустити",
@@ -413,21 +431,24 @@
   "Show file sizes when attaching": "Розмір файлів під час прикріплення",
   "Show hidden channels": "Показувати приховані канали",
   "Show icons": "Де показувати",
+  "Show its details": "Показувати відомості",
   "Show original": "Показати оригінал",
   "Show the be-respectful note": "Показувати нагадування про ввічливість",
   "Show the original language": "Показувати мову оригіналу",
   "Show the original text": "Показувати текст оригіналу",
   "Show theme background image": "Показати фонове зображення теми",
+  "Showing hidden channels": "Приховані канали показано",
   "Shown {n} notification since Discord opened.": "Показано {n} сповіщення з моменту відкриття Discord.",
   "Shown {n} notifications since Discord opened.": {
-   "one": "Показано {n} сповіщення з моменту відкриття Discord.",
    "few": "Показано {n} сповіщення з моменту відкриття Discord.",
-   "many": "Показано {n} сповіщень з моменту відкриття Discord."
+   "many": "Показано {n} сповіщень з моменту відкриття Discord.",
+   "one": "Показано {n} сповіщення з моменту відкриття Discord."
   },
   "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Показує «general chat» замість «general-chat». Змінюється лише вигляд назв.",
   "Shows a Switch accounts button next to the notifications bell on the bottom bar.": "Показує кнопку перемикання акаунтів поруч із дзвіночком сповіщень на нижній панелі.",
   "Shows a notice when chosen friends or users change status, start typing or send a message.": "Показує сповіщення, коли вибрані друзі або користувачі змінюють статус, починають писати або надсилають повідомлення.",
   "Shows the wallpaper behind chat, for themes that come with one.": "Показує фоновий малюнок за чатом для тем, які входять до нього.",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Показує дату створення, останнє повідомлення й останнє закріплення, з кнопкою «Усе одно відкрити».",
   "Sign in to ReviewDB": "Увійти в ReviewDB",
   "Sign in to ReviewDB in Venus settings to write a review.": "Щоб написати відгук, увійдіть у ReviewDB у налаштуваннях Venus.",
   "Sign in to another Discord account on this phone.": "Увійдіть в інший акаунт Discord на цьому телефоні.",
@@ -459,13 +480,15 @@
   "Switches All friends back on and clears {count}.": "Знову вмикає «Усі друзі» та очищає {count}.",
   "Tamil": "тамільська",
   "Tap Add account below to sign in to another account.": "Торкніться «Додати акаунт» нижче, щоб увійти в інший акаунт.",
+  "Tap a locked channel to see when it was made and last used.": "Натисніть на закритий канал, щоб побачити, коли його створено й востаннє використано.",
   "Tap gestures": "Жести дотику",
+  "Tap gestures preview": "Попередній перегляд жестів",
   "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Торкніться теми, яка використовується, щоб повернутися до кольорів Discord. Утримуйте тему, щоб видалити її.",
   "Tap to add a review": "Торкніться, щоб написати відгук",
-  "Tap to apply": "Торкніться, щоб застосувати",
   "Tap to close server reviews.": "Торкніться, щоб закрити відгуки про сервер.",
   "Tap to edit your review": "Торкніться, щоб змінити свій відгук",
   "Tap to switch": "Торкніться для перемикання",
+  "Tap your avatar on the You tab, or hold the You tab, to switch from anywhere. Hold an account above to remove it.": "Торкніться свого аватара на вкладці «Ви» або утримуйте вкладку «Ви», щоб перейти звідки завгодно. Утримуйте обліковий запис вище, щоб видалити його.",
   "Tap your own message three times to delete it, with no confirmation. Never affects other people's messages.": "Торкніться свого повідомлення тричі, щоб видалити його без підтвердження. Чужі повідомлення не зачіпаються.",
   "Telugu": "телугу",
   "Thai": "тайська",
@@ -482,6 +505,7 @@
   "Themes cleared": "Теми очищено",
   "This message is already in your language": "Це повідомлення вже вашою мовою",
   "Today at 4:01 PM": "Сьогодні о 16:01",
+  "Today at 4:02 PM": "Сьогодні о 16:02",
   "Today at 4:03 PM": "Сьогодні о 16:03",
   "Today at 4:05 PM": "Сьогодні о 16:05",
   "Translate": "Перекласти",
@@ -491,12 +515,14 @@
   "Translated from {language}. Original:": "Перекладено з мови: {language}. Оригінал:",
   "Translated {n} message since Discord opened.": "{n} повідомлення перекладено, відколи відкрито Discord.",
   "Translated {n} messages since Discord opened.": {
-   "one": "{n} повідомлення перекладено, відколи відкрито Discord.",
    "few": "{n} повідомлення перекладено, відколи відкрито Discord.",
-   "many": "{n} повідомлень перекладено, відколи відкрито Discord."
+   "many": "{n} повідомлень перекладено, відколи відкрито Discord.",
+   "one": "{n} повідомлення перекладено, відколи відкрито Discord."
   },
+  "Translation preview": "Попередній перегляд перекладу",
   "Triple-tap": "Потрійний дотик",
   "Triple-tap to delete": "Потрійний дотик для видалення",
+  "Triple-tap: delete": "Потрійне натискання: видалити",
   "Trying again in {n} s.": "Нова спроба через {n} с.",
   "Turkish": "турецька",
   "Turn on at least one place below.": "Увімкніть хоча б одне місце нижче.",
@@ -547,14 +573,16 @@
   "What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.": "Що було в повідомленні до змін — блідо й закреслено над ним. До 10 версій на повідомлення.",
   "What people write is colored too, in a lighter shade of their name.": "Текст повідомлень теж забарвлюється, у світліший відтінок кольору імені.",
   "What's new": "Що нового",
+  "When it's full, the oldest is removed first.": "Коли він заповнений, найстаріший видаляється першим.",
   "When to translate": "Коли перекладати",
   "When you tap Read all": "Коли торкаєтеся «Прочитати все»",
+  "When you tap a locked channel": "Коли ви натискаєте на закритий канал",
   "Who to watch": "На кого дивитися",
+  "Working, see below": "Працює, дивіться нижче",
   "Yellow": "Жовтий",
   "Yes": "Так",
   "Yes, it looks great!": "Так, виглядає чудово!",
   "You": "Ви",
-  "You can also switch accounts anytime by tapping your avatar on the You tab or holding the You tab in the bottom navigation bar. Hold a non-active account above to remove it.": "Ви також можете будь-коли змінити акаунт, торкнувшись свого аватара на вкладці «Ви» або утримуючи вкладку «Ви» на нижній панелі. Утримуйте неактивний акаунт вище, щоб видалити його.",
   "You can read reviews. Sign in to write your own.": "Ви можете почитати відгуки. Увійдіть, щоб написати власний.",
   "You can read, write, delete and report reviews.": "Ви можете читати, писати, видаляти відгуки та повідомляти про них.",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "У вас немає доступу до цього каналу. Ці відомості взято з даних, які Discord уже надіслав вашому клієнту.",
@@ -585,9 +613,9 @@
   "{name} sent you a DM": "{name} надіслав(-ла) вам ОП",
   "{n} DM": "{n} особисте",
   "{n} DMs": {
-   "one": "{n} особисте",
    "few": "{n} особисті",
-   "many": "{n} особистих"
+   "many": "{n} особистих",
+   "one": "{n} особисте"
   },
   "{n} Quest done": "{n} Квест виконано",
   "{n} Quests done": {
@@ -605,34 +633,34 @@
    "other": "{n} рахунків"
   },
   "{n} accounts saved (up to {max}).": {
-   "one": "Збережено {n} акаунт (до {max}).",
    "few": "Збережено {n} акаунти (до {max}).",
-   "many": "Збережено {n} акаунтів (до {max})."
+   "many": "Збережено {n} акаунтів (до {max}).",
+   "one": "Збережено {n} акаунт (до {max})."
   },
   "{n} chosen people": {
-   "one": "{n} вибрану людину",
    "few": "{n} вибраних людей",
-   "many": "{n} вибраних людей"
+   "many": "{n} вибраних людей",
+   "one": "{n} вибрану людину"
   },
   "{n} chosen person": "{n} вибрану людину",
   "{n} day": "{n} день",
   "{n} days": {
-   "one": "{n} день",
    "few": "{n} дні",
-   "many": "{n} днів"
+   "many": "{n} днів",
+   "one": "{n} день"
   },
   "{n} deleted message": "{n} видалене повідомлення",
   "{n} deleted messages": {
-   "one": "{n} видалене повідомлення",
    "few": "{n} видалені повідомлення",
-   "many": "{n} видалених повідомлень"
+   "many": "{n} видалених повідомлень",
+   "one": "{n} видалене повідомлення"
   },
   "{n} dp": "{n} dp",
   "{n} edited message": "{n} змінене повідомлення",
   "{n} edited messages": {
-   "one": "{n} змінене повідомлення",
    "few": "{n} змінені повідомлення",
-   "many": "{n} змінених повідомлень"
+   "many": "{n} змінених повідомлень",
+   "one": "{n} змінене повідомлення"
   },
   "{n} friend": "{n} друг",
   "{n} friends": {
@@ -643,9 +671,9 @@
   },
   "{n} hour": "{n} годину",
   "{n} hours": {
-   "one": "{n} годину",
    "few": "{n} години",
-   "many": "{n} годин"
+   "many": "{n} годин",
+   "one": "{n} годину"
   },
   "{n} message kept": "{n} повідомлення збережено",
   "{n} messages kept": {
@@ -656,63 +684,56 @@
   },
   "{n} minute": "{n} хвилину",
   "{n} minutes": {
-   "one": "{n} хвилину",
    "few": "{n} хвилини",
-   "many": "{n} хвилин"
+   "many": "{n} хвилин",
+   "one": "{n} хвилину"
   },
   "{n} month": "{n} місяць",
   "{n} months": {
-   "one": "{n} місяць",
    "few": "{n} місяці",
-   "many": "{n} місяців"
+   "many": "{n} місяців",
+   "one": "{n} місяць"
   },
   "{n} second ago": "{n} секунду тому",
   "{n} seconds ago": {
-   "one": "{n} секунду тому",
    "few": "{n} секунди тому",
-   "many": "{n} секунд тому"
+   "many": "{n} секунд тому",
+   "one": "{n} секунду тому"
   },
   "{n} server": "{n} сервер",
   "{n} server was marked as read": "{n} сервер позначено як прочитаний",
   "{n} servers": {
-   "one": "{n} сервер",
    "few": "{n} сервери",
-   "many": "{n} серверів"
+   "many": "{n} серверів",
+   "one": "{n} сервер"
   },
   "{n} servers were marked as read": {
-   "one": "{n} сервер позначено як прочитаний",
    "few": "{n} сервери позначено як прочитані",
-   "many": "{n} серверів позначено як прочитані"
+   "many": "{n} серверів позначено як прочитані",
+   "one": "{n} сервер позначено як прочитаний"
   },
   "{n} theme installed.": "Тему {n} встановлено.",
   "{n} themes installed.": {
-   "one": "Встановлено {n} тему.",
    "few": "Встановлено {n} теми.",
    "many": "Встановлено {n} тем.",
+   "one": "Встановлено {n} тему.",
    "other": "Встановлено {n} тем."
   },
   "{n} translation": "{n} переклад",
   "{n} translations": {
-   "one": "{n} переклад",
    "few": "{n} переклади",
-   "many": "{n} перекладів"
+   "many": "{n} перекладів",
+   "one": "{n} переклад"
   },
   "{n} waiting.": "У черзі: {n}.",
   "{n} year": "{n} рік",
   "{n} years": {
-   "one": "{n} рік",
    "few": "{n} роки",
-   "many": "{n} років"
+   "many": "{n} років",
+   "one": "{n} рік"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Увімкнено функцій: {on} з {total}. Вмикайте й вимикайте їх у розділі «Функції».",
-  "{time} ago": "{time} тому",
-  "Hidden channels": "Приховані канали",
-  "Showing hidden channels": "Приховані канали показано",
-  "Tap a locked channel to see when it was made and last used.": "Натисніть на закритий канал, щоб побачити, коли його створено й востаннє використано.",
-  "Locked channels are listed, and tapping one does nothing.": "Закриті канали є у списку, натискання на них нічого не робить.",
-  "When you tap a locked channel": "Коли ви натискаєте на закритий канал",
-  "Show its details": "Показувати відомості",
-  "Shows when it was created, its last message and last pin, with View Anyway.": "Показує дату створення, останнє повідомлення й останнє закріплення, з кнопкою «Усе одно відкрити».",
-  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Відкриває його лише натискання: прокручування, відкриття сервера чи Discord — ніколи."
+  "{on} of {total} turned on": "{on} з {total} увімкнено",
+  "{time} ago": "{time} тому"
  }
 }

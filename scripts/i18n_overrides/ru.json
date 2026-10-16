@@ -27,9 +27,9 @@
  "All friends": "Все друзья",
  "All {n} friend selected. Tap a friend to pick individually.": "Выбран {n} друг. Нажмите на друга, чтобы выбрать отдельно.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Выбран {n} друг. Нажмите на друга, чтобы выбрать отдельно.",
   "few": "Выбраны все {n} друга. Нажмите на друга, чтобы выбрать отдельно.",
-  "many": "Выбраны все {n} друзей. Нажмите на друга, чтобы выбрать отдельно."
+  "many": "Выбраны все {n} друзей. Нажмите на друга, чтобы выбрать отдельно.",
+  "one": "Выбран {n} друг. Нажмите на друга, чтобы выбрать отдельно."
  },
  "Allow Discord notifications?": "Разрешить уведомления Discord?",
  "Allow notification permission": "Разрешить уведомления",
@@ -75,9 +75,9 @@
  "Completed {name}.": "Выполнено: {name}.",
  "Completed {n} Quest since Discord opened.": "{n} задание выполнено с запуска Discord.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "{n} задание выполнено с запуска Discord.",
   "few": "{n} задания выполнено с запуска Discord.",
-  "many": "{n} заданий выполнено с запуска Discord."
+  "many": "{n} заданий выполнено с запуска Discord.",
+  "one": "{n} задание выполнено с запуска Discord."
  },
  "Console": "Консоль",
  "Copied Review Text": "Текст отзыва скопирован",
@@ -179,12 +179,15 @@
  "In DMs or in any server channel your client receives.": "В ЛС или в любом канале сервера, который получает ваш клиент.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "В чате, реакциях и выборе эмодзи. Discord перезапустится, чтобы применить.",
  "In lists": "В списках",
+ "In use": "Используется",
  "Indonesian": "индонезийский",
+ "Install": "Установить",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Устанавливайте и переключайте цветовые темы по ссылкам, скомпилированным в таблицу цветов Discord, без задержек.",
  "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.": "Устанавливайте цветовые темы по ссылке и переключайтесь между ними. Подходят темы Revenge и Vendetta.",
  "Install theme": "Установить тему",
  "Installed themes": "Установленные темы",
  "Installing theme...": "Установка темы...",
+ "Installing...": "Установка...",
  "Irish": "ирландский",
  "It will be sent as a normal file instead.": "Вместо этого он будет отправлен обычным файлом.",
  "Italian": "итальянский",
@@ -292,6 +295,7 @@
  "Other people (by user ID)": "Другие люди (по ID пользователя)",
  "Others won't see when you're typing. You still see when they are.": "Другие не увидят, что вы печатаете. Вы по-прежнему видите, когда печатают они.",
  "Outside Discord": "Вне Discord",
+ "Paste": "Вставить",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Вставьте прямую ссылку на тему «Месть» или «Вендетта» в формате .json выше.",
  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Вставьте ниже прямую ссылку на .json-тему Revenge или Vendetta.",
  "Paste link from clipboard": "Вставить ссылку из буфера обмена",
@@ -329,9 +333,9 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Убирает рекламу заданий над панелью профиля. Задания продолжают работать.",
  "Removes {n} saved theme and restores Discord's default colors.": "Удаляет сохраненную тему {n} и восстанавливает цвета Discord по умолчанию.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Удаляет {n} сохраненную тему и восстанавливает цвета Discord по умолчанию.",
   "few": "Удаляет {n} сохраненные темы и восстанавливает цвета Discord по умолчанию.",
   "many": "Удаляет {n} сохраненных тем и восстанавливает цвета Discord по умолчанию.",
+  "one": "Удаляет {n} сохраненную тему и восстанавливает цвета Discord по умолчанию.",
   "other": "Удаляет {n} сохраненных тем и восстанавливает цвета Discord по умолчанию."
  },
  "Reopen now": "Перезапустить",
@@ -393,9 +397,9 @@
  "Show theme background image": "Показать фоновое изображение темы",
  "Shown {n} notification since Discord opened.": "Показано {n} уведомление с момента открытия Discord.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Показано {n} уведомление с момента открытия Discord.",
   "few": "Показано {n} уведомления с момента открытия Discord.",
-  "many": "Показано {n} уведомлений с момента открытия Discord."
+  "many": "Показано {n} уведомлений с момента открытия Discord.",
+  "one": "Показано {n} уведомление с момента открытия Discord."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Показывает «general chat» вместо «general-chat». Меняется только отображение названий.",
  "Shows a Switch accounts button next to Settings at the top of the You tab.": "Показывает кнопку смены аккаунта рядом с Настройками вверху вкладки «Вы».",
@@ -462,9 +466,9 @@
  "Translated from {language}. Original:": "Перевод с языка: {language}. Оригинал:",
  "Translated {n} message since Discord opened.": "{n} сообщение переведено с запуска Discord.",
  "Translated {n} messages since Discord opened.": {
-  "one": "{n} сообщение переведено с запуска Discord.",
   "few": "{n} сообщения переведено с запуска Discord.",
-  "many": "{n} сообщений переведено с запуска Discord."
+  "many": "{n} сообщений переведено с запуска Discord.",
+  "one": "{n} сообщение переведено с запуска Discord."
  },
  "Triple-tap": "Тройное касание",
  "Triple-tap to delete": "Тройное касание для удаления",
@@ -497,15 +501,15 @@
  "Waiting for new Quests.": "Ждём новые задания.",
  "Watching all friends.": "Отслеживаются все друзья.",
  "Watching all {n} friends.": {
-  "one": "Отслеживается {n} друг.",
   "few": "Отслеживаются все {n} друга.",
-  "many": "Отслеживаются все {n} друзей."
+  "many": "Отслеживаются все {n} друзей.",
+  "one": "Отслеживается {n} друг."
  },
  "Watching {n} friend.": "Отслеживается {n} друг.",
  "Watching {n} people.": {
-  "one": "Отслеживается {n} человек.",
   "few": "Отслеживаются {n} человека.",
-  "many": "Отслеживаются {n} человек."
+  "many": "Отслеживаются {n} человек.",
+  "one": "Отслеживается {n} человек."
  },
  "Watching {n} person.": "Отслеживается {n} человек.",
  "Web": "Браузер",
@@ -546,108 +550,108 @@
  "{name} sent you a DM": "{name} отправил(а) вам ЛС",
  "{n} DM": "{n} ЛС",
  "{n} DMs": {
-  "one": "{n} ЛС",
   "few": "{n} ЛС",
-  "many": "{n} ЛС"
+  "many": "{n} ЛС",
+  "one": "{n} ЛС"
  },
  "{n} account saved (up to {max}).": "Сохранён {n} аккаунт (до {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "Сохранён {n} аккаунт (до {max}).",
   "few": "Сохранено {n} аккаунта (до {max}).",
-  "many": "Сохранено {n} аккаунтов (до {max})."
+  "many": "Сохранено {n} аккаунтов (до {max}).",
+  "one": "Сохранён {n} аккаунт (до {max})."
  },
  "{n} chosen people": {
-  "one": "{n} выбранного человека",
   "few": "{n} выбранных человек",
-  "many": "{n} выбранных человек"
+  "many": "{n} выбранных человек",
+  "one": "{n} выбранного человека"
  },
  "{n} chosen person": "{n} выбранного человека",
  "{n} color token": "{n} токен цвета",
  "{n} color tokens": {
-  "one": "{n} жетон цвета",
   "few": "{n} жетона цвета",
   "many": "{n} цветных жетонов",
+  "one": "{n} жетон цвета",
   "other": "{n} цветных жетонов"
  },
  "{n} day": "{n} день",
  "{n} days": {
-  "one": "{n} день",
   "few": "{n} дня",
-  "many": "{n} дней"
+  "many": "{n} дней",
+  "one": "{n} день"
  },
  "{n} deleted message": "{n} удалённое сообщение",
  "{n} deleted messages": {
-  "one": "{n} удалённое сообщение",
   "few": "{n} удалённых сообщения",
-  "many": "{n} удалённых сообщений"
+  "many": "{n} удалённых сообщений",
+  "one": "{n} удалённое сообщение"
  },
  "{n} edited message": "{n} изменённое сообщение",
  "{n} edited messages": {
-  "one": "{n} изменённое сообщение",
   "few": "{n} изменённых сообщения",
-  "many": "{n} изменённых сообщений"
+  "many": "{n} изменённых сообщений",
+  "one": "{n} изменённое сообщение"
  },
  "{n} friend selected.": "Выбран {n} друг.",
  "{n} friends selected.": {
-  "one": "Выбран {n} друг.",
   "few": "Выбрано {n} друга.",
-  "many": "Выбрано {n} друзей."
+  "many": "Выбрано {n} друзей.",
+  "one": "Выбран {n} друг."
  },
  "{n} hour": "{n} час",
  "{n} hours": {
-  "one": "{n} час",
   "few": "{n} часа",
-  "many": "{n} часов"
+  "many": "{n} часов",
+  "one": "{n} час"
  },
  "{n} minute": "{n} минуту",
  "{n} minutes": {
-  "one": "{n} минуту",
   "few": "{n} минуты",
-  "many": "{n} минут"
+  "many": "{n} минут",
+  "one": "{n} минуту"
  },
  "{n} month": "{n} месяц",
  "{n} months": {
-  "one": "{n} месяц",
   "few": "{n} месяца",
-  "many": "{n} месяцев"
+  "many": "{n} месяцев",
+  "one": "{n} месяц"
  },
  "{n} second ago": "{n} секунду назад",
  "{n} seconds ago": {
-  "one": "{n} секунду назад",
   "few": "{n} секунды назад",
-  "many": "{n} секунд назад"
+  "many": "{n} секунд назад",
+  "one": "{n} секунду назад"
  },
  "{n} server": "{n} сервер",
  "{n} server was marked as read": "{n} сервер отмечен как прочитанный",
  "{n} servers": {
-  "one": "{n} сервер",
   "few": "{n} сервера",
-  "many": "{n} серверов"
+  "many": "{n} серверов",
+  "one": "{n} сервер"
  },
  "{n} servers were marked as read": {
-  "one": "{n} сервер отмечен как прочитанный",
   "few": "{n} сервера отмечены как прочитанные",
-  "many": "{n} серверов отмечены как прочитанные"
+  "many": "{n} серверов отмечены как прочитанные",
+  "one": "{n} сервер отмечен как прочитанный"
  },
  "{n} theme installed.": "Тема {n} установлена.",
  "{n} themes installed.": {
-  "one": "Установлена ​​{n} тема.",
   "few": "Установлено {n} темы.",
   "many": "Установлено {n} тем.",
+  "one": "Установлена ​​{n} тема.",
   "other": "Установлено {n} тем."
  },
  "{n} translation": "{n} перевод",
  "{n} translations": {
-  "one": "{n} перевод",
   "few": "{n} перевода",
-  "many": "{n} переводов"
+  "many": "{n} переводов",
+  "one": "{n} перевод"
  },
  "{n} waiting.": "В очереди: {n}.",
  "{n} year": "{n} год",
  "{n} years": {
-  "one": "{n} год",
   "few": "{n} года",
-  "many": "{n} лет"
+  "many": "{n} лет",
+  "one": "{n} год"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Включено функций: {on} из {total}. Включайте и выключайте их в разделе «Функции».",
  "{time} ago": "{time} назад"
