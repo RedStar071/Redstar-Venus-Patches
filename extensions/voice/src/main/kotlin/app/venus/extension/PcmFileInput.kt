@@ -26,14 +26,17 @@ class PcmFileInput private constructor(
         require(remaining < 0 || remaining / (channels * (bits / 8)) <= rate.toLong() * 1200) { "Audio exceeds 20 minutes" }
     }
 
-    /** Next block as little-endian float samples, or null at the end. remaining < 0 streams to EOF. */
+    private val rawBytes = ByteArray(channels * (bits / 8) * 1024)
+    private val sampleBuffer = ByteBuffer.allocate(channels * 1024 * 2).order(ByteOrder.LITTLE_ENDIAN)
+
+    /** Next block as little-endian PCM16 samples, or null at the end. remaining < 0 streams to EOF. */
     fun readFrames(): ByteBuffer? {
         if (remaining == 0L) return null
         val frameBytes = channels * (bits / 8)
         // Sized data reads exactly its chunk; unsized (streamed/RF64) data reads to EOF. A file cut
         // short (interrupted recorder/download) keeps every complete frame instead of failing.
-        val want = if (remaining > 0) Math.min(remaining, frameBytes * 1024L).toInt() else frameBytes * 1024
-        val bytes = ByteArray(want)
+        val want = if (remaining > 0) Math.min(remaining, rawBytes.size.toLong()).toInt() else rawBytes.size
+        val bytes = rawBytes
         var size = 0
         while (size < want) {
             val n = input.read(bytes, size, want - size)
@@ -45,27 +48,33 @@ class PcmFileInput private constructor(
         if (remaining > 0) remaining -= want
         if (!complete) remaining = 0L
         if (size == 0) { remaining = 0L; return null }
+        if (little && bits == 16 && !floating && law == LAW_NONE) {
+            return ByteBuffer.wrap(bytes, 0, size).order(ByteOrder.LITTLE_ENDIAN)
+        }
         val source = ByteBuffer.wrap(bytes, 0, size).order(if (little) ByteOrder.LITTLE_ENDIAN else ByteOrder.BIG_ENDIAN)
-        val result = ByteBuffer.allocate(size / (bits / 8) * 4).order(ByteOrder.LITTLE_ENDIAN)
+        val result = sampleBuffer
+        result.clear()
         while (source.hasRemaining()) {
-            val value = if (law == LAW_MU) mulaw(source.get().toInt() and 255) / 32768.0
-            else if (law == LAW_A) alaw(source.get().toInt() and 255) / 32768.0
+            val sample = if (law == LAW_MU) mulaw(source.get().toInt() and 255)
+            else if (law == LAW_A) alaw(source.get().toInt() and 255)
             else if (floating) {
-                if (bits == 64) source.double else source.float.toDouble()
+                val value = if (bits == 64) source.double else source.float.toDouble()
+                require(java.lang.Double.isFinite(value)) { "Non-finite PCM sample" }
+                Math.max(-32768L, Math.min(32767L, Math.round(value * 32768.0))).toInt()
             } else when (bits) {
-                8 -> if (unsigned8) ((source.get().toInt() and 255) - 128) / 128.0 else source.get().toInt() / 128.0
-                16 -> source.short.toDouble() / 32768.0
+                8 -> (if (unsigned8) (source.get().toInt() and 255) - 128 else source.get().toInt()) shl 8
+                16 -> source.short.toInt()
                 24 -> {
                     val a = source.get().toInt() and 255
                     val b = source.get().toInt() and 255
                     val c = source.get().toInt() and 255
                     val raw = if (little) a or (b shl 8) or (c shl 16) else c or (b shl 8) or (a shl 16)
-                    ((raw shl 8) shr 8) / 8388608.0
+                    val signed = (raw shl 8) shr 8
+                    Math.max(-32768, Math.min(32767, (signed + 128) shr 8))
                 }
-                else -> source.int.toDouble() / 2147483648.0
+                else -> Math.max(-32768L, Math.min(32767L, (source.int.toLong() + 32768L) shr 16)).toInt()
             }
-            require(java.lang.Double.isFinite(value)) { "Non-finite PCM sample" }
-            result.putFloat(Math.max(-1.0, Math.min(1.0, value)).toFloat())
+            result.putShort(sample.toShort())
         }
         result.flip()
         return result

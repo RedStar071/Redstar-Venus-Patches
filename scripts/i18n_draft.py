@@ -12,7 +12,7 @@ stay) and fills in every CLDR plural form for the {n} texts. Drafts should be re
 import html, json, os, re, sys, time, urllib.parse, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-KEEP = ['Venus Patches', 'Google Translate', 'manti.vendicated.dev', '@unknown-user', 'GPL-3.0', 'ReviewDB', 'GitHub', 'Discord', 'Venus', 'Nitro', 'GIF']
+KEEP = ['Venus Patches', 'Google Translate', 'manti.vendicated.dev', '@unknown-user', 'GPL-3.0', 'ReviewDB', 'GitHub', 'Discord', 'Venus', 'Nitro', 'GIF', 'Revenge', 'Vendetta', 'Blurple']
 TOKEN = re.compile(r'\{\w+\}|' + '|'.join(re.escape(k) for k in KEEP))
 # The plural ("other") English text of each pl()/take()/count() call, and its singular: scripts/i18n_plurals.cjs.
 PAIRS = json.load(open(os.path.join(ROOT, 'work', 'plurals.json')))

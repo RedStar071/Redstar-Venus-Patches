@@ -1,3 +1,36 @@
+## [1.13.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.12.0...v1.13.0) (2026-10-16)
+
+### ✨ New Features
+
+* **Discord:** Add `Message highlights` patch ([#60](https://github.com/VenusIsJaded/Venus-Patches/issues/60))
+* **Discord - Message highlights:** Change the left bar width and highlight colors for replies, mentions and deleted messages, with a live chat preview and any-color picker ([#60](https://github.com/VenusIsJaded/Venus-Patches/issues/60))
+* **Discord:** Add `Custom themes` patch ([#57](https://github.com/VenusIsJaded/Venus-Patches/issues/57))
+* **Discord - Custom themes:** Install Revenge and Vendetta color themes from a link, switch between them and show their chat wallpaper ([#57](https://github.com/VenusIsJaded/Venus-Patches/issues/57))
+
+### 🐛 Bug Fixes
+
+* **Discord - Venus button on profile bar:** Fixed the first tap after restarting opening Account settings or a black screen instead of Venus settings ([#58](https://github.com/VenusIsJaded/Venus-Patches/issues/58))
+* **Discord - Account switcher:** Fixed adding a sixth account removing one of your saved accounts instead of keeping up to 50 ([#59](https://github.com/VenusIsJaded/Venus-Patches/issues/59))
+* **Discord - Spaces in channel names:** Fixed forum, media, directory and app channels and channel mentions still showing dashes instead of spaces
+* **Discord - Double-tap to reply:** Fixed double-tapping replying in channels where you can't reply, and Discord still showing its double-tap to react tips
+* **Discord - Send long messages:** Fixed turning it off not bringing back Discord's real 2000 or 4000 character limit until restart
+* **Discord - Send long messages:** Fixed long messages losing text-to-speech and mention settings, and waiting out slowmode even when you can bypass it
+* **Discord - Read all button:** Fixed servers you're previewing, guest servers, servers with unread events and DMs past the first 20 staying unread
+* **Discord - User activity notifications:** Fixed no notice showing when a watched person came online for the first time since Discord opened
+* **Discord - Send audio as voice messages:** Fixed audio sent in announcement channels or as a scheduled message not becoming a voice message
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Redesign every option page with a status card, Discord's row icons and live previews of what each feature changes
+* **Discord - Venus settings:** Show every Venus pop-up message with an icon, like Discord's own, and translate every new settings text
+* **Discord - User activity notifications:** Pick All friends or People I pick with one switch, with avatars and status dots for each person
+* **Discord - User and server reviews:** Retry a failed load with a real button, and say Signed in to ReviewDB after signing in
+
+### ⚡ Performance Improvements
+
+* **Discord - Pastel name colors:** Skip copying a message on every scroll frame when its colors didn't change
+* **Discord - Send audio as voice messages:** Convert audio with less memory and without waiting between decoder steps
+
 ## [1.12.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.11.0...v1.12.0) (2026-10-14)
 
 ### ✨ New Features

@@ -147,7 +147,7 @@ class PcmResampler(private var rate: Int, private var channels: Int, private var
         var offset = 0
         while (buffer.remaining() >= bytesPerFrame) {
             var sum = 0.0
-            for (c in 0 until channels) sum += if (floating) buffer.float.toDouble() * 32767 else buffer.short.toDouble()
+            for (c in 0 until channels) sum += if (floating) buffer.float.toDouble() * 32768 else buffer.short.toDouble()
             val current = sum / channels
             if (floating) require(java.lang.Double.isFinite(current)) { "Invalid non-finite PCM sample" }
             if (inputFrames == 0L) previous = current

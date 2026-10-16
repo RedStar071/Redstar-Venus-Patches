@@ -72,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "messageHighlight")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -688,6 +688,82 @@ val accountSwitcher = bundledPlugin("accountSwitcher", "Account switcher",
 @Suppress("unused")
 val unlockAppIcons = bundledPlugin("appIcons", "Unlock app icons",
     "Use any Discord app icon in Settings without Nitro.")
+
+@Suppress("unused")
+val customThemes = bundledPlugin("customThemes", "Custom themes",
+    "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.")
+
+internal const val HIGHLIGHT_DRAWER = "Lcom/discord/chat/presentation/message/decorations/HighlightedMessageDrawer;"
+internal const val CHAT_R_DIMEN = "Lcom/discord/chat/R\$dimen;"
+/** Instructions [scaleMessageGutterWidth] adds before Discord's own drawHighlight code, counting the nop its label lands on. */
+internal const val MESSAGE_GUTTER_GUARD_SIZE = 25
+
+/**
+ * Discord's native HighlightedMessageDrawer sets gutterWidth once from R.dimen.message_gutter_width (2dp)
+ * in its constructor, and paints the left bar with gutterPaintColor. When Message highlights encodes a width
+ * multiplier (2x..8x) in gutterPaintColor's alpha byte (256 - multiplier = 254..248), this guard restores full
+ * 0xFF alpha on gutterPaintColor and scales gutterWidth by that multiplier; normal 0xFF colors reset gutterWidth
+ * to 1x so toggling or changing thickness updates every row live without restarting Discord (#60).
+ * 12 registers, 5 of them parameters (p0..p4 = v7..v11): v0-v2 are free until Discord's first const-string.
+ */
+internal fun scaleMessageGutterWidth(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val implementation = method.implementation ?: throw PatchException("HighlightedMessageDrawer.drawHighlight has no code")
+    if (method.definingClass != HIGHLIGHT_DRAWER || method.parameterTypes.map { it.toString() } != listOf("Landroid/graphics/Canvas;", "Landroid/view/View;", "I", "I") ||
+        method.returnType != "V" || implementation.registerCount - 5 < 3)
+        throw PatchException("HighlightedMessageDrawer.drawHighlight ABI changed")
+    if (implementation.instructions.firstOrNull()?.opcode == com.android.tools.smali.dexlib2.Opcode.IGET_OBJECT)
+        throw PatchException("${method.definingClass}->${method.name} already has a Venus guard; each method may only get one")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        iget-object v0, p0, $HIGHLIGHT_DRAWER->gutterPaintColor:Ljava/lang/Integer;
+        if-eqz v0, :venus_gutter_done
+        invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+        move-result v0
+        ushr-int/lit8 v1, v0, 0x18
+        rsub-int v1, v1, 0x100
+        const/4 v2, 0x2
+        if-lt v1, v2, :venus_gutter_default
+        const/16 v2, 0x8
+        if-gt v1, v2, :venus_gutter_default
+        const/high16 v2, -0x1000000
+        or-int/2addr v0, v2
+        invoke-static {v0}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+        move-result-object v0
+        iput-object v0, p0, $HIGHLIGHT_DRAWER->gutterPaintColor:Ljava/lang/Integer;
+        goto :venus_gutter_scale
+        :venus_gutter_default
+        const/4 v1, 0x1
+        :venus_gutter_scale
+        invoke-virtual {p2}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
+        move-result-object v0
+        sget v2, $CHAT_R_DIMEN->message_gutter_width:I
+        invoke-virtual {v0, v2}, Landroid/content/res/Resources;->getDimensionPixelSize(I)I
+        move-result v0
+        mul-int/2addr v0, v1
+        iput v0, p0, $HIGHLIGHT_DRAWER->gutterWidth:I
+        :venus_gutter_done
+        nop
+    """)
+}
+
+@Suppress("unused")
+val messageHighlights = bytecodePatch(
+    name = "Message highlights",
+    description = "Change the left bar thickness and highlight colors for replies, mentions and deleted messages."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    execute {
+        additionalSelections += "messageHighlight"
+        scaleMessageGutterWidth(Fingerprint(
+            definingClass = HIGHLIGHT_DRAWER,
+            name = "drawHighlight",
+            returnType = "V",
+            parameters = listOf("Landroid/graphics/Canvas;", "Landroid/view/View;", "I", "I")
+        ).method)
+    }
+}
 
 internal const val USER_AGENT_INTERCEPTOR = "Lcom/discord/client_info/ClientUserAgent\$DiscordUserAgentInterceptor;"
 /** The start of the Windows desktop User-Agent that Quest Completer sends Play and Activity heartbeats with. */
