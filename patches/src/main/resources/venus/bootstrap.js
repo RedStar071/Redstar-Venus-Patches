@@ -2071,7 +2071,7 @@
         return orig.apply(self, next);
     }
     let guildChannels = null;
-    let pastelHash, guildMembers, presenceStore, sessionsStore, displayNameType, nativeRowGroup, nativeSwitchRow, nativeLock, oauthModal;
+    let pastelHash, guildMembers, presenceStore, sessionsStore, displayNameType, nativeRowGroup, nativeSwitchRow, oauthModal;
     // The original PlatformIndicators plugin's themable PNG glyphs, tinted by status.
     const platformPngs = {"desktop": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAAVFBMVEUAAACvv7+3u7+5u7+2ub+4u726vL65u765vL65vMG5u723ub23v7+3t7+6vL+4ur+6u765u764vL+4ur23t7+7vb+3ur25ur64ur+7u766ur6vr7/+1nXbAAAAHHRSTlMAEEB/UHDv/99fgIAgQJ+f7++fnyB/YN9vTz8QSaZf3QAAAI1JREFUeAHt1tUBwkAURNEXHZzg1n+d2Fc8u4OTOQXcyKqJ3ARh5C22qiQFYTC0khFIYyuYgDYthGagzQuhDLRFIYS7yBPuakLmSaF2CimkkEIKKfT8I5un0MdCT7v6LUFbFUIhaGsr2IAUWcl2B0K2t6pDVKttGR5P3BJvpxCnfdTMHVo9NaRQ1MpKRC5jHSw3VFQzIwAAAABJRU5ErkJggg==", "web": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAQAAAD/5HvMAAADgklEQVR42u3a32vVdRzH8VdOv2NzGzM7bkp0E9F9RQSbOmK6groQpeugOzXJfnCW3YwgC4IyHCldrBmFELtQRxfK2MHp1sjVZRfBMSJFYu6cMUnOOZPz9Gb45uyc79fv5/tDvDiPv+DJh/fn8+HL56umpqbHFZsZ4hjjzJOnQJkyBfLMM87H7GWzHh16OcoVKgQpM8N79Cht7GaSVcJa5QK7lBZe5SpRzDCgpLGdH6gS3SRPKzm8xTJxFTmgJNDKtyRllFbFQxfTRLVCvSk6FR3b+J3onuRTlllvgUzk1YmVsyJJdPMN1bqkzmizM00cc1rDIP9SawpPrjhFPAf1AN1cotZJ940ezwKb1q33BLX2Kzx2sBwzZ7vWoYXvAVOkV2FxlqjuMMtBNqkBNpIDzI/h7ywnTsfIP5gquxUGV3EiB7zMPcxlPRwDOJITTgNmpx6GyZSDnqKAOa9g9LKKIzniA0yFbQrC+5B6UDf/Y44oCFdwdUPOGMfkgr8kyrg6Lmf0YUq0yw9DuLnBcTw5YwNFzB754RhmkYaUCH7BDMsPZzDDZFMM+gQzJj/8inlTYiS1oNcws/LD35jnJUtKPOgFzHX5YQmzdmCRTSXoGcyi/FDGtEqWlHhQG6YULsjTA4zg5iZf4CkAXrig25gtUowk+FwB2IpZDDfUz8pEWiUF4DnM9XDbfkiKl6QAvB5u248H38KMJBZ0FDMW7uo4qwbIJhQ0gcnKD3sxN3lCirNKgZfrf5hB+aGdEuYVNUQ2dtAuTIk2+WMG87V8MBIzaBQzrdDDVqBDPuIE0cUy5rCC0MMq5lAqQR9hKmRcPoNu0ZF0EN0sYs7JBAyc+UwNsUJYd7nGO2zUGr4CTL9MqMGu8KIaYB43C2yVJPq4h8kpDAaoYv6kS3U4jKvfaGELeUyVfoXDT4C5wAatg8cfuHqbS4A54/K8UgTMd/WnNjuckyqAKdCj8DhArdO0NFilQ8xxhyiq7JMbRqk1GXAEuDshV3hMUesvXkoo6CKe3NHJArUqfEln7KBrdCgaMnVJcIsPa6OcczKKjk6mqFfkFH20RAi6SIfiweMkjS0xwTBvEFaVE3hKAvspEleBfUoOvTGfOH+mJ40X6ctEkaNfaWEn56kQVoVz9CltZDhCjhJBSuR4l4weHdrZwzBjzJFniTJlbpNnljGyDNLW/BmlqelxdR++AoGbDB4jjAAAAABJRU5ErkJggg==", "mobile": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAMAAADVRocKAAAAXVBMVEUAAAAwMDgwMDUwMDUuMDYwMDYvMTcvMTYvMTYwMDYwMDUvMTYwMjUvMTUvMjYvMTUuMDUuMDQvMDUtMTUwMDgvMDUwMDAtMDYuMDYwMDAtMDUvMDYuMDUtMDcpMTo5aAq8AAAAH3RSTlMAIGBvf1C//89fMN9g75+/j3+fP0C/IFBfMGDPb08fcZ9WCgAAAMNJREFUeAHt2YWNxQAMg2EX/fiVud1/zBuhSaRjfwv8UsQx5J9L0iw/VySIyUoaXa7wu93pcE/g9KDTFS4F+amF5Em3ZwK7FwPeMEsYcoNVxZAaViX5uTd6MuQJKwY5A01u9goFWph1fyKggAIKKKCAAgoooIACCiiggAIKKKCAAgoooIACn/l9d/t3gU/fcEqG9LDKGVLB6saQAZ97owZ2w5NuzwEOKd1G4FMLE5wG36Y/w29ZadRviBn2/Nw2HfjTPgD3/UVA1TCAGgAAAABJRU5ErkJggg==", "embedded": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAAk1BMVEUAAAC3u7+4ur+5vL+5u765u7+6vL+2ub+3v7+6u7+5vL66v7+6vL65u761ur+4u765vL+3t7+6u765u7+9vb23t7+7vb+6u766ur+5ur6/v7+vv7+9vcW1tb+5u727u763ur25vL+6vL+3ub24ur+5u7+4vL+5ur66ur64ur25vL+6u764ur24u722uby5u76vr7/eehxsAAAAMXRSTlMAQJ/f/8+fUCC/3zDv7zC/UEDvfx8gf88w3xAQHzCAT2Bfb4Bvj5/PP6+vv59wUM8QEONx+AAAAWZJREFUeAHt1dWa6zAMBOA5PSqzs2Vmhvd/uWWcVFHqr5f+r+3JRqtJ8UhBEAT/Mv8lpWwuD02hKHcpFXBTuSJ3qtZwQ0HPUVULiCuJhzpiGuKlCZaTL3gnxEVPaLWdkAxYJznIdfGmy0k9MEkOivChLQSkbwS18KElZEBBLSMIX4QMuRxaEJ0vCBndCkJMbEZjIRO6MTWCqjWlRjO6MTeCpLoooDWuCFvSjcgK0pYzohsrM0hZzhXdWJtBynJyR4rGv19dzrp3EC3nhoJKZpCynNxalzqIlrPKU7WDlOXUym8H0XIOufy+htxZX9tHBU24/L5mXH5fSy6/r4jL/8sOidYJv2x7fu0k84SgIn/Qmb50dT2oB6YXk+tf4hElWuuPdeaIlCFx/fkLeM+Q1Ferw3RQZ9SmP8jQlR9H/NZ3tKmG08+sW/SMnrxzZ6Qy/TrfBWkdL+Lq0RUptaYHJyU+HwRB4O0FjTMnvIkvoBQAAAAASUVORK5CYII=", "vr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAANlBMVEVMaXHv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hs7PTu7vHv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hv7/EEUZf/AAAAEXRSTlMAzGV4UNr78OcJFDufKb6ri3Gd0SEAAAHQSURBVFjD7VbHdsQgDDRNiOby/z+bjY0N2LRk95C8xxwNHo0KkqZpYGBg4PMwbBa4ZYFiZqaPRVGxNSCoavPwJs0ujLbk2K0TtipKz1s3Zl3RE/PILGKmsqbLL8JcwZ5y9LJmi3E+k8Ib1UH8xcI95Utnaeb2TAnmbzLP01NsnilfBEcBCW9FVXWpwzvxrGYiE785ASC1p2DO3M5xlWty5ZREyrEmKlQK0Tedweu1npUdNPxDVBrlHe5bIHQQue1m/YVIEKjIGKmGG7ZbPKYpqnsMnsGqqxUQNSzpP8WdJoSaNUop7nwFInZF600ijT0F3kE06dXS6RNEXfh7ROI/EMG7RPAM2++I8D48wqefZe0cJy74Bo+HaixBJPbRLXX0k5ueDenWgtzVYojLz670edNL55y2wSgPQPOtFhPbirPlKYlDPOyBPwUtjD8auzr6GwYXDKRrA4RAucMFmR0PvuXjeZ3K+wIiT++MD8Wa32n8KSxc67ArSOYcOzln6rTmi5eKhWbMIbMGyV2gkZkjKE4ZVr6cM1Lp6qxslN6ZoDodeLoVi6igTbqlYmOJ0muIBrIku4oFK7Ix9I7atAQ2SWym1F5HEjB3NDAwMPAuvgCPRUw2yKsaYwAAAABJRU5ErkJggg=="};
     function PlatformPng(props) {
@@ -3284,19 +3284,45 @@
     function count(n,word) { return pl(n,"{n} "+word,"{n} "+word+"s"); }
     // Settings page: Discord's own radio list (TableRadioGroup 5995 / TableRadioRow 5994).
     // Hidden channels: one choice, whether tapping a locked channel shows its details or does nothing.
+    // The locked channel in the preview: pressable like a real row, and it gives a small shake when tapping does nothing.
+    let hiddenNudgeFn = null;
+    function hiddenNudge() { if (hiddenNudgeFn) hiddenNudgeFn(); }
+    function HiddenPreviewRow(props) {
+        const A = motion(), ref = React.useRef(null), Press = RN.Pressable || RN.View;
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            hiddenNudgeFn = () => {
+                const value = ref.current;
+                if (!value || reduceMotion || typeof A.sequence !== "function") return;
+                value.setValue(0);
+                A.sequence([1, -1, 1, 0].map(to => A.timing(value, {toValue:to, duration:60, useNativeDriver:true}))).start();
+            };
+            return () => { hiddenNudgeFn = null; };
+        }, []);
+        const row = {flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7};
+        const style = ref.current ? [row, {transform:[{translateX:ref.current.interpolate({inputRange:[-1, 1], outputRange:[-6, 6]})}]}] : row;
+        return el(Press, {onPress:props.onPress, accessibilityRole:"button", accessibilityLabel:props.label + ", " + tr("locked")},
+            el(ref.current ? A.View : RN.View, {style}, props.children));
+    }
     function HiddenChannelsSettings() {
         useSettings("hiddenChannels");
         const ui=reviewUI();
         if (!React || !RN) return null;
         const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5410,"LockIcon");
-        const s=useChatPreviewStyles(), Hash=venusIcon(15125,"HashmarkIcon");
-        // A few channels the way the list shows them: the locked one appears (faded, with a lock) only while it's on.
-        const channel=(name,locked) => el(RN.View,{key:name,style:{flexDirection:"row",alignItems:"center",gap:8,paddingHorizontal:16,paddingVertical:7,opacity:locked ? 0.6 : 1}},
-            el(Hash,{size:"sm"}),el(RN.Text,{style:[s.text,{flex:1}],numberOfLines:1},name),locked ? popIn("lock",el(lock,{size:"xs"})) : null);
+        const s=useChatPreviewStyles(), Hash=venusIcon(15125,"HashmarkIcon"), TextLock=venusIcon(5393,"TextLockIcon");
+        // A few channels the way Discord's list shows them: muted names, and the locked one with Discord's own
+        // # and lock icon. Tap it to try what tapping a real one does.
+        const sample={id:"1180000000000000000",guild_id:"1",type:0,name:"staff-only",lastMessageId:"1290000000000000000"};
+        const tapLocked=() => { if (!on) return; if (settings.hiddenChannelsMenu) showHidden(sample); else hiddenNudge(); };
+        const channel=(name,locked) => el(locked ? HiddenPreviewRow : RN.View,locked ? {key:name,onPress:tapLocked,label:name} :
+            {key:name,style:{flexDirection:"row",alignItems:"center",gap:8,paddingHorizontal:16,paddingVertical:7}},
+            el(locked ? TextLock : Hash,{size:"sm",color:s.muted.color}),el(RN.Text,{style:[s.text,{flex:1,color:s.muted.color}],numberOfLines:1},name));
         const groups=[
             on ? statusCard("status",settings.hiddenChannelsMenu ? "Tap a locked channel to see when it was made and last used." :
                 "Locked channels are listed, and tapping one does nothing.",{title:tr("Showing hidden channels"),IconComponent:lock}) : offCard("status",lock),
-            chatPreview(s,"preview","Hidden channels preview",[channel("general",false),on ? channel("staff-only",true) : null,channel("memes",false)]),
+            chatPreview(s,"preview","Hidden channels preview",[channel("general",false),on ? channel("staff-only",true) : null,channel("memes",false),
+                on ? el(RN.View,{key:"hint",style:{paddingHorizontal:16,paddingTop:4}},el(RN.Text,{style:s.muted},
+                    tr(settings.hiddenChannelsMenu ? "Tap staff-only to try it." : "Tap staff-only: nothing happens."))) : null]),
             el(Group,{key:"tap",title:tr("When you tap a locked channel")},
                 switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4788,"CircleInformationIcon"))),
             footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];
@@ -3730,11 +3756,9 @@
         if (React) useSettings("hiddenChannels");
         const tree = orig.apply(self,args), channel = args[0] && args[0].channel;
         if (!tree || !React || !RN || !hiddenMetadata(channel)) return tree;
-        const icon = nativeLock || inspectedExport(5410,"LockIcon");
-        if (!icon) return tree;
-        // Lock next to hidden names, (20px lock, right margin).
-        return el(RN.View,{style:{flexDirection:"row",alignItems:"center"},accessibilityLabel:hiddenName(channel)+", locked"},
-            el(icon,{color:"#80848e",style:{width:20,height:20,marginRight:4}}),tree);
+        // Discord already draws its own locked-channel icon (TextLockIcon, the # with a small lock) for these rows,
+        // so a second lock beside the name only doubled it. Screen readers still hear that the channel is locked.
+        return el(RN.View,{style:{flexDirection:"row",alignItems:"center"},accessible:true,accessibilityLabel:hiddenName(channel)+", "+tr("locked")},tree);
     }
     function authorizationUrl(result) {
         // Do not depend on a browser-complete global URL / URLSearchParams in RN.
@@ -7088,7 +7112,6 @@
         if (features.reviewDB && id === 8510) oauthModal=exports.default;
         if (features.reviewDB && id === 5997) nativeRowGroup=exports.TableRowGroup;
         if (features.reviewDB && id === 6621) nativeSwitchRow=exports.TableSwitchRow;
-        if (features.hiddenChannels && id === 5410) nativeLock=exports.LockIcon;
         if (features.hiddenChannels && id === 15859) {
             // ChannelInfo can be consumed as default export and as named export
             // (GuildRolesAndChannelsRow reads it by name); hook both.

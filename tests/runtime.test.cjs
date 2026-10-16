@@ -1744,11 +1744,12 @@ test('Hidden Channels cached gateway names clear on logout, account switch and c
     remember();b.api.setSetting('hiddenChannels',false);assert.equal(b.store.getChannels('g'),b.result);
     b.api.setSetting('hiddenChannels',true);assert.equal(b.label(b.channels.hidden),'received name');
 });
-test('Hidden Channels uses a native lock icon and preserves frozen ChannelInfo and stock disabled output',()=>{
+test('Hidden Channels adds no second lock and preserves frozen ChannelInfo and stock disabled output',()=>{
     const b=hiddenHarness(),{React}=reactHarness(b);b.api.setSetting('hiddenChannels',true);
     b.load({LockIcon:'NativeLock'},null,5410);const original=Object.freeze(React.createElement('ChannelInfo',{children:'staff'}));
     const info=b.load({default:()=>original},null,15859).default;
-    const tree=info({channel:b.channels.hidden});assert.equal(tree.props.children[0].type,'NativeLock');assert.equal(tree.props.children[1],original);assert.match(tree.props.accessibilityLabel,/locked/);
+    // Discord draws its own TextLockIcon for the row; Venus no longer adds a second, bigger lock beside the name.
+    const tree=info({channel:b.channels.hidden});assert.equal(tree.props.children,original);assert.match(tree.props.accessibilityLabel,/locked/);
     b.api.setSetting('hiddenChannels',false);assert.equal(info({channel:b.channels.hidden}),original);
 });
 test('PlatformIndicators uses the bundled tinted PNG glyphs for desktop and mobile',()=>{
@@ -4925,4 +4926,18 @@ test('Message highlights preview glows only the highlight you just changed, neve
     assert.deepEqual(glows().map(n => n.props.fresh), [false, false], 'and only once');
     b.api.setSetting('messageHighlightThickness', 3);
     assert.deepEqual(glows().map(n => n.props.fresh), [true, true], 'a new width shows on both');
+});
+test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];
+    b.context.__r = id => ({5205:{default:{show:o => shown.push(o)}}, 4833:{Text(){}}}[id] || null);
+    b.api.setSetting('hiddenChannels', true);
+    const row = () => pageNodes(b.registry.VENUS_HIDDENCHANNELS.screen.getComponent()()).find(n => n.type && n.type.name === 'HiddenPreviewRow');
+    const icon = row().props.children[0];
+    assert.equal(icon.type, b.context.__r ? icon.type : null);
+    b.context.__r = id => ({5393:{TextLockIcon:'TL'}, 5205:{default:{show:o => shown.push(o)}}, 4833:{Text(){}}}[id] || null);
+    assert.equal(icon.type({size:'sm'}).type, 'TL', 'the # with a small lock, not a separate big lock');
+    row().props.onPress(); assert.equal(shown.length, 1, 'opens the same details Discord shows for a locked channel');
+    assert.equal(shown[0].confirmText, 'View Anyway');
+    shown[0].onCancel();
+    b.api.setSetting('hiddenChannelsMenu', false); row().props.onPress(); assert.equal(shown.length, 1, 'with the menu off, nothing opens');
 });
