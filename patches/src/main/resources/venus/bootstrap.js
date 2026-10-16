@@ -2466,34 +2466,61 @@
         if (React) useSettings("gestures");
         return enabled("gestures") ? null : orig.apply(self, args);
     }
-    // Two messages and what a double-tap on each does, with a ripple that taps them in turn.
+    // A small chat you can try the gestures in: double-tap Sam's message to reply, double-tap yours to edit or reply,
+    // triple-tap yours to delete it. The message box under it shows what happened, the way Discord's does.
+    const GESTURE_TAP_MS = 300;
     function GesturePreview(props) {
         useSettings("gestures");
-        const s = useChatPreviewStyles(), A = motion(), ref = React.useRef(null);
-        if (!ref.current && A) ref.current = new A.Value(0);
-        React.useEffect(() => {
-            const value = ref.current;
-            if (!value || reduceMotion || typeof A.loop !== "function" || typeof A.sequence !== "function") return undefined;
-            const tap = () => A.sequence([A.timing(value, {toValue:1, duration:220, useNativeDriver:true}), A.timing(value, {toValue:0, duration:220, useNativeDriver:true})]);
-            const run = A.loop(A.sequence([A.delay(900), tap(), A.delay(90), tap(), A.delay(1600)]));
-            run.start();
-            return () => run.stop();
-        }, []);
-        const own = settings.gestureOwn === "edit", on = props.on;
-        const ripple = ref.current && on ? el(A.View, {pointerEvents:"none", style:{position:"absolute", right:20, top:18, width:28, height:28, borderRadius:14,
-            backgroundColor:"#ffffff", opacity:ref.current.interpolate({inputRange:[0, 1], outputRange:[0, 0.35]}),
-            transform:[{scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.6, 1.4]})}]}}) : null;
-        const result = (Icon, text) => el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6, marginTop:4}},
-            el(Icon, {size:"xs"}), el(RN.Text, {style:s.muted}, text));
-        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon");
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View;
+        const [state, setState] = React.useState({mode:null, target:null, gone:false}), taps = React.useRef({who:null, count:0, at:0, timer:undefined});
+        const box = useThemed("gestureBox", c => ({bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:12, paddingVertical:8,
+            backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopLeftRadius:12, borderTopRightRadius:12, marginHorizontal:12, marginTop:8},
+            input:{marginHorizontal:12, marginBottom:4, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:c.BACKGROUND_MOD_NORMAL}}),
+            {bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:12, paddingVertical:8, backgroundColor:"#4e505833",
+                borderTopLeftRadius:12, borderTopRightRadius:12, marginHorizontal:12, marginTop:8},
+             input:{marginHorizontal:12, marginBottom:4, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"}});
+        React.useEffect(() => () => { const t = taps.current; if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer); }, []);
+        const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete;
+        const act = (who, count) => {
+            if (!on) return;
+            if (who === "mine" && count >= 3 && triple) {
+                animateLayout(); gestureHaptic(); setState({mode:"deleted", target:"mine", gone:true});
+                later(() => { animateLayout(); setState(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : st); }, 1800, false);
+                return;
+            }
+            if (count < 2) return;
+            animateLayout(); gestureHaptic();
+            setState({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false});
+        };
+        // Same rule as in chat: a third tap soon after a double-tap deletes your own message instead.
+        const tap = who => {
+            const t = taps.current, now = Date.now();
+            t.count = t.who === who && now - t.at < GESTURE_TAP_MS * 2 ? t.count + 1 : 1; t.who = who; t.at = now;
+            if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer);
+            const waitForThird = who === "mine" && triple && t.count === 2;
+            if (t.count >= 3 || (t.count === 2 && !waitForThird)) { const n = t.count; t.count = 0; act(who, n); return; }
+            if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
+        };
+        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon"), X = venusIcon(5940, "XSmallIcon");
+        const picked = who => state.target === who && state.mode !== "deleted";
+        const message = (who, name, color, time, text) => el(Press, {key:who, onPress:() => tap(who), accessibilityRole:"button",
+            accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
+            el(RN.View, {style:picked(who) ? {backgroundColor:"#f0b2321a"} : null},
+                picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#f0b232"}}) : null,
+                previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text))));
+        const mineGone = state.gone;
+        const bar = state.mode === "deleted" ? [Trash, tr("Message deleted")] : state.mode === "edit" ? [Pencil, tr("Editing message")] :
+            state.mode === "reply" ? [Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"})] : null;
         return chatPreview(s, "preview", "Tap gestures preview", [
-            el(RN.View, {key:"theirs"}, previewMessage(s, "theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), el(RN.View, null,
-                el(RN.Text, {style:s.text}, tr("Anyone up for a game later?")),
-                on ? result(Reply, tr("Double-tap: reply")) : null)), ripple),
-            previewMessage(s, "mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), el(RN.View, null,
-                el(RN.Text, {style:s.text}, tr("I'm in!")),
-                on ? result(own ? Pencil : Reply, tr(own ? "Double-tap: edit" : "Double-tap: reply")) : null,
-                on && settings.gestureTripleDelete ? result(Trash, tr("Triple-tap: delete")) : null))]);
+            message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
+            mineGone ? null : message("mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("I'm in!")),
+            bar ? el(RN.View, {key:"bar", style:box.bar},
+                popIn("icon:" + state.mode, el(bar[0], {size:"xs"})), el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, bar[1]),
+                state.mode !== "deleted" ? el(Press, {onPress:() => { animateLayout(); setState({mode:null, target:null, gone:false}); }, accessibilityRole:"button",
+                    accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}}, el(X, {size:"xs"})) : null) : null,
+            el(RN.View, {key:"input", style:bar ? [box.input, {borderTopLeftRadius:0, borderTopRightRadius:0, marginTop:0}] : [box.input, {marginTop:8}]},
+                el(RN.Text, {style:s.muted, numberOfLines:1}, state.mode === "edit" ? tr("I'm in!") :
+                    on ? tr(triple ? "Try it: double-tap a message, or triple-tap yours" : "Try it: double-tap a message") : tr("Message #general")))]);
     }
     function GestureSettings() {
         useSettings("gestures");

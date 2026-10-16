@@ -4894,19 +4894,43 @@ test('Read all shows a check for a moment after it clears something, and its lab
     timers.splice(0).forEach(fn => fn());
     assert.equal(render().props.children.type, 'Text', 'back to its label');
 });
-test('Tap gestures and Hidden channels pages preview what they do', () => {
-    const b = settingsHarness(); const {React} = reactHarness(b); React.useRef = v => ({current:v});
+test('the Tap gestures preview can be tried: double-tap replies or edits, triple-tap deletes your own', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    let clock = 1000; b.context.__clock = () => clock; vm.runInContext('Date.now=function(){return __clock();}', b.context);
+    const timers = []; b.context.setTimeout = fn => { timers.push(fn); return timers.length; }; b.context.clearTimeout = () => {};
+    let state; const refs = [];
+    React.useState = init => { if (state === undefined) state = init; return [state, v => { state = typeof v === 'function' ? v(state) : v; }]; };
+    let r = 0; React.useRef = v => { const i = r++; if (!(i in refs)) refs[i] = {current:v}; return refs[i]; };
     b.api.setSetting('gestures', true);
-    const preview = pageNodes(b.registry.VENUS_GESTURES.screen.getComponent()()).find(n => n.type && n.type.name === 'GesturePreview');
-    const texts = () => pageNodes(preview.type(preview.props)).filter(n => typeof n.props.children === 'string').map(n => n.props.children);
-    assert.ok(texts().includes('Double-tap: edit')); assert.ok(texts().includes('Triple-tap: delete'));
-    b.api.setSetting('gestureOwn', 'reply'); b.api.setSetting('gestureTripleDelete', false);
-    assert.ok(!texts().includes('Double-tap: edit')); assert.ok(!texts().includes('Triple-tap: delete'));
-    b.api.setSetting('hiddenChannels', true);
+    const node = pageNodes(b.registry.VENUS_GESTURES.screen.getComponent()()).find(n => n.type && n.type.name === 'GesturePreview');
+    const render = () => { r = 0; return pageNodes(node.type(node.props)); };
+    const texts = () => render().filter(n => typeof n.props.children === 'string').map(n => n.props.children);
+    const press = who => { render().find(n => n.props && n.props.accessibilityRole === 'button' && n.props.key === who).props.onPress(); clock += 100; };
+    assert.ok(texts().includes('Try it: double-tap a message, or triple-tap yours'));
+    // Someone else's message: a double-tap replies straight away.
+    press('theirs'); assert.ok(!texts().includes('Replying to Sam'), 'one tap does nothing');
+    press('theirs'); assert.ok(texts().includes('Replying to Sam'));
+    // Your own: a double-tap waits a moment for a third tap, then edits.
+    press('mine'); press('mine'); assert.ok(!texts().includes('Editing message'), 'waits for a possible third tap');
+    timers.splice(0).forEach(fn => fn()); assert.ok(texts().includes('Editing message'));
+    // A third tap deletes it, and it comes back a moment later.
+    clock += 2000; press('mine'); press('mine'); press('mine');
+    assert.ok(texts().includes('Message deleted')); assert.ok(!texts().includes("I'm in!"), 'gone from the chat');
+    timers.splice(0).forEach(fn => fn()); assert.ok(texts().includes("I'm in!"), 'back again');
+    // Reply instead of edit, and no triple-tap: a double-tap on yours replies at once.
+    b.api.setSetting('gestureOwn', 'reply'); b.api.setSetting('gestureTripleDelete', false); clock += 2000;
+    press('mine'); press('mine'); assert.ok(texts().includes('Replying to You'));
+    // Off: nothing happens.
+    b.api.setSetting('gestures', false); state = {mode:null, target:null, gone:false}; clock += 2000;
+    const off = pageNodes(b.registry.VENUS_GESTURES.screen.getComponent()()).find(n => n.type && n.type.name === 'GesturePreview');
+    node.props = off.props; press('theirs'); press('theirs'); assert.ok(!texts().includes('Replying to Sam'));
+});
+test('Hidden channels preview lists the locked channel only while it is on', () => {
+    const b = settingsHarness(); reactHarness(b);
     const names = on => { b.api.setSetting('hiddenChannels', on);
         return pageNodes(b.registry.VENUS_HIDDENCHANNELS.screen.getComponent()()).filter(n => n.type === 'Text' && /^[a-z-]+$/.test(n.props.children)).map(n => n.props.children); };
     assert.deepEqual(names(true), ['general', 'staff-only', 'memes']);
-    assert.deepEqual(names(false), ['general', 'memes'], 'the locked channel only shows while it is on');
+    assert.deepEqual(names(false), ['general', 'memes']);
 });
 test('the Features entry says how many are on', () => {
     const b = settingsHarness();
