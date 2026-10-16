@@ -1484,6 +1484,9 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
     assert.equal(b.toasts.at(-1).content,'Signed in to ReviewDB');
     // Like Discord's own toasts, Venus's carry an icon for what just happened.
     assert.equal(typeof b.toasts.at(-1).IconComponent,'function','sign-in toast has an icon');
+    // Success toasts use Discord's CircleCheckIcon; failures use CircleXIcon.
+    const Before=b.context.__r;let asked=[];b.context.__r=id=>{asked.push(id);return Before(id);};
+    b.toasts.at(-1).IconComponent({});assert.ok(asked.includes(4793),'success toast uses CircleCheckIcon');b.context.__r=Before;
 });
 test('ReviewDB sign-in survives disabling the plugin and logs out explicitly, and stays signed in',async()=>{
     const b=reviewHarness();const props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=x'});await flush();await flush();
