@@ -3510,22 +3510,41 @@
             el(RN.Text, {style:{fontSize:Math.round(item.size * 0.75), lineHeight:item.size}}, item.glyph);
         return el(ref.current ? A.View : RN.View, {style:motionStyle}, art);
     }
-    // The message as everyone sees it: just the emoji or sticker, the way chat shows a link to one. Tap to switch.
+    // The message as everyone sees it: just the emoji or sticker, the way chat shows a link to one.
+    // Watch: you type :wumpus_wave:, it's sent and shows as the emoji, then you send a sticker. Try it: tap to switch.
     function NitroPreview(props) {
         useSettings("freeNitro");
-        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [pick, setPick] = React.useState(0);
+        const s = useChatPreviewStyles(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = props.on;
+        const blank = {pick:0, draft:"", sent:null, caption:""};
         const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
-        const kind = kinds.length ? kinds[pick % kinds.length] : "emoji", item = NITRO_SAMPLES[kind];
+        const [state, setState] = React.useState(blank), watching = on && kinds.length > 0 && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const box = useThemed("nitroInput", c => ({marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20,
+            backgroundColor:c.BACKGROUND_MOD_NORMAL}), {marginHorizontal:12, marginTop:8, paddingHorizontal:14, paddingVertical:10, borderRadius:20, backgroundColor:"#4e505866"});
+        useDemo(watching, () => {
+            const steps = [[0, () => setState(blank)]];
+            if (settings.emojis) {
+                steps.push([600, () => update({caption:tr("You type a Nitro emoji")})]);
+                typeSteps(":" + NITRO_SAMPLES.emoji.name + ":", text => update({draft:text}), 75).forEach(step => steps.push(step));
+                steps.push([500, () => { animateLayout(); update(st => ({draft:"", sent:"emoji", pick:st.pick + 1, caption:tr("Everyone sees the emoji")})); }], [2200, () => {}]);
+            }
+            if (settings.stickers) steps.push([300, () => update({caption:tr("You send a Nitro sticker")})],
+                [900, () => { animateLayout(); update(st => ({sent:"sticker", pick:st.pick + 1, caption:tr("Everyone sees the sticker")})); }], [2600, () => {}]);
+            return steps;
+        }, [settings.emojis, settings.stickers]);
+        const kind = watching ? state.sent : kinds.length ? kinds[state.pick % kinds.length] : "emoji", item = kind && NITRO_SAMPLES[kind];
         const link = kind === "emoji" ? "https://cdn.discordapp.com/emojis/\u2026.gif" : "https://media.discordapp.net/stickers/\u2026.png";
-        const sent = settings.hyperlinks ? "[" + item.name + "](\u2026)" : link;
-        return el(Press, {key:"preview", onPress:() => setPick(n => n + 1), accessibilityRole:"button",
-            accessibilityHint:tr(kinds.length > 1 ? "Tap to switch between an emoji and a sticker" : "Tap to play it again")},
-            chatPreview(s, "preview", "Nitro link preview", [
-                previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}},
-                    el(NitroArt, {key:kind, kind, item, play:pick}))),
-                el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2, gap:2}},
-                    el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:sent})),
-                    el(RN.Text, {style:s.muted}, tr(kinds.length > 1 ? "Tap to switch between an emoji and a sticker" : "Tap to play it again")))]));
+        const sent = item && (settings.hyperlinks ? "[" + item.name + "](\u2026)" : link);
+        const hint = tr(kinds.length > 1 ? "Tap to switch between an emoji and a sticker" : "Tap to play it again");
+        const body = [
+            item ? el(RN.View, {key:"msg:" + kind}, popIn("msg:" + kind, previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"),
+                el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}}, el(NitroArt, {key:kind, kind, item, play:state.pick}))))) : null,
+            item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2}}, el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:sent}))) : null,
+            watching ? el(RN.View, {key:"input", style:box}, el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, state.draft || tr("Message #general"))) : null,
+            previewCaption(s, watching ? state.caption : on ? hint : "")];
+        const preview = chatPreview(s, "preview", "Nitro link preview", body);
+        return el(RN.View, {key:"preview"}, on && kinds.length ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            watching ? preview : el(Press, {key:"press", onPress:() => { if (on) update(st => ({pick:st.pick + 1})); }, accessibilityRole:"button", accessibilityHint:hint}, preview));
     }
     function FreeNitroSettings() {
         useSettings("freeNitro");
@@ -3537,7 +3556,7 @@
         const groups=[
             on ? statusCard("status",sends || "Turn on emojis or stickers below.",
                 {title:tr("Sending as links"),IconComponent:venusIcon(8119,"NitroWheelIcon")}) : offCard("status",venusIcon(8119,"NitroWheelIcon")),
-            el(NitroPreview,{key:"preview"}),
+            el(NitroPreview,{key:"preview",on}),
             el(Group,{key:"send",title:tr("Send as links")},
                 switchRow(Switch,"emojis","Emojis","Emojis from other servers, and animated emojis.",rowIcon(8719,"ChatSmileIcon")),
                 switchRow(Switch,"stickers","Stickers","Stickers from other servers. Animated ones may not move.",rowIcon(11937,"StickerIcon"))),
