@@ -4751,7 +4751,9 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
     }[id] || null);
     const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
     const page = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()());
-    const nodes = page();
+    const hp = page().find(n => n.type && n.type.name === 'HighlightPreview');
+    const saved = {useState:React.useState, useRef:React.useRef, useEffect:React.useEffect};
+    const nodes = hookHost(b, React, hp).render(); Object.assign(React, saved);
     const preview = nodes.find(n => n.props && n.props.accessibilityLabel === 'Message highlight preview');
     assert.ok(preview, 'live reply & deleted message preview card rendered');
     const avatarImages = nodes.filter(n => n.type === RN.Image && n.props.source && n.props.source.uri && n.props.source.uri.includes('av_hash'));
@@ -4998,13 +5000,40 @@ test('Message highlights preview glows only the highlight you just changed, neve
     const ref = {current:null}; React.useRef = () => ref; React.useState = init => [init, () => {}];
     b.api.setSetting('messageHighlight', true);
     const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
-    const glows = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).filter(n => n.type && n.type.name === 'HighlightGlow');
-    assert.deepEqual(glows().map(n => n.props.fresh), [false, false], 'nothing glows when the page opens');
+    const fresh = () => { const f = pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview').props.fresh;
+        return f ? [f.reply, f.deleted] : [false, false]; };
+    assert.deepEqual(fresh(), [false, false], 'nothing glows when the page opens');
     b.api.setSetting('messageHighlightPingColor', 'pink');
-    assert.deepEqual(glows().map(n => n.props.fresh), [true, false], 'only replies and mentions');
-    assert.deepEqual(glows().map(n => n.props.fresh), [false, false], 'and only once');
+    assert.deepEqual(fresh(), [true, false], 'only replies and mentions');
+    assert.deepEqual(fresh(), [false, false], 'and only once');
     b.api.setSetting('messageHighlightThickness', 3);
-    assert.deepEqual(glows().map(n => n.props.fresh), [true, true], 'a new width shows on both');
+    assert.deepEqual(fresh(), [true, true], 'a new width shows on both');
+});
+test('Message highlights preview plays: Sam\'s reply lights up as it arrives, Alex\'s deleted message stays highlighted', () => {
+    const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
+    b.api.setSetting('messageHighlight', true);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const node = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview');
+    const host = hookHost(b, React, node());
+    host.render();
+    const glows = () => host.render().filter(n => n.type && n.type.name === 'HighlightGlow');
+    host.run(1); assert.equal(glows().length, 0, 'starts with just your question');
+    host.run(1); assert.deepEqual(glows().map(n => n.props.fresh), [true], 'the reply glows as it arrives');
+    const keyOf = () => glows().map(n => n.props.key);
+    host.run(1); assert.equal(glows().length, 1, 'Alex\'s message arrives plain'); const replyGlow = keyOf()[0];
+    host.run(2); assert.deepEqual(glows().map(n => n.props.fresh), [true, true], 'deleted: it lights up in the deleted color');
+    assert.equal(keyOf()[0], replyGlow, 'the reply\'s glow isn\'t replayed');
+    const seen = new Set(); [0, 1, 2, 3, 4, 5].forEach(() => { host.run(1); host.texts().forEach(t => seen.add(t)); });
+    for (const t of ['You ask a question', "Sam replies to you: it's highlighted", 'Alex sends a message...', '...and deletes it: it stays, highlighted']) assert.ok(seen.has(t), 'shows: ' + t);
+    // Try it: tap a highlighted message and it lights up again.
+    const t = hookHost(b, React, node()); t.render();
+    t.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); t.timers.length = 0; t.render();
+    const tg = () => t.render().filter(n => n.type && n.type.name === 'HighlightGlow');
+    assert.ok(tg().every(n => !n.props.fresh), 'nothing glows when you switch to Try it');
+    const before = tg()[0].props.key;
+    t.render().find(n => n.props && n.props.key === 'reply' && n.props.onPress).props.onPress('reply');
+    assert.deepEqual(tg().map(n => n.props.fresh), [true, false]); assert.notEqual(tg()[0].props.key, before, 'a new glow plays');
+    assert.ok(t.render().some(n => n.type && n.type.name === 'TapRipple'));
 });
 test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
     const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];

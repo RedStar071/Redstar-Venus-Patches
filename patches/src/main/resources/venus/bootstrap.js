@@ -7255,14 +7255,22 @@
         const header = (name, time) => el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", gap:6, marginBottom:2}},
             el(RN.Text, {style:s.name, numberOfLines:1}, name), el(RN.Text, {style:s.muted}, time));
         // A highlight that just changed glows once, like a new mention arriving, then settles to its normal tint.
-        const message = (key, hex, children) => el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
-            hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
-            hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children);
+        // props.count shows only the first few messages (while Watch plays), props.beats replays one's glow, props.ripple
+        // marks a tap, and props.onPress makes a highlighted message tappable.
+        const Press = RN.Pressable || RN.View, count = props.count == null ? 3 : props.count;
+        const message = (key, hex, children) => {
+            const beat = props.beats && props.beats[key] || 0;
+            const body = el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
+                hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar + ":" + beat, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
+                hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children,
+                props.ripple ? props.ripple(key) : null);
+            return hex && props.onPress ? el(Press, {key, onPress:() => props.onPress(key), accessibilityRole:"button", accessibilityHint:tr("Tap to see it light up again")}, body) : body;
+        };
         const question = tr("Did everyone see the new update?");
         return el(RN.View, {key:props.key, style:s.chat, accessible:true, accessibilityLabel:tr("Message highlight preview")},
             message("plain", null, el(RN.View, {style:{flexDirection:"row", gap:12}}, face(40),
                 el(RN.View, {style:{flex:1}}, header(myName, tr("Today at 4:01 PM")), el(RN.Text, {style:s.text}, question)))),
-            message("reply", props.ping, el(RN.View, null,
+            count < 2 ? null : message("reply", props.ping, el(RN.View, null,
                 el(RN.View, {style:{flexDirection:"row", alignItems:"center", marginBottom:4}},
                     el(RN.View, {style:[{width:22, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, s.spine]}),
                     el(RN.View, {style:{marginRight:4}}, face(16)),
@@ -7271,10 +7279,41 @@
                 el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("S", "#eb459e"),
                     el(RN.View, {style:{flex:1}}, header("Sam", tr("Today at 4:03 PM")),
                         el(RN.Text, {style:s.text}, el(RN.Text, {style:s.mention}, "@" + myName), " " + tr("Yes, it looks great!")))))),
-            props.deleted ? el(RN.View, {style:{height:4}}) : null,
-            props.deleted ? message("deleted", props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
+            props.deleted && count >= 3 ? el(RN.View, {style:{height:4}}) : null,
+            props.deleted && count >= 3 ? message("deleted", props.pending ? null : props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
                 el(RN.View, {style:{flex:1}}, header("Alex", tr("Today at 4:05 PM")),
-                    el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null);
+                    el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null,
+            props.caption ? previewCaption(s, props.caption) : null);
+    }
+    // Watch: you ask, Sam replies and mentions you (it lights up as it arrives), Alex sends a message and deletes it
+    // (it stays, in your deleted color). Try it: change the options below and the highlight you changed glows; tap a
+    // highlighted message to see it light up again.
+    function HighlightPreview(props) {
+        useSettings("messageHighlight");
+        const [mode, setMode] = usePreviewMode(), on = props.on, watching = on && mode === "watch", hasDeleted = !!props.deleted;
+        const blank = {count:3, pending:false, beats:{reply:0, deleted:0}, pulse:null, caption:""};
+        const [state, setState] = React.useState(blank);
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const beat = key => update(st => ({beats:Object.assign({}, st.beats, {[key]:st.beats[key] + 1})}));
+        useDemo(watching, () => {
+            const steps = [[0, () => setState(st => Object.assign({}, blank, {count:1, beats:st.beats, caption:tr("You ask a question")}))],
+                [1400, () => { animateLayout(); update({count:2, caption:tr("Sam replies to you: it's highlighted")}); beat("reply"); }]];
+            if (hasDeleted) steps.push([2000, () => { animateLayout(); update({count:3, pending:true, caption:tr("Alex sends a message...")}); }],
+                [1300, () => update({pulse:{who:"deleted", id:"del:" + Date.now()}})],
+                [150, () => { animateLayout(); update({pending:false, caption:tr("...and deletes it: it stays, highlighted")}); beat("deleted"); }]);
+            steps.push([2800, () => {}]);
+            return steps;
+        }, [hasDeleted]);
+        // A message glows when its beat goes up (it arrived, or you tapped it), or when you change its color or the width:
+        // each beat is a new glow, which plays once when it appears, so drawing the page again never replays it.
+        const beats = state.beats, given = props.fresh || {};
+        const fresh = {reply:!!given.reply || beats.reply > 0, deleted:!!given.deleted || beats.deleted > 0};
+        const tapped = key => { if (!on || watching) return; update(st => ({pulse:{who:key, id:key + ":" + st.beats[key]}})); beat(key); };
+        const caption = watching ? state.caption : on ? tr("Tap a highlighted message to see it light up again") : "";
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(st => Object.assign({}, blank, {beats:st.beats})); }) : null,
+            highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, deleted:props.deleted, fresh,
+                count:watching ? state.count : 3, pending:watching && state.pending, beats, caption,
+                onPress:watching ? null : tapped, ripple:key => tapRipple(state.pulse, key)}));
     }
     // One highlight's colors: its name and current color, then a row of swatches and a last one for any color.
     function highlightColorPicker(props) {
@@ -7333,7 +7372,7 @@
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
             on ? null : offCard("status", venusIcon(16122, "PaintbrushThinIcon")),
-            highlightPreview({key:"preview", me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
+            el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
                 venusSegmented({key:"choice", value:settings.messageHighlightThickness, disabled:!on, onChange:value => setSetting("messageHighlightThickness", value),
