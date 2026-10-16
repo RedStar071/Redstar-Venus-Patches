@@ -219,9 +219,9 @@ every screen starts from these rules. Use them for every new feature and every c
 
 The layouts, page order and styling below are what the user likes, so start from them. They are purely suggestions,
 not fixed requirements. What the user wants most is the best-looking, easiest-to-use UI, and what they like won't
-always be what looks or works best. Use your own judgement: if you believe something would look better or be easier to use
-another way, do it that way, and say what you changed and why in the pull request. This covers the whole Venus UI
-inside Discord, not only the settings pages: chat additions, buttons, sheets, toasts, previews and the Features list.
+always be what looks or works best. Use your own judgement: if you believe something would look better or be easier
+to use another way, do it that way, and say what you changed and why in the pull request. This covers the whole Venus
+UI inside Discord, not only the settings pages: chat additions, buttons, sheets, toasts, previews and the Features list.
 
 Change something only when it's genuinely better, though. Don't invent changes to look busy, and leave things alone when
 the current design already works. Wherever a rule here touches something other than looks (a name staying the same in
