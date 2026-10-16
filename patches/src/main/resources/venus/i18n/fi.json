@@ -625,6 +625,14 @@
   "{n} year": "{n} vuosi",
   "{n} years": "{n} vuotta",
   "{on} of {total} features on. Turn them on or off in Features.": "{on}/{total} ominaisuutta käytössä. Ota niitä käyttöön tai pois kohdassa Ominaisuudet.",
-  "{time} ago": "{time} sitten"
+  "{time} ago": "{time} sitten",
+  "Hidden channels": "Piilotetut kanavat",
+  "Showing hidden channels": "Piilotetut kanavat näkyvissä",
+  "Tap a locked channel to see when it was made and last used.": "Napauta lukittua kanavaa nähdäksesi, milloin se luotiin ja milloin sitä viimeksi käytettiin.",
+  "Locked channels are listed, and tapping one does nothing.": "Lukitut kanavat näkyvät luettelossa, eikä napautus tee mitään.",
+  "When you tap a locked channel": "Kun napautat lukittua kanavaa",
+  "Show its details": "Näytä tiedot",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Näyttää luontiajan, viimeisen viestin ja viimeisen kiinnityksen sekä Näytä silti -valinnan.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Vain napautus avaa sen: vierittäminen, palvelimen tai Discordin avaaminen ei koskaan avaa."
  }
 }

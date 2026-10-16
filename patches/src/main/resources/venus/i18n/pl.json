@@ -705,6 +705,14 @@
    "many": "{n} lat"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Włączone funkcje: {on} z {total}. Włączaj i wyłączaj je w Funkcjach.",
-  "{time} ago": "{time} temu"
+  "{time} ago": "{time} temu",
+  "Hidden channels": "Ukryte kanały",
+  "Showing hidden channels": "Pokazywanie ukrytych kanałów",
+  "Tap a locked channel to see when it was made and last used.": "Dotknij zablokowanego kanału, aby zobaczyć, kiedy go utworzono i ostatnio używano.",
+  "Locked channels are listed, and tapping one does nothing.": "Zablokowane kanały są na liście, a dotknięcie ich nic nie robi.",
+  "When you tap a locked channel": "Gdy dotkniesz zablokowanego kanału",
+  "Show its details": "Pokaż szczegóły",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Pokazuje datę utworzenia, ostatnią wiadomość i ostatnie przypięcie, z opcją Wyświetl mimo to.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Otwiera go tylko dotknięcie: przewijanie, otwarcie serwera czy Discorda nigdy tego nie robi."
  }
 }

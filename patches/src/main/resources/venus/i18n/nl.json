@@ -625,6 +625,14 @@
   "{n} year": "{n} jaar",
   "{n} years": "{n} jaar",
   "{on} of {total} features on. Turn them on or off in Features.": "{on} van {total} functies aan. Zet ze aan of uit bij Functies.",
-  "{time} ago": "{time} geleden"
+  "{time} ago": "{time} geleden",
+  "Hidden channels": "Verborgen kanalen",
+  "Showing hidden channels": "Verborgen kanalen zichtbaar",
+  "Tap a locked channel to see when it was made and last used.": "Tik op een vergrendeld kanaal om te zien wanneer het is gemaakt en voor het laatst gebruikt.",
+  "Locked channels are listed, and tapping one does nothing.": "Vergrendelde kanalen staan in de lijst, en erop tikken doet niets.",
+  "When you tap a locked channel": "Als je op een vergrendeld kanaal tikt",
+  "Show its details": "Details tonen",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Toont wanneer het is gemaakt, het laatste bericht en de laatste pin, met Toch bekijken.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Alleen tikken opent het: scrollen, een server openen of Discord openen doet dat nooit."
  }
 }

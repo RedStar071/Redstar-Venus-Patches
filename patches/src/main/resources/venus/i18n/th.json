@@ -592,6 +592,14 @@
   "{n} year": "{n} ปี",
   "{n} years": "{n} ปี",
   "{on} of {total} features on. Turn them on or off in Features.": "เปิดอยู่ {on} จาก {total} ฟีเจอร์ เปิดหรือปิดได้ในฟีเจอร์",
-  "{time} ago": "{time}ที่ผ่านมา"
+  "{time} ago": "{time}ที่ผ่านมา",
+  "Hidden channels": "ช่องที่ซ่อนอยู่",
+  "Showing hidden channels": "กำลังแสดงช่องที่ซ่อนอยู่",
+  "Tap a locked channel to see when it was made and last used.": "แตะช่องที่ล็อกเพื่อดูว่าสร้างเมื่อไรและใช้ล่าสุดเมื่อไร",
+  "Locked channels are listed, and tapping one does nothing.": "ช่องที่ล็อกจะแสดงในรายการ และการแตะไม่ทำอะไร",
+  "When you tap a locked channel": "เมื่อคุณแตะช่องที่ล็อก",
+  "Show its details": "แสดงรายละเอียด",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "แสดงวันที่สร้าง ข้อความล่าสุด และการปักหมุดล่าสุด พร้อมปุ่มดูอยู่ดี",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "เปิดได้ด้วยการแตะเท่านั้น การเลื่อน การเปิดเซิร์ฟเวอร์ หรือการเปิด Discord จะไม่เปิด"
  }
 }

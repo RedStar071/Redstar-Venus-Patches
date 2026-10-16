@@ -625,6 +625,14 @@
   "{n} year": "{n} έτος",
   "{n} years": "{n} έτη",
   "{on} of {total} features on. Turn them on or off in Features.": "Ενεργές {on} από {total} λειτουργίες. Ενεργοποίησέ τες ή απενεργοποίησέ τες στις Λειτουργίες.",
-  "{time} ago": "πριν από {time}"
+  "{time} ago": "πριν από {time}",
+  "Hidden channels": "Κρυφά κανάλια",
+  "Showing hidden channels": "Εμφάνιση κρυφών καναλιών",
+  "Tap a locked channel to see when it was made and last used.": "Πάτησε ένα κλειδωμένο κανάλι για να δεις πότε δημιουργήθηκε και χρησιμοποιήθηκε τελευταία.",
+  "Locked channels are listed, and tapping one does nothing.": "Τα κλειδωμένα κανάλια εμφανίζονται στη λίστα και το πάτημα δεν κάνει τίποτα.",
+  "When you tap a locked channel": "Όταν πατάς ένα κλειδωμένο κανάλι",
+  "Show its details": "Εμφάνιση λεπτομερειών",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Δείχνει δημιουργία, τελευταίο μήνυμα και τελευταίο καρφίτσωμα, με Προβολή ούτως ή άλλως.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Μόνο ένα πάτημα το ανοίγει: η κύλιση ή το άνοιγμα διακομιστή ή του Discord ποτέ."
  }
 }

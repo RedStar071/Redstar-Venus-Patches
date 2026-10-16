@@ -625,6 +625,14 @@
   "{n} year": "{n} वर्ष",
   "{n} years": "{n} वर्ष",
   "{on} of {total} features on. Turn them on or off in Features.": "{total} में से {on} फ़ीचर चालू हैं। इन्हें फ़ीचर में चालू या बंद करें।",
-  "{time} ago": "{time} पहले"
+  "{time} ago": "{time} पहले",
+  "Hidden channels": "छिपे हुए चैनल",
+  "Showing hidden channels": "छिपे हुए चैनल दिख रहे हैं",
+  "Tap a locked channel to see when it was made and last used.": "लॉक चैनल पर टैप करके देखें कि वह कब बना और आख़िरी बार कब इस्तेमाल हुआ।",
+  "Locked channels are listed, and tapping one does nothing.": "लॉक चैनल सूची में दिखते हैं, और उन पर टैप करने से कुछ नहीं होता।",
+  "When you tap a locked channel": "जब आप लॉक चैनल पर टैप करते हैं",
+  "Show its details": "विवरण दिखाएँ",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "बनने का समय, आख़िरी संदेश और आख़िरी पिन दिखाता है, फिर भी देखें के साथ।",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "सिर्फ़ टैप से खुलता है: स्क्रॉल करना, सर्वर या Discord खोलना कभी नहीं खोलता।"
  }
 }

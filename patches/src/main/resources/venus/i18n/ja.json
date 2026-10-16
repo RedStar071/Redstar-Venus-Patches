@@ -592,6 +592,14 @@
   "{n} year": "{n} 年",
   "{n} years": "{n} 年",
   "{on} of {total} features on. Turn them on or off in Features.": "{total} 件中 {on} 件の機能がオンです。「機能」でオン・オフを切り替えます。",
-  "{time} ago": "{time}前"
+  "{time} ago": "{time}前",
+  "Hidden channels": "非表示チャンネル",
+  "Showing hidden channels": "非表示チャンネルを表示中",
+  "Tap a locked channel to see when it was made and last used.": "ロックされたチャンネルをタップすると、作成日時と最終利用日時を確認できます。",
+  "Locked channels are listed, and tapping one does nothing.": "ロックされたチャンネルは一覧に表示され、タップしても何も起きません。",
+  "When you tap a locked channel": "ロックされたチャンネルをタップしたとき",
+  "Show its details": "詳細を表示",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "作成日時、最後のメッセージ、最後のピン留めを「それでも表示」とともに表示します。",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "開くのはタップしたときだけです。スクロール、サーバーやDiscordを開いたときに開くことはありません。"
  }
 }

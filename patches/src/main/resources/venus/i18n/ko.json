@@ -592,6 +592,14 @@
   "{n} year": "{n}년",
   "{n} years": "{n}년",
   "{on} of {total} features on. Turn them on or off in Features.": "기능 {total}개 중 {on}개가 켜져 있어요. 기능에서 켜고 끌 수 있어요.",
-  "{time} ago": "{time} 전"
+  "{time} ago": "{time} 전",
+  "Hidden channels": "숨겨진 채널",
+  "Showing hidden channels": "숨겨진 채널 표시 중",
+  "Tap a locked channel to see when it was made and last used.": "잠긴 채널을 탭하면 만든 시점과 마지막으로 사용된 시점을 볼 수 있어요.",
+  "Locked channels are listed, and tapping one does nothing.": "잠긴 채널은 목록에 표시되며, 탭해도 아무 일도 일어나지 않아요.",
+  "When you tap a locked channel": "잠긴 채널을 탭할 때",
+  "Show its details": "세부 정보 보기",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "만든 시점, 마지막 메시지, 마지막 고정을 '그래도 보기'와 함께 보여줘요.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "탭할 때만 열려요. 스크롤하거나 서버 또는 Discord를 열 때는 절대 열리지 않아요."
  }
 }

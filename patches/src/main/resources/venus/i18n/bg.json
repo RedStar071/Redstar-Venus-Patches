@@ -625,6 +625,14 @@
   "{n} year": "{n} година",
   "{n} years": "{n} години",
   "{on} of {total} features on. Turn them on or off in Features.": "Включени са {on} от {total} функции. Включете или изключете ги от Функции.",
-  "{time} ago": "преди {time}"
+  "{time} ago": "преди {time}",
+  "Hidden channels": "Скрити канали",
+  "Showing hidden channels": "Показват се скрити канали",
+  "Tap a locked channel to see when it was made and last used.": "Докосни заключен канал, за да видиш кога е създаден и последно използван.",
+  "Locked channels are listed, and tapping one does nothing.": "Заключените канали са в списъка, а докосването им не прави нищо.",
+  "When you tap a locked channel": "Когато докоснеш заключен канал",
+  "Show its details": "Показване на подробности",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Показва създаването, последното съобщение и последното закачване, с „Преглед въпреки това“.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Отваря се само с докосване: превъртането, отварянето на сървър или на Discord никога."
  }
 }

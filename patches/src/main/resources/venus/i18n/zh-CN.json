@@ -592,6 +592,14 @@
   "{n} year": "{n}年",
   "{n} years": "{n}年",
   "{on} of {total} features on. Turn them on or off in Features.": "已开启 {on}/{total} 项功能。可在“功能”中开启或关闭。",
-  "{time} ago": "{time}前"
+  "{time} ago": "{time}前",
+  "Hidden channels": "隐藏频道",
+  "Showing hidden channels": "正在显示隐藏频道",
+  "Tap a locked channel to see when it was made and last used.": "点按锁定的频道，查看它的创建时间和最近使用时间。",
+  "Locked channels are listed, and tapping one does nothing.": "锁定的频道会显示在列表中，点按不会有任何反应。",
+  "When you tap a locked channel": "点按锁定的频道时",
+  "Show its details": "显示详情",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "显示创建时间、最后一条消息和最后一次置顶，并提供“仍然查看”。",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "只有点按才会打开：滚动、打开服务器或打开 Discord 都不会。"
  }
 }

@@ -625,6 +625,14 @@
   "{n} year": "{n} an",
   "{n} years": "{n} ans",
   "{on} of {total} features on. Turn them on or off in Features.": "{on} fonctionnalités actives sur {total}. Activez-les ou désactivez-les dans Fonctionnalités.",
-  "{time} ago": "il y a {time}"
+  "{time} ago": "il y a {time}",
+  "Hidden channels": "Salons masqués",
+  "Showing hidden channels": "Salons masqués affichés",
+  "Tap a locked channel to see when it was made and last used.": "Touche un salon verrouillé pour voir quand il a été créé et utilisé pour la dernière fois.",
+  "Locked channels are listed, and tapping one does nothing.": "Les salons verrouillés sont listés, et les toucher ne fait rien.",
+  "When you tap a locked channel": "Quand tu touches un salon verrouillé",
+  "Show its details": "Afficher ses détails",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Affiche sa création, son dernier message et son dernier message épinglé, avec Voir quand même.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Seul un appui l'ouvre : faire défiler, ouvrir un serveur ou ouvrir Discord ne le fait jamais."
  }
 }

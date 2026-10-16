@@ -696,6 +696,14 @@
    "other": "{n} godina"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Uključeno {on} od {total} značajki. Uključite ih ili isključite u Značajkama.",
-  "{time} ago": "prije {time}"
+  "{time} ago": "prije {time}",
+  "Hidden channels": "Skriveni kanali",
+  "Showing hidden channels": "Prikazuju se skriveni kanali",
+  "Tap a locked channel to see when it was made and last used.": "Dodirni zaključani kanal da vidiš kada je stvoren i zadnji put korišten.",
+  "Locked channels are listed, and tapping one does nothing.": "Zaključani kanali su na popisu, a dodir ne radi ništa.",
+  "When you tap a locked channel": "Kada dodirneš zaključani kanal",
+  "Show its details": "Prikaži pojedinosti",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Prikazuje stvaranje, zadnju poruku i zadnje prikvačivanje, uz Svejedno prikaži.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Otvara ga samo dodir: pomicanje, otvaranje poslužitelja ili Discorda nikada."
  }
 }

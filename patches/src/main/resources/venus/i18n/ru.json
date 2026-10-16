@@ -700,6 +700,14 @@
    "many": "{n} лет"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Включено функций: {on} из {total}. Включайте и выключайте их в разделе «Функции».",
-  "{time} ago": "{time} назад"
+  "{time} ago": "{time} назад",
+  "Hidden channels": "Скрытые каналы",
+  "Showing hidden channels": "Скрытые каналы показаны",
+  "Tap a locked channel to see when it was made and last used.": "Нажмите на закрытый канал, чтобы узнать, когда он создан и когда им пользовались.",
+  "Locked channels are listed, and tapping one does nothing.": "Закрытые каналы видны в списке, нажатие на них ничего не делает.",
+  "When you tap a locked channel": "Когда вы нажимаете на закрытый канал",
+  "Show its details": "Показывать сведения",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Показывает дату создания, последнее сообщение и последнее закрепление, с кнопкой «Всё равно открыть».",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Открывает его только нажатие: прокрутка, открытие сервера или Discord — никогда."
  }
 }

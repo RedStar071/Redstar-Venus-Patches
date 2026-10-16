@@ -625,6 +625,14 @@
   "{n} year": "{n} yıl",
   "{n} years": "{n} yıl",
   "{on} of {total} features on. Turn them on or off in Features.": "{total} özellikten {on} tanesi açık. Özellikler'den açıp kapatabilirsin.",
-  "{time} ago": "{time} önce"
+  "{time} ago": "{time} önce",
+  "Hidden channels": "Gizli kanallar",
+  "Showing hidden channels": "Gizli kanallar gösteriliyor",
+  "Tap a locked channel to see when it was made and last used.": "Ne zaman oluşturulduğunu ve en son kullanıldığını görmek için kilitli bir kanala dokun.",
+  "Locked channels are listed, and tapping one does nothing.": "Kilitli kanallar listede görünür, dokunmak hiçbir şey yapmaz.",
+  "When you tap a locked channel": "Kilitli bir kanala dokunduğunda",
+  "Show its details": "Ayrıntıları göster",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Oluşturulma, son mesaj ve son sabitlemeyi Yine de Görüntüle ile gösterir.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Yalnızca dokunmak açar: kaydırmak, bir sunucuyu ya da Discord'u açmak asla açmaz."
  }
 }

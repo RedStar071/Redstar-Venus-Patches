@@ -625,6 +625,14 @@
   "{n} year": "{n} år",
   "{n} years": "{n} år",
   "{on} of {total} features on. Turn them on or off in Features.": "{on} av {total} funktioner på. Slå på eller av dem i Funktioner.",
-  "{time} ago": "för {time} sedan"
+  "{time} ago": "för {time} sedan",
+  "Hidden channels": "Dolda kanaler",
+  "Showing hidden channels": "Visar dolda kanaler",
+  "Tap a locked channel to see when it was made and last used.": "Tryck på en låst kanal för att se när den skapades och senast användes.",
+  "Locked channels are listed, and tapping one does nothing.": "Låsta kanaler visas i listan, och ett tryck gör ingenting.",
+  "When you tap a locked channel": "När du trycker på en låst kanal",
+  "Show its details": "Visa detaljer",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Visar när den skapades, senaste meddelandet och senaste fästningen, med Visa ändå.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Bara ett tryck öppnar den: att skrolla, öppna en server eller öppna Discord gör det aldrig."
  }
 }

@@ -592,6 +592,14 @@
   "{n} year": "{n} năm",
   "{n} years": "{n} năm",
   "{on} of {total} features on. Turn them on or off in Features.": "Đã bật {on}/{total} tính năng. Bật hoặc tắt trong Tính năng.",
-  "{time} ago": "{time} trước"
+  "{time} ago": "{time} trước",
+  "Hidden channels": "Kênh ẩn",
+  "Showing hidden channels": "Đang hiện kênh ẩn",
+  "Tap a locked channel to see when it was made and last used.": "Chạm vào kênh bị khóa để xem thời điểm tạo và lần dùng gần nhất.",
+  "Locked channels are listed, and tapping one does nothing.": "Kênh bị khóa vẫn hiện trong danh sách, chạm vào không làm gì cả.",
+  "When you tap a locked channel": "Khi bạn chạm vào kênh bị khóa",
+  "Show its details": "Hiện chi tiết",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Hiện thời điểm tạo, tin nhắn cuối và lần ghim cuối, kèm Vẫn xem.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Chỉ chạm mới mở: cuộn, mở máy chủ hay mở Discord không bao giờ mở."
  }
 }

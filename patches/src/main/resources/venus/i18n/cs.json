@@ -696,6 +696,14 @@
    "other": "{n} lety"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Zapnuto {on} z {total} funkcí. Zapněte nebo vypněte je ve Funkcích.",
-  "{time} ago": "před {time}"
+  "{time} ago": "před {time}",
+  "Hidden channels": "Skryté kanály",
+  "Showing hidden channels": "Zobrazují se skryté kanály",
+  "Tap a locked channel to see when it was made and last used.": "Klepnutím na zamčený kanál uvidíte, kdy byl vytvořen a naposledy použit.",
+  "Locked channels are listed, and tapping one does nothing.": "Zamčené kanály jsou v seznamu a klepnutí na ně nic nedělá.",
+  "When you tap a locked channel": "Když klepnete na zamčený kanál",
+  "Show its details": "Zobrazit podrobnosti",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Ukáže vytvoření, poslední zprávu a poslední připnutí, s možností Přesto zobrazit.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Otevře ho jen klepnutí: posouvání, otevření serveru ani Discordu to nikdy neudělá."
  }
 }

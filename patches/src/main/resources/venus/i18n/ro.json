@@ -696,6 +696,14 @@
    "other": "{n} de ani"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "{on} din {total} funcții activate. Activează-le sau dezactivează-le din Funcții.",
-  "{time} ago": "acum {time}"
+  "{time} ago": "acum {time}",
+  "Hidden channels": "Canale ascunse",
+  "Showing hidden channels": "Se afișează canalele ascunse",
+  "Tap a locked channel to see when it was made and last used.": "Atinge un canal blocat ca să vezi când a fost creat și folosit ultima dată.",
+  "Locked channels are listed, and tapping one does nothing.": "Canalele blocate apar în listă, iar atingerea lor nu face nimic.",
+  "When you tap a locked channel": "Când atingi un canal blocat",
+  "Show its details": "Arată detaliile",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Arată crearea, ultimul mesaj și ultimul fixat, cu Vezi oricum.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Doar o atingere îl deschide: derularea, deschiderea unui server sau a Discord nu o fac niciodată."
  }
 }

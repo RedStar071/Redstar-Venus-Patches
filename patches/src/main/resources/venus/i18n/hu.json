@@ -625,6 +625,14 @@
   "{n} year": "{n} évvel",
   "{n} years": "{n} évvel",
   "{on} of {total} features on. Turn them on or off in Features.": "{total} funkcióból {on} bekapcsolva. Kapcsold be vagy ki őket a Funkciók között.",
-  "{time} ago": "{time} ezelőtt"
+  "{time} ago": "{time} ezelőtt",
+  "Hidden channels": "Rejtett csatornák",
+  "Showing hidden channels": "Rejtett csatornák megjelenítve",
+  "Tap a locked channel to see when it was made and last used.": "Koppints egy zárolt csatornára, hogy lásd, mikor hozták létre és használták utoljára.",
+  "Locked channels are listed, and tapping one does nothing.": "A zárolt csatornák a listában vannak, a koppintás nem csinál semmit.",
+  "When you tap a locked channel": "Amikor egy zárolt csatornára koppintasz",
+  "Show its details": "Részletek megjelenítése",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Megmutatja a létrehozást, az utolsó üzenetet és az utolsó kitűzést, a Megtekintés mégis gombbal.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Csak a koppintás nyitja meg: görgetés, szerver vagy a Discord megnyitása soha."
  }
 }

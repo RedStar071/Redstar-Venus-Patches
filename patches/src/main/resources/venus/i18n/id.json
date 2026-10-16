@@ -592,6 +592,14 @@
   "{n} year": "{n} tahun",
   "{n} years": "{n} tahun",
   "{on} of {total} features on. Turn them on or off in Features.": "{on} dari {total} fitur aktif. Nyalakan atau matikan di Fitur.",
-  "{time} ago": "{time} yang lalu"
+  "{time} ago": "{time} yang lalu",
+  "Hidden channels": "Saluran tersembunyi",
+  "Showing hidden channels": "Menampilkan saluran tersembunyi",
+  "Tap a locked channel to see when it was made and last used.": "Ketuk saluran terkunci untuk melihat kapan dibuat dan terakhir digunakan.",
+  "Locked channels are listed, and tapping one does nothing.": "Saluran terkunci tampil di daftar, dan mengetuknya tidak melakukan apa pun.",
+  "When you tap a locked channel": "Saat kamu mengetuk saluran terkunci",
+  "Show its details": "Tampilkan detailnya",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Menampilkan waktu dibuat, pesan terakhir, dan sematan terakhir, dengan Tetap Lihat.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Hanya ketukan yang membukanya: menggulir, membuka server, atau membuka Discord tidak pernah."
  }
 }

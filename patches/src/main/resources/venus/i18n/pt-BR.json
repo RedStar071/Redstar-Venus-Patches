@@ -625,6 +625,14 @@
   "{n} year": "{n} ano",
   "{n} years": "{n} anos",
   "{on} of {total} features on. Turn them on or off in Features.": "{on} de {total} recursos ativados. Ligue ou desligue em Recursos.",
-  "{time} ago": "há {time}"
+  "{time} ago": "há {time}",
+  "Hidden channels": "Canais ocultos",
+  "Showing hidden channels": "Mostrando canais ocultos",
+  "Tap a locked channel to see when it was made and last used.": "Toque em um canal bloqueado para ver quando foi criado e usado pela última vez.",
+  "Locked channels are listed, and tapping one does nothing.": "Canais bloqueados aparecem na lista e tocar neles não faz nada.",
+  "When you tap a locked channel": "Quando você toca em um canal bloqueado",
+  "Show its details": "Mostrar detalhes",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Mostra quando foi criado, a última mensagem e o último fixado, com Ver mesmo assim.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Só um toque abre: rolar a lista, abrir um servidor ou abrir o Discord nunca abre."
  }
 }

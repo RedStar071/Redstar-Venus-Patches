@@ -696,6 +696,14 @@
    "other": "{n} metų"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Įjungta funkcijų: {on} iš {total}. Įjunkite arba išjunkite jas skiltyje Funkcijos.",
-  "{time} ago": "prieš {time}"
+  "{time} ago": "prieš {time}",
+  "Hidden channels": "Paslėpti kanalai",
+  "Showing hidden channels": "Rodomi paslėpti kanalai",
+  "Tap a locked channel to see when it was made and last used.": "Bakstelėkite užrakintą kanalą, kad pamatytumėte, kada jis sukurtas ir paskutinį kartą naudotas.",
+  "Locked channels are listed, and tapping one does nothing.": "Užrakinti kanalai rodomi sąraše, o bakstelėjimas nieko nedaro.",
+  "When you tap a locked channel": "Kai bakstelite užrakintą kanalą",
+  "Show its details": "Rodyti informaciją",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Rodo sukūrimą, paskutinę žinutę ir paskutinį prisegimą, su „Vis tiek peržiūrėti“.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Atidaro tik bakstelėjimas: slinkimas, serverio ar Discord atidarymas – niekada."
  }
 }

@@ -705,6 +705,14 @@
    "many": "{n} років"
   },
   "{on} of {total} features on. Turn them on or off in Features.": "Увімкнено функцій: {on} з {total}. Вмикайте й вимикайте їх у розділі «Функції».",
-  "{time} ago": "{time} тому"
+  "{time} ago": "{time} тому",
+  "Hidden channels": "Приховані канали",
+  "Showing hidden channels": "Приховані канали показано",
+  "Tap a locked channel to see when it was made and last used.": "Натисніть на закритий канал, щоб побачити, коли його створено й востаннє використано.",
+  "Locked channels are listed, and tapping one does nothing.": "Закриті канали є у списку, натискання на них нічого не робить.",
+  "When you tap a locked channel": "Коли ви натискаєте на закритий канал",
+  "Show its details": "Показувати відомості",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Показує дату створення, останнє повідомлення й останнє закріплення, з кнопкою «Усе одно відкрити».",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Відкриває його лише натискання: прокручування, відкриття сервера чи Discord — ніколи."
  }
 }

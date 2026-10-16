@@ -625,6 +625,14 @@
   "{n} year": "{n} år",
   "{n} years": "{n} år",
   "{on} of {total} features on. Turn them on or off in Features.": "{on} av {total} funksjoner på. Slå dem av eller på under Funksjoner.",
-  "{time} ago": "for {time} siden"
+  "{time} ago": "for {time} siden",
+  "Hidden channels": "Skjulte kanaler",
+  "Showing hidden channels": "Viser skjulte kanaler",
+  "Tap a locked channel to see when it was made and last used.": "Trykk på en låst kanal for å se når den ble opprettet og sist brukt.",
+  "Locked channels are listed, and tapping one does nothing.": "Låste kanaler vises i listen, og et trykk gjør ingenting.",
+  "When you tap a locked channel": "Når du trykker på en låst kanal",
+  "Show its details": "Vis detaljer",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "Viser når den ble opprettet, siste melding og siste festing, med Vis likevel.",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "Bare et trykk åpner den: å bla, åpne en server eller åpne Discord gjør det aldri."
  }
 }

@@ -592,6 +592,14 @@
   "{n} year": "{n} 年",
   "{n} years": "{n} 年",
   "{on} of {total} features on. Turn them on or off in Features.": "已開啟 {on}/{total} 項功能。可在「功能」中開啟或關閉。",
-  "{time} ago": "{time}前"
+  "{time} ago": "{time}前",
+  "Hidden channels": "隱藏頻道",
+  "Showing hidden channels": "正在顯示隱藏頻道",
+  "Tap a locked channel to see when it was made and last used.": "點按鎖定的頻道，查看它的建立時間和最近使用時間。",
+  "Locked channels are listed, and tapping one does nothing.": "鎖定的頻道會顯示在清單中，點按不會有任何反應。",
+  "When you tap a locked channel": "點按鎖定的頻道時",
+  "Show its details": "顯示詳細資訊",
+  "Shows when it was created, its last message and last pin, with View Anyway.": "顯示建立時間、最後一則訊息和最後一次釘選，並提供「仍要檢視」。",
+  "Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.": "只有點按才會開啟：捲動、開啟伺服器或開啟 Discord 都不會。"
  }
 }
