@@ -2533,7 +2533,7 @@
         const bar = state.mode === "deleted" ? [Trash, tr("Message deleted")] : state.mode === "edit" ? [Pencil, tr("Editing message")] :
             state.mode === "reply" ? [Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"})] : null;
         const inputText = state.draft ? state.draft : state.mode === "edit" ? tr("I'm in!") :
-            on && !watching ? tr(triple ? "Try it: double-tap a message, or triple-tap yours" : "Try it: double-tap a message") : tr("Message #general");
+            on && !watching ? tr(triple ? "Try it: double-tap a message, or triple-tap yours" : "Try it: double-tap a message") : tr("Message {channel}", {channel:"#general"});
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
             chatPreview(s, "chat", "Tap gestures preview", [
                 message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
@@ -3450,7 +3450,7 @@
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
             chatPreview(s, "preview", "Hidden channels preview", [
                 el(RN.View, {key:"list", style:state.scroll ? {transform:[{translateY:-10}], opacity:0.8} : null}, list), card,
-                on ? previewCaption(s, watching ? state.caption : tr(menu ? "Tap staff-only to try it." : "Tap staff-only: nothing happens.")) : null]));
+                on ? previewCaption(s, watching ? state.caption : tr(menu ? "Tap {channel} to try it." : "Tap {channel}: nothing happens.", {channel:"staff-only"})) : null]));
     }
     function HiddenChannelsSettings() {
         useSettings("hiddenChannels");
@@ -3540,7 +3540,7 @@
             item ? el(RN.View, {key:"msg:" + kind}, popIn("msg:" + kind, previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"),
                 el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}}, el(NitroArt, {key:kind, kind, item, play:state.pick}))))) : null,
             item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingTop:2}}, el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:sent}))) : null,
-            watching ? el(RN.View, {key:"input", style:box}, el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, state.draft || tr("Message #general"))) : null,
+            watching ? el(RN.View, {key:"input", style:box}, el(RN.Text, {style:state.draft ? s.text : s.muted, numberOfLines:1}, state.draft || tr("Message {channel}", {channel:"#general"}))) : null,
             previewCaption(s, watching ? state.caption : on ? hint : "")];
         const preview = chatPreview(s, "preview", "Nitro link preview", body);
         return el(RN.View, {key:"preview"}, on && kinds.length ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
