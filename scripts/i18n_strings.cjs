@@ -8,7 +8,7 @@ const text = node => node && node.type === 'Literal' && typeof node.value === 's
 // Helpers whose string arguments (by position) are passed through tr() inside them.
 const ARGS = {tr:[0], pl:[1, 2], take:[1, 2], footnote:[1], statusCard:[1], reviewToast:[1], confirmAction:[0, 1, 2], actionRow:[2, 3],
     switchRow:[2, 3], toggle:[2, 3], withOptions:[3, 4, 5], route:[1], section:[0], settingNode:[1, 2], link:[1, 2], option:[1, 2],
-    radioGroup:[2], count:[], questStatus:[0], mutate:[3], userNotifShow:[0]};
+    radioGroup:[2], groupTitle:[1], inputWithButton:[4], picker:[1], count:[], questStatus:[0], mutate:[3], userNotifShow:[0]};
 function strings(node, out) {
     if (!node) return;
     const value = text(node);
@@ -31,6 +31,11 @@ walk.simple(ast, {CallExpression(node) {
         node.args[5].elements.forEach(choice => { if (choice && choice.type === 'ArrayExpression') choice.elements.slice(1).forEach(item => strings(item, out)); });
     out.forEach(value => { if (/[A-Za-z]/.test(value) && value !== 'Venus') found.add(value); });
 }});
+// Message highlights' color names, read by tr() from its swatch tables.
+for (const table of ['HIGHLIGHT_PING_CHOICES', 'HIGHLIGHT_DELETED_CHOICES']) {
+    const match = new RegExp('const ' + table + ' = \\[([\\s\\S]*?)\\];').exec(source);
+    if (match) for (const value of match[1].matchAll(/\["\w+", "([^"]+)"/g)) found.add(value[1]);
+}
 // The language names "Translated from ..." falls back to when the phone can't name a language.
 const names = /const LANGUAGE_NAMES = \{([\s\S]*?)\};/.exec(source);
 if (names) for (const match of names[1].matchAll(/:"([^"]+)"/g)) found.add(match[1]);

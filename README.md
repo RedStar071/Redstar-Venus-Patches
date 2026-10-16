@@ -52,7 +52,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide the call button | Removes Call from people's profiles |
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
-| | Custom themes | Install and switch color themes from links, compiled into Discord's color table with no lag |
+| | Custom themes | Install color themes from a link and switch between them. Works with Revenge and Vendetta themes |
 | **Quests** | Complete Quests automatically | Finishes video, Play and Activity Quests in the background |
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 

@@ -908,7 +908,7 @@
         toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles. Message fills the space.");
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus, next to the notifications bell.");
         toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon in Settings without Nitro.");
-        withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install and switch color themes from links, compiled into Discord's color table with no lag.", "Custom themes", CustomThemesSettings);
+        withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.", "Custom themes", CustomThemesSettings);
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background. You still claim the rewards.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar. Quests still work.");
@@ -6464,10 +6464,8 @@
     function customThemesSummary() {
         if (!enabled("customThemes")) return tr("Turned off. Switch it on in Features to start.");
         if (customThemes.error) return customThemes.error;
-        const active = customThemesActiveEntry();
         const savedCount = customThemes.list.length;
-        const countLine = savedCount ? pl(savedCount, "{n} theme installed.", "{n} themes installed.") : tr("No themes installed yet. Paste a theme .json link below to add one.");
-        return active ? tr("Active theme: {name}.", {name:active.name}) + "\n" + countLine : countLine;
+        return savedCount ? pl(savedCount, "{n} theme installed.", "{n} themes installed.") : tr("No themes installed yet. Paste a theme .json link below to add one.");
     }
     // A theme's own colors as a small round swatch: its background, its card color and its accent.
     function themeColorOf(item, keys) {
@@ -6525,7 +6523,6 @@
         const themeRows = customThemes.list.length ? customThemes.list.map(item => {
             if (!item || !Row) return null;
             const isSelected = customThemes.active === item.id;
-            const tokenCount = Object.keys(item.rawColors || {}).length + Object.keys(item.semanticColors || {}).length;
             const byLine = item.authors ? tr("by {author}", {author:item.authors}) + " \u00b7 " : "";
             const descLine = item.description ? item.description + " \u00b7 " : "";
             const bgBadge = item.background && item.background.url ? tr("Background image") + " \u00b7 " : "";
@@ -6535,24 +6532,23 @@
                 label:item.name,
                 icon:themeSwatch(item),
                 trailing:isSelected ? el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"}) : undefined,
-                subLabel:byLine + descLine + bgBadge + pl(tokenCount, "{n} color token", "{n} color tokens") + " \u00b7 " + stateLine,
+                subLabel:byLine + descLine + bgBadge + stateLine,
                 disabled:!on || customThemes.installing,
                 onPress:() => customThemesSelect(item.id),
                 onLongPress:() => confirmAction("Remove theme?",
                     tr("Remove {name} from this phone?", {name:item.name}),
                     "Remove", () => customThemesRemove(item.id))
             });
-        }) : [Row ? el(Row, {key:"empty", label:tr("No themes installed yet"), subLabel:tr("Paste a direct link to a Revenge or Vendetta .json theme above."), disabled:true}) : null];
+        }) : [Row ? el(Row, {key:"empty", label:tr("No themes installed yet"), subLabel:tr("Paste a direct link to a Revenge or Vendetta .json theme below."), disabled:true}) : null];
         const groups = [
             on ? statusCard("status", customThemesSummary(), {title:customThemes.error ? tr("Couldn't install the theme") : customThemesActiveEntry() ? customThemesActiveEntry().name : tr("Discord's colors"),
                 IconComponent:venusIcon(14887, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
                 offCard("status", venusIcon(14887, "EyeDropperIcon")),
-            el(Group, {key:"options", title:tr("Options")},
-                switchRow(Switch, "customThemesBackground", "Show theme background image", "Displays the wallpaper and surface transparency from themes that include a background image.", rowIcon(5402, "ImageIcon"))),
+            el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
             el(Group, {key:"install", title:tr("Add from link")},
                 el(RN.View, {key:"input", style:{padding:12, gap:8}}, urlInput),
                 Row ? el(Row, {key:"add", label:tr(customThemes.installing ? "Installing theme..." : "Install theme"), icon:rowIcon(4782, "DownloadIcon"),
-                    subLabel:tr("Downloads the .json file once and compiles its colors into Discord's palette."),
+                    subLabel:tr("Downloads the theme once and keeps it on this phone."),
                     disabled:!canInstall, onPress:onInstall}) : null,
                 Row ? el(Row, {key:"paste", label:tr("Paste link from clipboard"), icon:rowIcon(4780, "CopyIcon"),
                     subLabel:tr("Fills the box above with the link on your clipboard."),
@@ -6560,13 +6556,14 @@
                 Row ? el(Row, {key:"browse", label:tr("Browse Revenge themes"), icon:rowIcon(8041, "LinkExternalSmallIcon"),
                     subLabel:"plugins-list.pages.dev/Themes",
                     arrow:true, onPress:() => openLink("https://plugins-list.pages.dev/Themes/")}) : null),
-            el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
+            el(Group, {key:"display", title:tr("Display")},
+                switchRow(Switch, "customThemesBackground", "Show theme background image", "Shows the wallpaper behind chat, for themes that come with one.", rowIcon(5402, "ImageIcon"))),
             el(Group, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "clear", "Clear installed themes",
                     customThemes.list.length ? pl(customThemes.list.length, "Removes {n} saved theme and restores Discord's default colors.", "Removes {n} saved themes and restores Discord's default colors.") : "No themes installed.",
                     () => confirmAction("Clear installed themes?", "Every installed theme will be removed from this phone and Discord's default colors will be restored.", "Clear", customThemesClearAll),
                     !customThemes.list.length, true)),
-            footnote("note", "Themes are compiled straight into Discord's native color table once when applied, and theme wallpapers sit on a single static layer behind chat outside the message list, so scrolling and chat stay just as fast as stock Discord. Hold an installed theme above to remove it, or tap an active theme to switch back to Discord's default colors.")];
+            footnote("note", "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.")];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
     // Message highlights settings: a live chat preview, the bar width as a segmented choice, and a row of color
@@ -6677,6 +6674,7 @@
         const picker = (setting, title, choices, defaultHex) => highlightColorPicker({ setting, title, choices, defaultHex, on, value:settings[setting],
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
+            on ? null : offCard("status", venusIcon(16122, "PaintbrushThinIcon")),
             highlightPreview({key:"preview", me:currentUser(), bar:(on ? settings.messageHighlightThickness : 1) * 2, ping:pingHex, deleted:showDeleted ? delHex : null}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
@@ -6687,7 +6685,7 @@
                 el(RN.View, {style:s.card},
                     picker("messageHighlightPingColor", "Replies and mentions", HIGHLIGHT_PING_CHOICES, "#f0b232"),
                     showDeleted ? el(RN.View, {style:s.divider}) : null,
-                    showDeleted ? picker("messageHighlightDeletedColor", "Kept deleted messages", HIGHLIGHT_DELETED_CHOICES, "#f23f43") : null,
+                    showDeleted ? picker("messageHighlightDeletedColor", "Deleted messages", HIGHLIGHT_DELETED_CHOICES, "#f23f43") : null,
                     hexTarget ? inputWithButton(ui, "hex", {value:hexDraft, label:tr("Hex color"), autoCapitalize:"none", autoCorrect:false, maxLength:7, placeholder:"#5865f2",
                         onSubmitEditing:applyHex, returnKeyType:"done", editable:on, isDisabled:!on}, text => setHexDraft(String(text || "")), "Use", applyHex, !on || !validHex) : null)),
             el(ui.TableRowGroup || RN.View, {key:"manage", title:tr("Manage")},

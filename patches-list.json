@@ -106,7 +106,7 @@
     },
     {
       "name": "Custom themes",
-      "description": "Install and switch color themes from links, compiled into Discord's color table with no lag.",
+      "description": "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.",
       "default": true,
       "category": "Features",
       "dependencies": [

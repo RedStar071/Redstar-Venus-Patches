@@ -691,7 +691,7 @@ val unlockAppIcons = bundledPlugin("appIcons", "Unlock app icons",
 
 @Suppress("unused")
 val customThemes = bundledPlugin("customThemes", "Custom themes",
-    "Install and switch color themes from links, compiled into Discord's color table with no lag.")
+    "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.")
 
 internal const val HIGHLIGHT_DRAWER = "Lcom/discord/chat/presentation/message/decorations/HighlightedMessageDrawer;"
 internal const val CHAT_R_DIMEN = "Lcom/discord/chat/R\$dimen;"

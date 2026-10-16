@@ -4707,9 +4707,9 @@ test('every option page renders in the shared design: status card first, row ico
         // The Language list is the exception: 30 names in their own words read best without icons.
         if (id!=='VENUS_LANGUAGE') for (const row of nodes.filter(n=>n.type===TableSwitchRow||n.type===TableRadioRow))
             assert.equal(row.props.icon&&row.props.icon.type,TableRowIcon,id+': '+row.props.label+' has a row icon');
-        if (id==='VENUS_MESSAGEHIGHLIGHT') continue;
         const titles=nodes.filter(n=>n.type===Text&&n.props.variant==='text-md/semibold').map(n=>n.props.children);
-        assert.ok(titles.length,id+' starts with a titled status card');
+        // Message highlights has no live status: its preview leads, and the card only shows to say it's off.
+        if (id!=='VENUS_MESSAGEHIGHLIGHT' || !on) assert.ok(titles.length,id+' starts with a titled status card');
         if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
     }
 });
