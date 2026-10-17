@@ -56,7 +56,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | **Quests** | Complete Quests automatically | Finishes video, Play and Activity Quests in the background |
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 
-**Language** sets the language Venus settings are shown in. It follows Discord's language until you pick another one. 30 languages are included, among them Russian, Ukrainian, German, Spanish, French, Portuguese, Polish, Turkish, Japanese, Korean and Chinese. Counts use each language's plural forms. Corrections are welcome on GitHub ([`patches/src/main/resources/venus/i18n`](patches/src/main/resources/venus/i18n)).
+**Language** sets the language Venus settings are shown in. It follows Discord's language until you pick another one. 31 languages are included, among them Russian, Ukrainian, German, Spanish, Catalan, French, Portuguese, Polish, Turkish, Japanese, Korean and Chinese. Counts use each language's plural forms. Corrections are welcome on GitHub ([`patches/src/main/resources/venus/i18n`](patches/src/main/resources/venus/i18n)).
 
 **About** shows your version, how many features are on (in total and per group), whether everything is working, and links to what's new and to report a problem. Venus settings animate gently as you use them, and follow Android's **Remove animations** setting.
 

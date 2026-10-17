@@ -10,12 +10,12 @@ const NAMES = {};
 for (const m of /const LANGUAGE_NAMES = \{([\s\S]*?)\};/.exec(source)[1].matchAll(/(\w+):"([^"]+)"/g)) if (!NAMES[m[2]]) NAMES[m[2]] = m[1];
 // The plural forms each language file uses, matching pluralKind() in bootstrap.js.
 const FORMS = {};
-'bg da de el es fi hu it nl no sv tr fr pt-BR hi'.split(' ').forEach(c => FORMS[c] = ['one', 'other']);
+'bg ca da de el es fi hu it nl no sv tr fr pt-BR hi'.split(' ').forEach(c => FORMS[c] = ['one', 'other']);
 'ja ko zh-CN zh-TW th vi id'.split(' ').forEach(c => FORMS[c] = ['other']);
 'ru uk pl'.split(' ').forEach(c => FORMS[c] = ['one', 'few', 'many']);
 'hr cs lt ro'.split(' ').forEach(c => FORMS[c] = ['one', 'few', 'other']);
 const SAMPLE = {one: 1, few: 2, many: 5}, OTHER = {cs: 5, hr: 5, lt: 10, ro: 20};
-const JUST_NOW = {bg:'току-що', cs:'právě teď', da:'lige nu', de:'gerade eben', el:'μόλις τώρα', es:'justo ahora', fi:'juuri nyt', fr:'à l’instant',
+const JUST_NOW = {bg:'току-що', ca:'ara mateix', cs:'právě teď', da:'lige nu', de:'gerade eben', el:'μόλις τώρα', es:'justo ahora', fi:'juuri nyt', fr:'à l’instant',
     hi:'अभी-अभी', hr:'upravo sada', hu:'épp most', id:'baru saja', it:'proprio ora', ja:'たった今', ko:'방금', lt:'ką tik', nl:'zojuist', no:'akkurat nå',
     pl:'przed chwilą', 'pt-BR':'agora mesmo', ro:'chiar acum', ru:'только что', sv:'just nu', th:'เมื่อสักครู่', tr:'az önce', uk:'щойно', vi:'vừa xong',
     'zh-CN':'刚刚', 'zh-TW':'剛剛'};

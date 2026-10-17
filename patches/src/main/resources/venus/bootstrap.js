@@ -92,7 +92,7 @@
     }
     // The language of Venus settings. English is built in; every other one is a file in the patched APK
     // (assets/venus/i18n), read once when it's first needed, so none of them slows down Discord's start.
-    const UI_LANGUAGES = [["en","English","English"],["bg","\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438","Bulgarian"],["cs","\u010ce\u0161tina","Czech"],
+    const UI_LANGUAGES = [["en","English","English"],["bg","\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438","Bulgarian"],["ca","Catal\u00e0","Catalan"],["cs","\u010ce\u0161tina","Czech"],
         ["da","Dansk","Danish"],["de","Deutsch","German"],["el","\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac","Greek"],["es","Espa\u00f1ol","Spanish"],
         ["fi","Suomi","Finnish"],["fr","Fran\u00e7ais","French"],["hi","\u0939\u093f\u0928\u094d\u0926\u0940","Hindi"],["hr","Hrvatski","Croatian"],
         ["hu","Magyar","Hungarian"],["id","Bahasa Indonesia","Indonesian"],["it","Italiano","Italian"],["ja","\u65e5\u672c\u8a9e","Japanese"],
@@ -2518,24 +2518,31 @@
             if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
         };
         const switchMode = value => { setMode(value); setState(blank); };
-        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon");
+        const Trash = venusIcon(4791, "TrashIcon"), Spine = {borderColor:k.iconMuted.color};
         // Try it: a tip under the message to tap next, step by step, until you've tried everything your options allow.
         const done = state.done, next = !on || watching ? null : !done.reply ? ["theirs", tr("Double-tap Sam's message to reply")] :
             !done.own ? ["mine", tr(own ? "Now double-tap your message to edit it" : "Now double-tap your message to reply to it")] :
             triple && !done.del ? ["mine", tr("Now tap your message three times to delete it")] : null;
         const picked = who => state.target === who && state.mode !== "deleted";
+        const replyLine = who => who !== "mine" ? null : el(RN.View, {style:{flexDirection:"row", alignItems:"center", paddingHorizontal:12, paddingTop:4, marginBottom:-2}},
+            el(RN.View, {style:[{width:28, height:10, marginLeft:19, marginRight:4, marginTop:6, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, Spine]}),
+            el(RN.View, {style:{width:16, height:16, borderRadius:8, backgroundColor:"#eb459e", alignItems:"center", justifyContent:"center", marginRight:4}},
+                el(RN.Text, {style:{color:"#ffffff", fontSize:9, fontWeight:"700"}}, "S")),
+            el(RN.Text, {style:[s.muted, {fontWeight:"600", marginRight:4}], numberOfLines:1}, "Sam"),
+            el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, tr("Anyone up for a game later?")));
         const message = (who, name, color, time, text) => el(RN.View, {key:who},
             el(Press, {onPress:() => tap(who), accessibilityRole:"button",
                 accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
-                el(RN.View, {style:picked(who) ? {backgroundColor:"#f0b2321a"} : null},
-                    picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#f0b232"}}) : null,
+                el(RN.View, {style:picked(who) ? {backgroundColor:"#5865f21f"} : null},
+                    picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#5865f2"}}) : null,
+                    replyLine(who),
                     previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who))),
             next && next[0] === who ? previewTip(k, next[1]) : null);
         const showMine = watching ? state.mine && !state.gone : !state.gone;
         const close = watching ? null : () => { animateLayout(); update({mode:null, target:null, gone:false, draft:""}); };
         const bar = state.mode === "deleted" ? previewBar(k, s, Trash, tr("Message deleted"), null) :
-            state.mode === "edit" ? previewBar(k, s, Pencil, tr("Editing message"), close) :
-            state.mode === "reply" ? previewBar(k, s, Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close, "bar", true) : null;
+            state.mode === "edit" ? previewBar(k, s, null, tr("Editing message"), close) :
+            state.mode === "reply" ? previewBar(k, s, null, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close, "bar", true) : null;
         const allDone = on && !watching && !next && done.reply;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
             previewScreen(s, "chat", "Tap gestures preview", [
@@ -3240,55 +3247,63 @@
     }
     function clockText(ms) { const sec = Math.round(ms / 1000); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
     const PREVIEW_CHROME_DARK = {
-        header:{flexDirection:"row", alignItems:"center", gap:10, paddingHorizontal:12, height:48, borderBottomWidth:1, borderBottomColor:"#ffffff0f"},
+        header:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, height:48, borderBottomWidth:1, borderBottomColor:"#ffffff0f"},
+        headerPill:{width:32, height:32, borderRadius:16, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
         title:{color:"#f2f3f5", fontSize:16, fontWeight:"700"}, sub:{color:"#949ba4", fontSize:12}, icon:{color:"#b5bac1"}, iconMuted:{color:"#80848e"},
-        inputRow:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingTop:6, paddingBottom:8},
+        inputRow:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingTop:8, paddingBottom:8},
         round:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
         emojiBtn:{width:44, height:44, borderRadius:22, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
         pill:{flex:1, minHeight:40, borderRadius:20, paddingHorizontal:14, flexDirection:"row", alignItems:"center", gap:10, backgroundColor:"#2b2d31"},
         send:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
-        bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:8, backgroundColor:"#232428", borderTopWidth:1, borderTopColor:"#ffffff0f"},
+        bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:8, backgroundColor:"#232428", borderTopWidth:1, borderTopColor:"#ffffff0f", borderBottomWidth:1, borderBottomColor:"#ffffff0f"},
+        barDivider:{width:1, height:16, backgroundColor:"#ffffff14"},
         brand:{backgroundColor:"#5865f2"}, brandText:{color:"#ffffff"}, brandFg:{color:"#5865f2"},
         secondary:{backgroundColor:"#4e505899"}, secondaryText:{color:"#f2f3f5"},
         sheet:{backgroundColor:"#232428", borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, paddingBottom:4},
-        sheetRow:{backgroundColor:"#2b2d31"}, modal:{backgroundColor:"#313338", borderRadius:16, padding:16, gap:12}, scrim:{backgroundColor:"#000000a6"},
+        sheetRow:{backgroundColor:"#2b2d31", borderColor:"#ffffff0f"}, modal:{backgroundColor:"#313338", borderRadius:16, padding:16, gap:12}, scrim:{backgroundColor:"#000000a6"},
         strip:{backgroundColor:"#4e50581a", borderTopWidth:1, borderTopColor:"#ffffff0f"}, track:{backgroundColor:"#4e505899"}, fill:{backgroundColor:"#5865f2"},
-        mention:{backgroundColor:"#5865f23d", color:"#c9cdfb"}, category:{color:"#949ba4", fontSize:12, fontWeight:"700", letterSpacing:0.3},
-        channel:{color:"#949ba4"}, selected:{backgroundColor:"#4e505866"}, card:{backgroundColor:"#2b2d31"}};
+        mention:{backgroundColor:"#5865f23d", color:"#c9cdfb"}, category:{color:"#949ba4", fontSize:13, fontWeight:"600"},
+        channel:{color:"#949ba4"}, selected:{backgroundColor:"#4e505866"}, card:{backgroundColor:"#2b2d31", borderColor:"#ffffff14"}};
     function usePreviewChrome() {
         return useThemed("previewChrome", c => ({
             header:Object.assign({}, PREVIEW_CHROME_DARK.header, {borderBottomColor:c.MOBILE_HEADER_BORDER || c.BORDER_SUBTLE}),
+            headerPill:Object.assign({}, PREVIEW_CHROME_DARK.headerPill, {backgroundColor:c.REDESIGN_BUTTON_TERTIARY_BACKGROUND || c.BACKGROUND_BASE_LOW || c.BACKGROUND_MOD_SUBTLE}),
             title:Object.assign({}, PREVIEW_CHROME_DARK.title, {color:c.MOBILE_TEXT_HEADING_PRIMARY || c.TEXT_STRONG}),
             sub:Object.assign({}, PREVIEW_CHROME_DARK.sub, {color:c.TEXT_MUTED}),
-            icon:{color:c.MOBILE_HEADER_ICON_DEFAULT || c.INTERACTIVE_ICON_DEFAULT}, iconMuted:{color:c.ICON_MUTED},
+            icon:{color:c.MOBILE_HEADER_ICON_DEFAULT || c.INTERACTIVE_ICON_DEFAULT}, iconMuted:{color:c.ICON_MUTED || c.TEXT_SUBTLE},
             inputRow:PREVIEW_CHROME_DARK.inputRow,
             round:Object.assign({}, PREVIEW_CHROME_DARK.round, {backgroundColor:c.CHAT_INPUT_ACTION_BUTTON_BACKGROUND || c.BACKGROUND_MOD_SUBTLE}),
             emojiBtn:Object.assign({}, PREVIEW_CHROME_DARK.emojiBtn, {backgroundColor:c.MOBILE_EMOJI_BUTTON_BACKGROUND || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_MOD_SUBTLE}),
             pill:Object.assign({}, PREVIEW_CHROME_DARK.pill, {backgroundColor:c.REDESIGN_CHAT_INPUT_BACKGROUND || c.CHAT_INPUT_BACKGROUND}),
             send:Object.assign({}, PREVIEW_CHROME_DARK.send, {backgroundColor:c.CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND || c.BACKGROUND_BRAND}),
-            bar:Object.assign({}, PREVIEW_CHROME_DARK.bar, {backgroundColor:c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_MUTED || c.BORDER_SUBTLE}),
+            bar:Object.assign({}, PREVIEW_CHROME_DARK.bar, {backgroundColor:c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_MUTED || c.BORDER_SUBTLE, borderBottomColor:c.BORDER_MUTED || c.BORDER_SUBTLE}),
+            barDivider:Object.assign({}, PREVIEW_CHROME_DARK.barDivider, {backgroundColor:c.BORDER_SUBTLE}),
             brand:{backgroundColor:c.BACKGROUND_BRAND}, brandText:{color:c.CONTROL_BRAND_FOREGROUND_NEW || c.WHITE || "#ffffff"},
-            brandFg:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND || "#5865f2"},
+            brandFg:{color:c.CONTROL_BRAND_FOREGROUND || c.TEXT_BRAND || c.BACKGROUND_BRAND || "#5865f2"},
             secondary:{backgroundColor:c.CONTROL_SECONDARY_BACKGROUND_DEFAULT}, secondaryText:{color:c.CONTROL_SECONDARY_TEXT_DEFAULT},
             sheet:Object.assign({}, PREVIEW_CHROME_DARK.sheet, {backgroundColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW}),
-            sheetRow:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}, modal:Object.assign({}, PREVIEW_CHROME_DARK.modal, {backgroundColor:c.MODAL_BACKGROUND}),
+            sheetRow:{backgroundColor:c.CARD_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE}, modal:Object.assign({}, PREVIEW_CHROME_DARK.modal, {backgroundColor:c.MODAL_BACKGROUND}),
             scrim:{backgroundColor:c.BACKGROUND_SCRIM}, strip:Object.assign({}, PREVIEW_CHROME_DARK.strip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_SUBTLE}),
             track:{backgroundColor:c.PROGRESSBAR_TRACK_BACKGROUND || c.BACKGROUND_MOD_STRONG}, fill:{backgroundColor:c.PROGRESSBAR_INDICATOR_BACKGROUND || c.BACKGROUND_BRAND},
             mention:{backgroundColor:c.MENTION_BACKGROUND, color:c.MENTION_FOREGROUND},
             category:Object.assign({}, PREVIEW_CHROME_DARK.category, {color:c.TEXT_SUBTLE || c.TEXT_MUTED}), channel:{color:c.CHANNELS_DEFAULT || c.TEXT_MUTED},
-            selected:{backgroundColor:c.MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED || c.BACKGROUND_MOD_NORMAL}, card:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}}),
+            selected:{backgroundColor:c.MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED || c.BACKGROUND_MOD_NORMAL}, card:{backgroundColor:c.CARD_BACKGROUND_DEFAULT, borderColor:c.BORDER_MUTED || c.BORDER_SUBTLE}}),
             PREVIEW_CHROME_DARK);
     }
-    // Discord's channel header: back arrow, the channel (or person) and the icons on the right.
+    // Discord's channel header: back arrow, the channel (or person) with its small right chevron, and circular 32px action buttons on the right.
     function previewHeader(k, props) {
-        const Back = venusIcon(5937, "ArrowLargeLeftIcon"), Hash = venusIcon(15125, "HashmarkIcon");
+        const Back = venusIcon(5937, "ArrowLargeLeftIcon"), Hash = venusIcon(15125, "HashmarkIcon"), Chevron = venusIcon(6631, "ChevronSmallRightIcon");
         return el(RN.View, {key:"header", style:k.header},
-            el(Back, {size:"md", color:k.icon.color}),
-            props.leading || el(Hash, {size:"md", color:k.iconMuted.color}),
-            el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:6}},
-                el(RN.Text, {style:k.title, numberOfLines:1}, props.title), props.badges || null),
-            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:14}},
-                (props.icons || [[5388, "ThreadIcon"], [6473, "MagnifyingGlassIcon"], [5404, "GroupIcon"]]).map(([id, name]) => el(venusIcon(id, name), {key:name, size:"md", color:k.icon.color}))));
+            el(RN.View, {style:{width:32, height:32, alignItems:"center", justifyContent:"center"}}, el(Back, {size:"md", color:k.icon.color})),
+            el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:8}},
+                props.leading || el(Hash, {size:"sm", color:k.iconMuted.color}),
+                el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:4}},
+                    el(RN.Text, {style:k.title, numberOfLines:1}, props.title),
+                    props.badges || null,
+                    el(Chevron, {size:"xxs", color:k.iconMuted.color}))),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8}},
+                (props.icons || [[5388, "ThreadIcon"], [6473, "MagnifyingGlassIcon"]]).map(([id, name]) =>
+                    el(RN.View, {key:name, style:k.headerPill}, el(venusIcon(id, name), {size:"sm", color:k.icon.color})))));
     }
     // Discord's message bar: the + button, the text pill with its gift and emoji buttons, then the mic, or Send once there's text.
     function previewInput(k, s, props) {
@@ -3304,14 +3319,16 @@
                 text ? popIn("send", el(RN.View, {style:k.send}, el(Send, {size:"sm", color:k.brandText.color}))) :
                     el(RN.View, {style:k.round}, el(Mic, {size:"sm", color:k.icon.color}))));
     }
-    // The bar above the message box while replying or editing, like Discord's: an icon, what it is, the @ ON indicator on replies, and a close button.
+    // The bar above the message box while replying or editing (ChatInputContextBar 11808): what it is, the @ ON toggle + vertical divider on replies, and the close X.
     function previewBar(k, s, Icon, text, onClose, key, mention) {
         const X = venusIcon(5940, "XSmallIcon"), At = venusIcon(5405, "AtIcon"), Press = RN.Pressable || RN.View;
-        return el(RN.View, {key:key || "bar", style:k.bar}, popIn("icon:" + text, el(Icon, {size:"xs", color:k.icon.color})),
-            el(RN.Text, {style:[s.muted, {flex:1, fontSize:13, fontWeight:"500"}], numberOfLines:1}, text),
-            mention ? el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:3, paddingRight:4}},
+        return el(RN.View, {key:key || "bar", style:k.bar},
+            Icon ? popIn("icon:" + text, el(Icon, {size:"xs", color:k.icon.color})) : null,
+            el(RN.Text, {style:[s.muted, {flex:1, fontSize:14, fontWeight:"500"}], numberOfLines:1}, text),
+            mention ? el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:3}},
                 el(At, {size:"xxs", color:k.brandFg.color}),
-                el(RN.Text, {style:[k.brandFg, {fontSize:11, fontWeight:"700"}]}, "ON")) : null,
+                el(RN.Text, {style:[k.brandFg, {fontSize:12, fontWeight:"700"}]}, "ON")) : null,
+            mention && onClose ? el(RN.View, {style:[k.barDivider, {marginHorizontal:8}]}) : null,
             onClose ? el(Press, {onPress:onClose, accessibilityRole:"button", accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}},
                 el(X, {size:"xs", color:k.icon.color})) : null);
     }
@@ -3477,16 +3494,16 @@
             muted:Object.assign({}, CHAT_PREVIEW_DARK.muted, {color:c.TEXT_MUTED}), faded:Object.assign({}, CHAT_PREVIEW_DARK.faded, {color:c.TEXT_MUTED}),
             quote:Object.assign({}, CHAT_PREVIEW_DARK.quote, {borderColor:c.BORDER_STRONG})}), CHAT_PREVIEW_DARK);
     }
-    // One message in a preview: a round letter avatar, the name (optionally colored), the time and its body.
+    // One message in a preview: a 40px round letter avatar at 12px margin (64px start guideline), the name, timestamp (+8px) and body.
     function previewMessage(s, key, who, color, time, body, extra) {
-        return el(RN.View, Object.assign({key, style:{paddingHorizontal:16, paddingVertical:6, flexDirection:"row", gap:12}}, extra),
+        return el(RN.View, Object.assign({key, style:{paddingHorizontal:12, paddingVertical:6, flexDirection:"row", gap:12}}, extra),
             el(RN.View, {style:{width:40, height:40, borderRadius:20, backgroundColor:color, alignItems:"center", justifyContent:"center"}},
                 el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, who.slice(0, 1).toUpperCase())),
             el(RN.View, {style:{flex:1}},
-                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6, marginBottom:2}},
+                el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", marginBottom:2}},
                     el(RN.Text, {style:extra && extra.nameColor ? [s.name, {color:extra.nameColor}] : s.name, numberOfLines:1}, who),
-                    extra && extra.badges ? extra.badges : null,
-                    el(RN.Text, {style:s.muted}, time)),
+                    extra && extra.badges ? el(RN.View, {style:{marginLeft:4}}, extra.badges) : null,
+                    el(RN.Text, {style:[s.muted, {marginLeft:8}]}, time)),
                 body));
     }
     // Discord's own icon in a settings row (TableRowIcon 5922), the way its own settings pages show them.
@@ -3626,13 +3643,17 @@
                 button(tr("View Anyway"), true), button(tr("Cancel"), false)))) : null;
         const list = el(RN.View, {key:"list", style:{paddingVertical:6, transform:state.scroll ? [{translateY:-14}] : []}},
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:16, paddingVertical:6}},
-                el(Down, {size:"xs", color:k.category.color}), el(RN.Text, {style:k.category}, tr("Text channels").toUpperCase())),
+                el(Down, {size:"xxs", color:k.category.color}), el(RN.Text, {style:k.category}, tr("Text channels").toUpperCase())),
             channel("general", false, true), on ? channel("staff-only", true) : null, channel("memes", false), channel("clips", false));
         const tip = on && !watching ? previewTip(k, !state.tried ? tr(menu ? "Tap staff-only to see its details" : "Tap staff-only: nothing will open") :
             tr(menu ? "That's the dialog you'll see in Discord" : "Tapping a locked channel now does nothing")) : null;
-        const server = el(RN.View, {key:"server", style:[k.header, {height:52}]},
-            el(RN.Text, {style:[k.title, {flex:1, fontSize:17}], numberOfLines:1}, tr("Game Night")),
-            el(venusIcon(7364, "MoreHorizontalIcon"), {size:"md", color:k.icon.color}));
+        const Chevron = venusIcon(6631, "ChevronSmallRightIcon"), Search = venusIcon(6473, "MagnifyingGlassIcon");
+        const server = el(RN.View, {key:"server", style:[k.header, {height:52, paddingHorizontal:16}]},
+            el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:4}},
+                el(RN.Text, {style:[k.title, {fontSize:18}], numberOfLines:1}, tr("Game Night")),
+                el(Chevron, {size:"xxs", color:k.iconMuted.color})),
+            el(RN.View, {style:k.headerPill}, el(Search, {size:"sm", color:k.icon.color})),
+            el(RN.View, {style:k.headerPill}, el(venusIcon(7364, "MoreHorizontalIcon"), {size:"sm", color:k.icon.color})));
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
             previewScreen(s, "preview", "Hidden channels preview", [el(RN.View, {key:"body", style:{minHeight:210, overflow:"hidden"}}, list, card), tip],
                 {header:server, footer:watching ? storyStrip(k, s, story) : null}));
@@ -3699,15 +3720,18 @@
     // Watch: you open the emoji picker, pick a Nitro emoji (it would normally be locked), it's sent and everyone sees it;
     // then the same with a sticker. Try it: send one yourself from the picker.
     function NitroPicker(props) {
-        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Lock = venusIcon(5410, "LockIcon");
+        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Lock = venusIcon(5410, "LockIcon"), Down = venusIcon(10604, "ChevronSmallDownIcon");
         const kinds = props.kinds, tab = props.tab, item = NITRO_SAMPLES[tab];
         const tabPill = kind => el(Press, {key:kind, onPress:() => props.onTab && props.onTab(kind), accessibilityRole:"tab", accessibilityState:{selected:tab === kind},
             style:[{paddingHorizontal:14, paddingVertical:6, borderRadius:16}, tab === kind ? k.secondary : null]},
             el(RN.Text, {style:[tab === kind ? k.secondaryText : s.muted, {fontWeight:"600", fontSize:13}]}, tr(kind === "emoji" ? "Emojis" : "Stickers")));
         const plain = kind => kind === "emoji" ? ["\ud83d\ude00", "\ud83d\ude02", "\ud83d\udc4d", "\ud83c\udf89"] : [];
-        return el(RN.View, {key:"picker", style:[k.sheet, {borderTopLeftRadius:12, borderTopRightRadius:12, paddingHorizontal:12, gap:8, paddingBottom:10}]},
+        return el(RN.View, {key:"picker", style:[k.sheet, {borderTopLeftRadius:16, borderTopRightRadius:16, paddingHorizontal:12, gap:8, paddingBottom:10}]},
+            el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66"}}),
             el(RN.View, {style:{flexDirection:"row", gap:6, alignSelf:"center"}}, kinds.map(tabPill)),
-            el(RN.Text, {style:[k.category, {marginTop:2}]}, tr("Game Night").toUpperCase()),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:4, marginTop:2}},
+                el(RN.Text, {style:k.category}, tr("Game Night")),
+                el(Down, {size:"xxs", color:k.category.color})),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10, flexWrap:"wrap"}},
                 plain(tab).map(e => el(RN.Text, {key:e, style:{fontSize:28}}, e)),
                 el(Press, {key:"nitro", onPress:props.onPick, accessibilityRole:"button", accessibilityLabel:item.name, accessibilityHint:tr("Tap to send it"),
@@ -3886,8 +3910,8 @@
                 previewMessage(s, "a1", "Alex", "#3ba55c", tr("Today at 4:01 PM"), el(Text, {style:s.text}, tr("Are you coming to the game tonight?"))),
                 previewMessage(s, "a2", tr("You"), "#5865f2", tr("Today at 4:02 PM"), el(Text, {style:s.text}, tr("Yes, see you there!")))),
             previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"@Alex"})})];
-        const dmHeader = () => el(RN.View, {key:"hd"}, previewHeader(k, {title:"Alex", leading:avatar("A", "#3ba55c", clients, 24, k.header.backgroundColor),
-            badges:icons("piDmHeader", clients), icons:[[7309, "PhoneCallIcon"], [10976, "VideoIcon"]]}), ripple);
+        const dmHeader = () => el(RN.View, {key:"hd"}, previewHeader(k, {title:"Alex", leading:avatar("A", "#3ba55c", clients, 32, k.header.backgroundColor),
+            badges:icons("piDmHeader", clients), icons:[[7309, "PhoneCallIcon"], [10976, "VideoIcon"], [6473, "MagnifyingGlassIcon"]]}), ripple);
         // The member list: Discord's "Online — 3" header and a row per person, status under the name.
         const memberRow = (name, color, c, alex) => el(RN.View, {key:name, style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:6},
             alex ? {marginHorizontal:8, paddingHorizontal:8, borderRadius:8} : null, alex && watching ? k.selected : null]},
@@ -3895,17 +3919,22 @@
                 el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}}, el(Text, {style:[s.name, {fontSize:15}], numberOfLines:1}, name), icons("piUserList", c, name)),
                 el(Text, {style:s.muted}, tr(PLATFORM_STATUS[statusOf(c)] || "Online"))), alex ? ripple : null);
         const list = () => [el(RN.View, {key:"members", style:{paddingTop:6, paddingBottom:8}},
-            el(Text, {style:[k.category, {paddingHorizontal:16, paddingBottom:6}]}, tr("Online").toUpperCase() + " \u2014 3"),
+            el(Text, {style:[k.category, {paddingHorizontal:16, paddingBottom:4}]}, tr("Online").toUpperCase() + " \u2014 3"),
             memberRow("Alex", "#3ba55c", clients, true), PLATFORM_PEOPLE.map(([n, color, c]) => memberRow(n, color, c, false)))];
-        // A profile: Discord's banner, the avatar overlapping it, the name with the icons and a Message button.
+        // A profile: Discord's banner, the 80px avatar with 6px cutout overlapping it, the name with the icons and action buttons.
         const profile = () => [el(RN.View, {key:"profile"},
-            el(RN.View, {style:{height:64, backgroundColor:"#2d7d46"}}),
-            el(RN.View, {style:{paddingHorizontal:16, marginTop:-36, gap:8, paddingBottom:12}},
-                el(RN.View, {style:{alignSelf:"flex-start", padding:4, borderRadius:44, backgroundColor:s.chat.backgroundColor}}, avatar("A", "#3ba55c", clients, 72), ripple),
-                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8}}, el(Text, {style:[s.name, {fontSize:22, fontWeight:"800"}]}, "Alex"), icons("piProfile", clients)),
-                el(Text, {style:s.muted}, "alex"),
-                el(RN.View, {style:[k.brand, {borderRadius:20, paddingVertical:10, alignItems:"center", flexDirection:"row", justifyContent:"center", gap:8}]},
-                    el(venusIcon(5386, "ChatIcon"), {size:"sm", color:k.brandText.color}), el(Text, {style:[k.brandText, {fontWeight:"600"}]}, tr("Message")))))];
+            el(RN.View, {style:{height:68, backgroundColor:"#2d7d46"}}),
+            el(RN.View, {style:{paddingHorizontal:16, marginTop:-42, gap:6, paddingBottom:12}},
+                el(RN.View, {style:{alignSelf:"flex-start", padding:6, borderRadius:46, backgroundColor:s.chat.backgroundColor}}, avatar("A", "#3ba55c", clients, 72), ripple),
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, marginTop:2}}, el(Text, {style:[s.name, {fontSize:22, fontWeight:"800"}]}, "Alex"), icons("piProfile", clients)),
+                el(Text, {style:[s.muted, {fontSize:14, fontWeight:"600"}]}, "alex"),
+                el(RN.View, {style:{flexDirection:"row", gap:8, marginTop:4}},
+                    el(RN.View, {style:[k.brand, {flex:1, borderRadius:20, paddingVertical:10, alignItems:"center", flexDirection:"row", justifyContent:"center", gap:8}]},
+                        el(venusIcon(5386, "ChatIcon"), {size:"sm", color:k.brandText.color}), el(Text, {style:[k.brandText, {fontWeight:"600"}]}, tr("Message"))),
+                    el(RN.View, {style:[k.secondary, {width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center"}]},
+                        el(venusIcon(7309, "PhoneCallIcon"), {size:"sm", color:k.secondaryText.color})),
+                    el(RN.View, {style:[k.secondary, {width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center"}]},
+                        el(venusIcon(10976, "VideoIcon"), {size:"sm", color:k.secondaryText.color})))))];
         const body = screen === "piDmHeader" ? dm() : screen === "piUserList" ? list() : profile();
         const header = screen === "piDmHeader" ? dmHeader() : screen === "piUserList" ? previewHeader(k, {title:"general"}) : null;
         const off = on && !settings[screen] ? el(RN.View, {key:"off", style:{marginHorizontal:12, marginBottom:8, padding:10, borderRadius:8, backgroundColor:"#4e505833"}},
@@ -6641,17 +6670,17 @@
     // in Discord's message menu (whichever you chose below). Try it: hold the message to open Discord's menu, then tap
     // Translate or Show original in the menu, just like in real Discord.
     const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
-    // A message's long-press menu, the way Discord draws it: a sheet with 4 quick reactions + Add Reaction, and a list of actions.
+    // A message's long-press menu (LongPressMessageActionSheet 6176 + EmojiRow 11970): 5 quick reactions + Add Reaction, and a rounded card of actions.
     function previewSheet(k, s, rows, pulse) {
         const Press = RN.Pressable || RN.View, AddReaction = venusIcon(8216, "ReactionIcon");
         return el(RN.View, {key:"sheet", style:[k.sheet, {marginTop:6}]},
             el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66", marginBottom:8}}),
             el(RN.View, {style:{flexDirection:"row", justifyContent:"space-between", paddingHorizontal:16, paddingBottom:10}},
-                ["\ud83d\udc4d", "\u2764\ufe0f", "\ud83d\ude02", "\ud83d\ude2e"].map(e => el(RN.View, {key:e, style:k.emojiBtn}, el(RN.Text, {style:{fontSize:20}}, e))),
+                ["\ud83d\udc4d", "\u2764\ufe0f", "\ud83d\ude02", "\ud83d\ude2e", "\ud83d\ude22"].map(e => el(RN.View, {key:e, style:k.emojiBtn}, el(RN.Text, {style:{fontSize:20}}, e))),
                 el(RN.View, {key:"more", style:k.emojiBtn}, el(AddReaction, {size:"sm", color:k.icon.color}))),
-            el(RN.View, {style:[k.sheetRow, {marginHorizontal:12, marginBottom:8, borderRadius:16, overflow:"hidden"}]},
+            el(RN.View, {style:[k.sheetRow, {marginHorizontal:16, marginBottom:8, borderRadius:16, overflow:"hidden"}]},
                 rows.map(([key, Icon, label, onPress], i) => el(Press, {key, onPress, accessibilityRole:onPress ? "button" : undefined,
-                    style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:"#ffffff0d"} : null]},
+                    style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:k.sheetRow.borderColor} : null]},
                     el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {fontSize:15, fontWeight:"500"}]}, label), tapRipple(pulse, key, {left:8, top:7})))));
     }
     function TranslatePreview(props) {
@@ -7564,15 +7593,15 @@
                 el(RN.Text, {style:{color:"#ffffff", fontSize:Math.round(size * 0.42), fontWeight:"700"}}, myName.slice(0, 1).toUpperCase()));
         const letter = (char, color) => el(RN.View, {style:{width:40, height:40, borderRadius:20, backgroundColor:color, alignItems:"center", justifyContent:"center"}},
             el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, char));
-        const header = (name, time) => el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", gap:6, marginBottom:2}},
-            el(RN.Text, {style:s.name, numberOfLines:1}, name), el(RN.Text, {style:s.muted}, time));
+        const header = (name, time) => el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", marginBottom:2}},
+            el(RN.Text, {style:s.name, numberOfLines:1}, name), el(RN.Text, {style:[s.muted, {marginLeft:8}]}, time));
         // A highlight that just changed glows once, like a new mention arriving, then settles to its normal tint.
         // props.count shows only the first few messages (while Watch plays), props.beats replays one's glow, props.ripple
         // marks a tap, and props.onPress makes a highlighted message tappable.
         const Press = RN.Pressable || RN.View, count = props.count == null ? 3 : props.count;
         const message = (key, hex, children) => {
             const beat = props.beats && props.beats[key] || 0;
-            const body = el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
+            const body = el(RN.View, {key, style:{paddingHorizontal:12, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
                 hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar + ":" + beat, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
                 hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children,
                 props.ripple ? props.ripple(key) : null);
@@ -7586,7 +7615,7 @@
                     el(RN.View, {style:{flex:1}}, header(myName, tr("Today at 4:01 PM")), el(RN.Text, {style:s.text}, question)))),
                 count < 2 ? null : message("reply", props.ping, el(RN.View, null,
                     el(RN.View, {style:{flexDirection:"row", alignItems:"center", marginBottom:4}},
-                        el(RN.View, {style:[{width:22, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, s.spine]}),
+                        el(RN.View, {style:[{width:28, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, s.spine]}),
                         el(RN.View, {style:{marginRight:4}}, face(16)),
                         el(RN.Text, {style:[s.muted, {fontWeight:"600", marginRight:4}], numberOfLines:1}, myName),
                         el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, question)),
