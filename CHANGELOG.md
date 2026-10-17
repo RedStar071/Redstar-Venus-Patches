@@ -7,13 +7,9 @@
 
 ## [1.15.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.14.0...v1.15.0) (2026-10-17)
 
-### ✨ New Features
-
-* **Discord - Venus settings:** Add Catalan (Català) as a settings language, bringing Venus settings to 31 languages
-
 ### 🔧 Improvements
 
-* **Discord - Venus settings:** Hand-review and refine all 30 translated settings languages for more natural, idiomatic wording
+* **Discord - Venus settings:** Hand-review and refine all 29 translated settings languages for more natural, idiomatic wording
 * **Discord - Venus settings:** Remove redundant top status cards on option pages when a feature is already on and its preview or options speak for themselves
 * **Discord - Venus settings:** Channel, DM and server headers in previews show Discord's title chevron and round action buttons
 * **Discord - Venus settings:** Message bars in previews show Discord's gift button when Hide the gift button is off, and tapping the emoji button opens the expression picker

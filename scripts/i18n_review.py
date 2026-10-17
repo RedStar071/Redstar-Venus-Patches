@@ -21,7 +21,7 @@ NAMES = set(re.findall(r':"([^"]+)"', re.search(r'const LANGUAGE_NAMES = \{([\s\
 UNITS = ('second', 'minute', 'hour', 'day', 'month', 'year')
 CLDR = {'just now', '{time} ago', 'and'} | {k for k in PL if any(u in k for u in UNITS) and 'left' not in k} | {PL[k] for k in PL if any(u in k for u in UNITS) and 'left' not in k}
 KEYS = [k for k in STRINGS if k not in NAMES and k not in CLDR]
-FORMS = {**{c: ['one', 'other'] for c in 'bg ca da de el es fi hu it nl no sv tr fr pt-BR hi'.split()},
+FORMS = {**{c: ['one', 'other'] for c in 'bg da de el es fi hu it nl no sv tr fr pt-BR hi'.split()},
          **{c: ['other'] for c in 'ja ko zh-CN zh-TW th vi id'.split()},
          **{c: ['one', 'few', 'many'] for c in 'ru uk pl'.split()}, **{c: ['one', 'few', 'other'] for c in 'hr cs lt ro'.split()}}
 KEEP = ['Venus', 'Discord', 'Google Translate', 'ReviewDB', 'Nitro', 'GitHub', 'GIF', 'GPL-3.0', 'manti.vendicated.dev', '@unknown-user', 'Android', 'Revenge', 'Vendetta', 'Blurple']
