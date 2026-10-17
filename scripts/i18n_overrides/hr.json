@@ -26,8 +26,8 @@
  "All friends": "Svi prijatelji",
  "All {n} friend selected. Tap a friend to pick individually.": "Odabran je {n} prijatelj. Dodirnite prijatelja za pojedinačni odabir.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Odabran je {n} prijatelj. Dodirnite prijatelja za pojedinačni odabir.",
   "few": "Odabrana su sva {n} prijatelja. Dodirnite prijatelja za pojedinačni odabir.",
+  "one": "Odabran je {n} prijatelj. Dodirnite prijatelja za pojedinačni odabir.",
   "other": "Odabrano je svih {n} prijatelja. Dodirnite prijatelja za pojedinačni odabir."
  },
  "Allow Discord notifications?": "Dopustiti Discord obavijesti?",
@@ -73,8 +73,8 @@
  "Completed {name}.": "Dovršeno: {name}.",
  "Completed {n} Quest since Discord opened.": "Od otvaranja Discorda dovršen je {n} Quest.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "Od otvaranja Discorda dovršen je {n} Quest.",
   "few": "Od otvaranja Discorda dovršena su {n} Questa.",
+  "one": "Od otvaranja Discorda dovršen je {n} Quest.",
   "other": "Od otvaranja Discorda dovršeno je {n} Questova."
  },
  "Console": "Konzola",
@@ -94,6 +94,7 @@
  "Custom theme": "Prilagođena tema",
  "Custom themes": "Prilagođene teme",
  "Czech": "češki",
+ "DM": "IP",
  "Danish": "danski",
  "Delete Review": "Izbriši recenziju",
  "Delete a kept message again to hide just that one.": "Ponovno izbrišite sačuvanu poruku da sakrijete samo nju.",
@@ -174,11 +175,14 @@
  "In DMs or in any server channel your client receives.": "U izravnim porukama ili u bilo kojem kanalu poslužitelja koji klijent prima.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "U razgovoru, reakcijama i biraču emojija. Discord se ponovno otvara da primijeni promjenu.",
  "In lists": "Na popisima",
+ "In use": "U upotrebi",
  "Indonesian": "indonezijski",
+ "Install": "Instaliraj",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Instalirajte i mijenjajte teme boja s poveznica, kompiliranih u tablicu boja Discord bez zastoja.",
  "Install theme": "Instalirajte temu",
  "Installed themes": "Instalirane teme",
  "Installing theme...": "Instaliranje teme...",
+ "Installing...": "Instaliranje...",
  "Irish": "irski",
  "It will be sent as a normal file instead.": "Umjesto toga šalje se kao obična datoteka.",
  "Italian": "talijanski",
@@ -227,6 +231,8 @@
  "Marks every unread server as read.": "Označava sve nepročitane servere pročitanima.",
  "Marks everything as read in one tap.": "Jednim dodirom označava sve pročitanim.",
  "Member list, friends, DM list and voice channels.": "Popis članova, prijatelji, popis izravnih poruka i glasovni kanali.",
+ "Members": "Članovi",
+ "Message": "Poruka",
  "Messages": "Poruke",
  "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.": "Poruke i pregledi poveznica brišu se odmah, bez pitanja „Jeste li sigurni?”. To se ne može poništiti.",
  "Messages in other languages show in yours. Their text is sent to Google Translate.": "Poruke na drugim jezicima prikazuju se na vašem. Njihov tekst šalje se u Google Translate.",
@@ -239,6 +245,7 @@
  "Nepali": "nepalski",
  "Network fetch is unavailable right now.": "Dohvaćanje mreže trenutačno nije dostupno.",
  "New Quests": "Novi Questovi",
+ "New people": "Novi ljudi",
  "Next to the name at the top of a DM.": "Pokraj imena na vrhu izravne poruke.",
  "Next to the name on a profile.": "Pokraj imena na profilu.",
  "Nitro stickers and emojis": "Nitro naljepnice i emojiji",
@@ -284,17 +291,21 @@
  "Other people (by user ID)": "Druge osobe (prema korisničkom ID-u)",
  "Others won't see when you're typing. You still see when they are.": "Drugi ne vide kad tipkate. Vi i dalje vidite kad oni tipkaju.",
  "Outside Discord": "Izvan Discorda",
+ "Paste": "Zalijepi",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Gore zalijepite izravnu vezu na .json temu Revenge ili Vendetta.",
  "Paste link from clipboard": "Zalijepi vezu iz međuspremnika",
  "Pastel name colors": "Pastelne boje imena",
  "Pastel names": "Pastelna imena",
+ "Pause": "Pauza",
  "People": "Osobe",
  "People list reset": "Popis osoba poništen",
  "Persian": "perzijski",
+ "Play": "Reproduciraj",
  "Play Quests": "Questovi igranja",
  "Play time counts without installing or opening the game.": "Vrijeme igranja se broji bez instaliranja ili otvaranja igre.",
  "Polish": "poljski",
  "Portuguese": "portugalski",
+ "Profile": "Profil",
  "Punjabi": "pandžapski",
  "Push notifications outside Discord": "Push obavijesti izvan Discorda",
  "Quest Completer": "Automatski Quests",
@@ -317,13 +328,14 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Uklanja promociju Questova iznad trake profila. Questovi i dalje rade.",
  "Removes {n} saved theme and restores Discord's default colors.": "Uklanja {n} spremljenu temu i vraća Discord zadane boje.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Uklanja {n} spremljenu temu i vraća zadane boje Discorda.",
   "few": "Uklanja {n} spremljene teme i vraća zadane boje Discorda.",
+  "one": "Uklanja {n} spremljenu temu i vraća zadane boje Discorda.",
   "other": "Uklanja {n} spremljenih tema i vraća zadane boje Discorda."
  },
  "Reopen now": "Ponovno otvori sada",
  "Replace role colors": "Zamijeni boje uloga",
  "Replaces Discord's font everywhere. Discord reopens to apply it. Needs Android 9 or newer.": "Zamjenjuje Discordov font posvuda. Discord se ponovno otvara da primijeni promjenu. Potreban je Android 9 ili noviji.",
+ "Reply": "Odgovori",
  "Reply to it": "Odgovori",
  "Report Review": "Prijavi recenziju",
  "Report a problem": "Prijavi problem",
@@ -379,8 +391,8 @@
  "Show theme background image": "Prikaži pozadinsku sliku teme",
  "Shown {n} notification since Discord opened.": "Prikazana je {n} obavijest otkako je Discord otvoren.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Prikazana je {n} obavijest otkako je Discord otvoren.",
   "few": "Prikazane su {n} obavijesti otkako je Discord otvoren.",
+  "one": "Prikazana je {n} obavijest otkako je Discord otvoren.",
   "other": "Prikazano je {n} obavijesti otkako je Discord otvoren."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Prikazuje „general chat” umjesto „general-chat”. Mijenja samo izgled naziva.",
@@ -401,6 +413,7 @@
  "Spaces in channel names": "Razmaci u nazivima kanala",
  "Spanish": "španjolski",
  "Star any image or video in the media viewer to keep it in your GIF favourites.": "Označite zvjezdicom bilo koju sliku ili videozapis u pregledniku medija da ga zadržite u GIF favoritima.",
+ "Start over": "Ispočetka",
  "Start typing": "Počnu tipkati",
  "Status": "Status",
  "Stickers": "Naljepnice",
@@ -446,12 +459,13 @@
  "Translated from {language}. Original:": "Prevedeno s jezika: {language}. Izvornik:",
  "Translated {n} message since Discord opened.": "Od otvaranja Discorda prevedena je {n} poruka.",
  "Translated {n} messages since Discord opened.": {
-  "one": "Od otvaranja Discorda prevedena je {n} poruka.",
   "few": "Od otvaranja Discorda prevedene su {n} poruke.",
+  "one": "Od otvaranja Discorda prevedena je {n} poruka.",
   "other": "Od otvaranja Discorda prevedeno je {n} poruka."
  },
  "Triple-tap": "Trostruki dodir",
  "Triple-tap to delete": "Trostruki dodir za brisanje",
+ "Try it": "Isprobaj",
  "Trying again in {n} s.": "Pokušajte ponovno za {n} s.",
  "Turkish": "turski",
  "Turned off. Switch it on in Features to start.": "Isključeno. Uključite u Značajkama za početak.",
@@ -478,16 +492,17 @@
  "Vietnamese": "vijetnamski",
  "View Anyway": "Svejedno prikaži",
  "Waiting for new Quests.": "Čeka se na nove Questove.",
+ "Watch": "Gledaj",
  "Watching all friends.": "Prate se svi prijatelji.",
  "Watching all {n} friends.": {
-  "one": "Prati se {n} prijatelj.",
   "few": "Prate se sva {n} prijatelja.",
+  "one": "Prati se {n} prijatelj.",
   "other": "Prati se svih {n} prijatelja."
  },
  "Watching {n} friend.": "Prati se {n} prijatelj.",
  "Watching {n} people.": {
-  "one": "Prati se {n} osoba.",
   "few": "Prate se {n} osobe.",
+  "one": "Prati se {n} osoba.",
   "other": "Prati se {n} osoba."
  },
  "Watching {n} person.": "Prati se {n} osoba.",
@@ -512,6 +527,7 @@
  "by {author}": "autor {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "upravo sada",
+ "locked": "zaključano",
  "{count} kept on this phone, so chats you reopen show them at once.": "Sačuvano na ovom telefonu: {count}. Razgovori koje ponovno otvorite odmah ih prikazuju.",
  "{deleted} and {edited} kept until Discord restarts.": "Sačuvano do ponovnog pokretanja Discorda: {deleted} i {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Sačuvano na ovom telefonu: {deleted} i {edited}.",
@@ -527,105 +543,105 @@
  "{name} sent you a DM": "{name} vam je poslao/la izravnu poruku",
  "{n} DM": "{n} izravna poruka",
  "{n} DMs": {
-  "one": "{n} izravna poruka",
   "few": "{n} izravne poruke",
+  "one": "{n} izravna poruka",
   "other": "{n} izravnih poruka"
  },
  "{n} account saved (up to {max}).": "{n} spremljen račun (do {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "{n} spremljen račun (do {max}).",
   "few": "{n} spremljena računa (do {max}).",
+  "one": "{n} spremljen račun (do {max}).",
   "other": "{n} spremljenih računa (do {max})."
  },
  "{n} chosen people": {
-  "one": "{n} odabranu osobu",
   "few": "{n} odabrane osobe",
+  "one": "{n} odabranu osobu",
   "other": "{n} odabranih osoba"
  },
  "{n} chosen person": "{n} odabranu osobu",
  "{n} color token": "{n} žeton u boji",
  "{n} color tokens": {
-  "one": "{n} žeton u boji",
   "few": "{n} žetona u boji",
+  "one": "{n} žeton u boji",
   "other": "{n} žetona u boji"
  },
  "{n} day": "{n} dan",
  "{n} days": {
-  "one": "{n} dan",
   "few": "{n} dana",
+  "one": "{n} dan",
   "other": "{n} dana"
  },
  "{n} deleted message": "{n} izbrisana poruka",
  "{n} deleted messages": {
-  "one": "{n} izbrisana poruka",
   "few": "{n} izbrisane poruke",
+  "one": "{n} izbrisana poruka",
   "other": "{n} izbrisanih poruka"
  },
  "{n} edited message": "{n} uređena poruka",
  "{n} edited messages": {
-  "one": "{n} uređena poruka",
   "few": "{n} uređene poruke",
+  "one": "{n} uređena poruka",
   "other": "{n} uređenih poruka"
  },
  "{n} friend selected.": "Odabran je {n} prijatelj.",
  "{n} friends selected.": {
-  "one": "Odabran je {n} prijatelj.",
   "few": "Odabrana su {n} prijatelja.",
+  "one": "Odabran je {n} prijatelj.",
   "other": "Odabrano je {n} prijatelja."
  },
  "{n} hour": "{n} sat",
  "{n} hours": {
-  "one": "{n} sat",
   "few": "{n} sata",
+  "one": "{n} sat",
   "other": "{n} sati"
  },
  "{n} minute": "{n} minutu",
  "{n} minutes": {
-  "one": "{n} minutu",
   "few": "{n} minute",
+  "one": "{n} minutu",
   "other": "{n} minuta"
  },
  "{n} month": "{n} mjesec",
  "{n} months": {
-  "one": "{n} mjesec",
   "few": "{n} mjeseca",
+  "one": "{n} mjesec",
   "other": "{n} mjeseci"
  },
  "{n} second ago": "prije {n} sekundu",
  "{n} seconds ago": {
-  "one": "prije {n} sekundu",
   "few": "prije {n} sekunde",
+  "one": "prije {n} sekundu",
   "other": "prije {n} sekundi"
  },
  "{n} server": "{n} server",
  "{n} server was marked as read": "{n} server označen je pročitanim",
  "{n} servers": {
-  "one": "{n} server",
   "few": "{n} servera",
+  "one": "{n} server",
   "other": "{n} servera"
  },
  "{n} servers were marked as read": {
-  "one": "{n} server označen je pročitanim",
   "few": "{n} servera označena su pročitanima",
+  "one": "{n} server označen je pročitanim",
   "other": "{n} servera označeno je pročitanima"
  },
  "{n} theme installed.": "Tema {n} instalirana.",
  "{n} themes installed.": {
-  "one": "{n} tema instalirana.",
   "few": "Instalirane {n} teme.",
+  "one": "{n} tema instalirana.",
   "other": "Instalirano {n} tema."
  },
  "{n} translation": "{n} prijevod",
  "{n} translations": {
-  "one": "{n} prijevod",
   "few": "{n} prijevoda",
+  "one": "{n} prijevod",
   "other": "{n} prijevoda"
  },
  "{n} waiting.": "Na čekanju: {n}.",
  "{n} year": "{n} godinu",
  "{n} years": {
-  "one": "{n} godinu",
   "few": "{n} godine",
+  "one": "{n} godinu",
   "other": "{n} godina"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Uključeno {on} od {total} značajki. Uključite ih ili isključite u Značajkama.",

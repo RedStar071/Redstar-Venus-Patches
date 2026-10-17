@@ -1,3 +1,43 @@
+## [1.14.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.13.0...v1.14.0) (2026-10-17)
+
+### ✨ New Features
+
+* **Discord - Show hidden channels:** Add an option to turn off the locked-channel menu, so tapping a locked channel does nothing ([#62](https://github.com/VenusIsJaded/Venus-Patches/issues/62))
+
+### 🐛 Bug Fixes
+
+* **Discord - Account switcher:** Fixed every added account disappearing after Discord was closed in the background for a while and reopened ([#63](https://github.com/VenusIsJaded/Venus-Patches/issues/63))
+* **Discord - Show hidden channels:** Fixed scrolling past a locked channel showing its menu even though you never tapped it ([#62](https://github.com/VenusIsJaded/Venus-Patches/issues/62))
+* **Discord - Show hidden channels:** Fixed opening a server or Discord showing the menu of a locked channel you had last tapped there
+* **Discord - Show hidden channels:** Fixed a locked channel listed above the real ones being picked as the server's first channel
+* **Discord - Show hidden channels:** Fixed locked channels in the channel list showing an extra large lock beside Discord's own lock icon
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Option pages rise into place group by group, and switches and choices ease the page into its new layout
+* **Discord - Venus settings:** Segmented choices slide to the one you pick, and picked colors, themes and accounts pop in a check mark
+* **Discord - Venus settings:** Motion follows Android's Remove animations setting and stays off when it's on
+* **Discord - Venus settings:** About is a designed page with the version, a features-on bar, a count per group and a working status
+* **Discord - Venus settings:** The Features entry shows how many features are on, like "5 of 31 turned on"
+* **Discord - Complete Quests automatically:** The status card shows the running Quest's progress bar and about how many minutes are left
+* **Discord - Venus settings:** Every preview looks like the part of Discord it changes, with its header, message bar and menus
+* **Discord - Venus settings:** Previews can be watched like a short video, with readable steps, a progress bar, pause and start over
+* **Discord - Venus settings:** Try it on a preview shows a tip with what to tap next until you've tried everything
+* **Discord - Double-tap to reply:** The preview shows a double-tap reply, then triple-tapping your message away, or editing it
+* **Discord - Show hidden channels:** The preview is a server's channel list with Discord's locked-channel icon; a tap opens the same details dialog as in chat
+* **Discord - Send Nitro stickers and emojis as links:** The preview sends Discord's own Wumpus emoji and sticker from the picker, never your servers' emojis or stickers
+* **Discord - Show device indicators:** The preview shows the icons in a DM, the member list and a profile, following your switches
+* **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving; tap a highlighted message to see it again
+* **Discord - Keep deleted messages:** The preview shows edits keeping their old text and a deleted message staying, outlined
+* **Discord - Pastel name colors:** The preview shows names filling in with their colors, with New people for more
+* **Discord - Translate messages:** The preview follows Automatically or Only when you ask, with Discord's message menu, and Try it switches to the original and back
+* **Discord - Read all button:** The button shows a check for a moment after it marks something as read
+* **Discord - Keep deleted messages:** How many deleted messages to keep is a choice of 100, 512, 1000 or 5000 instead of a number to type
+* **Discord - Custom themes:** One link box with a Paste or Install button replaces the separate Install and Paste rows
+* **Discord - Custom themes:** Theme rows no longer repeat "Tap to apply"; the one in use says so
+* **Discord - Account switcher:** Removed the Open quick switcher row; tap your active account to open the same sheet
+* **Discord - User and server reviews:** The Account group shows only the action you can take now, Sign in or Sign out, not a greyed-out opposite
+
 ## [1.13.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.12.0...v1.13.0) (2026-10-16)
 
 ### ✨ New Features

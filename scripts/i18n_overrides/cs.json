@@ -26,8 +26,8 @@
  "All friends": "Všichni přátelé",
  "All {n} friend selected. Tap a friend to pick individually.": "Vybrán {n} přítel. Klepnutím vyberete jednotlivě.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Vybrán {n} přítel. Klepnutím vyberete jednotlivě.",
   "few": "Vybráni všichni {n} přátelé. Klepnutím vyberete jednotlivě.",
+  "one": "Vybrán {n} přítel. Klepnutím vyberete jednotlivě.",
   "other": "Vybráno všech {n} přátel. Klepnutím vyberete jednotlivě."
  },
  "Allow Discord notifications?": "Povolit oznámení Discordu?",
@@ -73,8 +73,8 @@
  "Completed {name}.": "Splněno: {name}.",
  "Completed {n} Quest since Discord opened.": "Od otevření Discordu splněn {n} Quest.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "Od otevření Discordu splněn {n} Quest.",
   "few": "Od otevření Discordu splněny {n} Questy.",
+  "one": "Od otevření Discordu splněn {n} Quest.",
   "other": "Od otevření Discordu splněno {n} Questů."
  },
  "Console": "Konzole",
@@ -94,6 +94,7 @@
  "Custom theme": "Vlastní téma",
  "Custom themes": "Vlastní témata",
  "Czech": "čeština",
+ "DM": "SZ",
  "Danish": "dánština",
  "Delete Review": "Smazat recenzi",
  "Delete a kept message again to hide just that one.": "Smažte uchovanou zprávu znovu, abyste skryli jen ji.",
@@ -174,11 +175,14 @@
  "In DMs or in any server channel your client receives.": "Ve zprávách nebo v jakémkoli kanálu serveru, který klient přijímá.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "V chatu, reakcích a výběru emoji. Discord se znovu otevře, aby se změna použila.",
  "In lists": "V seznamech",
+ "In use": "Používá se",
  "Indonesian": "indonéština",
+ "Install": "Instalovat",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Instalujte a přepínejte barevná témata z odkazů zkompilovaných do tabulky barev Discord bez zpoždění.",
  "Install theme": "Nainstalujte motiv",
  "Installed themes": "Nainstalovaná témata",
  "Installing theme...": "Instalace motivu...",
+ "Installing...": "Instalace...",
  "Irish": "irština",
  "It will be sent as a normal file instead.": "Odešle se místo toho jako běžný soubor.",
  "Italian": "italština",
@@ -227,6 +231,8 @@
  "Marks every unread server as read.": "Označí všechny nepřečtené servery jako přečtené.",
  "Marks everything as read in one tap.": "Označí vše jako přečtené jedním klepnutím.",
  "Member list, friends, DM list and voice channels.": "Seznam členů, přátelé, seznam přímých zpráv a hlasové kanály.",
+ "Members": "Členové",
+ "Message": "Zpráva",
  "Messages": "Zprávy",
  "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.": "Zprávy a náhledy odkazů se smažou hned, bez otázky „Opravdu?“. Nelze to vrátit zpět.",
  "Messages in other languages show in yours. Their text is sent to Google Translate.": "Zprávy v jiných jazycích se zobrazí ve vašem jazyce. Jejich text se odesílá do Google Translate.",
@@ -239,6 +245,7 @@
  "Nepali": "nepálština",
  "Network fetch is unavailable right now.": "Načítání sítě je momentálně nedostupné.",
  "New Quests": "Nové Questy",
+ "New people": "Noví lidé",
  "Next to the name at the top of a DM.": "Vedle jména v horní části přímé zprávy.",
  "Next to the name on a profile.": "Vedle jména na profilu.",
  "Nitro stickers and emojis": "Nitro nálepky a emoji",
@@ -284,17 +291,21 @@
  "Other people (by user ID)": "Ostatní lidé (podle ID uživatele)",
  "Others won't see when you're typing. You still see when they are.": "Ostatní nevidí, že píšete. Vy stále vidíte, když píšou oni.",
  "Outside Discord": "Mimo Discord",
+ "Paste": "Vložit",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Výše vložte přímý odkaz na motiv .json Revenge nebo Vendetta.",
  "Paste link from clipboard": "Vložte odkaz ze schránky",
  "Pastel name colors": "Pastelové barvy jmen",
  "Pastel names": "Pastelová jména",
+ "Pause": "Pozastavit",
  "People": "Lidé",
  "People list reset": "Seznam lidí obnoven",
  "Persian": "perština",
+ "Play": "Přehrát",
  "Play Quests": "Herní Questy",
  "Play time counts without installing or opening the game.": "Herní čas se počítá bez instalace nebo otevření hry.",
  "Polish": "polština",
  "Portuguese": "portugalština",
+ "Profile": "Profil",
  "Punjabi": "paňdžábština",
  "Push notifications outside Discord": "Push oznámení mimo Discord",
  "Quest Completer": "Automatické Quests",
@@ -317,13 +328,14 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Odebere propagaci Questů nad lištou profilu. Questy stále fungují.",
  "Removes {n} saved theme and restores Discord's default colors.": "Odstraní {n} uložené téma a obnoví výchozí barvy Discord.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Odebere {n} uložený motiv a obnoví výchozí barvy Discordu.",
   "few": "Odebere {n} uložená témata a obnoví výchozí barvy Discordu.",
+  "one": "Odebere {n} uložený motiv a obnoví výchozí barvy Discordu.",
   "other": "Odebere {n} uložených motivů a obnoví výchozí barvy Discordu."
  },
  "Reopen now": "Znovu otevřít",
  "Replace role colors": "Nahradit barvy rolí",
  "Replaces Discord's font everywhere. Discord reopens to apply it. Needs Android 9 or newer.": "Nahradí písmo Discordu všude. Discord se znovu otevře, aby se změna použila. Vyžaduje Android 9 nebo novější.",
+ "Reply": "Odpovědět",
  "Reply to it": "Odpovědět",
  "Report Review": "Nahlásit recenzi",
  "Report a problem": "Nahlásit problém",
@@ -379,8 +391,8 @@
  "Show theme background image": "Zobrazit obrázek na pozadí motivu",
  "Shown {n} notification since Discord opened.": "Zobrazeno {n} oznámení od otevření Discordu.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Zobrazeno {n} oznámení od otevření Discordu.",
   "few": "Zobrazena {n} oznámení od otevření Discordu.",
+  "one": "Zobrazeno {n} oznámení od otevření Discordu.",
   "other": "Zobrazeno {n} oznámení od otevření Discordu."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Zobrazuje „general chat“ místo „general-chat“. Mění jen vzhled názvů.",
@@ -401,6 +413,7 @@
  "Spaces in channel names": "Mezery v názvech kanálů",
  "Spanish": "španělština",
  "Star any image or video in the media viewer to keep it in your GIF favourites.": "Označte hvězdičkou libovolný obrázek nebo video v prohlížeči médií a uložte si ho mezi oblíbené GIF.",
+ "Start over": "Od začátku",
  "Start typing": "Začnou psát",
  "Status": "Stav",
  "Stickers": "Nálepky",
@@ -446,12 +459,13 @@
  "Translated from {language}. Original:": "Přeloženo z jazyka: {language}. Originál:",
  "Translated {n} message since Discord opened.": "Od otevření Discordu přeložena {n} zpráva.",
  "Translated {n} messages since Discord opened.": {
-  "one": "Od otevření Discordu přeložena {n} zpráva.",
   "few": "Od otevření Discordu přeloženy {n} zprávy.",
+  "one": "Od otevření Discordu přeložena {n} zpráva.",
   "other": "Od otevření Discordu přeloženo {n} zpráv."
  },
  "Triple-tap": "Trojité klepnutí",
  "Triple-tap to delete": "Smazat trojitým klepnutím",
+ "Try it": "Vyzkoušet",
  "Trying again in {n} s.": "Zkuste to znovu za {n} s.",
  "Turkish": "turečtina",
  "Turned off. Switch it on in Features to start.": "Vypnuto. Zapněte to ve Funkcích.",
@@ -478,16 +492,17 @@
  "Vietnamese": "vietnamština",
  "View Anyway": "Přesto zobrazit",
  "Waiting for new Quests.": "Čeká se na nové Questy.",
+ "Watch": "Sledovat",
  "Watching all friends.": "Sledováni všichni přátelé.",
  "Watching all {n} friends.": {
-  "one": "Sledován {n} přítel.",
   "few": "Sledováni všichni {n} přátelé.",
+  "one": "Sledován {n} přítel.",
   "other": "Sledováno všech {n} přátel."
  },
  "Watching {n} friend.": "Sledován {n} přítel.",
  "Watching {n} people.": {
-  "one": "Sledován {n} člověk.",
   "few": "Sledováni {n} lidé.",
+  "one": "Sledován {n} člověk.",
   "other": "Sledováno {n} lidí."
  },
  "Watching {n} person.": "Sledován {n} člověk.",
@@ -512,6 +527,7 @@
  "by {author}": "podle {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "právě teď",
+ "locked": "zamčeno",
  "{count} kept on this phone, so chats you reopen show them at once.": "V tomto telefonu uchováno: {count}. Znovu otevřené chaty je ukážou hned.",
  "{deleted} and {edited} kept until Discord restarts.": "Uchováno do restartu Discordu: {deleted} a {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Uchováno v tomto telefonu: {deleted} a {edited}.",
@@ -527,105 +543,105 @@
  "{name} sent you a DM": "{name} vám poslal(a) soukromou zprávu",
  "{n} DM": "{n} přímá zpráva",
  "{n} DMs": {
-  "one": "{n} přímá zpráva",
   "few": "{n} přímé zprávy",
+  "one": "{n} přímá zpráva",
   "other": "{n} přímých zpráv"
  },
  "{n} account saved (up to {max}).": "{n} uložený účet (až {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "{n} uložený účet (až {max}).",
   "few": "{n} uložené účty (až {max}).",
+  "one": "{n} uložený účet (až {max}).",
   "other": "{n} uložených účtů (až {max})."
  },
  "{n} chosen people": {
-  "one": "{n} vybranou osobu",
   "few": "{n} vybrané osoby",
+  "one": "{n} vybranou osobu",
   "other": "{n} vybraných osob"
  },
  "{n} chosen person": "{n} vybranou osobu",
  "{n} color token": "{n} barevný token",
  "{n} color tokens": {
-  "one": "{n} barevný žeton",
   "few": "{n} barevné žetony",
+  "one": "{n} barevný žeton",
   "other": "{n} barevných žetonů"
  },
  "{n} day": "{n} dnem",
  "{n} days": {
-  "one": "{n} dnem",
   "few": "{n} dny",
+  "one": "{n} dnem",
   "other": "{n} dny"
  },
  "{n} deleted message": "{n} smazaná zpráva",
  "{n} deleted messages": {
-  "one": "{n} smazaná zpráva",
   "few": "{n} smazané zprávy",
+  "one": "{n} smazaná zpráva",
   "other": "{n} smazaných zpráv"
  },
  "{n} edited message": "{n} upravená zpráva",
  "{n} edited messages": {
-  "one": "{n} upravená zpráva",
   "few": "{n} upravené zprávy",
+  "one": "{n} upravená zpráva",
   "other": "{n} upravených zpráv"
  },
  "{n} friend selected.": "Vybrán {n} přítel.",
  "{n} friends selected.": {
-  "one": "Vybrán {n} přítel.",
   "few": "Vybráni {n} přátelé.",
+  "one": "Vybrán {n} přítel.",
   "other": "Vybráno {n} přátel."
  },
  "{n} hour": "{n} hodinou",
  "{n} hours": {
-  "one": "{n} hodinou",
   "few": "{n} hodinami",
+  "one": "{n} hodinou",
   "other": "{n} hodinami"
  },
  "{n} minute": "{n} minutou",
  "{n} minutes": {
-  "one": "{n} minutou",
   "few": "{n} minutami",
+  "one": "{n} minutou",
   "other": "{n} minutami"
  },
  "{n} month": "{n} měsícem",
  "{n} months": {
-  "one": "{n} měsícem",
   "few": "{n} měsíci",
+  "one": "{n} měsícem",
   "other": "{n} měsíci"
  },
  "{n} second ago": "před {n} sekundou",
  "{n} seconds ago": {
-  "one": "před {n} sekundou",
   "few": "před {n} sekundami",
+  "one": "před {n} sekundou",
   "other": "před {n} sekundami"
  },
  "{n} server": "{n} server",
  "{n} server was marked as read": "{n} server byl označen jako přečtený",
  "{n} servers": {
-  "one": "{n} server",
   "few": "{n} servery",
+  "one": "{n} server",
   "other": "{n} serverů"
  },
  "{n} servers were marked as read": {
-  "one": "{n} server byl označen jako přečtený",
   "few": "{n} servery byly označeny jako přečtené",
+  "one": "{n} server byl označen jako přečtený",
   "other": "{n} serverů bylo označeno jako přečtené"
  },
  "{n} theme installed.": "{n} motiv nainstalován.",
  "{n} themes installed.": {
-  "one": "{n} motiv nainstalován.",
   "few": "{n} nainstalované motivy.",
+  "one": "{n} motiv nainstalován.",
   "other": "{n} nainstalovaných motivů."
  },
  "{n} translation": "{n} překlad",
  "{n} translations": {
-  "one": "{n} překlad",
   "few": "{n} překlady",
+  "one": "{n} překlad",
   "other": "{n} překladů"
  },
  "{n} waiting.": "Čeká: {n}.",
  "{n} year": "{n} rokem",
  "{n} years": {
-  "one": "{n} rokem",
   "few": "{n} lety",
+  "one": "{n} rokem",
   "other": "{n} lety"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Zapnuto {on} z {total} funkcí. Zapněte nebo vypněte je ve Funkcích.",

@@ -8,7 +8,7 @@ const text = node => node && node.type === 'Literal' && typeof node.value === 's
 // Helpers whose string arguments (by position) are passed through tr() inside them.
 const ARGS = {tr:[0], pl:[1, 2], take:[1, 2], footnote:[1], statusCard:[1], reviewToast:[1], confirmAction:[0, 1, 2], actionRow:[2, 3],
     switchRow:[2, 3], toggle:[2, 3], withOptions:[3, 4, 5], route:[1], section:[0], settingNode:[1, 2], link:[1, 2], option:[1, 2],
-    radioGroup:[2], groupTitle:[1], inputWithButton:[4], picker:[1], count:[], questStatus:[0], mutate:[3], userNotifShow:[0]};
+    radioGroup:[2], groupTitle:[1], linkRow:[1, 2], pill:[1], button:[2], previewScreen:[2], inputWithButton:[4], picker:[1], count:[], questStatus:[0], mutate:[3], userNotifShow:[0]};
 function strings(node, out) {
     if (!node) return;
     const value = text(node);

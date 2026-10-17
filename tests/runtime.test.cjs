@@ -545,7 +545,7 @@ function reactHarness(b) {
     const React = {
         createElement(type, props, ...children) { return {type, props:{...props, ...(children.length ? {children:children.length === 1 ? children[0] : children} : {})}}; },
         cloneElement(node, props) {return {...node, props:{...node.props,...props}};},
-        useState:() => [0, () => {}], useEffect() {},
+        useState:() => [0, () => {}], useEffect() {}, useRef:value => ({current:value}),
     };
     const RN = {View:'View', Text:'Text', Image:'Image', Modal:'Modal', Pressable:'Pressable'};
     b.load(React, null, 19); b.load(RN, null, 17);
@@ -594,11 +594,11 @@ test('native registry adds authorless About, Settings and option-page routes wit
     for (const key of ['VENUS_GENERAL','VENUS_PLUGINS','VENUS_FREENITRO']) {
         assert.equal(b.registry[key].type,'route'); assert.equal(b.registry[key].screen.route,key);
         const screen=b.registry[key].screen.getComponent();assert.equal(screen,b.registry[key].screen.getComponent());
-        if (key!=='VENUS_FREENITRO') assert.equal(screen().type,b.SettingsList);
+        if (key==='VENUS_PLUGINS') assert.equal(screen().type,b.SettingsList);
     }
     // Nitro links is a designed page with a preview; its options stay real setting nodes for Discord's search.
     const nitro=pageNodes(b.registry.VENUS_FREENITRO.screen.getComponent()());
-    assert.ok(nitro.some(n=>n.props&&n.props.accessibilityLabel==='Nitro link preview'));
+    assert.ok(nitro.some(n=>n.type&&n.type.name==='NitroPreview'));
     assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
     assert.equal(b.registry.VENUS_STICKERS.parent,'VENUS_FREENITRO');
     for (const value of Object.values(b.registry)) assert.equal(value.authors,undefined);
@@ -863,8 +863,8 @@ test('immutable function export hooks retain the Metro module marker and stock d
 
 test('attachment tools and all five ports live in Features, never About', () => {
     const b=settingsHarness();
-    const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
-    assert.deepEqual(Array.from(general.sections,s=>s.label),['Venus Patches','Links']);
+    assert.deepEqual(Object.keys(b.registry).filter(id=>b.registry[id].parent==='VENUS_GENERAL'),
+        ['VENUS_VERSION','VENUS_STATUS','VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']);
     for (const id of ['PICKER','VOICE','NOTYPING','NODELETE','JUMPTOTOP','HIDDENCHANNELS','QUICKDELETE'])
         assert.equal(b.registry['VENUS_'+id].parent,'VENUS_PLUGINS');
     for (const key of ['quickDelete','noDelete','hiddenChannels']) assert.equal(b.api.settings[key],false);
@@ -990,7 +990,10 @@ function hiddenHarness() {
     const store=b.load({default:{getChannels:()=>result}},null,4470).default;
     const fetched=[];const actions=b.load({default:{fetchMessages:value=>fetched.push(value)}},null,6880).default;
     const label=b.load({default:channel=>channel.name},null,4990).default;
-    return {...b,channels,allowed,permission,viewPermission,result,store,actions,fetched,alerts,label};
+    // A real tap on a channel row: Discord navigates (transitionToChannel -> router_utils.transitionTo 1113).
+    const navigated=[];const routes=b.load({transitionTo:r=>navigated.push(r),replaceWith:r=>navigated.push(r),transitionToGuild:(g,c)=>navigated.push([g,c])},null,1113);
+    const tap=id=>routes.transitionTo('/channels/g/'+id);
+    return {...b,channels,allowed,permission,viewPermission,result,store,actions,fetched,alerts,label,routes,navigated,tap};
 }
 test('Hidden Channels adds cached metadata immutably, deduplicates categories and leaves permissions intact', () => {
     const b=hiddenHarness();assert.equal(b.store.getChannels('g'),b.result);b.api.setSetting('hiddenChannels',true);
@@ -1028,23 +1031,66 @@ test('Hidden Channels with the switch off walks a server\'s channels once, not o
     b.api.setSetting('hiddenChannels',true);store.getChannels('g');
     assert.ok(reads>1);
 });
-test('Hidden Channels refuses message fetches for locked channels and preserves visible or disabled traffic', async () => {
+test('Hidden Channels refuses message fetches for locked channels silently and preserves visible or disabled traffic', async () => {
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
-    await b.actions.fetchMessages({channelId:'hidden'});assert.equal(b.fetched.length,0);assert.equal(b.alerts[0][0],'Locked channel');assert.match(b.alerts[0][1],/Created: Unavailable/);assert.match(b.alerts[0][1],/Last message: No messages yet/);
+    // A fetch is never a tap: press-in preloads (scrolling) and startup restores must not show the details (#62).
+    await b.actions.fetchMessages({channelId:'hidden',isPreload:true});await b.actions.fetchMessages({channelId:'hidden'});
+    assert.equal(b.fetched.length,0);assert.equal(b.alerts.length,0,'no menu while scrolling or opening the app (#62)');
+    b.tap('hidden');assert.equal(b.alerts[0][0],'Locked channel');assert.match(b.alerts[0][1],/Created: Unavailable/);assert.match(b.alerts[0][1],/Last message: No messages yet/);
     b.actions.fetchMessages({channelId:'public'});assert.equal(b.fetched.length,1);
     b.api.setSetting('hiddenChannels',false);b.actions.fetchMessages({channelId:'hidden'});assert.equal(b.fetched.length,2);
+});
+test('Hidden Channels: scrolling past a locked channel (press-in preload) never shows its menu, a tap does (#62)',()=>{
+    const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
+    // ChannelActionCreators.preload on onPressIn -> CHANNEL_PRELOAD -> MessageManager.fetchMessages({isPreload:true}).
+    for(let i=0;i<5;i++) b.actions.fetchMessages({guildId:'g',channelId:'hidden',isPreload:true});
+    assert.equal(b.alerts.length,0);assert.equal(b.fetched.length,0,'locked channel messages are still never loaded');
+    b.tap('hidden');assert.equal(b.alerts.length,1);assert.equal(b.navigated.length,0,'waits for View Anyway');
+    b.alerts[0][2][1].onPress();assert.deepEqual(b.navigated,['/channels/g/hidden'],'View Anyway opens it');
+});
+test('Hidden Channels option turns the locked-channel menu off: tapping does nothing (#62)',()=>{
+    const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
+    assert.equal(b.api.settings.hiddenChannelsMenu,true,'the menu starts on');
+    b.api.setSetting('hiddenChannelsMenu',false);
+    b.tap('hidden');assert.equal(b.alerts.length,0,'no menu');assert.equal(b.navigated.length,0,'and the channel stays closed');
+    b.tap('public');assert.deepEqual(b.navigated,['/channels/g/public'],'real channels still open');
+    b.api.setSetting('hiddenChannelsMenu',true);b.tap('hidden');assert.equal(b.alerts.length,1);
+});
+test('Hidden Channels: opening a server or the app never lands on a locked channel, and real channels come first',()=>{
+    const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
+    // Locked 'hidden' sits above the real 'public' channel in the list.
+    b.channels.hidden={...b.channels.hidden,position:-1};
+    const view=b.permission.can;
+    const guildStore=b.load({default:{
+        getChannels(){return {SELECTABLE:[{channel:b.channels.hidden,comparator:-1},{channel:b.channels.public,comparator:0}]};},
+        getFirstChannel(guild,predicate){return (this.getChannels(guild).SELECTABLE.find(predicate)||{}).channel||null;},
+        getDefaultChannel(guild){return this.getFirstChannel(guild,e=>view(b.viewPermission,e.channel));}
+    }},null,4470).default;
+    assert.equal(guildStore.getDefaultChannel('g').id,'public','a locked channel is never the first channel over a real one');
+    // Discord remembers the locked channel as the last one picked in the server, and as the current channel at startup.
+    let last='hidden';
+    const selected=b.load({default:{getChannelId:guild=>last}},null,2102).default;
+    assert.equal(selected.getChannelId('g'),'public','opening the server lands on its first real channel');
+    assert.equal(selected.getChannelId(),'public','opening the app lands on a real channel');
+    last='public';assert.equal(selected.getChannelId('g'),'public');
+    // Tapping the server in the guild bar with a remembered locked channel goes to the real one, no menu.
+    b.routes.transitionToGuild('g','hidden');assert.equal(b.alerts.length,0);assert.deepEqual(b.navigated.at(-1),['g','public']);
+    // A locked channel opened on purpose with View Anyway stays open.
+    last='hidden';b.tap('hidden');b.alerts[0][2][1].onPress();assert.equal(selected.getChannelId('g'),'hidden');
+    b.api.setSetting('hiddenChannels',false);last='second';assert.equal(selected.getChannelId('g'),'second');
 });
 
 test('Hidden Channels blocks only locked channel navigation, including voice, with real native flag objects', () => {
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);const calls=[];
     const navigation=b.load({transitionTo:(...args)=>calls.push(args),replaceWith:(...args)=>calls.push(args),transitionToGuild:(...args)=>calls.push(args)},null,1113);
-    navigation.transitionTo('/channels/g/hidden');navigation.replaceWith('/channels/g/voice');navigation.transitionToGuild('g','hidden');
+    navigation.transitionTo('/channels/g/hidden');navigation.replaceWith('/channels/g/voice');navigation.transitionTo('/channels/g/hidden');
     // The still-open prompt for 'hidden' is not stacked a second time.
     assert.equal(calls.length,0);assert.equal(b.alerts.length,2);assert.equal(b.alerts[1][0],'Locked voice channel');
-    b.alerts[0][2][0].onPress();navigation.transitionToGuild('g','hidden');assert.equal(b.alerts.length,3);
+    // Opening the server with a remembered locked channel never asks: it goes to the server without it.
+    navigation.transitionToGuild('g','hidden');assert.equal(b.alerts.length,2);assert.equal(calls.length,1);assert.notEqual(calls[0][1],'hidden');
     navigation.transitionTo('/channels/g/public',{keep:true});navigation.transitionTo('/settings/hidden');navigation.transitionToGuild('g','public');
-    assert.equal(calls.length,3);assert.deepEqual(calls[0][1],{keep:true});
-    b.api.setSetting('hiddenChannels',false);navigation.transitionTo('/channels/g/hidden');assert.equal(calls.length,4);
+    assert.equal(calls.length,4);assert.deepEqual(calls[1][1],{keep:true});
+    b.api.setSetting('hiddenChannels',false);navigation.transitionTo('/channels/g/hidden');assert.equal(calls.length,5);
 });
 test('Hidden Channels cache refreshes replaced records and parent metadata without stale references', () => {
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);const first=b.store.getChannels('g');
@@ -1468,7 +1514,8 @@ test('ReviewDB settings: Account and Settings groups with native rows',()=>{
     const b=reviewHarness();b.api.setSetting('reviewDB',true);const tree=b.Settings();
     assert.deepEqual(walkElements(tree,n=>n.type==='RowGroup').map(n=>n.props.title),['Account','Display']);
     const login=walkElements(tree,n=>n.props.label==='Sign in to ReviewDB')[0];assert.equal(login.type,'NativeRow');assert.equal(login.props.arrow,true);assert.equal(login.props.disabled,false);
-    const logout=walkElements(tree,n=>n.props.label==='Sign out of ReviewDB')[0];assert.equal(logout.props.disabled,true);assert.match(logout.props.subLabel,/Authorized Apps/);
+    // One row: the action you can take now, never a greyed-out opposite.
+    assert.equal(walkElements(tree,n=>n.props.label==='Sign out of ReviewDB').length,0,'no disabled sign-out row while signed out');
     // The main switch lives on the Settings list row, not repeated on its page.
     assert.deepEqual(walkElements(tree,n=>n.type==='SwitchRow').map(n=>n.props.label),['Show the be-respectful note']);
     assert.equal(walkElements(tree,n=>n.type==='Stack')[0].props.spacing,24);
@@ -1480,7 +1527,9 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
     props.dismissOAuthModal();assert.deepEqual(b.popped,['oauth2-authorize']);
     props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=a%2Bb'});await flush();await flush();
     assert.equal(b.requests[0][0],'https://manti.vendicated.dev/api/reviewdb/auth?code=a%2Bb&returnType=json&clientMod=vendetta');
-    assert.equal(b.popped.length,1);assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,1);
+    assert.equal(b.popped.length,1);assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB').length,1);
+    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign in to ReviewDB').length,0,'sign-in row replaced by sign-out');
+    assert.match(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB')[0].props.subLabel,/Authorized Apps/);
     assert.equal(b.toasts.at(-1).content,'Signed in to ReviewDB');
     // Like Discord's own toasts, Venus's carry an icon for what just happened.
     assert.equal(typeof b.toasts.at(-1).IconComponent,'function','sign-in toast has an icon');
@@ -1491,7 +1540,7 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
 test('ReviewDB sign-in survives disabling the plugin and logs out explicitly, and stays signed in',async()=>{
     const b=reviewHarness();const props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=x'});await flush();await flush();
     b.api.setSetting('reviewDB',false);b.api.setSetting('reviewDB',true);
-    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,1);
+    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB').length,1);
     walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB')[0].props.onPress();
     assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign in to ReviewDB').length,1);
 });
@@ -1503,7 +1552,7 @@ test('ReviewDB cancellation, malformed redirects and account switches never sign
     let resolve;b.context.fetch=()=>new Promise(done=>{resolve=done;});
     props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=late'});await flush();
     b.account.id='222222222222222222';resolve({ok:true,json:async()=>({success:true,token:'must-not-survive'})});await flush();await flush();
-    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Signed in to ReviewDB').length,0);
+    assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign out of ReviewDB').length,0);
 });
 test('ReviewDB profile section renders directly after the profile note card directly beneath it',async()=>{
     const b=reviewHarness();assert.equal(b.note({userId:'222222222222222222'}).props.children[0],b.noteOriginal);
@@ -1589,7 +1638,7 @@ test('Hidden Channels information uses only cached topics, parent and snowflake/
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
     const id=String((BigInt(Date.UTC(2020,0,1)-1420070400000)<<22n)+1n);
     b.channels.details={...b.channels.hidden,id,lastMessageId:id,lastPinTimestamp:'2020-01-02T00:00:00.000Z'};
-    b.actions.fetchMessages({channelId:'details'});assert.equal(b.fetched.length,0);
+    b.tap('details');b.actions.fetchMessages({channelId:'details'});assert.equal(b.fetched.length,0);
     const text=b.alerts.at(-1)[1];assert.match(text,/Created: .*ago \(.*2020/);assert.match(text,/Last message: .*ago \(.*2020/);assert.match(text,/Last pin: .*2020/);assert.doesNotMatch(text,/Category:|Topic:/);
 });
 
@@ -1645,7 +1694,7 @@ test('Hidden Channels popup shows precise relative timestamps',()=>{
     const ago = 8*day + 7*hour + 7*minute;
     const id = String((BigInt(Date.now()-ago-1420070400000)<<22n)+1n);
     b.channels.timed={...b.channels.hidden,id,lastMessageId:id,lastPinTimestamp:new Date(Date.now()-ago).toISOString()};
-    b.actions.fetchMessages({channelId:'timed'});
+    b.tap('timed');
     const text=b.alerts.at(-1)[1];
     assert.match(text,/8 days, 7 hours and 7 minutes ago/);
 });
@@ -1658,7 +1707,7 @@ test('Hidden Channels popup uses Discord\'s native AlertModal with themed Text t
     const ago = 8*day + 7*hour + 7*minute;
     const id = String((BigInt(Date.now()-ago-1420070400000)<<22n)+1n);
     b.channels.timed={...b.channels.hidden,id,lastMessageId:id,lastPinTimestamp:new Date(Date.now()-ago).toISOString()};
-    b.actions.fetchMessages({channelId:'timed'});
+    b.tap('timed');
     assert.equal(shown.length,1);assert.equal(b.alerts.length,0);assert.deepEqual(required.sort(),[4833,5205]);
     const alert=shown[0];
     // Strings + element children select the modern AlertModal path in AlertActionCreators.show.
@@ -1672,14 +1721,15 @@ test('Hidden Channels popup uses Discord\'s native AlertModal with themed Text t
     assert.match(dump,/8 days, 7 hours and 7 minutes ago/);assert.match(dump,/CREATED/);assert.match(dump,/LAST PIN/);
     assert.doesNotMatch(dump+alert.title+alert.body,/Category:|Topic:|staff-chat|Staff only|#[0-9a-f]{6}/i);
     // Duplicate triggers for the same tap do not stack; cancel releases the guard.
-    b.actions.fetchMessages({channelId:'timed'});assert.equal(shown.length,1);
-    alert.onCancel();b.actions.fetchMessages({channelId:'timed'});assert.equal(shown.length,2);
-    shown[1].onConfirm();assert.equal(b.fetched.length,1);
+    b.tap('timed');assert.equal(shown.length,1);
+    alert.onCancel();b.tap('timed');assert.equal(shown.length,2);
+    shown[1].onConfirm();assert.deepEqual(b.navigated,['/channels/g/timed']);
+    b.actions.fetchMessages({channelId:'timed'});assert.equal(b.fetched.length,1);
 });
 test('Hidden Channels never presents a server redaction as a real name or fetches unknown names',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};b.channels.cat={...b.channels.cat,name:'__hidden__'};
     assert.equal(b.label(b.channels.hidden),'Hidden channel (name unavailable)');assert.equal(b.label(b.channels.cat),'Hidden category (name unavailable)');
-    b.actions.fetchMessages({channelId:'hidden'});assert.equal(b.fetched.length,0);
+    b.tap('hidden');b.actions.fetchMessages({channelId:'hidden'});assert.equal(b.fetched.length,0);
     assert.doesNotMatch(String(b.alerts[0][1]),/__hidden__|\[locked\]|Category:|Topic:/);
 });
 test('Hidden Channels cached gateway names clear on logout, account switch and channel removal but survive disabling',()=>{
@@ -1694,11 +1744,12 @@ test('Hidden Channels cached gateway names clear on logout, account switch and c
     remember();b.api.setSetting('hiddenChannels',false);assert.equal(b.store.getChannels('g'),b.result);
     b.api.setSetting('hiddenChannels',true);assert.equal(b.label(b.channels.hidden),'received name');
 });
-test('Hidden Channels uses a native lock icon and preserves frozen ChannelInfo and stock disabled output',()=>{
+test('Hidden Channels adds no second lock and preserves frozen ChannelInfo and stock disabled output',()=>{
     const b=hiddenHarness(),{React}=reactHarness(b);b.api.setSetting('hiddenChannels',true);
     b.load({LockIcon:'NativeLock'},null,5410);const original=Object.freeze(React.createElement('ChannelInfo',{children:'staff'}));
     const info=b.load({default:()=>original},null,15859).default;
-    const tree=info({channel:b.channels.hidden});assert.equal(tree.props.children[0].type,'NativeLock');assert.equal(tree.props.children[1],original);assert.match(tree.props.accessibilityLabel,/locked/);
+    // Discord draws its own TextLockIcon for the row; Venus no longer adds a second, bigger lock beside the name.
+    const tree=info({channel:b.channels.hidden});assert.equal(tree.props.children,original);assert.match(tree.props.accessibilityLabel,/locked/);
     b.api.setSetting('hiddenChannels',false);assert.equal(info({channel:b.channels.hidden}),original);
 });
 test('PlatformIndicators uses the bundled tinted PNG glyphs for desktop and mobile',()=>{
@@ -1749,9 +1800,10 @@ test('Hidden Channels includes basic-only native metadata and blocks its message
     const parent={id:'basic-cat',guild_id:'g',type:4,name:'BASIC CATEGORY',position:6};const basic={'basic-only':extra,'basic-cat':parent};
     b.load({default:{getChannel:id=>b.channels[id],getBasicChannel:id=>basic[id],getMutableGuildChannelsForGuild:()=>b.channels,getMutableBasicGuildChannelsForGuild:()=>basic}},null,2051);
     const list=b.store.getChannels('g');assert.equal(list.SELECTABLE.find(entry=>entry.channel.id===extra.id).channel.name,'private-basic');assert.equal(list[4].find(entry=>entry.channel.id===parent.id).channel.name,'BASIC CATEGORY');
-    assert.equal(b.store.getChannels('g'),list);await b.actions.fetchMessages({channelId:extra.id});assert.equal(b.fetched.length,0);assert.match(b.alerts.at(-1)[1],/Created: Unavailable/);
+    assert.equal(b.store.getChannels('g'),list);await b.actions.fetchMessages({channelId:extra.id});assert.equal(b.fetched.length,0);
     const calls=[];const routes=b.load({transitionTo:r=>calls.push(r),transitionToGuild:(g,c)=>calls.push(c)},null,1113);
-    routes.transitionTo('/channels/g/basic-only');routes.transitionToGuild('g','basic-only');assert.equal(calls.length,0);
+    routes.transitionTo('/channels/g/basic-only');assert.equal(calls.length,0);assert.match(b.alerts.at(-1)[1],/Created: Unavailable/);
+    routes.transitionToGuild('g','basic-only');assert.equal(calls.length,1);assert.notEqual(calls[0],'basic-only');
     assert.equal(b.permission.can(b.viewPermission,extra),true);
     assert.equal(b.permission.can(b.viewPermission,Object.assign({},extra,{realCheck:true})),false);
 });
@@ -2114,9 +2166,18 @@ test('row icons are Discord\'s own, loaded when drawn, with a fallback',()=>{
 });
 test('About shows the version, features on, status and links',()=>{
     const b=settingsHarness();const opened=[];
-    const general=b.registry.VENUS_GENERAL.screen.getComponent()().props.node;
-    assert.deepEqual(JSON.parse(JSON.stringify(general.sections)),[{label:'Venus Patches',settings:['VENUS_VERSION','VENUS_STATUS']},
-        {label:'Links',settings:['VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']}]);
+    // About is a designed page: the version up top, features on with a bar and a chip per group, a status line, and links.
+    function Text(){} function TableRow(){}
+    b.context.__r=id=>({4833:{Text},5916:{TableRow}}[id]||null);
+    const about=()=>pageNodes(b.registry.VENUS_GENERAL.screen.getComponent()());
+    const texts=()=>about().filter(n=>n.type===Text).map(n=>n.props.children);
+    assert.ok(texts().some(t=>/^Venus Patches \d/.test(t)),'version in the header');
+    assert.ok(texts().includes('For Discord 348.10'));
+    assert.ok(about().some(n=>n.type&&n.type.name==='VenusProgress'&&n.props.value>=0&&n.props.value<=1),'a bar for features on');
+    assert.ok(about().some(n=>n.props&&/^Messages: \d+\/\d+$/.test(n.props.accessibilityLabel||'')),'a chip per group');
+    assert.deepEqual(about().filter(n=>n.type===TableRow).map(n=>n.props.label),["What's new",'Report a problem','Source code']);
+    // The native rows stay, so Discord's settings search still finds them.
+    for (const id of ['VENUS_VERSION','VENUS_STATUS','VENUS_LINK_CHANGES','VENUS_LINK_ISSUES','VENUS_LINK_SOURCE']) assert.equal(b.registry[id].parent,'VENUS_GENERAL');
     assert.match(b.registry.VENUS_VERSION.useDescription(),/^\d+ of 31 features on/);
     b.api.setSetting('dashless',false);const before=Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]);
     b.api.setSetting('dashless',true);assert.equal(Number(b.registry.VENUS_VERSION.useDescription().split(' ')[0]),before+1);
@@ -2132,7 +2193,7 @@ test('settings with more options have a switch and a separate button to their pa
     b.context.__r=id=>({6622:{FormSwitch},6631:{ChevronSmallRightIcon},1491:{useStackNavigation:()=>navigation},
         14239:{onRouteSettingOnPress:({navigation:nav,screen})=>nav.navigate(screen.route)}}[id]||null);
     const pages={VENUS_PASTELIZE:'pastelize',VENUS_FREENITRO:'freeNitro',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_TRANSLATE:'translate',
-        VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests',VENUS_GESTURES:'gestures',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher'};
+        VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests',VENUS_GESTURES:'gestures',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',VENUS_HIDDENCHANNELS:'hiddenChannels'};
     for (const [page,key] of Object.entries(pages)) {
         const row=b.registry[page+'_ROW'];
         assert.equal(row.type,'pressable');assert.equal(row.parent,'VENUS_PLUGINS');assert.equal(row.unsearchable,true);
@@ -2153,7 +2214,7 @@ test('settings with more options have a switch and a separate button to their pa
     const prev=b.context.__r;b.context.__r=id=>id===6621?{TableSwitchRow}:prev(id);
     const pastel=pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()());
     assert.deepEqual(pastel.filter(n=>n.type===TableSwitchRow).map(n=>n.props.key),['pastelAll','pastelContent']);
-    assert.ok(pastel.some(n=>n.props&&n.props.accessibilityLabel==='Pastel names preview'));
+    assert.ok(pastel.some(n=>n.type&&n.type.name==='PastelPreview'));
     pastel.find(n=>n.type===TableSwitchRow&&n.props.key==='pastelAll').props.onValueChange(false);assert.equal(b.api.settings.pastelAll,false);
     assert.equal(b.registry.VENUS_PASTELCONTENT.parent,'VENUS_PASTELIZE');
 });
@@ -2296,9 +2357,15 @@ test('option page switches are greyed out while their main switch is off',()=>{
     b.api.setSetting('noDelete',false);assert.deepEqual(rows('VENUS_NODELETE').map(n=>n.props.disabled),[true,true]);
     b.api.setSetting('noDelete',true);assert.deepEqual(rows('VENUS_NODELETE').map(n=>n.props.disabled),[false,false]);
     assert.match(row('VENUS_NODELETE','noDeleteEdits').props.subLabel,/before it was edited/);
-    const input=()=>{let found;(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);
-        if(n.props&&n.props.keyboardType==='number-pad')found=n;walk(n.props&&n.props.children);})(b.registry.VENUS_NODELETE.screen.getComponent()());return found;};
-    assert.equal(input().props.editable,true);b.api.setSetting('noDelete',false);assert.equal(input().props.editable,false,'the maximum box is read-only too');
+    // How many to keep is a segmented choice now, greyed out with the switches.
+    const tabs=()=>pageNodes(b.registry.VENUS_NODELETE.screen.getComponent()()).filter(n=>n.props&&n.props.accessibilityRole==='tab');
+    assert.deepEqual(tabs().map(n=>n.props.accessibilityLabel),['100','512','1000','5000']);
+    assert.equal(tabs().find(n=>n.props.accessibilityState.selected).props.accessibilityLabel,'512','default 512 is chosen');
+    tabs().find(n=>n.props.accessibilityLabel==='1000').props.onPress();assert.equal(b.api.settings.noDeleteLimit,1000);
+    // A number an older version saved shows as the closest choice and isn't changed until you pick another.
+    b.api.setSetting('noDeleteLimit',90);assert.equal(tabs().find(n=>n.props.accessibilityState.selected).props.accessibilityLabel,'100');
+    assert.equal(b.api.settings.noDeleteLimit,90);
+    b.api.setSetting('noDelete',false);assert.ok(tabs().every(n=>n.props.disabled),'the choice is greyed out too');
 });
 test('Read All mode persists and an invalid saved mode falls back to Servers',async()=>{
     const b=boot(allFeatures);
@@ -4156,14 +4223,13 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     addRow.props.onPress();
     assert.equal(modalCalls.at(-1),'login','Add account opens native login modal');
 
-    // Uninitialized PersistedStore (store._isInitialized === false): accountSwitcherSync calls initializeIfNeeded()
-    // before reading state.users so persisted accounts (>5 accounts) are never overwritten by an empty pre-init array (#59).
-    let persistedLoaded=false, persistedSaved=0;
+    // Initialized PersistedStore with more than 5 saved accounts: the active account is added without truncation (#59).
+    let persistedSaved=0;
     const savedSixAccounts=[1,2,3,4,5,6].map(n=>({id:'u'+n,username:'user'+n,discriminator:'0',avatar:null,tokenStatus:2}));
-    const lazyStore={
-        _isInitialized:false,
-        state:{users:[],canUseMultiAccountMobile:false},
-        initializeIfNeeded(){this._isInitialized=true;this.state={users:savedSixAccounts.slice(),canUseMultiAccountMobile:true};persistedLoaded=true;},
+    const fullStore={
+        _isInitialized:true,
+        state:{users:savedSixAccounts.slice(),canUseMultiAccountMobile:true},
+        initializeIfNeeded(){throw new Error('Venus must never initialize MultiAccountStore itself (#63)');},
         getState(){return this.state;},
         getUsers(){return this.state.users;},
         getValidUsers(){return this.state.users.filter(u=>u.tokenStatus===2);},
@@ -4173,10 +4239,45 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
         asyncPersist(){persistedSaved++;},
         emitChange(){}
     };
-    b.load({default:lazyStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
-    assert.equal(persistedLoaded,true,'initializeIfNeeded called before syncing state (#59)');
-    assert.ok(persistedSaved>=1,'asyncPersist called after syncing current user (#59)');
-    assert.equal(lazyStore.state.users.length,7,'all 6 persisted accounts + active account preserved without 5-account truncation (#59)');
+    b.load({default:fullStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
+    assert.ok(persistedSaved>=1,'asyncPersist called after adding the current user (#59)');
+    assert.equal(fullStore.state.users.length,7,'all 6 persisted accounts + active account preserved without 5-account truncation (#59)');
+    const savesBefore=persistedSaved;b.api.setSetting('accountSwitcherYouBar',true);
+    assert.equal(persistedSaved,savesBefore,'nothing is rewritten when the active account is already saved');
+});
+
+test('Account switcher never wipes saved accounts on a cold start before Discord loaded its storage (#63)',()=>{
+    const b=boot({accountSwitcher:true});reactHarness(b);
+    b.api.setSetting('accountSwitcher',true);
+    const saved=[{id:'111',username:'main',discriminator:'0',avatar:null,tokenStatus:2},{id:'222',username:'alt',discriminator:'0',avatar:null,tokenStatus:2},{id:'333',username:'alt2',discriminator:'0',avatar:null,tokenStatus:2}];
+    const storage={hasLoaded:false,data:{}};
+    let writes=0,initializedEarly=false;
+    // Behaves like Discord's PersistedStore: initializeIfNeeded reads storage exactly once.
+    const store={
+        _isInitialized:false,users:[],
+        initializeIfNeeded(){if(this._isInitialized)return;this._isInitialized=true;if(!storage.hasLoaded)initializedEarly=true;this.users=(storage.data.MultiAccountStore||{users:[]}).users.slice();},
+        initialize(s){this.users=s&&Array.isArray(s.users)?s.users:[];},
+        getState(){return {users:this.users,canUseMultiAccountMobile:false};},
+        getUsers(){return this.users;},getValidUsers(){return this.users;},getCanUseMultiAccountMobile(){return false;},getHasLoggedInAccounts(){return this.users.length>0;},
+        asyncPersist(){writes++;storage.data.MultiAccountStore={users:this.users.slice()};},
+        emitChange(){}
+    };
+    let me=null;
+    b.context.__r=id=>({510:{Storage:storage},1112:{default:{getToken:()=>null,setToken(){}}},
+        1378:{default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},
+        11800:{default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}}}[id]||null);
+    b.load({default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},null,1378);
+    const patched=b.load({default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800).default;
+    // Venus's own settings finish loading while Discord's storage is still being read.
+    me={id:'111',username:'main'};
+    b.api.setSetting('accountSwitcherYouBar',false);
+    assert.equal(initializedEarly,false,'MultiAccountStore is not read before Discord loaded its storage');
+    assert.equal(writes,0,'nothing is saved before Discord loaded its storage');
+    // Discord finishes loading and initializes the store itself.
+    storage.data.MultiAccountStore={users:saved.slice()};storage.hasLoaded=true;store.initializeIfNeeded();
+    b.api.setSetting('accountSwitcherYouBar',true);
+    assert.deepEqual(patched.getUsers().map(u=>u.id),['111','222','333'],'all three saved accounts survive the restart');
+    assert.equal(writes,0,'the saved list is not rewritten when the active account is already in it');
 });
 
 test('Unlock app icons marks all alternate icons non-premium, blocks background reset, and strips the Nitro upsell button and header',()=>{
@@ -4440,12 +4541,16 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
         React.useState = init => typeof init === 'string' ? [draft, v => { draft = v; }] : [init, () => {}];
         return page();
     };
-    const pasteRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Paste link from clipboard');
-    pasteRow.props.onPress();
+    // One field and one button beside it: Paste while the box is empty, Install once it holds a link.
+    const button = () => withDraft().find(n => n.props && n.props.accessibilityRole === 'button' && /^(Paste|Install)$/.test(n.props.accessibilityLabel));
+    assert.equal(withDraft().filter(n => n.type === 'Row' && /Install theme|Paste link/.test(n.props.label)).length, 0, 'no separate Install and Paste rows');
+    assert.equal(button().props.accessibilityLabel, 'Paste');
+    button().props.onPress();
     await flush(); await flush();
     assert.equal(draft, 'https://github.com/rose-pine/discord-mobile/blob/main/rosepinemoon.json', 'clipboard link pasted into draft');
 
-    const installRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Install theme');
+    const installRow = button();
+    assert.equal(installRow.props.accessibilityLabel, 'Install');
     assert.equal(installRow.props.disabled, false);
     installRow.props.onPress();
     await flush(); await flush(); await flush();
@@ -4646,7 +4751,9 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
     }[id] || null);
     const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
     const page = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()());
-    const nodes = page();
+    const hp = page().find(n => n.type && n.type.name === 'HighlightPreview');
+    const saved = {useState:React.useState, useRef:React.useRef, useEffect:React.useEffect};
+    const nodes = hookHost(b, React, hp).render(); Object.assign(React, saved);
     const preview = nodes.find(n => n.props && n.props.accessibilityLabel === 'Message highlight preview');
     assert.ok(preview, 'live reply & deleted message preview card rendered');
     const avatarImages = nodes.filter(n => n.type === RN.Image && n.props.source && n.props.source.uri && n.props.source.uri.includes('av_hash'));
@@ -4708,7 +4815,7 @@ test('every option page renders in the shared design: status card first, row ico
         1378:{default:{getCurrentUser:()=>({id:'1',username:'me'}),getUser:()=>null}}}[id]||null);
     const pages={VENUS_NODELETE:'noDelete',VENUS_MESSAGEHIGHLIGHT:'messageHighlight',VENUS_TRANSLATE:'translate',VENUS_GESTURES:'gestures',VENUS_FREENITRO:'freeNitro',
         VENUS_PASTELIZE:'pastelize',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_REVIEWDB:'reviewDB',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',
-        VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_LANGUAGE:null};
+        VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_HIDDENCHANNELS:'hiddenChannels',VENUS_LANGUAGE:null};
     for (const on of [true,false]) for (const [id,key] of Object.entries(pages)) {
         if (key) b.api.setSetting(key,on);
         const nodes=pageNodes(b.registry[id].screen.getComponent()());
@@ -4721,4 +4828,442 @@ test('every option page renders in the shared design: status card first, row ico
         if (id!=='VENUS_MESSAGEHIGHLIGHT' || !on) assert.ok(titles.length,id+' starts with a titled status card');
         if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
     }
+});
+
+// UI motion and feedback (1.15.0): every page still renders without Animated, and with it each group rises in.
+function animatedHarness(b, RN) {
+    const runs = [];
+    class Value { constructor(v) { this.v = v; } setValue(v) { this.v = v; } interpolate(c) { return {interpolated:c, from:this}; } }
+    const animation = (kind, value, config) => ({start(){ runs.push({kind, value, config}); value.v = config.toValue; }, stop(){}});
+    RN.Animated = {Value, View:'AnimatedView', timing:(v, c) => animation('timing', v, c), spring:(v, c) => animation('spring', v, c),
+        sequence:list => ({start(){ runs.push({kind:'sequence', list}); }, stop(){}}), loop:a => ({start(){ runs.push({kind:'loop'}); }, stop(){}}), delay:ms => ({ms})};
+    let layout = 0; RN.LayoutAnimation = {Presets:{easeInEaseOut:'ease'}, create:() => 'custom', configureNext:() => { layout++; }};
+    b.load(RN, null, 17);
+    return {runs, get layout() { return layout; }};
+}
+test('option pages reveal their groups in turn on the native driver, and a switch eases the layout', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); const RN = {View:'View', Text:'Text', Image:'Image', Modal:'Modal', Pressable:'Pressable', ScrollView:'Scroll'};
+    const motion = animatedHarness(b, RN);
+    const effects = []; React.useEffect = fn => effects.push(fn); let ref; React.useRef = v => ({current:v}); React.useState = init => [init, () => {}];
+    function TableSwitchRow(){} b.context.__r = id => ({6621:{TableSwitchRow}}[id] || null);
+    b.api.setSetting('gestures', true);
+    const page = b.registry.VENUS_GESTURES.screen.getComponent()();
+    const reveals = pageNodes(page).filter(n => n.type && n.type.name === 'VenusReveal');
+    assert.ok(reveals.length >= 4, 'each group is wrapped');
+    assert.deepEqual(reveals.map(n => n.props.index), reveals.map((_, i) => i), 'in order, so they rise one after another');
+    // Render one reveal: it starts hidden and its effect times it in on the native driver, delayed by its place.
+    const second = reveals[1].type(reveals[1].props);
+    assert.equal(second.type, 'AnimatedView');
+    effects.splice(0).forEach(fn => fn());
+    const run = motion.runs.at(-1);
+    assert.equal(run.kind, 'timing'); assert.equal(run.config.useNativeDriver, true); assert.equal(run.config.delay, 45);
+    // A switch on the page eases the layout change it causes.
+    const row = pageNodes(page).find(n => n.type === TableSwitchRow);
+    const before = motion.layout; row.props.onValueChange(false); assert.equal(motion.layout, before + 1);
+});
+test('pages still render plainly when React Native has no Animated', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); React.useRef = v => ({current:v});
+    b.api.setSetting('quests', true);
+    const reveals = pageNodes(b.registry.VENUS_QUESTS.screen.getComponent()()).filter(n => n.type && n.type.name === 'VenusReveal');
+    const child = reveals[0].type(reveals[0].props);
+    assert.equal(child, reveals[0].props.children, 'no wrapper view without Animated');
+});
+test('the Quests status card shows the running Quest\'s progress and the minutes left', async () => {
+    const b = questHarness({quests:[playFixture('p1', 900, enrolledAgo(5))]});
+    const {React} = reactHarness(b); React.useRef = v => ({current:v});
+    b.connect();
+    // Run until the first heartbeat is answered, not to the end.
+    await b.run(30 * 1000);
+    b.load({SettingsList(){}},null,14236);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const nodes = pageNodes(registry.VENUS_QUESTS.screen.getComponent()());
+    const bar = nodes.find(n => n.type && n.type.name === 'VenusProgress');
+    assert.ok(bar, 'a progress bar while a Quest runs');
+    assert.ok(bar.props.value > 0 && bar.props.value < 1, 'part way: ' + bar.props.value);
+    assert.ok(nodes.some(n => typeof n.props.children === 'string' && /About 14 minutes left\./.test(n.props.children)), 'minutes left');
+    await b.run(30 * 60 * 1000);
+    const after = pageNodes(registry.VENUS_QUESTS.screen.getComponent()());
+    assert.equal(after.filter(n => n.type && n.type.name === 'VenusProgress').length, 0, 'no bar once nothing runs');
+});
+test('Read all shows a check for a moment after it clears something, and its label stays for screen readers', () => {
+    const b = readAllHarness(); const timers = []; b.context.setTimeout = (fn, ms) => { timers.push(fn); return timers.length; };
+    const render = () => { const button = findReadAll(b.props().listDataProps.renderItem(6,0)); return button.type(button.props).props.children; };
+    assert.equal(render().props.children.type, 'Text');
+    pressReadAll(b);
+    const pill = render();
+    assert.equal(pill.props.accessibilityLabel, 'Read all');
+    assert.equal(pill.props.children.type.name, 'PopIn', 'a check pops in');
+    timers.splice(0).forEach(fn => fn());
+    assert.equal(render().props.children.type, 'Text', 'back to its label');
+});
+// Renders one component again and again with real hook order: state slots, refs and effects (run after each render,
+// with deps), and fake timers you can run. Enough to test a preview's Watch and Try it modes end to end.
+function hookHost(b, React, node) {
+    const slots = [], refs = [], effects = [], timers = [];
+    let i = 0, r = 0, e = 0, id = 0;
+    b.context.setTimeout = (fn, ms) => { const t = {fn, ms, id:++id}; timers.push(t); return t.id; };
+    b.context.clearTimeout = tid => { const k = timers.findIndex(t => t.id === tid); if (k >= 0) timers.splice(k, 1); };
+    React.useState = init => { const k = i++; if (!(k in slots)) slots[k] = typeof init === 'function' ? init() : init;
+        return [slots[k], v => { slots[k] = typeof v === 'function' ? v(slots[k]) : v; }]; };
+    React.useRef = v => { const k = r++; if (!(k in refs)) refs[k] = {current:v}; return refs[k]; };
+    React.useEffect = (fn, deps) => { const k = e++; const old = effects[k];
+        const changed = !old || !deps || !old.deps || deps.length !== old.deps.length || deps.some((d, j) => d !== old.deps[j]);
+        if (changed) effects[k] = {fn, deps, pending:true, cleanup:old && old.cleanup}; };
+    function render() {
+        i = r = e = 0;
+        const tree = node.type(node.props);
+        effects.forEach(x => { if (x.pending) { x.pending = false; if (typeof x.cleanup === 'function') x.cleanup(); x.cleanup = x.fn(); } });
+        // The Watch / Try it switch is its own small component (no hooks of its own besides theme styles): draw it inline.
+        const nodes = pageNodes(tree);
+        return nodes.concat(...nodes.filter(n => n.type && ['PreviewToggle', 'NitroPicker'].includes(n.type.name)).map(n => pageNodes(n.type(n.props))));
+    }
+    // Runs timers one at a time (each may add the next), re-rendering after each, up to n steps.
+    function run(n) { for (let k = 0; k < n && timers.length; k++) { const t = timers.shift(); t.fn(); render(); } }
+    return {render, run, timers, texts:() => render().filter(x => typeof x.props.children === 'string').map(x => x.props.children)};
+}
+function previewNode(b, id, name) { return pageNodes(b.registry[id].screen.getComponent()()).find(n => n.type && n.type.name === name); }
+// The caption shown by the player strip, its step badge (2/5) and time (0:03 / 0:24).
+function strip(host) {
+    const nodes = host.render(), texts = nodes.filter(n => typeof n.props.children === 'string').map(n => n.props.children);
+    return {step:texts.find(t => /^\d+\/\d+$/.test(t)), time:texts.find(t => /^\d+:\d\d \/ \d+:\d\d$/.test(t)),
+        button:label => nodes.find(n => n.props && n.props.accessibilityLabel === label)};
+}
+test('the Tap gestures preview can be tried: a tip shows what to tap next, double-tap replies or edits, triple-tap deletes', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    let clock = 1000; b.context.__clock = () => clock; vm.runInContext('Date.now=function(){return __clock();}', b.context);
+    b.api.setSetting('gestures', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
+    host.render();
+    host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress();
+    host.timers.length = 0;
+    // Find the pressable of each message by the message key it wraps.
+    const msg = who => host.render().find(n => n.props && n.props.key === who && n.props.children && pageNodes(n.props.children).some(c => c.props && c.props.accessibilityRole === 'button'));
+    const tap = who => { pageNodes(msg(who).props.children).find(c => c.props && c.props.accessibilityRole === 'button').props.onPress(); clock += 100; };
+    assert.ok(host.texts().includes("Double-tap Sam's message to reply"), 'a tip says what to try first');
+    assert.ok(!host.render().some(n => n.props && n.props.accessibilityLabel === 'Pause'), 'no player in Try it');
+    tap('theirs'); assert.ok(!host.texts().includes('Replying to Sam'), 'one tap does nothing');
+    tap('theirs'); assert.ok(host.texts().includes('Replying to Sam'));
+    assert.ok(host.texts().includes('Now double-tap your message to edit it'), 'then the next thing to try');
+    // Your own: a double-tap waits a moment for a third tap, then edits.
+    tap('mine'); tap('mine'); assert.ok(!host.texts().includes('Editing message'), 'waits for a possible third tap');
+    host.run(1); assert.ok(host.texts().includes('Editing message'));
+    assert.ok(host.texts().includes('Now tap your message three times to delete it'));
+    // A third tap deletes it, and it comes back a moment later.
+    clock += 2000; tap('mine'); tap('mine'); tap('mine');
+    assert.ok(host.texts().includes('Message deleted')); assert.ok(!host.texts().includes("I'm in!"), 'gone from the chat');
+    assert.ok(host.texts().includes("That's everything. Double-tap again any time."));
+    host.run(1); assert.ok(host.texts().includes("I'm in!"), 'back again');
+    b.api.setSetting('gestureOwn', 'reply'); b.api.setSetting('gestureTripleDelete', false); clock += 2000;
+    tap('mine'); tap('mine'); assert.ok(host.texts().includes('Replying to You'));
+});
+// Runs a Watch story once through and returns how long each caption stayed up (ms), plus everything it showed.
+function storyTimes(host, max = 300) {
+    let now = 0, cap = null, from = 0; const times = [], seen = new Set();
+    host.render();
+    for (let k = 0; k < max; k++) {
+        const t = host.timers[0]; if (!t) break; now += t.ms; host.run(1);
+        const nodes = host.render(), texts = nodes.filter(n => typeof n.props.children === 'string').map(n => n.props.children); texts.forEach(x => seen.add(x));
+        const capNode = nodes.find(n => n.type && n.type.name === 'PopIn' && /^cap:/.test(n.props.key)), c = capNode ? capNode.props.key.slice(4) : null;
+        if (c !== cap) { if (cap) times.push([cap, now - from]); cap = c; from = now; }
+        if (/^0:00 \//.test(texts.find(x => / \/ /.test(x)) || '') && k > 2) break;
+    }
+    return {times, seen};
+}
+test('Watch plays like a short video: each caption stays up long enough to read, with its step, the time, pause and start over', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('gestures', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
+    host.render();
+    // Follow the clock: how long each caption stays on screen.
+    let now = 0; const shownAt = new Map(), seen = new Set(), steps = new Set(), drafts = new Set(); let ripples = 0, prev = null, total = null;
+    for (let k = 0; k < 120; k++) {
+        const t = host.timers[0]; if (!t) break; now += t.ms; host.run(1);
+        const st = strip(host); const cap = host.texts().find(x => /^(Sam asks|You double-tap|A reply to Sam|You send it|Then Sam says|You change your mind|It's deleted)/.test(x));
+        host.texts().forEach(x => seen.add(x)); if (st.step) steps.add(st.step); if (!total && st.time) total = st.time.split(' / ')[1];
+        if (cap && cap !== prev) { if (prev) shownAt.set(prev, now - shownAt.get(prev)); shownAt.set(cap, now); prev = cap; }
+        if (host.render().some(n => n.type && n.type.name === 'TapRipple')) ripples++;
+        host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1).forEach(n => drafts.add(n.props.children));
+        if (seen.has('Message deleted') && k > 40) break;
+    }
+    for (const t of ["Sam asks if anyone wants to play", "You double-tap Sam's message", 'A reply to Sam opens, ready to type', 'You send it',
+        'Then Sam says it starts at 6 AM', 'You change your mind and tap your message three times', "It's deleted at once, with no question",
+        'Replying to Sam', 'Great, it starts at 6 AM!', 'Message deleted']) assert.ok(seen.has(t), 'shows: ' + t);
+    for (const [cap, ms] of shownAt) if (typeof ms === 'number' && ms < 1e9 && ms > 0) assert.ok(ms >= 2400, cap + ' stays up ' + ms + ' ms');
+    assert.ok(drafts.has('I'), 'types the reply letter by letter'); assert.ok(ripples >= 5, 'a ripple for each tap: ' + ripples);
+    assert.ok(steps.has('1/7') && steps.has('7/7'), 'shows which step of how many: ' + [...steps]);
+    assert.match(total, /^0:[1-5]\d$/, 'about half a minute long: ' + total);
+    // Pause stops time; Play goes on; Start over goes back to 0:00.
+    const before = strip(host).time; strip(host).button('Pause').props.onPress(); host.render();
+    assert.equal(host.timers.length, 0, 'paused: nothing runs'); assert.equal(strip(host).time, before);
+    assert.ok(strip(host).button('Play')); strip(host).button('Play').props.onPress(); host.render(); assert.ok(host.timers.length > 0);
+    strip(host).button('Start over').props.onPress(); host.render(); assert.match(strip(host).time, /^0:00 \//);
+    // Every caption, through one whole loop, stays up long enough to read.
+    const run = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview')));
+    assert.equal(run.times.length, 7); for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    // Without triple-tap, the story ends by editing instead.
+    b.api.setSetting('gestureTripleDelete', false);
+    const again = hookHost(b, React, previewNode(b, 'VENUS_GESTURES', 'GesturePreview'));
+    again.render(); const seen2 = new Set();
+    for (let k = 0; k < 120 && !seen2.has('Editing message'); k++) { again.run(1); again.texts().forEach(t => seen2.add(t)); }
+    assert.ok(seen2.has('It opens for editing, so you can fix it') && !seen2.has('Message deleted'));
+});
+test('Hidden channels preview lists the locked channel only while it is on', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    const names = on => { b.api.setSetting('hiddenChannels', on);
+        const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+        return host.render().filter(n => n.type === 'Text' && /^[a-z-]+$/.test(n.props.children)).map(n => n.props.children); };
+    assert.deepEqual(names(true), ['general', 'staff-only', 'memes', 'clips']);
+    assert.deepEqual(names(false), ['general', 'memes', 'clips']);
+});
+test('Hidden channels preview plays at a readable pace: scrolling past opens nothing, a tap opens Discord\'s dialog or does nothing', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('hiddenChannels', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+    let ripple = false; const orig = host.run; host.run = n => { orig(n); if (host.render().find(x => x.type && x.type.name === 'HiddenPreviewRow').props.ripple) ripple = true; };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['Locked channels show in the list with a lock, like staff-only here', 'Scrolling past it, or opening the server, opens nothing',
+        'Only a tap on it opens its details', 'You see when it was made and last used. View Anyway would open it']) assert.ok(caps.includes(t), 'caption: ' + t);
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    for (const t of ['Game Night', 'TEXT CHANNELS', 'Locked channel', 'LAST MESSAGE', 'View Anyway', 'Cancel']) assert.ok(run.seen.has(t), 'shows: ' + t);
+    assert.ok(ripple, 'the tap shows where it lands');
+    b.api.setSetting('hiddenChannelsMenu', false);
+    const off = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+    let shook = 0; const o2 = off.run; off.run = n => { o2(n); shook = Math.max(shook, off.render().find(x => x.type && x.type.name === 'HiddenPreviewRow').props.shake); };
+    const r2 = storyTimes(off);
+    assert.ok(r2.times.some(([c]) => c === 'Nothing happens: you turned its details off') && !r2.seen.has('Locked channel'));
+    assert.equal(shook, 1, 'the row shakes instead');
+});
+test('the Features entry says how many are on', () => {
+    const b = settingsHarness();
+    const on = () => { const m = /^(\d+) of 31 turned on$/.exec(b.registry.VENUS_PLUGINS.useDescription()); assert.ok(m); return Number(m[1]); };
+    b.api.setSetting('dashless', false); const before = on();
+    b.api.setSetting('dashless', true); assert.equal(on(), before + 1);
+});
+test('Message highlights preview glows only the highlight you just changed, never on first open', () => {
+    const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
+    const ref = {current:null}; React.useRef = () => ref; React.useState = init => [init, () => {}];
+    b.api.setSetting('messageHighlight', true);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const fresh = () => { const f = pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview').props.fresh;
+        return f ? [f.reply, f.deleted] : [false, false]; };
+    assert.deepEqual(fresh(), [false, false], 'nothing glows when the page opens');
+    b.api.setSetting('messageHighlightPingColor', 'pink');
+    assert.deepEqual(fresh(), [true, false], 'only replies and mentions');
+    assert.deepEqual(fresh(), [false, false], 'and only once');
+    b.api.setSetting('messageHighlightThickness', 3);
+    assert.deepEqual(fresh(), [true, true], 'a new width shows on both');
+});
+test('Message highlights preview plays at a readable pace: Sam\'s reply lights up as it arrives, Alex\'s deleted message stays highlighted', () => {
+    const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
+    b.api.setSetting('messageHighlight', true);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const node = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview');
+    const host = hookHost(b, React, node());
+    const glows = () => host.render().filter(n => n.type && n.type.name === 'HighlightGlow');
+    let counts = new Set(), both = false; const orig = host.run;
+    host.run = n => { orig(n); const g = glows(); counts.add(g.length); if (g.length === 2 && g.every(x => x.props.fresh)) both = true; };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['You ask everyone a question', "Sam replies and mentions you, so it's highlighted in your reply color", 'Alex sends a message',
+        'Alex deletes it: it stays, highlighted in your deleted color', 'Change the colors or the bar width below to see them here'])
+        assert.ok(caps.includes(t), 'caption: ' + t + ' / ' + caps.join(' | '));
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(counts.has(0) && counts.has(1) && counts.has(2), 'messages arrive one by one: ' + [...counts]); assert.ok(both, 'the deleted one lights up too');
+    // Try it: tap a highlighted message and it lights up again; a tip says what to try next.
+    const t = hookHost(b, React, node()); t.render();
+    t.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); t.timers.length = 0;
+    const tg = () => t.render().filter(n => n.type && n.type.name === 'HighlightGlow');
+    assert.ok(tg().every(n => !n.props.fresh), 'nothing glows when you switch to Try it');
+    assert.ok(t.texts().includes('Tap a highlighted message to see it light up again'));
+    const before = tg()[0].props.key;
+    t.render().find(n => n.props && n.props.key === 'reply' && n.props.onPress).props.onPress('reply');
+    assert.deepEqual(tg().map(n => n.props.fresh), [true, false]); assert.notEqual(tg()[0].props.key, before, 'a new glow plays');
+    assert.ok(t.render().some(n => n.type && n.type.name === 'TapRipple'));
+    assert.ok(t.texts().includes('Now change a color or the bar width below: it glows here'));
+});
+test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];
+    b.context.__r = id => ({5393:{TextLockIcon:'TL'}, 5205:{default:{show:o => shown.push(o)}}, 4833:{Text(){}}}[id] || null);
+    b.api.setSetting('hiddenChannels', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    const row = () => host.render().find(n => n.type && n.type.name === 'HiddenPreviewRow');
+    const icon = row().props.children[0];
+    assert.equal(icon.type({size:'sm'}).type, 'TL', 'the # with a small lock, not a separate big lock');
+    row().props.onPress(); assert.equal(shown.length, 1, 'opens the same details Discord shows for a locked channel');
+    assert.equal(shown[0].confirmText, 'View Anyway');
+    shown[0].onCancel();
+    b.api.setSetting('hiddenChannelsMenu', false); row().props.onPress(); assert.equal(shown.length, 1, 'with the menu off, nothing opens');
+    assert.equal(row().props.shake, 1, 'it shakes instead');
+});
+test('Device indicators preview shows the real screens around the icons, follows every option, and Try it guides you', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('platformIndicators', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    const nodes = () => { const n = host.render(); return n.concat(...n.filter(x => x.type && x.type.name === 'PreviewSegmented').map(x => pageNodes(x.props.items.map(i => ({type:'Tab', props:{label:i.label, onPress:() => x.props.onChange(i.value)}}))))); };
+    const icons = () => nodes().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)).map(n => n.props.key.split(':')[0]);
+    const pick = label => nodes().find(n => n.type === 'Tab' && n.props.label === label).props.onPress();
+    const texts = () => host.texts();
+    // A DM: Discord's header with Alex, the chat and the message bar; the icons sit next to the name.
+    assert.deepEqual(icons(), ['piDmHeader']);
+    assert.ok(texts().includes('Are you coming to the game tonight?') && texts().includes('Message @Alex'));
+    assert.ok(texts().includes("Tap Change Alex's devices and watch the icons change"), 'a tip says what to try');
+    // Members: Discord's Online header, Alex and two others, each with their own icons.
+    pick('Members'); assert.deepEqual(icons(), ['piUserList', 'piUserList', 'piUserList']);
+    assert.ok(texts().some(t => /^ONLINE — 3$/.test(t)) && texts().includes('Riley'));
+    // Profile: the name, a Message button.
+    pick('Profile'); assert.deepEqual(icons(), ['piProfile']); assert.ok(texts().includes('Message'));
+    // Each screen follows its own switch, and says when it's off.
+    b.api.setSetting('piProfile', false); assert.deepEqual(icons(), []); assert.ok(texts().includes('Off in your options: no icons here'));
+    b.api.setSetting('piProfile', true);
+    // Change Alex's devices: on a phone only, the avatar shows Discord's phone badge unless Hide the phone badge is on.
+    const phone = () => nodes().some(n => n.props && n.props.style && n.props.style.borderRadius === 2);
+    const change = () => nodes().find(n => n.props && n.props.accessibilityHint === "Tap to change Alex's devices").props.onPress();
+    assert.match(texts().find(t => /^Alex is on: /.test(t)), /Desktop \(Online\), Mobile \(Idle\)/);
+    change(); assert.equal(texts().find(t => /^Alex is on: /.test(t)), 'Alex is on: Mobile (Online)');
+    assert.equal(phone(), false, 'hidden by default');
+    b.api.setSetting('piHideMobile', false); assert.equal(phone(), true, 'phone badge shows when not hidden');
+    assert.ok(!texts().includes("Tap Change Alex's devices and watch the icons change"), 'the tip moves on');
+    b.api.setSetting('platformIndicators', false);
+    const off = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
+    assert.deepEqual(off.render().filter(n => n.type && n.type.name === 'PopIn' && /^pi/.test(n.props.key)), [], 'no icons while off');
+});
+test('Device indicators preview plays: from a DM to the member list to a profile, as Alex changes devices', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('platformIndicators', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview'));
+    const run = storyTimes(host);
+    for (const t of ["In a DM, Alex's devices show next to their name at the top: a computer and a phone", 'Alex is only on a phone now',
+        "In the member list, everyone's devices show next to their name", 'Alex switches to a computer and the web, on Do Not Disturb',
+        'On a profile, they show next to the name', 'Then to a console and a computer'])
+        assert.ok(run.times.some(([c]) => c === t), 'caption: ' + t + ' / ' + run.times.map(x => x[0]));
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(run.seen.has('Message @Alex') && run.seen.has('Riley') && run.seen.has('Message'), 'all three screens show');
+    // A screen whose switch is off says so.
+    b.api.setSetting('piUserList', false);
+    const off = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_PLATFORMINDICATORS', 'PlatformPreview')));
+    assert.ok(off.times.some(([c]) => c === "Here they're off in your options, so nothing shows"));
+});
+test('Nitro preview shows Discord\'s own Wumpus, sent from Discord\'s picker; Try it guides you through an emoji and a sticker', () => {
+    const b = nitroHarness(); const {React} = reactHarness(b);
+    let read = 0; b.load({default:{getCustomEmojiById:() => null, getGuilds:() => { read++; return {}; }}}, null, 5772);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    b.api.setSetting('freeNitro', true);
+    const node = pageNodes(registry.VENUS_FREENITRO.screen.getComponent()()).find(x => x.type && x.type.name === 'NitroPreview');
+    const host = hookHost(b, React, node);
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    const arts = () => host.render().filter(x => x.type && x.type.name === 'NitroArt').map(n => pageNodes(n.type(n.props)).find(x => x.type === 'Image').props.source.uri);
+    const sent = () => host.texts().find(t => /^Sent as /.test(t));
+    const send = () => host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to send it').props.onPress();
+    assert.ok(host.texts().includes('Nothing sent yet') && host.texts().includes('Tap the locked one below to send it without Nitro'));
+    assert.equal(host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to send it').props.accessibilityLabel, 'wumpus_wave', 'the picker has the Nitro emoji');
+    send(); assert.deepEqual(arts(), ['modules_guilds_bar_native_images_wumpus_wave'], 'an image bundled in Discord, shown as chat shows it');
+    assert.equal(sent(), 'Sent as [wumpus_wave](\u2026)');
+    assert.ok(host.texts().includes('Now try a sticker: tap Stickers, then the locked one'));
+    host.render().find(n => n.props && n.props.accessibilityRole === 'tab' && n.props.key === 'sticker').props.onPress(); send();
+    assert.deepEqual(arts(), ['modules_guilds_bar_native_images_wumpus_wave', 'images_native_gifting_wumpus_box_premium120'], 'then the sticker');
+    assert.ok(host.texts().includes("That's how everyone sees it. You can send more"));
+    b.api.setSetting('hyperlinks', false); assert.match(sent(), /^Sent as https:\/\/media\.discordapp\.net\/stickers\//);
+    assert.equal(read, 0, 'never reads your servers\' emojis or stickers');
+});
+test('Nitro preview plays at a readable pace: open the picker, pick the locked emoji, everyone sees it; then a sticker', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('freeNitro', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
+    const kinds = new Set(); const orig = host.run; host.run = n => { orig(n); host.render().filter(x => x.type && x.type.name === 'NitroArt').forEach(x => kinds.add(x.props.kind)); };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['You open the emoji picker', 'You pick a Nitro emoji from another server. The lock means it needs Nitro',
+        'Venus sends it as a short link, and everyone sees the emoji', 'Then you open the sticker picker', "It's sent as a short link too, and everyone sees the sticker"])
+        assert.ok(caps.includes(t), 'caption: ' + t + ' / ' + caps.join(' | '));
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.deepEqual([...kinds].sort(), ['emoji', 'sticker']);
+    // With only stickers on, it skips the emoji.
+    b.api.setSetting('emojis', false);
+    const only = storyTimes(hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview')));
+    assert.ok(!only.times.some(([c]) => c === 'You open the emoji picker') && only.times.some(([c]) => /sticker/.test(c)));
+    // Both off: no toggle, nothing plays.
+    b.api.setSetting('stickers', false);
+    const none = hookHost(b, React, previewNode(b, 'VENUS_FREENITRO', 'NitroPreview'));
+    assert.ok(!none.render().some(n => n.props && n.props.accessibilityLabel === 'Watch')); assert.equal(none.timers.length, 0);
+});
+test('Deleted messages preview plays at a readable pace: Alex edits twice and the old versions stay, Sam deletes and it stays', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    let most = 0, outlined = false, ripples = 0;
+    const orig = host.run; host.run = n => { orig(n); const nodes = host.render();
+        most = Math.max(most, nodes.filter(x => x.type && x.type.name === 'PopIn' && /^old:/.test(x.props.key)).length);
+        if (nodes.some(x => x.type && x.type.name === 'PopIn' && x.props.key === 'bar')) outlined = true;
+        if (nodes.some(x => x.type && x.type.name === 'TapRipple')) ripples++; };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['Alex says when to meet', 'Alex edits it to 7', 'The old text stays above it, crossed out', 'And edits it again to 8',
+        'Sam deletes a message', 'It stays for you, outlined, so you can still read it']) assert.ok(caps.includes(t), 'caption: ' + t);
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.equal(most, 2, 'both earlier versions show'); assert.ok(outlined); assert.ok(ripples >= 3);
+    b.api.setSetting('noDeleteEdits', false);
+    const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview')); let old2 = 0;
+    const o2 = plain.run; plain.run = n => { o2(n); old2 += plain.render().filter(x => x.type && x.type.name === 'PopIn' && /^old:/.test(x.props.key)).length; };
+    const r2 = storyTimes(plain);
+    assert.ok(r2.times.some(([c]) => c === 'It shows (edited), like in Discord') && old2 === 0, 'without edit history, only the new version shows');
+});
+test('Pastel names preview plays at a readable pace: people post one by one and each name fills in with its color', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('pastelize', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
+    const names = () => host.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1 && n.props.children !== 'general').map(n => n.props.children);
+    const counts = []; const orig = host.run; host.run = n => { orig(n); counts.push(names().length); };
+    const run = storyTimes(host), caps = run.times.map(x => x[0]);
+    for (const t of ['People post in the chat', 'Each name gets its own soft color', 'A name with a role color keeps it',
+        'The same name always gets the same color, on every phone']) assert.ok(caps.includes(t), 'caption: ' + t);
+    for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(counts.includes(1) && counts.includes(2) && counts.includes(3), 'one at a time: ' + counts);
+});
+test('Translate preview plays your choice at a readable pace (on its own, or Hold and Translate in the menu); Try it guides you', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('translate', true);
+    const play = () => storyTimes(hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview')));
+    const auto = play(), caps = auto.times.map(x => x[0]);
+    assert.ok(caps.includes('Lucía writes in Spanish') && caps.some(c => /translates it on its own$/.test(c)) && caps.some(c => /^Now it reads in /.test(c)), caps.join(' | '));
+    assert.ok(caps.includes('The small note under it says what language it was in'));
+    for (const [cap, ms] of auto.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    assert.ok(auto.seen.has('Translating…') && auto.seen.has("Hi everyone! Who's coming tonight?"));
+    b.api.setSetting('translateMode', 'manual');
+    const manual = play(), mcaps = manual.times.map(x => x[0]);
+    assert.ok(mcaps.includes('You hold the message to open its menu') && mcaps.includes('And tap Translate'), mcaps.join(' | '));
+    assert.ok(manual.seen.has('Reply') && manual.seen.has('Copy Text'), 'Discord\'s message menu shows');
+    for (const [cap, ms] of manual.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
+    // Try it: a tip, then tap Translate / Show original under the message.
+    const host = hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    assert.ok(host.texts().includes("In chat you'd hold the message and tap Translate. Try it here"));
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?"), 'starts in Spanish');
+    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to translate it').props.onPress();
+    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?") && host.texts().includes('Tap Show original to go back'));
+    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to show the original').props.onPress();
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && !host.texts().includes('Tap Show original to go back'));
+});
+test('Deleted messages and Pastel names previews can be tried, with a tip on what to tap next', () => {
+    const b = settingsHarness(); const {React} = reactHarness(b);
+    b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
+    const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
+    const tap = hint => host.render().find(n => n.props && n.props.accessibilityHint === hint).props.onPress();
+    assert.ok(host.texts().includes("Tap Alex's message to edit it"));
+    tap('Tap to edit it'); tap('Tap to edit it');
+    assert.equal(host.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 2, 'both earlier versions stay above it');
+    assert.ok(host.texts().includes("Now tap Sam's message to delete it"));
+    tap('Tap to delete it'); assert.ok(host.render().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'), 'stays, outlined');
+    assert.ok(host.texts().includes('Tap it again to bring it back'));
+    tap('Tap to bring it back'); assert.ok(!host.render().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'));
+    b.api.setSetting('noDeleteEdits', false);
+    const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
+    assert.equal(plain.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
+    b.api.setSetting('pastelize', true);
+    const pastel = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
+    pastel.render(); pastel.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); pastel.timers.length = 0;
+    const names = () => pastel.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1 && n.props.children !== 'general').map(n => n.props.children);
+    assert.deepEqual(names(), ['Alex', 'Sam', 'Jordan']); assert.ok(pastel.texts().includes('Tap New people to see more colors'));
+    pastel.render().find(n => n.props && n.props.accessibilityHint === 'Tap for new people').props.onPress();
+    assert.deepEqual(names(), ['Riley', 'Morgan', 'Casey']);
+    assert.ok(pastel.texts().includes('New names, new colors. The same name always gets the same one'));
 });

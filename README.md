@@ -44,7 +44,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | User activity notifications | Shows a notice when chosen friends or users change status, start typing or send a message |
 | | Account switcher | Switch between up to 50 Discord accounts from the profile bar or Venus settings |
 | **Servers** | Read all button | Marks servers, DMs or both as read in one tap |
-| | Show hidden channels | Channels you can't open appear with a lock |
+| | Show hidden channels | Channels you can't open appear with a lock. Only a tap opens their details menu, which you can turn off |
 | | Spaces in channel names | "general chat" instead of "general-chat" |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
 | | Use your phone's emojis | Your phone's emojis instead of Discord's |
@@ -58,7 +58,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 
 **Language** sets the language Venus settings are shown in. It follows Discord's language until you pick another one. 30 languages are included, among them Russian, Ukrainian, German, Spanish, French, Portuguese, Polish, Turkish, Japanese, Korean and Chinese. Counts use each language's plural forms. Corrections are welcome on GitHub ([`patches/src/main/resources/venus/i18n`](patches/src/main/resources/venus/i18n)).
 
-**About** shows your version, how many features are on, whether your settings are saved, and links to what's new and to report a problem.
+**About** shows your version, how many features are on (in total and per group), whether everything is working, and links to what's new and to report a problem. Venus settings animate gently as you use them, and follow Android's **Remove animations** setting.
 
 ### Privacy options
 

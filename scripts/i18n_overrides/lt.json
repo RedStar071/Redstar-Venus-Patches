@@ -26,8 +26,8 @@
  "All friends": "Visi draugai",
  "All {n} friend selected. Tap a friend to pick individually.": "Pasirinktas {n} draugas. Palieskite draugą, kad pasirinktumėte atskirai.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Pasirinktas {n} draugas. Palieskite draugą, kad pasirinktumėte atskirai.",
   "few": "Pasirinkti visi {n} draugai. Palieskite draugą, kad pasirinktumėte atskirai.",
+  "one": "Pasirinktas {n} draugas. Palieskite draugą, kad pasirinktumėte atskirai.",
   "other": "Pasirinkta visų {n} draugų. Palieskite draugą, kad pasirinktumėte atskirai."
  },
  "Allow Discord notifications?": "Leisti „Discord“ pranešimus?",
@@ -73,8 +73,8 @@
  "Completed {name}.": "Atlikta: {name}.",
  "Completed {n} Quest since Discord opened.": "Nuo Discord atidarymo atlikta {n} Quest užduotis.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "Nuo Discord atidarymo atlikta {n} Quest užduotis.",
   "few": "Nuo Discord atidarymo atliktos {n} Quest užduotys.",
+  "one": "Nuo Discord atidarymo atlikta {n} Quest užduotis.",
   "other": "Nuo Discord atidarymo atlikta {n} Quest užduočių."
  },
  "Console": "Konsolė",
@@ -94,6 +94,7 @@
  "Custom theme": "Pasirinktinė tema",
  "Custom themes": "Individualios temos",
  "Czech": "čekų",
+ "DM": "AŽ",
  "Danish": "danų",
  "Delete Review": "Ištrinti apžvalgą",
  "Delete a kept message again to hide just that one.": "Ištrinkite išsaugotą žinutę dar kartą, kad paslėptumėte tik ją.",
@@ -174,11 +175,14 @@
  "In DMs or in any server channel your client receives.": "Asmeninėse žinutėse arba bet kuriame serverio kanale, kurį gauna jūsų programa.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "Pokalbyje, reakcijose ir jaustukų pasirinkiklyje. Discord atidaromas iš naujo, kad pritaikytų pakeitimą.",
  "In lists": "Sąrašuose",
+ "In use": "Naudojama",
  "Indonesian": "indoneziečių",
+ "Install": "Įdiegti",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Įdiekite ir perjunkite spalvų temas iš nuorodų, sukompiliuotų į Discord spalvų lentelę be vėlavimo.",
  "Install theme": "Įdiegti temą",
  "Installed themes": "Įdiegtos temos",
  "Installing theme...": "Diegiama tema...",
+ "Installing...": "Diegiama...",
  "Irish": "airių",
  "It will be sent as a normal file instead.": "Jis bus išsiųstas kaip įprastas failas.",
  "Italian": "italų",
@@ -227,6 +231,8 @@
  "Marks every unread server as read.": "Pažymi visus neperskaitytus serverius kaip perskaitytus.",
  "Marks everything as read in one tap.": "Vienu bakstelėjimu viską pažymi kaip perskaitytą.",
  "Member list, friends, DM list and voice channels.": "Narių sąrašas, draugai, tiesioginių žinučių sąrašas ir balso kanalai.",
+ "Members": "Nariai",
+ "Message": "Žinutė",
  "Messages": "Žinutės",
  "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.": "Žinutės ir nuorodų peržiūros ištrinamos iškart, be klausimo „Ar tikrai?“. To negalima atšaukti.",
  "Messages in other languages show in yours. Their text is sent to Google Translate.": "Žinutės kitomis kalbomis rodomos jūsų kalba. Jų tekstas siunčiamas į Google Translate.",
@@ -239,6 +245,7 @@
  "Nepali": "nepaliečių",
  "Network fetch is unavailable right now.": "Tinklo gavimas šiuo metu nepasiekiamas.",
  "New Quests": "Naujos Quest užduotys",
+ "New people": "Kiti žmonės",
  "Next to the name at the top of a DM.": "Šalia vardo tiesioginės žinutės viršuje.",
  "Next to the name on a profile.": "Šalia vardo profilyje.",
  "Nitro stickers and emojis": "Nitro lipdukai ir jaustukai",
@@ -284,17 +291,21 @@
  "Other people (by user ID)": "Kiti žmonės (pagal naudotojo ID)",
  "Others won't see when you're typing. You still see when they are.": "Kiti nemato, kai rašote. Jūs vis tiek matote, kai rašo jie.",
  "Outside Discord": "Ne „Discord“ programoje",
+ "Paste": "Įklijuoti",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Įklijuokite tiesioginę nuorodą į aukščiau esančią keršto arba vendetos .json temą.",
  "Paste link from clipboard": "Įklijuokite nuorodą iš mainų srities",
  "Pastel name colors": "Pastelinės vardų spalvos",
  "Pastel names": "Pasteliniai vardai",
+ "Pause": "Pristabdyti",
  "People": "Žmonės",
  "People list reset": "Žmonių sąrašas atstatytas",
  "Persian": "persų",
+ "Play": "Leisti",
  "Play Quests": "Žaidimų Quest užduotys",
  "Play time counts without installing or opening the game.": "Žaidimo laikas skaičiuojamas neįdiegus ir neatidarius žaidimo.",
  "Polish": "lenkų",
  "Portuguese": "portugalų",
+ "Profile": "Profilis",
  "Punjabi": "pendžabų",
  "Push notifications outside Discord": "Tiesioginiai pranešimai ne „Discord“ programoje",
  "Quest Completer": "Quest vykdytojas",
@@ -317,13 +328,14 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Pašalina Quest reklamą virš jūsų profilio juostos. Quest užduotys vis tiek veikia.",
  "Removes {n} saved theme and restores Discord's default colors.": "Pašalina {n} išsaugotą temą ir atkuria Discord numatytąsias spalvas.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Pašalina {n} išsaugotą temą ir atkuria numatytąsias Discord spalvas.",
   "few": "Pašalina {n} išsaugotas temas ir atkuria numatytąsias Discord spalvas.",
+  "one": "Pašalina {n} išsaugotą temą ir atkuria numatytąsias Discord spalvas.",
   "other": "Pašalina {n} išsaugotų temų ir atkuria numatytąsias Discord spalvas."
  },
  "Reopen now": "Atidaryti iš naujo dabar",
  "Replace role colors": "Pakeisti vaidmenų spalvas",
  "Replaces Discord's font everywhere. Discord reopens to apply it. Needs Android 9 or newer.": "Visur pakeičia Discord šriftą. Discord atidaromas iš naujo, kad pritaikytų pakeitimą. Reikia Android 9 ar naujesnės.",
+ "Reply": "Atsakyti",
  "Reply to it": "Atsakyti",
  "Report Review": "Pranešti apie apžvalgą",
  "Report a problem": "Pranešti apie problemą",
@@ -379,8 +391,8 @@
  "Show theme background image": "Rodyti temos fono paveikslėlį",
  "Shown {n} notification since Discord opened.": "Parodytas {n} pranešimas nuo Discord atidarymo.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Parodytas {n} pranešimas nuo Discord atidarymo.",
   "few": "Parodyti {n} pranešimai nuo Discord atidarymo.",
+  "one": "Parodytas {n} pranešimas nuo Discord atidarymo.",
   "other": "Parodyta {n} pranešimų nuo Discord atidarymo."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Rodo „general chat“ vietoj „general-chat“. Keičia tik pavadinimų išvaizdą.",
@@ -401,6 +413,7 @@
  "Spaces in channel names": "Tarpai kanalų pavadinimuose",
  "Spanish": "ispanų",
  "Star any image or video in the media viewer to keep it in your GIF favourites.": "Medijos peržiūros programoje pažymėkite žvaigždute bet kokį vaizdą ar vaizdo įrašą, kad jis liktų jūsų GIF mėgstamuose.",
+ "Start over": "Iš naujo",
  "Start typing": "Pradeda rašyti",
  "Status": "Būsena",
  "Stickers": "Lipdukai",
@@ -446,12 +459,13 @@
  "Translated from {language}. Original:": "Išversta iš: {language}. Originalas:",
  "Translated {n} message since Discord opened.": "Nuo Discord atidarymo išversta {n} žinutė.",
  "Translated {n} messages since Discord opened.": {
-  "one": "Nuo Discord atidarymo išversta {n} žinutė.",
   "few": "Nuo Discord atidarymo išverstos {n} žinutės.",
+  "one": "Nuo Discord atidarymo išversta {n} žinutė.",
   "other": "Nuo Discord atidarymo išversta {n} žinučių."
  },
  "Triple-tap": "Trigubas bakstelėjimas",
  "Triple-tap to delete": "Trigubas bakstelėjimas ištrinti",
+ "Try it": "Išbandyti",
  "Trying again in {n} s.": "Bandykite dar kartą po {n} s.",
  "Turkish": "turkų",
  "Turned off. Switch it on in Features to start.": "Išjungta. Įjunkite skiltyje Funkcijos, kad pradėtumėte.",
@@ -478,16 +492,17 @@
  "Vietnamese": "vietnamiečių",
  "View Anyway": "Vis tiek peržiūrėti",
  "Waiting for new Quests.": "Laukiama naujų Quest užduočių.",
+ "Watch": "Žiūrėti",
  "Watching all friends.": "Stebimi visi draugai.",
  "Watching all {n} friends.": {
-  "one": "Stebimas {n} draugas.",
   "few": "Stebimi visi {n} draugai.",
+  "one": "Stebimas {n} draugas.",
   "other": "Stebima visų {n} draugų."
  },
  "Watching {n} friend.": "Stebimas {n} draugas.",
  "Watching {n} people.": {
-  "one": "Stebimas {n} žmogus.",
   "few": "Stebimi {n} žmonės.",
+  "one": "Stebimas {n} žmogus.",
   "other": "Stebima {n} žmonių."
  },
  "Watching {n} person.": "Stebimas {n} žmogus.",
@@ -512,6 +527,7 @@
  "by {author}": "pateikė {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "ką tik",
+ "locked": "užrakinta",
  "{count} kept on this phone, so chats you reopen show them at once.": "Šiame telefone išsaugota: {count}. Iš naujo atidaryti pokalbiai juos rodo iškart.",
  "{deleted} and {edited} kept until Discord restarts.": "Išsaugota iki Discord paleidimo iš naujo: {deleted} ir {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Išsaugota šiame telefone: {deleted} ir {edited}.",
@@ -527,105 +543,105 @@
  "{name} sent you a DM": "{name} atsiuntė jums AŽ",
  "{n} DM": "{n} tiesioginė žinutė",
  "{n} DMs": {
-  "one": "{n} tiesioginė žinutė",
   "few": "{n} tiesioginės žinutės",
+  "one": "{n} tiesioginė žinutė",
   "other": "{n} tiesioginių žinučių"
  },
  "{n} account saved (up to {max}).": "Išsaugota {n} paskyra (iki {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "Išsaugota {n} paskyra (iki {max}).",
   "few": "Išsaugotos {n} paskyros (iki {max}).",
+  "one": "Išsaugota {n} paskyra (iki {max}).",
   "other": "Išsaugota {n} paskyrų (iki {max})."
  },
  "{n} chosen people": {
-  "one": "{n} pasirinktą žmogų",
   "few": "{n} pasirinktus žmones",
+  "one": "{n} pasirinktą žmogų",
   "other": "{n} pasirinktų žmonių"
  },
  "{n} chosen person": "{n} pasirinktą žmogų",
  "{n} color token": "{n} spalvos ženklas",
  "{n} color tokens": {
-  "one": "{n} spalvos ženklas",
   "few": "{n} spalvų žetonai",
+  "one": "{n} spalvos ženklas",
   "other": "{n} spalvų žetonų"
  },
  "{n} day": "{n} dieną",
  "{n} days": {
-  "one": "{n} dieną",
   "few": "{n} dienas",
+  "one": "{n} dieną",
   "other": "{n} dienų"
  },
  "{n} deleted message": "{n} ištrinta žinutė",
  "{n} deleted messages": {
-  "one": "{n} ištrinta žinutė",
   "few": "{n} ištrintos žinutės",
+  "one": "{n} ištrinta žinutė",
   "other": "{n} ištrintų žinučių"
  },
  "{n} edited message": "{n} redaguota žinutė",
  "{n} edited messages": {
-  "one": "{n} redaguota žinutė",
   "few": "{n} redaguotos žinutės",
+  "one": "{n} redaguota žinutė",
   "other": "{n} redaguotų žinučių"
  },
  "{n} friend selected.": "Pasirinktas {n} draugas.",
  "{n} friends selected.": {
-  "one": "Pasirinktas {n} draugas.",
   "few": "Pasirinkti {n} draugai.",
+  "one": "Pasirinktas {n} draugas.",
   "other": "Pasirinkta {n} draugų."
  },
  "{n} hour": "{n} valandą",
  "{n} hours": {
-  "one": "{n} valandą",
   "few": "{n} valandas",
+  "one": "{n} valandą",
   "other": "{n} valandų"
  },
  "{n} minute": "{n} minutę",
  "{n} minutes": {
-  "one": "{n} minutę",
   "few": "{n} minutes",
+  "one": "{n} minutę",
   "other": "{n} minučių"
  },
  "{n} month": "{n} mėnesį",
  "{n} months": {
-  "one": "{n} mėnesį",
   "few": "{n} mėnesius",
+  "one": "{n} mėnesį",
   "other": "{n} mėnesių"
  },
  "{n} second ago": "prieš {n} sekundę",
  "{n} seconds ago": {
-  "one": "prieš {n} sekundę",
   "few": "prieš {n} sekundes",
+  "one": "prieš {n} sekundę",
   "other": "prieš {n} sekundžių"
  },
  "{n} server": "{n} serveris",
  "{n} server was marked as read": "{n} serveris pažymėtas kaip perskaitytas",
  "{n} servers": {
-  "one": "{n} serveris",
   "few": "{n} serveriai",
+  "one": "{n} serveris",
   "other": "{n} serverių"
  },
  "{n} servers were marked as read": {
-  "one": "{n} serveris pažymėtas kaip perskaitytas",
   "few": "{n} serveriai pažymėti kaip perskaityti",
+  "one": "{n} serveris pažymėtas kaip perskaitytas",
   "other": "{n} serverių pažymėta kaip perskaityti"
  },
  "{n} theme installed.": "Įdiegta {n} tema.",
  "{n} themes installed.": {
-  "one": "Įdiegta {n} tema.",
   "few": "Įdiegtos {n} temos.",
+  "one": "Įdiegta {n} tema.",
   "other": "Įdiegta {n} temų."
  },
  "{n} translation": "{n} vertimas",
  "{n} translations": {
-  "one": "{n} vertimas",
   "few": "{n} vertimai",
+  "one": "{n} vertimas",
   "other": "{n} vertimų"
  },
  "{n} waiting.": "Laukia: {n}.",
  "{n} year": "{n} metus",
  "{n} years": {
-  "one": "{n} metus",
   "few": "{n} metus",
+  "one": "{n} metus",
   "other": "{n} metų"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Įjungta funkcijų: {on} iš {total}. Įjunkite arba išjunkite jas skiltyje Funkcijos.",

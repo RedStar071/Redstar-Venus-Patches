@@ -16,7 +16,7 @@
     if (features.quickDelete) selectModules([5205, 1127]);
     if (features.noDelete) selectModules([585, 5057, 5059, 1378, 2051, 6880, 7378]);
     if (features.jumpToTop) selectModules([11642, 11643, 11644, 8838, 6880, 5057]);
-    if (features.hiddenChannels) selectModules([1086, 1097, 1113, 2051, 4470, 6952, 4472, 4990, 6880, 585, 1378, 15859, 5410]);
+    if (features.hiddenChannels) selectModules([1086, 1097, 1113, 2051, 2102, 4470, 6952, 4472, 4990, 6880, 585, 1378, 15859, 5410]);
     if (features.pastelize) selectModules([7378, 1252, 2111]);
     if (features.platformIndicators) selectModules([4877, 4855, 1378, 2051, 10603, 10371, 12845, 15667, 9108, 13649, 12602]);
     if (features.reviewDB) selectModules([12627, 13521, 13987, 8510, 5997, 6621, 1378, 585]);
@@ -38,7 +38,7 @@
     if (features.messageHighlight) selectModules([585, 1378, 5057, 7378]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2115]);
-    const revision = "1.13.0";
+    const revision = "1.14.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;
@@ -47,7 +47,7 @@
     // their own defaults, so turning a feature on does what it says straight away.
     const settings = { picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
         noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true,
-        jumpToTop: false, hiddenChannels: false, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
+        jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
@@ -670,7 +670,7 @@
 
     // Native setting nodes use Discord's own themed rows, navigation and back stack.
     let SettingsList;
-    const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : key;
+    const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : key;
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
         const entry = { settings: keys };
@@ -820,12 +820,16 @@
         link("VENUS_LINK_SOURCE", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8041, "LinkExternalSmallIcon");
         route("VENUS_GENERAL", "About", [section("Venus Patches", ["VENUS_VERSION", "VENUS_STATUS"]), section("Links", links)], undefined,
             venusIcon(4788, "CircleInformationIcon", icon));
+        // The nodes above stay for Discord's settings search; the page itself is the designed About page.
+        next.VENUS_GENERAL.screen.getComponent = () => AboutSettings;
         // The features list: each row says what it does, grouped by where you'll notice it.
         const P = "VENUS_PLUGINS";
         const groups = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
         const iconFor = key => { const found = FEATURE_ICONS[key]; return found ? venusIcon(found[0], found[1], icon) : icon; };
+        featureGroups = groups.keys = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
         function toggle(group, key, title, hint) {
             if (!features[key]) return;
+            groups.keys[group].push(key);
             const id = "VENUS_" + key.toUpperCase(); groups[group].push(id);
             next[id] = settingNode(key, title, hint, P);
             next[id].IconComponent = iconFor(key);
@@ -835,6 +839,7 @@
         const navigators = new Map();
         function withOptions(group, key, id, title, hint, pageTitle, page) {
             if (!features[key]) return;
+            groups.keys[group].push(key);
             // Option pages are built only for patched settings, so unpatched ones leave no nodes behind.
             if (typeof page === "function" && !page.prototype) page = page();
             if (page && page.sections && page.page) { route(id, pageTitle, page.sections, P, iconFor(key)); const Page = page.page; next[id].screen.getComponent = () => Page; }
@@ -878,7 +883,7 @@
         withOptions("sending", "freeNitro", "VENUS_FREENITRO", "Send Nitro stickers and emojis as links", "Stickers and emojis you'd need Nitro for are sent as a link, which shows up in chat as the sticker or emoji image.", "Nitro stickers and emojis",
             () => ({page:FreeNitroSettings, sections:[section("Send as links", [option("emojis", "Emojis", "Emojis from other servers, and animated emojis.", "VENUS_FREENITRO"),
                 option("stickers", "Stickers", "Stickers from other servers. Animated ones may not move.", "VENUS_FREENITRO")]),
-             section("Link style", [option("hyperlinks", "Short links", "The link shows as the emoji or sticker's name instead of a long web address.", "VENUS_FREENITRO")])]}));
+             section("Link style", [option("hyperlinks", "Short links", "In chat it looks the same either way. Short links only change what's copied or quoted.", "VENUS_FREENITRO")])]}));
         toggle("sending", "voice", "Send audio as voice messages", "An audio file sent on its own becomes a real voice message, with a waveform. Needs Android 10 or newer.");
         toggle("sending", "splitMessages", "Send long messages", "Type past the character limit. Long messages are sent in parts, split between lines or words.");
         toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing. You still see when they are.");
@@ -899,7 +904,7 @@
         withOptions("people", "accountSwitcher", "VENUS_ACCOUNTSWITCHER", "Account switcher", "Switch between multiple Discord accounts from the You tab, your profile bar or Settings.", "Account switcher", AccountSwitcherSettings);
         // Servers
         withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button under Direct Messages that marks everything as read. Hold it to choose what.", "Read all", ReadAllSettings);
-        toggle("servers", "hiddenChannels", "Show hidden channels", "Channels you can't open appear with a lock. Only their name and dates show, not messages.");
+        withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open appear with a lock. Only their name and dates show, not messages.", "Hidden channels", HiddenChannelsSettings);
         toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.");
         // Appearance
         toggle("appearance", "systemFont", "Use your phone's font", "Replaces Discord's font everywhere. Discord reopens to apply it. Needs Android 9 or newer.");
@@ -915,12 +920,76 @@
         const sections = [section("Messages", groups.messages), section("Sending", groups.sending), section("People", groups.people),
             section("Servers", groups.servers), section("Appearance", groups.appearance), section("Quests", groups.quests)].filter(entry => entry.settings.length);
         route(P, "Features", sections, undefined, venusIcon(14478, "PuzzlePieceIcon", icon));
+        // "5 of 26 on", right on the entry, so you see at a glance what Venus is doing before opening it.
+        next[P].useDescription = function () {
+            useSettings();
+            const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
+            return tr("{on} of {total} turned on", {on:keys.filter(key => settings[key]).length, total:keys.length});
+        };
         // Language: the language Venus settings are shown in, Discord's own by default.
         route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(14958, "LanguageIcon", icon));
         next.VENUS_LANGUAGE.screen.getComponent = () => LanguageSettings;
         next.VENUS_LANGUAGE.useDescription = function () { useLanguage(); return languageLabel(settings.language); };
         status.menu = true;
         return next;
+    }
+    // Which patched features sit in which group of the Features list, for the About page.
+    let featureGroups = null;
+    const FEATURE_GROUPS = [["messages", "Messages", 5386, "ChatIcon"], ["sending", "Sending", 4778, "SendMessageIcon"], ["people", "People", 4532, "FriendsIcon"],
+        ["servers", "Servers", 8584, "ServerIcon"], ["appearance", "Appearance", 14795, "PaintPaletteIcon"], ["quests", "Quests", 14519, "QuestsIcon"]];
+    // Is Venus working? One word and a colored dot, the way Discord shows a status.
+    function aboutHealth() {
+        const storage = status.storage;
+        if (storage === "ready" || storage === "saved") return status.archive === "save failed" || status.archive === "restore failed" || status.audioError ? "idle" : "online";
+        if (storage === "waiting" || storage === "loading") return "idle";
+        return "dnd";
+    }
+    const ABOUT_DARK = {hero:{backgroundColor:"#2b2d31", borderRadius:16, padding:20, alignItems:"center", gap:6},
+        logo:{width:64, height:64, borderRadius:32, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2", marginBottom:6},
+        chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"},
+        card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:10}};
+    // About: who you're running, how much of it is on, whether it's healthy, and where to go next.
+    function AboutSettings() {
+        useSettings();
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const s = useThemed("about", c => ({hero:Object.assign({}, ABOUT_DARK.hero, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            logo:Object.assign({}, ABOUT_DARK.logo, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
+            chip:Object.assign({}, ABOUT_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            card:Object.assign({}, ABOUT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT})}), ABOUT_DARK);
+        const Text = inspectedExport(4833, "Text"), Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
+        const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]), on = keys.filter(key => settings[key]).length;
+        const health = aboutHealth(), Sparkles = venusIcon(16292, "SparklesIcon");
+        const chips = FEATURE_GROUPS.map(([group, label, id, name]) => {
+            const list = featureGroups && featureGroups[group] || [];
+            if (!list.length) return null;
+            const count = list.filter(key => settings[key]).length;
+            return el(RN.View, {key:group, style:[s.chip, {opacity:count ? 1 : 0.6}], accessible:true, accessibilityLabel:tr(label) + ": " + count + "/" + list.length},
+                el(venusIcon(id, name), {size:"xs"}), text(tr(label) + " " + count + "/" + list.length, "text-xs/semibold", count ? "text-strong" : "text-muted", {color:"#dbdee1", fontSize:12}));
+        });
+        const linkRow = (key, label, sub, url, id, name) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true, onPress:() => openLink(url)}) : null;
+        const groups = [
+            el(RN.View, {key:"hero", style:s.hero, accessible:true},
+                popIn("logo", el(RN.View, {style:s.logo}, el(Sparkles, {size:"lg", color:"#ffffff"}))),
+                text("Venus Patches " + revision, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
+                text(tr("For Discord {version}", {version:"348.10"}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+            el(RN.View, {key:"features", style:s.card},
+                text(keys.length ? tr("{on} of {total} turned on", {on, total:keys.length}) : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
+                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:4}}, chips)),
+            el(RN.View, {key:"status", style:[s.card, {flexDirection:"row", alignItems:"center", gap:14}]},
+                el(RN.View, {style:{width:12, height:12, borderRadius:6, backgroundColor:STATUS_HEX[health]}}),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    text(tr(health === "online" ? "Everything's working" : health === "idle" ? (status.storage === "waiting" || status.storage === "loading" ? "Loading your settings" : "Working, see below") : "Something went wrong"),
+                        "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    text(aboutText(), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
+            el(Group, {key:"links", title:tr("Links")},
+                linkRow("changes", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16292, "SparklesIcon"),
+                linkRow("issues", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15329, "BugIcon"),
+                linkRow("source", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8041, "LinkExternalSmallIcon")),
+            footnote("note", "Nothing is tracked, and everything works offline except the features that say they use a service.")];
+        return settingsBody(ui, groups);
     }
     function languageLabel(code) {
         if (code === "auto") { const shown = UI_LANGUAGES.find(entry => entry[0] === uiLanguage()); return tr("Same as Discord ({language})", {language:shown ? shown[1] : "English"}); }
@@ -1843,12 +1912,37 @@
         return next;
     }
     const hiddenConfirmed = new Set();
+    // Message fetches are never a tap. A channel row preloads its messages on press-in (ChannelActionCreators.preload
+    // 4850 -> CHANNEL_PRELOAD -> MessageManager 9394 -> fetchMessages isPreload), which fires as soon as a finger
+    // touches the row, even when it then scrolls. Discord also fetches the restored channel on its own at startup.
+    // Asking here showed the locked-channel details while scrolling or opening the app (#62). Taps go through
+    // navigation (hiddenNavigation), which asks; this guard only keeps locked channels from loading, silently.
     function hiddenFetch(orig, self, args) {
         const channelId = typeof args[0] === "string" ? args[0] : args[0] && args[0].channelId;
         if (!hiddenChannel(channelId) || hiddenConfirmed.has(channelId)) return orig.apply(self, args);
-        const channel = receivedChannel(channelId);
-        showHidden(channel, () => { hiddenConfirmed.add(channelId); return orig.apply(self, args); });
         return Promise.resolve();
+    }
+    // Locked channels are listed among the selectable ones, and the facade says they can be viewed, so Discord's
+    // "first channel you can see" (GuildChannelStore 4470 getDefaultChannel/getSFWDefaultChannel -> getFirstChannel)
+    // picked a locked channel placed above the real ones. A locked channel never wins over a real one.
+    function hiddenFirstChannel(orig, self, args) {
+        if (!enabled("hiddenChannels") || typeof args[1] !== "function") return orig.apply(self, args);
+        const predicate = args[1], next = Array.from(args);
+        next[1] = function (entry) { return !(entry && hiddenChannel(entry.channel)) && predicate.apply(this, arguments); };
+        return orig.apply(self, next);
+    }
+    // The channel a server opens on (SelectedChannelStore 2102 getChannelId(guildId), used when you tap a server, by
+    // getChannelIdForGuildTransition 6639 and when Discord restores the last server at startup) is the last one
+    // picked there; with no server given it is the current channel, which Discord restores when the app opens.
+    // Opening a server or the app never lands on a locked channel: a remembered locked channel gives way to the
+    // server's first real channel. Only a locked channel you opened yourself with View Anyway is kept.
+    function hiddenSelectedChannel(orig, self, args) {
+        const id = orig.apply(self, args);
+        if (!enabled("hiddenChannels") || typeof id !== "string" || hiddenConfirmed.has(id) || !hiddenChannel(id)) return id;
+        const channel = receivedChannel(id), guild = args[0] != null ? args[0] : channel && channel.guild_id;
+        let real = null;
+        try { real = guildChannels && guild ? guildChannels.getDefaultChannel(guild) : null; } catch (_) { real = null; }
+        return real && real.id && !hiddenChannel(real) ? real.id : null;
     }
     // "A, B and C" in Venus's language. Japanese and Chinese join with "、" and no spaces (「8 日、7 時間と7 分」),
     // Thai with plain spaces, as it has no commas.
@@ -1962,15 +2056,22 @@
         const match = typeof route === "string" && /^\/channels\/(?:@me|[^/]+)\/([^/?#]+)(?:[/?#]|$)/.exec(route);
         if (!match || !hiddenChannel(match[1]) || hiddenConfirmed.has(match[1])) return orig.apply(self, args);
         const id = match[1];
-        showHidden(receivedChannel(id), () => { hiddenConfirmed.add(id); return orig.apply(self, args); });
+        // With the details menu turned off, tapping a locked channel simply does nothing.
+        if (enabled("hiddenChannelsMenu")) showHidden(receivedChannel(id), () => { hiddenConfirmed.add(id); return orig.apply(self, args); });
         return; // Wait for user choice; View Anyway then navigates.
     }
     function hiddenGuildNavigation(orig, self, args) {
+        // Opening a server by itself (with a locked channel Discord remembered) goes to the server's first real
+        // channel without asking: the locked channel may have been the last one tapped, but you opened the server.
         if (!hiddenChannel(args[1]) || hiddenConfirmed.has(args[1])) return orig.apply(self, args);
-        const id = args[1];
-        showHidden(receivedChannel(id), () => { hiddenConfirmed.add(id); return orig.apply(self, args); });
+        const next = Array.from(args);
+        let real = null;
+        try { real = guildChannels && args[0] ? guildChannels.getDefaultChannel(args[0]) : null; } catch (_) { real = null; }
+        next[1] = real && real.id && !hiddenChannel(real) ? real.id : undefined;
+        return orig.apply(self, next);
     }
-    let pastelHash, guildMembers, presenceStore, sessionsStore, displayNameType, nativeRowGroup, nativeSwitchRow, nativeLock, oauthModal;
+    let guildChannels = null;
+    let pastelHash, guildMembers, presenceStore, sessionsStore, displayNameType, nativeRowGroup, nativeSwitchRow, oauthModal;
     // The original PlatformIndicators plugin's themable PNG glyphs, tinted by status.
     const platformPngs = {"desktop": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAAVFBMVEUAAACvv7+3u7+5u7+2ub+4u726vL65u765vL65vMG5u723ub23v7+3t7+6vL+4ur+6u765u764vL+4ur23t7+7vb+3ur25ur64ur+7u766ur6vr7/+1nXbAAAAHHRSTlMAEEB/UHDv/99fgIAgQJ+f7++fnyB/YN9vTz8QSaZf3QAAAI1JREFUeAHt1tUBwkAURNEXHZzg1n+d2Fc8u4OTOQXcyKqJ3ARh5C22qiQFYTC0khFIYyuYgDYthGagzQuhDLRFIYS7yBPuakLmSaF2CimkkEIKKfT8I5un0MdCT7v6LUFbFUIhaGsr2IAUWcl2B0K2t6pDVKttGR5P3BJvpxCnfdTMHVo9NaRQ1MpKRC5jHSw3VFQzIwAAAABJRU5ErkJggg==", "web": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAQAAAD/5HvMAAADgklEQVR42u3a32vVdRzH8VdOv2NzGzM7bkp0E9F9RQSbOmK6groQpeugOzXJfnCW3YwgC4IyHCldrBmFELtQRxfK2MHp1sjVZRfBMSJFYu6cMUnOOZPz9Gb45uyc79fv5/tDvDiPv+DJh/fn8+HL56umpqbHFZsZ4hjjzJOnQJkyBfLMM87H7GWzHh16OcoVKgQpM8N79Cht7GaSVcJa5QK7lBZe5SpRzDCgpLGdH6gS3SRPKzm8xTJxFTmgJNDKtyRllFbFQxfTRLVCvSk6FR3b+J3onuRTlllvgUzk1YmVsyJJdPMN1bqkzmizM00cc1rDIP9SawpPrjhFPAf1AN1cotZJ940ezwKb1q33BLX2Kzx2sBwzZ7vWoYXvAVOkV2FxlqjuMMtBNqkBNpIDzI/h7ywnTsfIP5gquxUGV3EiB7zMPcxlPRwDOJITTgNmpx6GyZSDnqKAOa9g9LKKIzniA0yFbQrC+5B6UDf/Y44oCFdwdUPOGMfkgr8kyrg6Lmf0YUq0yw9DuLnBcTw5YwNFzB754RhmkYaUCH7BDMsPZzDDZFMM+gQzJj/8inlTYiS1oNcws/LD35jnJUtKPOgFzHX5YQmzdmCRTSXoGcyi/FDGtEqWlHhQG6YULsjTA4zg5iZf4CkAXrig25gtUowk+FwB2IpZDDfUz8pEWiUF4DnM9XDbfkiKl6QAvB5u248H38KMJBZ0FDMW7uo4qwbIJhQ0gcnKD3sxN3lCirNKgZfrf5hB+aGdEuYVNUQ2dtAuTIk2+WMG87V8MBIzaBQzrdDDVqBDPuIE0cUy5rCC0MMq5lAqQR9hKmRcPoNu0ZF0EN0sYs7JBAyc+UwNsUJYd7nGO2zUGr4CTL9MqMGu8KIaYB43C2yVJPq4h8kpDAaoYv6kS3U4jKvfaGELeUyVfoXDT4C5wAatg8cfuHqbS4A54/K8UgTMd/WnNjuckyqAKdCj8DhArdO0NFilQ8xxhyiq7JMbRqk1GXAEuDshV3hMUesvXkoo6CKe3NHJArUqfEln7KBrdCgaMnVJcIsPa6OcczKKjk6mqFfkFH20RAi6SIfiweMkjS0xwTBvEFaVE3hKAvspEleBfUoOvTGfOH+mJ40X6ctEkaNfaWEn56kQVoVz9CltZDhCjhJBSuR4l4weHdrZwzBjzJFniTJlbpNnljGyDNLW/BmlqelxdR++AoGbDB4jjAAAAABJRU5ErkJggg==", "mobile": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAMAAADVRocKAAAAXVBMVEUAAAAwMDgwMDUwMDUuMDYwMDYvMTcvMTYvMTYwMDYwMDUvMTYwMjUvMTUvMjYvMTUuMDUuMDQvMDUtMTUwMDgvMDUwMDAtMDYuMDYwMDAtMDUvMDYuMDUtMDcpMTo5aAq8AAAAH3RSTlMAIGBvf1C//89fMN9g75+/j3+fP0C/IFBfMGDPb08fcZ9WCgAAAMNJREFUeAHt2YWNxQAMg2EX/fiVud1/zBuhSaRjfwv8UsQx5J9L0iw/VySIyUoaXa7wu93pcE/g9KDTFS4F+amF5Em3ZwK7FwPeMEsYcoNVxZAaViX5uTd6MuQJKwY5A01u9goFWph1fyKggAIKKKCAAgoooIACCiiggAIKKKCAAgoooIACn/l9d/t3gU/fcEqG9LDKGVLB6saQAZ97owZ2w5NuzwEOKd1G4FMLE5wG36Y/w29ZadRviBn2/Nw2HfjTPgD3/UVA1TCAGgAAAABJRU5ErkJggg==", "embedded": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAAk1BMVEUAAAC3u7+4ur+5vL+5u765u7+6vL+2ub+3v7+6u7+5vL66v7+6vL65u761ur+4u765vL+3t7+6u765u7+9vb23t7+7vb+6u766ur+5ur6/v7+vv7+9vcW1tb+5u727u763ur25vL+6vL+3ub24ur+5u7+4vL+5ur66ur64ur25vL+6u764ur24u722uby5u76vr7/eehxsAAAAMXRSTlMAQJ/f/8+fUCC/3zDv7zC/UEDvfx8gf88w3xAQHzCAT2Bfb4Bvj5/PP6+vv59wUM8QEONx+AAAAWZJREFUeAHt1dWa6zAMBOA5PSqzs2Vmhvd/uWWcVFHqr5f+r+3JRqtJ8UhBEAT/Mv8lpWwuD02hKHcpFXBTuSJ3qtZwQ0HPUVULiCuJhzpiGuKlCZaTL3gnxEVPaLWdkAxYJznIdfGmy0k9MEkOivChLQSkbwS18KElZEBBLSMIX4QMuRxaEJ0vCBndCkJMbEZjIRO6MTWCqjWlRjO6MTeCpLoooDWuCFvSjcgK0pYzohsrM0hZzhXdWJtBynJyR4rGv19dzrp3EC3nhoJKZpCynNxalzqIlrPKU7WDlOXUym8H0XIOufy+htxZX9tHBU24/L5mXH5fSy6/r4jL/8sOidYJv2x7fu0k84SgIn/Qmb50dT2oB6YXk+tf4hElWuuPdeaIlCFx/fkLeM+Q1Ferw3RQZ9SmP8jQlR9H/NZ3tKmG08+sW/SMnrxzZ6Qy/TrfBWkdL+Lq0RUptaYHJyU+HwRB4O0FjTMnvIkvoBQAAAAASUVORK5CYII=", "vr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAANlBMVEVMaXHv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hs7PTu7vHv7/Hv7/Hv7/Hv7/Hv7/Hv7/Hv7/EEUZf/AAAAEXRSTlMAzGV4UNr78OcJFDufKb6ri3Gd0SEAAAHQSURBVFjD7VbHdsQgDDRNiOby/z+bjY0N2LRk95C8xxwNHo0KkqZpYGBg4PMwbBa4ZYFiZqaPRVGxNSCoavPwJs0ujLbk2K0TtipKz1s3Zl3RE/PILGKmsqbLL8JcwZ5y9LJmi3E+k8Ib1UH8xcI95Utnaeb2TAnmbzLP01NsnilfBEcBCW9FVXWpwzvxrGYiE785ASC1p2DO3M5xlWty5ZREyrEmKlQK0Tedweu1npUdNPxDVBrlHe5bIHQQue1m/YVIEKjIGKmGG7ZbPKYpqnsMnsGqqxUQNSzpP8WdJoSaNUop7nwFInZF600ijT0F3kE06dXS6RNEXfh7ROI/EMG7RPAM2++I8D48wqefZe0cJy74Bo+HaixBJPbRLXX0k5ueDenWgtzVYojLz670edNL55y2wSgPQPOtFhPbirPlKYlDPOyBPwUtjD8auzr6GwYXDKRrA4RAucMFmR0PvuXjeZ3K+wIiT++MD8Wa32n8KSxc67ArSOYcOzln6rTmi5eKhWbMIbMGyV2gkZkjKE4ZVr6cM1Lp6qxslN6ZoDodeLoVi6igTbqlYmOJ0muIBrIku4oFK7Ix9I7atAQ2SWym1F5HEjB3NDAwMPAuvgCPRUw2yKsaYwAAAABJRU5ErkJggg=="};
     function PlatformPng(props) {
@@ -2154,6 +2255,7 @@
             const done=guilds ? " ("+pl(guilds,"{n} server was marked as read","{n} servers were marked as read")+")" : "";
             reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(error && error.message || error)})+done,venusIcon(6026,"CircleXIcon")); return;
         }
+        if (guilds || dms) readAllDone();
         const parts=[];
         if (guilds) parts.push(pl(guilds,"{n} server","{n} servers"));
         if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
@@ -2173,8 +2275,16 @@
     const READ_ALL_PRESSED_SCALE = {transform:[{scale:0.96}]}, READ_ALL_TEXT_BASE = {fontSize:11,fontWeight:"700",includeFontPadding:false};
     const READ_ALL_FALLBACK_STYLES = {pill:{backgroundColor:"#4e505899"},pressed:{backgroundColor:"#4e5058"},text:{color:"#dbdee1"}};
     function readAllPress() { readAll(settings.readAllMode); }
+    // For a moment after it clears something, the pill shows a check instead of its label, then goes back.
+    let readAllDoneUntil=0, readAllDoneTimer;
+    function readAllDone() {
+        readAllDoneUntil=Date.now()+1400; notify("readAll");
+        if (readAllDoneTimer!==undefined && global.clearTimeout) global.clearTimeout(readAllDoneTimer);
+        readAllDoneTimer=later(() => { readAllDoneTimer=undefined; readAllDoneUntil=0; notify("readAll"); },1450,false);
+    }
     function ReadAllButton() {
-        const ui=reviewUI();
+        useSettings("readAll");
+        const ui=reviewUI(), done=readAllDoneUntil>Date.now();
         // Discord's semantic tokens, so the pill follows light, dark and custom themes.
         if (!readAllStylesTried) {
             const c=ui.colors;
@@ -2189,11 +2299,12 @@
         if (readAllStyleHook) try { styles=readAllStyleHook(); } catch (_) {}
         styles=styles || READ_ALL_FALLBACK_STYLES;
         return el(RN.View,{style:READ_ALL_OUTER_STYLE},
-            el(RN.Pressable,{accessibilityRole:"button",accessibilityHint:tr("Hold to choose"),
+            el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Read all"),accessibilityHint:tr("Hold to choose"),
                 hitSlop:6,onPress:readAllPress,onLongPress:readAllChooser,delayLongPress:350,
                 style:({pressed}) => [READ_ALL_PILL_BASE,styles.pill,
                     pressed ? styles.pressed : null,pressed ? READ_ALL_PRESSED_SCALE : null]},
-                el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
+                done ? popIn("done",el(venusIcon(6555,"CheckmarkSmallIcon"),{size:"xs",color:styles.text && styles.text.color})) :
+                    el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
     }
     function readAllBarProps(orig, self, args) {
         const result=orig.apply(self,args);
@@ -2355,6 +2466,88 @@
         if (React) useSettings("gestures");
         return enabled("gestures") ? null : orig.apply(self, args);
     }
+    // Watch: Sam asks, you double-tap to reply and say you're in, Sam says it's at 6 AM, you regret it and triple-tap
+    // your message away. Try it: the same chat, with a tip pointing at what to tap next. Both follow your choices below.
+    const GESTURE_TAP_MS = 300;
+    function GesturePreview(props) {
+        useSettings("gestures");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
+        const blank = {mode:null, target:null, gone:false, mine:true, late:false, draft:"", pulse:null, done:{}};
+        const [state, setState] = React.useState(blank), taps = React.useRef({who:null, count:0, at:0, timer:undefined});
+        React.useEffect(() => () => { const t = taps.current; if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer); }, []);
+        const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete, watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const pulse = who => update(st => ({pulse:{who, id:(st.pulse ? st.pulse.n + 1 : 1) + ":" + who, n:st.pulse ? st.pulse.n + 1 : 1}}));
+        // The story, built from your settings: what a double-tap on your own message does, and whether triple-tap deletes.
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(Object.assign({}, blank, {mine:false})), tr("Sam asks if anyone wants to play")],
+                [1200, () => pulse("theirs"), tr("You double-tap Sam's message")], [200, () => pulse("theirs")],
+                [500, () => { animateLayout(); gestureHaptic(); update({mode:"reply", target:"theirs"}); }, tr("A reply to Sam opens, ready to type")]];
+            typeSteps(tr("I'm in!"), text => update({draft:text}), 110).forEach(step => steps.push(step));
+            steps.push([600, () => { animateLayout(); update({mode:null, target:null, draft:"", mine:true}); }, tr("You send it")],
+                [1200, () => { animateLayout(); update({late:true}); }, tr("Then Sam says it starts at 6 AM")]);
+            if (triple) steps.push([1000, () => pulse("mine"), tr("You change your mind and tap your message three times")],
+                [220, () => pulse("mine")], [220, () => pulse("mine")],
+                [500, () => { animateLayout(); gestureHaptic(); update({mode:"deleted", target:"mine", gone:true}); }, tr("It's deleted at once, with no question")],
+                [1500, () => {}]);
+            else steps.push([1000, () => pulse("mine"), tr("You double-tap your own message")], [200, () => pulse("mine")],
+                [500, () => { animateLayout(); update({mode:own ? "edit" : "reply", target:"mine", draft:own ? tr("I'm in!") : ""}); },
+                    tr(own ? "It opens for editing, so you can fix it" : "A reply to your own message opens")], [1500, () => {}]);
+            return steps;
+        }, [own, triple]);
+        const act = (who, count) => {
+            if (!on || watching) return;
+            if (who === "mine" && count >= 3 && triple) {
+                animateLayout(); gestureHaptic(); update(st => ({mode:"deleted", target:"mine", gone:true, done:Object.assign({}, st.done, {del:true})}));
+                later(() => { animateLayout(); update(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : {}); }, 2200, false);
+                return;
+            }
+            if (count < 2) return;
+            animateLayout(); gestureHaptic();
+            update(st => ({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false,
+                done:Object.assign({}, st.done, who === "mine" ? {own:true} : {reply:true})}));
+        };
+        // Same rule as in chat: a third tap soon after a double-tap deletes your own message instead.
+        const tap = who => {
+            if (watching) return;
+            const t = taps.current, now = Date.now();
+            t.count = t.who === who && now - t.at < GESTURE_TAP_MS * 2 ? t.count + 1 : 1; t.who = who; t.at = now;
+            if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer);
+            const waitForThird = who === "mine" && triple && t.count === 2;
+            if (t.count >= 3 || (t.count === 2 && !waitForThird)) { const n = t.count; t.count = 0; act(who, n); return; }
+            if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
+        };
+        const switchMode = value => { setMode(value); setState(blank); };
+        const Reply = venusIcon(11108, "ArrowAngleLeftUpIcon"), Pencil = venusIcon(9829, "PencilIcon"), Trash = venusIcon(4791, "TrashIcon");
+        // Try it: a tip under the message to tap next, step by step, until you've tried everything your options allow.
+        const done = state.done, next = !on || watching ? null : !done.reply ? ["theirs", tr("Double-tap Sam's message to reply")] :
+            !done.own ? ["mine", tr(own ? "Now double-tap your message to edit it" : "Now double-tap your message to reply to it")] :
+            triple && !done.del ? ["mine", tr("Now tap your message three times to delete it")] : null;
+        const picked = who => state.target === who && state.mode !== "deleted";
+        const message = (who, name, color, time, text) => el(RN.View, {key:who},
+            el(Press, {onPress:() => tap(who), accessibilityRole:"button",
+                accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
+                el(RN.View, {style:picked(who) ? {backgroundColor:"#f0b2321a"} : null},
+                    picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#f0b232"}}) : null,
+                    previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who))),
+            next && next[0] === who ? previewTip(k, next[1]) : null);
+        const showMine = watching ? state.mine && !state.gone : !state.gone;
+        const close = watching ? null : () => { animateLayout(); update({mode:null, target:null, gone:false, draft:""}); };
+        const bar = state.mode === "deleted" ? previewBar(k, s, Trash, tr("Message deleted"), null) :
+            state.mode === "edit" ? previewBar(k, s, Pencil, tr("Editing message"), close) :
+            state.mode === "reply" ? previewBar(k, s, Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close) : null;
+        const allDone = on && !watching && !next && done.reply;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
+            previewScreen(s, "chat", "Tap gestures preview", [
+                message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
+                showMine ? message("mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("I'm in!")) : null,
+                watching && state.late ? el(RN.View, {key:"late"}, popIn("late", previewMessage(s, "late", "Sam", "#eb459e", tr("Today at 4:03 PM"),
+                    el(RN.Text, {style:s.text}, tr("Great, it starts at 6 AM!"))))) : null,
+                allDone ? previewTip(k, tr("That's everything. Double-tap again any time.")) : null],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, previewInput(k, s, {bar, text:state.draft, placeholder:tr("Message {channel}", {channel:"#general"})}),
+                    watching ? storyStrip(k, s, story) : null)}));
+    }
     function GestureSettings() {
         useSettings("gestures");
         const ui = reviewUI();
@@ -2364,6 +2557,7 @@
             on ? statusCard("status", settings.gestureTripleDelete ? "Double-tap replies. Triple-tap your own message deletes it." :
                 settings.gestureOwn === "edit" ? "Double-tap replies, or edits your own message." : "Double-tap any message to reply to it.",
                 {title:tr("Double-tap to reply"), IconComponent:venusIcon(8216, "ReactionIcon")}) : offCard("status", venusIcon(8216, "ReactionIcon")),
+            el(GesturePreview, {key:"preview", on}),
             radioGroup(ui, "own", "Double-tap your own message", "gestureOwn", on, [
                 ["edit", "Edit it", "Opens it for editing, when Discord lets you.", rowIcon(9829, "PencilIcon")],
                 ["reply", "Reply to it", "Same as someone else's message.", rowIcon(11108, "ArrowAngleLeftUpIcon")]]),
@@ -2665,6 +2859,13 @@
         });
     }
     // Mirrors the server's answer into QuestStore, so Discord's own Quest screens stay right.
+    // How far the running Quest is, for the progress bar on the Quests page. Only that page listens.
+    function questProgressed(entry, value) {
+        const n = Number(value);
+        if (!Number.isFinite(n) || quest.running !== entry) return;
+        entry.progress = Math.max(0, Math.min(entry.task.target, n));
+        notify("quests");
+    }
     function questVideoStatus(response) {
         const body = response && response.body;
         if (body && body.quest_id) questDispatch({type:"QUESTS_USER_STATUS_UPDATE", user_status:body});
@@ -2678,6 +2879,7 @@
         const enrolled = questTime(item.userStatus && item.userStatus.enrolledAt), target = entry.task.target;
         if (!Number.isFinite(enrolled)) throw new Error("no accepted time");
         let done = questProgress(item, entry.task.type), completed = false;
+        questProgressed(entry, done);
         while (questActive(entry) && done < target) {
             const step = 6 + Math.random() * 2;
             const allowed = (Date.now() - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, next = Math.min(target, done + step);
@@ -2688,6 +2890,7 @@
             if (!questActive(entry)) return false;
             completed = questVideoStatus(response);
             done = next;
+            questProgressed(entry, done);
             if (completed) break;
             await questSleep(1000 + Math.floor(Math.random() * 500));
         }
@@ -2749,6 +2952,7 @@
         while (questActive(entry)) {
             const beat = await questHeartbeat(entry, desktop);
             if (!questActive(entry)) return false;
+            questProgressed(entry, beat.value);
             if (beat.completed || beat.value >= target) return true;
             // A Quest Discord stops counting used to get a heartbeat every minute for as long as Discord stayed open.
             if (beat.value > best) { best = beat.value; stalled = 0; }
@@ -2838,10 +3042,18 @@
     function questStatusText() {
         if (!enabled("quests")) return "Turned off. Switch it on in Features to start.";
         const lines = [quest.completed ? pl(quest.completed, "Completed {n} Quest since Discord opened.", "Completed {n} Quests since Discord opened.") : tr("Waiting for new Quests.")];
-        if (quest.running) lines.push(tr("Now: {name}.", {name:quest.running.name}));
+        if (quest.running) {
+            const share = questShare(), left = share != null ? Math.ceil((quest.running.task.target - quest.running.progress) / 60) : 0;
+            lines.push(tr("Now: {name}.", {name:quest.running.name}) + (share != null && left > 0 ? " " + pl(left, "About {n} minute left.", "About {n} minutes left.") : ""));
+        }
         if (quest.last) lines.push(tr("Last: {name}", {name:tr(quest.last.text, quest.last.vars)}));
         if (quest.error) lines.push(tr(quest.error.text, quest.error.vars));
         return lines.join("\n");
+    }
+    // The running Quest's progress, 0 to 1, or null before its first report.
+    function questShare() {
+        const entry = quest.running, target = entry && entry.task && entry.task.target;
+        return entry && target > 0 && typeof entry.progress === "number" ? entry.progress / target : null;
     }
     function questStatusTitle() {
         if (quest.error) return tr("Something went wrong");
@@ -2858,7 +3070,8 @@
         const toggle = (key, label, subLabel, icon) => switchRow(Switch, key, label, subLabel, icon);
         const groups = [
             on ? statusCard("status", questStatusText(), {title:questStatusTitle(), IconComponent:venusIcon(quest.error ? 11840 : quest.running ? 10968 : 14519,
-                quest.error ? "ChatWarningIcon" : quest.running ? "TimerIcon" : "QuestsIcon")}) : offCard("status", venusIcon(14519, "QuestsIcon")),
+                quest.error ? "ChatWarningIcon" : quest.running ? "TimerIcon" : "QuestsIcon"),
+                footer:questShare() != null ? el(VenusProgress, {key:"progress:" + quest.running.id, value:questShare()}) : null}) : offCard("status", venusIcon(14519, "QuestsIcon")),
             el(Group, {key:"types", title:tr("Quests to complete")},
                 toggle("questsVideo", "Video Quests", "Reported as watched at normal speed, without playing the video.", rowIcon(10976, "VideoIcon")),
                 toggle("questsPlay", "Play Quests", "Play time counts without installing or opening the game.", rowIcon(8532, "GameControllerIcon")),
@@ -2868,16 +3081,304 @@
             footnote("note", "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.")];
         return settingsBody(ui, groups);
     }
-    // Shared by the Read All, ReviewDB and NoDelete pages: Discord's spacing, scrolling and switch rows.
+    // Motion, from React Native's own Animated and LayoutAnimation. Opacity, position and scale run on the native
+    // driver, so nothing extra runs in JS while a page animates. Without them, or with Android's "Remove animations"
+    // on, everything simply shows at once.
+    let reduceMotion = false, reduceMotionAsked = false;
+    function motion() {
+        const A = RN && RN.Animated;
+        if (!A || typeof A.timing !== "function" || typeof A.Value !== "function") return null;
+        if (!reduceMotionAsked) {
+            reduceMotionAsked = true;
+            const info = RN.AccessibilityInfo;
+            try { if (info && typeof info.isReduceMotionEnabled === "function") Promise.resolve(info.isReduceMotionEnabled()).then(on => { reduceMotion = !!on; }, () => {}); } catch (_) {}
+            try { if (info && typeof info.addEventListener === "function") info.addEventListener("reduceMotionChanged", on => { reduceMotion = !!on; }); } catch (_) {}
+        }
+        return A;
+    }
+    // The next layout change on screen eases into place instead of jumping: rows that appear, a bar that widens.
+    function animateLayout() {
+        const animate = RN && RN.LayoutAnimation;
+        if (reduceMotion || !animate || typeof animate.configureNext !== "function") return;
+        try { animate.configureNext(typeof animate.create === "function" ? animate.create(200, "easeInEaseOut", "opacity") : animate.Presets.easeInEaseOut); } catch (_) {}
+    }
+    function easeOut() { const E = RN && RN.Easing; try { return E && E.out && E.cubic ? E.out(E.cubic) : undefined; } catch (_) { return undefined; } }
+    // An option page's groups rise into place one after another when the page opens, and a row group that
+    // appears later (Manage, a hex box) fades in the same way.
+    function VenusReveal(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) {
+            const value = new A.Value(reduceMotion ? 1 : 0);
+            ref.current = {value, style:{opacity:value, transform:[{translateY:value.interpolate({inputRange:[0, 1], outputRange:[14, 0]})}]}};
+        }
+        React.useEffect(() => {
+            const state = ref.current;
+            if (!state || reduceMotion) return undefined;
+            const run = A.timing(state.value, {toValue:1, duration:280, delay:Math.min(props.index || 0, 6) * 45, easing:easeOut(), useNativeDriver:true});
+            run.start();
+            return () => { run.stop(); state.value.setValue(1); };
+        }, []);
+        return ref.current ? el(A.View, {style:ref.current.style}, props.children) : props.children;
+    }
+    // A check mark or choice that pops in with a small spring when it's picked.
+    function PopIn(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) {
+            const value = new A.Value(reduceMotion ? 1 : 0);
+            ref.current = {value, style:{opacity:value.interpolate({inputRange:[0, 1], outputRange:[0, 1], extrapolate:"clamp"}),
+                transform:[{scale:value.interpolate({inputRange:[0, 1], outputRange:[0.4, 1]})}]}};
+        }
+        React.useEffect(() => {
+            const state = ref.current;
+            if (!state || reduceMotion || typeof A.spring !== "function") { if (state) state.value.setValue(1); return undefined; }
+            const run = A.spring(state.value, {toValue:1, speed:20, bounciness:12, useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, []);
+        return ref.current ? el(A.View, {style:ref.current.style, pointerEvents:"none"}, props.children) : props.children;
+    }
+    function popIn(key, child) { return child ? el(PopIn, {key}, child) : child; }
+    // Every preview can be watched or tried. Watch plays a short story of the feature on a loop; Try it lets you tap the
+    // preview yourself. The choice is shared by every page until Discord restarts, so you only pick it once.
+    let previewModeChoice = "watch";
+    function usePreviewMode() {
+        const [mode, setMode] = React.useState(previewModeChoice);
+        return [mode, value => { previewModeChoice = value; animateLayout(); setMode(value); }];
+    }
+    // Steps that type text into a preview's message box one letter at a time.
+    function typeSteps(text, set, ms) { return Array.from(text).map((_, i) => [ms || 70, () => set(text.slice(0, i + 1))]); }
+    // Where the demo's finger taps: a soft circle that grows and fades once each time it mounts (key it on the tap).
+    function TapRipple(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || reduceMotion) return undefined;
+            const run = A.timing(value, {toValue:1, duration:420, easing:easeOut(), useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, []);
+        const base = Object.assign({position:"absolute", width:34, height:34, borderRadius:17, backgroundColor:"#ffffff"}, props.at || {right:22, top:14});
+        if (!ref.current) return el(RN.View, {pointerEvents:"none", style:[base, {opacity:0.25}]});
+        return el(A.View, {pointerEvents:"none", style:[base, {opacity:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.45, 0]}),
+            transform:[{scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.5, 1.7]})}]}]});
+    }
+    function tapRipple(pulse, who, at) { return pulse && pulse.who === who ? el(TapRipple, {key:"tap:" + pulse.id, at}) : null; }
+    const PREVIEW_TOGGLE_DARK = {wrap:{flexDirection:"row", alignSelf:"flex-end", padding:3, gap:3, borderRadius:16, backgroundColor:"#1e1f22", marginHorizontal:12, marginBottom:4},
+        on:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13, backgroundColor:"#4e5058"},
+        off:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13}};
+    // The small Watch / Try it switch at the top of a preview, in Discord's segmented-control colors. Its own component,
+    // so a preview can show it only while the feature is on without changing the preview's hooks.
+    function previewToggle(mode, setMode) { return el(PreviewToggle, {key:"toggle", mode, setMode}); }
+    function PreviewToggle(props) {
+        const mode = props.mode, setMode = props.setMode;
+        const s = useThemed("previewToggle", c => ({wrap:Object.assign({}, PREVIEW_TOGGLE_DARK.wrap, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND}),
+            on:Object.assign({}, PREVIEW_TOGGLE_DARK.on, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}), off:PREVIEW_TOGGLE_DARK.off}), PREVIEW_TOGGLE_DARK);
+        const Text = inspectedExport(4833, "Text"), Press = RN.Pressable || RN.View;
+        const pill = (value, label, Icon) => el(Press, {key:value, style:mode === value ? s.on : s.off, accessibilityRole:"button", accessibilityLabel:tr(label),
+            accessibilityState:{selected:mode === value}, onPress:() => { if (mode !== value) setMode(value); }, hitSlop:{top:6, bottom:6, left:4, right:4}},
+            el(Icon, {size:"xxs", color:mode === value ? undefined : "#949ba4"}),
+            Text ? el(Text, {variant:"text-xs/semibold", color:mode === value ? "interactive-text-active" : "text-muted"}, tr(label)) :
+                el(RN.Text, {style:{fontSize:12, fontWeight:"600", color:mode === value ? "#ffffff" : "#949ba4"}}, tr(label)));
+        return el(RN.View, {key:"toggle", style:s.wrap}, pill("watch", "Watch", venusIcon(7726, "PlayIcon")), pill("try", "Try it", venusIcon(9370, "HandRequestSpeakIcon")));
+    }
+    // Watch plays like a short video: a story is a list of [wait ms, step, caption?]. Each caption stays up long enough
+    // to read (storyPlan stretches the wait before the next one), the clock ticks once a second, and a bar under the
+    // preview shows where it is, how long it is, and lets you pause or start over. It loops, and starts over when the
+    // options below change. Its timers end when you switch to Try it or leave the page.
+    function readMs(text) { return Math.max(2400, Math.min(5000, 1500 + 55 * String(text || "").length)); }
+    function storyPlan(list) {
+        const out = list.filter(Boolean).map(step => step.slice());
+        let last = null, since = 0;
+        out.forEach(step => {
+            if (step[2] && last !== null && since + step[0] < readMs(last)) step[0] += readMs(last) - since - step[0];
+            if (step[2]) { last = step[2]; since = 0; } else since += step[0];
+        });
+        if (last !== null && since < readMs(last)) out.push([readMs(last) - since, () => {}]);
+        return out;
+    }
+    function useStory(active, build, deps) {
+        const [view, setView] = React.useState({t:0, total:0, caption:"", chapter:0, chapters:[], playing:true, segment:null});
+        const control = React.useRef({});
+        React.useEffect(() => {
+            if (!active) return undefined;
+            const plan = storyPlan(build()), at = [];
+            let sum = 0;
+            plan.forEach(step => { sum += step[0]; at.push(sum); });
+            const total = sum, chapters = plan.map((step, i) => step[2] ? at[i] : null).filter(x => x !== null);
+            const st = {i:0, t:0, timer:undefined, cancelled:false, paused:false, caption:"", chapter:0, seg:0};
+            const show = segment => setView({t:st.t, total, caption:st.caption, chapter:st.chapter, chapters, playing:!st.paused, segment});
+            const stop = () => { if (st.timer !== undefined && global.clearTimeout) global.clearTimeout(st.timer); st.timer = undefined; };
+            const schedule = () => {
+                if (st.cancelled || st.paused) return;
+                const due = st.i < at.length ? at[st.i] : total, target = Math.min(due, Math.floor(st.t / 1000) * 1000 + 1000);
+                const wait = Math.max(0, target - st.t);
+                show({from:st.t, to:target, ms:wait, id:++st.seg});
+                st.timer = later(() => {
+                    st.timer = undefined;
+                    if (st.cancelled) return;
+                    st.t = target;
+                    while (st.i < plan.length && at[st.i] <= st.t) {
+                        const step = plan[st.i++];
+                        if (step[2]) { st.caption = step[2]; st.chapter++; }
+                        try { step[1](); } catch (_) {}
+                    }
+                    if (st.i >= plan.length) { st.i = 0; st.t = 0; st.caption = ""; st.chapter = 0; }
+                    schedule();
+                }, wait, false);
+            };
+            control.current = {
+                pause() { if (st.paused) return; st.paused = true; stop(); show(null); },
+                play() { if (!st.paused) return; st.paused = false; schedule(); },
+                replay() { stop(); st.i = 0; st.t = 0; st.caption = ""; st.chapter = 0; st.paused = false; schedule(); }
+            };
+            schedule();
+            return () => { st.cancelled = true; stop(); control.current = {}; };
+        }, [active].concat(deps || []));
+        return Object.assign({}, view, {pause:() => control.current.pause && control.current.pause(),
+            play:() => control.current.play && control.current.play(), replay:() => control.current.replay && control.current.replay()});
+    }
+    function clockText(ms) { const sec = Math.round(ms / 1000); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+    const PREVIEW_CHROME_DARK = {
+        header:{flexDirection:"row", alignItems:"center", gap:10, paddingHorizontal:12, height:48, borderBottomWidth:1, borderBottomColor:"#ffffff0f"},
+        title:{color:"#f2f3f5", fontSize:16, fontWeight:"700"}, sub:{color:"#949ba4", fontSize:12}, icon:{color:"#b5bac1"}, iconMuted:{color:"#80848e"},
+        inputRow:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingTop:6, paddingBottom:8},
+        round:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
+        pill:{flex:1, minHeight:40, borderRadius:20, paddingHorizontal:14, flexDirection:"row", alignItems:"center", gap:8, backgroundColor:"#2b2d31"},
+        send:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:8, backgroundColor:"#4e505826"},
+        brand:{backgroundColor:"#5865f2"}, brandText:{color:"#ffffff"},
+        secondary:{backgroundColor:"#4e505899"}, secondaryText:{color:"#f2f3f5"},
+        sheet:{backgroundColor:"#232428", borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, paddingBottom:4},
+        sheetRow:{backgroundColor:"#2b2d31"}, modal:{backgroundColor:"#313338", borderRadius:16, padding:16, gap:12}, scrim:{backgroundColor:"#000000a6"},
+        strip:{backgroundColor:"#4e50581a", borderTopWidth:1, borderTopColor:"#ffffff0f"}, track:{backgroundColor:"#4e505899"}, fill:{backgroundColor:"#5865f2"},
+        mention:{backgroundColor:"#5865f23d", color:"#c9cdfb"}, category:{color:"#949ba4", fontSize:12, fontWeight:"700", letterSpacing:0.3},
+        channel:{color:"#949ba4"}, selected:{backgroundColor:"#4e505866"}, card:{backgroundColor:"#2b2d31"}};
+    function usePreviewChrome() {
+        return useThemed("previewChrome", c => ({
+            header:Object.assign({}, PREVIEW_CHROME_DARK.header, {borderBottomColor:c.MOBILE_HEADER_BORDER || c.BORDER_SUBTLE}),
+            title:Object.assign({}, PREVIEW_CHROME_DARK.title, {color:c.MOBILE_TEXT_HEADING_PRIMARY || c.TEXT_STRONG}),
+            sub:Object.assign({}, PREVIEW_CHROME_DARK.sub, {color:c.TEXT_MUTED}),
+            icon:{color:c.MOBILE_HEADER_ICON_DEFAULT || c.INTERACTIVE_ICON_DEFAULT}, iconMuted:{color:c.ICON_MUTED},
+            inputRow:PREVIEW_CHROME_DARK.inputRow,
+            round:Object.assign({}, PREVIEW_CHROME_DARK.round, {backgroundColor:c.CHAT_INPUT_ACTION_BUTTON_BACKGROUND || c.BACKGROUND_MOD_SUBTLE}),
+            pill:Object.assign({}, PREVIEW_CHROME_DARK.pill, {backgroundColor:c.REDESIGN_CHAT_INPUT_BACKGROUND || c.CHAT_INPUT_BACKGROUND}),
+            send:Object.assign({}, PREVIEW_CHROME_DARK.send, {backgroundColor:c.CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND || c.BACKGROUND_BRAND}),
+            bar:Object.assign({}, PREVIEW_CHROME_DARK.bar, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            brand:{backgroundColor:c.BACKGROUND_BRAND}, brandText:{color:c.CONTROL_BRAND_FOREGROUND_NEW || c.WHITE || "#ffffff"},
+            secondary:{backgroundColor:c.CONTROL_SECONDARY_BACKGROUND_DEFAULT}, secondaryText:{color:c.CONTROL_SECONDARY_TEXT_DEFAULT},
+            sheet:Object.assign({}, PREVIEW_CHROME_DARK.sheet, {backgroundColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW}),
+            sheetRow:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}, modal:Object.assign({}, PREVIEW_CHROME_DARK.modal, {backgroundColor:c.MODAL_BACKGROUND}),
+            scrim:{backgroundColor:c.BACKGROUND_SCRIM}, strip:Object.assign({}, PREVIEW_CHROME_DARK.strip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_SUBTLE}),
+            track:{backgroundColor:c.PROGRESSBAR_TRACK_BACKGROUND || c.BACKGROUND_MOD_STRONG}, fill:{backgroundColor:c.PROGRESSBAR_INDICATOR_BACKGROUND || c.BACKGROUND_BRAND},
+            mention:{backgroundColor:c.MENTION_BACKGROUND, color:c.MENTION_FOREGROUND},
+            category:Object.assign({}, PREVIEW_CHROME_DARK.category, {color:c.TEXT_MUTED}), channel:{color:c.CHANNELS_DEFAULT || c.TEXT_MUTED},
+            selected:{backgroundColor:c.MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED || c.BACKGROUND_MOD_NORMAL}, card:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}}),
+            PREVIEW_CHROME_DARK);
+    }
+    // Discord's channel header: back arrow, the channel (or person) and the icons on the right.
+    function previewHeader(k, props) {
+        const Back = venusIcon(5937, "ArrowLargeLeftIcon"), Hash = venusIcon(15125, "HashmarkIcon");
+        return el(RN.View, {key:"header", style:k.header},
+            el(Back, {size:"md", color:k.icon.color}),
+            props.leading || el(Hash, {size:"md", color:k.iconMuted.color}),
+            el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:6}},
+                el(RN.Text, {style:k.title, numberOfLines:1}, props.title), props.badges || null),
+            (props.icons || [[6473, "MagnifyingGlassIcon"], [5404, "GroupIcon"]]).map(([id, name]) => el(venusIcon(id, name), {key:name, size:"md", color:k.icon.color})));
+    }
+    // Discord's message bar: the + button, the text pill with its emoji button, then the mic, or Send once there's text.
+    function previewInput(k, s, props) {
+        const Plus = venusIcon(10455, "PlusLargeIcon"), Smile = venusIcon(8216, "ReactionIcon"), Mic = venusIcon(9461, "MicrophoneIcon"),
+            Send = venusIcon(4778, "SendMessageIcon"), text = props.text || "";
+        return el(RN.View, {key:"input"}, props.bar || null, props.above || null,
+            el(RN.View, {style:k.inputRow},
+                el(RN.View, {style:k.round}, el(Plus, {size:"sm", color:k.icon.color})),
+                el(RN.View, {style:k.pill}, el(RN.Text, {style:[text ? s.text : s.muted, {flex:1, fontSize:15}], numberOfLines:1}, text || props.placeholder),
+                    el(Smile, {size:"sm", color:k.icon.color})),
+                text ? popIn("send", el(RN.View, {style:k.send}, el(Send, {size:"sm", color:k.brandText.color}))) :
+                    el(RN.View, {style:k.round}, el(Mic, {size:"sm", color:k.icon.color}))));
+    }
+    // The bar above the message box while replying or editing, like Discord's: an icon, what it is, and a close button.
+    function previewBar(k, s, Icon, text, onClose, key) {
+        const X = venusIcon(5940, "XSmallIcon"), Press = RN.Pressable || RN.View;
+        return el(RN.View, {key:key || "bar", style:k.bar}, popIn("icon:" + text, el(Icon, {size:"xs", color:k.icon.color})),
+            el(RN.Text, {style:[s.muted, {flex:1, fontSize:13}], numberOfLines:1}, text),
+            onClose ? el(Press, {onPress:onClose, accessibilityRole:"button", accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}},
+                el(X, {size:"xs", color:k.icon.color})) : null);
+    }
+    // A Discord tooltip pointing at what to tap in Try it: the brand color, white text and a small arrow.
+    function previewTip(k, text, side) {
+        if (!text) return null;
+        const down = side === "down";
+        return el(RN.View, {key:"tip", style:{alignItems:"flex-start", paddingHorizontal:16, paddingTop:down ? 0 : 6, paddingBottom:down ? 6 : 0}},
+            popIn("tip:" + text, el(RN.View, null,
+                down ? null : el(RN.View, {style:[k.brand, {width:10, height:10, marginLeft:22, marginBottom:-5, transform:[{rotate:"45deg"}]}]}),
+                el(RN.View, {style:[k.brand, {borderRadius:8, paddingHorizontal:12, paddingVertical:8, maxWidth:300}]},
+                    el(RN.Text, {style:[k.brandText, {fontSize:14, fontWeight:"600"}]}, text)),
+                down ? el(RN.View, {style:[k.brand, {width:10, height:10, marginLeft:22, marginTop:-5, transform:[{rotate:"45deg"}]}]}) : null)));
+    }
+    // A preview's surface: Discord's chat colors, its header on top, and Watch's player strip at the bottom.
+    function previewScreen(s, key, label, children, extra) {
+        return el(RN.View, {key, style:[s.chat, {paddingVertical:0}], accessible:false, accessibilityLabel:tr(label)},
+            extra && extra.header || null, el(RN.View, {style:{paddingVertical:4}}, children), extra && extra.footer || null);
+    }
+    // The progress bar of the player: glides from one tick to the next, stops where it is while paused.
+    function StoryTrack(props) {
+        const A = motion(), ref = React.useRef(null), story = props.story, k = props.k, total = story.total || 1;
+        if (!ref.current && A) ref.current = new A.Value(0);
+        const seg = story.segment;
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || !seg) return undefined;
+            value.setValue(seg.from / total);
+            if (reduceMotion || typeof A.timing !== "function") { value.setValue(seg.to / total); return undefined; }
+            const run = A.timing(value, {toValue:seg.to / total, duration:seg.ms, useNativeDriver:false});
+            run.start();
+            return () => run.stop();
+        }, [seg && seg.id]);
+        const width = ref.current ? ref.current.interpolate({inputRange:[0, 1], outputRange:["0%", "100%"]}) : Math.round(story.t / total * 100) + "%";
+        return el(RN.View, {style:[k.track, {flex:1, height:4, borderRadius:2, overflow:"hidden"}], accessible:true, accessibilityRole:"progressbar",
+            accessibilityValue:{min:0, max:Math.round(total / 1000), now:Math.round(story.t / 1000)}},
+            el(ref.current ? A.View : RN.View, {style:[k.fill, {position:"absolute", left:0, top:0, bottom:0, width}]}),
+            story.chapters.map((at, i) => i ? el(RN.View, {key:"c" + i, style:{position:"absolute", top:0, bottom:0, width:2,
+                left:(at / total * 100) + "%", backgroundColor:"#00000059"}}) : null));
+    }
+    // What Watch is showing (step 2 of 5), and the player: pause or play, the bar, the time, start over.
+    function storyStrip(k, s, story) {
+        const Press = RN.Pressable || RN.View, Play = venusIcon(7726, "PlayIcon"), Pause = venusIcon(7728, "PauseIcon"), Again = venusIcon(11106, "RetryIcon");
+        const button = (key, Icon, label, onPress) => el(Press, {key, onPress, accessibilityRole:"button", accessibilityLabel:tr(label),
+            hitSlop:{top:10, bottom:10, left:10, right:10}, style:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"}},
+            el(Icon, {size:"xs", color:k.icon.color}));
+        const steps = story.chapters.length;
+        return el(RN.View, {key:"strip", style:[k.strip, {paddingHorizontal:12, paddingTop:10, paddingBottom:8, gap:8}]},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"flex-start", gap:8, minHeight:40}},
+                steps ? el(RN.View, {style:[k.secondary, {borderRadius:8, paddingHorizontal:6, paddingVertical:2, marginTop:1}]},
+                    el(RN.Text, {style:[k.secondaryText, {fontSize:12, fontWeight:"700"}]}, Math.max(1, story.chapter) + "/" + steps)) : null,
+                el(RN.View, {style:{flex:1}}, story.caption ? popIn("cap:" + story.caption,
+                    el(RN.Text, {style:[s.text, {fontSize:14, lineHeight:20}]}, story.caption)) : null)),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
+                story.playing ? button("pause", Pause, "Pause", story.pause) : button("play", Play, "Play", story.play),
+                el(StoryTrack, {story, k}),
+                el(RN.Text, {style:[s.muted, {fontSize:12, minWidth:72, textAlign:"right"}]}, clockText(story.t) + " / " + clockText(story.total)),
+                button("again", Again, "Start over", story.replay)));
+    }
+    // A muted line under a preview: what's happening in Watch, what to tap in Try it.
+    function previewCaption(s, text) {
+        return text ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, popIn("cap:" + text, el(RN.Text, {style:s.muted}, text))) : null;
+    }
+    // Shared by every option page: Discord's spacing and scrolling, with each group revealed in turn.
     function settingsBody(ui,groups,scroll) {
-        const body=ui.Stack ? el(ui.Stack,{style:{paddingVertical:24,paddingHorizontal:12},spacing:24},groups) :
-            el(RN.View,{style:{paddingVertical:24,paddingHorizontal:12,gap:24}},groups);
+        const shown=groups.map((group,i) => group && typeof group==="object" ?
+            el(VenusReveal,{key:group.key != null ? group.key : group.props && group.props.key != null ? group.props.key : "group"+i,index:i},group) : group);
+        const body=ui.Stack ? el(ui.Stack,{style:{paddingVertical:24,paddingHorizontal:12},spacing:24},shown) :
+            el(RN.View,{style:{paddingVertical:24,paddingHorizontal:12,gap:24}},shown);
         return RN.ScrollView ? el(RN.ScrollView,scroll || null,body) : body;
     }
     // Greyed out while the main switch is off, like the options on the Settings list.
     function switchRow(Switch,key,label,subLabel,icon) {
         const owner=featureFor(key);
-        return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],onValueChange:value=>setSetting(key,value)}) : null;
+        return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],
+            onValueChange:value => { animateLayout(); setSetting(key,value); }}) : null;
     }
     // One choice from a few: Discord's radio list (TableRadioGroup 5995 / TableRadioRow 5994), or check-marked rows.
     // Each choice may carry a fourth item, its row icon (rowIcon), like Discord's own radio lists.
@@ -2921,10 +3422,33 @@
         const Text = inspectedExport(4833, "Text"), Icon = props.IconComponent, title = props.title, body = props.body;
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
         return el(RN.View, {key:props.key, style:s.card, accessible:true},
-            props.leading || (Icon ? el(RN.View, {style:s.badge}, el(Icon, {size:"md"})) : null),
+            // The badge pops in when the page opens, and again whenever the card's state (its title) changes.
+            popIn("badge:" + (title || ""), props.leading || (Icon ? el(RN.View, {style:s.badge}, el(Icon, {size:"md"})) : null)),
             el(RN.View, {style:{flex:1, gap:2}},
                 title ? line(title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}) : null,
-                body ? line(body, "text-sm/medium", title ? "text-muted" : "text-default", {color:title ? "#949ba4" : "#dbdee1", fontSize:14}) : null));
+                body ? line(body, "text-sm/medium", title ? "text-muted" : "text-default", {color:title ? "#949ba4" : "#dbdee1", fontSize:14}) : null,
+                props.footer || null));
+    }
+    // A thin rounded progress bar in the theme's brand color that glides to each new value.
+    function VenusProgress(props) {
+        const s = useThemed("progress", c => ({track:{height:6, borderRadius:3, overflow:"hidden", backgroundColor:c.BACKGROUND_MOD_STRONG || c.BACKGROUND_MOD_NORMAL},
+            fill:{height:6, borderRadius:3, backgroundColor:c.BACKGROUND_BRAND || c.TEXT_BRAND}}),
+            {track:{height:6, borderRadius:3, overflow:"hidden", backgroundColor:"#4e505899"}, fill:{height:6, borderRadius:3, backgroundColor:"#5865f2"}});
+        const A = motion(), ref = React.useRef(null), share = Math.max(0, Math.min(1, Number(props.value) || 0));
+        if (!ref.current && A) ref.current = new A.Value(reduceMotion ? share : 0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value) return undefined;
+            if (reduceMotion) { value.setValue(share); return undefined; }
+            // Width can't run on the native driver; it's one small view, animated once per Quest update.
+            const run = A.timing(value, {toValue:share, duration:600, easing:easeOut(), useNativeDriver:false});
+            run.start();
+            return () => run.stop();
+        }, [share]);
+        const width = ref.current ? ref.current.interpolate({inputRange:[0, 1], outputRange:["0%", "100%"]}) : Math.round(share * 100) + "%";
+        return el(RN.View, {key:props.key, style:[s.track, {marginTop:8}], accessible:true, accessibilityRole:"progressbar",
+            accessibilityValue:{min:0, max:100, now:Math.round(share * 100)}},
+            el(ref.current ? A.View : RN.View, {style:[s.fill, {width}]}));
     }
     // A rounded card with live status, in the theme's card colors. extra: {title, IconComponent, leading}.
     function statusCard(key,text,extra) {
@@ -2956,9 +3480,6 @@
                     el(RN.Text, {style:s.muted}, time)),
                 body));
     }
-    function chatPreview(s, key, label, children) {
-        return el(RN.View, {key, style:s.chat, accessible:true, accessibilityLabel:tr(label)}, children);
-    }
     // Discord's own icon in a settings row (TableRowIcon 5922), the way its own settings pages show them.
     function rowIcon(id,name) {
         const RowIcon=inspectedExport(5922,"TableRowIcon");
@@ -2970,17 +3491,41 @@
         return Title ? el(Title,{key,title:tr(title)}) : el(RN.View,{key,style:{paddingHorizontal:16}},
             Text ? el(Text,{variant:"text-sm/semibold",color:"text-muted"},tr(title)) : el(RN.Text,{style:{color:"#949ba4",fontSize:13,fontWeight:"600"}},tr(title)));
     }
+    // The chosen pill of a segmented control, as one view that slides between choices with a soft spring.
+    // It measures the track once; until then the pills draw their own background, so nothing ever flickers.
+    const segmentMeasured = new Map();
+    function SegmentedSlider(props) {
+        const A = motion(), [width, setWidth] = React.useState(segmentMeasured.get(props.slot) || 0), ref = React.useRef(null);
+        if (!ref.current) ref.current = {x:new A.Value(0), placed:false};
+        const state = ref.current, pill = width ? (width - 4 * (props.count - 1)) / props.count : 0, target = props.index * (pill + 4);
+        React.useEffect(() => {
+            if (!pill) return undefined;
+            if (!state.placed || reduceMotion || typeof A.spring !== "function") { state.placed = true; state.x.setValue(target); return undefined; }
+            const run = A.spring(state.x, {toValue:target, speed:18, bounciness:6, useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, [target, pill]);
+        return el(RN.View, {pointerEvents:"none", style:{position:"absolute", left:4, right:4, top:4, bottom:4},
+            onLayout:event => { const w = event && event.nativeEvent && event.nativeEvent.layout && event.nativeEvent.layout.width;
+                if (w && Math.abs(w - width) > 0.5) { segmentMeasured.set(props.slot, w); setWidth(w); } }},
+            pill ? el(A.View, {style:{position:"absolute", top:0, bottom:0, left:0, width:pill, borderRadius:20, backgroundColor:props.color,
+                transform:[{translateX:state.x}]}}) : null);
+    }
     // A choice of two to four, drawn like Discord's segmented control (its MOBILE_SEGMENTED_CONTROL tokens).
     function venusSegmented(props) {
         const index=Math.max(0,props.items.findIndex(item => item.value===props.value));
-        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) props.onChange(item.value); };
+        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { animateLayout(); props.onChange(item.value); } };
         const pill={flex:1,paddingVertical:9,borderRadius:20,alignItems:"center"};
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
             on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill}),
             {wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:"#1e1f22"},on:Object.assign({},pill,{backgroundColor:"#4e5058"}),off:pill});
         const Text=inspectedExport(4833,"Text"), Press=RN.Pressable || RN.View;
+        // Once its slider has measured the track, the chosen pill slides to the new choice instead of jumping.
+        const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
+        const indicator=s.on && s.on.backgroundColor;
         return el(RN.View,{key:props.key,style:[s.wrap,{opacity:props.disabled ? 0.5 : 1}],accessibilityRole:"tablist"},
-            props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
+            motion() ? el(SegmentedSlider,{key:"slider",slot,index,count:props.items.length,color:indicator}) : null,
+            props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index && !sliding ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
                 accessibilityState:{selected:i===index,disabled:!!props.disabled},disabled:!!props.disabled,onPress:() => pick(i)},
                 Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted"},item.label) :
                     el(RN.Text,{style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600"}},item.label))));
@@ -3016,6 +3561,87 @@
     }
     function count(n,word) { return pl(n,"{n} "+word,"{n} "+word+"s"); }
     // Settings page: Discord's own radio list (TableRadioGroup 5995 / TableRadioRow 5994).
+    // Hidden channels: one choice, whether tapping a locked channel shows its details or does nothing.
+    // The locked channel in the preview: pressable like a real row, and it gives a small shake when tapping does nothing
+    // (each time props.shake goes up).
+    function HiddenPreviewRow(props) {
+        const A = motion(), ref = React.useRef(null), Press = RN.Pressable || RN.View;
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!props.shake || !value || reduceMotion || typeof A.sequence !== "function") return undefined;
+            value.setValue(0);
+            const run = A.sequence([1, -1, 1, 0].map(to => A.timing(value, {toValue:to, duration:60, useNativeDriver:true})));
+            run.start();
+            return () => run.stop();
+        }, [props.shake]);
+        const row = {flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7};
+        const style = ref.current ? [row, {transform:[{translateX:ref.current.interpolate({inputRange:[-1, 1], outputRange:[-6, 6]})}]}] : row;
+        return el(Press, {onPress:props.onPress, accessibilityRole:"button", accessibilityLabel:props.label + ", " + tr("locked")},
+            el(ref.current ? A.View : RN.View, {style}, props.children), props.ripple || null);
+    }
+    // A server's channel list the way Discord draws it: the server name, a category and its channels, the locked one with
+    // Discord's own # and lock icon. Watch: scrolling past it opens nothing, then a tap opens its details in Discord's
+    // dialog (or nothing at all, when details are off). Try it: tap it yourself and Discord's real dialog opens.
+    const HIDDEN_SAMPLE = {id:"1180000000000000000", guild_id:"1", type:0, name:"staff-only", lastMessageId:"1290000000000000000"};
+    function HiddenChannelsPreview(props) {
+        useSettings("hiddenChannels");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on, menu = settings.hiddenChannelsMenu;
+        const Hash = venusIcon(15125, "HashmarkIcon"), TextLock = venusIcon(5393, "TextLockIcon"), Down = venusIcon(10604, "ChevronSmallDownIcon");
+        const blank = {shake:0, pulse:null, card:false, scroll:0, tried:false};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const shake = () => update(st => ({shake:st.shake + 1}));
+        const story = useStory(watching, () => [[0, () => setState(blank), tr("Locked channels show in the list with a lock, like staff-only here")],
+            [1200, () => { animateLayout(); update({scroll:1}); }, tr("Scrolling past it, or opening the server, opens nothing")],
+            [1400, () => { animateLayout(); update({scroll:0}); }],
+            [1000, () => update(st => ({pulse:{who:"locked", id:"tap" + st.shake}})), tr(menu ? "Only a tap on it opens its details" : "You tap it")],
+            [400, () => { if (menu) { animateLayout(); update({card:true}); } else shake(); },
+                menu ? tr("You see when it was made and last used. View Anyway would open it") : tr("Nothing happens: you turned its details off")],
+            [3000, () => { animateLayout(); update({card:false}); }], [600, () => {}]], [menu]);
+        const tapLocked = () => { if (!on || watching) return; update({tried:true}); if (menu) showHidden(HIDDEN_SAMPLE); else shake(); };
+        const channel = (name, locked, selected) => el(locked ? HiddenPreviewRow : RN.View, locked ?
+            {key:name, onPress:tapLocked, label:name, shake:state.shake, ripple:tapRipple(state.pulse, "locked", {right:40, top:2})} :
+            {key:name, style:[{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7, marginHorizontal:8, borderRadius:8},
+                selected ? k.selected : null]},
+            el(locked ? TextLock : Hash, {size:"sm", color:selected ? s.name.color : k.channel.color}),
+            el(RN.Text, {style:[s.text, {flex:1, color:selected ? s.name.color : k.channel.color, fontWeight:selected ? "600" : "500"}], numberOfLines:1}, name));
+        // Discord's alert, drawn inside the preview while it plays: a title, the details and its two buttons.
+        const button = (text, brand) => el(RN.View, {key:text, style:[brand ? k.brand : k.secondary, {borderRadius:20, paddingVertical:10, alignItems:"center"}]},
+            el(RN.Text, {style:[brand ? k.brandText : k.secondaryText, {fontWeight:"600"}]}, text));
+        const card = watching && state.card ? el(RN.View, {key:"card", style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"center", padding:16}]},
+            popIn("card", el(RN.View, {style:k.modal},
+                el(RN.Text, {style:[s.name, {fontSize:18, fontWeight:"700", textAlign:"center"}]}, tr("Locked channel")),
+                hiddenDetails(HIDDEN_SAMPLE).map(([label, stamp]) => el(RN.View, {key:label},
+                    el(RN.Text, {style:[s.muted, {fontSize:11, fontWeight:"700"}]}, label.toUpperCase()), el(RN.Text, {style:s.text}, stamp.relative))),
+                button(tr("View Anyway"), true), button(tr("Cancel"), false)))) : null;
+        const list = el(RN.View, {key:"list", style:{paddingVertical:6, transform:state.scroll ? [{translateY:-14}] : []}},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:16, paddingVertical:6}},
+                el(Down, {size:"xs", color:k.category.color}), el(RN.Text, {style:k.category}, tr("Text channels").toUpperCase())),
+            channel("general", false, true), on ? channel("staff-only", true) : null, channel("memes", false), channel("clips", false));
+        const tip = on && !watching ? previewTip(k, !state.tried ? tr(menu ? "Tap staff-only to see its details" : "Tap staff-only: nothing will open") :
+            tr(menu ? "That's the dialog you'll see in Discord" : "Tapping a locked channel now does nothing")) : null;
+        const server = el(RN.View, {key:"server", style:[k.header, {height:52}]},
+            el(RN.Text, {style:[k.title, {flex:1, fontSize:17}], numberOfLines:1}, tr("Game Night")),
+            el(venusIcon(7364, "MoreHorizontalIcon"), {size:"md", color:k.icon.color}));
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Hidden channels preview", [el(RN.View, {key:"body", style:{minHeight:210, overflow:"hidden"}}, list, card), tip],
+                {header:server, footer:watching ? storyStrip(k, s, story) : null}));
+    }
+    function HiddenChannelsSettings() {
+        useSettings("hiddenChannels");
+        const ui=reviewUI();
+        if (!React || !RN) return null;
+        const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5410,"LockIcon");
+        const groups=[
+            on ? statusCard("status",settings.hiddenChannelsMenu ? "Tap a locked channel to see when it was made and last used." :
+                "Locked channels are listed, and tapping one does nothing.",{title:tr("Showing hidden channels"),IconComponent:lock}) : offCard("status",lock),
+            el(HiddenChannelsPreview,{key:"preview",on}),
+            el(Group,{key:"tap",title:tr("When you tap a locked channel")},
+                switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4788,"CircleInformationIcon"))),
+            footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];
+        return settingsBody(ui,groups);
+    }
     function ReadAllSettings() {
         useSettings("readAll");
         const ui=reviewUI();
@@ -3032,69 +3658,282 @@
         return settingsBody(ui,groups);
     }
     // Nitro stickers and emojis: what a sent emoji looks like with each link style, then the switches.
+    // The preview's emoji and sticker are Discord's own Wumpus art, shipped inside the app (drawable resources, loaded by
+    // name like Discord's own images), so nothing is read from your servers and nothing is downloaded.
+    const NITRO_SAMPLES = {emoji:{name:"wumpus_wave", res:"modules_guilds_bar_native_images_wumpus_wave", size:48, glyph:"\ud83d\udc4b"},
+        sticker:{name:"Wumpus Surprise", res:"images_native_gifting_wumpus_box_premium120", size:140, glyph:"\ud83c\udf81"}};
+    // Each one moves the way an animated emoji or sticker does: the emoji waves, the sticker hops. Tap to play it again.
+    function NitroArt(props) {
+        const A = motion(), ref = React.useRef(null), [failed, setFailed] = React.useState(false), item = props.item;
+        if (!ref.current && A) ref.current = new A.Value(0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || reduceMotion || typeof A.sequence !== "function") return undefined;
+            value.setValue(0);
+            const run = props.kind === "emoji" ?
+                A.sequence([0.6, -0.6, 0.6, -0.6, 0].map(to => A.timing(value, {toValue:to, duration:130, useNativeDriver:true}))) :
+                A.sequence([A.timing(value, {toValue:1, duration:170, easing:easeOut(), useNativeDriver:true}),
+                    A.spring(value, {toValue:0, speed:14, bounciness:14, useNativeDriver:true})]);
+            run.start();
+            return () => run.stop();
+        }, [props.kind, props.play]);
+        const motionStyle = !ref.current ? null : props.kind === "emoji" ?
+            {transform:[{rotate:ref.current.interpolate({inputRange:[-1, 1], outputRange:["-18deg", "18deg"]})}]} :
+            {transform:[{translateY:ref.current.interpolate({inputRange:[0, 1], outputRange:[0, -14]})},
+                {scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[1, 1.06]})}]};
+        const art = !failed && RN.Image ? el(RN.Image, {source:{uri:item.res, width:item.size, height:item.size}, style:{width:item.size, height:item.size},
+            resizeMode:"contain", accessibilityLabel:item.name, onError:() => setFailed(true)}) :
+            el(RN.Text, {style:{fontSize:Math.round(item.size * 0.75), lineHeight:item.size}}, item.glyph);
+        return el(ref.current ? A.View : RN.View, {style:motionStyle}, art);
+    }
+    // The message as everyone sees it: just the emoji or sticker, the way chat shows a link to one.
+    // Watch: you open the emoji picker, pick a Nitro emoji (it would normally be locked), it's sent and everyone sees it;
+    // then the same with a sticker. Try it: send one yourself from the picker.
+    function NitroPicker(props) {
+        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Lock = venusIcon(5410, "LockIcon");
+        const kinds = props.kinds, tab = props.tab, item = NITRO_SAMPLES[tab];
+        const tabPill = kind => el(Press, {key:kind, onPress:() => props.onTab && props.onTab(kind), accessibilityRole:"tab", accessibilityState:{selected:tab === kind},
+            style:[{paddingHorizontal:14, paddingVertical:6, borderRadius:16}, tab === kind ? k.secondary : null]},
+            el(RN.Text, {style:[tab === kind ? k.secondaryText : s.muted, {fontWeight:"600", fontSize:13}]}, tr(kind === "emoji" ? "Emojis" : "Stickers")));
+        const plain = kind => kind === "emoji" ? ["\ud83d\ude00", "\ud83d\ude02", "\ud83d\udc4d", "\ud83c\udf89"] : [];
+        return el(RN.View, {key:"picker", style:[k.sheet, {borderTopLeftRadius:12, borderTopRightRadius:12, paddingHorizontal:12, gap:8, paddingBottom:10}]},
+            el(RN.View, {style:{flexDirection:"row", gap:6, alignSelf:"center"}}, kinds.map(tabPill)),
+            el(RN.Text, {style:[k.category, {marginTop:2}]}, tr("Game Night").toUpperCase()),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:10, flexWrap:"wrap"}},
+                plain(tab).map(e => el(RN.Text, {key:e, style:{fontSize:28}}, e)),
+                el(Press, {key:"nitro", onPress:props.onPick, accessibilityRole:"button", accessibilityLabel:item.name, accessibilityHint:tr("Tap to send it"),
+                    style:[{padding:4, borderRadius:10}, props.highlight ? k.selected : null]},
+                    el(RN.View, {style:{width:tab === "emoji" ? 36 : 72, height:tab === "emoji" ? 36 : 72}},
+                        RN.Image ? el(RN.Image, {source:{uri:item.res, width:tab === "emoji" ? 36 : 72, height:tab === "emoji" ? 36 : 72},
+                            style:{width:tab === "emoji" ? 36 : 72, height:tab === "emoji" ? 36 : 72}, resizeMode:"contain"}) : null,
+                        el(RN.View, {style:[k.brand, {position:"absolute", right:-4, bottom:-4, width:18, height:18, borderRadius:9, alignItems:"center", justifyContent:"center"}]},
+                            el(Lock, {size:"xxs", color:k.brandText.color}))),
+                    tapRipple(props.pulse, "pick", {left:0, top:0}))));
+    }
+    function NitroPreview(props) {
+        useSettings("freeNitro");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on, Press = RN.Pressable || RN.View;
+        const blank = {pick:0, sent:[], picker:null, pulse:null, tried:{}};
+        const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
+        const [state, setState] = React.useState(blank), watching = on && kinds.length > 0 && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const send = kind => update(st => ({picker:null, pulse:null, pick:st.pick + 1, sent:st.sent.concat([kind]).slice(-2), tried:Object.assign({}, st.tried, {[kind]:true})}));
+        const link = settings.hyperlinks ? tr("a short link") : tr("a link");
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(blank)]];
+            kinds.forEach((kind, i) => {
+                steps.push([i ? 600 : 900, () => update({pulse:{who:"plus", id:kind}}), tr(kind === "emoji" ? "You open the emoji picker" : i ? "Then you open the sticker picker" : "You open the sticker picker")],
+                    [400, () => { animateLayout(); update({picker:kind}); }],
+                    [1400, () => update({pulse:{who:"pick", id:"p" + kind}}), tr(kind === "emoji" ? "You pick a Nitro emoji from another server. The lock means it needs Nitro" :
+                        "You pick a Nitro sticker. It would need Nitro too")],
+                    [500, () => { animateLayout(); send(kind); }, tr(kind === "emoji" ? "Venus sends it as {link}, and everyone sees the emoji" : "It's sent as {link} too, and everyone sees the sticker", {link})],
+                    [1200, () => {}]);
+            });
+            return steps;
+        }, [settings.emojis, settings.stickers, settings.hyperlinks]);
+        // Try it: the picker is open under the chat; tap the locked one to send it. Tabs switch between emojis and stickers.
+        const tab = watching ? state.picker : on && kinds.length ? (state.picker || kinds[0]) : null;
+        const messages = state.sent.map((kind, i) => el(RN.View, {key:"msg" + state.pick + ":" + i}, popIn("msg" + i + kind + state.pick,
+            previewMessage(s, "m" + i, tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}},
+                el(NitroArt, {key:kind, kind, item:NITRO_SAMPLES[kind], play:state.pick}))))));
+        const sample = state.sent.length || watching ? null : el(RN.View, {key:"empty", style:{paddingHorizontal:16, paddingVertical:20}},
+            el(RN.Text, {style:[s.muted, {textAlign:"center"}]}, tr("Nothing sent yet")));
+        const last = state.sent[state.sent.length - 1], item = last && NITRO_SAMPLES[last];
+        const sentAs = item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingBottom:4}},
+            el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:settings.hyperlinks ? "[" + item.name + "](\u2026)" :
+                last === "emoji" ? "https://cdn.discordapp.com/emojis/\u2026.gif" : "https://media.discordapp.net/stickers/\u2026.png"}))) : null;
+        const picker = tab ? el(NitroPicker, {key:"picker", k, s, kinds:watching ? [tab] : kinds, tab, pulse:state.pulse, highlight:watching && state.pulse && state.pulse.who === "pick",
+            onTab:watching ? null : kind => update({picker:kind}), onPick:watching ? null : () => { animateLayout(); send(tab); }}) : null;
+        const remaining = kinds.filter(kind => !state.tried[kind]);
+        const tip = on && !watching && kinds.length ? previewTip(k, remaining.length === kinds.length ? tr("Tap the locked one below to send it without Nitro") :
+            remaining.length ? tr("Now try a sticker: tap Stickers, then the locked one") : tr("That's how everyone sees it. You can send more"), "down") : null;
+        const plusRipple = el(RN.View, {key:"plus", style:{position:"absolute", left:8, bottom:8, width:40, height:40}}, tapRipple(state.pulse, "plus", {left:3, top:3}));
+        return el(RN.View, {key:"preview"}, on && kinds.length ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Nitro link preview", [el(RN.View, {key:"chat", style:{minHeight:watching ? 150 : 110}}, messages.length ? messages : sample), sentAs],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, tip, el(RN.View, null, previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}), plusRipple),
+                    picker, watching ? storyStrip(k, s, story) : null)}));
+    }
     function FreeNitroSettings() {
         useSettings("freeNitro");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("freeNitro"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
-        const link=useThemed("nitroLink",c => ({link:{color:c.TEXT_LINK || c.TEXT_BRAND,fontSize:15}}),{link:{color:"#00a8fc",fontSize:15}});
+        const on=enabled("freeNitro"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const sends=settings.emojis && settings.stickers ? "Nitro emojis and stickers you send become links that show up as the image." :
             settings.emojis ? "Nitro emojis you send become links that show up as the image." : settings.stickers ? "Nitro stickers you send become links that show up as the image." : "";
         const groups=[
             on ? statusCard("status",sends || "Turn on emojis or stickers below.",
                 {title:tr("Sending as links"),IconComponent:venusIcon(8119,"NitroWheelIcon")}) : offCard("status",venusIcon(8119,"NitroWheelIcon")),
-            chatPreview(s,"preview","Nitro link preview",previewMessage(s,"msg",tr("You"),"#5865f2",tr("Today at 4:01 PM"),el(RN.View,{style:{gap:6}},
-                el(RN.Text,{style:link.link,numberOfLines:1},settings.hyperlinks ? "partyblob" : "https://cdn.discordapp.com/emojis/1234567890.webp?size=48"),
-                el(RN.View,{style:{width:48,height:48,borderRadius:8,backgroundColor:"#eb459e33",alignItems:"center",justifyContent:"center"}},
-                    el(RN.Text,{style:{fontSize:30}},"\ud83c\udf89"))))),
+            el(NitroPreview,{key:"preview",on}),
             el(Group,{key:"send",title:tr("Send as links")},
                 switchRow(Switch,"emojis","Emojis","Emojis from other servers, and animated emojis.",rowIcon(8719,"ChatSmileIcon")),
                 switchRow(Switch,"stickers","Stickers","Stickers from other servers. Animated ones may not move.",rowIcon(11937,"StickerIcon"))),
             el(Group,{key:"style",title:tr("Link style")},
-                switchRow(Switch,"hyperlinks","Short links","The link shows as the emoji or sticker's name instead of a long web address.",rowIcon(4776,"LinkIcon"))),
+                switchRow(Switch,"hyperlinks","Short links","In chat it looks the same either way. Short links only change what's copied or quoted.",rowIcon(4776,"LinkIcon"))),
             footnote("note","Everyone sees the image, but it's a link, not a real Nitro emoji or sticker.")];
         return settingsBody(ui,groups);
     }
     // Pastel names: a few names in their own pastel color, the way they'll show in chat.
+    const PASTEL_CAST = [["Alex","Sam","Jordan"],["Riley","Morgan","Casey"],["Taylor","Jamie","Avery"],["Quinn","Rowan","Skyler"]];
+    // Watch: people post one at a time and each name fills in with its own color; then a new group arrives.
+    // Try it: tap New people. Everyone gets their own color, always the same one for the same name.
+    function PastelPreview(props) {
+        useSettings("pastelize");
+        const s=useChatPreviewStyles(), k=usePreviewChrome(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode(), on=props.on;
+        const [state,setState]=React.useState({round:0,shown:3,painted:3,taps:0}), watching=on && mode==="watch";
+        const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
+        const story=useStory(watching,() => {
+            const steps=[[0,() => setState(st => ({round:st.round,shown:0,painted:0,taps:0})),tr("People post in the chat")]];
+            [0,1,2].forEach(i => steps.push([i ? 900 : 600,() => { animateLayout(); update({shown:i+1}); }],
+                [500,() => update({painted:i+1}),i===0 ? tr("Each name gets its own soft color") :
+                    i===1 ? (settings.pastelAll ? tr("Even names with a role color get a pastel one") : tr("A name with a role color keeps it")) : null]));
+            steps.push([1200,() => {},tr("The same name always gets the same color, on every phone")],
+                [1500,() => { animateLayout(); update(st => ({round:st.round+1,shown:0,painted:0})); }]);
+            return steps;
+        },[settings.pastelAll,settings.pastelContent]);
+        const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
+        const cast=PASTEL_CAST[state.round % PASTEL_CAST.length], shown=watching ? state.shown : 3, painted=watching ? state.painted : 3;
+        const people=[[cast[0],"#3ba55c",tr("Has anyone tried the new update?"),null],[cast[1],"#eb459e",tr("Yes, it looks great!"),"#e67e22"],[cast[2],"#faa61a",tr("Same here.")]];
+        const chat=people.slice(0,shown).map(([who,avatar,text,role],i) => {
+            const plain=i>=painted, kept=role && !settings.pastelAll;
+            const name=kept ? role : plain ? s.name.color : tint(who,0.75,0.6,s.name.color);
+            const body=!plain && settings.pastelContent && !kept ? tint(who,0.85,0.75,null) : null;
+            return el(RN.View,{key:state.round+":"+who},popIn("msg:"+state.round+":"+who,previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),
+                el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name})));
+        });
+        const shuffle=() => { if (on) { animateLayout(); update(st => ({round:st.round+1,taps:st.taps+1})); } };
+        const tryBar=on && !watching ? el(RN.View,{key:"try",style:[k.strip,{padding:12,gap:10}]},
+            previewTip(k,state.taps ? tr("New names, new colors. The same name always gets the same one") : tr("Tap New people to see more colors"),"down"),
+            el(Press,{onPress:shuffle,accessibilityRole:"button",accessibilityHint:tr("Tap for new people"),
+                style:[k.secondary,{borderRadius:20,paddingVertical:10,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:8}]},
+                el(venusIcon(11106,"RetryIcon"),{size:"sm",color:k.secondaryText.color}),el(RN.Text,{style:[k.secondaryText,{fontWeight:"600"}]},tr("New people")))) : null;
+        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(st => ({round:st.round,shown:3,painted:3,taps:0})); }) : null,
+            previewScreen(s,"preview","Pastel names preview",[el(RN.View,{key:"chat",style:{minHeight:watching ? 200 : 0}},chat)],
+                {header:previewHeader(k,{title:"general"}),footer:el(RN.View,{key:"foot"},tryBar,watching ? storyStrip(k,s,story) : null)}));
+    }
     function PastelSettings() {
         useSettings("pastelize");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
-        const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
-        const people=[["Alex","#3ba55c",tr("Has anyone tried the new update?"),null],["Sam","#eb459e",tr("Yes, it looks great!"),"#e67e22"],["Jordan","#faa61a",tr("Same here.")]];
+        const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const groups=[
             on ? statusCard("status",settings.pastelAll ? "Every name has its own pastel color, even with a role color." : "Names without a role color get their own pastel color.",
                 {title:tr("Pastel names"),IconComponent:venusIcon(14795,"PaintPaletteIcon")}) : offCard("status",venusIcon(14795,"PaintPaletteIcon")),
-            chatPreview(s,"preview","Pastel names preview",people.map(([who,avatar,text,role],i) => {
-                const name=role && !settings.pastelAll ? role : tint(who+i,0.75,0.6,s.name.color);
-                const body=settings.pastelContent && !(role && !settings.pastelAll) ? tint(who+i,0.85,0.75,null) : null;
-                return previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name});
-            })),
+            el(PastelPreview,{key:"preview",on}),
             el(Group,{key:"colors",title:tr("Colors")},
                 switchRow(Switch,"pastelAll","Replace role colors","Every name uses its pastel color, even with a role color.",rowIcon(10398,"CrownIcon")),
                 switchRow(Switch,"pastelContent","Color message text","What people write is colored too, in a lighter shade of their name.",rowIcon(5395,"TextIcon"))),
             footnote("note","Each person always gets the same color, on every device.")];
         return settingsBody(ui,groups);
     }
-    // Device indicators: a name with the icons next to it, then where they show.
+    // Device indicators: the icons shown where Discord shows them, inside the screen around them: a DM's header, the
+    // member list and a profile, each following its own switch. Watch: Alex moves between devices while the preview
+    // goes from the DM to the member list to the profile. Try it: pick the screen, then change Alex's devices.
+    const PLATFORM_DEMO = [{desktop:"online", mobile:"idle"}, {mobile:"online"}, {desktop:"dnd", web:"dnd"}, {embedded:"online", desktop:"idle"}];
+    const PLATFORM_SCREENS = [["piDmHeader"], ["piUserList"], ["piProfile"]];
+    const PLATFORM_PEOPLE = [["Sam", "#eb459e", {desktop:"online"}], ["Riley", "#faa61a", {mobile:"online"}]];
+    // Discord's segmented control inside a preview, as its own component so its theme hook only runs while it's shown.
+    function PreviewSegmented(props) { return venusSegmented(props); }
+    function PlatformPreview(props) {
+        useSettings("platformIndicators");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
+        const blank = {demo:0, screen:"piDmHeader", pulse:null, tried:{}};
+        const [state, setState] = React.useState(blank), demo = state.demo, on = props.on, watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const shown = key => on && settings[key];
+        // Where each screen is, and what it says when its switch is off.
+        const where = key => tr(key === "piDmHeader" ? "In a DM, Alex's devices show next to their name at the top: a computer and a phone" :
+            key === "piUserList" ? "In the member list, everyone's devices show next to their name" : "On a profile, they show next to the name");
+        const offHere = () => tr("Here they're off in your options, so nothing shows");
+        const story = useStory(watching, () => {
+            const steps = [];
+            const go = (screen, demoAt, caption) => steps.push([steps.length ? 600 : 0, () => { animateLayout(); update({screen, demo:demoAt, pulse:null}); }, caption]);
+            const change = (next, caption) => steps.push([900, () => update(st => ({pulse:{who:"alex", id:"p" + next + ":" + st.screen}}))],
+                [300, () => { animateLayout(); update({demo:next}); }, caption]);
+            go("piDmHeader", 0, settings.piDmHeader ? where("piDmHeader") : offHere());
+            change(1, tr(settings.piHideMobile ? "Alex is only on a phone now" : "Alex is only on a phone now, so their avatar shows a phone"));
+            go("piUserList", 1, settings.piUserList ? where("piUserList") : offHere());
+            change(2, tr("Alex switches to a computer and the web, on Do Not Disturb"));
+            go("piProfile", 2, settings.piProfile ? where("piProfile") : offHere());
+            change(3, tr("Then to a console and a computer"));
+            steps.push([600, () => {}]);
+            return steps;
+        }, [settings.piDmHeader, settings.piUserList, settings.piProfile, settings.piHideMobile]);
+        const clients = PLATFORM_DEMO[demo % PLATFORM_DEMO.length];
+        const statusOf = c => c.desktop || c.mobile || c.web || c.embedded || "offline";
+        const icons = (place, c, keyed) => shown(place) ? popIn(place + ":" + (keyed || "") + demo, el(RN.View, {style:{flexDirection:"row", gap:2, alignItems:"center"}},
+            Object.keys(c).map(platform => el(RN.View, {key:platform, accessible:true, accessibilityLabel:tr(PLATFORM_LABELS[platform]) + ": " + tr(PLATFORM_STATUS[c[platform]])},
+                el(PlatformPng, {platform, color:PLATFORM_COLORS[c[platform]]}))))) : null;
+        // Discord's avatar: a status dot, or a small phone instead when the only device is a phone (unless hidden).
+        const avatar = (letter, color, c, size, ring) => {
+            const mobileOnly = !!c.mobile && Object.keys(c).length === 1, phone = mobileOnly && !(on && settings.piHideMobile), dot = Math.round(size * 0.3);
+            return el(RN.View, {style:{width:size, height:size}},
+                el(RN.View, {style:{width:size, height:size, borderRadius:size / 2, backgroundColor:color, alignItems:"center", justifyContent:"center"}},
+                    el(RN.Text, {style:{color:"#ffffff", fontWeight:"700", fontSize:Math.round(size * 0.42)}}, letter)),
+                el(RN.View, {style:{position:"absolute", right:-2, bottom:-2, padding:Math.max(2, Math.round(size / 24)), borderRadius:size, backgroundColor:ring || s.chat.backgroundColor}},
+                    phone ? el(RN.View, {style:{width:Math.round(dot * 0.72), height:Math.round(dot * 1.1), borderRadius:2, backgroundColor:STATUS_HEX[statusOf(c)]}}) :
+                        el(RN.View, {style:{width:dot, height:dot, borderRadius:dot / 2, backgroundColor:STATUS_HEX[statusOf(c)]}})));
+        };
+        const ripple = tapRipple(state.pulse, "alex", {left:12, top:4});
+        const screen = state.screen, Text = RN.Text;
+        // A DM with Alex: Discord's header with the icons next to the name, a short chat and the message bar.
+        const dm = () => [
+            el(RN.View, {key:"msgs", style:{paddingTop:4}},
+                previewMessage(s, "a1", "Alex", "#3ba55c", tr("Today at 4:01 PM"), el(Text, {style:s.text}, tr("Are you coming to the game tonight?"))),
+                previewMessage(s, "a2", tr("You"), "#5865f2", tr("Today at 4:02 PM"), el(Text, {style:s.text}, tr("Yes, see you there!")))),
+            previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"@Alex"})})];
+        const dmHeader = () => el(RN.View, {key:"hd"}, previewHeader(k, {title:"Alex", leading:avatar("A", "#3ba55c", clients, 24, k.header.backgroundColor),
+            badges:icons("piDmHeader", clients), icons:[[7309, "PhoneCallIcon"], [10976, "VideoIcon"]]}), ripple);
+        // The member list: Discord's "Online — 3" header and a row per person, status under the name.
+        const memberRow = (name, color, c, alex) => el(RN.View, {key:name, style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:6},
+            alex ? {marginHorizontal:8, paddingHorizontal:8, borderRadius:8} : null, alex && watching ? k.selected : null]},
+            avatar(name.slice(0, 1), color, c, 32), el(RN.View, {style:{flex:1}},
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}}, el(Text, {style:[s.name, {fontSize:15}], numberOfLines:1}, name), icons("piUserList", c, name)),
+                el(Text, {style:s.muted}, tr(PLATFORM_STATUS[statusOf(c)] || "Online"))), alex ? ripple : null);
+        const list = () => [el(RN.View, {key:"members", style:{paddingTop:6, paddingBottom:8}},
+            el(Text, {style:[k.category, {paddingHorizontal:16, paddingBottom:6}]}, tr("Online").toUpperCase() + " \u2014 3"),
+            memberRow("Alex", "#3ba55c", clients, true), PLATFORM_PEOPLE.map(([n, color, c]) => memberRow(n, color, c, false)))];
+        // A profile: Discord's banner, the avatar overlapping it, the name with the icons and a Message button.
+        const profile = () => [el(RN.View, {key:"profile"},
+            el(RN.View, {style:{height:64, backgroundColor:"#2d7d46"}}),
+            el(RN.View, {style:{paddingHorizontal:16, marginTop:-36, gap:8, paddingBottom:12}},
+                el(RN.View, {style:{alignSelf:"flex-start", padding:4, borderRadius:44, backgroundColor:s.chat.backgroundColor}}, avatar("A", "#3ba55c", clients, 72), ripple),
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8}}, el(Text, {style:[s.name, {fontSize:22, fontWeight:"800"}]}, "Alex"), icons("piProfile", clients)),
+                el(Text, {style:s.muted}, "alex"),
+                el(RN.View, {style:[k.brand, {borderRadius:20, paddingVertical:10, alignItems:"center", flexDirection:"row", justifyContent:"center", gap:8}]},
+                    el(venusIcon(5386, "ChatIcon"), {size:"sm", color:k.brandText.color}), el(Text, {style:[k.brandText, {fontWeight:"600"}]}, tr("Message")))))];
+        const body = screen === "piDmHeader" ? dm() : screen === "piUserList" ? list() : profile();
+        const header = screen === "piDmHeader" ? dmHeader() : screen === "piUserList" ? previewHeader(k, {title:"general"}) : null;
+        const off = on && !settings[screen] ? el(RN.View, {key:"off", style:{marginHorizontal:12, marginBottom:8, padding:10, borderRadius:8, backgroundColor:"#4e505833"}},
+            el(Text, {style:[s.muted, {fontSize:13}]}, tr("Off in your options: no icons here"))) : null;
+        // Try it: pick the screen, then change what Alex is on. A tip says what Alex is on right now.
+        const now = Object.keys(clients).map(platform => tr(PLATFORM_LABELS[platform]) + " (" + tr(PLATFORM_STATUS[clients[platform]]) + ")").join(", ");
+        const tryBar = on && !watching ? el(RN.View, {key:"try", style:[k.strip, {padding:12, gap:10}]},
+            el(PreviewSegmented, {key:"platformScreen", value:screen, onChange:value => update(st => ({screen:value, tried:Object.assign({}, st.tried, {[value]:true})})),
+                items:PLATFORM_SCREENS.map(([key]) => ({value:key, label:tr(key === "piDmHeader" ? "DM" : key === "piUserList" ? "Members" : "Profile")}))}),
+            el(Press, {onPress:() => { animateLayout(); update(st => ({demo:st.demo + 1, pulse:{who:"alex", id:"t" + (st.demo + 1)}, tried:Object.assign({}, st.tried, {devices:true})})); },
+                accessibilityRole:"button", accessibilityHint:tr("Tap to change Alex's devices"),
+                style:[k.secondary, {borderRadius:20, paddingVertical:10, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8}]},
+                el(venusIcon(14470, "LaptopPhoneIcon"), {size:"sm", color:k.secondaryText.color}),
+                el(Text, {style:[k.secondaryText, {fontWeight:"600"}]}, tr("Change Alex's devices"))),
+            el(Text, {style:[s.muted, {fontSize:13}]}, tr("Alex is on: {devices}", {devices:now}))) : null;
+        const tip = on && !watching ? previewTip(k, !state.tried.devices ? tr("Tap Change Alex's devices and watch the icons change") :
+            Object.keys(state.tried).length < 3 ? tr("Now pick another screen to see the icons there") : null, "down") : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Device indicators preview", [el(RN.View, {key:"screen:" + screen, style:{minHeight:236}}, popIn("screen:" + screen,
+                el(RN.View, null, body))), off],
+                {header, footer:el(RN.View, {key:"foot"}, tip, tryBar, watching ? storyStrip(k, s, story) : null)}));
+    }
     function PlatformSettings() {
         useSettings("platformIndicators");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("platformIndicators"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, s=useChatPreviewStyles();
-        const icon=(platform,status) => el(RN.View,{key:platform,accessible:true,accessibilityLabel:tr(PLATFORM_LABELS[platform])+": "+tr(PLATFORM_STATUS[status])},
-            el(PlatformPng,{platform,color:PLATFORM_COLORS[status]}));
-        const badges=el(RN.View,{style:{flexDirection:"row",gap:2,alignItems:"center"}},icon("desktop","online"),icon("mobile","idle"));
+        const on=enabled("platformIndicators"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const places=[settings.piDmHeader && tr("In DMs"),settings.piUserList && tr("In lists"),settings.piProfile && tr("On profiles")].filter(Boolean);
         const groups=[
             on ? statusCard("status",places.length ? places.join(" \u00b7 ") : "Turn on at least one place below.",
                 {title:tr("Device indicators"),IconComponent:venusIcon(14470,"LaptopPhoneIcon")}) : offCard("status",venusIcon(14470,"LaptopPhoneIcon")),
-            chatPreview(s,"preview","Device indicators preview",[
-                previewMessage(s,"msg","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.Text,{style:s.text},tr("On my laptop, phone in my pocket.")),{badges:on ? badges : null}),
-                el(RN.View,{key:"legend",style:{paddingHorizontal:16,paddingTop:4,flexDirection:"row",flexWrap:"wrap",gap:12}},
-                    [["online","Online"],["idle","Idle"],["dnd","Do Not Disturb"]].map(([status,label]) => el(RN.View,{key:status,style:{flexDirection:"row",alignItems:"center",gap:4}},
-                        el(RN.View,{style:{width:8,height:8,borderRadius:4,backgroundColor:PLATFORM_COLORS[status]}}),el(RN.Text,{style:s.muted},tr(label)))))]),
+            el(PlatformPreview,{key:"preview",on}),
             el(Group,{key:"where",title:tr("Show icons")},
                 switchRow(Switch,"piDmHeader","In DMs","Next to the name at the top of a DM.",rowIcon(6503,"EnvelopeIcon")),
                 switchRow(Switch,"piUserList","In lists","Member list, friends, DM list and voice channels.",rowIcon(5404,"GroupIcon")),
@@ -3444,11 +4283,9 @@
         if (React) useSettings("hiddenChannels");
         const tree = orig.apply(self,args), channel = args[0] && args[0].channel;
         if (!tree || !React || !RN || !hiddenMetadata(channel)) return tree;
-        const icon = nativeLock || inspectedExport(5410,"LockIcon");
-        if (!icon) return tree;
-        // Lock next to hidden names, (20px lock, right margin).
-        return el(RN.View,{style:{flexDirection:"row",alignItems:"center"},accessibilityLabel:hiddenName(channel)+", locked"},
-            el(icon,{color:"#80848e",style:{width:20,height:20,marginRight:4}}),tree);
+        // Discord already draws its own locked-channel icon (TextLockIcon, the # with a small lock) for these rows,
+        // so a second lock beside the name only doubled it. Screen readers still hear that the channel is locked.
+        return el(RN.View,{style:{flexDirection:"row",alignItems:"center"},accessible:true,accessibilityLabel:hiddenName(channel)+", "+tr("locked")},tree);
     }
     function authorizationUrl(result) {
         // Do not depend on a browser-complete global URL / URLSearchParams in RN.
@@ -3588,44 +4425,69 @@
                 statusCard("status",authenticated ? "You can read, write, delete and report reviews." : "You can read reviews. Sign in to write your own.",
                     {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in..." : "Reading reviews"),
                         IconComponent:venusIcon(7358,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
+            // One row: the action you can take now. The status card already says whether you're signed in.
             el(Group,{key:"auth",title:tr("Account")},
-                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : authenticated ? "Signed in to ReviewDB" : "Sign in to ReviewDB"),icon:rowIcon(6374,"KeyIcon"),
-                    arrow:true,disabled:!on || authenticated || pending,onPress:authenticateReviews,subLabel:reviewAuthError || (authenticated ? undefined : tr("Needed to post, delete or report reviews. Never uses your Discord token."))}),
-                el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9348,"DoorExitIcon"),variant:authenticated ? "danger" : undefined,disabled:!authenticated,onPress:clearReviewAuth,
-                    subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")})),
+                authenticated ? el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9348,"DoorExitIcon"),variant:"danger",onPress:clearReviewAuth,
+                    subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")}) :
+                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : "Sign in to ReviewDB"),icon:rowIcon(6374,"KeyIcon"),
+                    arrow:true,disabled:!on || pending,onPress:authenticateReviews,subLabel:reviewAuthError || tr("Needed to post, delete or report reviews. Never uses your Discord token.")})),
             el(Group,{key:"settings",title:tr("Display")},
                 switchRow(Switch,"reviewWarning","Show the be-respectful note","ReviewDB's reminder to be kind, shown above reviews.",rowIcon(8699,"ShieldIcon"))),
             footnote("note","Reviews come from manti.vendicated.dev. Opening reviews sends that profile's or server's ID to ReviewDB.")];
         return settingsBody(ui,groups);
     }
+    // Try it: tap Sam's message to delete it (it stays, outlined), tap Alex's to edit it (the old text stays above).
+    // Follows Show edit history and your Message highlights colors.
+    // Watch: Alex edits a message twice and the earlier versions stay above it, then Sam deletes one and it stays,
+    // outlined. Try it: tap Alex's message to edit it, Sam's to delete it, with a tip on what to try next.
     function NoDeletePreview(props) {
-        const s=useChatPreviewStyles(), red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
+        const s=useChatPreviewStyles(), k=usePreviewChrome(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode();
+        const blank={deleted:false,edits:0,pulse:null,tried:{}};
+        const [state,setState]=React.useState(blank), on=!!props.on, watching=on && mode==="watch";
+        const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
+        const red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
         const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2;
-        return chatPreview(s,"preview","Deleted messages preview",[
-            props.edits ? previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
-                el(RN.Text,{style:s.faded},tr("See you at 6")),
-                el(RN.Text,{style:s.text},tr("See you at 7"),el(RN.Text,{style:s.muted}," "+tr("(edited)"))))) : null,
-            el(RN.View,{key:"deleted",style:{backgroundColor:red+"1a"}},
-                el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}}),
-                previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))))]);
+        const versions=[tr("See you at 6"),tr("See you at 7"),tr("See you at 8")];
+        const pulse=who => update(st => ({pulse:{who,id:who+":"+st.edits+":"+st.deleted}}));
+        const story=useStory(watching,() => [[0,() => setState(blank),tr("Alex says when to meet")],
+            [1400,() => pulse("edited"),tr("Alex edits it to 7")],[400,() => { animateLayout(); update({edits:1}); },
+                props.edits ? tr("The old text stays above it, crossed out") : tr("It shows (edited), like in Discord")],
+            [1400,() => pulse("edited"),tr("And edits it again to 8")],[400,() => { animateLayout(); update({edits:2}); }],
+            [1400,() => pulse("deleted"),tr("Sam deletes a message")],
+            [400,() => { animateLayout(); update({deleted:true}); },tr("It stays for you, outlined, so you can still read it")],
+            [1200,() => {}]],[props.edits]);
+        const edit=() => { if (!on || watching) return; animateLayout(); update(st => ({edits:st.edits>=2 ? 0 : st.edits+1,tried:Object.assign({},st.tried,{edit:true})})); };
+        const remove=() => { if (!on || watching) return; animateLayout(); update(st => ({deleted:!st.deleted,tried:Object.assign({},st.tried,st.deleted ? {back:true} : {del:true})})); };
+        const history=props.edits ? versions.slice(0,state.edits) : [];
+        const tried=state.tried, next=!on || watching ? null : !tried.edit ? ["edited",tr("Tap Alex's message to edit it")] :
+            !tried.del ? ["deleted",tr("Now tap Sam's message to delete it")] : !tried.back ? ["deleted",tr("Tap it again to bring it back")] : null;
+        const tip=who => next && next[0]===who ? previewTip(k,next[1]) : null;
+        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s,"preview","Deleted messages preview",[
+            el(Press,{key:"edited",onPress:edit,accessibilityRole:"button",accessibilityHint:tr("Tap to edit it")},
+                previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
+                    history.map((text,i) => popIn("old:"+i,el(RN.Text,{style:s.faded},text))),
+                    el(RN.Text,{style:s.text},versions[state.edits],state.edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null))),
+                tapRipple(state.pulse,"edited")),
+            tip("edited"),
+            el(Press,{key:"deleted",onPress:remove,accessibilityRole:"button",accessibilityHint:tr(state.deleted ? "Tap to bring it back" : "Tap to delete it")},
+                el(RN.View,{style:state.deleted ? {backgroundColor:red+"1a"} : null},
+                    state.deleted ? popIn("bar",el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}})) : null,
+                    previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))),
+                    tapRipple(state.pulse,"deleted"))),
+            tip("deleted")],
+            {header:previewHeader(k,{title:"general"}),footer:el(RN.View,{key:"foot"},previewInput(k,s,{placeholder:tr("Message {channel}",{channel:"#general"})}),
+                watching ? storyStrip(k,s,story) : null)}));
     }
+    const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {
         useSettings();
         const ui=reviewUI();
-        const [draft,setDraft]=React.useState(String(settings.noDeleteLimit));
-        // Follow the saved value when preferences finish loading after the page opened.
-        React.useEffect(() => { setDraft(String(settings.noDeleteLimit)); },[settings.noDeleteLimit]);
         if (!React || !RN) return null;
         const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
-        // An emptied field keeps the current maximum instead of silently resetting it to 512.
-        const commit=() => { if (draft) setSetting("noDeleteLimit",draft); setDraft(String(settings.noDeleteLimit)); };
-        const onText=text => setDraft(String(text).replace(/[^0-9]/g,"").slice(0,4));
-        const inputProps={value:draft,keyboardType:"number-pad",maxLength:4,placeholder:"512",onBlur:commit,onSubmitEditing:commit,returnKeyType:"done",
-            // Read-only while NoDelete is off, like the switches above it.
-            editable:!!settings.noDelete,isDisabled:!settings.noDelete};
-        // Discord's TextInput reports text via onChange(text); RN's via onChangeText.
-        const input=ui.TextInput ? el(ui.TextInput,Object.assign({label:tr("Keep up to"),onChange:onText},inputProps)) :
-            el(RN.TextInput,Object.assign({onChangeText:onText,style:{fontSize:16,padding:12}},inputProps));
+        // How many to keep is a choice of four, not a number to type. A number saved by an older version shows
+        // as the closest choice and stays as it is until you pick another.
+        const limit=settings.noDeleteLimit, nearest=NODELETE_LIMITS.reduce((best,n) => Math.abs(n-limit)<Math.abs(best-limit) ? n : best,NODELETE_LIMITS[0]);
         const kept=deleted.size, changed=edits.size;
         const summary=!settings.noDelete ? "Turned off. Switch it on in Features to start." :
             kept || changed ? tr(settings.noDeleteSave ? "{deleted} and {edited} kept, saved on this phone." : "{deleted} and {edited} kept until Discord restarts.",
@@ -3634,14 +4496,18 @@
         const groups=[
             settings.noDelete ? statusCard("status",summary,{title:kept || changed ? pl(kept+changed,"{n} message kept","{n} messages kept") : tr("Keeping deleted messages"),
                 IconComponent:venusIcon(4791,"TrashIcon")}) : offCard("status",venusIcon(4791,"TrashIcon")),
-            el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits}),
+            el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits,on:!!settings.noDelete}),
             el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(9829,"PencilIcon"))),
             el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.",rowIcon(4782,"DownloadIcon"))),
-            el(Group,{key:"limit",title:tr("Limit"),description:tr("From 1 to {max}. When full, the oldest is removed first.",{max:MAX_DELETED})},el(RN.View,{style:{padding:12,gap:8}},input)),
+            el(RN.View,{key:"limit",style:{gap:8}},
+                groupTitle("title","Keep up to"),
+                venusSegmented({key:"choice",value:nearest,disabled:!settings.noDelete,onChange:value => setSetting("noDeleteLimit",value),
+                    items:NODELETE_LIMITS.map(n => ({value:n,label:String(n)}))}),
+                footnote("hint","When it's full, the oldest is removed first.")),
             el(Group,{key:"clear",title:tr("Manage")},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
                 () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),!kept && !changed,true)),
             footnote("note","Delete a kept message again to hide just that one.")];
-        return settingsBody(ui,groups,{keyboardShouldPersistTaps:"handled"});
+        return settingsBody(ui,groups);
         function toggle(key,label,subLabel,icon) { return switchRow(Switch,key,label,subLabel,icon); }
     }
     // Clear kept messages: every kept deletion leaves chat and the saved file, and so does edit history.
@@ -4924,28 +5790,38 @@
         } catch (_) {}
         return accountSwitcherWithCurrent(list, false);
     }
+    // Discord's saved data (Storage 510/511) is read asynchronously at startup. Until it has loaded, the saved
+    // account list and tokens look empty, so nothing may be written yet.
+    function accountSwitcherStorageReady() {
+        const storage = inspectedExport(510, "Storage");
+        return !storage || storage.hasLoaded !== false;
+    }
     function accountSwitcherSync() {
         const store = accountSwitcherStore();
-        if (enabled("accountSwitcher")) {
-            const me = currentUser();
+        // MultiAccountStore is a PersistedStore: initializeIfNeeded() reads the saved list once and then never again.
+        // Calling it (or initialize + asyncPersist) before Discord loaded its storage and signed in, as happens on a
+        // cold start, read an empty list and saved it over every account (#63). Only Discord initializes the store;
+        // Venus adds the signed-in account afterwards, and only when it is missing.
+        const me = enabled("accountSwitcher") ? currentUser() : null;
+        if (me && me.id && accountSwitcherStorageReady()) {
             const rawTokenMod = global.__r && global.__r(1112);
             const tokenMgr = rawTokenMod && typeof rawTokenMod.setToken === "function" ? rawTokenMod :
                 rawTokenMod && rawTokenMod.default && typeof rawTokenMod.default.setToken === "function" ? rawTokenMod.default : null;
             try {
-                if (me && me.id && tokenMgr && typeof tokenMgr.getToken === "function" && typeof tokenMgr.setToken === "function") {
+                if (tokenMgr && typeof tokenMgr.getToken === "function") {
                     const activeToken = tokenMgr.getToken();
                     if (typeof activeToken === "string" && activeToken && !tokenMgr.getToken(me.id))
                         tokenMgr.setToken(activeToken, me.id);
                 }
             } catch (_) {}
             try {
-                if (store && typeof store.initializeIfNeeded === "function") store.initializeIfNeeded();
-                if (store && typeof store.initialize === "function" && typeof store.getState === "function" &&
-                    (store._isInitialized !== false)) {
+                if (store && store._isInitialized !== false && typeof store.initialize === "function" && typeof store.getState === "function") {
                     const state = store.getState() || {};
-                    const users = accountSwitcherWithCurrent(state.users, false);
-                    store.initialize({users, canUseMultiAccountMobile:true});
-                    if (typeof store.asyncPersist === "function") store.asyncPersist();
+                    const saved = Array.isArray(state.users) ? state.users : [];
+                    if (!saved.some(u => u && u.id === me.id)) {
+                        store.initialize(Object.assign({}, state, {users:accountSwitcherWithCurrent(saved, false), canUseMultiAccountMobile:true}));
+                        if (typeof store.asyncPersist === "function") store.asyncPersist();
+                    }
                 }
             } catch (_) {}
         }
@@ -5091,12 +5967,12 @@
             const fullUser = (active ? me : userStore && userStore.getUser(acc.id)) || acc;
             const displayName = fullUser && (fullUser.globalName || fullUser.global_name || fullUser.username) || acc.username || acc.id;
             const handle = acc.username && acc.username !== displayName ? "@" + acc.username + " \u00b7 " : "";
-            const statusText = active ? tr("Active account") :
+            const statusText = active ? tr("Active account \u00b7 Tap for the quick switcher") :
                 acc.tokenStatus === invalidStatus ? tr("Session expired \u00b7 Tap to sign in again") :
                 acc.tokenStatus === validatingStatus ? tr("Checking session...") : tr("Tap to switch");
             return el(Row, {key:"acc:" + acc.id, label:displayName, subLabel:handle + statusText,
                 icon:avatarBubble(fullUser, 32, active ? "online" : acc.tokenStatus === invalidStatus ? "dnd" : null), disabled:!on,
-                trailing:active ? el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"}) : undefined,
+                trailing:active ? popIn("on:" + acc.id, el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
                 onPress:() => {
                     if (active) { openAccountSwitcherSheet(); return; }
                     if (acc.tokenStatus === invalidStatus) { openAddAccountModal(); return; }
@@ -5116,11 +5992,10 @@
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
                 Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(6799, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
-                Row ? el(Row, {key:"sheet", label:tr("Open quick switcher"), subLabel:tr("Opens the account & status sheet."), icon:rowIcon(11519, "ArrowsUpDownIcon"),
-                    arrow:true, disabled:!on, onPress:openAccountSwitcherSheet}) : null),
+                null),
             el(Group, {key:"shortcuts", title:tr("Shortcuts")},
                 switchRow(Switch, "accountSwitcherYouBar", "Button on the profile bar", "Shows a Switch accounts button next to the notifications bell on the bottom bar.", rowIcon(10420, "UserCircleIcon"))),
-            footnote("note", "You can also switch accounts anytime by tapping your avatar on the You tab or holding the You tab in the bottom navigation bar. Hold a non-active account above to remove it.")];
+            footnote("note", "Tap your avatar on the You tab, or hold the You tab, to switch from anywhere. Hold an account above to remove it.")];
         return settingsBody(ui, groups);
     }
 
@@ -5765,15 +6640,68 @@
             (waiting ? " " + tr("{n} waiting.", {n:waiting}) : "");
     }
     // A message in Spanish shown the way Translate messages shows it, following the Display switches.
+    // Watch: Lucía writes in Spanish and it turns into your language, on its own, or after you hold it and tap Translate
+    // in Discord's message menu (whichever you chose below). Try it: tap Translate or Show original under the message.
+    const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
+    // A message's long-press menu, the way Discord draws it: a sheet with quick reactions and a list of actions.
+    function previewSheet(k, s, rows, pulse) {
+        const Press = RN.Pressable || RN.View;
+        return el(RN.View, {key:"sheet", style:[k.sheet, {marginTop:6}]},
+            el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66", marginBottom:8}}),
+            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-around", paddingHorizontal:12, paddingBottom:8}},
+                ["\ud83d\udc4d", "\u2764\ufe0f", "\ud83d\ude02", "\ud83d\ude2e"].map(e => el(RN.View, {key:e, style:[k.round, {width:44, height:44, borderRadius:22}]}, el(RN.Text, {style:{fontSize:20}}, e)))),
+            el(RN.View, {style:[k.sheetRow, {marginHorizontal:12, marginBottom:8, borderRadius:16, overflow:"hidden"}]},
+                rows.map(([key, Icon, label, onPress], i) => el(Press, {key, onPress, accessibilityRole:onPress ? "button" : undefined,
+                    style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:"#ffffff0d"} : null]},
+                    el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {fontSize:15, fontWeight:"500"}]}, label), tapRipple(pulse, key, {left:8, top:7})))));
+    }
     function TranslatePreview(props) {
         useSettings("translate");
-        const s = useChatPreviewStyles();
-        return chatPreview(s, "preview", "Translation preview",
-            previewMessage(s, "msg", "Lucía", "#faa61a", tr("Today at 4:01 PM"), el(RN.View, null,
-                el(RN.Text, {style:s.text}, tr("Hi everyone! Who's coming tonight?")),
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = !!props.on;
+        const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null, tried:{}};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch", manual = settings.translateMode === "manual";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const target = languageName(localeCode(settings.translateTarget === "phone" ? "phone" : "discord"));
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(Object.assign({}, blank, {shown:false}))],
+                [700, () => { animateLayout(); update({shown:true}); }, tr("Luc\u00eda writes in Spanish")]];
+            if (manual) steps.push([1400, () => update({pulse:{who:"msg", id:"hold"}, held:true}), tr("You hold the message to open its menu")],
+                [700, () => { animateLayout(); update({menu:true}); }],
+                [1800, () => update({pulse:{who:"translate", id:"tap"}}), tr("And tap Translate")],
+                [600, () => { animateLayout(); update({menu:false, held:false, busy:true}); }]);
+            else steps.push([1400, () => update({busy:true}), tr("Venus sees it's not in {language} and translates it on its own", {language:target})]);
+            steps.push([1600, () => { animateLayout(); update({busy:false, done:true}); }, tr("Now it reads in {language}", {language:target})]);
+            if (settings.translateNote || settings.translateOriginal) steps.push([300, () => {},
+                tr(settings.translateOriginal ? "The note under it says what it was in, with the original quoted below" : "The small note under it says what language it was in")]);
+            steps.push([800, () => {}]);
+            return steps;
+        }, [manual, settings.translateNote, settings.translateOriginal, target]);
+        const translated = on ? state.done : true;
+        const Lang = venusIcon(14958, "LanguageIcon");
+        const body = !state.shown ? null : state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
+                el(RN.Text, {style:[s.muted, {marginTop:2}]}, tr("Translating\u2026"))) :
+            !translated ? el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE) : el(RN.View, null,
+                popIn("tr", el(RN.Text, {style:s.text}, tr("Hi everyone! Who's coming tonight?"))),
                 settings.translateNote ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
-                settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?")) : null)));
+                settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
+        const toggle = () => { if (!on || watching) return; animateLayout(); update(st => ({done:!st.done, tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})})); };
+        const message = state.shown ? el(RN.View, {key:"msg", style:state.held ? k.selected : null},
+            popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg")) : null;
+        // Try it: the action you'd find in the message's menu, as a button under the message, with a tip on what to try.
+        const tryButton = on && !watching ? el(RN.View, {key:"try", style:{paddingHorizontal:16, paddingTop:2, paddingBottom:6, flexDirection:"row"}},
+            el(Press, {onPress:toggle, accessibilityRole:"button", accessibilityHint:tr(state.done ? "Tap to show the original" : "Tap to translate it"),
+                style:[k.secondary, {flexDirection:"row", alignItems:"center", gap:6, borderRadius:16, paddingHorizontal:12, paddingVertical:7, marginLeft:52}]},
+                el(Lang, {size:"xs", color:k.secondaryText.color}), el(RN.Text, {style:[k.secondaryText, {fontWeight:"600", fontSize:13}]}, tr(state.done ? "Show original" : "Translate")))) : null;
+        const tip = on && !watching ? previewTip(k, !state.tried.tr ? tr(manual ? "In chat you'd hold the message and tap Translate. Try it here" :
+            "In chat this happens on its own. Tap Translate to see it") : !state.tried.back ? tr("Tap Show original to go back") : null) : null;
+        const sheet = watching && state.menu ? previewSheet(k, s, [["reply", venusIcon(11108, "ArrowAngleLeftUpIcon"), tr("Reply")],
+            ["translate", Lang, tr("Translate")], ["copy", venusIcon(4780, "CopyIcon"), tr("Copy Text")]], state.pulse) : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Translation preview", [message, tryButton, tip, sheet],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
+                    watching ? storyStrip(k, s, story) : null)}));
     }
     function TranslateSettings() {
         useSettings("translate");
@@ -5785,7 +6713,7 @@
         const groups = [
             on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:name(settings.translateTarget === "phone" ? "phone" : "discord")}), IconComponent:venusIcon(14958, "LanguageIcon")}) :
                 offCard("status", venusIcon(14958, "LanguageIcon")),
-            el(TranslatePreview, {key:"preview"}),
+            el(TranslatePreview, {key:"preview", on}),
             radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(16292, "SparklesIcon")],
                 ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8216, "ReactionIcon")]]),
             radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(8719, "ChatSmileIcon")],
@@ -6528,21 +7456,24 @@
             editable:on && !customThemes.installing,
             isDisabled:!on || customThemes.installing
         };
-        const urlInput = ui.TextInput ? el(ui.TextInput, Object.assign({label:tr("Theme JSON link"), onChange:setUrlDraft}, inputProps)) :
-            el(RN.TextInput, Object.assign({onChangeText:setUrlDraft, style:{fontSize:16, padding:12}}, inputProps));
+        // One field and one button: Paste while the box is empty, Install once it has a link.
+        const empty = !urlDraft.trim();
+        const urlInput = inputWithButton(ui, "input", Object.assign({label:tr("Theme JSON link")}, inputProps), text => setUrlDraft(String(text || "")),
+            customThemes.installing ? "Installing..." : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || customThemes.installing : !canInstall);
         const themeRows = customThemes.list.length ? customThemes.list.map(item => {
             if (!item || !Row) return null;
             const isSelected = customThemes.active === item.id;
             const byLine = item.authors ? tr("by {author}", {author:item.authors}) + " \u00b7 " : "";
             const descLine = item.description ? item.description + " \u00b7 " : "";
             const bgBadge = item.background && item.background.url ? tr("Background image") + " \u00b7 " : "";
-            const stateLine = isSelected ? tr("Active \u00b7 Tap to turn off") : tr("Tap to apply");
+            // The footnote says what a tap does; each row only says what's different about it.
+            const stateLine = isSelected ? tr("In use") : "";
             return el(Row, {
                 key:"theme:" + item.id,
                 label:item.name,
                 icon:themeSwatch(item),
-                trailing:isSelected ? el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"}) : undefined,
-                subLabel:byLine + descLine + bgBadge + stateLine,
+                trailing:isSelected ? popIn("on:" + item.id, el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
+                subLabel:(byLine + descLine + bgBadge + stateLine).replace(/ \u00b7 $/, "") || undefined,
                 disabled:!on || customThemes.installing,
                 onPress:() => customThemesSelect(item.id),
                 onLongPress:() => confirmAction("Remove theme?",
@@ -6555,14 +7486,8 @@
                 IconComponent:venusIcon(14887, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
                 offCard("status", venusIcon(14887, "EyeDropperIcon")),
             el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
-            el(Group, {key:"install", title:tr("Add from link")},
-                el(RN.View, {key:"input", style:{padding:12, gap:8}}, urlInput),
-                Row ? el(Row, {key:"add", label:tr(customThemes.installing ? "Installing theme..." : "Install theme"), icon:rowIcon(4782, "DownloadIcon"),
-                    subLabel:tr("Downloads the theme once and keeps it on this phone."),
-                    disabled:!canInstall, onPress:onInstall}) : null,
-                Row ? el(Row, {key:"paste", label:tr("Paste link from clipboard"), icon:rowIcon(4780, "CopyIcon"),
-                    subLabel:tr("Fills the box above with the link on your clipboard."),
-                    disabled:!on || customThemes.installing, onPress:onPaste}) : null,
+            el(Group, {key:"install", title:tr("Add from link"), description:tr("Downloads the theme once and keeps it on this phone.")},
+                el(RN.View, {key:"input", style:{padding:12}}, urlInput),
                 Row ? el(Row, {key:"browse", label:tr("Browse Revenge themes"), icon:rowIcon(8041, "LinkExternalSmallIcon"),
                     subLabel:"plugins-list.pages.dev/Themes",
                     arrow:true, onPress:() => openLink("https://plugins-list.pages.dev/Themes/")}) : null),
@@ -6599,6 +7524,20 @@
             return true;
         } catch (_) { return false; }
     }
+    // Keyed on the color and width, so it mounts again only when one of them changes. It glows only when the page
+    // says that highlight just changed (props.fresh), never on the page's first draw.
+    function HighlightGlow(props) {
+        const A = motion(), ref = React.useRef(null);
+        if (!ref.current && A) ref.current = new A.Value(props.fresh && !reduceMotion ? 1 : 0);
+        React.useEffect(() => {
+            const value = ref.current;
+            if (!value || !props.fresh || reduceMotion) return undefined;
+            const run = A.timing(value, {toValue:0, duration:900, easing:easeOut(), useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, []);
+        return ref.current ? el(A.View, {pointerEvents:"none", style:{position:"absolute", left:0, right:0, top:0, bottom:0, backgroundColor:props.hex + "40", opacity:ref.current}}) : null;
+    }
     function highlightPreview(props) {
         const s = useThemed("highlightPreview", c => ({chat:Object.assign({}, HIGHLIGHT_DARK.chat, {backgroundColor:c.CHANNEL_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOWER, borderColor:c.BORDER_SUBTLE}),
             name:Object.assign({}, HIGHLIGHT_DARK.name, {color:c.TEXT_STRONG}), text:Object.assign({}, HIGHLIGHT_DARK.text, {color:c.TEXT_DEFAULT}),
@@ -6613,13 +7552,23 @@
             el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, char));
         const header = (name, time) => el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", gap:6, marginBottom:2}},
             el(RN.Text, {style:s.name, numberOfLines:1}, name), el(RN.Text, {style:s.muted}, time));
-        const message = (key, hex, children) => el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
-            hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children);
+        // A highlight that just changed glows once, like a new mention arriving, then settles to its normal tint.
+        // props.count shows only the first few messages (while Watch plays), props.beats replays one's glow, props.ripple
+        // marks a tap, and props.onPress makes a highlighted message tappable.
+        const Press = RN.Pressable || RN.View, count = props.count == null ? 3 : props.count;
+        const message = (key, hex, children) => {
+            const beat = props.beats && props.beats[key] || 0;
+            const body = el(RN.View, {key, style:{paddingHorizontal:16, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
+                hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar + ":" + beat, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
+                hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children,
+                props.ripple ? props.ripple(key) : null);
+            return hex && props.onPress ? el(Press, {key, onPress:() => props.onPress(key), accessibilityRole:"button", accessibilityHint:tr("Tap to see it light up again")}, body) : body;
+        };
         const question = tr("Did everyone see the new update?");
         return el(RN.View, {key:props.key, style:s.chat, accessible:true, accessibilityLabel:tr("Message highlight preview")},
             message("plain", null, el(RN.View, {style:{flexDirection:"row", gap:12}}, face(40),
                 el(RN.View, {style:{flex:1}}, header(myName, tr("Today at 4:01 PM")), el(RN.Text, {style:s.text}, question)))),
-            message("reply", props.ping, el(RN.View, null,
+            count < 2 ? null : message("reply", props.ping, el(RN.View, null,
                 el(RN.View, {style:{flexDirection:"row", alignItems:"center", marginBottom:4}},
                     el(RN.View, {style:[{width:22, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, s.spine]}),
                     el(RN.View, {style:{marginRight:4}}, face(16)),
@@ -6628,10 +7577,44 @@
                 el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("S", "#eb459e"),
                     el(RN.View, {style:{flex:1}}, header("Sam", tr("Today at 4:03 PM")),
                         el(RN.Text, {style:s.text}, el(RN.Text, {style:s.mention}, "@" + myName), " " + tr("Yes, it looks great!")))))),
-            props.deleted ? el(RN.View, {style:{height:4}}) : null,
-            props.deleted ? message("deleted", props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
+            props.deleted && count >= 3 ? el(RN.View, {style:{height:4}}) : null,
+            props.deleted && count >= 3 ? message("deleted", props.pending ? null : props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
                 el(RN.View, {style:{flex:1}}, header("Alex", tr("Today at 4:05 PM")),
-                    el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null);
+                    el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null,
+            props.tip || null, props.caption ? previewCaption(s, props.caption) : null, props.footer || null);
+    }
+    // Watch: you ask, Sam replies and mentions you (it lights up as it arrives), Alex sends a message and deletes it
+    // (it stays, in your deleted color). Try it: tap a highlighted message to see it light up again, or change the
+    // colors and width below; the one you changed glows.
+    function HighlightPreview(props) {
+        useSettings("messageHighlight");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode();
+        const on = props.on, watching = on && mode === "watch", hasDeleted = !!props.deleted;
+        const blank = {count:3, pending:false, beats:{reply:0, deleted:0}, pulse:null, tried:false};
+        const [state, setState] = React.useState(blank);
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const beat = key => update(st => ({beats:Object.assign({}, st.beats, {[key]:st.beats[key] + 1})}));
+        const story = useStory(watching, () => {
+            const steps = [[0, () => setState(st => Object.assign({}, blank, {count:1, beats:st.beats})), tr("You ask everyone a question")],
+                [1200, () => { animateLayout(); update({count:2}); beat("reply"); }, tr("Sam replies and mentions you, so it's highlighted in your reply color")]];
+            if (hasDeleted) steps.push([1400, () => { animateLayout(); update({count:3, pending:true}); }, tr("Alex sends a message")],
+                [1300, () => update({pulse:{who:"deleted", id:"del" + Date.now()}})],
+                [400, () => { animateLayout(); update({pending:false}); beat("deleted"); }, tr("Alex deletes it: it stays, highlighted in your deleted color")]);
+            steps.push([600, () => {}, tr("Change the colors or the bar width below to see them here")], [800, () => {}]);
+            return steps;
+        }, [hasDeleted]);
+        // A message glows when its beat goes up (it arrived, or you tapped it), or when you change its color or the width:
+        // each beat is a new glow, which plays once when it appears, so drawing the page again never replays it.
+        const beats = state.beats, given = props.fresh || {};
+        const fresh = {reply:!!given.reply || beats.reply > 0, deleted:!!given.deleted || beats.deleted > 0};
+        const tapped = key => { if (!on || watching) return; update(st => ({tried:true, pulse:{who:key, id:key + ":" + st.beats[key]}})); beat(key); };
+        const tip = on && !watching ? previewTip(k, state.tried ? tr("Now change a color or the bar width below: it glows here") :
+            tr("Tap a highlighted message to see it light up again")) : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(st => Object.assign({}, blank, {beats:st.beats})); }) : null,
+            highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, deleted:props.deleted, fresh,
+                count:watching ? state.count : 3, pending:watching && state.pending, beats, tip,
+                footer:watching ? storyStrip(k, s, story) : null,
+                onPress:watching ? null : tapped, ripple:key => tapRipple(state.pulse, key)}));
     }
     // One highlight's colors: its name and current color, then a row of swatches and a last one for any color.
     function highlightColorPicker(props) {
@@ -6656,19 +7639,24 @@
                 Text ? el(Text, {variant:"text-sm/medium", color:"text-muted"}, activeName) : el(RN.Text, {style:{color:"#949ba4", fontSize:13}}, activeName)),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center"}, accessibilityRole:"radiogroup"},
                 props.choices.map(([choice, label, hex]) => swatch(choice, tr(label), hex, value === choice, () => { if (on) setSetting(props.setting, choice); },
-                    value === choice ? tick(hex) : null)),
-                swatch("custom", tr("Any color"), custom ? value : null, custom, pickAny, custom ? tick(value) : el(Dropper, {size:"xs"}))));
+                    value === choice ? popIn("tick:" + choice, tick(hex)) : null)),
+                swatch("custom", tr("Any color"), custom ? value : null, custom, pickAny, custom ? popIn("tick:" + value, tick(value)) : el(Dropper, {size:"xs"}))));
     }
     function MessageHighlightSettings() {
         useSettings("messageHighlight");
         const ui = reviewUI();
         const [hexDraft, setHexDraft] = React.useState(""), [hexTarget, setHexTarget] = React.useState("");
+        // What the preview last showed, so only the highlight you just changed glows.
+        const shown = React.useRef(null);
         if (!React || !RN) return null;
         const s = useThemed("highlightCard", c => ({card:Object.assign({}, HIGHLIGHT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
             divider:{height:1, backgroundColor:c.BORDER_SUBTLE}}), HIGHLIGHT_DARK);
         const on = enabled("messageHighlight"), showDeleted = !!features.noDelete;
         const pingHex = on ? highlightColorHex(settings.messageHighlightPingColor, "#f0b232") : "#f0b232";
         const delHex = on ? highlightColorHex(settings.messageHighlightDeletedColor, "#f23f43") : "#f23f43";
+        const barWidth = (on ? settings.messageHighlightThickness : 1) * 2, last = shown.current;
+        const fresh = last ? {reply:last.ping !== pingHex || last.bar !== barWidth, deleted:last.deleted !== delHex || last.bar !== barWidth} : null;
+        shown.current = {ping:pingHex, deleted:delHex, bar:barWidth};
         const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightDeletedColor !== "default";
         const resetAll = () => {
             setSetting("messageHighlightThickness", 2); setSetting("messageHighlightPingColor", "default"); setSetting("messageHighlightDeletedColor", "default");
@@ -6685,7 +7673,7 @@
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
             on ? null : offCard("status", venusIcon(16122, "PaintbrushThinIcon")),
-            highlightPreview({key:"preview", me:currentUser(), bar:(on ? settings.messageHighlightThickness : 1) * 2, ping:pingHex, deleted:showDeleted ? delHex : null}),
+            el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
                 venusSegmented({key:"choice", value:settings.messageHighlightThickness, disabled:!on, onChange:value => setSetting("messageHighlightThickness", value),
@@ -6778,7 +7766,6 @@
         if (features.reviewDB && id === 8510) oauthModal=exports.default;
         if (features.reviewDB && id === 5997) nativeRowGroup=exports.TableRowGroup;
         if (features.reviewDB && id === 6621) nativeSwitchRow=exports.TableSwitchRow;
-        if (features.hiddenChannels && id === 5410) nativeLock=exports.LockIcon;
         if (features.hiddenChannels && id === 15859) {
             // ChannelInfo can be consumed as default export and as named export
             // (GuildRolesAndChannelsRow reads it by name); hook both.
@@ -6859,7 +7846,13 @@
                 }
             } catch (_) {}
         }
-        if (features.hiddenChannels && id === 4470) return replaceValue(exports, "default", hookExport(exports.default, "getChannels", hiddenDirectory));
+        if (features.hiddenChannels && id === 4470) {
+            const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
+            guildChannels = store;
+            return replaceValue(exports, "default", store);
+        }
+        if (features.hiddenChannels && id === 2102 && exports && exports.default)
+            return replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel));
         if (features.jumpToTop && id === 8838) chatHeight = exports;
         if (features.jumpToTop && id === 11643) jumpPill = exports.default;
         // 348.10's arrow is a registered image asset: Metro exports the asset id itself, not a default.

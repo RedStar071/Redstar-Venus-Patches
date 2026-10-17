@@ -26,9 +26,9 @@
  "All friends": "Wszyscy znajomi",
  "All {n} friend selected. Tap a friend to pick individually.": "Wybrano {n} znajomego. Dotknij znajomego, aby wybrać osobno.",
  "All {n} friends selected. Tap a friend to pick individually.": {
-  "one": "Wybrano {n} znajomego. Dotknij znajomego, aby wybrać osobno.",
   "few": "Wybrano wszystkich {n} znajomych. Dotknij znajomego, aby wybrać osobno.",
-  "many": "Wybrano wszystkich {n} znajomych. Dotknij znajomego, aby wybrać osobno."
+  "many": "Wybrano wszystkich {n} znajomych. Dotknij znajomego, aby wybrać osobno.",
+  "one": "Wybrano {n} znajomego. Dotknij znajomego, aby wybrać osobno."
  },
  "Allow Discord notifications?": "Zezwolić na powiadomienia Discorda?",
  "Allow notification permission": "Zezwól na powiadomienia",
@@ -73,9 +73,9 @@
  "Completed {name}.": "Ukończono: {name}.",
  "Completed {n} Quest since Discord opened.": "Ukończono {n} misję od otwarcia Discorda.",
  "Completed {n} Quests since Discord opened.": {
-  "one": "Ukończono {n} misję od otwarcia Discorda.",
   "few": "Ukończono {n} misje od otwarcia Discorda.",
-  "many": "Ukończono {n} misji od otwarcia Discorda."
+  "many": "Ukończono {n} misji od otwarcia Discorda.",
+  "one": "Ukończono {n} misję od otwarcia Discorda."
  },
  "Console": "Konsola",
  "Copied Review Text": "Skopiowano tekst recenzji",
@@ -94,6 +94,7 @@
  "Custom theme": "Motyw niestandardowy",
  "Custom themes": "Niestandardowe motywy",
  "Czech": "czeski",
+ "DM": "PW",
  "Danish": "duński",
  "Delete Review": "Usuń recenzję",
  "Delete a kept message again to hide just that one.": "Usuń zachowaną wiadomość jeszcze raz, aby ukryć tylko ją.",
@@ -174,11 +175,14 @@
  "In DMs or in any server channel your client receives.": "W wiadomościach prywatnych lub na dowolnym kanale serwera odbieranym przez klienta.",
  "In chat, reactions and the emoji picker. Discord reopens to apply it.": "Na czacie, w reakcjach i wyborze emoji. Discord uruchomi się ponownie, by to zastosować.",
  "In lists": "Na listach",
+ "In use": "W użyciu",
  "Indonesian": "indonezyjski",
+ "Install": "Zainstaluj",
  "Install and switch color themes from links, compiled into Discord's color table with no lag.": "Instaluj i przełączaj motywy kolorów z linków skompilowanych w tabeli kolorów Discord bez opóźnień.",
  "Install theme": "Zainstaluj motyw",
  "Installed themes": "Zainstalowane motywy",
  "Installing theme...": "Instaluję motyw...",
+ "Installing...": "Instalowanie...",
  "Irish": "irlandzki",
  "It will be sent as a normal file instead.": "Zostanie wysłany jako zwykły plik.",
  "Italian": "włoski",
@@ -227,6 +231,8 @@
  "Marks every unread server as read.": "Oznacza wszystkie nieprzeczytane serwery jako przeczytane.",
  "Marks everything as read in one tap.": "Oznacza wszystko jako przeczytane jednym stuknięciem.",
  "Member list, friends, DM list and voice channels.": "Lista członków, znajomi, lista wiadomości prywatnych i kanały głosowe.",
+ "Members": "Członkowie",
+ "Message": "Wiadomość",
  "Messages": "Wiadomości",
  "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.": "Wiadomości i podglądy linków są usuwane od razu, bez „Na pewno?”. Tego nie da się cofnąć.",
  "Messages in other languages show in yours. Their text is sent to Google Translate.": "Wiadomości w innych językach pokazują się w twoim. Ich tekst jest wysyłany do Google Translate.",
@@ -239,6 +245,7 @@
  "Nepali": "nepalski",
  "Network fetch is unavailable right now.": "Pobieranie sieciowe jest obecnie niedostępne.",
  "New Quests": "Nowe misje",
+ "New people": "Inne osoby",
  "Next to the name at the top of a DM.": "Obok nazwy u góry wiadomości prywatnej.",
  "Next to the name on a profile.": "Obok nazwy w profilu.",
  "Nitro stickers and emojis": "Naklejki i emoji Nitro",
@@ -284,17 +291,21 @@
  "Other people (by user ID)": "Inne osoby (według ID użytkownika)",
  "Others won't see when you're typing. You still see when they are.": "Inni nie zobaczą, że piszesz. Ty nadal widzisz, kiedy oni piszą.",
  "Outside Discord": "Poza Discordem",
+ "Paste": "Wklej",
  "Paste a direct link to a Revenge or Vendetta .json theme above.": "Wklej powyżej bezpośredni link do motywu .json Revenge lub Vendetta.",
  "Paste link from clipboard": "Wklej link ze schowka",
  "Pastel name colors": "Pastelowe kolory nazw",
  "Pastel names": "Pastelowe nazwy",
+ "Pause": "Pauza",
  "People": "Ludzie",
  "People list reset": "Zresetowano listę osób",
  "Persian": "perski",
+ "Play": "Odtwórz",
  "Play Quests": "Misje z grami",
  "Play time counts without installing or opening the game.": "Czas gry się liczy bez instalowania i uruchamiania gry.",
  "Polish": "polski",
  "Portuguese": "portugalski",
+ "Profile": "Profil",
  "Punjabi": "pendżabski",
  "Push notifications outside Discord": "Powiadomienia push poza Discordem",
  "Quest Completer": "Automatyzacja Questów",
@@ -317,14 +328,15 @@
  "Removes the Quest promotion above your profile bar. Quests still work.": "Usuwa reklamę misji nad paskiem profilu. Misje nadal działają.",
  "Removes {n} saved theme and restores Discord's default colors.": "Usuwa zapisany motyw {n} i przywraca domyślne kolory Discord.",
  "Removes {n} saved themes and restores Discord's default colors.": {
-  "one": "Usuwa {n} zapisany motyw i przywraca domyślne kolory Discorda.",
   "few": "Usuwa {n} zapisane motywy i przywraca domyślne kolory Discorda.",
   "many": "Usuwa {n} zapisanych motywów i przywraca domyślne kolory Discorda.",
+  "one": "Usuwa {n} zapisany motyw i przywraca domyślne kolory Discorda.",
   "other": "Usuwa {n} zapisanych motywów i przywraca domyślne kolory Discorda."
  },
  "Reopen now": "Uruchom ponownie",
  "Replace role colors": "Zastępuj kolory ról",
  "Replaces Discord's font everywhere. Discord reopens to apply it. Needs Android 9 or newer.": "Zastępuje czcionkę Discorda wszędzie. Discord uruchomi się ponownie, by to zastosować. Wymaga Androida 9 lub nowszego.",
+ "Reply": "Odpowiedz",
  "Reply to it": "Odpowiedz",
  "Report Review": "Zgłoś recenzję",
  "Report a problem": "Zgłoś problem",
@@ -380,9 +392,9 @@
  "Show theme background image": "Pokaż obraz tła motywu",
  "Shown {n} notification since Discord opened.": "Wyświetlono {n} powiadomienie od otwarcia Discorda.",
  "Shown {n} notifications since Discord opened.": {
-  "one": "Wyświetlono {n} powiadomienie od otwarcia Discorda.",
   "few": "Wyświetlono {n} powiadomienia od otwarcia Discorda.",
-  "many": "Wyświetlono {n} powiadomień od otwarcia Discorda."
+  "many": "Wyświetlono {n} powiadomień od otwarcia Discorda.",
+  "one": "Wyświetlono {n} powiadomienie od otwarcia Discorda."
  },
  "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.": "Pokazuje „general chat” zamiast „general-chat”. Zmienia tylko wygląd nazw.",
  "Shows a Switch accounts button next to Settings at the top of the You tab.": "Pokazuje przycisk Przełącz konta obok Ustawień na górze karty Ty.",
@@ -402,6 +414,7 @@
  "Spaces in channel names": "Spacje w nazwach kanałów",
  "Spanish": "hiszpański",
  "Star any image or video in the media viewer to keep it in your GIF favourites.": "Oznacz gwiazdką dowolny obraz lub wideo w przeglądarce multimediów, aby zachować je w ulubionych GIF-ach.",
+ "Start over": "Od początku",
  "Start typing": "Zaczną pisać",
  "Status": "Stan",
  "Stickers": "Naklejki",
@@ -447,12 +460,13 @@
  "Translated from {language}. Original:": "Przetłumaczono z: {language}. Oryginał:",
  "Translated {n} message since Discord opened.": "Przetłumaczono {n} wiadomość od otwarcia Discorda.",
  "Translated {n} messages since Discord opened.": {
-  "one": "Przetłumaczono {n} wiadomość od otwarcia Discorda.",
   "few": "Przetłumaczono {n} wiadomości od otwarcia Discorda.",
-  "many": "Przetłumaczono {n} wiadomości od otwarcia Discorda."
+  "many": "Przetłumaczono {n} wiadomości od otwarcia Discorda.",
+  "one": "Przetłumaczono {n} wiadomość od otwarcia Discorda."
  },
  "Triple-tap": "Trzykrotne stuknięcie",
  "Triple-tap to delete": "Trzykrotne stuknięcie, by usunąć",
+ "Try it": "Wypróbuj",
  "Trying again in {n} s.": "Ponowna próba za {n} s.",
  "Turkish": "turecki",
  "Turned off. Switch it on in Features to start.": "Wyłączone. Włącz w Funkcjach, aby zacząć.",
@@ -479,17 +493,18 @@
  "Vietnamese": "wietnamski",
  "View Anyway": "Pokaż mimo to",
  "Waiting for new Quests.": "Czekam na nowe misje.",
+ "Watch": "Oglądaj",
  "Watching all friends.": "Obserwowanie wszystkich znajomych.",
  "Watching all {n} friends.": {
-  "one": "Obserwowanie {n} znajomego.",
   "few": "Obserwowanie wszystkich {n} znajomych.",
-  "many": "Obserwowanie wszystkich {n} znajomych."
+  "many": "Obserwowanie wszystkich {n} znajomych.",
+  "one": "Obserwowanie {n} znajomego."
  },
  "Watching {n} friend.": "Obserwowanie {n} znajomego.",
  "Watching {n} people.": {
-  "one": "Obserwowanie {n} osoby.",
   "few": "Obserwowanie {n} osób.",
-  "many": "Obserwowanie {n} osób."
+  "many": "Obserwowanie {n} osób.",
+  "one": "Obserwowanie {n} osoby."
  },
  "Watching {n} person.": "Obserwowanie {n} osoby.",
  "Web": "Przeglądarka",
@@ -513,6 +528,7 @@
  "by {author}": "przez {author}",
  "https://.../theme.json": "https://.../theme.json",
  "just now": "przed chwilą",
+ "locked": "zablokowany",
  "{count} kept on this phone, so chats you reopen show them at once.": "Zapisano na telefonie: {count}. Ponownie otwarte czaty pokazują je od razu.",
  "{deleted} and {edited} kept until Discord restarts.": "Zachowano do ponownego uruchomienia Discorda: {deleted}, {edited}.",
  "{deleted} and {edited} kept, saved on this phone.": "Zachowano i zapisano na tym telefonie: {deleted}, {edited}.",
@@ -528,108 +544,108 @@
  "{name} sent you a DM": "{name} wysłał(a) Ci wiadomość prywatną",
  "{n} DM": "{n} wiadomość prywatna",
  "{n} DMs": {
-  "one": "{n} wiadomość prywatna",
   "few": "{n} wiadomości prywatne",
-  "many": "{n} wiadomości prywatnych"
+  "many": "{n} wiadomości prywatnych",
+  "one": "{n} wiadomość prywatna"
  },
  "{n} account saved (up to {max}).": "Zapisano {n} konto (do {max}).",
  "{n} accounts saved (up to {max}).": {
-  "one": "Zapisano {n} konto (do {max}).",
   "few": "Zapisano {n} konta (do {max}).",
-  "many": "Zapisano {n} kont (do {max})."
+  "many": "Zapisano {n} kont (do {max}).",
+  "one": "Zapisano {n} konto (do {max})."
  },
  "{n} chosen people": {
-  "one": "{n} wybraną osobę",
   "few": "{n} wybrane osoby",
-  "many": "{n} wybranych osób"
+  "many": "{n} wybranych osób",
+  "one": "{n} wybraną osobę"
  },
  "{n} chosen person": "{n} wybraną osobę",
  "{n} color token": "Znacznik koloru {n}",
  "{n} color tokens": {
-  "one": "{n} żeton koloru",
   "few": "{n} kolorowe żetony",
   "many": "{n} kolorowych żetonów",
+  "one": "{n} żeton koloru",
   "other": "{n} kolorowych żetonów"
  },
  "{n} day": "{n} dzień",
  "{n} days": {
-  "one": "{n} dzień",
   "few": "{n} dni",
-  "many": "{n} dni"
+  "many": "{n} dni",
+  "one": "{n} dzień"
  },
  "{n} deleted message": "{n} usunięta wiadomość",
  "{n} deleted messages": {
-  "one": "{n} usunięta wiadomość",
   "few": "{n} usunięte wiadomości",
-  "many": "{n} usuniętych wiadomości"
+  "many": "{n} usuniętych wiadomości",
+  "one": "{n} usunięta wiadomość"
  },
  "{n} edited message": "{n} edytowana wiadomość",
  "{n} edited messages": {
-  "one": "{n} edytowana wiadomość",
   "few": "{n} edytowane wiadomości",
-  "many": "{n} edytowanych wiadomości"
+  "many": "{n} edytowanych wiadomości",
+  "one": "{n} edytowana wiadomość"
  },
  "{n} friend selected.": "Wybrano {n} znajomego.",
  "{n} friends selected.": {
-  "one": "Wybrano {n} znajomego.",
   "few": "Wybrano {n} znajomych.",
-  "many": "Wybrano {n} znajomych."
+  "many": "Wybrano {n} znajomych.",
+  "one": "Wybrano {n} znajomego."
  },
  "{n} hour": "{n} godzinę",
  "{n} hours": {
-  "one": "{n} godzinę",
   "few": "{n} godziny",
-  "many": "{n} godzin"
+  "many": "{n} godzin",
+  "one": "{n} godzinę"
  },
  "{n} minute": "{n} minutę",
  "{n} minutes": {
-  "one": "{n} minutę",
   "few": "{n} minuty",
-  "many": "{n} minut"
+  "many": "{n} minut",
+  "one": "{n} minutę"
  },
  "{n} month": "{n} miesiąc",
  "{n} months": {
-  "one": "{n} miesiąc",
   "few": "{n} miesiące",
-  "many": "{n} miesięcy"
+  "many": "{n} miesięcy",
+  "one": "{n} miesiąc"
  },
  "{n} second ago": "{n} sekundę temu",
  "{n} seconds ago": {
-  "one": "{n} sekundę temu",
   "few": "{n} sekundy temu",
-  "many": "{n} sekund temu"
+  "many": "{n} sekund temu",
+  "one": "{n} sekundę temu"
  },
  "{n} server": "{n} serwer",
  "{n} server was marked as read": "{n} serwer oznaczono jako przeczytany",
  "{n} servers": {
-  "one": "{n} serwer",
   "few": "{n} serwery",
-  "many": "{n} serwerów"
+  "many": "{n} serwerów",
+  "one": "{n} serwer"
  },
  "{n} servers were marked as read": {
-  "one": "{n} serwer oznaczono jako przeczytany",
   "few": "{n} serwery oznaczono jako przeczytane",
-  "many": "{n} serwerów oznaczono jako przeczytane"
+  "many": "{n} serwerów oznaczono jako przeczytane",
+  "one": "{n} serwer oznaczono jako przeczytany"
  },
  "{n} theme installed.": "Zainstalowano motyw {n}.",
  "{n} themes installed.": {
-  "one": "Zainstalowano {n} motyw.",
   "few": "Zainstalowano {n} motywy.",
   "many": "Zainstalowano {n} motywów.",
+  "one": "Zainstalowano {n} motyw.",
   "other": "Zainstalowano {n} motywów."
  },
  "{n} translation": "{n} tłumaczenie",
  "{n} translations": {
-  "one": "{n} tłumaczenie",
   "few": "{n} tłumaczenia",
-  "many": "{n} tłumaczeń"
+  "many": "{n} tłumaczeń",
+  "one": "{n} tłumaczenie"
  },
  "{n} waiting.": "W kolejce: {n}.",
  "{n} year": "{n} rok",
  "{n} years": {
-  "one": "{n} rok",
   "few": "{n} lata",
-  "many": "{n} lat"
+  "many": "{n} lat",
+  "one": "{n} rok"
  },
  "{on} of {total} features on. Turn them on or off in Features.": "Włączone funkcje: {on} z {total}. Włączaj i wyłączaj je w Funkcjach.",
  "{time} ago": "{time} temu"
