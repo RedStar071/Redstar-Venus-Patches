@@ -611,7 +611,7 @@ test('Venus section inserts once after Account with immutable list input and sto
     const result=b.builder.createList(input,'extra');
     assert.equal(input.sections.length,2);assert.equal(result.sections.length,3);assert.equal(result.extra,'extra');
     assert.equal(result.sections[0],first);assert.equal(result.sections[1].label,'Venus');
-    assert.deepEqual(Array.from(result.sections[1].settings),['VENUS_PLUGINS','VENUS_LANGUAGE','VENUS_GENERAL']);
+    assert.deepEqual(Array.from(result.sections[1].settings),['VENUS_PLUGINS','VENUS_LANGUAGE','VENUS_BACKUP','VENUS_GENERAL']);
     const again=b.builder.createList(result);assert.equal(again.sections,result.sections);
     const other={sections:[{settings:['CHAT']}]};assert.equal(b.builder.createList(other).sections,other.sections);
 });
@@ -5205,4 +5205,100 @@ test('Translate preview plays your choice at a readable pace (on its own, or Hol
     assert.ok(host.texts().includes('Tap Show original in the menu'));
     host.render().find(n => n.props && n.props.key === 'translate' && n.props.onPress).props.onPress();
     assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && !host.texts().includes('Hold it again to show the original'));
+});
+
+// Features search and Backup and restore (#68).
+function featuresPageHarness() {
+    const b=settingsHarness(); const {React}=reactHarness(b);
+    const page=b.registry.VENUS_PLUGINS.screen.getComponent();
+    const ids=()=>[...page().props.node.sections.flatMap(s=>Array.from(s.settings))];
+    const header=()=>page().props.node.ListHeaderComponent;
+    const search=text=>{ const bar=header(); const tree=bar.type(bar.props); const field=pageNodes(tree).find(n=>n.props&&typeof n.props.onChange==='function'&&'value' in n.props); field.props.onChange(text); return tree; };
+    return {...b,React,page,ids,header,search};
+}
+test('the Features list has a search bar that keeps its group titles and finds rows by title, description, page and options',()=>{
+    const b=featuresPageHarness(); function SearchField(){} b.context.__r=id=>({6472:{SearchField}}[id]||null);
+    assert.equal(b.page().type,b.SettingsList,'still Discord\'s own settings list');
+    assert.equal(b.ids().length,31,'every row until you type');
+    const bar=b.header(); assert.equal(bar.type.name,'FeatureSearchBar'); assert.equal(b.header(),bar,'one stable header, so typing keeps the keyboard up');
+    const field=pageNodes(bar.type(bar.props)).find(n=>n.type===SearchField); assert.ok(field,'uses Discord\'s SearchField'); assert.equal(field.props.placeholder,'Search features');
+    b.search('font'); assert.deepEqual(b.ids(),['VENUS_SYSTEMFONT']);
+    assert.deepEqual([...b.page().props.node.sections.map(s=>s.label)],['Appearance'],'matches stay under their group title');
+    b.search('GIF'); assert.ok(b.ids().includes('VENUS_FAVOURITEANYTHING'),'found by its description');
+    b.search('stickers'); assert.ok(b.ids().includes('VENUS_FREENITRO_ROW'),'found by an option on its page');
+    b.search('tap gestures'); assert.deepEqual(b.ids(),['VENUS_GESTURES_ROW'],'found by its page title, every word must match');
+    b.search('QUESTS'); assert.deepEqual(b.ids(),['VENUS_QUESTS_ROW','VENUS_HIDEQUESTDOCK'],'case-insensitive, and the group name finds its rows');
+    b.search('zzzz'); assert.equal(b.ids().length,0);
+    assert.ok(JSON.stringify(pageNodes(b.search('zzzz'))).includes('No features found'),'says nothing matched');
+    b.search('   '); assert.equal(b.ids().length,31,'blank search shows everything');
+});
+test('the Features search matches the language Venus is shown in, and in English',async()=>{
+    const b=languageHarness({locale:'ru',packs:{ru:{...RU,'Use your phone\'s font':'Шрифт телефона'}}}); reactHarness(b);
+    b.registry.VENUS_PLUGINS.useTitle(); await b.run();
+    const page=b.registry.VENUS_PLUGINS.screen.getComponent();
+    const bar=page().props.node.ListHeaderComponent;
+    pageNodes(bar.type(bar.props)).find(n=>n.props&&typeof n.props.onChange==='function').props.onChange('шрифт');
+    assert.deepEqual([...page().props.node.sections.flatMap(s=>Array.from(s.settings))],['VENUS_SYSTEMFONT']);
+});
+function backupHarness() {
+    const b=settingsHarness(); const {React}=reactHarness(b);
+    const writes=[], saved=[], alerts=[], toasts=[]; let clip='';
+    const files=native({getConstants:()=>({DocumentsDirPath:'/data/discord/files',CacheDirPath:'/data/discord/cache'}),writeFile:async(dir,name,data)=>{writes.push([dir,name,data]);}});
+    b.load({default:files});
+    const picker={saveDocuments:async opts=>{saved.push(opts);return [{uri:'content://saved'}];},errorCodes:{OPERATION_CANCELED:'OPERATION_CANCELED'},isErrorWithCode:e=>!!(e&&e.code)};
+    b.context.__r=id=>({10776:picker,6614:{Clipboard:{setString:v=>{clip=v;},getString:async()=>clip}},
+        5205:{default:{show:a=>alerts.push(a)}},4531:{default:{open:t=>toasts.push(t)}},5916:{TableRow:'Row'}}[id]||null);
+    const page=()=>pageNodes(b.registry.VENUS_BACKUP.screen.getComponent()());
+    const row=label=>page().find(n=>n.type==='Row'&&n.props.label===label);
+    return {...b,React,writes,saved,alerts,toasts,picker,files,page,row,get clip(){return clip;},set clip(v){clip=v;}};
+}
+test('Backup and restore copies every setting and brings it back, with the rest reset to how Venus starts',async()=>{
+    const b=backupHarness(); await flush();
+    assert.equal(b.registry.VENUS_BACKUP.parent,undefined); assert.equal(b.registry.VENUS_BACKUP.useTitle(),'Backup and restore');
+    assert.equal(b.registry.VENUS_BACKUP.useDescription(),'Save your settings or bring them back.');
+    b.api.setSetting('noDelete',true); b.api.setSetting('gestureOwn','reply'); b.api.setSetting('messageHighlightPingColor','#123456');
+    b.row('Copy to clipboard').props.onPress();
+    const data=JSON.parse(b.clip);
+    assert.equal(data.app,'Venus Patches'); assert.equal(data.format,1); assert.equal(data.settings.noDelete,true); assert.equal(data.settings.gestureOwn,'reply');
+    assert.ok(!('reviewAuth' in data)&&!JSON.stringify(data).includes('token'),'never includes a sign-in');
+    assert.match(b.registry.VENUS_BACKUP.useDescription(),/^Last backup /);
+    assert.equal(b.toasts.at(-1).content,'Backup copied');
+    // Change things, then restore: what the backup had comes back, and what it didn't have goes back to the default.
+    b.api.setSetting('noDelete',false); b.api.setSetting('gestureOwn','edit'); b.api.setSetting('hideGift',true);
+    b.row('Paste from clipboard').props.onPress(); await flush(); await flush();
+    const ask=b.alerts.at(-1); assert.equal(ask.title,'Restore this backup?'); assert.match(ask.body,/features will be on\. Your current Venus settings will be replaced\.$/);
+    ask.onConfirm();
+    assert.equal(b.api.settings.noDelete,true); assert.equal(b.api.settings.gestureOwn,'reply'); assert.equal(b.api.settings.messageHighlightPingColor,'#123456');
+    assert.equal(b.api.settings.hideGift,data.settings.hideGift,'every setting follows the backup');
+    assert.equal(b.toasts.at(-1).content,'Settings restored');
+});
+test('a restore rejects anything that isn\'t a Venus backup and cleans up bad values',async()=>{
+    const b=backupHarness(); await flush();
+    for (const bad of ['','hello','[1,2]','{"app":"Venus Patches","format":1,"settings":{"nope":1}}']) {
+        b.clip=bad; b.row('Paste from clipboard').props.onPress(); await flush(); await flush();
+        assert.equal(b.alerts.at(-1).title,'Couldn\'t restore',JSON.stringify(bad));
+    }
+    b.clip=JSON.stringify({app:'Venus Patches',format:9,settings:{noDelete:true}}); b.row('Paste from clipboard').props.onPress(); await flush(); await flush();
+    assert.match(b.alerts.at(-1).body,/newer Venus/);
+    // A plain venus-patches.json works too, and impossible values are dropped instead of breaking a page.
+    b.clip=JSON.stringify({noDelete:true,gestureOwn:'explode',messageHighlightThickness:9,noDeleteLimit:999999,language:'xx'});
+    b.row('Paste from clipboard').props.onPress(); await flush(); await flush(); b.alerts.at(-1).onConfirm();
+    assert.equal(b.api.settings.noDelete,true); assert.equal(b.api.settings.gestureOwn,'edit'); assert.equal(b.api.settings.messageHighlightThickness,2);
+    assert.equal(b.api.settings.noDeleteLimit,5000); assert.equal(b.api.settings.language,'auto');
+});
+test('Save to a file goes through Android\'s Save to screen, and cancelling it is quiet',async()=>{
+    const b=backupHarness(); await flush();
+    b.row('Save to a file').props.onPress(); for (let i=0;i<5;i++) await flush();
+    const file=b.writes.find(w=>w[0]==='cache'); assert.ok(file,'written to Discord\'s cache first'); assert.match(file[1],/^venus-backup-\d{4}-\d\d-\d\d\.json$/);
+    assert.equal(JSON.parse(file[2]).app,'Venus Patches');
+    assert.equal(b.saved.length,1); assert.equal(b.saved[0].sourceUris[0],'file:///data/discord/cache/'+file[1]); assert.equal(b.saved[0].mimeType,'application/json');
+    assert.equal(b.toasts.at(-1).content,'Backup saved');
+    const alerts=b.alerts.length; b.picker.saveDocuments=async()=>{throw Object.assign(new Error('x'),{code:'OPERATION_CANCELED'});};
+    b.row('Save to a file').props.onPress(); for (let i=0;i<5;i++) await flush();
+    assert.equal(b.alerts.length,alerts,'cancelling says nothing');
+    // Reset to defaults only shows when something differs, and asks first.
+    assert.ok(b.row('Reset to defaults'),'settings differ from the defaults here');
+    b.row('Reset to defaults').props.onPress(); b.alerts.at(-1).onConfirm();
+    assert.ok(Object.keys(b.api.features).every(k=>!(k in b.api.settings)||b.api.settings[k]===false),'every feature off');
+    assert.equal(b.row('Reset to defaults'),undefined,'hidden once there\'s nothing to reset');
 });
