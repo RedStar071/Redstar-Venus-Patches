@@ -4815,9 +4815,9 @@ test('every option page renders in the shared design: status card only when usef
         1378:{default:{getCurrentUser:()=>({id:'1',username:'me'}),getUser:()=>null}}}[id]||null);
     const pages={VENUS_NODELETE:'noDelete',VENUS_MESSAGEHIGHLIGHT:'messageHighlight',VENUS_TRANSLATE:'translate',VENUS_GESTURES:'gestures',VENUS_FREENITRO:'freeNitro',
         VENUS_PASTELIZE:'pastelize',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_REVIEWDB:'reviewDB',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',
-        VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_HIDDENCHANNELS:'hiddenChannels',VENUS_LANGUAGE:null};
+        VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_HIDDENCHANNELS:'hiddenChannels',VENUS_LANGUAGE:null,VENUS_BACKUP:null};
     // Pages with live runtime status always show a status card when on; others lead directly with their preview or controls.
-    const liveStatus=new Set(['VENUS_TRANSLATE','VENUS_REVIEWDB','VENUS_USERNOTIF','VENUS_ACCOUNTSWITCHER','VENUS_CUSTOMTHEMES','VENUS_QUESTS']);
+    const liveStatus=new Set(['VENUS_TRANSLATE','VENUS_REVIEWDB','VENUS_USERNOTIF','VENUS_ACCOUNTSWITCHER','VENUS_CUSTOMTHEMES','VENUS_QUESTS','VENUS_BACKUP']);
     for (const on of [true,false]) for (const [id,key] of Object.entries(pages)) {
         if (key) b.api.setSetting(key,on);
         const nodes=pageNodes(b.registry[id].screen.getComponent()());
@@ -4826,7 +4826,7 @@ test('every option page renders in the shared design: status card only when usef
         if (id!=='VENUS_LANGUAGE') for (const row of nodes.filter(n=>n.type===TableSwitchRow||n.type===TableRadioRow))
             assert.equal(row.props.icon&&row.props.icon.type,TableRowIcon,id+': '+row.props.label+' has a row icon');
         const titles=nodes.filter(n=>n.type===Text&&n.props.variant==='text-md/semibold').map(n=>n.props.children);
-        if (liveStatus.has(id) && on) assert.ok(titles.length,id+' shows its live status card');
+        if (liveStatus.has(id) && (on || !key)) assert.ok(titles.length,id+' shows its live status card');
         if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
     }
 });

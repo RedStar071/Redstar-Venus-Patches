@@ -3,6 +3,8 @@
 ### ✨ New Features
 
 * **Discord - Venus settings:** Add Catalan (Català) as a settings language, bringing Venus settings to 31 languages
+* **Discord - Venus settings:** Add Backup and restore to save every Venus setting to a file or the clipboard and bring it back after patching again ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
+* **Discord - Venus settings:** Add a search bar to the Features list that finds features by name, description or option ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
 
 ### 🔧 Improvements
 

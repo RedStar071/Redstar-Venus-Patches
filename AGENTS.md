@@ -329,6 +329,12 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Helpers called from a page render (`VenusStatusCard`, `venusSegmented`, `highlightPreview`…) are plain
   functions called directly, not components, so the page stays one render tree; components with their own hooks
   (`HighlightPreview`-style previews that use `useSettings`) are created with `el`.
+- The Features list is Discord's own `SettingsList` with `FeatureSearchBar` as its `ListHeaderComponent` (#68). Every
+  `toggle`/`withOptions` row is added to `featureSearch.rows` automatically; when a new feature page has options people would
+  search for by name, add their labels to `FEATURE_KEYWORDS`.
+- **Backup and restore** saves `settings` (plus watched people and installed themes). A new setting needs nothing extra as long
+  as `acceptedSetting` can validate it: add a check there for any setting with a fixed list of values, so a hand-edited backup
+  can't put a page in a state it can't show. Never add sign-ins, tokens, saved accounts or kept messages to `backupText`.
 - Pages whose options are also native setting nodes (Nitro links, Pastel names, Device indicators) keep those
   nodes for Discord's settings search and pass `{page, sections}` to `withOptions`, so the designed page is shown.
 - Every new text goes through `tr()`/`pl()` and gets added to all 30 language files.

@@ -20,7 +20,7 @@ You can also download `patches-<version>.mpp` from [Releases](https://github.com
 
 ## Features
 
-Open **Discord Settings → Venus → Features** to turn things on or off at any time. Rows with an arrow button have more options. Each feature has the same name in Venus and in Morphe. **Everything starts off**, so Discord looks and works like normal until you turn on what you want. Your choices from an earlier version are kept.
+Open **Discord Settings → Venus → Features** to turn things on or off at any time. Type in the search bar at the top to find a feature by its name, what it does or one of its options. Rows with an arrow button have more options. Each feature has the same name in Venus and in Morphe. **Everything starts off**, so Discord looks and works like normal until you turn on what you want. Your choices from an earlier version are kept.
 
 | Group | Feature | What it does |
 | --- | --- | --- |
@@ -57,6 +57,8 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 
 **Language** sets the language Venus settings are shown in. It follows Discord's language until you pick another one. 31 languages are included, among them Russian, Ukrainian, German, Spanish, Catalan, French, Portuguese, Polish, Turkish, Japanese, Korean and Chinese. Counts use each language's plural forms. Corrections are welcome on GitHub ([`patches/src/main/resources/venus/i18n`](patches/src/main/resources/venus/i18n)).
+
+**Backup and restore** keeps your Venus setup safe when you patch again, reinstall or move to a new phone. **Save to a file** opens Android's Save to screen so you can keep the backup in Downloads, Drive or anywhere else, and **Copy to clipboard** lets you paste it into a note. **Restore from a file** or **Paste from clipboard** brings every feature, option, watched person and installed theme back after asking first. Backups are small JSON files and never include your ReviewDB sign-in, saved accounts or kept deleted messages. **Reset to defaults** turns every feature off again.
 
 **About** shows your version, how many features are on (in total and per group), whether everything is working, and links to what's new and to report a problem. Venus settings animate gently as you use them, and follow Android's **Remove animations** setting.
 
