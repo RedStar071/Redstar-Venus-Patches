@@ -183,7 +183,10 @@
   "For Discord {version}": "Discord {version} के लिए",
   "French": "फ़्रेंच",
   "Friends": "दोस्त",
-  "Friends · {n} picked": "दोस्त · {n} चुने गए",
+  "Friends · {n} picked": {
+   "one": "दोस्त · {n} चुना गया",
+   "other": "दोस्त · {n} चुने गए"
+  },
   "Galician": "गैलिशियन",
   "Game Night": "गेम नाइट",
   "Georgian": "जॉर्जियाई",
@@ -628,7 +631,10 @@
   "View Anyway": "फिर भी देखें",
   "Waiting for new Quests.": "नए Quest का इंतज़ार है।",
   "Watch": "देखें",
-  "Watching all {n} friends": "सभी {n} दोस्तों पर नज़र रखी जा रही है",
+  "Watching all {n} friends": {
+   "one": "{n} दोस्त पर नज़र रखी जा रही है",
+   "other": "सभी {n} दोस्तों पर नज़र रखी जा रही है"
+  },
   "Watching for Quests": "Quest की निगरानी चालू है",
   "Watching {n} friend": "{n} दोस्त पर नज़र रखी जा रही है",
   "Watching {n} people": {
