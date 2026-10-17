@@ -55,6 +55,12 @@
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", language:"auto" };
+    // The settings every feature starts from, for Reset to defaults on the Backup page.
+    const DEFAULT_SETTINGS = Object.freeze(Object.assign({}, settings));
+    // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
+    const backup = {last:0, busy:"", restoring:false};
+    // What you typed in the Features list's search bar (#68).
+    const featureSearch = {query:"", rows:[], listeners:new Set(), cache:null};
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
     const listeners = new Set();
     const dirty = new Set();
@@ -213,6 +219,7 @@
         const extra = {};
         if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
         if (features.userNotif && userNotif.ids.size) extra.userNotifIds = Array.from(userNotif.ids);
+        if (backup.last) extra.lastBackup = backup.last;
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
     }
     function save() {
@@ -237,6 +244,17 @@
     }
     // Typing 0 in the maximum box used to jump it to 512; anything below 1 now means the lowest, 1.
     function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(MAX_DELETED, n)) : 512; }
+    // A saved or imported value for one setting, cleaned up, or undefined when it can't be used. Shared by the settings
+    // file and by restoring a backup, so a hand-edited backup can never put a setting in a state the pages can't show.
+    function acceptedSetting(key, value) {
+        if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
+        if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
+            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) ||
+            key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
+        if (key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
+        if (key === "noDeleteLimit") return deleteLimit(value);
+        return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
+    }
     function setSetting(key, value) {
         // The settings language isn't a feature: it's always there.
         if (key === "language") {
@@ -302,8 +320,8 @@
             clearSizes();
         }
         if (features.quests && featureFor(key) === "quests") questsSettingChanged(key, value);
-        if (key === "systemFont" && features.systemFont && status.storage !== "loading" && status.storage !== "waiting" && value !== fontInUse) later(() => askRestart("font"), 0);
-        if (key === "systemEmoji" && features.systemEmoji && status.storage !== "loading" && status.storage !== "waiting" && value !== emojiInUse) later(() => askRestart("emoji"), 0);
+        if (key === "systemFont" && features.systemFont && !backup.restoring && status.storage !== "loading" && status.storage !== "waiting" && value !== fontInUse) later(() => askRestart("font"), 0);
+        if (key === "systemEmoji" && features.systemEmoji && !backup.restoring && status.storage !== "loading" && status.storage !== "waiting" && value !== emojiInUse) later(() => askRestart("emoji"), 0);
         save();
         notify(key);
         if (features.translate && key === "translate" && value) translateRestore();
@@ -335,16 +353,11 @@
             if (text) {
                 const loaded = JSON.parse(text);
                 if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) throw new Error("Invalid preferences");
-                for (const key of Object.keys(settings))
-                    if (!dirty.has(key) && typeof loaded[key] === typeof settings[key] && (key !== "readAllMode" || READ_ALL_MODES.includes(loaded[key])) &&
-                        (key !== "gestureOwn" || GESTURE_OWN_MODES.includes(loaded[key])) &&
-                        (key !== "translateTarget" || TRANSLATE_TARGETS.includes(loaded[key])) &&
-                        (key !== "translateMode" || TRANSLATE_MODES.includes(loaded[key])) &&
-                        (key !== "messageHighlightThickness" || HIGHLIGHT_THICKNESSES.includes(loaded[key])) &&
-                        (key !== "messageHighlightPingColor" && key !== "messageHighlightDeletedColor" || isHighlightColor(loaded[key])) &&
-                        (key !== "language" || isLanguage(loaded[key])))
-                        settings[key] = key === "noDeleteLimit" ? deleteLimit(loaded[key]) :
-                            key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor" ? normalizeHighlightColor(loaded[key]) : loaded[key];
+                for (const key of Object.keys(settings)) {
+                    const value = dirty.has(key) ? undefined : acceptedSetting(key, loaded[key]);
+                    if (value !== undefined) settings[key] = value;
+                }
+                if (typeof loaded.lastBackup === "number" && Number.isFinite(loaded.lastBackup) && !backup.last) backup.last = loaded.lastBackup;
                 const auth = loaded.reviewAuth;
                 // Restore a saved ReviewDB sign-in (a ReviewDB token, never the Discord token).
                 if (features.reviewDB && !reviewToken && auth && typeof auth.token === "string" && auth.token.length <= 8192 &&
@@ -733,6 +746,87 @@
             return React && List ? el(List, { node }) : null;
         };
     }
+    // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
+    // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
+    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting"], translate:["Show the original language", "Show the original text"],
+        freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
+        platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
+        userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
+        hiddenChannels:["Show its details"], customThemes:["Show theme background image", "Browse Revenge themes"]};
+    function searchFold(text) {
+        let out = String(text || "").toLowerCase();
+        // Hermes has normalize only with Intl; without it, accents simply have to match.
+        try { if (typeof out.normalize === "function") out = out.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (_) {}
+        return out;
+    }
+    function featureMatches(query) {
+        const key = query + "\u0000" + uiLanguage() + "\u0000" + i18n.version, cached = featureSearch.cache;
+        if (cached && cached.key === key) return cached.ids;
+        const words = searchFold(query).split(/\s+/).filter(Boolean), ids = new Set();
+        featureSearch.rows.forEach(row => {
+            const texts = [row.title, row.hint, row.page, row.group].concat(FEATURE_KEYWORDS[row.key] || []).filter(Boolean);
+            const haystack = searchFold(texts.map(text => tr(text) + " " + text).join(" "));
+            if (words.every(word => haystack.indexOf(word) >= 0)) ids.add(row.id);
+        });
+        featureSearch.cache = {key, ids};
+        return ids;
+    }
+    function setFeatureSearch(text) {
+        const next = String(text == null ? "" : text);
+        if (next === featureSearch.query) return;
+        featureSearch.query = next;
+        featureSearch.listeners.forEach(fn => fn());
+    }
+    // Typing only redraws the Features page and its search bar, never the rest of Discord's settings.
+    function useFeatureSearch() {
+        const [, update] = React.useState(0);
+        React.useEffect(() => {
+            const fn = () => update(n => n + 1);
+            featureSearch.listeners.add(fn);
+            return () => featureSearch.listeners.delete(fn);
+        }, []);
+    }
+    const SEARCH_EMPTY_DARK = {badge:{width:56, height:56, borderRadius:28, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}};
+    // Discord's own search field (SearchField 6472, the one its settings and friends lists use) above the Features list.
+    // It is one stable element in the list's header, so the keyboard stays up while the rows below it filter.
+    function FeatureSearchBar() {
+        useFeatureSearch(); useLanguage();
+        if (!React || !RN) return null;
+        const ui = reviewUI(), SearchField = inspectedExport(6472, "SearchField"), Text = inspectedExport(4833, "Text");
+        const s = useThemed("featureSearch", c => ({badge:Object.assign({}, SEARCH_EMPTY_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), SEARCH_EMPTY_DARK);
+        const query = featureSearch.query, label = tr("Search features");
+        const props = {placeholder:label, accessibilityLabel:label, value:query, onChange:setFeatureSearch, autoCorrect:false, autoCapitalize:"none", returnKeyType:"search"};
+        const field = SearchField ? el(SearchField, props) : ui.TextInput ? el(ui.TextInput, props) :
+            el(RN.TextInput, Object.assign({}, props, {onChangeText:setFeatureSearch, style:{fontSize:16, padding:12}}));
+        const none = !!query.trim() && !featureMatches(query).size;
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color, style:{textAlign:"center"}}, value) : el(RN.Text, {style:[fallback, {textAlign:"center"}]}, value);
+        return el(RN.View, {style:{paddingTop:12, paddingBottom:4}},
+            field,
+            none ? el(RN.View, {key:"none", style:{alignItems:"center", gap:6, paddingTop:40, paddingBottom:24}, accessibilityLiveRegion:"polite"},
+                popIn("none", el(RN.View, {style:[s.badge, {marginBottom:6}]}, el(venusIcon(6473, "MagnifyingGlassIcon"), {size:"md"}))),
+                text(tr("No features found"), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                text(tr("Try a different word."), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})) : null);
+    }
+    // The Features list: Discord's own settings list, with the search bar as its header. While you search it only keeps
+    // the rows that match, still under their group titles, and the search clears when you leave the page.
+    function featuresPage(groups) {
+        const full = {type:"list", sections:groups.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length)};
+        let header = null, filtered = null;
+        return function VenusFeaturesPage() {
+            useFeatureSearch();
+            React.useEffect(() => () => { featureSearch.query = ""; featureSearch.cache = null; }, []);
+            const List = SettingsList || (SettingsList = inspectedExport(14236, "SettingsList"));
+            if (!React || !List) return null;
+            if (!header) full.ListHeaderComponent = header = el(FeatureSearchBar, {key:"venus-search"});
+            const query = featureSearch.query.trim();
+            if (!query) return el(List, {node:full});
+            const ids = featureMatches(query);
+            if (!filtered || filtered.ids !== ids)
+                filtered = {ids, node:{type:"list", ListHeaderComponent:header,
+                    sections:groups.map(([label, list]) => section(label, list.filter(id => ids.has(id)))).filter(entry => entry.settings.length)}};
+            return el(List, {node:filtered.node});
+        };
+    }
     function settingNode(key, title, description, parent) {
         const node = { type: "toggle", parent, useTitle: () => { useLanguage(); return tr(title); },
             useValue: function () { useSettings(key); return settings[key]; },
@@ -827,10 +921,13 @@
         const groups = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
         const iconFor = key => { const found = FEATURE_ICONS[key]; return found ? venusIcon(found[0], found[1], icon) : icon; };
         featureGroups = groups.keys = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
+        featureSearch.rows = []; featureSearch.cache = null;
+        const groupLabel = group => (FEATURE_GROUPS.find(entry => entry[0] === group) || [])[1];
         function toggle(group, key, title, hint) {
             if (!features[key]) return;
             groups.keys[group].push(key);
             const id = "VENUS_" + key.toUpperCase(); groups[group].push(id);
+            featureSearch.rows.push({id, key, title, hint, group:groupLabel(group)});
             next[id] = settingNode(key, title, hint, P);
             next[id].IconComponent = iconFor(key);
         }
@@ -853,6 +950,7 @@
                 catch (_) { try { navigation.navigate(screen.route); } catch (__) {} }
             };
             groups[group].push(rowId);
+            featureSearch.rows.push({id:rowId, key, title, hint, page:pageTitle, group:groupLabel(group)});
             next[rowId] = { type: "pressable", parent: P, unsearchable: true, useTitle: () => { useLanguage(); return tr(title); }, onPress: open, IconComponent: iconFor(key),
                 useTrailing: function () {
                     // Called as a hook by Discord's row, so it can read the settings stack it's in.
@@ -917,9 +1015,13 @@
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background. You still claim the rewards.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar. Quests still work.");
-        const sections = [section("Messages", groups.messages), section("Sending", groups.sending), section("People", groups.people),
-            section("Servers", groups.servers), section("Appearance", groups.appearance), section("Quests", groups.quests)].filter(entry => entry.settings.length);
+        const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
+            ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests]];
+        const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);
         route(P, "Features", sections, undefined, venusIcon(14478, "PuzzlePieceIcon", icon));
+        // The nodes above stay for Discord's settings search; the page itself adds the Features search bar.
+        const FeaturesPage = featuresPage(listed);
+        next[P].screen.getComponent = () => FeaturesPage;
         // "5 of 26 on", right on the entry, so you see at a glance what Venus is doing before opening it.
         next[P].useDescription = function () {
             useSettings();
@@ -930,6 +1032,10 @@
         route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(14958, "LanguageIcon", icon));
         next.VENUS_LANGUAGE.screen.getComponent = () => LanguageSettings;
         next.VENUS_LANGUAGE.useDescription = function () { useLanguage(); return languageLabel(settings.language); };
+        // Backup and restore (#68): save every Venus setting to a file or the clipboard and bring it back after patching again.
+        route("VENUS_BACKUP", "Backup and restore", [], undefined, venusIcon(11519, "ArrowsUpDownIcon", icon));
+        next.VENUS_BACKUP.screen.getComponent = () => BackupSettings;
+        next.VENUS_BACKUP.useDescription = function () { useSettings(); return backup.last ? backupAgo() : tr("Save your settings or bring them back."); };
         status.menu = true;
         return next;
     }
@@ -1007,13 +1113,219 @@
             footnote("note", i18n.loading.has(uiLanguage()) ? "Loading the language..." : "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.")];
         return settingsBody(ui, groups);
     }
+    // Backup and restore (#68): every Venus setting in one small JSON file, so patching again or a new phone doesn't
+    // mean setting everything up again. Never includes the ReviewDB sign-in, saved accounts or kept deleted messages.
+    const BACKUP_APP = "Venus Patches", BACKUP_FORMAT = 1, BACKUP_MAX_BYTES = 1024 * 1024;
+    function backupDate(ms) {
+        const d = new Date(ms), pad = n => (n < 10 ? "0" : "") + n;
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    }
+    // "Last backup 3 days ago", from the plural forms every language already has.
+    function backupAgo() {
+        const diff = Math.max(0, Date.now() - backup.last), minute = 60000, hour = 60 * minute, day = 24 * hour;
+        const time = diff < minute ? tr("just now") : tr("{time} ago", {time:diff < hour ? pl(Math.floor(diff / minute), "{n} minute", "{n} minutes") :
+            diff < day ? pl(Math.floor(diff / hour), "{n} hour", "{n} hours") : pl(Math.floor(diff / day), "{n} day", "{n} days")});
+        return tr("Last backup {time}", {time});
+    }
+    // What a backup holds right now, for the page's summary: features on, options changed, people watched, themes.
+    function backupContents() {
+        const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
+        const changed = Object.keys(DEFAULT_SETTINGS).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
+            settings[key] !== DEFAULT_SETTINGS[key]).length;
+        return {on:keys.filter(key => settings[key]).length, total:keys.length, changed, people:features.userNotif ? userNotif.ids.size : 0,
+            themes:features.customThemes ? customThemes.list.length : 0, language:settings.language !== "auto"};
+    }
+    function backupIsDefault() {
+        return Object.keys(DEFAULT_SETTINGS).every(key => !features[featureFor(key)] && key !== "language" || settings[key] === DEFAULT_SETTINGS[key]);
+    }
+    function backupText() {
+        const out = {app:BACKUP_APP, format:BACKUP_FORMAT, version:revision, created:new Date().toISOString(), settings:Object.assign({}, settings)};
+        if (features.userNotif && userNotif.ids.size) out.people = Array.from(userNotif.ids);
+        if (features.customThemes && customThemes.list.length) out.themes = {active:customThemes.active || "", list:customThemes.list.slice(0, THEMES_MAX)};
+        return JSON.stringify(out, null, 1);
+    }
+    // A backup, or a plain venus-patches.json settings file, read back. Throws a message you can show when it isn't one.
+    function backupParse(text) {
+        if (typeof text !== "string" || !text.trim()) throw new Error(tr("That isn't a Venus backup."));
+        if (text.length > BACKUP_MAX_BYTES) throw new Error(tr("That backup is too large."));
+        let data;
+        try { data = JSON.parse(text.trim()); } catch (_) { throw new Error(tr("That isn't a Venus backup.")); }
+        if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error(tr("That isn't a Venus backup."));
+        const wrapped = data.app === BACKUP_APP && data.settings && typeof data.settings === "object" && !Array.isArray(data.settings);
+        if (wrapped && typeof data.format === "number" && data.format > BACKUP_FORMAT) throw new Error(tr("This backup is from a newer Venus. Update Venus to restore it."));
+        const raw = wrapped ? data.settings : data, values = {};
+        Object.keys(DEFAULT_SETTINGS).forEach(key => { const value = acceptedSetting(key, raw[key]); if (value !== undefined) values[key] = value; });
+        if (!Object.keys(values).length) throw new Error(tr("That isn't a Venus backup."));
+        const people = Array.isArray(wrapped ? data.people : data.userNotifIds) ? (wrapped ? data.people : data.userNotifIds)
+            .filter(id => typeof id === "string" && /^\d{17,20}$/.test(id)).slice(0, USER_NOTIF_MAX_IDS) : null;
+        let themes = null;
+        if (wrapped && data.themes && Array.isArray(data.themes.list)) {
+            const list = [];
+            data.themes.list.slice(0, THEMES_MAX).forEach(item => {
+                try {
+                    const clean = sanitizeThemeSpec(item, item && typeof item.url === "string" ? item.url : item && typeof item.id === "string" ? item.id : "");
+                    if (item && typeof item.id === "string" && item.id) clean.id = item.id;
+                    if (!list.some(x => x.id === clean.id)) list.push(clean);
+                } catch (_) {}
+            });
+            themes = {list, active:typeof data.themes.active === "string" && list.some(t => t.id === data.themes.active) ? data.themes.active : ""};
+        }
+        const created = wrapped && typeof data.created === "string" ? Date.parse(data.created) : NaN;
+        return {values, people, themes, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
+    }
+    // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
+    // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
+    function backupApply(parsed) {
+        const fontWas = fontInUse, emojiWas = emojiInUse;
+        backup.restoring = true;
+        try {
+            animateLayout();
+            Object.keys(DEFAULT_SETTINGS).forEach(key => {
+                if (key !== "language" && !features[featureFor(key)]) return;
+                setSetting(key, owns(parsed.values, key) ? parsed.values[key] : DEFAULT_SETTINGS[key]);
+            });
+            if (features.userNotif && parsed.people) {
+                userNotif.ids.clear(); parsed.people.forEach(id => userNotif.ids.add(id));
+                userNotif.dirty = true; save(); userNotifSync(); notify("userNotif");
+            }
+            if (features.customThemes && parsed.themes) {
+                customThemes.loaded = true; customThemes.list = parsed.themes.list; customThemes.active = parsed.themes.active; customThemes.error = "";
+                customThemesPersist(); customThemesApply(); notify("customThemes");
+            }
+        } finally { backup.restoring = false; }
+        notify("*");
+        reviewToast(reviewUI(), "Settings restored", venusIcon(4793, "CircleCheckIcon"));
+        // One question to reopen, only when the font or emojis actually changed.
+        if (features.systemFont && settings.systemFont !== fontWas) later(() => askRestart("font"), 0);
+        else if (features.systemEmoji && settings.systemEmoji !== emojiWas) later(() => askRestart("emoji"), 0);
+    }
+    function backupConfirm(text) {
+        let parsed;
+        try { parsed = backupParse(text); }
+        catch (error) { showProblem("Couldn't restore", String(error && error.message || error)); return; }
+        const on = Object.keys(FEATURE_ICONS).filter(key => features[key] && parsed.values[key] === true).length;
+        const from = parsed.created ? (parsed.version ? tr("Made with Venus {version} on {date}.", {version:parsed.version, date:backupDate(parsed.created)}) :
+            tr("Made on {date}.", {date:backupDate(parsed.created)})) + " " : "";
+        confirmAction("Restore this backup?", from + pl(on, "{n} feature will be on.", "{n} features will be on.") + " " + tr("Your current Venus settings will be replaced."),
+            "Restore", () => backupApply(parsed));
+    }
+    // A short alert that something didn't work, with the reason.
+    function showProblem(title, body) {
+        const ui = reviewUI();
+        if (ui.alerts && typeof ui.alerts.show === "function") try { ui.alerts.show({title:tr(title), body, confirmText:tr("OK")}); return; } catch (_) {}
+        try { RN.Alert.alert(tr(title), body); } catch (_) {}
+    }
+    function backupBusy(kind) { backup.busy = kind; notify("*"); }
+    function backupSaved() {
+        backup.last = Date.now(); save(); backupBusy("");
+    }
+    const pickerCancelled = error => {
+        const codes = inspectedExport(10776, "errorCodes"), is = inspectedExport(10776, "isErrorWithCode");
+        try { if (codes && typeof is === "function" && is(error) && error.code === codes.OPERATION_CANCELED) return true; } catch (_) {}
+        return /cancel/i.test(String(error && (error.code || error.message) || ""));
+    };
+    function cacheDir() {
+        let constants = null;
+        try { constants = files && (typeof files.getConstants === "function" ? files.getConstants() : files); } catch (_) {}
+        const dir = constants && constants.CacheDirPath;
+        return typeof dir === "string" ? dir.replace(/\/$/, "") : null;
+    }
+    // Save to a file: written to Discord's cache first, then Android's own "Save to" screen (Discord's document picker
+    // 10776, saveDocuments) copies it wherever you choose: Downloads, Drive, a USB stick.
+    function backupToFile() {
+        const saveDocuments = inspectedExport(10776, "saveDocuments"), dir = cacheDir();
+        if (!files || typeof saveDocuments !== "function" || !dir) { backupToClipboard(); return; }
+        const name = "venus-backup-" + backupDate(Date.now()) + ".json";
+        backupBusy("save");
+        Promise.resolve().then(() => files.writeFile("cache", name, backupText(), "utf8"))
+            .then(() => saveDocuments({sourceUris:["file://" + dir + "/" + name], fileName:name, mimeType:"application/json"}))
+            .then(result => {
+                const first = Array.isArray(result) ? result[0] : result;
+                if (first && first.error) throw new Error(String(first.error));
+                backupSaved();
+                reviewToast(reviewUI(), "Backup saved", venusIcon(4793, "CircleCheckIcon"));
+            }).catch(error => {
+                backupBusy("");
+                if (!pickerCancelled(error)) showProblem("Couldn't save the backup", tr("Try Copy to clipboard instead."));
+            });
+    }
+    function backupToClipboard() {
+        const clip = reviewUI().clipboard || RN && RN.Clipboard;
+        try { clip.setString(backupText()); } catch (_) { showProblem("Couldn't save the backup", tr("Try again in a moment.")); return; }
+        backupSaved();
+        reviewToast(reviewUI(), "Backup copied", venusIcon(4780, "CopyIcon"));
+    }
+    // Restore from a file: Android's file picker, then a local copy Discord can read (keepLocalCopy), then the backup.
+    function backupFromFile() {
+        const pick = inspectedExport(10776, "pick"), keep = inspectedExport(10776, "keepLocalCopy"), types = inspectedExport(10776, "types");
+        if (!files || typeof pick !== "function" || typeof keep !== "function") { backupFromClipboard(); return; }
+        backupBusy("restore");
+        Promise.resolve().then(() => pick({type:[types && types.allFiles || "*/*"], allowMultiSelection:false, mode:"import"})).then(picked => {
+            const file = Array.isArray(picked) ? picked[0] : picked;
+            if (!file || typeof file.uri !== "string") throw new Error("cancel");
+            if (typeof file.size === "number" && file.size > BACKUP_MAX_BYTES) throw new Error(tr("That backup is too large."));
+            return Promise.resolve(keep({files:[{uri:file.uri, fileName:"venus-restore.json"}], destination:"cachesDirectory"})).then(copies => {
+                const copy = Array.isArray(copies) ? copies[0] : copies;
+                if (!copy || copy.status !== "success" || typeof copy.localUri !== "string") throw new Error(tr("That file couldn't be opened."));
+                return files.readFile(decodeURIComponent(copy.localUri.replace(/^file:\/\//, "")), "utf8");
+            });
+        }).then(text => { backupBusy(""); backupConfirm(text); }).catch(error => {
+            backupBusy("");
+            if (!pickerCancelled(error)) showProblem("Couldn't restore", String(error && error.message && !/^[A-Z_]+$/.test(error.message) ? error.message : tr("That file couldn't be opened.")));
+        });
+    }
+    function backupFromClipboard() {
+        const clip = reviewUI().clipboard || RN && RN.Clipboard;
+        if (!clip || typeof clip.getString !== "function") return;
+        Promise.resolve().then(() => clip.getString()).then(text => {
+            if (typeof text !== "string" || !text.trim()) showProblem("Couldn't restore", tr("Your clipboard is empty. Copy a Venus backup first."));
+            else backupConfirm(text);
+        }).catch(() => showProblem("Couldn't restore", tr("Your clipboard is empty. Copy a Venus backup first.")));
+    }
+    function backupReset() {
+        confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes and people stay.", "Reset",
+            () => backupApply({values:Object.assign({}, DEFAULT_SETTINGS, {language:settings.language}), people:null, themes:null}));
+    }
+    const BACKUP_DARK = {chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"}};
+    // Backup and restore: what a backup holds right now, two ways to save it, two ways to bring one back.
+    function BackupSettings() {
+        useSettings(); useLanguage();
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const s = useThemed("backup", c => ({chip:Object.assign({}, BACKUP_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), BACKUP_DARK);
+        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, Text = inspectedExport(4833, "Text");
+        const what = backupContents(), busy = backup.busy, canFile = !!inspectedExport(10776, "saveDocuments") && !!cacheDir();
+        const chip = (key, id, name, label) => el(RN.View, {key, style:s.chip, accessible:true, accessibilityLabel:label},
+            el(venusIcon(id, name), {size:"xs"}), Text ? el(Text, {variant:"text-xs/semibold", color:"text-strong"}, label) : el(RN.Text, {style:{color:"#dbdee1", fontSize:12}}, label));
+        const chips = [chip("features", 14478, "PuzzlePieceIcon", tr("{on} of {total} turned on", {on:what.on, total:what.total})),
+            what.changed ? chip("options", 6799, "SettingsIcon", pl(what.changed, "{n} option changed", "{n} options changed")) : null,
+            what.people ? chip("people", 4532, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
+            what.themes ? chip("themes", 14887, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
+            what.language ? chip("language", 14958, "LanguageIcon", languageLabel(settings.language)) : null];
+        const backupRow = (key, label, sub, id, name, onPress, disabled) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true,
+            onPress, disabled:!!busy || !!disabled}) : null;
+        const groups = [
+            statusCard("status", backup.last ? "Everything below goes into a backup." : "Save one now, so patching again or a new phone takes one tap to set up.",
+                {title:backup.last ? backupAgo() : tr("No backup yet"), IconComponent:venusIcon(11519, "ArrowsUpDownIcon"),
+                 footer:el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:10}}, chips)}),
+            el(Group, {key:"save", title:tr("Back up")},
+                canFile ? backupRow("file", busy === "save" ? "Saving..." : "Save to a file", "Choose where to keep it, like Downloads or Drive.", 4782, "DownloadIcon", backupToFile) : null,
+                backupRow("copy", "Copy to clipboard", "Paste it into a note or a message to yourself.", 4780, "CopyIcon", backupToClipboard)),
+            el(Group, {key:"restore", title:tr("Restore")},
+                canFile ? backupRow("open", busy === "restore" ? "Opening..." : "Restore from a file", "Pick a Venus backup you saved before.", 8671, "UploadIcon", backupFromFile) : null,
+                backupRow("paste", "Paste from clipboard", "Restore a backup you copied.", 5851, "ClipboardListIcon", backupFromClipboard)),
+            backupIsDefault() ? null : el(Group, {key:"manage", title:tr("Manage")},
+                actionRow(ui, "reset", "Reset to defaults", "Turns every feature off and puts every option back.", backupReset, !!busy, true)),
+            footnote("note", "Restoring replaces your Venus settings. Your ReviewDB sign-in, saved accounts and kept deleted messages are never included.")];
+        return settingsBody(ui, groups);
+    }
     function settingsSections(orig, self, args) {
         const config = args[0];
         if (!status.menu || !config || !Array.isArray(config.sections)) return orig.apply(self, args);
         const index = config.sections.findIndex(s => s && Array.isArray(s.settings) && s.settings.includes("ACCOUNT"));
         if (index < 0 || config.sections.some(s => s && s.label === "Venus")) return orig.apply(self, args);
         const sections = config.sections.slice();
-        sections.splice(index + 1, 0, section("Venus", ["VENUS_PLUGINS", "VENUS_LANGUAGE", "VENUS_GENERAL"]));
+        sections.splice(index + 1, 0, section("Venus", ["VENUS_PLUGINS", "VENUS_LANGUAGE", "VENUS_BACKUP", "VENUS_GENERAL"]));
         const next = Array.from(args); next[0] = Object.assign({}, config, { sections });
         return orig.apply(self, next);
     }
