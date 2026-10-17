@@ -279,16 +279,19 @@ design") renders each page on and off and fails when a page breaks the rules bel
    `chatPreview` + `previewMessage` that follows the settings below it as you change them (bar width and colors,
    edit history, pastel names, device icons, translation notes, link style). Previews use plain sample people and
    text, never real messages, and only the theme tokens from `useChatPreviewStyles`.
-   Every preview is a component with **Watch and Try it** (`previewToggle(mode, setMode)` from `usePreviewMode()`,
-   shown only while the feature is on), drawn as the part of Discord it changes: `previewScreen` with
-   `previewHeader` (channel header), `previewInput` (message bar) and `previewBar` (reply/edit bar), or that screen's
-   own layout (member list, profile, channel list, message menu, dialog), using `usePreviewChrome()` tokens.
+   Every preview is drawn as the part of Discord it changes: `previewScreen` with
+   `previewHeader` (channel header with `ThreadIcon` / `MagnifyingGlassIcon` / `GroupIcon`), `previewInput` (message bar with `GiftIcon` and `ReactionIcon`) and `previewBar` (reply/edit bar with `@ ON` on replies), or that screen's
+   own layout (member list, profile, channel list, message menu with 4 quick reactions + Add Reaction, dialog), using `usePreviewChrome()` tokens.
    - Watch is `useStory(active, () => [[waitMs, step, caption?], …], deps)` with `storyStrip(k, s, story)` under the
      preview. Each caption says in plain words what happens and stays up at least `readMs` (2.4–5 s); the strip shows
      the step number, a progress bar, the time and pause / start over. Build the steps from the settings below
      (no triple-tap, no delete scene), show the finger with `tapRipple` and type with `typeSteps`.
-   - Try it lets you tap the preview yourself. A `previewTip` (Discord's brand tooltip) says what to tap next, step by
-     step, until everything your options allow has been tried.
+   - Include **Watch and Try it** (`previewToggle(mode, setMode)` from `usePreviewMode()`, shown only while the feature
+     is on) only when the feature is something you learn by doing the actual interaction in Discord (double-tap / triple-tap
+     gestures, tapping a locked channel, sending from the emoji/sticker picker, holding a message to open its menu and tap
+     Translate, or switching screens in Device indicators). Passive visual features whose controls below already update the
+     preview live (Keep deleted messages, Pastel name colors, Message highlights) use Watch directly without a separate Try it toggle.
+   - In Try it, a `previewTip` (Discord's brand tooltip) says what to do next, step by step, until everything your options allow has been tried.
    - Use sample art bundled in Discord (the Wumpus drawables) or plain sample people, never anything from your servers.
 3. **Choices**, each group with a short title:
    - a choice of 2–4 short values (widths, who to watch): `venusSegmented` under a `groupTitle`;
@@ -326,6 +329,29 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Pages whose options are also native setting nodes (Nitro links, Pastel names, Device indicators) keep those
   nodes for Discord's settings search and pass `{page, sections}` to `withOptions`, so the designed page is shown.
 - Every new text goes through `tr()`/`pl()` and gets added to all 30 language files.
+- **Hand-review every language to be as accurate and as natural as possible (no Google Translate, Acorn, or lazy partial reviews):**
+  - **Translations must be both as accurate as possible and as natural as possible.** Never settle for literal, stiff,
+    or machine-translated phrasing, and never sacrifice accuracy for fluency. Every string must read the way a native
+    speaker of that language would naturally write and expect to see it inside Discord's mobile UI, while conveying the
+    exact meaning of the English original.
+  - Never use Google Translate or Acorn to draft or parse translations. Every single string in every language file under
+    `patches/src/main/resources/venus/i18n/` and `scripts/i18n_overrides/` must be carefully hand-translated and
+    hand-reviewed by you for 100% accuracy, natural and idiomatic phrasing, grammatical correctness, consistent tone
+    (informal second-person where appropriate, matching Discord's own UI in that language), preserved `{placeholders}`
+    and product names (`Venus`, `Discord`, `Nitro`, `ReviewDB`, `Revenge`, `Vendetta`, `Blurple`, `GitHub`,
+    `@unknown-user`), and proper CLDR plural categories (`one` / `few` / `many` / `other`).
+  - **No lazy or partial audits:** When auditing or updating a language, you must look really hard and think carefully
+    about every single string in the entire file (all 718 strings in `patches/src/main/resources/venus/i18n/<code>.json`
+    and the full override set in `scripts/i18n_overrides/<code>.json`), never just touching a few lines. Every
+    mistranslated word (for example, translating UI nouns like "Themes", "Revenge", "Play", "Watch", "Hold", "Keep", or
+    "Clear" into the wrong sense or wrong grammatical form), awkward machine-translated syntax, unnatural word order,
+    wrong formality level, or missing plural form must be fixed.
+  - Whenever you add or change any English text in `bootstrap.js` (including Venus settings, option pages, previews,
+    toasts, dialogs, and the About page), you **must** hand-review and update every other language for an accurate,
+    natural, idiomatic translation.
+  - When reviewing multiple languages, thoroughly audit one language completely at a time until you are confident it is
+    perfectly translated (both as accurate and as natural as possible), commit and push that language to the open pull
+    request, and only then move on to the next language.
 
 **Motion** (since 1.14.0)
 

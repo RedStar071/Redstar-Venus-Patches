@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
-"""Developer-only: loads a reviewed translation into scripts/i18n_overrides/<code>.json and the language file.
+"""Developer-only: validates and loads a hand-reviewed translation into scripts/i18n_overrides/<code>.json and patches/src/main/resources/venus/i18n/<code>.json.
 
-    NODE_PATH=<acorn> node scripts/i18n_strings.cjs > work/strings.json
-    NODE_PATH=<acorn> node scripts/i18n_plurals.cjs > work/plurals.json
+    node scripts/i18n_strings.cjs > work/strings.json
+    node scripts/i18n_plurals.cjs > work/plurals.json
     python3 scripts/i18n_review.py keys                 # numbered list of the texts a reviewer translates
-    python3 scripts/i18n_review.py load <code> <file>   # file: one "index|text" per line
+    python3 scripts/i18n_review.py load <code> <file>   # file: one "index|text" per line (or JSON dict)
 
+Never use Google Translate or Acorn. Every translation must be hand-reviewed for accuracy, tone, and CLDR plural forms.
 Language names, times and "and" are left out of the list: scripts/i18n_cldr.cjs fills them from CLDR.
 A plural text gives every form of its language joined by " || " (one || other, or one || few || many...).
 Every {placeholder} and product name is checked before anything is written.
 """
-import json, os, re, sys
+import json, os, re, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STRINGS = json.load(open(os.path.join(ROOT, 'work/strings.json')))
-PL = json.load(open(os.path.join(ROOT, 'work/plurals.json')))
+os.makedirs(os.path.join(ROOT, 'work'), exist_ok=True)
+STRINGS = json.loads(subprocess.check_output(['node', os.path.join(ROOT, 'scripts/i18n_strings.cjs')], text=True))
+PL = json.loads(subprocess.check_output(['node', os.path.join(ROOT, 'scripts/i18n_plurals.cjs')], text=True))
 SOURCE = open(os.path.join(ROOT, 'patches/src/main/resources/venus/bootstrap.js'), encoding='utf-8').read()
 NAMES = set(re.findall(r':"([^"]+)"', re.search(r'const LANGUAGE_NAMES = \{([\s\S]*?)\};', SOURCE).group(1)))
 UNITS = ('second', 'minute', 'hour', 'day', 'month', 'year')
-CLDR = {'just now', '{time} ago', 'and'} | {k for k in PL if any(u in k for u in UNITS)} | {PL[k] for k in PL if any(u in k for u in UNITS)}
+CLDR = {'just now', '{time} ago', 'and'} | {k for k in PL if any(u in k for u in UNITS) and 'left' not in k} | {PL[k] for k in PL if any(u in k for u in UNITS) and 'left' not in k}
 KEYS = [k for k in STRINGS if k not in NAMES and k not in CLDR]
-FORMS = {**{c: ['one', 'other'] for c in 'bg da de el es fi hu it nl no sv tr fr pt-BR hi'.split()},
+FORMS = {**{c: ['one', 'other'] for c in 'bg ca da de el es fi hu it nl no sv tr fr pt-BR hi'.split()},
          **{c: ['other'] for c in 'ja ko zh-CN zh-TW th vi id'.split()},
          **{c: ['one', 'few', 'many'] for c in 'ru uk pl'.split()}, **{c: ['one', 'few', 'other'] for c in 'hr cs lt ro'.split()}}
 KEEP = ['Venus', 'Discord', 'Google Translate', 'ReviewDB', 'Nitro', 'GitHub', 'GIF', 'GPL-3.0', 'manti.vendicated.dev', '@unknown-user', 'Android', 'Revenge', 'Vendetta', 'Blurple']
@@ -49,6 +51,7 @@ def load(code, path):
         json.dump(out, f, ensure_ascii=False, indent=1); f.write('\n')
     pack_path = os.path.join(ROOT, f'patches/src/main/resources/venus/i18n/{code}.json')
     pack = json.load(open(pack_path, encoding='utf-8')); pack['strings'].update(out)
+    pack['strings'] = {s: pack['strings'][s] for s in STRINGS if s in pack['strings']}
     with open(pack_path, 'w', encoding='utf-8') as f:
         json.dump(pack, f, ensure_ascii=False, indent=1); f.write('\n')
     print(code, 'ok', len(out))
