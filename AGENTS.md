@@ -329,25 +329,29 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Pages whose options are also native setting nodes (Nitro links, Pastel names, Device indicators) keep those
   nodes for Discord's settings search and pass `{page, sections}` to `withOptions`, so the designed page is shown.
 - Every new text goes through `tr()`/`pl()` and gets added to all 30 language files.
-- **Hand-review every language with extreme accuracy (no Google Translate, Acorn, or lazy partial reviews):**
+- **Hand-review every language to be as accurate and as natural as possible (no Google Translate, Acorn, or lazy partial reviews):**
+  - **Translations must be both as accurate as possible and as natural as possible.** Never settle for literal, stiff,
+    or machine-translated phrasing, and never sacrifice accuracy for fluency. Every string must read the way a native
+    speaker of that language would naturally write and expect to see it inside Discord's mobile UI, while conveying the
+    exact meaning of the English original.
   - Never use Google Translate or Acorn to draft or parse translations. Every single string in every language file under
     `patches/src/main/resources/venus/i18n/` and `scripts/i18n_overrides/` must be carefully hand-translated and
     hand-reviewed by you for 100% accuracy, natural and idiomatic phrasing, grammatical correctness, consistent tone
     (informal second-person where appropriate, matching Discord's own UI in that language), preserved `{placeholders}`
     and product names (`Venus`, `Discord`, `Nitro`, `ReviewDB`, `Revenge`, `Vendetta`, `Blurple`, `GitHub`,
     `@unknown-user`), and proper CLDR plural categories (`one` / `few` / `many` / `other`).
-  - **No lazy or partial audits:** When auditing or updating a language, you must read and think carefully about every
-    single string in the entire file (all 718 strings in `patches/src/main/resources/venus/i18n/<code>.json` and the full
-    override set in `scripts/i18n_overrides/<code>.json`), never just touching a few lines. Every mistranslated word
-    (for example, translating UI nouns like "Themes", "Revenge", "Play", "Watch", "Hold", "Keep", or "Clear" into the
-    wrong sense or wrong grammatical form), awkward machine-translated syntax, wrong formality level, or missing plural
-    form must be fixed.
+  - **No lazy or partial audits:** When auditing or updating a language, you must look really hard and think carefully
+    about every single string in the entire file (all 718 strings in `patches/src/main/resources/venus/i18n/<code>.json`
+    and the full override set in `scripts/i18n_overrides/<code>.json`), never just touching a few lines. Every
+    mistranslated word (for example, translating UI nouns like "Themes", "Revenge", "Play", "Watch", "Hold", "Keep", or
+    "Clear" into the wrong sense or wrong grammatical form), awkward machine-translated syntax, unnatural word order,
+    wrong formality level, or missing plural form must be fixed.
   - Whenever you add or change any English text in `bootstrap.js` (including Venus settings, option pages, previews,
     toasts, dialogs, and the About page), you **must** hand-review and update every other language for an accurate,
-    idiomatic translation.
+    natural, idiomatic translation.
   - When reviewing multiple languages, thoroughly audit one language completely at a time until you are confident it is
-    perfectly translated, commit and push that language to the open pull request, and only then move on to the next
-    language.
+    perfectly translated (both as accurate and as natural as possible), commit and push that language to the open pull
+    request, and only then move on to the next language.
 
 **Motion** (since 1.14.0)
 
