@@ -1,12 +1,29 @@
 // Lists every plural pair Venus shows ({plural: singular}), from pl(), take() and count() calls in bootstrap.js.
-// Developer-only: NODE_PATH=<dir with acorn, acorn-walk> node scripts/i18n_plurals.cjs > work/plurals.json
-const fs = require('node:fs'), acorn = require('acorn'), walk = require('acorn-walk');
+// Zero external dependencies (no Acorn): node scripts/i18n_plurals.cjs > work/plurals.json
+const fs = require('node:fs');
+const {tokenize, splitArgs} = require('./i18n_strings.cjs');
 const source = fs.readFileSync('patches/src/main/resources/venus/bootstrap.js', 'utf8').replace('/*__FEATURES__*/', '{}');
-const text = node => node && node.type === 'Literal' && typeof node.value === 'string' ? node.value : null;
+const tokens = tokenize(source);
 const pairs = {};
-walk.simple(acorn.parse(source, {ecmaVersion:'latest'}), {CallExpression(node) {
-    const name = node.callee && node.callee.type === 'Identifier' && node.callee.name, a = node.arguments;
-    if ((name === 'pl' || name === 'take') && text(a[1]) && text(a[2])) pairs[text(a[2])] = text(a[1]);
-    if (name === 'count' && text(a[1])) pairs['{n} ' + text(a[1]) + 's'] = '{n} ' + text(a[1]);
-}});
-process.stdout.write(JSON.stringify(pairs, null, 1));
+
+for (let i = 0; i < tokens.length - 1; i++) {
+    const t = tokens[i], next = tokens[i + 1];
+    if (t.type !== 'ident' || next.type !== 'punct' || next.value !== '(') continue;
+    const prev = i > 0 ? tokens[i - 1] : null;
+    if (prev && prev.type === 'punct' && (prev.value === '.' || prev.value === '?.')) continue;
+    if (prev && prev.type === 'ident' && prev.value === 'function') continue;
+    const name = t.value;
+    if (name !== 'pl' && name !== 'take' && name !== 'count') continue;
+    const {args} = splitArgs(tokens, i + 1);
+    if ((name === 'pl' || name === 'take') && args[1]?.length === 1 && args[1][0].type === 'str' && args[2]?.length === 1 && args[2][0].type === 'str') {
+        pairs[args[2][0].value] = args[1][0].value;
+    }
+    if (name === 'count' && args[1]?.length === 1 && args[1][0].type === 'str') {
+        pairs['{n} ' + args[1][0].value + 's'] = '{n} ' + args[1][0].value;
+    }
+}
+
+if (require.main === module) {
+    process.stdout.write(JSON.stringify(pairs, null, 1) + '\n');
+}
+module.exports = {pairs};

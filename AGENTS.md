@@ -329,6 +329,18 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Pages whose options are also native setting nodes (Nitro links, Pastel names, Device indicators) keep those
   nodes for Discord's settings search and pass `{page, sections}` to `withOptions`, so the designed page is shown.
 - Every new text goes through `tr()`/`pl()` and gets added to all 30 language files.
+- **Hand-review every language (no Google Translate or Acorn):**
+  - Never use Google Translate or Acorn to draft or parse translations. Every string in every language file under
+    `patches/src/main/resources/venus/i18n/` and `scripts/i18n_overrides/` must be hand-translated and hand-reviewed
+    by you for natural, accurate phrasing, consistent tone (informal second-person where appropriate, matching Discord's
+    own UI in that language), preserved `{placeholders}` and product names (`Venus`, `Discord`, `Nitro`, `ReviewDB`,
+    `Revenge`, `Vendetta`, `Blurple`, `GitHub`, `@unknown-user`), and proper CLDR plural categories (`one` / `few` /
+    `many` / `other`).
+  - Whenever you add or change any English text in `bootstrap.js` (including Venus settings, option pages, previews,
+    toasts, dialogs, and the About page), you **must** hand-review and update every other language for an accurate,
+    idiomatic translation.
+  - When reviewing multiple languages, review one language completely at a time and commit its changes before moving on
+    to the next language.
 
 **Motion** (since 1.14.0)
 

@@ -1,52 +1,217 @@
 // Lists every English text Venus shows through tr(), so language files can be checked against it.
-// Developer-only: NODE_PATH=<dir with acorn, acorn-walk> node scripts/i18n_strings.cjs  ->  JSON array on stdout
-const fs = require('node:fs'), acorn = require('acorn'), walk = require('acorn-walk');
+// Zero external dependencies (no Acorn): node scripts/i18n_strings.cjs  ->  JSON array on stdout
+const fs = require('node:fs');
 const source = fs.readFileSync('patches/src/main/resources/venus/bootstrap.js', 'utf8').replace('/*__FEATURES__*/', '{}');
-const ast = acorn.parse(source, {ecmaVersion:'latest'});
-const found = new Set();
-const text = node => node && node.type === 'Literal' && typeof node.value === 'string' ? node.value : null;
+
+function tokenize(code) {
+    const tokens = [];
+    let i = 0, n = code.length, prevType = null, prevVal = null;
+    const REGEX_PRECEDERS = new Set([
+        null, '(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';',
+        '+', '-', '*', '/', '%', '<', '>', '^', '~',
+        'return', 'case', 'typeof', 'void', 'delete', 'in', 'instanceof', 'new'
+    ]);
+    while (i < n) {
+        const c = code[i];
+        if (c === ' ' || c === '\t' || c === '\r' || c === '\n') { i++; continue; }
+        if (c === '/' && code[i + 1] === '/') {
+            const end = code.indexOf('\n', i + 2);
+            i = end === -1 ? n : end + 1;
+            continue;
+        }
+        if (c === '/' && code[i + 1] === '*') {
+            const end = code.indexOf('*/', i + 2);
+            i = end === -1 ? n : end + 2;
+            continue;
+        }
+        if (c === '"' || c === "'" || c === '`') {
+            const q = c;
+            let j = i + 1;
+            while (j < n) {
+                if (code[j] === '\\') j += 2;
+                else if (code[j] === q) { j++; break; }
+                else j++;
+            }
+            const raw = code.slice(i, j);
+            if (q === '"' || q === "'") {
+                const val = q === '"' ? JSON.parse(raw) : JSON.parse('"' + raw.slice(1, -1).replace(/"/g, '\\"') + '"');
+                tokens.push({type: 'str', value: val});
+            } else {
+                tokens.push({type: 'tpl', value: raw});
+            }
+            prevType = 'str'; prevVal = raw; i = j;
+            continue;
+        }
+        if (c === '/' && (prevType === null || REGEX_PRECEDERS.has(prevVal) || (prevType === 'punct' && '({[,=:!&|?;+-*/%<>^~'.includes(prevVal[prevVal.length - 1])))) {
+            let j = i + 1, inClass = false;
+            while (j < n) {
+                if (code[j] === '\\') j += 2;
+                else if (code[j] === '[') { inClass = true; j++; }
+                else if (code[j] === ']') { inClass = false; j++; }
+                else if (code[j] === '/' && !inClass) {
+                    j++;
+                    while (j < n && /[a-z]/i.test(code[j])) j++;
+                    break;
+                } else j++;
+            }
+            tokens.push({type: 'regex', value: code.slice(i, j)});
+            prevType = 'regex'; prevVal = '/'; i = j;
+            continue;
+        }
+        if (/[A-Za-z_$]/.test(c)) {
+            let j = i + 1;
+            while (j < n && /[A-Za-z0-9_$]/.test(code[j])) j++;
+            const val = code.slice(i, j);
+            tokens.push({type: 'ident', value: val});
+            prevType = 'ident'; prevVal = val; i = j;
+            continue;
+        }
+        if (/[0-9]/.test(c)) {
+            let j = i + 1;
+            while (j < n && /[0-9.eE+-]/.test(code[j])) j++;
+            const val = code.slice(i, j);
+            tokens.push({type: 'num', value: val});
+            prevType = 'num'; prevVal = val; i = j;
+            continue;
+        }
+        if ('()[],{}?:;'.includes(c)) {
+            tokens.push({type: 'punct', value: c});
+            prevType = 'punct'; prevVal = c; i++;
+            continue;
+        }
+        let j = i + 1;
+        while (j < n && /[.|&!=+*/<>~%-]/.test(code[j]) && !'()[],{}?:;'.includes(code[j]) && !(code[j] === '/' && (code[j + 1] === '/' || code[j + 1] === '*'))) j++;
+        const val = code.slice(i, j);
+        tokens.push({type: 'punct', value: val});
+        prevType = 'punct'; prevVal = val; i = j;
+    }
+    return tokens;
+}
+
+function splitArgs(tokens, startIdx) {
+    const open = tokens[startIdx].value;
+    const close = open === '(' ? ')' : ']';
+    const args = [];
+    let cur = [], depth = 0, i = startIdx + 1;
+    while (i < tokens.length) {
+        const t = tokens[i];
+        if (t.type === 'punct' && (t.value === '(' || t.value === '[' || t.value === '{')) {
+            depth++; cur.push(t);
+        } else if (t.type === 'punct' && (t.value === ')' || t.value === ']' || t.value === '}')) {
+            if (depth === 0 && t.value === close) {
+                if (cur.length) args.push(cur);
+                return {args, endIdx: i};
+            }
+            depth--; cur.push(t);
+        } else if (t.type === 'punct' && t.value === ',' && depth === 0) {
+            args.push(cur); cur = [];
+        } else {
+            cur.push(t);
+        }
+        i++;
+    }
+    return {args, endIdx: i};
+}
+
+function stringsInExpr(exprTokens, out) {
+    if (!exprTokens || !exprTokens.length) return;
+    if (exprTokens.length >= 2 && exprTokens[0].type === 'punct' && exprTokens[0].value === '(' && exprTokens[exprTokens.length - 1].type === 'punct' && exprTokens[exprTokens.length - 1].value === ')') {
+        let d = 0, wrapsAll = true;
+        for (let i = 0; i < exprTokens.length - 1; i++) {
+            if (exprTokens[i].type === 'punct' && '([{'.includes(exprTokens[i].value)) d++;
+            else if (exprTokens[i].type === 'punct' && ')]}'.includes(exprTokens[i].value)) d--;
+            if (d === 0) { wrapsAll = false; break; }
+        }
+        if (wrapsAll) return stringsInExpr(exprTokens.slice(1, -1), out);
+    }
+    if (exprTokens.length === 1 && exprTokens[0].type === 'str') {
+        out.push(exprTokens[0].value);
+        return;
+    }
+    let depth = 0;
+    for (let i = 0; i < exprTokens.length; i++) {
+        const t = exprTokens[i];
+        if (t.type === 'punct' && '([{'.includes(t.value)) depth++;
+        else if (t.type === 'punct' && ')]}'.includes(t.value)) depth--;
+        else if (depth === 0 && t.type === 'punct' && t.value === '?') {
+            let qDepth = 0;
+            for (let j = i + 1; j < exprTokens.length; j++) {
+                const tj = exprTokens[j];
+                if (tj.type === 'punct' && '([{'.includes(tj.value)) qDepth++;
+                else if (tj.type === 'punct' && ')]}'.includes(tj.value)) qDepth--;
+                else if (qDepth === 0 && tj.type === 'punct' && tj.value === ':') {
+                    stringsInExpr(exprTokens.slice(i + 1, j), out);
+                    stringsInExpr(exprTokens.slice(j + 1), out);
+                    return;
+                }
+            }
+        }
+    }
+    depth = 0;
+    for (let i = 0; i < exprTokens.length; i++) {
+        const t = exprTokens[i];
+        if (t.type === 'punct' && '([{'.includes(t.value)) depth++;
+        else if (t.type === 'punct' && ')]}'.includes(t.value)) depth--;
+        else if (depth === 0 && t.type === 'punct' && (t.value === '||' || t.value === '&&')) {
+            stringsInExpr(exprTokens.slice(0, i), out);
+            stringsInExpr(exprTokens.slice(i + 1), out);
+            return;
+        }
+    }
+}
+
 // Helpers whose string arguments (by position) are passed through tr() inside them.
 const ARGS = {tr:[0], pl:[1, 2], take:[1, 2], footnote:[1], statusCard:[1], reviewToast:[1], confirmAction:[0, 1, 2], actionRow:[2, 3],
     switchRow:[2, 3], toggle:[2, 3], withOptions:[3, 4, 5], route:[1], section:[0], settingNode:[1, 2], link:[1, 2], option:[1, 2],
     radioGroup:[2], groupTitle:[1], linkRow:[1, 2], pill:[1], button:[2], previewScreen:[2], inputWithButton:[4], picker:[1], count:[], questStatus:[0], mutate:[3], userNotifShow:[0]};
-function strings(node, out) {
-    if (!node) return;
-    const value = text(node);
-    if (value !== null) out.push(value);
-    else if (node.type === 'ConditionalExpression') { strings(node.consequent, out); strings(node.alternate, out); }
-    else if (node.type === 'LogicalExpression') { strings(node.left, out); strings(node.right, out); }
-}
-walk.simple(ast, {CallExpression(node) {
-    if (!node.callee || node.callee.type !== 'Identifier') return;
-    const name = node.callee.name;
-    // The Features list's toggle(group, key, title, hint), or an option page's own toggle(key, label, subLabel).
-    const positions = name === 'toggle' && node.arguments.length === 3 ? [1, 2] : ARGS[name];
-    if (!positions) return;
-    node.args = node.arguments;
+
+const tokens = tokenize(source);
+const found = new Set();
+
+for (let i = 0; i < tokens.length - 1; i++) {
+    const t = tokens[i], next = tokens[i + 1];
+    if (t.type !== 'ident' || next.type !== 'punct' || next.value !== '(') continue;
+    const prev = i > 0 ? tokens[i - 1] : null;
+    if (prev && prev.type === 'punct' && (prev.value === '.' || prev.value === '?.')) continue;
+    if (prev && prev.type === 'ident' && prev.value === 'function') continue;
+    const name = t.value;
+    if (!(name in ARGS)) continue;
+    const {args} = splitArgs(tokens, i + 1);
+    const positions = name === 'toggle' && args.length === 3 ? [1, 2] : ARGS[name];
     const out = [];
-    positions.forEach(i => strings(node.args[i], out));
-    if (name === 'count' && text(node.args[1])) { out.push('{n} ' + text(node.args[1])); out.push('{n} ' + text(node.args[1]) + 's'); }
-    // radioGroup's choices: [value, label, subLabel], unless the page passes them already translated.
-    if (name === 'radioGroup' && node.args[5] && node.args[5].type === 'ArrayExpression' && !node.args[6])
-        node.args[5].elements.forEach(choice => { if (choice && choice.type === 'ArrayExpression') choice.elements.slice(1).forEach(item => strings(item, out)); });
+    positions.forEach(idx => stringsInExpr(args[idx], out));
+    if (name === 'count' && args[1] && args[1].length === 1 && args[1][0].type === 'str') {
+        out.push('{n} ' + args[1][0].value);
+        out.push('{n} ' + args[1][0].value + 's');
+    }
+    if (name === 'radioGroup' && args[5] && args[5][0]?.value === '[' && !args[6]) {
+        const {args: choices} = splitArgs(args[5], 0);
+        choices.forEach(choice => {
+            if (choice[0]?.value === '[') {
+                const {args: items} = splitArgs(choice, 0);
+                items.slice(1).forEach(item => stringsInExpr(item, out));
+            }
+        });
+    }
     out.forEach(value => { if (/[A-Za-z]/.test(value) && value !== 'Venus') found.add(value); });
-}});
-// Message highlights' color names, read by tr() from its swatch tables.
+}
+
 for (const table of ['HIGHLIGHT_PING_CHOICES', 'HIGHLIGHT_DELETED_CHOICES']) {
     const match = new RegExp('const ' + table + ' = \\[([\\s\\S]*?)\\];').exec(source);
     if (match) for (const value of match[1].matchAll(/\["\w+", "([^"]+)"/g)) found.add(value[1]);
 }
-// The language names "Translated from ..." falls back to when the phone can't name a language.
 const names = /const LANGUAGE_NAMES = \{([\s\S]*?)\};/.exec(source);
 if (names) for (const match of names[1].matchAll(/:"([^"]+)"/g)) found.add(match[1]);
 found.add('another language');
-// Tables tr() reads by key: device names and statuses, and the stand-in names of hidden channels.
 for (const table of ['PLATFORM_LABELS', 'PLATFORM_STATUS']) {
     const match = new RegExp('const ' + table + ' = \\{([^}]*)\\}').exec(source);
     if (match) for (const value of match[1].matchAll(/:"([^"]+)"/g)) if (value[1] !== 'VR') found.add(value[1]);
 }
 const hidden = /const HIDDEN_CHANNEL = "([^"]+)", HIDDEN_CATEGORY = "([^"]+)"/.exec(source);
 if (hidden) { found.add(hidden[1]); found.add(hidden[2]); }
-// Status texts aboutText() picks between.
 for (const value of ["Kept deleted messages are saved on this phone.", "Kept deleted messages couldn't be saved.", "Saved deleted messages couldn't be loaded."]) found.add(value);
-process.stdout.write(JSON.stringify(Array.from(found).sort(), null, 1));
+
+if (require.main === module) {
+    process.stdout.write(JSON.stringify(Array.from(found).sort(), null, 1) + '\n');
+}
+module.exports = {tokenize, splitArgs, stringsInExpr, found};
