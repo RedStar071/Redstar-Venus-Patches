@@ -5068,17 +5068,9 @@ test('Message highlights preview plays at a readable pace: Sam\'s reply lights u
         assert.ok(caps.includes(t), 'caption: ' + t + ' / ' + caps.join(' | '));
     for (const [cap, ms] of run.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
     assert.ok(counts.has(0) && counts.has(1) && counts.has(2), 'messages arrive one by one: ' + [...counts]); assert.ok(both, 'the deleted one lights up too');
-    // Try it: tap a highlighted message and it lights up again; a tip says what to try next.
-    const t = hookHost(b, React, node()); t.render();
-    t.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); t.timers.length = 0;
-    const tg = () => t.render().filter(n => n.type && n.type.name === 'HighlightGlow');
-    assert.ok(tg().every(n => !n.props.fresh), 'nothing glows when you switch to Try it');
-    assert.ok(t.texts().includes('Tap a highlighted message to see it light up again'));
-    const before = tg()[0].props.key;
-    t.render().find(n => n.props && n.props.key === 'reply' && n.props.onPress).props.onPress('reply');
-    assert.deepEqual(tg().map(n => n.props.fresh), [true, false]); assert.notEqual(tg()[0].props.key, before, 'a new glow plays');
-    assert.ok(t.render().some(n => n.type && n.type.name === 'TapRipple'));
-    assert.ok(t.texts().includes('Now change a color or the bar width below: it glows here'));
+    // No useless Try it toggle: changing a color or bar width below lights up the corresponding message right away.
+    assert.ok(!host.render().some(n => n.props && n.props.accessibilityLabel === 'Try it'), 'no separate Try it toggle');
+    assert.ok(host.render().some(n => n.props && n.props.accessibilityLabel === 'Pause'), 'Watch player controls stay available');
 });
 test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
     const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];
@@ -5232,38 +5224,32 @@ test('Translate preview plays your choice at a readable pace (on its own, or Hol
     assert.ok(mcaps.includes('You hold the message to open its menu') && mcaps.includes('And tap Translate'), mcaps.join(' | '));
     assert.ok(manual.seen.has('Reply') && manual.seen.has('Copy Text'), 'Discord\'s message menu shows');
     for (const [cap, ms] of manual.times) assert.ok(ms >= 2400, cap + ': ' + ms + ' ms');
-    // Try it: a tip, then tap Translate / Show original under the message.
+    // Try it: hold the message to open Discord's message menu, then tap Translate or Show original in the menu.
     const host = hookHost(b, React, previewNode(b, 'VENUS_TRANSLATE', 'TranslatePreview'));
     host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
-    assert.ok(host.texts().includes("In chat you'd hold the message and tap Translate. Try it here"));
-    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?"), 'starts in Spanish');
-    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to translate it').props.onPress();
-    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?") && host.texts().includes('Tap Show original to go back'));
-    host.render().find(n => n.props && n.props.accessibilityHint === 'Tap to show the original').props.onPress();
-    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && !host.texts().includes('Tap Show original to go back'));
+    assert.ok(host.texts().includes('Hold the message to open its menu'));
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?"), 'starts in Spanish when mode is manual');
+    const hold = () => host.render().find(n => n.props && n.props.accessibilityHint === 'Hold the message to open its menu').props.onLongPress();
+    hold();
+    assert.ok(host.texts().includes('Reply') && host.texts().includes('Copy Text') && host.texts().includes('Tap Translate in the menu'), 'menu opens on hold');
+    host.render().find(n => n.props && n.props.key === 'translate' && n.props.onPress).props.onPress();
+    assert.ok(host.texts().includes("Hi everyone! Who's coming tonight?") && host.texts().includes('Hold it again to show the original'));
+    hold();
+    assert.ok(host.texts().includes('Tap Show original in the menu'));
+    host.render().find(n => n.props && n.props.key === 'translate' && n.props.onPress).props.onPress();
+    assert.ok(!host.texts().includes("Hi everyone! Who's coming tonight?") && !host.texts().includes('Hold it again to show the original'));
 });
-test('Deleted messages and Pastel names previews can be tried, with a tip on what to tap next', () => {
+test('Deleted messages and Pastel names previews have no redundant Try it switch and follow their options live', () => {
     const b = settingsHarness(); const {React} = reactHarness(b);
     b.api.setSetting('noDelete', true); b.api.setSetting('noDeleteEdits', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
-    host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
-    const tap = hint => host.render().find(n => n.props && n.props.accessibilityHint === hint).props.onPress();
-    assert.ok(host.texts().includes("Tap Alex's message to edit it"));
-    tap('Tap to edit it'); tap('Tap to edit it');
-    assert.equal(host.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 2, 'both earlier versions stay above it');
-    assert.ok(host.texts().includes("Now tap Sam's message to delete it"));
-    tap('Tap to delete it'); assert.ok(host.render().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'), 'stays, outlined');
-    assert.ok(host.texts().includes('Tap it again to bring it back'));
-    tap('Tap to bring it back'); assert.ok(!host.render().some(n => n.type && n.type.name === 'PopIn' && n.props.key === 'bar'));
+    assert.ok(!host.render().some(n => n.props && n.props.accessibilityLabel === 'Try it'), 'no redundant Try it toggle on Deleted messages');
+    assert.ok(host.render().some(n => n.props && n.props.accessibilityLabel === 'Pause'), 'Watch player strip is active');
     b.api.setSetting('noDeleteEdits', false);
     const plain = hookHost(b, React, previewNode(b, 'VENUS_NODELETE', 'NoDeletePreview'));
     assert.equal(plain.render().filter(n => n.type && n.type.name === 'PopIn' && /^old:/.test(n.props.key)).length, 0, 'no history when Show edit history is off');
     b.api.setSetting('pastelize', true);
     const pastel = hookHost(b, React, previewNode(b, 'VENUS_PASTELIZE', 'PastelPreview'));
-    pastel.render(); pastel.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); pastel.timers.length = 0;
-    const names = () => pastel.render().filter(n => n.type === 'Text' && n.props.numberOfLines === 1 && n.props.children !== 'general').map(n => n.props.children);
-    assert.deepEqual(names(), ['Alex', 'Sam', 'Jordan']); assert.ok(pastel.texts().includes('Tap New people to see more colors'));
-    pastel.render().find(n => n.props && n.props.accessibilityHint === 'Tap for new people').props.onPress();
-    assert.deepEqual(names(), ['Riley', 'Morgan', 'Casey']);
-    assert.ok(pastel.texts().includes('New names, new colors. The same name always gets the same one'));
+    assert.ok(!pastel.render().some(n => n.props && n.props.accessibilityLabel === 'Try it'), 'no redundant Try it toggle on Pastel names');
+    assert.ok(pastel.render().some(n => n.props && n.props.accessibilityLabel === 'Pause'), 'Watch player strip is active');
 });

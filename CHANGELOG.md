@@ -27,10 +27,10 @@
 * **Discord - Show hidden channels:** The preview is a server's channel list with Discord's locked-channel icon; a tap opens the same details dialog as in chat
 * **Discord - Send Nitro stickers and emojis as links:** The preview sends Discord's own Wumpus emoji and sticker from the picker, never your servers' emojis or stickers
 * **Discord - Show device indicators:** The preview shows the icons in a DM, the member list and a profile, following your switches
-* **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving; tap a highlighted message to see it again
+* **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving
 * **Discord - Keep deleted messages:** The preview shows edits keeping their old text and a deleted message staying, outlined
-* **Discord - Pastel name colors:** The preview shows names filling in with their colors, with New people for more
-* **Discord - Translate messages:** The preview follows Automatically or Only when you ask, with Discord's message menu, and Try it switches to the original and back
+* **Discord - Pastel name colors:** The preview shows names filling in with their colors and follows your color switches live
+* **Discord - Translate messages:** The preview follows Automatically or Only when you ask, and Try it lets you hold the message to open Discord's menu and tap Translate or Show original
 * **Discord - Read all button:** The button shows a check for a moment after it marks something as read
 * **Discord - Keep deleted messages:** How many deleted messages to keep is a choice of 100, 512, 1000 or 5000 instead of a number to type
 * **Discord - Custom themes:** One link box with a Paste or Install button replaces the separate Install and Paste rows

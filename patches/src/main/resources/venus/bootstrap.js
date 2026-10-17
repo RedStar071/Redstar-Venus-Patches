@@ -2535,7 +2535,7 @@
         const close = watching ? null : () => { animateLayout(); update({mode:null, target:null, gone:false, draft:""}); };
         const bar = state.mode === "deleted" ? previewBar(k, s, Trash, tr("Message deleted"), null) :
             state.mode === "edit" ? previewBar(k, s, Pencil, tr("Editing message"), close) :
-            state.mode === "reply" ? previewBar(k, s, Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close) : null;
+            state.mode === "reply" ? previewBar(k, s, Reply, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close, "bar", true) : null;
         const allDone = on && !watching && !next && done.reply;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
             previewScreen(s, "chat", "Tap gestures preview", [
@@ -3244,10 +3244,11 @@
         title:{color:"#f2f3f5", fontSize:16, fontWeight:"700"}, sub:{color:"#949ba4", fontSize:12}, icon:{color:"#b5bac1"}, iconMuted:{color:"#80848e"},
         inputRow:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingTop:6, paddingBottom:8},
         round:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
-        pill:{flex:1, minHeight:40, borderRadius:20, paddingHorizontal:14, flexDirection:"row", alignItems:"center", gap:8, backgroundColor:"#2b2d31"},
+        emojiBtn:{width:44, height:44, borderRadius:22, alignItems:"center", justifyContent:"center", backgroundColor:"#2b2d31"},
+        pill:{flex:1, minHeight:40, borderRadius:20, paddingHorizontal:14, flexDirection:"row", alignItems:"center", gap:10, backgroundColor:"#2b2d31"},
         send:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
-        bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:8, backgroundColor:"#4e505826"},
-        brand:{backgroundColor:"#5865f2"}, brandText:{color:"#ffffff"},
+        bar:{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:8, backgroundColor:"#232428", borderTopWidth:1, borderTopColor:"#ffffff0f"},
+        brand:{backgroundColor:"#5865f2"}, brandText:{color:"#ffffff"}, brandFg:{color:"#5865f2"},
         secondary:{backgroundColor:"#4e505899"}, secondaryText:{color:"#f2f3f5"},
         sheet:{backgroundColor:"#232428", borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, paddingBottom:4},
         sheetRow:{backgroundColor:"#2b2d31"}, modal:{backgroundColor:"#313338", borderRadius:16, padding:16, gap:12}, scrim:{backgroundColor:"#000000a6"},
@@ -3262,17 +3263,19 @@
             icon:{color:c.MOBILE_HEADER_ICON_DEFAULT || c.INTERACTIVE_ICON_DEFAULT}, iconMuted:{color:c.ICON_MUTED},
             inputRow:PREVIEW_CHROME_DARK.inputRow,
             round:Object.assign({}, PREVIEW_CHROME_DARK.round, {backgroundColor:c.CHAT_INPUT_ACTION_BUTTON_BACKGROUND || c.BACKGROUND_MOD_SUBTLE}),
+            emojiBtn:Object.assign({}, PREVIEW_CHROME_DARK.emojiBtn, {backgroundColor:c.MOBILE_EMOJI_BUTTON_BACKGROUND || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_MOD_SUBTLE}),
             pill:Object.assign({}, PREVIEW_CHROME_DARK.pill, {backgroundColor:c.REDESIGN_CHAT_INPUT_BACKGROUND || c.CHAT_INPUT_BACKGROUND}),
             send:Object.assign({}, PREVIEW_CHROME_DARK.send, {backgroundColor:c.CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND || c.BACKGROUND_BRAND}),
-            bar:Object.assign({}, PREVIEW_CHROME_DARK.bar, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            bar:Object.assign({}, PREVIEW_CHROME_DARK.bar, {backgroundColor:c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_MUTED || c.BORDER_SUBTLE}),
             brand:{backgroundColor:c.BACKGROUND_BRAND}, brandText:{color:c.CONTROL_BRAND_FOREGROUND_NEW || c.WHITE || "#ffffff"},
+            brandFg:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND || "#5865f2"},
             secondary:{backgroundColor:c.CONTROL_SECONDARY_BACKGROUND_DEFAULT}, secondaryText:{color:c.CONTROL_SECONDARY_TEXT_DEFAULT},
             sheet:Object.assign({}, PREVIEW_CHROME_DARK.sheet, {backgroundColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW}),
             sheetRow:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}, modal:Object.assign({}, PREVIEW_CHROME_DARK.modal, {backgroundColor:c.MODAL_BACKGROUND}),
             scrim:{backgroundColor:c.BACKGROUND_SCRIM}, strip:Object.assign({}, PREVIEW_CHROME_DARK.strip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE, borderTopColor:c.BORDER_SUBTLE}),
             track:{backgroundColor:c.PROGRESSBAR_TRACK_BACKGROUND || c.BACKGROUND_MOD_STRONG}, fill:{backgroundColor:c.PROGRESSBAR_INDICATOR_BACKGROUND || c.BACKGROUND_BRAND},
             mention:{backgroundColor:c.MENTION_BACKGROUND, color:c.MENTION_FOREGROUND},
-            category:Object.assign({}, PREVIEW_CHROME_DARK.category, {color:c.TEXT_MUTED}), channel:{color:c.CHANNELS_DEFAULT || c.TEXT_MUTED},
+            category:Object.assign({}, PREVIEW_CHROME_DARK.category, {color:c.TEXT_SUBTLE || c.TEXT_MUTED}), channel:{color:c.CHANNELS_DEFAULT || c.TEXT_MUTED},
             selected:{backgroundColor:c.MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED || c.BACKGROUND_MOD_NORMAL}, card:{backgroundColor:c.CARD_BACKGROUND_DEFAULT}}),
             PREVIEW_CHROME_DARK);
     }
@@ -3284,25 +3287,31 @@
             props.leading || el(Hash, {size:"md", color:k.iconMuted.color}),
             el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:6}},
                 el(RN.Text, {style:k.title, numberOfLines:1}, props.title), props.badges || null),
-            (props.icons || [[6473, "MagnifyingGlassIcon"], [5404, "GroupIcon"]]).map(([id, name]) => el(venusIcon(id, name), {key:name, size:"md", color:k.icon.color})));
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:14}},
+                (props.icons || [[5388, "ThreadIcon"], [6473, "MagnifyingGlassIcon"], [5404, "GroupIcon"]]).map(([id, name]) => el(venusIcon(id, name), {key:name, size:"md", color:k.icon.color}))));
     }
-    // Discord's message bar: the + button, the text pill with its emoji button, then the mic, or Send once there's text.
+    // Discord's message bar: the + button, the text pill with its gift and emoji buttons, then the mic, or Send once there's text.
     function previewInput(k, s, props) {
-        const Plus = venusIcon(10455, "PlusLargeIcon"), Smile = venusIcon(8216, "ReactionIcon"), Mic = venusIcon(9461, "MicrophoneIcon"),
-            Send = venusIcon(4778, "SendMessageIcon"), text = props.text || "";
+        const Plus = venusIcon(10455, "PlusLargeIcon"), Gift = venusIcon(10528, "GiftIcon"), Smile = venusIcon(8216, "ReactionIcon"),
+            Mic = venusIcon(9461, "MicrophoneIcon"), Send = venusIcon(4778, "SendMessageIcon"), text = props.text || "";
+        const showGift = !text && !(features.hideGift && enabled("hideGift"));
         return el(RN.View, {key:"input"}, props.bar || null, props.above || null,
             el(RN.View, {style:k.inputRow},
                 el(RN.View, {style:k.round}, el(Plus, {size:"sm", color:k.icon.color})),
                 el(RN.View, {style:k.pill}, el(RN.Text, {style:[text ? s.text : s.muted, {flex:1, fontSize:15}], numberOfLines:1}, text || props.placeholder),
+                    showGift ? el(Gift, {size:"sm", color:k.icon.color}) : null,
                     el(Smile, {size:"sm", color:k.icon.color})),
                 text ? popIn("send", el(RN.View, {style:k.send}, el(Send, {size:"sm", color:k.brandText.color}))) :
                     el(RN.View, {style:k.round}, el(Mic, {size:"sm", color:k.icon.color}))));
     }
-    // The bar above the message box while replying or editing, like Discord's: an icon, what it is, and a close button.
-    function previewBar(k, s, Icon, text, onClose, key) {
-        const X = venusIcon(5940, "XSmallIcon"), Press = RN.Pressable || RN.View;
+    // The bar above the message box while replying or editing, like Discord's: an icon, what it is, the @ ON indicator on replies, and a close button.
+    function previewBar(k, s, Icon, text, onClose, key, mention) {
+        const X = venusIcon(5940, "XSmallIcon"), At = venusIcon(5405, "AtIcon"), Press = RN.Pressable || RN.View;
         return el(RN.View, {key:key || "bar", style:k.bar}, popIn("icon:" + text, el(Icon, {size:"xs", color:k.icon.color})),
-            el(RN.Text, {style:[s.muted, {flex:1, fontSize:13}], numberOfLines:1}, text),
+            el(RN.Text, {style:[s.muted, {flex:1, fontSize:13, fontWeight:"500"}], numberOfLines:1}, text),
+            mention ? el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:3, paddingRight:4}},
+                el(At, {size:"xxs", color:k.brandFg.color}),
+                el(RN.Text, {style:[k.brandFg, {fontSize:11, fontWeight:"700"}]}, "ON")) : null,
             onClose ? el(Press, {onPress:onClose, accessibilityRole:"button", accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}},
                 el(X, {size:"xs", color:k.icon.color})) : null);
     }
@@ -3575,7 +3584,7 @@
             run.start();
             return () => run.stop();
         }, [props.shake]);
-        const row = {flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7};
+        const row = {flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingVertical:7, marginHorizontal:8, borderRadius:8};
         const style = ref.current ? [row, {transform:[{translateX:ref.current.interpolate({inputRange:[-1, 1], outputRange:[-6, 6]})}]}] : row;
         return el(Press, {onPress:props.onPress, accessibilityRole:"button", accessibilityLabel:props.label + ", " + tr("locked")},
             el(ref.current ? A.View : RN.View, {style}, props.children), props.ripple || null);
@@ -3602,9 +3611,9 @@
         const tapLocked = () => { if (!on || watching) return; update({tried:true}); if (menu) showHidden(HIDDEN_SAMPLE); else shake(); };
         const channel = (name, locked, selected) => el(locked ? HiddenPreviewRow : RN.View, locked ?
             {key:name, onPress:tapLocked, label:name, shake:state.shake, ripple:tapRipple(state.pulse, "locked", {right:40, top:2})} :
-            {key:name, style:[{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:16, paddingVertical:7, marginHorizontal:8, borderRadius:8},
+            {key:name, style:[{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingVertical:7, marginHorizontal:8, borderRadius:8},
                 selected ? k.selected : null]},
-            el(locked ? TextLock : Hash, {size:"sm", color:selected ? s.name.color : k.channel.color}),
+            el(locked ? TextLock : Hash, {size:"sm", color:selected ? s.name.color : locked ? k.iconMuted.color : k.channel.color}),
             el(RN.Text, {style:[s.text, {flex:1, color:selected ? s.name.color : k.channel.color, fontWeight:selected ? "600" : "500"}], numberOfLines:1}, name));
         // Discord's alert, drawn inside the preview while it plays: a title, the details and its two buttons.
         const button = (text, brand) => el(RN.View, {key:text, style:[brand ? k.brand : k.secondary, {borderRadius:20, paddingVertical:10, alignItems:"center"}]},
@@ -3775,15 +3784,15 @@
     }
     // Pastel names: a few names in their own pastel color, the way they'll show in chat.
     const PASTEL_CAST = [["Alex","Sam","Jordan"],["Riley","Morgan","Casey"],["Taylor","Jamie","Avery"],["Quinn","Rowan","Skyler"]];
-    // Watch: people post one at a time and each name fills in with its own color; then a new group arrives.
-    // Try it: tap New people. Everyone gets their own color, always the same one for the same name.
+    // People post one at a time and each name fills in with its own color; then a new group arrives.
+    // The switches below (Replace role colors, Color message text) update the preview live.
     function PastelPreview(props) {
         useSettings("pastelize");
-        const s=useChatPreviewStyles(), k=usePreviewChrome(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode(), on=props.on;
-        const [state,setState]=React.useState({round:0,shown:3,painted:3,taps:0}), watching=on && mode==="watch";
+        const s=useChatPreviewStyles(), k=usePreviewChrome(), on=!!props.on;
+        const [state,setState]=React.useState({round:0,shown:3,painted:3});
         const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
-        const story=useStory(watching,() => {
-            const steps=[[0,() => setState(st => ({round:st.round,shown:0,painted:0,taps:0})),tr("People post in the chat")]];
+        const story=useStory(on,() => {
+            const steps=[[0,() => setState(st => ({round:st.round,shown:0,painted:0})),tr("People post in the chat")]];
             [0,1,2].forEach(i => steps.push([i ? 900 : 600,() => { animateLayout(); update({shown:i+1}); }],
                 [500,() => update({painted:i+1}),i===0 ? tr("Each name gets its own soft color") :
                     i===1 ? (settings.pastelAll ? tr("Even names with a role color get a pastel one") : tr("A name with a role color keeps it")) : null]));
@@ -3792,7 +3801,7 @@
             return steps;
         },[settings.pastelAll,settings.pastelContent]);
         const tint=(seed,sat,light,fallback) => { const c=on && pastelColor(seed,sat,light); return c ? c.hex : fallback; };
-        const cast=PASTEL_CAST[state.round % PASTEL_CAST.length], shown=watching ? state.shown : 3, painted=watching ? state.painted : 3;
+        const cast=PASTEL_CAST[state.round % PASTEL_CAST.length], shown=on ? state.shown : 3, painted=on ? state.painted : 3;
         const people=[[cast[0],"#3ba55c",tr("Has anyone tried the new update?"),null],[cast[1],"#eb459e",tr("Yes, it looks great!"),"#e67e22"],[cast[2],"#faa61a",tr("Same here.")]];
         const chat=people.slice(0,shown).map(([who,avatar,text,role],i) => {
             const plain=i>=painted, kept=role && !settings.pastelAll;
@@ -3801,15 +3810,10 @@
             return el(RN.View,{key:state.round+":"+who},popIn("msg:"+state.round+":"+who,previewMessage(s,who,who,avatar,tr(["Today at 4:01 PM","Today at 4:03 PM","Today at 4:05 PM"][i]),
                 el(RN.Text,{style:body ? [s.text,{color:body}] : s.text},text),{nameColor:name})));
         });
-        const shuffle=() => { if (on) { animateLayout(); update(st => ({round:st.round+1,taps:st.taps+1})); } };
-        const tryBar=on && !watching ? el(RN.View,{key:"try",style:[k.strip,{padding:12,gap:10}]},
-            previewTip(k,state.taps ? tr("New names, new colors. The same name always gets the same one") : tr("Tap New people to see more colors"),"down"),
-            el(Press,{onPress:shuffle,accessibilityRole:"button",accessibilityHint:tr("Tap for new people"),
-                style:[k.secondary,{borderRadius:20,paddingVertical:10,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:8}]},
-                el(venusIcon(11106,"RetryIcon"),{size:"sm",color:k.secondaryText.color}),el(RN.Text,{style:[k.secondaryText,{fontWeight:"600"}]},tr("New people")))) : null;
-        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(st => ({round:st.round,shown:3,painted:3,taps:0})); }) : null,
-            previewScreen(s,"preview","Pastel names preview",[el(RN.View,{key:"chat",style:{minHeight:watching ? 200 : 0}},chat)],
-                {header:previewHeader(k,{title:"general"}),footer:el(RN.View,{key:"foot"},tryBar,watching ? storyStrip(k,s,story) : null)}));
+        return el(RN.View,{key:"preview"},
+            previewScreen(s,"preview","Pastel names preview",[el(RN.View,{key:"chat",style:{minHeight:on ? 200 : 0}},chat)],
+                {header:previewHeader(k,{title:"general"}),
+                 footer:el(RN.View,{key:"foot"},previewInput(k,s,{placeholder:tr("Message {channel}",{channel:"#general"})}),on ? storyStrip(k,s,story) : null)}));
     }
     function PastelSettings() {
         useSettings("pastelize");
@@ -4439,45 +4443,38 @@
     // Try it: tap Sam's message to delete it (it stays, outlined), tap Alex's to edit it (the old text stays above).
     // Follows Show edit history and your Message highlights colors.
     // Watch: Alex edits a message twice and the earlier versions stay above it, then Sam deletes one and it stays,
-    // outlined. Try it: tap Alex's message to edit it, Sam's to delete it, with a tip on what to try next.
+    // outlined. Toggling Show edit history updates the preview live.
     function NoDeletePreview(props) {
-        const s=useChatPreviewStyles(), k=usePreviewChrome(), Press=RN.Pressable || RN.View, [mode,setMode]=usePreviewMode();
-        const blank={deleted:false,edits:0,pulse:null,tried:{}};
-        const [state,setState]=React.useState(blank), on=!!props.on, watching=on && mode==="watch";
+        const s=useChatPreviewStyles(), k=usePreviewChrome(), on=!!props.on;
+        const blank={deleted:false,edits:0,pulse:null};
+        const [state,setState]=React.useState(blank);
         const update=change => setState(st => Object.assign({},st,typeof change==="function" ? change(st) : change));
         const red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
         const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2;
         const versions=[tr("See you at 6"),tr("See you at 7"),tr("See you at 8")];
         const pulse=who => update(st => ({pulse:{who,id:who+":"+st.edits+":"+st.deleted}}));
-        const story=useStory(watching,() => [[0,() => setState(blank),tr("Alex says when to meet")],
+        const story=useStory(on,() => [[0,() => setState(blank),tr("Alex says when to meet")],
             [1400,() => pulse("edited"),tr("Alex edits it to 7")],[400,() => { animateLayout(); update({edits:1}); },
                 props.edits ? tr("The old text stays above it, crossed out") : tr("It shows (edited), like in Discord")],
             [1400,() => pulse("edited"),tr("And edits it again to 8")],[400,() => { animateLayout(); update({edits:2}); }],
             [1400,() => pulse("deleted"),tr("Sam deletes a message")],
             [400,() => { animateLayout(); update({deleted:true}); },tr("It stays for you, outlined, so you can still read it")],
             [1200,() => {}]],[props.edits]);
-        const edit=() => { if (!on || watching) return; animateLayout(); update(st => ({edits:st.edits>=2 ? 0 : st.edits+1,tried:Object.assign({},st.tried,{edit:true})})); };
-        const remove=() => { if (!on || watching) return; animateLayout(); update(st => ({deleted:!st.deleted,tried:Object.assign({},st.tried,st.deleted ? {back:true} : {del:true})})); };
-        const history=props.edits ? versions.slice(0,state.edits) : [];
-        const tried=state.tried, next=!on || watching ? null : !tried.edit ? ["edited",tr("Tap Alex's message to edit it")] :
-            !tried.del ? ["deleted",tr("Now tap Sam's message to delete it")] : !tried.back ? ["deleted",tr("Tap it again to bring it back")] : null;
-        const tip=who => next && next[0]===who ? previewTip(k,next[1]) : null;
-        return el(RN.View,{key:"preview"},on ? previewToggle(mode,value => { setMode(value); setState(blank); }) : null,
+        const edits=on ? state.edits : 2, deleted=on ? state.deleted : true;
+        const history=props.edits ? versions.slice(0,edits) : [];
+        return el(RN.View,{key:"preview"},
             previewScreen(s,"preview","Deleted messages preview",[
-            el(Press,{key:"edited",onPress:edit,accessibilityRole:"button",accessibilityHint:tr("Tap to edit it")},
+            el(RN.View,{key:"edited"},
                 previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
                     history.map((text,i) => popIn("old:"+i,el(RN.Text,{style:s.faded},text))),
-                    el(RN.Text,{style:s.text},versions[state.edits],state.edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null))),
+                    el(RN.Text,{style:s.text},versions[edits],edits ? el(RN.Text,{style:s.muted}," "+tr("(edited)")) : null))),
                 tapRipple(state.pulse,"edited")),
-            tip("edited"),
-            el(Press,{key:"deleted",onPress:remove,accessibilityRole:"button",accessibilityHint:tr(state.deleted ? "Tap to bring it back" : "Tap to delete it")},
-                el(RN.View,{style:state.deleted ? {backgroundColor:red+"1a"} : null},
-                    state.deleted ? popIn("bar",el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}})) : null,
-                    previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))),
-                    tapRipple(state.pulse,"deleted"))),
-            tip("deleted")],
+            el(RN.View,{key:"deleted",style:deleted ? {backgroundColor:red+"1a"} : null},
+                deleted ? popIn("bar",el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}})) : null,
+                previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))),
+                tapRipple(state.pulse,"deleted"))],
             {header:previewHeader(k,{title:"general"}),footer:el(RN.View,{key:"foot"},previewInput(k,s,{placeholder:tr("Message {channel}",{channel:"#general"})}),
-                watching ? storyStrip(k,s,story) : null)}));
+                on ? storyStrip(k,s,story) : null)}));
     }
     const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {
@@ -6641,15 +6638,17 @@
     }
     // A message in Spanish shown the way Translate messages shows it, following the Display switches.
     // Watch: Lucía writes in Spanish and it turns into your language, on its own, or after you hold it and tap Translate
-    // in Discord's message menu (whichever you chose below). Try it: tap Translate or Show original under the message.
+    // in Discord's message menu (whichever you chose below). Try it: hold the message to open Discord's menu, then tap
+    // Translate or Show original in the menu, just like in real Discord.
     const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
-    // A message's long-press menu, the way Discord draws it: a sheet with quick reactions and a list of actions.
+    // A message's long-press menu, the way Discord draws it: a sheet with 4 quick reactions + Add Reaction, and a list of actions.
     function previewSheet(k, s, rows, pulse) {
-        const Press = RN.Pressable || RN.View;
+        const Press = RN.Pressable || RN.View, AddReaction = venusIcon(8216, "ReactionIcon");
         return el(RN.View, {key:"sheet", style:[k.sheet, {marginTop:6}]},
             el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66", marginBottom:8}}),
-            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-around", paddingHorizontal:12, paddingBottom:8}},
-                ["\ud83d\udc4d", "\u2764\ufe0f", "\ud83d\ude02", "\ud83d\ude2e"].map(e => el(RN.View, {key:e, style:[k.round, {width:44, height:44, borderRadius:22}]}, el(RN.Text, {style:{fontSize:20}}, e)))),
+            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-between", paddingHorizontal:16, paddingBottom:10}},
+                ["\ud83d\udc4d", "\u2764\ufe0f", "\ud83d\ude02", "\ud83d\ude2e"].map(e => el(RN.View, {key:e, style:k.emojiBtn}, el(RN.Text, {style:{fontSize:20}}, e))),
+                el(RN.View, {key:"more", style:k.emojiBtn}, el(AddReaction, {size:"sm", color:k.icon.color}))),
             el(RN.View, {style:[k.sheetRow, {marginHorizontal:12, marginBottom:8, borderRadius:16, overflow:"hidden"}]},
                 rows.map(([key, Icon, label, onPress], i) => el(Press, {key, onPress, accessibilityRole:onPress ? "button" : undefined,
                     style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:"#ffffff0d"} : null]},
@@ -6676,6 +6675,7 @@
             steps.push([800, () => {}]);
             return steps;
         }, [manual, settings.translateNote, settings.translateOriginal, target]);
+        const startTry = () => Object.assign({}, blank, {done:!manual});
         const translated = on ? state.done : true;
         const Lang = venusIcon(14958, "LanguageIcon");
         const body = !state.shown ? null : state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
@@ -6685,20 +6685,34 @@
                 settings.translateNote ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
                 settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
-        const toggle = () => { if (!on || watching) return; animateLayout(); update(st => ({done:!st.done, tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})})); };
-        const message = state.shown ? el(RN.View, {key:"msg", style:state.held ? k.selected : null},
-            popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg")) : null;
-        // Try it: the action you'd find in the message's menu, as a button under the message, with a tip on what to try.
-        const tryButton = on && !watching ? el(RN.View, {key:"try", style:{paddingHorizontal:16, paddingTop:2, paddingBottom:6, flexDirection:"row"}},
-            el(Press, {onPress:toggle, accessibilityRole:"button", accessibilityHint:tr(state.done ? "Tap to show the original" : "Tap to translate it"),
-                style:[k.secondary, {flexDirection:"row", alignItems:"center", gap:6, borderRadius:16, paddingHorizontal:12, paddingVertical:7, marginLeft:52}]},
-                el(Lang, {size:"xs", color:k.secondaryText.color}), el(RN.Text, {style:[k.secondaryText, {fontWeight:"600", fontSize:13}]}, tr(state.done ? "Show original" : "Translate")))) : null;
-        const tip = on && !watching ? previewTip(k, !state.tried.tr ? tr(manual ? "In chat you'd hold the message and tap Translate. Try it here" :
-            "In chat this happens on its own. Tap Translate to see it") : !state.tried.back ? tr("Tap Show original to go back") : null) : null;
-        const sheet = watching && state.menu ? previewSheet(k, s, [["reply", venusIcon(11108, "ArrowAngleLeftUpIcon"), tr("Reply")],
-            ["translate", Lang, tr("Translate")], ["copy", venusIcon(4780, "CopyIcon"), tr("Copy Text")]], state.pulse) : null;
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
-            previewScreen(s, "preview", "Translation preview", [message, tryButton, tip, sheet],
+        const holdMessage = () => {
+            if (!on || watching) return;
+            animateLayout();
+            update(st => ({menu:!st.menu, held:!st.menu, pulse:{who:"msg", id:"hold:" + Date.now()}}));
+        };
+        const tapMenuTranslate = () => {
+            if (!on || watching) return;
+            animateLayout();
+            update(st => ({menu:false, held:false, done:!st.done, pulse:{who:"translate", id:"tr:" + Date.now()},
+                tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
+        };
+        const closeMenu = () => { if (!on || watching) return; animateLayout(); update({menu:false, held:false}); };
+        const msgView = el(RN.View, {key:"msg", style:state.held ? k.selected : null},
+            popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg"));
+        const message = !state.shown ? null : on && !watching ? el(Press, {key:"msg", onLongPress:holdMessage, onPress:holdMessage,
+            accessibilityRole:"button", accessibilityHint:tr("Hold the message to open its menu")}, msgView) : msgView;
+        const actionLabel = tr(state.done ? "Show original" : "Translate");
+        const doneStep1 = manual ? state.tried.tr : state.tried.back, doneStep2 = manual ? state.tried.back : state.tried.tr;
+        const tip = on && !watching ? previewTip(k, state.menu ? tr("Tap {action} in the menu", {action:actionLabel}) :
+            !doneStep1 ? tr(state.done ? "Hold the message to see the original" : "Hold the message to open its menu") :
+            !doneStep2 ? tr(state.done ? "Hold it again to show the original" : "Hold it again to translate it") : null,
+            state.menu ? "down" : undefined) : null;
+        const sheet = (watching || on) && state.menu ? previewSheet(k, s, [
+            ["reply", venusIcon(11108, "ArrowAngleLeftUpIcon"), tr("Reply"), watching ? null : closeMenu],
+            ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate],
+            ["copy", venusIcon(4780, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu]], state.pulse) : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? startTry() : blank); }) : null,
+            previewScreen(s, "preview", "Translation preview", [message, tip, sheet],
                 {header:previewHeader(k, {title:"general"}),
                  footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     watching ? storyStrip(k, s, story) : null)}));
@@ -7565,36 +7579,38 @@
             return hex && props.onPress ? el(Press, {key, onPress:() => props.onPress(key), accessibilityRole:"button", accessibilityHint:tr("Tap to see it light up again")}, body) : body;
         };
         const question = tr("Did everyone see the new update?");
-        return el(RN.View, {key:props.key, style:s.chat, accessible:true, accessibilityLabel:tr("Message highlight preview")},
-            message("plain", null, el(RN.View, {style:{flexDirection:"row", gap:12}}, face(40),
-                el(RN.View, {style:{flex:1}}, header(myName, tr("Today at 4:01 PM")), el(RN.Text, {style:s.text}, question)))),
-            count < 2 ? null : message("reply", props.ping, el(RN.View, null,
-                el(RN.View, {style:{flexDirection:"row", alignItems:"center", marginBottom:4}},
-                    el(RN.View, {style:[{width:22, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, s.spine]}),
-                    el(RN.View, {style:{marginRight:4}}, face(16)),
-                    el(RN.Text, {style:[s.muted, {fontWeight:"600", marginRight:4}], numberOfLines:1}, myName),
-                    el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, question)),
-                el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("S", "#eb459e"),
-                    el(RN.View, {style:{flex:1}}, header("Sam", tr("Today at 4:03 PM")),
-                        el(RN.Text, {style:s.text}, el(RN.Text, {style:s.mention}, "@" + myName), " " + tr("Yes, it looks great!")))))),
-            props.deleted && count >= 3 ? el(RN.View, {style:{height:4}}) : null,
-            props.deleted && count >= 3 ? message("deleted", props.pending ? null : props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
-                el(RN.View, {style:{flex:1}}, header("Alex", tr("Today at 4:05 PM")),
-                    el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null,
-            props.tip || null, props.caption ? previewCaption(s, props.caption) : null, props.footer || null);
+        return el(RN.View, {key:props.key, style:[s.chat, {paddingVertical:0}], accessible:true, accessibilityLabel:tr("Message highlight preview")},
+            props.header || null,
+            el(RN.View, {style:{paddingVertical:4}},
+                message("plain", null, el(RN.View, {style:{flexDirection:"row", gap:12}}, face(40),
+                    el(RN.View, {style:{flex:1}}, header(myName, tr("Today at 4:01 PM")), el(RN.Text, {style:s.text}, question)))),
+                count < 2 ? null : message("reply", props.ping, el(RN.View, null,
+                    el(RN.View, {style:{flexDirection:"row", alignItems:"center", marginBottom:4}},
+                        el(RN.View, {style:[{width:22, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, s.spine]}),
+                        el(RN.View, {style:{marginRight:4}}, face(16)),
+                        el(RN.Text, {style:[s.muted, {fontWeight:"600", marginRight:4}], numberOfLines:1}, myName),
+                        el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, question)),
+                    el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("S", "#eb459e"),
+                        el(RN.View, {style:{flex:1}}, header("Sam", tr("Today at 4:03 PM")),
+                            el(RN.Text, {style:s.text}, el(RN.Text, {style:s.mention}, "@" + myName), " " + tr("Yes, it looks great!")))))),
+                props.deleted && count >= 3 ? el(RN.View, {style:{height:4}}) : null,
+                props.deleted && count >= 3 ? message("deleted", props.pending ? null : props.deleted, el(RN.View, {style:{flexDirection:"row", gap:12}}, letter("A", "#3ba55c"),
+                    el(RN.View, {style:{flex:1}}, header("Alex", tr("Today at 4:05 PM")),
+                        el(RN.Text, {style:s.text}, tr("Oops, wrong chat. Deleting this."))))) : null,
+                props.tip || null),
+            props.caption ? previewCaption(s, props.caption) : null, props.footer || null);
     }
     // Watch: you ask, Sam replies and mentions you (it lights up as it arrives), Alex sends a message and deletes it
-    // (it stays, in your deleted color). Try it: tap a highlighted message to see it light up again, or change the
-    // colors and width below; the one you changed glows.
+    // (it stays, in your deleted color). Changing the colors or bar width below lights up the matching message right away.
     function HighlightPreview(props) {
         useSettings("messageHighlight");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode();
-        const on = props.on, watching = on && mode === "watch", hasDeleted = !!props.deleted;
-        const blank = {count:3, pending:false, beats:{reply:0, deleted:0}, pulse:null, tried:false};
+        const s = useChatPreviewStyles(), k = usePreviewChrome();
+        const on = !!props.on, hasDeleted = !!props.deleted;
+        const blank = {count:3, pending:false, beats:{reply:0, deleted:0}, pulse:null};
         const [state, setState] = React.useState(blank);
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const beat = key => update(st => ({beats:Object.assign({}, st.beats, {[key]:st.beats[key] + 1})}));
-        const story = useStory(watching, () => {
+        const story = useStory(on, () => {
             const steps = [[0, () => setState(st => Object.assign({}, blank, {count:1, beats:st.beats})), tr("You ask everyone a question")],
                 [1200, () => { animateLayout(); update({count:2}); beat("reply"); }, tr("Sam replies and mentions you, so it's highlighted in your reply color")]];
             if (hasDeleted) steps.push([1400, () => { animateLayout(); update({count:3, pending:true}); }, tr("Alex sends a message")],
@@ -7603,18 +7619,17 @@
             steps.push([600, () => {}, tr("Change the colors or the bar width below to see them here")], [800, () => {}]);
             return steps;
         }, [hasDeleted]);
-        // A message glows when its beat goes up (it arrived, or you tapped it), or when you change its color or the width:
+        // A message glows when its beat goes up (it arrived), or when you change its color or the width:
         // each beat is a new glow, which plays once when it appears, so drawing the page again never replays it.
         const beats = state.beats, given = props.fresh || {};
         const fresh = {reply:!!given.reply || beats.reply > 0, deleted:!!given.deleted || beats.deleted > 0};
-        const tapped = key => { if (!on || watching) return; update(st => ({tried:true, pulse:{who:key, id:key + ":" + st.beats[key]}})); beat(key); };
-        const tip = on && !watching ? previewTip(k, state.tried ? tr("Now change a color or the bar width below: it glows here") :
-            tr("Tap a highlighted message to see it light up again")) : null;
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(st => Object.assign({}, blank, {beats:st.beats})); }) : null,
+        return el(RN.View, {key:"preview"},
             highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, deleted:props.deleted, fresh,
-                count:watching ? state.count : 3, pending:watching && state.pending, beats, tip,
-                footer:watching ? storyStrip(k, s, story) : null,
-                onPress:watching ? null : tapped, ripple:key => tapRipple(state.pulse, key)}));
+                count:on ? state.count : 3, pending:on && state.pending, beats,
+                header:previewHeader(k, {title:"general"}),
+                footer:el(RN.View, {key:"foot"}, previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
+                    on ? storyStrip(k, s, story) : null),
+                ripple:key => tapRipple(state.pulse, key)}));
     }
     // One highlight's colors: its name and current color, then a row of swatches and a last one for any color.
     function highlightColorPicker(props) {

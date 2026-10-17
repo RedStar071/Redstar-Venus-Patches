@@ -279,16 +279,19 @@ design") renders each page on and off and fails when a page breaks the rules bel
    `chatPreview` + `previewMessage` that follows the settings below it as you change them (bar width and colors,
    edit history, pastel names, device icons, translation notes, link style). Previews use plain sample people and
    text, never real messages, and only the theme tokens from `useChatPreviewStyles`.
-   Every preview is a component with **Watch and Try it** (`previewToggle(mode, setMode)` from `usePreviewMode()`,
-   shown only while the feature is on), drawn as the part of Discord it changes: `previewScreen` with
-   `previewHeader` (channel header), `previewInput` (message bar) and `previewBar` (reply/edit bar), or that screen's
-   own layout (member list, profile, channel list, message menu, dialog), using `usePreviewChrome()` tokens.
+   Every preview is drawn as the part of Discord it changes: `previewScreen` with
+   `previewHeader` (channel header with `ThreadIcon` / `MagnifyingGlassIcon` / `GroupIcon`), `previewInput` (message bar with `GiftIcon` and `ReactionIcon`) and `previewBar` (reply/edit bar with `@ ON` on replies), or that screen's
+   own layout (member list, profile, channel list, message menu with 4 quick reactions + Add Reaction, dialog), using `usePreviewChrome()` tokens.
    - Watch is `useStory(active, () => [[waitMs, step, caption?], …], deps)` with `storyStrip(k, s, story)` under the
      preview. Each caption says in plain words what happens and stays up at least `readMs` (2.4–5 s); the strip shows
      the step number, a progress bar, the time and pause / start over. Build the steps from the settings below
      (no triple-tap, no delete scene), show the finger with `tapRipple` and type with `typeSteps`.
-   - Try it lets you tap the preview yourself. A `previewTip` (Discord's brand tooltip) says what to tap next, step by
-     step, until everything your options allow has been tried.
+   - Include **Watch and Try it** (`previewToggle(mode, setMode)` from `usePreviewMode()`, shown only while the feature
+     is on) only when the feature is something you learn by doing the actual interaction in Discord (double-tap / triple-tap
+     gestures, tapping a locked channel, sending from the emoji/sticker picker, holding a message to open its menu and tap
+     Translate, or switching screens in Device indicators). Passive visual features whose controls below already update the
+     preview live (Keep deleted messages, Pastel name colors, Message highlights) use Watch directly without a separate Try it toggle.
+   - In Try it, a `previewTip` (Discord's brand tooltip) says what to do next, step by step, until everything your options allow has been tried.
    - Use sample art bundled in Discord (the Wumpus drawables) or plain sample people, never anything from your servers.
 3. **Choices**, each group with a short title:
    - a choice of 2–4 short values (widths, who to watch): `venusSegmented` under a `groupTitle`;
