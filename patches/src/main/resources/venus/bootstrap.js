@@ -38,7 +38,7 @@
     if (features.messageHighlight) selectModules([585, 1378, 5057, 7378]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2115]);
-    const revision = "1.14.0";
+    const revision = "1.15.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;

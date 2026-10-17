@@ -1,3 +1,23 @@
+## [1.15.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.14.0...v1.15.0) (2026-10-17)
+
+### ✨ New Features
+
+* **Discord - Venus settings:** Add Catalan (Català) as a settings language, bringing Venus settings to 31 languages
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Hand-review and refine all 30 translated settings languages for more natural, idiomatic wording
+* **Discord - Venus settings:** Channel, DM and server headers in previews show Discord's title chevron and round action buttons
+* **Discord - Venus settings:** Message bars in previews show Discord's gift button when Hide the gift button is off
+* **Discord - Venus settings:** Long-press message menus in previews show Discord's quick reaction row above the actions card
+* **Discord - Double-tap to reply:** The preview shows the reply line above your message, the @ ON mention switch in the reply bar and Discord's blue target highlight
+* **Discord - Translate messages:** Try it in the preview lets you hold the message to open Discord's menu and tap Translate or Show original
+* **Discord - Show device indicators:** The profile preview shows Discord's avatar cutout and Message, Call and Video buttons
+* **Discord - Send Nitro stickers and emojis as links:** The picker preview shows Discord's sheet handle and server category header
+* **Discord - Message highlights:** The preview includes Discord's channel header and message bar, and lights up messages as you change colors or bar width below
+* **Discord - Keep deleted messages:** The preview plays with the Watch controls without a separate Try it switch
+* **Discord - Pastel name colors:** The preview follows your color switches live without a separate Try it switch
+
 ## [1.14.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.13.0...v1.14.0) (2026-10-17)
 
 ### ✨ New Features
@@ -27,10 +47,10 @@
 * **Discord - Show hidden channels:** The preview is a server's channel list with Discord's locked-channel icon; a tap opens the same details dialog as in chat
 * **Discord - Send Nitro stickers and emojis as links:** The preview sends Discord's own Wumpus emoji and sticker from the picker, never your servers' emojis or stickers
 * **Discord - Show device indicators:** The preview shows the icons in a DM, the member list and a profile, following your switches
-* **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving
+* **Discord - Message highlights:** The preview glows the highlight you just changed, like a new mention arriving; tap a highlighted message to see it again
 * **Discord - Keep deleted messages:** The preview shows edits keeping their old text and a deleted message staying, outlined
-* **Discord - Pastel name colors:** The preview shows names filling in with their colors and follows your color switches live
-* **Discord - Translate messages:** The preview follows Automatically or Only when you ask, and Try it lets you hold the message to open Discord's menu and tap Translate or Show original
+* **Discord - Pastel name colors:** The preview shows names filling in with their colors, with New people for more
+* **Discord - Translate messages:** The preview follows Automatically or Only when you ask, with Discord's message menu, and Try it switches to the original and back
 * **Discord - Read all button:** The button shows a check for a moment after it marks something as read
 * **Discord - Keep deleted messages:** How many deleted messages to keep is a choice of 100, 512, 1000 or 5000 instead of a number to type
 * **Discord - Custom themes:** One link box with a Paste or Install button replaces the separate Install and Paste rows
