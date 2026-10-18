@@ -14,6 +14,8 @@ const src = fs.readFileSync(process.env.VENUS_RUNTIME_PATH || path.join(ROOT, 'p
 const TABLES = JSON.parse(fs.readFileSync(path.join(ROOT, 'work/discord_colors.json'), 'utf8'));
 const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'work/themes/index.json'), 'utf8'));
 const SLOTS = Object.values(TABLES.themes);
+// Venus's own alias table, read from bootstrap.js so the report follows the code.
+const ALIASES = (0, eval)('(' + /const LEGACY_SEMANTIC_ALIASES = (\{[\s\S]*?\n    \});/.exec(src)[1] + ')');
 const clone = o => JSON.parse(JSON.stringify(o));
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
@@ -89,9 +91,19 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
         const {error, ms} = await install(b, entry.url || 'https://example.com/theme.json', text);
         const after = snapshot(tables);
         const dark = Object.keys(after).filter(k => k.endsWith(':' + SLOTS[0]) && after[k] !== base[k]);
-        const landed = new Set(dark.map(k => String(after[k]).split('@')[0].toLowerCase()));
-        // A declared semantic key "lands" when some token now draws that key's color.
-        const unlanded = Object.entries(theme.semanticColors || {}).filter(([, v]) => { const h = hexOf(v); return h && !landed.has(h); }).map(([k]) => k);
+        // A declared key is placed when one of its own targets (the token itself, or its aliases) now draws its
+        // color. Targets the theme also sets by their own 349.9 name are the theme's choice, not a miss. Keys with
+        // no target at all count as placed only if their color shows on some token (a plus/background rule).
+        const declaredKeys = theme.semanticColors || {};
+        const drawn = new Set(Object.keys(after).filter(k => k.endsWith(':' + SLOTS[0])).map(k => String(after[k]).split('@')[0].toLowerCase()));
+        const targetsOf = k => (k in TABLES.sem ? [k] : []).concat(ALIASES[k] || []);
+        const unlanded = Object.entries(declaredKeys).filter(([k, v]) => {
+            const h = hexOf(v); if (!h) return false;
+            const all = targetsOf(k), own = all.filter(token => token === k || !(token in declaredKeys));
+            if (all.length && !own.length) return false;
+            if (own.length) return !own.some(token => String(after[token + ':' + SLOTS[0]]).split('@')[0].toLowerCase() === h);
+            return !drawn.has(h);
+        }).map(([k]) => k);
         // Theme switch cost on its own: off then on again recompiles the whole theme into the tables.
         let switchMs = 0;
         if (!error) { const reps = 20, s0 = process.hrtime.bigint();

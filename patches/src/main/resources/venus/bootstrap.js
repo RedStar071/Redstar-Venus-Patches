@@ -7608,13 +7608,22 @@
                 } else entry[slot] = {raw:syntheticKey, opacity:picked.opacity};
             }
         }
-        // First pass: aliases (so explicit Mana semantic keys in the same theme win over legacy aliases).
+        // First pass: aliases (so explicit Mana semantic keys in the same theme win over legacy aliases). When two
+        // legacy keys feed one token, the key that names it more exactly wins (its alias list puts the token
+        // earlier), not whichever key the theme happened to write last: CHAT_BACKGROUND over BACKGROUND_PRIMARY
+        // for the chat surface, KEYBOARD over BACKGROUND_PRIMARY for the keyboard gap.
+        const aliasRank = new Map();
         for (const key of Object.keys(semIn)) {
             const arr = semIn[key];
-            if (!Array.isArray(arr) || !arr.length) continue;
+            if (!Array.isArray(arr) || !arr.length || sem[key]) continue;
             const targets = LEGACY_SEMANTIC_ALIASES[key];
-            if (targets) for (let i = 0; i < targets.length; i++) writeSemanticTarget(targets[i], arr, false);
+            if (!targets) continue;
+            for (let i = 0; i < targets.length; i++) {
+                const was = aliasRank.get(targets[i]);
+                if (!was || i < was.rank || i === was.rank && targets.length < was.width) aliasRank.set(targets[i], {rank:i, width:targets.length, arr});
+            }
         }
+        aliasRank.forEach((pick, target) => writeSemanticTarget(target, pick.arr, false));
         // Second pass: direct Mana semantic keys.
         for (const key of Object.keys(semIn)) {
             const arr = semIn[key];
