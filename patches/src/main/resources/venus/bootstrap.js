@@ -34,7 +34,7 @@
     if (features.userNotif) selectModules([584, 1377, 2051, 2074, 4519, 4930, 7252, 13439, 13477]);
     if (features.accountSwitcher) selectModules([1377, 12056, 12057, 12058, 16335]);
     if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
-    if (features.customThemes) selectModules([589, 591, 1193, 4593, 9769]);
+    if (features.customThemes) selectModules([589, 590, 591, 1193, 4593, 9758, 9769]);
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2116]);
@@ -7271,7 +7271,7 @@
     const THEME_BG_WRAP_STYLE = {flex:1};
     const THEME_BG_LAYER_STYLE = {position:"absolute", top:0, left:0, right:0, bottom:0};
     const customThemes = {
-        rawTable:null, origRaw:null, semTable:null, origSem:null, themeStore:null, themeContextMod:null,
+        rawTable:null, origRaw:null, semTable:null, origSem:null, expTable:null, origExp:null, themeStore:null, themeContextMod:null,
         list:[], active:"", loaded:false, loading:false, installing:false, error:"", revision:0, editCounter:0, appliedKey:""
     };
     function parseAlphaValue(rawAlpha) {
@@ -7463,6 +7463,29 @@
             }
             customThemes.origSem = copy;
         }
+        // SemanticColorExperiments (590): {token: {experiment: {theme: {raw, opacity}}}}. resolveSemanticColor (587)
+        // reads it before SemanticColors whenever an experiment like mobile-visual-refresh is on.
+        if (customThemes.expTable && !customThemes.origExp) {
+            const copy = [];
+            eachExperimentSlot((token, slot) => copy.push([slot, slot.raw, slot.opacity]));
+            customThemes.origExp = copy;
+        }
+    }
+    function eachExperimentSlot(fn) {
+        const table = customThemes.expTable;
+        if (!table || typeof table !== "object") return;
+        for (const token of Object.keys(table)) {
+            const byExperiment = table[token];
+            if (!byExperiment || typeof byExperiment !== "object") continue;
+            for (const experiment of Object.keys(byExperiment)) {
+                const byTheme = byExperiment[experiment];
+                if (!byTheme || typeof byTheme !== "object") continue;
+                for (const theme of THEME_SLOTS) {
+                    const slot = byTheme[theme];
+                    if (slot && typeof slot === "object") fn(token, slot, theme);
+                }
+            }
+        }
     }
     function restoreOriginalColorTables() {
         if (customThemes.rawTable && customThemes.origRaw) {
@@ -7487,6 +7510,7 @@
                 if ("userProfileThemes" in snap) entry.userProfileThemes = snap.userProfileThemes;
             }
         }
+        if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
     }
     function compileThemeIntoTables(theme) {
         const raw = customThemes.rawTable, sem = customThemes.semTable;
@@ -7601,6 +7625,11 @@
                 }
             }
         }
+        // 6. An experiment override (590) would win over a themed token, so it follows every token the theme changed.
+        eachExperimentSlot((token, slot, theme) => {
+            const themed = sem[token] && sem[token][theme], was = customThemes.origSem && customThemes.origSem[token] && customThemes.origSem[token][theme];
+            if (themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) { slot.raw = themed.raw; slot.opacity = themed.opacity; }
+        });
     }
     function customThemesActiveEntry() {
         if (!enabled("customThemes") || !customThemes.active) return null;
@@ -7620,6 +7649,8 @@
             const m590 = global.__r && global.__r(589);
             if (m592 && m592._private && m592._private.RawColors) customThemes.rawTable = m592._private.RawColors;
             if (m590 && m590._private && m590._private.SemanticColors) customThemes.semTable = m590._private.SemanticColors;
+            const mExp = global.__r && global.__r(590);
+            if (!customThemes.expTable && mExp && mExp._private && mExp._private.SemanticColorExperiments) customThemes.expTable = mExp._private.SemanticColorExperiments;
         }
         if (!customThemes.rawTable || !customThemes.semTable) return;
         const active = customThemesActiveEntry();
@@ -7652,6 +7683,26 @@
             if (customThemes.rawTable && enabled("customThemes")) customThemesApply();
         }
         return exports;
+    }
+    function hookExperimentColorsModule(exports) {
+        const table = exports && exports._private && exports._private.SemanticColorExperiments;
+        if (table && typeof table === "object") {
+            customThemes.expTable = table;
+            if (customThemes.rawTable && customThemes.semTable) {
+                snapshotColorTables();
+                if (enabled("customThemes")) { customThemes.appliedKey = null; customThemesApply(); }
+            }
+        }
+        return exports;
+    }
+    // Discord's root providers (9758) build the theme context once and keep it in a memo keyed on theme, flags and
+    // so on, never on our revision. Re-keying the value they hand down makes createStyles and useToken read fresh.
+    function rootThemeContextProvider(orig, self, args) {
+        useSettings("customThemes");
+        const tree = orig.apply(self, args);
+        if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
+        const value = tree.props.value, key = value.key.split("#v")[0] + "#v" + customThemes.revision;
+        return value.key === key ? tree : React.cloneElement(tree, {value:Object.assign({}, value, {key})});
     }
     function hookCreateThemedContext(exports) {
         if (!exports) return exports;
@@ -8131,6 +8182,8 @@
         if (features.appIcons && (id === 15351 || id === 15352 || id === 17106)) return hookComponent(exports, appIconsScreen);
         if (features.customThemes && id === 589) return hookSemanticColorsModule(exports);
         if (features.customThemes && id === 591) return hookRawColorsModule(exports);
+        if (features.customThemes && id === 590) return hookExperimentColorsModule(exports);
+        if (features.customThemes && id === 9758) return hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider");
         if (features.customThemes && id === 1193 && exports && exports.default) customThemes.themeStore = exports.default;
         if (features.customThemes && id === 4593) return hookCreateThemedContext(exports);
         if (features.customThemes && id === 9769) return hookComponent(exports, chatViewWrapperThemeBackground);
