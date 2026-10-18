@@ -178,6 +178,7 @@ object SystemEmoji {
     private fun savedOn(file: File): Boolean {
         val text = String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8)
         // java.lang.String.indexOf: the host has no usable Kotlin text helpers.
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "CAST_NEVER_SUCCEEDS")
         val raw = text as java.lang.String
         if (raw.indexOf("\"systemEmoji\":true") < 0 && raw.indexOf("\"systemEmoji\":\"") < 0) return false
         return JSONObject(text).optBoolean("systemEmoji", false)

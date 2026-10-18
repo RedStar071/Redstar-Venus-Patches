@@ -17,10 +17,10 @@ internal val discord = Compatibility(
     apkFileType = ApkFileType.APKM,
     appIconColor = 0x5865F2,
     targets = listOf(AppTarget(
-        version = "348.10 - Stable",
-        versionCode = 348010,
+        version = "349.9 - Stable",
+        versionCode = 349009,
         minSdk = 26,
-        description = "Pinned Discord 348.10 bundle; Android device validation still required."
+        description = "Pinned Discord 349.9 bundle; Android device validation still required."
     ))
 )
 
@@ -149,7 +149,7 @@ internal fun skipLaunchOtaChecks(method: app.morphe.patcher.util.proxy.mutableTy
 
 internal fun pinPackagedDiscordBundle(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
     // Pin JS execution to the inspected packaged bundle, avoiding incompatible OTA cache bundles.
-    // 348.10 has two scratch locals; p1 is deliberately replaced with an asset loader.
+    // 349.9 has two scratch locals; p1 is deliberately replaced with an asset loader.
     if ((method.implementation?.registerCount ?: 0) - 2 < 2)
         throw PatchException("Bundle loader no longer has two safe scratch registers")
     method.addInstructions(0, """
@@ -236,7 +236,7 @@ val venusSettings = bytecodePatch(
 @Suppress("unused")
 val fileSizeOnPicker = rawResourcePatch(
     name = "Show file sizes when attaching",
-    description = "Each photo and video in the attachment picker shows its size."
+    description = "Photos and videos in the picker show their size."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -247,7 +247,7 @@ val fileSizeOnPicker = rawResourcePatch(
 @Suppress("unused")
 val copyBios = rawResourcePatch(
     name = "Copy profile bios",
-    description = "Hold a bio to select and copy its text. Links still work."
+    description = "Hold a bio to select and copy it."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -258,7 +258,7 @@ val copyBios = rawResourcePatch(
 @Suppress("unused")
 val dashless = rawResourcePatch(
     name = "Spaces in channel names",
-    description = "Shows \"general chat\" instead of \"general-chat\". Only changes how names look."
+    description = "Shows \"general chat\" instead of \"general-chat\"."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -269,7 +269,7 @@ val dashless = rawResourcePatch(
 @Suppress("unused")
 val favouriteAnything = rawResourcePatch(
     name = "Favourite any image or video",
-    description = "Star any image or video in the media viewer to keep it in your GIF favourites."
+    description = "Star any image or video to keep it in your GIF favourites."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -280,7 +280,7 @@ val favouriteAnything = rawResourcePatch(
 @Suppress("unused")
 val freeNitro = rawResourcePatch(
     name = "Send Nitro stickers and emojis as links",
-    description = "Stickers and emojis you'd need Nitro for are sent as a link, which shows up in chat as the sticker or emoji image."
+    description = "Sends Nitro emojis and stickers as links that show as the image."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -291,7 +291,7 @@ val freeNitro = rawResourcePatch(
 @Suppress("unused")
 val customVoiceMessages = bytecodePatch(
     name = "Send audio as voice messages",
-    description = "An audio file sent on its own becomes a real voice message, with a waveform. Needs Android 10 or newer."
+    description = "Audio files are sent as voice messages. Android 10 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -427,7 +427,7 @@ internal fun pastelReplyText(method: app.morphe.patcher.util.proxy.mutableTypes.
 @Suppress("unused")
 val pastelize = bytecodePatch(
     name = "Pastel name colors",
-    description = "Names without a role color get a soft pastel color, always the same for each person."
+    description = "Names without a role color get a soft pastel one."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -521,7 +521,7 @@ internal fun systemFontBridge(method: app.morphe.patcher.util.proxy.mutableTypes
 @Suppress("unused")
 val forceSystemFont = bytecodePatch(
     name = "Use your phone's font",
-    description = "Replaces Discord's font (gg sans) with your phone's, everywhere. Needs Android 9 or newer."
+    description = "Replaces Discord's font (gg sans) with your phone's, everywhere. Android 9 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -749,7 +749,7 @@ internal fun scaleMessageGutterWidth(method: app.morphe.patcher.util.proxy.mutab
 @Suppress("unused")
 val messageHighlights = bytecodePatch(
     name = "Message highlights",
-    description = "Change the left bar thickness and highlight colors for replies, mentions and deleted messages."
+    description = "Pick bar width and colors for replies, mentions and deleted messages."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -772,7 +772,7 @@ internal const val QUEST_DESKTOP_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x
 internal const val QUEST_AGENT_GUARD_SIZE = 14
 
 /**
- * Discord's OkHttp interceptor replaces every request's User-Agent with Discord-Android/348010;RNA.
+ * Discord's OkHttp interceptor replaces every request's User-Agent with Discord-Android/349009;RNA.
  * A request that already says it's the Windows desktop app passes through untouched; everything else is unchanged.
  * Locals v0-v2 are free: the interceptor has 5 registers and 2 of them are parameters.
  */
@@ -803,7 +803,7 @@ internal fun keepDesktopQuestAgent(method: app.morphe.patcher.util.proxy.mutable
 @Suppress("unused")
 val questCompleter = bytecodePatch(
     name = "Complete Quests automatically",
-    description = "Finishes video, Play and Activity Quests in the background. You still claim rewards. Discord may pause Quests on accounts that do this."
+    description = "Finishes video, Play and Activity Quests in the background. Discord may pause Quests on accounts that do this."
 ) {
     compatibleWith(discord)
     section(PLUGINS)

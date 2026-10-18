@@ -1,3 +1,55 @@
+## [1.16.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.15.0...v1.16.0) (2026-10-18)
+
+### ✨ New Features
+
+* **Discord - Venus settings:** Add Backup and restore to save every Venus setting to a file or the clipboard and bring it back after patching again ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
+* **Discord - Venus settings:** Add a search bar to the Features list that finds features by name, description or option ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
+* **Discord - Venus settings:** Add Start with the essentials, a one-tap setup on a fresh install that turns on eight popular offline features, with Undo
+* **Discord - Venus settings:** Turn a feature on right from its own page: the Turned off card now has a switch, so you don't have to go back to Features
+* **Discord - Venus settings:** Picking a choice, a color or a segment gives Discord's own light haptic tick, like its switches already do
+
+### 🐛 Bug Fixes
+
+* **Discord - Custom themes:** Fixed some colors staying Discord's own after picking a theme on Discord 349.9. Colors that Discord's visual refresh experiment overrides now follow the theme, and switching themes refreshes Discord's cached styles
+* **Discord - Custom themes:** Fixed some theme colors being ignored: `#transparent`, colors wrapped over lines and keys with a stray space (LilyPichu, Silver Sliver, It's Ourple!! and Sõmnum). A slot a theme leaves as `false` now always keeps Discord's color
+* **Discord - Custom themes:** Fixed 43 color keys used by published themes, like TEXT_SECONDARY and the button and status colors, doing nothing on Discord 349.9. When two keys color the same part, the more specific one now wins, whatever order the theme lists them in
+* **Discord - Account switcher:** Fixed saved accounts disappearing some time after adding one ([#69](https://github.com/VenusIsJaded/Venus-Patches/issues/69)). When Android had closed Discord in the background and started it again, Venus nudged Discord's saved-accounts list before Discord had read it, and Discord then saved its still-empty list over every account. Venus now waits until Discord has read the list, and never saves the token of the account you're switching to under the one you're leaving
+* **Discord - Keep deleted messages:** Fixed deleted messages and edits not being kept on Discord 349.9. Venus listened to the wrong module for Discord's events, which also stopped Show hidden channels, User and server reviews, Complete Quests automatically, Fix unknown mentions, Translate messages, User activity notifications and Message highlights from receiving them
+* **Discord - Complete Quests automatically:** Fixed Activity and Play Quests being reported complete before Discord confirmed completion
+* **Discord - Complete Quests automatically:** Fixed queued Activity requests and late replies continuing after switch-off, logout or account changes
+* **Discord - Complete Quests automatically:** Fixed Activity heartbeats continuing after expiry, suspension, removal or completion on another client
+* **Discord - Complete Quests automatically:** Fixed accepting Quests dropping sealed metadata by passing the Quest ID where Discord expects a decision ID
+* **Discord - Venus settings:** Fixed six switches on the Quests and Deleted messages pages staying in English in every other language
+* **Discord - User and server reviews:** Fixed tapping Cancel on Discord's authorize screen showing a "Couldn't sign in" error instead of just closing
+
+### 🔧 Improvements
+
+* **Discord - Custom themes:** The page is now a theme gallery: Discord's colors and every installed theme appear as tiles that preview each theme in its own colors, with the one in use ringed and checked, and a tile to browse more. Install errors show right under the link field
+* **Discord - Custom themes:** Switching themes or turning them off is more than three times faster, since Venus now undoes only the colors the theme changed
+* **Discord - Venus settings:** Slimmer Features rows: feature titles get the full width, the divider and round button beside each switch are now a small arrow, and every description fits on one or two lines, in every language
+* **Discord - Venus settings:** The reopen-Discord question and voice-message problems use Discord's own dialogs instead of Android's plain alert
+* **Discord - Venus settings:** Clearer wording for review actions, connection problems and the notification permission message
+* **Discord - Venus settings:** Remove redundant top status cards on option pages when a feature is on and its preview or options speak for themselves
+* **Discord - Venus settings:** Reset to defaults confirms with "Settings reset to defaults" instead of "Settings restored"
+* **Discord - Venus settings:** In-progress labels like Saving…, Opening… and Signing in… use one consistent ellipsis in every language
+* **Discord - Venus settings:** Remove Catalan as a settings language; Venus settings now come in 30 languages
+* **Discord - Venus settings:** Tapping the emoji button in preview message bars opens the expression picker, like in Discord
+* **Discord - Translate messages:** The long-press menu in the preview places Translate and Show original right below Copy Text, like Discord's real menu
+* **Discord - Show device indicators:** The preview is directly interactive with its DM, Members and Profile switcher and Change Alex's devices button
+* **Discord - Send Nitro stickers and emojis as links:** The preview's picker matches Discord's Emojis, GIFs and Stickers sheet, with unlocked Nitro items shown without a lock
+* **Discord - Message highlights:** The preview shows one chat picture that updates live and glows only the highlight you just changed
+* **Discord - Keep deleted messages:** The preview shows an edited message's history and an outlined deleted message, updating live as you flip Show edit history
+* **Discord - Pastel name colors:** The preview shows one chat picture that updates live as you flip Replace role colors or Color message text
+* **Discord - Complete Quests automatically:** The status card no longer says it's waiting while a Quest runs, and says what to do when every Quest type is off
+* **Discord - Account switcher:** The status card no longer repeats the account count from its title, and shows who you're signed in as first
+* **Discord - User activity notifications:** Turning All friends back on reads Watching all friends again, and Reset chosen people says what it clears
+* **Discord - Keep deleted messages:** Hide the Manage section while nothing is kept, instead of showing a greyed-out Clear row
+* **Discord - Venus settings:** The About page says once that your settings and kept deleted messages are saved, not in two matching lines
+
+### 🚀 Updated App Support
+
+* **Discord:** Support `349.9 - Stable`
+
 ## [1.15.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.14.0...v1.15.0) (2026-10-17)
 
 ### ✨ New Features

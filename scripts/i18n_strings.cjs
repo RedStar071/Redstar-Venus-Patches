@@ -163,7 +163,7 @@ function stringsInExpr(exprTokens, out) {
 // Helpers whose string arguments (by position) are passed through tr() inside them.
 const ARGS = {tr:[0], pl:[1, 2], take:[1, 2], footnote:[1], statusCard:[1], reviewToast:[1], confirmAction:[0, 1, 2], actionRow:[2, 3],
     switchRow:[2, 3], toggle:[2, 3], withOptions:[3, 4, 5], route:[1], section:[0], settingNode:[1, 2], link:[1, 2], option:[1, 2],
-    radioGroup:[2], groupTitle:[1], linkRow:[1, 2], pill:[1], button:[2], previewScreen:[2], inputWithButton:[4], picker:[1], count:[], questStatus:[0], mutate:[3], userNotifShow:[0]};
+    radioGroup:[2], groupTitle:[1], linkRow:[1, 2], pill:[1], button:[2], previewScreen:[2], inputWithButton:[4], picker:[1], count:[], questStatus:[0], mutate:[3], userNotifShow:[0], showProblem:[0], backupRow:[1, 2]};
 
 const tokens = tokenize(source);
 const found = new Set();
@@ -177,7 +177,10 @@ for (let i = 0; i < tokens.length - 1; i++) {
     const name = t.value;
     if (!(name in ARGS)) continue;
     const {args} = splitArgs(tokens, i + 1);
-    const positions = name === 'toggle' && args.length === 3 ? [1, 2] : ARGS[name];
+    // toggle(key, label, subLabel[, icon]) on option pages vs toggle(group, key, title, hint) on the Features list:
+    // the page helper's last argument is a rowIcon(...) call, never a plain string.
+    const pageToggle = name === 'toggle' && (args.length === 3 || args.length === 4 && !(args[3].length === 1 && args[3][0].type === 'str'));
+    const positions = pageToggle ? [1, 2] : ARGS[name];
     const out = [];
     positions.forEach(idx => stringsInExpr(args[idx], out));
     if (name === 'count' && args[1] && args[1].length === 1 && args[1][0].type === 'str') {
@@ -209,7 +212,7 @@ for (const table of ['PLATFORM_LABELS', 'PLATFORM_STATUS']) {
 }
 const hidden = /const HIDDEN_CHANNEL = "([^"]+)", HIDDEN_CATEGORY = "([^"]+)"/.exec(source);
 if (hidden) { found.add(hidden[1]); found.add(hidden[2]); }
-for (const value of ["Kept deleted messages are saved on this phone.", "Kept deleted messages couldn't be saved.", "Saved deleted messages couldn't be loaded."]) found.add(value);
+for (const value of ["Kept deleted messages couldn't be saved.", "Saved deleted messages couldn't be loaded."]) found.add(value);
 
 if (require.main === module) {
     process.stdout.write(JSON.stringify(Array.from(found).sort(), null, 1) + '\n');
