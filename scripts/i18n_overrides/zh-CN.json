@@ -651,5 +651,11 @@
  "{n} person watched": "关注了 {n} 人",
  "{n} people watched": "关注了 {n} 人",
  "{n} theme": "{n} 个主题",
- "{n} themes": "{n} 个主题"
+ "{n} themes": "{n} 个主题",
+ "Video Quests": "视频 Quest",
+ "Play Quests": "游戏 Quest",
+ "Activity Quests": "活动 Quest",
+ "Accept new Quests": "接取新 Quest",
+ "Show edit history": "显示编辑历史",
+ "Keep after restarting": "重启后保留"
 }

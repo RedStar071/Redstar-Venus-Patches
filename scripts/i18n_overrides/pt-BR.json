@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} tema",
   "other": "{n} temas"
- }
+ },
+ "Video Quests": "Missões de vídeo",
+ "Play Quests": "Missões de jogo",
+ "Activity Quests": "Missões de Atividade",
+ "Accept new Quests": "Aceitar novas Missões",
+ "Show edit history": "Mostrar histórico de edições",
+ "Keep after restarting": "Manter ao reiniciar"
 }

@@ -651,5 +651,11 @@
  "{n} person watched": "Đang theo dõi {n} người",
  "{n} people watched": "Đang theo dõi {n} người",
  "{n} theme": "{n} chủ đề",
- "{n} themes": "{n} chủ đề"
+ "{n} themes": "{n} chủ đề",
+ "Video Quests": "Nhiệm vụ video",
+ "Play Quests": "Nhiệm vụ chơi game",
+ "Activity Quests": "Nhiệm vụ Hoạt động",
+ "Accept new Quests": "Nhận Nhiệm vụ mới",
+ "Show edit history": "Hiện lịch sử chỉnh sửa",
+ "Keep after restarting": "Giữ lại sau khi khởi động lại"
 }

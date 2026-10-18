@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} thème",
   "other": "{n} thèmes"
- }
+ },
+ "Video Quests": "Quêtes vidéo",
+ "Play Quests": "Quêtes de jeu",
+ "Activity Quests": "Quêtes d'activité",
+ "Accept new Quests": "Accepter les nouvelles quêtes",
+ "Show edit history": "Afficher l'historique des modifications",
+ "Keep after restarting": "Conserver après un redémarrage"
 }

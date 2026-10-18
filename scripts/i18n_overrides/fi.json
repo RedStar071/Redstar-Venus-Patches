@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} teema",
   "other": "{n} teemaa"
- }
+ },
+ "Video Quests": "Video-Questit",
+ "Play Quests": "Peli-Questit",
+ "Activity Quests": "Aktiviteetti-Questit",
+ "Accept new Quests": "Hyväksy uudet Questit",
+ "Show edit history": "Näytä muokkaushistoria",
+ "Keep after restarting": "Säilytä uudelleenkäynnistyksen jälkeen"
 }

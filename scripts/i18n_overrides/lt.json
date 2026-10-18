@@ -751,5 +751,11 @@
   "one": "{n} tema",
   "few": "{n} temos",
   "other": "{n} temų"
- }
+ },
+ "Video Quests": "Vaizdo įrašų Quest užduotys",
+ "Play Quests": "Žaidimo Quest užduotys",
+ "Activity Quests": "Veiklos Quest užduotys",
+ "Accept new Quests": "Priimti naujas Quest užduotis",
+ "Show edit history": "Rodyti redagavimo istoriją",
+ "Keep after restarting": "Išsaugoti po paleidimo iš naujo"
 }

@@ -177,7 +177,10 @@ for (let i = 0; i < tokens.length - 1; i++) {
     const name = t.value;
     if (!(name in ARGS)) continue;
     const {args} = splitArgs(tokens, i + 1);
-    const positions = name === 'toggle' && args.length === 3 ? [1, 2] : ARGS[name];
+    // toggle(key, label, subLabel[, icon]) on option pages vs toggle(group, key, title, hint) on the Features list:
+    // the page helper's last argument is a rowIcon(...) call, never a plain string.
+    const pageToggle = name === 'toggle' && (args.length === 3 || args.length === 4 && !(args[3].length === 1 && args[3][0].type === 'str'));
+    const positions = pageToggle ? [1, 2] : ARGS[name];
     const out = [];
     positions.forEach(idx => stringsInExpr(args[idx], out));
     if (name === 'count' && args[1] && args[1].length === 1 && args[1][0].type === 'str') {

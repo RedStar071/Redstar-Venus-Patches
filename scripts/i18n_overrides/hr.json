@@ -751,5 +751,11 @@
   "one": "{n} tema",
   "few": "{n} teme",
   "other": "{n} tema"
- }
+ },
+ "Video Quests": "Video Questovi",
+ "Play Quests": "Questovi igranja",
+ "Activity Quests": "Questovi aktivnosti",
+ "Accept new Quests": "Prihvaćaj nove Questove",
+ "Show edit history": "Prikaži povijest uređivanja",
+ "Keep after restarting": "Zadrži nakon ponovnog pokretanja"
 }

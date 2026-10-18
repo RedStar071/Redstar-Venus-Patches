@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} tema",
   "other": "{n} tema"
- }
+ },
+ "Video Quests": "Video Görevleri",
+ "Play Quests": "Oyun Görevleri",
+ "Activity Quests": "Etkinlik Görevleri",
+ "Accept new Quests": "Yeni Görevleri kabul et",
+ "Show edit history": "Düzenleme geçmişini göster",
+ "Keep after restarting": "Yeniden başlatınca da sakla"
 }

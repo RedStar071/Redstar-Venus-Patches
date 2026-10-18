@@ -651,5 +651,11 @@
  "{n} person watched": "{n} orang dipantau",
  "{n} people watched": "{n} orang dipantau",
  "{n} theme": "{n} tema",
- "{n} themes": "{n} tema"
+ "{n} themes": "{n} tema",
+ "Video Quests": "Quest video",
+ "Play Quests": "Quest bermain",
+ "Activity Quests": "Quest Aktivitas",
+ "Accept new Quests": "Terima Quest baru",
+ "Show edit history": "Tampilkan riwayat edit",
+ "Keep after restarting": "Simpan setelah dimulai ulang"
 }

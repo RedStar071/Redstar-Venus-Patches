@@ -751,5 +751,11 @@
   "one": "{n} motiv",
   "few": "{n} motivy",
   "other": "{n} motivů"
- }
+ },
+ "Video Quests": "Video Questy",
+ "Play Quests": "Herní Questy",
+ "Activity Quests": "Questy v aktivitách",
+ "Accept new Quests": "Přijímat nové Questy",
+ "Show edit history": "Zobrazit historii úprav",
+ "Keep after restarting": "Zachovat i po restartu"
 }

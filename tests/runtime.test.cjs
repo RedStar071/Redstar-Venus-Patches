@@ -3869,12 +3869,16 @@ test('every language file has every Venus text and keeps its {placeholders}',()=
     assert.ok(codes.includes('ru'));assert.ok(codes.length>=29);
     const start=raw.indexOf('UI_LANGUAGES');assert.ok(start>0);
     const names=raw.slice(start,raw.indexOf('UI_CODES',start)).replace(/\s/g,'');
+    // Every text Venus passes through tr()/pl() (as scripts/i18n_strings.cjs finds it), so a new row can't ship in English.
+    const {found}=require('../scripts/i18n_strings.cjs');assert.ok(found.size>=700);
+    for (const label of ['Show edit history','Keep after restarting','Video Quests','Accept new Quests']) assert.ok(found.has(label),'option row '+label+' is listed');
     for (const code of codes) {
         assert.ok(names.includes('["'+code+'",'),code+' is listed in Language');
         const pack=JSON.parse(fs.readFileSync(folder+'/'+code+'.json','utf8'));assert.equal(pack.code,code);
         for (const [english,value] of Object.entries(pack.strings)) for (const text of typeof value==='object'?Object.values(value):[value])
             assert.deepEqual((text.match(/\{\w+\}/g)||[]).sort(),(english.match(/\{\w+\}/g)||[]).sort(),code+': '+english);
-        assert.ok(Object.keys(pack.strings).length>=300,code+' is complete');
+        const missing=[...found].filter(english=>!(english in pack.strings));
+        assert.deepEqual(missing,[],code+' translates every Venus text');
     }
 });
 

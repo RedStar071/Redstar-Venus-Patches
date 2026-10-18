@@ -751,5 +751,11 @@
   "one": "{n} motyw",
   "few": "{n} motywy",
   "many": "{n} motywów"
- }
+ },
+ "Video Quests": "Questy wideo",
+ "Play Quests": "Questy w grach",
+ "Activity Quests": "Questy w aktywnościach",
+ "Accept new Quests": "Przyjmuj nowe Questy",
+ "Show edit history": "Pokazuj historię edycji",
+ "Keep after restarting": "Zachowaj po ponownym uruchomieniu"
 }

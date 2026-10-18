@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} thema",
   "other": "{n} thema's"
- }
+ },
+ "Video Quests": "Video-Quests",
+ "Play Quests": "Speel-Quests",
+ "Activity Quests": "Activiteit-Quests",
+ "Accept new Quests": "Nieuwe Quests accepteren",
+ "Show edit history": "Bewerkingsgeschiedenis tonen",
+ "Keep after restarting": "Bewaren na herstart"
 }

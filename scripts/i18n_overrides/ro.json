@@ -751,5 +751,11 @@
   "one": "{n} temă",
   "few": "{n} teme",
   "other": "{n} de teme"
- }
+ },
+ "Video Quests": "Misiuni Quest video",
+ "Play Quests": "Misiuni Quest de joc",
+ "Activity Quests": "Misiuni Quest de Activitate",
+ "Accept new Quests": "Acceptă misiuni Quest noi",
+ "Show edit history": "Afișează istoricul editărilor",
+ "Keep after restarting": "Păstrează după repornire"
 }

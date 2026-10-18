@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} тема",
   "other": "{n} теми"
- }
+ },
+ "Video Quests": "Видео Quest мисии",
+ "Play Quests": "Quest мисии за игра",
+ "Activity Quests": "Quest мисии за активност",
+ "Accept new Quests": "Приемане на нови Quest мисии",
+ "Show edit history": "Показване на историята на редакциите",
+ "Keep after restarting": "Запазване след рестарт"
 }

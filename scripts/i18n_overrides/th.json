@@ -651,5 +651,11 @@
  "{n} person watched": "ติดตาม {n} คน",
  "{n} people watched": "ติดตาม {n} คน",
  "{n} theme": "{n} ธีม",
- "{n} themes": "{n} ธีม"
+ "{n} themes": "{n} ธีม",
+ "Video Quests": "Quests วิดีโอ",
+ "Play Quests": "Quests เล่นเกม",
+ "Activity Quests": "Quests กิจกรรม",
+ "Accept new Quests": "รับ Quests ใหม่",
+ "Show edit history": "แสดงประวัติการแก้ไข",
+ "Keep after restarting": "เก็บไว้หลังรีสตาร์ท"
 }

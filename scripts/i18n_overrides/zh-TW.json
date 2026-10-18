@@ -651,5 +651,11 @@
  "{n} person watched": "關注了 {n} 人",
  "{n} people watched": "關注了 {n} 人",
  "{n} theme": "{n} 個主題",
- "{n} themes": "{n} 個主題"
+ "{n} themes": "{n} 個主題",
+ "Video Quests": "影片 Quest",
+ "Play Quests": "遊戲 Quest",
+ "Activity Quests": "活動 Quest",
+ "Accept new Quests": "接取新 Quest",
+ "Show edit history": "顯示編輯紀錄",
+ "Keep after restarting": "重新啟動後保留"
 }

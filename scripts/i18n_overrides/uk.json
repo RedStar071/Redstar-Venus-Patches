@@ -751,5 +751,11 @@
   "one": "{n} тема",
   "few": "{n} теми",
   "many": "{n} тем"
- }
+ },
+ "Video Quests": "Завдання з відео",
+ "Play Quests": "Ігрові завдання",
+ "Activity Quests": "Завдання в активностях",
+ "Accept new Quests": "Приймати нові завдання",
+ "Show edit history": "Показувати історію змін",
+ "Keep after restarting": "Зберігати після перезапуску"
 }

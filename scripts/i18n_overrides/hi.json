@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} थीम",
   "other": "{n} थीम"
- }
+ },
+ "Video Quests": "वीडियो Quest",
+ "Play Quests": "गेम Quest",
+ "Activity Quests": "एक्टिविटी Quest",
+ "Accept new Quests": "नए Quest स्वीकार करें",
+ "Show edit history": "एडिट हिस्ट्री दिखाएँ",
+ "Keep after restarting": "रीस्टार्ट के बाद भी रखें"
 }

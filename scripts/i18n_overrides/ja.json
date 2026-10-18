@@ -651,5 +651,11 @@
  "{n} person watched": "{n} 人を見守り中",
  "{n} people watched": "{n} 人を見守り中",
  "{n} theme": "{n} 個のテーマ",
- "{n} themes": "{n} 個のテーマ"
+ "{n} themes": "{n} 個のテーマ",
+ "Video Quests": "動画クエスト",
+ "Play Quests": "プレイクエスト",
+ "Activity Quests": "アクティビティクエスト",
+ "Accept new Quests": "新しいクエストを受注",
+ "Show edit history": "編集履歴を表示",
+ "Keep after restarting": "再起動後も保持"
 }

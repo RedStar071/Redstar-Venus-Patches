@@ -726,5 +726,11 @@
  "{n} themes": {
   "one": "{n} tema",
   "other": "{n} teman"
- }
+ },
+ "Video Quests": "Video-Quests",
+ "Play Quests": "Spel-Quests",
+ "Activity Quests": "Aktivitets-Quests",
+ "Accept new Quests": "Acceptera nya Quests",
+ "Show edit history": "Visa redigeringshistorik",
+ "Keep after restarting": "Behåll efter omstart"
 }

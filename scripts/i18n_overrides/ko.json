@@ -651,5 +651,11 @@
  "{n} person watched": "{n}명 지켜보는 중",
  "{n} people watched": "{n}명 지켜보는 중",
  "{n} theme": "테마 {n}개",
- "{n} themes": "테마 {n}개"
+ "{n} themes": "테마 {n}개",
+ "Video Quests": "동영상 퀘스트",
+ "Play Quests": "플레이 퀘스트",
+ "Activity Quests": "활동 퀘스트",
+ "Accept new Quests": "새 퀘스트 수락",
+ "Show edit history": "수정 기록 표시",
+ "Keep after restarting": "다시 시작해도 유지"
 }

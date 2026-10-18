@@ -751,5 +751,11 @@
   "one": "{n} тема",
   "few": "{n} темы",
   "many": "{n} тем"
- }
+ },
+ "Video Quests": "Задания с видео",
+ "Play Quests": "Игровые задания",
+ "Activity Quests": "Задания в активностях",
+ "Accept new Quests": "Принимать новые задания",
+ "Show edit history": "Показывать историю правок",
+ "Keep after restarting": "Сохранять после перезапуска"
 }
