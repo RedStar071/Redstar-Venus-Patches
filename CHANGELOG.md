@@ -5,26 +5,47 @@
 * **Discord - Venus settings:** Add Backup and restore to save every Venus setting to a file or the clipboard and bring it back after patching again ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
 * **Discord - Venus settings:** Add a search bar to the Features list that finds features by name, description or option ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
 
+### 🐛 Bug Fixes
+
+* **Discord - Venus settings:** Fixed six switches on the Quests and Deleted messages pages staying in English in every other language
+* **Discord - User and server reviews:** Fixed tapping Cancel on Discord's authorize screen showing a "Couldn't sign in" error instead of just closing
+
+### 🔧 Improvements
+
+* **Discord - Venus settings:** Remove redundant top status cards on option pages when a feature is on and its preview or options speak for themselves
+* **Discord - Venus settings:** In-progress labels like Saving…, Opening… and Signing in… use one consistent ellipsis in every language
+* **Discord - Venus settings:** Remove Catalan as a settings language; Venus settings now come in 30 languages
+* **Discord - Venus settings:** Tapping the emoji button in preview message bars opens the expression picker, like in Discord
+* **Discord - Translate messages:** The long-press menu in the preview places Translate and Show original right below Copy Text, like Discord's real menu
+* **Discord - Show device indicators:** The preview is directly interactive with its DM, Members and Profile switcher and Change Alex's devices button
+* **Discord - Send Nitro stickers and emojis as links:** The preview's picker matches Discord's Emojis, GIFs and Stickers sheet, with unlocked Nitro items shown without a lock
+* **Discord - Message highlights:** The preview shows one chat picture that updates live and glows only the highlight you just changed
+* **Discord - Keep deleted messages:** The preview shows an edited message's history and an outlined deleted message, updating live as you flip Show edit history
+* **Discord - Pastel name colors:** The preview shows one chat picture that updates live as you flip Replace role colors or Color message text
+
 ### 🚀 Updated App Support
 
 * **Discord:** Support `349.9 - Stable`
 
 ## [1.15.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.14.0...v1.15.0) (2026-10-17)
 
+### ✨ New Features
+
+* **Discord - Venus settings:** Add Catalan (Català) as a settings language, bringing Venus settings to 31 languages
+
 ### 🔧 Improvements
 
-* **Discord - Venus settings:** Hand-review and refine all 29 translated settings languages for more natural, idiomatic wording
-* **Discord - Venus settings:** Remove redundant top status cards on option pages when a feature is already on and its preview or options speak for themselves
+* **Discord - Venus settings:** Hand-review and refine all 30 translated settings languages for more natural, idiomatic wording
 * **Discord - Venus settings:** Channel, DM and server headers in previews show Discord's title chevron and round action buttons
-* **Discord - Venus settings:** Message bars in previews show Discord's gift button when Hide the gift button is off, and tapping the emoji button opens the expression picker
+* **Discord - Venus settings:** Message bars in previews show Discord's gift button when Hide the gift button is off
 * **Discord - Venus settings:** Long-press message menus in previews show Discord's quick reaction row above the actions card
 * **Discord - Double-tap to reply:** The preview shows the reply line above your message, the @ ON mention switch in the reply bar and Discord's blue target highlight
-* **Discord - Translate messages:** The long-press menu in the preview places Translate and Show original right below Copy Text, matching Discord's real message menu
-* **Discord - Show device indicators:** The preview is directly interactive with the DM, Members and Profile switcher and Change Alex's devices button, and the profile shows Discord's avatar cutout and Message, Call and Video buttons
-* **Discord - Send Nitro stickers and emojis as links:** The expression picker in the preview matches Discord's real Emojis, GIFs and Stickers sheet with search bar, server header, unlocked Nitro items without a lock icon and bottom category bar, opened from the message bar's emoji button
-* **Discord - Message highlights:** The preview shows a static chat picture with your mention reply and kept deleted message that updates live and glows only the highlight you just changed
-* **Discord - Keep deleted messages:** The preview shows a static chat picture with an edited message's history and an outlined deleted message that updates live as you flip Show edit history
-* **Discord - Pastel name colors:** The preview shows a static chat picture that updates live as you flip Replace role colors or Color message text
+* **Discord - Translate messages:** Try it in the preview lets you hold the message to open Discord's menu and tap Translate or Show original
+* **Discord - Show device indicators:** The profile preview shows Discord's avatar cutout and Message, Call and Video buttons
+* **Discord - Send Nitro stickers and emojis as links:** The picker preview shows Discord's sheet handle and server category header
+* **Discord - Message highlights:** The preview includes Discord's channel header and message bar, and lights up messages as you change colors or bar width below
+* **Discord - Keep deleted messages:** The preview plays with the Watch controls without a separate Try it switch
+* **Discord - Pastel name colors:** The preview follows your color switches live without a separate Try it switch
 
 ## [1.14.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.13.0...v1.14.0) (2026-10-17)
 
