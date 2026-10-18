@@ -1,4 +1,4 @@
-## [1.16.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.15.0...v1.16.0) (2026-10-17)
+## [1.16.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.15.0...v1.16.0) (2026-10-18)
 
 ### ✨ New Features
 
