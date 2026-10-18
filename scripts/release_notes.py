@@ -5,7 +5,7 @@
     python3 scripts/release_notes.py 1.6.1       # the GitHub release body for 1.6.1
 
 Morphe Manager reads CHANGELOG.md from main (see AGENTS.md). Each "### " heading becomes a card
-(New, Fixes, Improvements, Performance, App support) and each "* **Scope:** text" bullet a row.
+(App support, New, Fixes, Improvements, Performance) and each "* **Scope:** text" bullet a row.
 """
 import re
 import sys
@@ -15,9 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 CHANGELOG = ROOT / "CHANGELOG.md"
 REPO = "https://github.com/VenusIsJaded/Venus-Patches"
 
-# The headings Morphe Manager maps to its own icons and titles, in the order they're written.
-SECTIONS = ["### ✨ New Features", "### 🐛 Bug Fixes", "### 🔧 Improvements",
-            "### ⚡ Performance Improvements", "### 🚀 Updated App Support"]
+# The headings Morphe Manager maps to its own icons and titles, in the order they're written. App support comes
+# first, so the Discord version a release works with is the first thing you read.
+SECTIONS = ["### 🚀 Updated App Support", "### ✨ New Features", "### 🐛 Bug Fixes", "### 🔧 Improvements",
+            "### ⚡ Performance Improvements"]
 HEADING = re.compile(r"^## (?:\[(?P<linked>[^\]]+)\]\((?P<url>[^)]+)\)|(?P<bare>\S+)) \((?P<date>\d{4}-\d{2}-\d{2})\)$")
 BULLET = re.compile(r"^\* \*\*Discord(?: - [^*:]+)?:\*\* (?P<desc>\S.*[^.])$")
 # Release-page leftovers that don't belong in notes (see AGENTS.md).
