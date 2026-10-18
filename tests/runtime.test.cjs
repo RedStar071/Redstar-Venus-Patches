@@ -5324,7 +5324,7 @@ test('Save to a file goes through Android\'s Save to screen, and cancelling it i
 
 test('the About page names the Discord version the patches are pinned to',()=>{
     const pinned=/version = "([\d.]+) - Stable"/.exec(fs.readFileSync('patches/src/main/kotlin/app/venus/patches/DiscordPatches.kt','utf8'));
-    const shown=/const DISCORD_VERSION = "([\d.]+)";/.exec(raw);
+    const shown=/DISCORD_VERSION\s*=\s*"([\d.]+)"/.exec(raw);
     assert.ok(pinned && shown);assert.equal(shown[1],pinned[1],'bootstrap.js DISCORD_VERSION matches compatibleWith in DiscordPatches.kt');
     assert.ok(fs.readFileSync('README.md','utf8').includes('**'+pinned[1]+' - Stable**'),'README says the same version');
 });
