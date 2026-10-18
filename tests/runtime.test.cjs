@@ -1608,8 +1608,8 @@ test('ReviewDB user context menu gains a Reviews entry and signed-in actions fol
     const m=await loadedReviews(b,'111111111111111111');
     const rows=m.render().props.children.props.children[0].props.children;
     rows[1].type(rows[1].props).props.children.props.onLongPress();
-    assert.deepEqual(Array.from(b.simple.at(-1).options,o=>o.label),['Copy Text','Delete Review','Report Review']);
-    b.simple.at(-1).options[1].onPress();assert.equal(b.confirms.at(-1).title,'Delete Review');b.confirms.at(-1).onConfirm();await flush();
+    assert.deepEqual(Array.from(b.simple.at(-1).options,o=>o.label),['Copy Text','Delete review','Report review']);
+    b.simple.at(-1).options[1].onPress();assert.equal(b.confirms.at(-1).title,'Delete review');b.confirms.at(-1).onConfirm();await flush();
     const del=b.requests.find(([,o])=>o&&o.method==='DELETE');assert.equal(del[1].headers.authorization,'review-only-token');assert.deepEqual(JSON.parse(del[1].body),{reviewid:1});
     rows[0].type(rows[0].props).props.children.props.onLongPress();assert.equal(b.simple.at(-1).header.title,'ReviewDB System Message');assert.deepEqual(Array.from(b.simple.at(-1).options,o=>o.label),['Copy Text']);
 });

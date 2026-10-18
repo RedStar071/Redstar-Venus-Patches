@@ -1087,7 +1087,7 @@
             el(RN.View, {key:"status", style:[s.card, {flexDirection:"row", alignItems:"center", gap:14}]},
                 el(RN.View, {style:{width:12, height:12, borderRadius:6, backgroundColor:STATUS_HEX[health]}}),
                 el(RN.View, {style:{flex:1, gap:2}},
-                    text(tr(health === "online" ? "Everything's working" : health === "idle" ? (status.storage === "waiting" || status.storage === "loading" ? "Loading your settings" : "Working, see below") : "Something went wrong"),
+                    text(tr(health === "online" ? "Everything's working" : health === "idle" ? (status.storage === "waiting" || status.storage === "loading" ? "Loading your settings" : "Working, with a note below") : "Something went wrong"),
                         "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                     text(aboutText(), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
             el(Group, {key:"links", title:tr("Links")},
@@ -4845,7 +4845,7 @@
         const ui=reviewUI();
         if (typeof ui.pushModal!=="function" || typeof ui.popModal!=="function" || !ui.OAuth) {RN.Alert.alert("ReviewDB",tr("Discord's authorization screen is unavailable. Reopen this page and try again."));return;}
         const accountId=currentId();
-        if (!accountId) {RN.Alert.alert("ReviewDB",tr("Discord account unavailable"));return;}
+        if (!accountId) {RN.Alert.alert("ReviewDB",tr("Discord hasn't loaded your account yet. Try again in a moment."));return;}
         const attempt=++reviewAuthAttempt, key="oauth2-authorize";
         let closed=false;
         reviewAuthError="";notify("reviewDB");
@@ -4925,13 +4925,13 @@
         }
         const options=[{label:tr("Copy Text"),onPress:() => {
             try { (ui.clipboard || RN.Clipboard).setString(review.comment); } catch (_) {}
-            reviewToast(ui,"Copied Review Text",venusIcon(4843,"CopyIcon"));
+            reviewToast(ui,"Review copied",venusIcon(4843,"CopyIcon"));
         }}];
         if (reviewAuth() && !system) {
-            if (sender.discordID===me || owner===me || reviewAdmins.has(me)) options.push({label:tr("Delete Review"),isDestructive:true,
-                onPress:() => confirm(tr("Delete Review"),tr("Are you sure you want to delete this review?"),() => mutate("/users/"+owner+"/reviews","DELETE",{reviewid:review.id},"Review deleted"))});
-            options.push({label:tr("Report Review"),isDestructive:true,
-                onPress:() => confirm(tr("Report Review"),tr("Are you sure you want to report this review?"),() => mutate("/reports","PUT",{reviewid:review.id},"Review reported"))});
+            if (sender.discordID===me || owner===me || reviewAdmins.has(me)) options.push({label:tr("Delete review"),isDestructive:true,
+                onPress:() => confirm(tr("Delete review"),tr("Are you sure you want to delete this review?"),() => mutate("/users/"+owner+"/reviews","DELETE",{reviewid:review.id},"Review deleted"))});
+            options.push({label:tr("Report review"),isDestructive:true,
+                onPress:() => confirm(tr("Report review"),tr("Are you sure you want to report this review?"),() => mutate("/reports","PUT",{reviewid:review.id},"Review reported"))});
         }
         const title=system ? tr("ReviewDB System Message") : tr("Review by {name}",{name:String(sender.username || "Unknown")});
         if (typeof ui.simpleSheet==="function") try {
@@ -5558,7 +5558,7 @@
         const askEnableInSystem = () => {
             userNotif.permissionGranted = false; notify("userNotif");
             confirmAction("Allow Discord notifications?",
-                "Android notifications are turned off for Discord. Enable them in system settings to receive push notifications outside the app.",
+                "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.",
                 "Open settings", openSystemSettings);
         };
         const checkStatus = () => userNotifCheckPermissions().then(ok => {
@@ -7663,7 +7663,7 @@
             return Promise.resolve(false);
         }
         if (typeof global.fetch !== "function") {
-            customThemes.error = tr("Network fetch is unavailable right now.");
+            customThemes.error = tr("Can't reach the internet right now. Try again in a moment.");
             notify("customThemes");
             return Promise.resolve(false);
         }
