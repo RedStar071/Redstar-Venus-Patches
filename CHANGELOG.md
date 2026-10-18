@@ -15,6 +15,7 @@
 
 ### 🔧 Improvements
 
+* **Discord - Venus settings:** Slimmer Features rows: feature titles get the full width, the divider and round button beside each switch are now a small arrow, and every description fits on one or two lines, in every language
 * **Discord - Venus settings:** The reopen-Discord question and voice-message problems use Discord's own dialogs instead of Android's plain alert
 * **Discord - Venus settings:** Clearer wording for review actions, connection problems and the notification permission message
 * **Discord - Venus settings:** Remove redundant top status cards on option pages when a feature is on and its preview or options speak for themselves

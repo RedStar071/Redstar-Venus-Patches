@@ -254,9 +254,12 @@ Venus and Morphe, translations, tests, the module map), keep following it.
 - **Titles say what it does, in plain words**, at most 40 characters: "Keep deleted messages", "Send long
   messages", "Hide the gift button". Use sentence case and no full stop. Never use a plugin or code name
   (FreeNitro, NoDelete, Pastelize).
-- **Descriptions are one short line**, at most about 130 characters. They cover what the user will see, then
-  anything important: a limit, what leaves the phone, what it needs. For example: "Stickers and emojis you'd need
-  Nitro for are sent as a link, which shows up in chat as the sticker or emoji image."
+- **Descriptions are one short line**: aim for about 65 characters in English (at most 130), so they fit in one or
+  two lines of the Features list in every language. Say what the user will see, then only what really matters (a
+  limit, what leaves the phone, what it needs). For example: "Sends Nitro emojis and stickers as links that show as
+  the image." Details belong on the feature's own page, and a restart is explained by the Reopen Discord dialog.
+- Rows with their own page show a switch and a small arrow (`SubpageTrailing`). Keep the trailing side that narrow:
+  anything wider takes width from the title and description, which then wrap.
 - Write for someone who has never heard of the feature. Use "you", say "your phone" (not "the device"), and
   don't use words like "spoof", "hook", "prelude" or "endpoint".
 - Credits ("Based on … by …") go in the Morphe description and README, not in the Venus row.
