@@ -82,7 +82,7 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
 
 (async () => {
     const base = snapshot(TABLES);
-    const results = [];
+    const results = [], fresh = new Map();
     for (const entry of index) {
         let theme, text;
         try { text = fs.readFileSync(path.join(ROOT, entry.file), 'utf8').replace(/^\uFEFF/, ''); theme = JSON.parse(text); }
@@ -104,6 +104,11 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
             if (own.length) return !own.some(token => String(after[token + ':' + SLOTS[0]]).split('@')[0].toLowerCase().slice(0, 7) === h);
             return !drawn.has(h);
         }).map(([k]) => k);
+        // Revenge's false means "keep Discord's color for this slot": a theme key named after a 349.9 token must
+        // leave those slots on Discord's own raw key
+        // (which the theme's rawColors may still recolor, as in Revenge).
+        const falseSlotsChanged = Object.entries(declaredKeys).filter(([k, v]) => k in TABLES.sem && Array.isArray(v))
+            .flatMap(([k, v]) => v.slice(0, 4).map((c, i) => c === false && (tables.sem[k][SLOTS[i]] || {}).raw !== (TABLES.sem[k][SLOTS[i]] || {}).raw ? k + ':' + SLOTS[i] : null)).filter(Boolean);
         // Theme switch cost on its own: off then on again recompiles the whole theme into the tables.
         let switchMs = 0;
         if (!error) { const reps = 20, s0 = process.hrtime.bigint();
@@ -111,19 +116,37 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
             switchMs = Number(process.hrtime.bigint() - s0) / 1e6 / reps; }
         b.api.setSetting('customThemes', false);
         const restored = JSON.stringify(snapshot(tables)) === JSON.stringify(base);
-        results.push({name:entry.name, error, ms, declared:Object.keys(theme.semanticColors || {}).length, darkTokens:dark.length, restored, unlanded, switchMs});
+        fresh.set(entry.file, JSON.stringify(after));
+        results.push({name:entry.name, error, ms, declared:Object.keys(theme.semanticColors || {}).length, darkTokens:dark.length, restored, unlanded, switchMs, falseSlotsChanged});
     }
+    // Chain: one session installs every theme over the previous one. Each must draw exactly what a fresh install
+    // draws, so nothing from an earlier theme leaks through the journaled restore.
+    const chainLeaks = [];
+    { const tables = clone(TABLES), b = bootWith(tables);
+      for (const entry of index) {
+          if (!fresh.has(entry.file)) continue;
+          const text = fs.readFileSync(path.join(ROOT, entry.file), 'utf8').replace(/^\uFEFF/, '');
+          const {error} = await install(b, entry.url || 'https://example.com/theme.json', text);
+          if (error || JSON.stringify(snapshot(tables)) !== fresh.get(entry.file)) chainLeaks.push(entry.name);
+      }
+      b.api.setSetting('customThemes', false);
+      if (JSON.stringify(snapshot(tables)) !== JSON.stringify(base)) chainLeaks.push('(off after chain)');
+      const left = Object.keys(tables.raw).filter(k => k.startsWith('__VENUS_')).length;
+      if (left) chainLeaks.push(left + ' synthetic keys left after off'); }
     const ok = results.filter(r => !r.error), times = ok.map(r => r.ms).sort((a, b) => a - b);
     const pct = p => times.length ? times[Math.min(times.length - 1, Math.floor(times.length * p))].toFixed(2) : '-';
     const misses = {};
     ok.forEach(r => r.unlanded.forEach(k => { misses[k] = (misses[k] || 0) + 1; }));
     const declared = ok.reduce((n, r) => n + r.declared, 0), unplaced = ok.reduce((n, r) => n + r.unlanded.length, 0);
     console.log(JSON.stringify({themes:results.length, installed:ok.length, errors:results.filter(r => r.error).map(r => [r.name, r.error]),
-        notRestored:ok.filter(r => !r.restored).map(r => r.name), noVisibleChange:ok.filter(r => !r.darkTokens).map(r => r.name),
+        notRestored:ok.filter(r => !r.restored).map(r => r.name), chainLeaks, noVisibleChange:ok.filter(r => !r.darkTokens).map(r => r.name),
+        falseSlotsChanged:ok.filter(r => r.falseSlotsChanged.length).map(r => [r.name, r.falseSlotsChanged]),
         medianTokensThemed:ok.map(r => r.darkTokens).sort((a, b) => a - b)[Math.floor(ok.length / 2)],
         declaredKeysPlaced:declared ? ((1 - unplaced / declared) * 100).toFixed(1) + '%' : '-', unplacedKeyUses:unplaced,
         installMs:{median:pct(0.5), p95:pct(0.95), max:pct(1)},
         switchMs:(() => { const s = ok.map(r => r.switchMs).sort((x, y) => x - y); return {median:s[Math.floor(s.length / 2)].toFixed(3), p95:s[Math.floor(s.length * 0.95)].toFixed(3), max:s[s.length - 1].toFixed(3)}; })(),
         topUnplaced:Object.entries(misses).sort((a, b) => b[1] - a[1]).slice(0, process.argv.includes('--all') ? 999 : 40)}, null, 1));
     if (process.argv.includes('--each')) for (const r of results) console.log(r.name.padEnd(40), r.error || `${r.darkTokens} tokens, ${r.unlanded.length} unplaced, ${r.ms.toFixed(2)} ms`);
+    // WHO=KEY lists the themes whose KEY did not land.
+    if (process.env.WHO) for (const r of results) if (r.unlanded && r.unlanded.includes(process.env.WHO)) console.log("WHO", r.name);
 })();

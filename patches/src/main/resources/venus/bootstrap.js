@@ -7327,12 +7327,27 @@
     // Accepts #rgb, #rgba, #rrggbb, #rrggbbaa (with or without leading # for 6/8-digit hex), or
     // rgb()/rgba()/hsl()/hsla() strings and converts them to {hex:"#rrggbb", opacity:0..1} once at theme compile
     // time so Discord's chroma/color tables never see malformed strings.
+    // Themes repeat the same few dozen colors hundreds of times; each distinct string is parsed once. Results are
+    // frozen because callers share them.
+    const parsedColorCache = new Map();
     function parseThemeColor(value) {
         if (typeof value !== "string") return null;
+        let hit = parsedColorCache.get(value);
+        if (hit !== undefined) return hit;
+        hit = parseThemeColorUncached(value);
+        if (hit) Object.freeze(hit);
+        if (parsedColorCache.size > 4096) parsedColorCache.clear();
+        parsedColorCache.set(value, hit);
+        return hit;
+    }
+    function parseThemeColorUncached(value) {
         const s = value.trim();
         if (!s) return null;
-        if (s.toLowerCase() === "transparent") return {hex:"#000000", opacity:0};
-        let m = /^#([0-9a-f]{3,8})$/i.exec(s) || /^([0-9a-f]{6}|[0-9a-f]{8})$/i.exec(s);
+        // Hex and keywords never contain spaces, so a value that a theme author wrapped across lines
+        // ("#66006\n\n64d") or wrote as "#transparent" still reads as the color they meant.
+        const compact = s.replace(/\s+/g, "");
+        if (/^#?transparent$/i.test(compact)) return {hex:"#000000", opacity:0};
+        let m = /^#([0-9a-f]{3,8})$/i.exec(compact) || /^([0-9a-f]{6}|[0-9a-f]{8})$/i.exec(compact);
         if (m) {
             const hex = m[1].toLowerCase();
             if (hex.length === 3) return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:1};
@@ -7441,14 +7456,22 @@
         const semIn = data.semanticColors && typeof data.semanticColors === "object" && !Array.isArray(data.semanticColors) ? data.semanticColors : {};
         const rawColors = {}, semanticColors = {};
         let count = 0;
-        for (const key of Object.keys(rawIn)) {
-            if (!/^[A-Z0-9_]{1,80}$/.test(key)) continue;
-            const parsed = parseThemeColor(rawIn[key]);
+        // "INTERACTIVE_NORMAL " with a stray space is the same key; an exact spelling elsewhere in the file wins.
+        const tidyKey = (key, table) => {
+            const k = typeof key === "string" ? key.trim() : "";
+            if (!/^[A-Z0-9_]{1,80}$/.test(k)) return "";
+            return k !== key && Object.prototype.hasOwnProperty.call(table, k) ? "" : k;
+        };
+        for (const rawKey of Object.keys(rawIn)) {
+            const key = tidyKey(rawKey, rawIn);
+            if (!key) continue;
+            const parsed = parseThemeColor(rawIn[rawKey]);
             if (parsed) { rawColors[key] = formatThemeColor(parsed); count++; }
         }
-        for (const key of Object.keys(semIn)) {
-            if (!/^[A-Z0-9_]{1,80}$/.test(key)) continue;
-            const val = semIn[key];
+        for (const rawKey of Object.keys(semIn)) {
+            const key = tidyKey(rawKey, semIn);
+            if (!key) continue;
+            const val = semIn[rawKey];
             const arr = Array.isArray(val) ? val : typeof val === "string" ? [val] : null;
             if (!arr || !arr.length) continue;
             const cleaned = arr.slice(0, 4).map(v => {
@@ -7530,7 +7553,34 @@
             }
         }
     }
-    function restoreOriginalColorTables() {
+    // Every write compile makes is journaled, so turning a theme off or switching themes undoes only the ~200 keys
+    // it touched instead of walking all 1707 raw colors and 414 tokens (that full walk was two thirds of a switch).
+    function restoreOriginalColorTables(keepSynthetic) {
+        const journal = customThemes.journal;
+        if (journal && customThemes.origRaw && customThemes.origSem) {
+            const raw = customThemes.rawTable, sem = customThemes.semTable, origRaw = customThemes.origRaw, origSem = customThemes.origSem;
+            // When one theme replaces another, synthetic __VENUS_ keys stay for the next theme to overwrite in place
+            // (nothing reads them once their tokens point back at Discord's keys). Turning themes off removes them.
+            const kept = [];
+            journal.raw.forEach(k => {
+                if (Object.prototype.hasOwnProperty.call(origRaw, k)) raw[k] = origRaw[k];
+                else if (keepSynthetic && k.startsWith("__VENUS_")) kept.push(k);
+                else delete raw[k];
+            });
+            journal.sem.forEach(k => {
+                const entry = sem[k], snap = origSem[k];
+                if (!entry || !snap) return;
+                for (const slot of THEME_SLOTS) {
+                    if (snap[slot] && entry[slot] && typeof entry[slot] === "object") { entry[slot].raw = snap[slot].raw; entry[slot].opacity = snap[slot].opacity; }
+                    else if (snap[slot]) entry[slot] = {raw:snap[slot].raw, opacity:snap[slot].opacity};
+                }
+            });
+            journal.raw.clear();
+            kept.forEach(k => journal.raw.add(k));
+            journal.sem.clear();
+            if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
+            return;
+        }
         if (customThemes.rawTable && customThemes.origRaw) {
             for (const k of Object.keys(customThemes.rawTable)) {
                 if (k.startsWith("__VENUS_")) delete customThemes.rawTable[k];
@@ -7554,18 +7604,25 @@
             }
         }
         if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
+        if (customThemes.origRaw && customThemes.origSem) customThemes.journal = {raw:new Set(), sem:new Set()};
     }
     function compileThemeIntoTables(theme) {
-        const raw = customThemes.rawTable, sem = customThemes.semTable;
-        if (!raw || !sem) return;
+        const rawTable = customThemes.rawTable, sem = customThemes.semTable;
+        if (!rawTable || !sem) return;
         snapshotColorTables();
-        restoreOriginalColorTables();
+        if (customThemes.journal && (customThemes.journal.rawTable !== rawTable || customThemes.journal.semTable !== sem)) customThemes.journal = null;
+        restoreOriginalColorTables(!!theme);
         if (!theme) return;
+        const journal = customThemes.journal;
+        if (journal) { journal.rawTable = rawTable; journal.semTable = sem; }
+        const touchedRaw = journal ? journal.raw : new Set(), touchedSem = journal ? journal.sem : new Set();
+        // Every raw write goes through raw.set so the key lands in the journal.
+        const raw = {set(k, v) { touchedRaw.add(k); rawTable[k] = v; }};
         const rawIn = theme.rawColors || {}, semIn = theme.semanticColors || {}, plus = theme.plus, bg = theme.background;
         // 1. Apply rawColors directly onto Discord's RawColors table (hex only; alpha is carried on semantic slots).
         for (const key of Object.keys(rawIn)) {
             const parsed = parseThemeColor(rawIn[key]);
-            if (parsed) raw[key] = parsed.hex;
+            if (parsed) raw.set(key, parsed.hex);
         }
         // 2. Bridge legacy PRIMARY / PLUM / BRAND raw colors to Discord 349.9's NEUTRAL / BLURPLE raw tokens
         // whenever the theme didn't already set the NEUTRAL / BLURPLE key directly.
@@ -7576,7 +7633,7 @@
                 const src = sources[j];
                 if (rawIn[src]) {
                     const parsed = parseThemeColor(rawIn[src]);
-                    if (parsed) { raw[target] = parsed.hex; break; }
+                    if (parsed) { raw.set(target, parsed.hex); break; }
                 }
             }
         }
@@ -7592,16 +7649,25 @@
             if (!entry || typeof entry !== "object") return;
             if (!isDirect && directWritten.has(targetKey)) return;
             if (isDirect) directWritten.add(targetKey);
-            const cDark = parseThemeColor(arr[0]);
-            const cLight = parseThemeColor(arr[1] || arr[0]) || cDark;
-            const cMidnight = parseThemeColor(arr[2] || arr[0]) || cDark;
-            const cDarker = parseThemeColor(arr[3] || arr[0]) || cDark;
-            const slotColors = {dark:cDark, darker:cDarker, light:cLight, midnight:cMidnight};
+            touchedSem.add(targetKey);
+            // A slot the array doesn't reach (single-palette themes) borrows index 0. A slot the theme wrote as
+            // false (stored as null) means "keep Discord's color here", as in Revenge: [false, false, "#fff"]
+            // only recolors Onyx.
+            const slotColor = i => parseThemeColor(i < arr.length ? arr[i] : arr[0]);
+            const slotColors = {dark:slotColor(0), light:slotColor(1), midnight:slotColor(2), darker:slotColor(3)};
+            const orig = isDirect && customThemes.origSem && customThemes.origSem[targetKey];
             for (const slot of THEME_SLOTS) {
                 const picked = slotColors[slot];
-                if (!picked) continue;
+                if (!picked) {
+                    // The theme's own key said false here: undo any legacy alias that reached this slot first.
+                    if (orig && orig[slot] && entry[slot] && typeof entry[slot] === "object") {
+                        entry[slot].raw = orig[slot].raw;
+                        entry[slot].opacity = orig[slot].opacity;
+                    }
+                    continue;
+                }
                 const syntheticKey = "__VENUS_" + targetKey + "_" + slot;
-                raw[syntheticKey] = picked.hex;
+                raw.set(syntheticKey, picked.hex);
                 if (entry[slot] && typeof entry[slot] === "object") {
                     entry[slot].raw = syntheticKey;
                     entry[slot].opacity = picked.opacity;
@@ -7651,7 +7717,7 @@
                     if (!Array.isArray(arr) || !arr.length) continue;
                     const mapping = PLUS_STATUS_ICON_MAP[iconKey];
                     const first = parseThemeColor(arr[0]);
-                    if (first) for (let i = 0; i < mapping.raw.length; i++) raw[mapping.raw[i]] = first.hex;
+                    if (first) for (let i = 0; i < mapping.raw.length; i++) raw.set(mapping.raw[i], first.hex);
                     for (let i = 0; i < mapping.sem.length; i++) writeSemanticTarget(mapping.sem[i], arr, false);
                 }
             }
@@ -7667,6 +7733,7 @@
                 for (let i = 0; i < CHAT_SURFACE_TOKENS.length; i++) {
                     const entry = sem[CHAT_SURFACE_TOKENS[i]];
                     if (!entry || typeof entry !== "object") continue;
+                    touchedSem.add(CHAT_SURFACE_TOKENS[i]);
                     for (const slot of THEME_SLOTS) {
                         const s = entry[slot];
                         if (s && typeof s === "object") {

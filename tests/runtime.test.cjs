@@ -5469,3 +5469,63 @@ test('Custom themes also themes experiment color overrides (590) and re-keys the
     assert.deepEqual(themed.dark, {raw:'OPACITY_4', opacity:0.04}, 'experiment override restored when turned off');
     assert.equal(Provider({children:'app'}).props.value.key.split('#v')[0], '{"theme":"dark"}');
 });
+
+// Compatibility rules found by installing 187 published Revenge themes (tests/theme_compat.cjs): false keeps
+// Discord's color for that slot, broken values still parse, stray spaces in keys are forgiven, the more specific
+// legacy key wins a token, and switching themes undoes only what the last theme wrote.
+test('Custom themes: false slots keep Discord\'s color, odd values parse, specific legacy keys win, switching restores exactly', async () => {
+    const b = boot({customThemes:true});
+    const {React} = reactHarness(b);
+    const slot = r => ({raw:r, opacity:1});
+    const tok = (d, l, m, k) => ({category:'x', dark:slot(d), light:slot(l), midnight:slot(m), darker:slot(k)});
+    const rawColors = {N1:'#111111', N2:'#222222', N3:'#333333', N4:'#444444'};
+    const sem = {TEXT_STRONG:tok('N1', 'N2', 'N3', 'N4'), TEXT_DEFAULT:tok('N1', 'N2', 'N3', 'N4'), INTERACTIVE_TEXT_DEFAULT:tok('N1', 'N2', 'N3', 'N4'),
+        BACKGROUND_BASE_LOWER:tok('N1', 'N2', 'N3', 'N4'), CHANNEL_BACKGROUND_DEFAULT:tok('N1', 'N2', 'N3', 'N4'), BORDER_SUBTLE:tok('N1', 'N2', 'N3', 'N4')};
+    const themeStore = {emitChange(){}};
+    b.load({_private:{RawColors:rawColors}}, null, 591);
+    b.load({_private:{SemanticColors:sem}}, null, 589);
+    b.load({default:themeStore}, null, 1193);
+    b.context.__r = id => ({591:{_private:{RawColors:rawColors}}, 589:{_private:{SemanticColors:sem}}, 1193:{default:themeStore},
+        5993:{TableRow:'Row'}, 6074:{TableRowGroup:'Group'}, 6098:{TextInput:'Input'}, 4568:{default:{open(){}}}}[id] || null);
+    const pristineRaw = JSON.stringify(rawColors), pristineSem = JSON.stringify(sem);
+    b.load({default:native({fileExists:async () => false, readFile:async () => '{}', writeFile:async () => {}})});
+    let body = '';
+    b.context.fetch = async () => ({ok:true, status:200, text:async () => body});
+    b.api.setSetting('customThemes', true);
+    let draft = '';
+    React.useState = init => typeof init === 'string' ? [draft, v => { draft = v; }] : [init, () => {}];
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
+    const install = async (url, theme) => {
+        body = JSON.stringify(theme); draft = url;
+        pageNodes(registry.VENUS_CUSTOMTHEMES.screen.getComponent()()).find(n => n.props && n.props.accessibilityLabel === 'Install').props.onPress();
+        await flush(); await flush(); await flush();
+    };
+    const color = (token, s) => { const e = sem[token][s]; return rawColors[e.raw] + '@' + e.opacity; };
+
+    // Rogue+-style: HEADER_PRIMARY (legacy, feeds TEXT_STRONG) recolors every slot, but TEXT_STRONG itself says
+    // false for dark and light, so those two stay Discord's own while Onyx takes the theme's white.
+    await install('https://example.com/a.json', {name:'A', semanticColors:{
+        HEADER_PRIMARY:['#aaaaaa'], TEXT_STRONG:[false, false, '#ffffff'],
+        'TEXT_NORMAL ':['#123456'],                    // stray space in the key
+        BORDER_SUBTLE:['#66006\n\n64d'],                // value wrapped over lines
+        BACKGROUND_PRIMARY:['#transparent'],            // "#transparent"
+        CHAT_BACKGROUND:['#0a0b0c']                      // more specific than BACKGROUND_PRIMARY for the chat surface
+    }});
+    assert.equal(sem.TEXT_STRONG.dark.raw, 'N1', 'false keeps Discord\'s dark slot');
+    assert.equal(sem.TEXT_STRONG.light.raw, 'N2', 'false keeps Discord\'s light slot');
+    assert.equal(color('TEXT_STRONG', 'midnight'), '#ffffff@1');
+    assert.equal(color('TEXT_DEFAULT', 'dark'), '#123456@1', '"TEXT_NORMAL " reads as TEXT_NORMAL');
+    assert.equal(color('BORDER_SUBTLE', 'dark'), '#660066@0.302', 'whitespace inside a hex value is ignored');
+    assert.equal(color('BACKGROUND_BASE_LOWER', 'dark'), '#0a0b0c@1', 'CHAT_BACKGROUND wins over the generic BACKGROUND_PRIMARY');
+    assert.equal(color('CHANNEL_BACKGROUND_DEFAULT', 'dark'), '#0a0b0c@1', 'whichever order the theme lists them in');
+
+    // Switching to another theme leaves nothing of the first behind.
+    await install('https://example.com/b.json', {name:'B', semanticColors:{TEXT_DEFAULT:['#fefefe'], BACKGROUND_PRIMARY:['transparent']}});
+    assert.equal(sem.TEXT_STRONG.midnight.raw, 'N3', 'first theme\'s Onyx color undone');
+    assert.equal(sem.BORDER_SUBTLE.dark.raw, 'N1');
+    assert.equal(color('TEXT_DEFAULT', 'dark'), '#fefefe@1');
+    assert.equal(color('BACKGROUND_BASE_LOWER', 'dark'), '#000000@0', 'transparent');
+    b.api.setSetting('customThemes', false);
+    assert.equal(JSON.stringify(rawColors), pristineRaw, 'RawColors exactly as Discord shipped them, no synthetic keys left');
+    assert.equal(JSON.stringify(sem), pristineSem, 'SemanticColors exactly as Discord shipped them');
+});
