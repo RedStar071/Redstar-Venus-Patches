@@ -5325,3 +5325,16 @@ test('the About page names the Discord version the patches are pinned to',()=>{
     assert.ok(pinned && shown);assert.equal(shown[1],pinned[1],'bootstrap.js DISCORD_VERSION matches compatibleWith in DiscordPatches.kt');
     assert.ok(fs.readFileSync('README.md','utf8').includes('**'+pinned[1]+' - Stable**'),'README says the same version');
 });
+
+test('Reopen Discord is asked in Discord\'s own dialog when it can, not Android\'s plain alert',async()=>{
+    const b=boot({systemFont:true});const androidAlerts=[],shown=[],sizes=[];
+    b.load({View:'View',Text:'Text',Modal:'Modal',Alert:{alert:(...args)=>androidAlerts.push(args)}},null,17);
+    b.context.setTimeout=(fn)=>{fn();return 0;};
+    const prev=b.context.__r;b.context.__r=id=>id===5708?{default:{show:opts=>shown.push(opts)}}:prev(id);
+    b.load(native({writeFile:async()=>{},fileExists:async uri=>{if(uri.startsWith('venus-font-v1:'))sizes.push(uri);return false;},getSize:async()=>0}));
+    await flush();await flush();
+    b.api.setSetting('systemFont',true);await flush();await flush();
+    assert.equal(androidAlerts.length,0,'no Android alert');assert.equal(shown.length,1);
+    assert.equal(shown[0].title,"Use your phone's font");assert.equal(shown[0].confirmText,'Reopen now');assert.equal(shown[0].cancelText,'Later');
+    shown[0].onConfirm();await flush();await flush();await flush();assert.equal(sizes.at(-1),'venus-font-v1:restart');
+});

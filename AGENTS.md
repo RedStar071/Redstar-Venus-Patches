@@ -374,10 +374,10 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Opacity, position and scale animate on the native driver only. Width (`VenusProgress`) is the one exception.
 - Every animation checks `motion()` and `reduceMotion`. Without `Animated`, or with Android's Remove animations on,
   everything shows at once. Never make anything depend on an animation finishing.
-- **Haptics** (since 1.16.0) go through `haptic(kind)`, Discord's own `triggerHapticFeedback`, so they follow Discord's and
-  Android's vibration settings. `venusSegmented` ticks `IMPACT_MEDIUM` like Discord's segmented control, radio choices and
-  color swatches tick `SELECTION`, and toasts with the check or X icon give `NOTIFICATION_SUCCESS` / `NOTIFICATION_ERROR`.
-  Only buzz when something actually changed (never for re-picking the current choice), and never on a timer.
+- **Haptics** (since 1.16.0) go through `haptic(kind)`, Discord's own `triggerHapticFeedback`. Switches already buzz by
+  themselves (Discord's `FormSwitch`), so never add a second one there. `venusSegmented` ticks `IMPACT_MEDIUM` like Discord's
+  segmented control, and radio choices and color swatches (which Discord leaves silent) tick `SELECTION`. Only buzz when
+  something actually changed, never for re-picking the current choice, for toasts, or on a timer.
 - Motion confirms what you did. Never loop it on its own, except a preview's Watch story (`useStory`), whose timers
   stop when you switch to Try it or leave the page.
 

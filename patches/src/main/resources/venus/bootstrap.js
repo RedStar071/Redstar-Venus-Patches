@@ -588,8 +588,7 @@
             // Unsupported codecs/devices remain ordinary orig attachments, never spoofed voice files.
             status.audioError = String(error && error.message || error);
             notify();
-            if (!job.cancelled && RN && RN.Alert) RN.Alert.alert(tr("Couldn't make a voice message"),
-                status.audioError + "\n\n" + tr("It will be sent as a normal file instead."));
+            if (!job.cancelled) showProblem("Couldn't make a voice message", status.audioError + "\n\n" + tr("It will be sent as a normal file instead."));
             return orig.apply(upload, args);
         }).finally(() => { activeJobs.delete(upload); });
         job.promise = promise;
@@ -843,20 +842,25 @@
     // Each one reopens Discord through its own native method, so no method carries two Venus guards.
     function askRestart(kind) {
         const font = kind === "font";
-        if (!features[font ? "systemFont" : "systemEmoji"] || !RN || !RN.Alert) return;
+        if (!features[font ? "systemFont" : "systemEmoji"] || !RN) return;
         const on = settings[font ? "systemFont" : "systemEmoji"];
-        RN.Alert.alert(tr(font ? (on ? "Use your phone's font" : "Use Discord's font") : (on ? "Use your phone's emojis" : "Use Discord's emojis")),
-            tr(font ? "Discord needs to reopen to change the font everywhere." : "Discord needs to reopen to change the emojis everywhere."), [
-            {text:tr("Later"), style:"cancel"},
-            {text:tr("Reopen now"), onPress:() => {
-                // Write the setting first, so the reopened Discord starts with it. If it can't be saved, Discord used to
-                // reopen anyway with the old setting; now it stays open and says so.
-                if (!files) return;
-                Promise.resolve().then(() => files.writeFile("documents", PREFS, settingsSnapshot(), "utf8")).then(
-                    () => Promise.resolve(font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart")).catch(() => {}),
-                    () => { status.storage = "save failed (session only)"; notify();
-                        try { RN.Alert.alert(tr("Couldn't save the setting"), tr("Discord didn't reopen, so nothing changed. Try again in a moment.")); } catch (_) {} });
-            }}]);
+        const title = tr(font ? (on ? "Use your phone's font" : "Use Discord's font") : (on ? "Use your phone's emojis" : "Use Discord's emojis"));
+        const body = tr(font ? "Discord needs to reopen to change the font everywhere." : "Discord needs to reopen to change the emojis everywhere.");
+        const reopen = () => {
+            // Write the setting first, so the reopened Discord starts with it. If it can't be saved, Discord used to
+            // reopen anyway with the old setting; now it stays open and says so.
+            if (!files) return;
+            Promise.resolve().then(() => files.writeFile("documents", PREFS, settingsSnapshot(), "utf8")).then(
+                () => Promise.resolve(font ? files.fileExists("venus-font-v1:restart") : files.getVideoDimensions("venus-emoji-v1:restart")).catch(() => {}),
+                () => { status.storage = "save failed (session only)"; notify();
+                    showProblem("Couldn't save the setting", tr("Discord didn't reopen, so nothing changed. Try again in a moment.")); });
+        };
+        // Discord's own dialog, like every other Venus question; Android's plain alert only if it isn't there.
+        const ui = reviewUI();
+        if (ui.alerts && typeof ui.alerts.show === "function") try {
+            ui.alerts.show({title, body, confirmText:tr("Reopen now"), cancelText:tr("Later"), onConfirm:reopen}); return;
+        } catch (_) {}
+        if (RN.Alert) RN.Alert.alert(title, body, [{text:tr("Later"), style:"cancel"}, {text:tr("Reopen now"), onPress:reopen}]);
     }
     // A main-list row with its own switch and a separate button that opens more options.
     // Discord's pressable rows render an element from useTrailing; tapping the row also opens the page.
@@ -2669,9 +2673,9 @@
             return params.chatInputRef || null;
         } catch (_) { return null; }
     }
-    // Tactile feedback through Discord's own haptics (HapticUtils 4855 / HapticFeedbackTypes 4856), so it feels like Discord's
-    // controls and follows Discord's and Android's vibration settings. Kinds are Discord's names: IMPACT_LIGHT for gestures,
-    // SELECTION for picking a choice, IMPACT_MEDIUM for its segmented control, NOTIFICATION_SUCCESS / NOTIFICATION_ERROR for results.
+    // Tactile feedback through Discord's own haptics (HapticUtils 4855 / HapticFeedbackTypes 4856). Switches already buzz on their
+    // own (Discord's FormSwitch does it); this covers the controls that don't: tap gestures (IMPACT_LIGHT), Venus's segmented
+    // control (IMPACT_MEDIUM, like Discord's own), radio rows and color swatches (SELECTION).
     const haptics = {trigger:null, types:null};
     function haptic(kind) {
         try {
@@ -4741,8 +4745,6 @@
     let reviewToastSeq = 0;
     // Discord's own toasts carry an icon for what just happened; IconComponent is optional (venusIcon).
     function reviewToast(ui,content,IconComponent) {
-        if (IconComponent && IconComponent === venusIcon(4797,"CircleXIcon")) haptic("NOTIFICATION_ERROR");
-        else if (IconComponent && IconComponent === venusIcon(4792,"CircleCheckIcon")) haptic("NOTIFICATION_SUCCESS");
         try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open(Object.assign({key:"venus-toast:" + (++reviewToastSeq),content:tr(content)},IconComponent ? {IconComponent} : null)); } catch (_) {}
     }
     function hideReviewSheet(ui,key) { try { if (ui.sheets && typeof ui.sheets.hideActionSheet==="function") ui.sheets.hideActionSheet(key); } catch (_) {} }
