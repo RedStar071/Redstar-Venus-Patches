@@ -24,15 +24,15 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 
 | Group | Feature | What it does |
 | --- | --- | --- |
-| **Messages** | Keep deleted messages | Deleted messages stay in chat, outlined in red, and edited messages show what they said before |
-| | Message highlights | Change the left bar thickness and highlight colors for replies, mentions and deleted messages |
+| **Messages** | Keep deleted messages | Deleted messages stay in chat, outlined in red, and edits keep their history |
+| | Message highlights | Pick bar width and colors for replies, mentions and deleted messages |
 | | Translate messages | Messages in other languages show in yours, automatically or only the ones you pick |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
 | | Skip delete confirmation | Messages and link previews are removed with no "Are you sure?" |
 | | Jump to first message | A button to go straight to the start of a chat |
-| | Favourite any image or video | Star any image or video in the media viewer |
-| **Sending** | Send Nitro stickers and emojis as links | Stickers and emojis you'd need Nitro for are sent as a link that shows up as the image |
-| | Send audio as voice messages | An audio file becomes a real voice message, with a waveform |
+| | Favourite any image or video | Star any image or video to keep it in your GIF favourites |
+| **Sending** | Send Nitro stickers and emojis as links | Sends Nitro emojis and stickers as links that show as the image |
+| | Send audio as voice messages | Audio files are sent as real voice messages, with a waveform |
 | | Send long messages | Type past the character limit; long messages are sent in parts |
 | | Hide typing indicator | Others won't see when you're typing |
 | | Show file sizes when attaching | Photos and videos in the picker show their size |

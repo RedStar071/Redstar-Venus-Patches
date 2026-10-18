@@ -236,7 +236,7 @@ val venusSettings = bytecodePatch(
 @Suppress("unused")
 val fileSizeOnPicker = rawResourcePatch(
     name = "Show file sizes when attaching",
-    description = "Each photo and video in the attachment picker shows its size."
+    description = "Photos and videos in the picker show their size."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -247,7 +247,7 @@ val fileSizeOnPicker = rawResourcePatch(
 @Suppress("unused")
 val copyBios = rawResourcePatch(
     name = "Copy profile bios",
-    description = "Hold a bio to select and copy its text. Links still work."
+    description = "Hold a bio to select and copy it."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -258,7 +258,7 @@ val copyBios = rawResourcePatch(
 @Suppress("unused")
 val dashless = rawResourcePatch(
     name = "Spaces in channel names",
-    description = "Shows \"general chat\" instead of \"general-chat\". Only changes how names look."
+    description = "Shows \"general chat\" instead of \"general-chat\"."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -269,7 +269,7 @@ val dashless = rawResourcePatch(
 @Suppress("unused")
 val favouriteAnything = rawResourcePatch(
     name = "Favourite any image or video",
-    description = "Star any image or video in the media viewer to keep it in your GIF favourites."
+    description = "Star any image or video to keep it in your GIF favourites."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -280,7 +280,7 @@ val favouriteAnything = rawResourcePatch(
 @Suppress("unused")
 val freeNitro = rawResourcePatch(
     name = "Send Nitro stickers and emojis as links",
-    description = "Stickers and emojis you'd need Nitro for are sent as a link, which shows up in chat as the sticker or emoji image."
+    description = "Sends Nitro emojis and stickers as links that show as the image."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -291,7 +291,7 @@ val freeNitro = rawResourcePatch(
 @Suppress("unused")
 val customVoiceMessages = bytecodePatch(
     name = "Send audio as voice messages",
-    description = "An audio file sent on its own becomes a real voice message, with a waveform. Needs Android 10 or newer."
+    description = "Audio files are sent as voice messages. Android 10 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -427,7 +427,7 @@ internal fun pastelReplyText(method: app.morphe.patcher.util.proxy.mutableTypes.
 @Suppress("unused")
 val pastelize = bytecodePatch(
     name = "Pastel name colors",
-    description = "Names without a role color get a soft pastel color, always the same for each person."
+    description = "Names without a role color get a soft pastel one."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -521,7 +521,7 @@ internal fun systemFontBridge(method: app.morphe.patcher.util.proxy.mutableTypes
 @Suppress("unused")
 val forceSystemFont = bytecodePatch(
     name = "Use your phone's font",
-    description = "Replaces Discord's font (gg sans) with your phone's, everywhere. Needs Android 9 or newer."
+    description = "Replaces Discord's font (gg sans) with your phone's, everywhere. Android 9 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -749,7 +749,7 @@ internal fun scaleMessageGutterWidth(method: app.morphe.patcher.util.proxy.mutab
 @Suppress("unused")
 val messageHighlights = bytecodePatch(
     name = "Message highlights",
-    description = "Change the left bar thickness and highlight colors for replies, mentions and deleted messages."
+    description = "Pick bar width and colors for replies, mentions and deleted messages."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -803,7 +803,7 @@ internal fun keepDesktopQuestAgent(method: app.morphe.patcher.util.proxy.mutable
 @Suppress("unused")
 val questCompleter = bytecodePatch(
     name = "Complete Quests automatically",
-    description = "Finishes video, Play and Activity Quests in the background. You still claim rewards. Discord may pause Quests on accounts that do this."
+    description = "Finishes video, Play and Activity Quests in the background. Discord may pause Quests on accounts that do this."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
