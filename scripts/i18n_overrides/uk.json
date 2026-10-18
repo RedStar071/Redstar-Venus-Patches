@@ -203,7 +203,6 @@
  "Jump to top": "На початок",
  "Keep deleted messages": "Зберігати видалені повідомлення",
  "Keep up to": "Зберігати до",
- "Kept deleted messages are saved on this phone.": "Збережені видалені повідомлення зберігаються на цьому телефоні.",
  "Kept deleted messages couldn't be saved.": "Не вдалося зберегти видалені повідомлення.",
  "Kept messages cleared": "Збережені повідомлення очищено",
  "Language": "Мова",
@@ -528,7 +527,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus надсилає його як {link}, і всі бачать емодзі",
  "Venus settings": "Налаштування Venus",
  "View Anyway": "Усе одно відкрити",
- "Waiting for new Quests.": "Очікування нових завдань.",
  "Watch": "Демонстрація",
  "Watching all {n} friends": {
   "one": "Відстежується {n} друг",
@@ -611,16 +609,10 @@
   "many": "Виконано {n} завдань"
  },
  "{n} account": "{n} акаунт",
- "{n} account saved (up to {max}).": "Збережено {n} акаунт (максимум — {max}).",
  "{n} accounts": {
   "one": "{n} акаунт",
   "few": "{n} акаунти",
   "many": "{n} акаунтів"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "Збережено {n} акаунт (максимум — {max}).",
-  "few": "Збережено {n} акаунти (максимум — {max}).",
-  "many": "Збережено {n} акаунтів (максимум — {max})."
  },
  "{n} chosen people": {
   "one": "{n} вибрану людину",
@@ -763,5 +755,23 @@
  "{n} feature turned on": "Увімкнено {n} функцію",
  "Themes": "Теми",
  "Default": "За замовчуванням",
- "Hold a theme to remove it.": "Утримуйте тему, щоб видалити її."
+ "Hold a theme to remove it.": "Утримуйте тему, щоб видалити її.",
+ "Your settings and kept deleted messages are saved on this phone.": "Налаштування та збережені видалені повідомлення зберігаються на цьому телефоні.",
+ "Turn on at least one Quest type below.": "Увімкніть нижче хоча б один тип завдань.",
+ "Starts the next Quest by itself as soon as one is available.": "Сам запускає наступне завдання, щойно воно з'явиться.",
+ "Starts as soon as you accept a Quest.": "Запускається, щойно ви приймете завдання.",
+ "Nothing to complete": "Нічого виконувати",
+ "You can save up to {n} accounts.": {
+  "one": "Можна зберегти до {n} акаунта.",
+  "few": "Можна зберегти до {n} акаунтів.",
+  "many": "Можна зберегти до {n} акаунтів."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Скидає {n} людину, яку ви вибрали або додали за ID.",
+  "few": "Скидає {n} людини, яких ви вибрали або додали за ID.",
+  "many": "Скидає {n} людей, яких ви вибрали або додали за ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Людей, яких ви вибрали або додали за ID, буде прибрано зі списку.",
+ "You can save up to {n} account.": "Можна зберегти до {n} акаунта.",
+ "Clears {n} person you picked or added by ID.": "Скидає {n} людину, яку ви вибрали або додали за ID."
 }

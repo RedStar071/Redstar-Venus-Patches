@@ -82,6 +82,12 @@
   "Clear kept messages?": "Očistiti sačuvane poruke?",
   "Clear saved translations": "Očisti spremljene prijevode",
   "Clear saved translations?": "Očistiti spremljene prijevode?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Briše {n} osobu koju ste odabrali ili dodali po ID-u.",
+   "few": "Briše {n} osobe koje ste odabrali ili dodali po ID-u.",
+   "other": "Briše {n} osoba koje ste odabrali ili dodali po ID-u."
+  },
+  "Clears {n} person you picked or added by ID.": "Briše {n} osobu koju ste odabrali ili dodali po ID-u.",
   "Close expression picker": "Zatvori izbornik izraza",
   "Color message text": "Oboji tekst poruke",
   "Colors": "Boje",
@@ -253,7 +259,6 @@
   "Keep after restarting": "Zadrži nakon ponovnog pokretanja",
   "Keep deleted messages": "Čuvaj izbrisane poruke",
   "Keep up to": "Čuvaj najviše",
-  "Kept deleted messages are saved on this phone.": "Sačuvane izbrisane poruke spremaju se na ovaj telefon.",
   "Kept deleted messages couldn't be saved.": "Sačuvane izbrisane poruke nije bilo moguće spremiti.",
   "Kept messages cleared": "Sačuvane poruke su očišćene",
   "Khmer": "kmerski",
@@ -333,6 +338,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Ništa se ne prati i sve radi izvan mreže, osim značajki kod kojih je navedeno da koriste vanjsku uslugu.",
   "Nothing saved yet.": "Još ništa nije spremljeno.",
   "Nothing sent yet": "Još ništa nije poslano",
+  "Nothing to complete": "Nema ništa za dovršiti",
   "Nothing to notify about": "Nema obavijesti za prikaz",
   "Nothing translated yet since Discord opened.": "Od otvaranja Discorda još ništa nije prevedeno.",
   "Nothing unread": "Nema nepročitanih poruka",
@@ -534,6 +540,8 @@
   "Start over": "Ispočetka",
   "Start typing": "Počnu tipkati",
   "Start with the essentials": "Počnite s osnovama",
+  "Starts as soon as you accept a Quest.": "Pokreće se čim prihvatite Quest.",
+  "Starts the next Quest by itself as soon as one is available.": "Sam pokreće sljedeći Quest čim neki postane dostupan.",
   "Status": "Status",
   "Stickers": "Naljepnice",
   "Stickers from other servers. Animated ones may not move.": "Naljepnice s drugih servera. Animirane naljepnice možda se neće micati.",
@@ -582,6 +590,7 @@
   "That's your own user ID": "To je vaš vlastiti korisnički ID",
   "The link returned an empty file.": "Poveznica je vratila praznu datoteku.",
   "The note under it says what it was in, with the original quoted below": "Napomena ispod navodi izvorni jezik, a ispod nje je citirana izvorna poruka",
+  "The people you picked and added by ID will be cleared.": "Osobe koje ste odabrali ili dodali po ID-u bit će izbrisane.",
   "The small note under it says what language it was in": "Mala napomena ispod navodi na kojem je jeziku bila poruka",
   "The untranslated message, in a quote under the translation.": "Neprevedena poruka prikazana kao citat ispod prijevoda.",
   "Theme JSON link": "JSON poveznica teme",
@@ -619,6 +628,7 @@
   "Trying again in {n} s.": "Ponovni pokušaj za {n} s.",
   "Turkish": "turski",
   "Turn it on here to start.": "Uključite je ovdje kako biste započeli.",
+  "Turn on at least one Quest type below.": "Ispod uključite barem jednu vrstu Questova.",
   "Turn on at least one place below.": "Uključite barem jedno mjesto ispod.",
   "Turn on at least one thing to be notified about.": "Uključite barem jednu vrstu obavijesti ispod.",
   "Turn on emojis or stickers below.": "Uključite emojije ili naljepnice ispod.",
@@ -651,7 +661,6 @@
   "Video Quests": "Video Questovi",
   "Vietnamese": "vijetnamski",
   "View Anyway": "Svejedno prikaži",
-  "Waiting for new Quests.": "Čekanje na nove Questove.",
   "Watch": "Pogledaj",
   "Watching all {n} friends": {
    "one": "Prati se {n} prijatelj",
@@ -684,6 +693,12 @@
   "You": "vi",
   "You can read reviews. Sign in to write your own.": "Možete čitati recenzije. Prijavite se kako biste napisali vlastitu.",
   "You can read, write, delete and report reviews.": "Možete čitati, pisati, brisati i prijavljivati recenzije.",
+  "You can save up to {n} account.": "Možete spremiti najviše {n} račun.",
+  "You can save up to {n} accounts.": {
+   "one": "Možete spremiti najviše {n} račun.",
+   "few": "Možete spremiti najviše {n} računa.",
+   "other": "Možete spremiti najviše {n} računa."
+  },
   "You change your mind and tap your message three times": "Predomislite se i triput dodirnete svoju poruku",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nemate dopuštenje za pregled ovog kanala. Ovi podaci potječu iz onoga što je Discord već poslao vašoj aplikaciji.",
   "You double-tap Sam's message": "Dvaput dodirnete Samovu poruku",
@@ -702,6 +717,7 @@
   "Your phone's language": "Jezik vašeg telefona",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Vaši odabrani prijatelji i prilagođeni korisnički ID-ovi bit će očišćeni, a opcija Svi prijatelji ponovno uključena.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Vaše spremljene postavke nije bilo moguće učitati pa se koriste zadane vrijednosti.",
+  "Your settings and kept deleted messages are saved on this phone.": "Vaše postavke i sačuvane izbrisane poruke spremaju se na ovaj telefon.",
   "Your settings are saved on this phone.": "Vaše su postavke spremljene na ovom telefonu.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Vaše postavke trenutačno nije moguće spremiti. Promjene će vrijediti do ponovnog pokretanja Discorda.",
   "a link": "poveznica",
@@ -739,16 +755,10 @@
    "other": "{n} Questova dovršeno"
   },
   "{n} account": "{n} račun",
-  "{n} account saved (up to {max}).": "Spremljen je {n} račun (najviše {max}).",
   "{n} accounts": {
    "one": "{n} račun",
    "few": "{n} računa",
    "other": "{n} računa"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "Spremljen je {n} račun (najviše {max}).",
-   "few": "Spremljena su {n} računa (najviše {max}).",
-   "other": "Spremljeno je {n} računa (najviše {max})."
   },
   "{n} chosen people": {
    "one": "{n} odabranu osobu",

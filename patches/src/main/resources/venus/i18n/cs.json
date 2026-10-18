@@ -82,6 +82,12 @@
   "Clear kept messages?": "Vymazat uchované zprávy?",
   "Clear saved translations": "Vymazat uložené překlady",
   "Clear saved translations?": "Vymazat uložené překlady?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Vymaže {n} osobu, kterou jste vybrali nebo přidali podle ID.",
+   "few": "Vymaže {n} osoby, které jste vybrali nebo přidali podle ID.",
+   "other": "Vymaže {n} osob, které jste vybrali nebo přidali podle ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Vymaže {n} osobu, kterou jste vybrali nebo přidali podle ID.",
   "Close expression picker": "Zavřít výběr výrazů",
   "Color message text": "Obarvit text zpráv",
   "Colors": "Barvy",
@@ -253,7 +259,6 @@
   "Keep after restarting": "Zachovat i po restartu",
   "Keep deleted messages": "Uchovávat smazané zprávy",
   "Keep up to": "Uchovat nejvýše",
-  "Kept deleted messages are saved on this phone.": "Uchované smazané zprávy se ukládají v tomto telefonu.",
   "Kept deleted messages couldn't be saved.": "Uchované smazané zprávy se nepodařilo uložit.",
   "Kept messages cleared": "Uchované zprávy vymazány",
   "Khmer": "khmérština",
@@ -333,6 +338,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nic se nesleduje a vše funguje offline, kromě funkcí, u kterých je uvedeno, že využívají externí službu.",
   "Nothing saved yet.": "Zatím nic uloženo.",
   "Nothing sent yet": "Zatím nic neodesláno",
+  "Nothing to complete": "Není co plnit",
   "Nothing to notify about": "Žádné události k upozornění",
   "Nothing translated yet since Discord opened.": "Od otevření Discordu nebylo nic přeloženo.",
   "Nothing unread": "Nic nepřečteného",
@@ -534,6 +540,8 @@
   "Start over": "Začít znovu",
   "Start typing": "Začnou psát",
   "Start with the essentials": "Začněte tím nejdůležitějším",
+  "Starts as soon as you accept a Quest.": "Spustí se, jakmile přijmete Quest.",
+  "Starts the next Quest by itself as soon as one is available.": "Další Quest spustí sám, jakmile nějaký bude k dispozici.",
   "Status": "Stav",
   "Stickers": "Nálepky",
   "Stickers from other servers. Animated ones may not move.": "Nálepky z jiných serverů. Animované se nemusí hýbat.",
@@ -582,6 +590,7 @@
   "That's your own user ID": "To je vaše vlastní ID uživatele",
   "The link returned an empty file.": "Odkaz vrátil prázdný soubor.",
   "The note under it says what it was in, with the original quoted below": "Poznámka pod zprávou uvádí původní jazyk a pod ní je citován originál",
+  "The people you picked and added by ID will be cleared.": "Lidé, které jste vybrali nebo přidali podle ID, budou vymazáni.",
   "The small note under it says what language it was in": "Malá poznámka pod ní uvádí, v jakém jazyce zpráva byla",
   "The untranslated message, in a quote under the translation.": "Nepřeložená zpráva jako citace pod překladem.",
   "Theme JSON link": "Odkaz na JSON motivu",
@@ -619,6 +628,7 @@
   "Trying again in {n} s.": "Zkuste to znovu za {n} s.",
   "Turkish": "turečtina",
   "Turn it on here to start.": "Pro spuštění ji zapněte tady.",
+  "Turn on at least one Quest type below.": "Níže zapněte alespoň jeden typ Questů.",
   "Turn on at least one place below.": "Zapněte alespoň jedno umístění níže.",
   "Turn on at least one thing to be notified about.": "Zapněte alespoň jednu událost, na kterou chcete být upozorněni.",
   "Turn on emojis or stickers below.": "Zapněte níže emoji nebo nálepky.",
@@ -651,7 +661,6 @@
   "Video Quests": "Video Questy",
   "Vietnamese": "vietnamština",
   "View Anyway": "Přesto zobrazit",
-  "Waiting for new Quests.": "Čeká se na nové Questy.",
   "Watch": "Ukázka",
   "Watching all {n} friends": {
    "one": "Sledován {n} přítel",
@@ -684,6 +693,12 @@
   "You": "Vy",
   "You can read reviews. Sign in to write your own.": "Můžete číst recenze. Pro napsání vlastní se přihlaste.",
   "You can read, write, delete and report reviews.": "Můžete číst, psát, mazat a nahlašovat recenze.",
+  "You can save up to {n} account.": "Uložit můžete až {n} účet.",
+  "You can save up to {n} accounts.": {
+   "one": "Uložit můžete až {n} účet.",
+   "few": "Uložit můžete až {n} účty.",
+   "other": "Uložit můžete až {n} účtů."
+  },
   "You change your mind and tap your message three times": "Rozmyslíte si to a třikrát klepnete na svou zprávu",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nemáte oprávnění zobrazit tento kanál. Tyto údaje pocházejí z toho, co už Discord poslal vaší aplikaci.",
   "You double-tap Sam's message": "Dvakrát klepnete na Samovu zprávu",
@@ -702,6 +717,7 @@
   "Your phone's language": "Jazyk telefonu",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Vybraní přátelé a vlastní ID uživatelů budou vymazáni a znovu se zapne Všichni přátelé.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Vaše uložené nastavení nešlo načíst, proto se používá výchozí.",
+  "Your settings and kept deleted messages are saved on this phone.": "Vaše nastavení a uchované smazané zprávy se ukládají v tomto telefonu.",
   "Your settings are saved on this phone.": "Vaše nastavení se ukládá v tomto telefonu.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Vaše nastavení teď nejde uložit. Změny platí do restartu Discordu.",
   "a link": "odkaz",
@@ -739,16 +755,10 @@
    "other": "{n} splněných Questů"
   },
   "{n} account": "{n} účet",
-  "{n} account saved (up to {max}).": "{n} uložený účet (až {max}).",
   "{n} accounts": {
    "one": "{n} účet",
    "few": "{n} účty",
    "other": "{n} účtů"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} uložený účet (až {max}).",
-   "few": "{n} uložené účty (až {max}).",
-   "other": "{n} uložených účtů (až {max})."
   },
   "{n} chosen people": {
    "one": "{n} vybranou osobu",

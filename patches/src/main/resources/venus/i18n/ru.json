@@ -82,6 +82,12 @@
   "Clear kept messages?": "Очистить сохранённые сообщения?",
   "Clear saved translations": "Очистить сохранённые переводы",
   "Clear saved translations?": "Очистить сохранённые переводы?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Сбрасывает {n} человека, выбранного вами или добавленного по ID.",
+   "few": "Сбрасывает {n} человека, выбранных вами или добавленных по ID.",
+   "many": "Сбрасывает {n} человек, выбранных вами или добавленных по ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Сбрасывает {n} человека, выбранного вами или добавленного по ID.",
   "Close expression picker": "Закрыть панель эмодзи и стикеров",
   "Color message text": "Окрашивать текст сообщений",
   "Colors": "Цвета",
@@ -253,7 +259,6 @@
   "Keep after restarting": "Сохранять после перезапуска",
   "Keep deleted messages": "Сохранять удалённые сообщения",
   "Keep up to": "Хранить до",
-  "Kept deleted messages are saved on this phone.": "Сохранённые удалённые сообщения хранятся на этом телефоне.",
   "Kept deleted messages couldn't be saved.": "Не удалось сохранить удалённые сообщения.",
   "Kept messages cleared": "Сохранённые сообщения очищены",
   "Khmer": "кхмерский",
@@ -333,6 +338,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Никакой слежки: всё работает локально, кроме функций, где прямо указано использование внешнего сервиса.",
   "Nothing saved yet.": "Пока ничего не сохранено.",
   "Nothing sent yet": "Пока ничего не отправлено",
+  "Nothing to complete": "Нечего выполнять",
   "Nothing to notify about": "Не о чем уведомлять",
   "Nothing translated yet since Discord opened.": "С момента запуска Discord ещё ничего не переведено.",
   "Nothing unread": "Нет непрочитанных",
@@ -534,6 +540,8 @@
   "Start over": "Сначала",
   "Start typing": "Начинают печатать",
   "Start with the essentials": "Начните с главного",
+  "Starts as soon as you accept a Quest.": "Запускается, как только вы примете задание.",
+  "Starts the next Quest by itself as soon as one is available.": "Сам запускает следующее задание, как только оно появится.",
   "Status": "Статус",
   "Stickers": "Стикеры",
   "Stickers from other servers. Animated ones may not move.": "Стикеры с других серверов. Анимированные стикеры могут быть статичными.",
@@ -582,6 +590,7 @@
   "That's your own user ID": "Это ваш собственный ID пользователя",
   "The link returned an empty file.": "По ссылке получен пустой файл.",
   "The note under it says what it was in, with the original quoted below": "В подписи под переводом указан язык оригинала, а ниже приведён исходный текст",
+  "The people you picked and added by ID will be cleared.": "Люди, которых вы выбрали или добавили по ID, будут удалены из списка.",
   "The small note under it says what language it was in": "Небольшая подпись под сообщением указывает, на каком языке был оригинал",
   "The untranslated message, in a quote under the translation.": "Исходный текст сообщения в виде цитаты под переводом.",
   "Theme JSON link": "Ссылка на JSON темы",
@@ -619,6 +628,7 @@
   "Trying again in {n} s.": "Повторная попытка через {n} с.",
   "Turkish": "турецкий",
   "Turn it on here to start.": "Включите здесь, чтобы начать.",
+  "Turn on at least one Quest type below.": "Включите ниже хотя бы один тип заданий.",
   "Turn on at least one place below.": "Включите хотя бы одно место отображения ниже.",
   "Turn on at least one thing to be notified about.": "Выберите хотя бы одно событие для уведомлений.",
   "Turn on emojis or stickers below.": "Включите эмодзи или стикеры ниже.",
@@ -651,7 +661,6 @@
   "Video Quests": "Задания с видео",
   "Vietnamese": "вьетнамский",
   "View Anyway": "Всё равно открыть",
-  "Waiting for new Quests.": "Ожидание новых заданий.",
   "Watch": "Демонстрация",
   "Watching all {n} friends": {
    "one": "Отслеживается {n} друг",
@@ -684,6 +693,12 @@
   "You": "Вы",
   "You can read reviews. Sign in to write your own.": "Вы можете читать отзывы. Войдите, чтобы оставлять свои.",
   "You can read, write, delete and report reviews.": "Вы можете читать, писать, удалять отзывы и жаловаться на них.",
+  "You can save up to {n} account.": "Можно сохранить до {n} аккаунта.",
+  "You can save up to {n} accounts.": {
+   "one": "Можно сохранить до {n} аккаунта.",
+   "few": "Можно сохранить до {n} аккаунтов.",
+   "many": "Можно сохранить до {n} аккаунтов."
+  },
   "You change your mind and tap your message three times": "Вы передумали и трижды касаетесь своего сообщения",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "У вас нет доступа к этому каналу. Эти сведения получены из данных, которые Discord уже передал вашему клиенту.",
   "You double-tap Sam's message": "Вы дважды касаетесь сообщения Сэма",
@@ -702,6 +717,7 @@
   "Your phone's language": "Язык телефона",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Список выбранных друзей и добавленных ID пользователей будет очищен, и снова включится режим «Все друзья».",
   "Your saved settings couldn't be read, so the defaults are in use.": "Не удалось прочитать сохранённые настройки, поэтому используются значения по умолчанию.",
+  "Your settings and kept deleted messages are saved on this phone.": "Настройки и сохранённые удалённые сообщения хранятся на этом телефоне.",
   "Your settings are saved on this phone.": "Настройки сохранены на этом телефоне.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Сейчас не удаётся сохранить настройки. Изменения будут действовать до перезапуска Discord.",
   "a link": "ссылка",
@@ -739,16 +755,10 @@
    "many": "Выполнено {n} заданий"
   },
   "{n} account": "{n} аккаунт",
-  "{n} account saved (up to {max}).": "Сохранён {n} аккаунт (максимум — {max}).",
   "{n} accounts": {
    "one": "{n} аккаунт",
    "few": "{n} аккаунта",
    "many": "{n} аккаунтов"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "Сохранён {n} аккаунт (максимум — {max}).",
-   "few": "Сохранено {n} аккаунта (максимум — {max}).",
-   "many": "Сохранено {n} аккаунтов (максимум — {max})."
   },
   "{n} chosen people": {
    "one": "{n} выбранного человека",

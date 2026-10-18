@@ -200,7 +200,6 @@
  "Jump to top": "Nach oben springen",
  "Keep deleted messages": "Gelöschte Nachrichten behalten",
  "Keep up to": "Höchstens behalten",
- "Kept deleted messages are saved on this phone.": "Behaltene gelöschte Nachrichten sind auf diesem Handy gespeichert.",
  "Kept deleted messages couldn't be saved.": "Behaltene gelöschte Nachrichten konnten nicht gespeichert werden.",
  "Kept messages cleared": "Behaltene Nachrichten gelöscht",
  "Language": "Sprache",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus sendet es als {link}, und alle sehen das Emoji",
  "Venus settings": "Venus-Einstellungen",
  "View Anyway": "Trotzdem ansehen",
- "Waiting for new Quests.": "Warte auf neue Quests.",
  "Watch": "Ansehen",
  "Watching all {n} friends": {
   "one": "{n} Freund wird beobachtet",
@@ -601,14 +599,9 @@
   "other": "{n} Quests abgeschlossen"
  },
  "{n} account": "{n} Account",
- "{n} account saved (up to {max}).": "{n} Account gespeichert (bis zu {max}).",
  "{n} accounts": {
   "one": "{n} Account",
   "other": "{n} Accounts"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} Account gespeichert (bis zu {max}).",
-  "other": "{n} Accounts gespeichert (bis zu {max})."
  },
  "{n} chosen people": {
   "one": "{n} ausgewählte Person",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} Funktion eingeschaltet",
  "Themes": "Themes",
  "Default": "Standard",
- "Hold a theme to remove it.": "Halte ein Theme gedrückt, um es zu entfernen."
+ "Hold a theme to remove it.": "Halte ein Theme gedrückt, um es zu entfernen.",
+ "Your settings and kept deleted messages are saved on this phone.": "Deine Einstellungen und behaltenen gelöschten Nachrichten sind auf diesem Handy gespeichert.",
+ "Turn on at least one Quest type below.": "Schalte unten mindestens eine Quest-Art ein.",
+ "Starts the next Quest by itself as soon as one is available.": "Startet die nächste Quest von selbst, sobald eine verfügbar ist.",
+ "Starts as soon as you accept a Quest.": "Startet, sobald du eine Quest annimmst.",
+ "Nothing to complete": "Nichts abzuschließen",
+ "You can save up to {n} accounts.": {
+  "one": "Du kannst bis zu {n} Account speichern.",
+  "other": "Du kannst bis zu {n} Accounts speichern."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Entfernt {n} Person, die du ausgewählt oder per ID hinzugefügt hast.",
+  "other": "Entfernt {n} Personen, die du ausgewählt oder per ID hinzugefügt hast."
+ },
+ "The people you picked and added by ID will be cleared.": "Die Personen, die du ausgewählt oder per ID hinzugefügt hast, werden entfernt.",
+ "You can save up to {n} account.": "Du kannst bis zu {n} Account speichern.",
+ "Clears {n} person you picked or added by ID.": "Entfernt {n} Person, die du ausgewählt oder per ID hinzugefügt hast."
 }

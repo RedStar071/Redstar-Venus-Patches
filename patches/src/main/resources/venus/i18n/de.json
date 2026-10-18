@@ -81,6 +81,11 @@
   "Clear kept messages?": "Behaltene Nachrichten löschen?",
   "Clear saved translations": "Gespeicherte Übersetzungen löschen",
   "Clear saved translations?": "Gespeicherte Übersetzungen löschen?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Entfernt {n} Person, die du ausgewählt oder per ID hinzugefügt hast.",
+   "other": "Entfernt {n} Personen, die du ausgewählt oder per ID hinzugefügt hast."
+  },
+  "Clears {n} person you picked or added by ID.": "Entfernt {n} Person, die du ausgewählt oder per ID hinzugefügt hast.",
   "Close expression picker": "Ausdrucksauswahl schließen",
   "Color message text": "Nachrichtentext einfärben",
   "Colors": "Farben",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Nach Neustart behalten",
   "Keep deleted messages": "Gelöschte Nachrichten behalten",
   "Keep up to": "Höchstens behalten",
-  "Kept deleted messages are saved on this phone.": "Behaltene gelöschte Nachrichten sind auf diesem Handy gespeichert.",
   "Kept deleted messages couldn't be saved.": "Behaltene gelöschte Nachrichten konnten nicht gespeichert werden.",
   "Kept messages cleared": "Behaltene Nachrichten gelöscht",
   "Khmer": "Khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nichts wird getrackt, und alles funktioniert offline – außer bei Funktionen, bei denen ausdrücklich ein externer Dienst genannt wird.",
   "Nothing saved yet.": "Noch nichts gespeichert.",
   "Nothing sent yet": "Noch nichts gesendet",
+  "Nothing to complete": "Nichts abzuschließen",
   "Nothing to notify about": "Nichts zum Benachrichtigen ausgewählt",
   "Nothing translated yet since Discord opened.": "Seit dem Öffnen von Discord noch nichts übersetzt.",
   "Nothing unread": "Nichts ungelesen",
@@ -529,6 +534,8 @@
   "Start over": "Neu starten",
   "Start typing": "Anfangen zu tippen",
   "Start with the essentials": "Starte mit dem Wichtigsten",
+  "Starts as soon as you accept a Quest.": "Startet, sobald du eine Quest annimmst.",
+  "Starts the next Quest by itself as soon as one is available.": "Startet die nächste Quest von selbst, sobald eine verfügbar ist.",
   "Status": "Status",
   "Stickers": "Sticker",
   "Stickers from other servers. Animated ones may not move.": "Sticker von anderen Servern. Animierte bewegen sich eventuell nicht.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Das ist deine eigene Benutzer-ID",
   "The link returned an empty file.": "Der Link hat eine leere Datei zurückgegeben.",
   "The note under it says what it was in, with the original quoted below": "Der Hinweis darunter zeigt die Ausgangssprache und zitiert darunter das Original",
+  "The people you picked and added by ID will be cleared.": "Die Personen, die du ausgewählt oder per ID hinzugefügt hast, werden entfernt.",
   "The small note under it says what language it was in": "Der kleine Hinweis darunter zeigt, in welcher Sprache die Nachricht war",
   "The untranslated message, in a quote under the translation.": "Die unübersetzte Nachricht als Zitat unter der Übersetzung.",
   "Theme JSON link": "Theme-JSON-Link",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Neuer Versuch in {n} s.",
   "Turkish": "Türkisch",
   "Turn it on here to start.": "Schalte es hier ein, um zu starten.",
+  "Turn on at least one Quest type below.": "Schalte unten mindestens eine Quest-Art ein.",
   "Turn on at least one place below.": "Schalte unten mindestens einen Ort ein.",
   "Turn on at least one thing to be notified about.": "Schalte mindestens ein Ereignis ein, über das du benachrichtigt werden möchtest.",
   "Turn on emojis or stickers below.": "Schalte unten Emojis oder Sticker ein.",
@@ -645,7 +654,6 @@
   "Video Quests": "Video-Quests",
   "Vietnamese": "Vietnamesisch",
   "View Anyway": "Trotzdem ansehen",
-  "Waiting for new Quests.": "Warte auf neue Quests.",
   "Watch": "Ansehen",
   "Watching all {n} friends": {
    "one": "{n} Freund wird beobachtet",
@@ -676,6 +684,11 @@
   "You": "Du",
   "You can read reviews. Sign in to write your own.": "Du kannst Bewertungen lesen. Melde dich an, um selbst welche zu schreiben.",
   "You can read, write, delete and report reviews.": "Du kannst Bewertungen lesen, schreiben, löschen und melden.",
+  "You can save up to {n} account.": "Du kannst bis zu {n} Account speichern.",
+  "You can save up to {n} accounts.": {
+   "one": "Du kannst bis zu {n} Account speichern.",
+   "other": "Du kannst bis zu {n} Accounts speichern."
+  },
   "You change your mind and tap your message three times": "Du überlegst es dir anders und tippst dreimal auf deine Nachricht",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Du hast keine Berechtigung, diesen Kanal anzusehen. Diese Details stammen aus dem, was Discord deinem Client bereits gesendet hat.",
   "You double-tap Sam's message": "Du tippst doppelt auf Sams Nachricht",
@@ -694,6 +707,7 @@
   "Your phone's language": "Sprache deines Handys",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Deine ausgewählten Freunde und Benutzer-IDs werden gelöscht und „Alle Freunde“ wird wieder eingeschaltet.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Deine gespeicherten Einstellungen konnten nicht gelesen werden, daher gelten die Standardwerte.",
+  "Your settings and kept deleted messages are saved on this phone.": "Deine Einstellungen und behaltenen gelöschten Nachrichten sind auf diesem Handy gespeichert.",
   "Your settings are saved on this phone.": "Deine Einstellungen sind auf diesem Handy gespeichert.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Deine Einstellungen können gerade nicht gespeichert werden. Änderungen gelten, bis Discord neu startet.",
   "a link": "ein Link",
@@ -729,14 +743,9 @@
    "other": "{n} Quests abgeschlossen"
   },
   "{n} account": "{n} Account",
-  "{n} account saved (up to {max}).": "{n} Account gespeichert (bis zu {max}).",
   "{n} accounts": {
    "one": "{n} Account",
    "other": "{n} Accounts"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} Account gespeichert (bis zu {max}).",
-   "other": "{n} Accounts gespeichert (bis zu {max})."
   },
   "{n} chosen people": {
    "one": "{n} ausgewählte Person",

@@ -203,7 +203,6 @@
  "Jump to top": "В начало",
  "Keep deleted messages": "Сохранять удалённые сообщения",
  "Keep up to": "Хранить до",
- "Kept deleted messages are saved on this phone.": "Сохранённые удалённые сообщения хранятся на этом телефоне.",
  "Kept deleted messages couldn't be saved.": "Не удалось сохранить удалённые сообщения.",
  "Kept messages cleared": "Сохранённые сообщения очищены",
  "Language": "Язык",
@@ -528,7 +527,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus отправляет его как {link}, и все видят эмодзи",
  "Venus settings": "Настройки Venus",
  "View Anyway": "Всё равно открыть",
- "Waiting for new Quests.": "Ожидание новых заданий.",
  "Watch": "Демонстрация",
  "Watching all {n} friends": {
   "one": "Отслеживается {n} друг",
@@ -611,16 +609,10 @@
   "many": "Выполнено {n} заданий"
  },
  "{n} account": "{n} аккаунт",
- "{n} account saved (up to {max}).": "Сохранён {n} аккаунт (максимум — {max}).",
  "{n} accounts": {
   "one": "{n} аккаунт",
   "few": "{n} аккаунта",
   "many": "{n} аккаунтов"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "Сохранён {n} аккаунт (максимум — {max}).",
-  "few": "Сохранено {n} аккаунта (максимум — {max}).",
-  "many": "Сохранено {n} аккаунтов (максимум — {max})."
  },
  "{n} chosen people": {
   "one": "{n} выбранного человека",
@@ -763,5 +755,23 @@
  "{n} feature turned on": "Включена {n} функция",
  "Themes": "Темы",
  "Default": "По умолчанию",
- "Hold a theme to remove it.": "Удерживайте тему, чтобы удалить её."
+ "Hold a theme to remove it.": "Удерживайте тему, чтобы удалить её.",
+ "Your settings and kept deleted messages are saved on this phone.": "Настройки и сохранённые удалённые сообщения хранятся на этом телефоне.",
+ "Turn on at least one Quest type below.": "Включите ниже хотя бы один тип заданий.",
+ "Starts the next Quest by itself as soon as one is available.": "Сам запускает следующее задание, как только оно появится.",
+ "Starts as soon as you accept a Quest.": "Запускается, как только вы примете задание.",
+ "Nothing to complete": "Нечего выполнять",
+ "You can save up to {n} accounts.": {
+  "one": "Можно сохранить до {n} аккаунта.",
+  "few": "Можно сохранить до {n} аккаунтов.",
+  "many": "Можно сохранить до {n} аккаунтов."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Сбрасывает {n} человека, выбранного вами или добавленного по ID.",
+  "few": "Сбрасывает {n} человека, выбранных вами или добавленных по ID.",
+  "many": "Сбрасывает {n} человек, выбранных вами или добавленных по ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Люди, которых вы выбрали или добавили по ID, будут удалены из списка.",
+ "You can save up to {n} account.": "Можно сохранить до {n} аккаунта.",
+ "Clears {n} person you picked or added by ID.": "Сбрасывает {n} человека, выбранного вами или добавленного по ID."
 }

@@ -81,6 +81,11 @@
   "Clear kept messages?": "Εκκαθάριση διατηρημένων μηνυμάτων;",
   "Clear saved translations": "Εκκαθάριση αποθηκευμένων μεταφράσεων",
   "Clear saved translations?": "Εκκαθάριση αποθηκευμένων μεταφράσεων;",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Εκκαθαρίζει {n} άτομο που επέλεξες ή πρόσθεσες με ID.",
+   "other": "Εκκαθαρίζει {n} άτομα που επέλεξες ή πρόσθεσες με ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Εκκαθαρίζει {n} άτομο που επέλεξες ή πρόσθεσες με ID.",
   "Close expression picker": "Κλείσιμο επιλογής εκφράσεων",
   "Color message text": "Χρωματισμός κειμένου μηνυμάτων",
   "Colors": "Χρώματα",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Διατήρηση μετά την επανεκκίνηση",
   "Keep deleted messages": "Διατήρηση διαγραμμένων μηνυμάτων",
   "Keep up to": "Διατήρηση έως",
-  "Kept deleted messages are saved on this phone.": "Τα διατηρημένα διαγραμμένα μηνύματα αποθηκεύονται σε αυτό το τηλέφωνο.",
   "Kept deleted messages couldn't be saved.": "Δεν ήταν δυνατή η αποθήκευση των διατηρημένων διαγραμμένων μηνυμάτων.",
   "Kept messages cleared": "Τα διατηρημένα μηνύματα εκκαθαρίστηκαν",
   "Khmer": "Χμερ",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Τίποτα δεν καταγράφεται και όλα λειτουργούν εκτός σύνδεσης, εκτός από τις λειτουργίες που αναφέρουν ότι χρησιμοποιούν κάποια υπηρεσία.",
   "Nothing saved yet.": "Δεν έχει αποθηκευτεί τίποτα ακόμα.",
   "Nothing sent yet": "Δεν έχει σταλεί τίποτα ακόμα",
+  "Nothing to complete": "Τίποτα για ολοκλήρωση",
   "Nothing to notify about": "Δεν έχει επιλεγεί τίποτα για ειδοποίηση",
   "Nothing translated yet since Discord opened.": "Δεν έχει μεταφραστεί τίποτα από τότε που άνοιξε το Discord.",
   "Nothing unread": "Τίποτα μη αναγνωσμένο",
@@ -529,6 +534,8 @@
   "Start over": "Από την αρχή",
   "Start typing": "Αρχίζουν να πληκτρολογούν",
   "Start with the essentials": "Ξεκίνα με τα βασικά",
+  "Starts as soon as you accept a Quest.": "Ξεκινά μόλις αποδεχτείς ένα Quest.",
+  "Starts the next Quest by itself as soon as one is available.": "Ξεκινά μόνο του το επόμενο Quest μόλις υπάρξει κάποιο.",
   "Status": "Κατάσταση",
   "Stickers": "Αυτοκόλλητα",
   "Stickers from other servers. Animated ones may not move.": "Αυτοκόλλητα από άλλους διακομιστές. Τα κινούμενα μπορεί να μην κινούνται.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Αυτό είναι το δικό σου ID χρήστη",
   "The link returned an empty file.": "Ο σύνδεσμος επέστρεψε ένα κενό αρχείο.",
   "The note under it says what it was in, with the original quoted below": "Η σημείωση από κάτω δείχνει σε ποια γλώσσα ήταν, με το πρωτότυπο σε παράθεση ακριβώς από κάτω",
+  "The people you picked and added by ID will be cleared.": "Τα άτομα που επέλεξες ή πρόσθεσες με ID θα εκκαθαριστούν.",
   "The small note under it says what language it was in": "Η μικρή σημείωση από κάτω δείχνει σε ποια γλώσσα ήταν",
   "The untranslated message, in a quote under the translation.": "Το αμετάφραστο μήνυμα, ως παράθεση κάτω από τη μετάφραση.",
   "Theme JSON link": "Σύνδεσμος θέματος JSON",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Δοκίμασε ξανά σε {n} δευτ.",
   "Turkish": "Τουρκικά",
   "Turn it on here to start.": "Ενεργοποίησέ το εδώ για να ξεκινήσεις.",
+  "Turn on at least one Quest type below.": "Ενεργοποίησε παρακάτω τουλάχιστον ένα είδος Quest.",
   "Turn on at least one place below.": "Ενεργοποίησε τουλάχιστον ένα σημείο παρακάτω.",
   "Turn on at least one thing to be notified about.": "Ενεργοποίησε τουλάχιστον μία επιλογή για την οποία θέλεις ειδοποίηση.",
   "Turn on emojis or stickers below.": "Ενεργοποίησε τα emoji ή τα αυτοκόλλητα παρακάτω.",
@@ -645,7 +654,6 @@
   "Video Quests": "Quests βίντεο",
   "Vietnamese": "Βιετναμικά",
   "View Anyway": "Προβολή ούτως ή άλλως",
-  "Waiting for new Quests.": "Αναμονή για νέα Quests.",
   "Watch": "Προβολή",
   "Watching all {n} friends": {
    "one": "Παρακολούθηση {n} φίλου",
@@ -676,6 +684,11 @@
   "You": "Εσύ",
   "You can read reviews. Sign in to write your own.": "Μπορείς να διαβάζεις κριτικές. Συνδέσου για να γράψεις τη δική σου.",
   "You can read, write, delete and report reviews.": "Μπορείς να διαβάζεις, να γράφεις, να διαγράφεις και να αναφέρεις κριτικές.",
+  "You can save up to {n} account.": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμό.",
+  "You can save up to {n} accounts.": {
+   "one": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμό.",
+   "other": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμούς."
+  },
   "You change your mind and tap your message three times": "Αλλάζεις γνώμη και πατάς το μήνυμά σου τρεις φορές",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Δεν έχεις άδεια να δεις αυτό το κανάλι. Αυτά τα στοιχεία προέρχονται από όσα έχει ήδη στείλει το Discord στην εφαρμογή σου.",
   "You double-tap Sam's message": "Πατάς δύο φορές το μήνυμα του Sam",
@@ -694,6 +707,7 @@
   "Your phone's language": "Η γλώσσα του τηλεφώνου",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Οι επιλεγμένοι φίλοι και τα ID χρηστών θα εκκαθαριστούν και το «Όλοι οι φίλοι» θα ενεργοποιηθεί ξανά.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Δεν ήταν δυνατή η ανάγνωση των αποθηκευμένων ρυθμίσεών σου, οπότε χρησιμοποιούνται οι προεπιλογές.",
+  "Your settings and kept deleted messages are saved on this phone.": "Οι ρυθμίσεις σου και τα διατηρημένα διαγραμμένα μηνύματα αποθηκεύονται σε αυτό το τηλέφωνο.",
   "Your settings are saved on this phone.": "Οι ρυθμίσεις σου αποθηκεύονται σε αυτό το τηλέφωνο.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Οι ρυθμίσεις σου δεν μπορούν να αποθηκευτούν αυτή τη στιγμή. Οι αλλαγές ισχύουν μέχρι να γίνει επανεκκίνηση του Discord.",
   "a link": "έναν σύνδεσμο",
@@ -729,14 +743,9 @@
    "other": "{n} Quests ολοκληρώθηκαν"
   },
   "{n} account": "{n} λογαριασμός",
-  "{n} account saved (up to {max}).": "{n} αποθηκευμένος λογαριασμός (έως {max}).",
   "{n} accounts": {
    "one": "{n} λογαριασμός",
    "other": "{n} λογαριασμοί"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} αποθηκευμένος λογαριασμός (έως {max}).",
-   "other": "{n} αποθηκευμένοι λογαριασμοί (έως {max})."
   },
   "{n} chosen people": {
    "one": "{n} επιλεγμένο άτομο",

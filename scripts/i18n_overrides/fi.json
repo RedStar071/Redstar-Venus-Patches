@@ -200,7 +200,6 @@
  "Jump to top": "Siirry alkuun",
  "Keep deleted messages": "Säilytä poistetut viestit",
  "Keep up to": "Säilytysraja",
- "Kept deleted messages are saved on this phone.": "Säilytetyt poistetut viestit tallennetaan tähän puhelimeen.",
  "Kept deleted messages couldn't be saved.": "Säilytettyjä poistettuja viestejä ei voitu tallentaa.",
  "Kept messages cleared": "Säilytetyt viestit tyhjennetty",
  "Language": "Kieli",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus lähettää sen muodossa {link}, ja kaikki näkevät emojin",
  "Venus settings": "Venus-asetukset",
  "View Anyway": "Näytä silti",
- "Waiting for new Quests.": "Odotetaan uusia Questeja.",
  "Watch": "Katso",
  "Watching all {n} friends": {
   "one": "Seurataan {n} kaveria",
@@ -601,14 +599,9 @@
   "other": "{n} Questia suoritettu"
  },
  "{n} account": "{n} tili",
- "{n} account saved (up to {max}).": "{n} tili tallennettu (enintään {max}).",
  "{n} accounts": {
   "one": "{n} tili",
   "other": "{n} tiliä"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} tili tallennettu (enintään {max}).",
-  "other": "{n} tiliä tallennettu (enintään {max})."
  },
  "{n} chosen people": {
   "one": "{n} valittu henkilö",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} ominaisuus otettu käyttöön",
  "Themes": "Teemat",
  "Default": "Oletus",
- "Hold a theme to remove it.": "Poista teema pitämällä sitä painettuna."
+ "Hold a theme to remove it.": "Poista teema pitämällä sitä painettuna.",
+ "Your settings and kept deleted messages are saved on this phone.": "Asetuksesi ja säilytetyt poistetut viestit tallennetaan tähän puhelimeen.",
+ "Turn on at least one Quest type below.": "Ota alta käyttöön vähintään yksi Quest-tyyppi.",
+ "Starts the next Quest by itself as soon as one is available.": "Aloittaa seuraavan Questin itse heti, kun sellainen on saatavilla.",
+ "Starts as soon as you accept a Quest.": "Alkaa heti, kun hyväksyt Questin.",
+ "Nothing to complete": "Ei suoritettavaa",
+ "You can save up to {n} accounts.": {
+  "one": "Voit tallentaa enintään {n} tilin.",
+  "other": "Voit tallentaa enintään {n} tiliä."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Tyhjentää {n} henkilön, jonka valitsit tai lisäsit ID:llä.",
+  "other": "Tyhjentää {n} henkilöä, jotka valitsit tai lisäsit ID:llä."
+ },
+ "The people you picked and added by ID will be cleared.": "Valitsemasi ja ID:llä lisäämäsi henkilöt tyhjennetään.",
+ "You can save up to {n} account.": "Voit tallentaa enintään {n} tilin.",
+ "Clears {n} person you picked or added by ID.": "Tyhjentää {n} henkilön, jonka valitsit tai lisäsit ID:llä."
 }

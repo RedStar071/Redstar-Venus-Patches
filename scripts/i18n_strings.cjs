@@ -212,7 +212,7 @@ for (const table of ['PLATFORM_LABELS', 'PLATFORM_STATUS']) {
 }
 const hidden = /const HIDDEN_CHANNEL = "([^"]+)", HIDDEN_CATEGORY = "([^"]+)"/.exec(source);
 if (hidden) { found.add(hidden[1]); found.add(hidden[2]); }
-for (const value of ["Kept deleted messages are saved on this phone.", "Kept deleted messages couldn't be saved.", "Saved deleted messages couldn't be loaded."]) found.add(value);
+for (const value of ["Kept deleted messages couldn't be saved.", "Saved deleted messages couldn't be loaded."]) found.add(value);
 
 if (require.main === module) {
     process.stdout.write(JSON.stringify(Array.from(found).sort(), null, 1) + '\n');

@@ -81,6 +81,11 @@
   "Clear kept messages?": "Saklanan mesajlar temizlensin mi?",
   "Clear saved translations": "Kayıtlı çevirileri temizle",
   "Clear saved translations?": "Kayıtlı çeviriler temizlensin mi?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Seçtiğin veya ID ile eklediğin {n} kişiyi temizler.",
+   "other": "Seçtiğin veya ID ile eklediğin {n} kişiyi temizler."
+  },
+  "Clears {n} person you picked or added by ID.": "Seçtiğin veya ID ile eklediğin {n} kişiyi temizler.",
   "Close expression picker": "İfade seçiciyi kapat",
   "Color message text": "Mesaj metnini renklendir",
   "Colors": "Renkler",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Yeniden başlatınca da sakla",
   "Keep deleted messages": "Silinen mesajları sakla",
   "Keep up to": "En fazla saklanacak",
-  "Kept deleted messages are saved on this phone.": "Saklanan silinmiş mesajlar bu telefona kaydedilir.",
   "Kept deleted messages couldn't be saved.": "Saklanan silinmiş mesajlar kaydedilemedi.",
   "Kept messages cleared": "Saklanan mesajlar temizlendi",
   "Khmer": "Khmer dili",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Hiçbir veri izlenmez ve bir servis kullandığı belirtilen özellikler dışında her şey çevrimdışı çalışır.",
   "Nothing saved yet.": "Henüz kayıtlı bir şey yok.",
   "Nothing sent yet": "Henüz bir şey gönderilmedi",
+  "Nothing to complete": "Tamamlanacak bir şey yok",
   "Nothing to notify about": "Bildirilecek bir şey seçilmedi",
   "Nothing translated yet since Discord opened.": "Discord açıldığından beri henüz hiçbir şey çevrilmedi.",
   "Nothing unread": "Okunmamış bir şey yok",
@@ -529,6 +534,8 @@
   "Start over": "Baştan başla",
   "Start typing": "Yazmaya başladığında",
   "Start with the essentials": "Temel özelliklerle başla",
+  "Starts as soon as you accept a Quest.": "Bir Görevi kabul ettiğin anda başlar.",
+  "Starts the next Quest by itself as soon as one is available.": "Uygun bir Görev çıkar çıkmaz sonrakini kendisi başlatır.",
   "Status": "Durum",
   "Stickers": "Çıkartmalar",
   "Stickers from other servers. Animated ones may not move.": "Diğer sunuculardaki çıkartmalar. Hareketli olanlar oynamayabilir.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Bu senin kendi kullanıcı ID'n",
   "The link returned an empty file.": "Bağlantı boş bir dosya döndürdü.",
   "The note under it says what it was in, with the original quoted below": "Altındaki satırda hangi dilde olduğu yazar ve orijinal metin aşağıda alıntılanır",
+  "The people you picked and added by ID will be cleared.": "Seçtiğin ve ID ile eklediğin kişiler temizlenecek.",
   "The small note under it says what language it was in": "Altındaki küçük satırda mesajın hangi dilde olduğu yazar",
   "The untranslated message, in a quote under the translation.": "Çevrilmemiş orijinal mesaj, çevirinin altında alıntı olarak gösterilir.",
   "Theme JSON link": "Tema JSON bağlantısı",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "{n} sn içinde tekrar deneniyor.",
   "Turkish": "Türkçe",
   "Turn it on here to start.": "Başlamak için buradan aç.",
+  "Turn on at least one Quest type below.": "Aşağıdan en az bir Görev türünü aç.",
   "Turn on at least one place below.": "Aşağıdan en az bir konum aç.",
   "Turn on at least one thing to be notified about.": "Bildirim almak için aşağıdan en az bir seçenek aç.",
   "Turn on emojis or stickers below.": "Aşağıdan emojileri veya çıkartmaları aç.",
@@ -645,7 +654,6 @@
   "Video Quests": "Video Görevleri",
   "Vietnamese": "Vietnamca",
   "View Anyway": "Yine de Görüntüle",
-  "Waiting for new Quests.": "Yeni Görevler bekleniyor.",
   "Watch": "İzle",
   "Watching all {n} friends": {
    "one": "{n} arkadaş takip ediliyor",
@@ -676,6 +684,11 @@
   "You": "Sen",
   "You can read reviews. Sign in to write your own.": "İncelemeleri okuyabilirsin. Kendi incelemeni yazmak için giriş yap.",
   "You can read, write, delete and report reviews.": "İncelemeleri okuyabilir, yazabilir, silebilir ve bildirebilirsin.",
+  "You can save up to {n} account.": "En fazla {n} hesap kaydedebilirsin.",
+  "You can save up to {n} accounts.": {
+   "one": "En fazla {n} hesap kaydedebilirsin.",
+   "other": "En fazla {n} hesap kaydedebilirsin."
+  },
   "You change your mind and tap your message three times": "Fikrini değiştirip mesajına üç kez dokunursun",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Bu kanalı görüntüleme iznin yok. Bu ayrıntılar Discord'un istemcine zaten gönderdiği verilerden alınır.",
   "You double-tap Sam's message": "Sam'in mesajına çift dokunursun",
@@ -694,6 +707,7 @@
   "Your phone's language": "Telefonunun dili",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Seçtiğin arkadaşlar ve özel kullanıcı ID'leri temizlenecek ve Tüm arkadaşlar yeniden açılacak.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Kayıtlı ayarların okunamadığı için varsayılan ayarlar kullanılıyor.",
+  "Your settings and kept deleted messages are saved on this phone.": "Ayarların ve saklanan silinmiş mesajlar bu telefona kaydedilir.",
   "Your settings are saved on this phone.": "Ayarların bu telefona kaydedilir.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Ayarların şu anda kaydedilemiyor. Değişiklikler Discord yeniden başlatılana kadar geçerli kalır.",
   "a link": "bir bağlantı",
@@ -729,14 +743,9 @@
    "other": "{n} Görev tamamlandı"
   },
   "{n} account": "{n} hesap",
-  "{n} account saved (up to {max}).": "{n} hesap kaydedildi (en fazla {max}).",
   "{n} accounts": {
    "one": "{n} hesap",
    "other": "{n} hesap"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} hesap kaydedildi (en fazla {max}).",
-   "other": "{n} hesap kaydedildi (en fazla {max})."
   },
   "{n} chosen people": {
    "one": "seçilen {n} kişi",

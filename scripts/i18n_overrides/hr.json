@@ -203,7 +203,6 @@
  "Jump to top": "Skoči na vrh",
  "Keep deleted messages": "Čuvaj izbrisane poruke",
  "Keep up to": "Čuvaj najviše",
- "Kept deleted messages are saved on this phone.": "Sačuvane izbrisane poruke spremaju se na ovaj telefon.",
  "Kept deleted messages couldn't be saved.": "Sačuvane izbrisane poruke nije bilo moguće spremiti.",
  "Kept messages cleared": "Sačuvane poruke su očišćene",
  "Language": "Jezik",
@@ -528,7 +527,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus ga šalje kao {link} i svi vide emoji",
  "Venus settings": "Postavke Venusa",
  "View Anyway": "Svejedno prikaži",
- "Waiting for new Quests.": "Čekanje na nove Questove.",
  "Watch": "Pogledaj",
  "Watching all {n} friends": {
   "one": "Prati se {n} prijatelj",
@@ -611,16 +609,10 @@
   "other": "{n} Questova dovršeno"
  },
  "{n} account": "{n} račun",
- "{n} account saved (up to {max}).": "Spremljen je {n} račun (najviše {max}).",
  "{n} accounts": {
   "one": "{n} račun",
   "few": "{n} računa",
   "other": "{n} računa"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "Spremljen je {n} račun (najviše {max}).",
-  "few": "Spremljena su {n} računa (najviše {max}).",
-  "other": "Spremljeno je {n} računa (najviše {max})."
  },
  "{n} chosen people": {
   "one": "{n} odabranu osobu",
@@ -763,5 +755,23 @@
  "{n} feature turned on": "Uključena je {n} značajka",
  "Themes": "Teme",
  "Default": "Zadano",
- "Hold a theme to remove it.": "Držite temu pritisnutom kako biste je uklonili."
+ "Hold a theme to remove it.": "Držite temu pritisnutom kako biste je uklonili.",
+ "Your settings and kept deleted messages are saved on this phone.": "Vaše postavke i sačuvane izbrisane poruke spremaju se na ovaj telefon.",
+ "Turn on at least one Quest type below.": "Ispod uključite barem jednu vrstu Questova.",
+ "Starts the next Quest by itself as soon as one is available.": "Sam pokreće sljedeći Quest čim neki postane dostupan.",
+ "Starts as soon as you accept a Quest.": "Pokreće se čim prihvatite Quest.",
+ "Nothing to complete": "Nema ništa za dovršiti",
+ "You can save up to {n} accounts.": {
+  "one": "Možete spremiti najviše {n} račun.",
+  "few": "Možete spremiti najviše {n} računa.",
+  "other": "Možete spremiti najviše {n} računa."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Briše {n} osobu koju ste odabrali ili dodali po ID-u.",
+  "few": "Briše {n} osobe koje ste odabrali ili dodali po ID-u.",
+  "other": "Briše {n} osoba koje ste odabrali ili dodali po ID-u."
+ },
+ "The people you picked and added by ID will be cleared.": "Osobe koje ste odabrali ili dodali po ID-u bit će izbrisane.",
+ "You can save up to {n} account.": "Možete spremiti najviše {n} račun.",
+ "Clears {n} person you picked or added by ID.": "Briše {n} osobu koju ste odabrali ili dodali po ID-u."
 }

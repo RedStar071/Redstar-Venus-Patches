@@ -200,7 +200,6 @@
  "Jump to top": "Ugrás az elejére",
  "Keep deleted messages": "Törölt üzenetek megőrzése",
  "Keep up to": "Megőrzési korlát",
- "Kept deleted messages are saved on this phone.": "A megőrzött törölt üzenetek ezen a telefonon vannak mentve.",
  "Kept deleted messages couldn't be saved.": "A megőrzött törölt üzeneteket nem sikerült elmenteni.",
  "Kept messages cleared": "Megőrzött üzenetek törölve",
  "Language": "Nyelv",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "A Venus {link} formájában küldi el, és mindenki látja az emojit",
  "Venus settings": "Venus beállításai",
  "View Anyway": "Megtekintés mégis",
- "Waiting for new Quests.": "Várakozás új Questekre.",
  "Watch": "Megnézem",
  "Watching all {n} friends": {
   "one": "{n} ismerős figyelése",
@@ -601,14 +599,9 @@
   "other": "{n} Quest teljesítve"
  },
  "{n} account": "{n} fiók",
- "{n} account saved (up to {max}).": "{n} mentett fiók (legfeljebb {max}).",
  "{n} accounts": {
   "one": "{n} fiók",
   "other": "{n} fiók"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} mentett fiók (legfeljebb {max}).",
-  "other": "{n} mentett fiók (legfeljebb {max})."
  },
  "{n} chosen people": {
   "one": "{n} kiválasztott személy",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} funkció bekapcsolva",
  "Themes": "Témák",
  "Default": "Alapértelmezett",
- "Hold a theme to remove it.": "Tartsd lenyomva a témát az eltávolításához."
+ "Hold a theme to remove it.": "Tartsd lenyomva a témát az eltávolításához.",
+ "Your settings and kept deleted messages are saved on this phone.": "A beállításaid és a megőrzött törölt üzenetek ezen a telefonon vannak mentve.",
+ "Turn on at least one Quest type below.": "Kapcsolj be alább legalább egy Quest-típust.",
+ "Starts the next Quest by itself as soon as one is available.": "Magától elindítja a következő Questet, amint van elérhető.",
+ "Starts as soon as you accept a Quest.": "Amint elfogadsz egy Questet, elindul.",
+ "Nothing to complete": "Nincs mit teljesíteni",
+ "You can save up to {n} accounts.": {
+  "one": "Legfeljebb {n} fiókot menthetsz.",
+  "other": "Legfeljebb {n} fiókot menthetsz."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Töröl {n} személyt, akit kiválasztottál vagy azonosítóval adtál hozzá.",
+  "other": "Töröl {n} személyt, akiket kiválasztottál vagy azonosítóval adtál hozzá."
+ },
+ "The people you picked and added by ID will be cleared.": "A kiválasztott és azonosítóval hozzáadott személyek törlődnek.",
+ "You can save up to {n} account.": "Legfeljebb {n} fiókot menthetsz.",
+ "Clears {n} person you picked or added by ID.": "Töröl {n} személyt, akit kiválasztottál vagy azonosítóval adtál hozzá."
 }

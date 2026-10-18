@@ -81,6 +81,11 @@
   "Clear kept messages?": "Изчистване на запазените съобщения?",
   "Clear saved translations": "Изчистване на запазените преводи",
   "Clear saved translations?": "Изчистване на запазените преводи?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Изчиства {n} човек, избран от вас или добавен по ID.",
+   "other": "Изчиства {n} души, избрани от вас или добавени по ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Изчиства {n} човек, избран от вас или добавен по ID.",
   "Close expression picker": "Затвори избора на емоджита и стикери",
   "Color message text": "Оцветяване на текста на съобщенията",
   "Colors": "Цветове",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Запазване след рестарт",
   "Keep deleted messages": "Запазване на изтритите съобщения",
   "Keep up to": "Запазване до",
-  "Kept deleted messages are saved on this phone.": "Запазените изтрити съобщения се съхраняват на този телефон.",
   "Kept deleted messages couldn't be saved.": "Запазените изтрити съобщения не можаха да бъдат съхранени.",
   "Kept messages cleared": "Запазените съобщения са изчистени",
   "Khmer": "кхмерски",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Нищо не се проследява и всичко работи офлайн, освен функциите, за които е посочено, че ползват външна услуга.",
   "Nothing saved yet.": "Още нищо не е съхранено.",
   "Nothing sent yet": "Още нищо не е изпратено",
+  "Nothing to complete": "Няма какво да се изпълнява",
   "Nothing to notify about": "Няма избрани събития за известяване",
   "Nothing translated yet since Discord opened.": "Нищо не е преведено, откакто Discord е отворен.",
   "Nothing unread": "Няма непрочетени",
@@ -529,6 +534,8 @@
   "Start over": "Отначало",
   "Start typing": "Започнат да пишат",
   "Start with the essentials": "Започнете с основното",
+  "Starts as soon as you accept a Quest.": "Започва веднага щом приемете Quest мисия.",
+  "Starts the next Quest by itself as soon as one is available.": "Започва следващата Quest мисия сама, щом има такава.",
   "Status": "Статус",
   "Stickers": "Стикери",
   "Stickers from other servers. Animated ones may not move.": "Стикери от други сървъри. Анимираните може да не се движат.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Това е вашето собствено потребителско ID",
   "The link returned an empty file.": "Връзката върна празен файл.",
   "The note under it says what it was in, with the original quoted below": "Бележката отдолу показва от какъв език е преведено, а оригиналът е цитиран под нея",
+  "The people you picked and added by ID will be cleared.": "Хората, които сте избрали или добавили по ID, ще бъдат изчистени.",
   "The small note under it says what language it was in": "Малката бележка отдолу показва на какъв език е било",
   "The untranslated message, in a quote under the translation.": "Непреведеното съобщение като цитат под превода.",
   "Theme JSON link": "JSON връзка към темата",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Опитайте пак след {n} сек.",
   "Turkish": "турски",
   "Turn it on here to start.": "Включете го оттук, за да започнете.",
+  "Turn on at least one Quest type below.": "Включете поне един вид Quest мисии по-долу.",
   "Turn on at least one place below.": "Включете поне едно място по-долу.",
   "Turn on at least one thing to be notified about.": "Включете поне едно събитие за известяване.",
   "Turn on emojis or stickers below.": "Включете емоджитата или стикерите по-долу.",
@@ -645,7 +654,6 @@
   "Video Quests": "Видео Quest мисии",
   "Vietnamese": "виетнамски",
   "View Anyway": "Преглед въпреки това",
-  "Waiting for new Quests.": "Изчакване на нови Quest мисии.",
   "Watch": "Демонстрация",
   "Watching all {n} friends": {
    "one": "Следи се {n} приятел",
@@ -676,6 +684,11 @@
   "You": "Вие",
   "You can read reviews. Sign in to write your own.": "Можете да четете отзиви. Влезте, за да напишете свой.",
   "You can read, write, delete and report reviews.": "Можете да четете, пишете, изтривате и докладвате отзиви.",
+  "You can save up to {n} account.": "Можете да запазите до {n} профил.",
+  "You can save up to {n} accounts.": {
+   "one": "Можете да запазите до {n} профил.",
+   "other": "Можете да запазите до {n} профила."
+  },
   "You change your mind and tap your message three times": "Размисляте и докосвате съобщението си три пъти",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Нямате разрешение да виждате този канал. Тези данни идват от това, което Discord вече е изпратил на приложението ви.",
   "You double-tap Sam's message": "Докосвате двукратно съобщението на Сам",
@@ -694,6 +707,7 @@
   "Your phone's language": "Езикът на телефона",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Избраните приятели и потребителски ID ще бъдат изчистени, а „Всички приятели“ ще се включи отново.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Запазените ви настройки не можаха да бъдат прочетени, затова се използват стандартните.",
+  "Your settings and kept deleted messages are saved on this phone.": "Настройките ви и запазените изтрити съобщения се съхраняват на този телефон.",
   "Your settings are saved on this phone.": "Настройките ви се запазват на този телефон.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Настройките ви не могат да бъдат запазени в момента. Промените важат до рестартиране на Discord.",
   "a link": "връзка",
@@ -729,14 +743,9 @@
    "other": "{n} изпълнени Quest мисии"
   },
   "{n} account": "{n} профил",
-  "{n} account saved (up to {max}).": "{n} запазен профил (до {max}).",
   "{n} accounts": {
    "one": "{n} профил",
    "other": "{n} профила"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} запазен профил (до {max}).",
-   "other": "{n} запазени профила (до {max})."
   },
   "{n} chosen people": {
    "one": "{n} избран човек",

@@ -81,6 +81,11 @@
   "Clear kept messages?": "Cancellare i messaggi conservati?",
   "Clear saved translations": "Cancella le traduzioni salvate",
   "Clear saved translations?": "Cancellare le traduzioni salvate?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Rimuove {n} persona che hai scelto o aggiunto tramite ID.",
+   "other": "Rimuove {n} persone che hai scelto o aggiunto tramite ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Rimuove {n} persona che hai scelto o aggiunto tramite ID.",
   "Close expression picker": "Chiudi il selettore delle espressioni",
   "Color message text": "Colora il testo dei messaggi",
   "Colors": "Colori",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Conserva dopo il riavvio",
   "Keep deleted messages": "Conserva i messaggi eliminati",
   "Keep up to": "Conserva fino a",
-  "Kept deleted messages are saved on this phone.": "I messaggi eliminati conservati vengono salvati su questo telefono.",
   "Kept deleted messages couldn't be saved.": "Impossibile salvare i messaggi eliminati conservati.",
   "Kept messages cleared": "Messaggi conservati cancellati",
   "Khmer": "khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nulla viene tracciato e tutto funziona offline, tranne le funzionalità che indicano esplicitamente l'uso di un servizio esterno.",
   "Nothing saved yet.": "Ancora nulla di salvato.",
   "Nothing sent yet": "Ancora nulla di inviato",
+  "Nothing to complete": "Niente da completare",
   "Nothing to notify about": "Nulla da notificare",
   "Nothing translated yet since Discord opened.": "Ancora nulla di tradotto dall'apertura di Discord.",
   "Nothing unread": "Nulla da leggere",
@@ -529,6 +534,8 @@
   "Start over": "Ricomincia",
   "Start typing": "Iniziano a scrivere",
   "Start with the essentials": "Inizia dall'essenziale",
+  "Starts as soon as you accept a Quest.": "Parte appena accetti una missione.",
+  "Starts the next Quest by itself as soon as one is available.": "Avvia da sola la missione successiva appena ce n'è una.",
   "Status": "Stato",
   "Stickers": "Adesivi",
   "Stickers from other servers. Animated ones may not move.": "Adesivi di altri server. Quelli animati potrebbero non muoversi.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Questo è il tuo ID utente",
   "The link returned an empty file.": "Il link ha restituito un file vuoto.",
   "The note under it says what it was in, with the original quoted below": "La nota sotto indica la lingua originale, con il testo originale citato più in basso",
+  "The people you picked and added by ID will be cleared.": "Le persone che hai scelto o aggiunto tramite ID verranno rimosse.",
   "The small note under it says what language it was in": "La piccola nota sotto indica la lingua originale",
   "The untranslated message, in a quote under the translation.": "Il messaggio non tradotto, mostrato come citazione sotto la traduzione.",
   "Theme JSON link": "Link JSON del tema",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Nuovo tentativo tra {n} s.",
   "Turkish": "turco",
   "Turn it on here to start.": "Attivalo qui per iniziare.",
+  "Turn on at least one Quest type below.": "Attiva qui sotto almeno un tipo di missione.",
   "Turn on at least one place below.": "Attiva almeno una posizione qui sotto.",
   "Turn on at least one thing to be notified about.": "Attiva almeno un tipo di avviso qui sotto.",
   "Turn on emojis or stickers below.": "Attiva emoji o adesivi qui sotto.",
@@ -645,7 +654,6 @@
   "Video Quests": "Missioni video",
   "Vietnamese": "vietnamita",
   "View Anyway": "Visualizza comunque",
-  "Waiting for new Quests.": "In attesa di nuove missioni.",
   "Watch": "Guarda",
   "Watching all {n} friends": {
    "one": "Segui {n} amico",
@@ -676,6 +684,11 @@
   "You": "Tu",
   "You can read reviews. Sign in to write your own.": "Puoi leggere le recensioni. Accedi per scrivere la tua.",
   "You can read, write, delete and report reviews.": "Puoi leggere, scrivere, eliminare e segnalare recensioni.",
+  "You can save up to {n} account.": "Puoi salvare fino a {n} account.",
+  "You can save up to {n} accounts.": {
+   "one": "Puoi salvare fino a {n} account.",
+   "other": "Puoi salvare fino a {n} account."
+  },
   "You change your mind and tap your message three times": "Cambi idea e tocchi il tuo messaggio tre volte",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Non hai il permesso di visualizzare questo canale. Questi dettagli provengono dai dati che Discord ha già inviato al tuo client.",
   "You double-tap Sam's message": "Tocchi due volte il messaggio di Sam",
@@ -694,6 +707,7 @@
   "Your phone's language": "Lingua del telefono",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Gli amici scelti e gli ID utente personalizzati verranno rimossi e Tutti gli amici verrà riattivato.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Impossibile leggere le impostazioni salvate; sono in uso quelle predefinite.",
+  "Your settings and kept deleted messages are saved on this phone.": "Le tue impostazioni e i messaggi eliminati conservati sono salvati su questo telefono.",
   "Your settings are saved on this phone.": "Le tue impostazioni sono salvate su questo telefono.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Al momento non è possibile salvare le impostazioni. Le modifiche resteranno attive fino al riavvio di Discord.",
   "a link": "un link",
@@ -729,14 +743,9 @@
    "other": "{n} missioni completate"
   },
   "{n} account": "{n} account",
-  "{n} account saved (up to {max}).": "{n} account salvato (fino a {max}).",
   "{n} accounts": {
    "one": "{n} account",
    "other": "{n} account"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} account salvato (fino a {max}).",
-   "other": "{n} account salvati (fino a {max})."
   },
   "{n} chosen people": {
    "one": "{n} persona scelta",

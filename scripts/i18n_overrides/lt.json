@@ -203,7 +203,6 @@
  "Jump to top": "Pereiti į pradžią",
  "Keep deleted messages": "Išsaugoti ištrintas žinutes",
  "Keep up to": "Saugoti iki",
- "Kept deleted messages are saved on this phone.": "Išsaugotos ištrintos žinutės laikomos šiame telefone.",
  "Kept deleted messages couldn't be saved.": "Nepavyko įrašyti išsaugotų ištrintų žinučių.",
  "Kept messages cleared": "Išsaugotos žinutės išvalytos",
  "Language": "Kalba",
@@ -528,7 +527,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus išsiunčia jį kaip {link}, ir visi mato jaustuką",
  "Venus settings": "Venus nustatymai",
  "View Anyway": "Vis tiek peržiūrėti",
- "Waiting for new Quests.": "Laukiama naujų Quest užduočių.",
  "Watch": "Žiūrėti",
  "Watching all {n} friends": {
   "one": "Stebimas {n} draugas",
@@ -611,16 +609,10 @@
   "other": "Atlikta {n} Quest užduočių"
  },
  "{n} account": "{n} paskyra",
- "{n} account saved (up to {max}).": "Išsaugota {n} paskyra (iki {max}).",
  "{n} accounts": {
   "one": "{n} paskyra",
   "few": "{n} paskyros",
   "other": "{n} paskyrų"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "Išsaugota {n} paskyra (iki {max}).",
-  "few": "Išsaugotos {n} paskyros (iki {max}).",
-  "other": "Išsaugota {n} paskyrų (iki {max})."
  },
  "{n} chosen people": {
   "one": "{n} pasirinktas žmogus",
@@ -763,5 +755,23 @@
  "{n} feature turned on": "Įjungta {n} funkcija",
  "Themes": "Temos",
  "Default": "Numatytoji",
- "Hold a theme to remove it.": "Palaikyk temą, kad ją pašalintum."
+ "Hold a theme to remove it.": "Palaikyk temą, kad ją pašalintum.",
+ "Your settings and kept deleted messages are saved on this phone.": "Tavo nustatymai ir išsaugotos ištrintos žinutės laikomos šiame telefone.",
+ "Turn on at least one Quest type below.": "Žemiau įjunk bent vieną Quest užduočių tipą.",
+ "Starts the next Quest by itself as soon as one is available.": "Kitą Quest užduotį pradeda pats, kai tik tokia atsiranda.",
+ "Starts as soon as you accept a Quest.": "Pradeda, kai tik priimi Quest užduotį.",
+ "Nothing to complete": "Nėra ką atlikti",
+ "You can save up to {n} accounts.": {
+  "one": "Gali išsaugoti iki {n} paskyros.",
+  "few": "Gali išsaugoti iki {n} paskyrų.",
+  "other": "Gali išsaugoti iki {n} paskyrų."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Išvalo {n} žmogų, kurį pasirinkai ar pridėjai pagal ID.",
+  "few": "Išvalo {n} žmones, kuriuos pasirinkai ar pridėjai pagal ID.",
+  "other": "Išvalo {n} žmonių, kuriuos pasirinkai ar pridėjai pagal ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Žmonės, kuriuos pasirinkai ar pridėjai pagal ID, bus išvalyti.",
+ "You can save up to {n} account.": "Gali išsaugoti iki {n} paskyros.",
+ "Clears {n} person you picked or added by ID.": "Išvalo {n} žmogų, kurį pasirinkai ar pridėjai pagal ID."
 }

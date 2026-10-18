@@ -81,6 +81,11 @@
   "Clear kept messages?": "Ryd gemte beskeder?",
   "Clear saved translations": "Ryd gemte oversættelser",
   "Clear saved translations?": "Ryd gemte oversættelser?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Rydder {n} person, du har valgt eller tilføjet med ID.",
+   "other": "Rydder {n} personer, du har valgt eller tilføjet med ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Rydder {n} person, du har valgt eller tilføjet med ID.",
   "Close expression picker": "Luk udtryksvælgeren",
   "Color message text": "Farv beskedtekst",
   "Colors": "Farver",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Bevar efter genstart",
   "Keep deleted messages": "Behold slettede beskeder",
   "Keep up to": "Behold op til",
-  "Kept deleted messages are saved on this phone.": "Gemte slettede beskeder opbevares på denne telefon.",
   "Kept deleted messages couldn't be saved.": "Gemte slettede beskeder kunne ikke opbevares.",
   "Kept messages cleared": "Gemte beskeder ryddet",
   "Khmer": "khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Intet spores, og alt virker offline undtagen de funktioner, hvor det er angivet, at de bruger en tjeneste.",
   "Nothing saved yet.": "Intet opbevaret endnu.",
   "Nothing sent yet": "Intet sendt endnu",
+  "Nothing to complete": "Intet at fuldføre",
   "Nothing to notify about": "Intet at give besked om",
   "Nothing translated yet since Discord opened.": "Intet er oversat, siden Discord blev åbnet.",
   "Nothing unread": "Intet ulæst",
@@ -529,6 +534,8 @@
   "Start over": "Start forfra",
   "Start typing": "Begynder at skrive",
   "Start with the essentials": "Kom i gang med det vigtigste",
+  "Starts as soon as you accept a Quest.": "Starter, så snart du accepterer en Quest.",
+  "Starts the next Quest by itself as soon as one is available.": "Starter selv den næste Quest, så snart der er en.",
   "Status": "Status",
   "Stickers": "Klistermærker",
   "Stickers from other servers. Animated ones may not move.": "Klistermærker fra andre servere. Animerede bevæger sig måske ikke.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Det er dit eget bruger-ID",
   "The link returned an empty file.": "Linket returnerede en tom fil.",
   "The note under it says what it was in, with the original quoted below": "Bemærkningen under viser originalsproget, med originalteksten citeret nedenunder",
+  "The people you picked and added by ID will be cleared.": "De personer, du har valgt eller tilføjet med ID, ryddes.",
   "The small note under it says what language it was in": "Den lille bemærkning nedenunder viser, hvilket sprog den var på",
   "The untranslated message, in a quote under the translation.": "Den uoversatte besked, som citat under oversættelsen.",
   "Theme JSON link": "Link til tema-JSON",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Prøv igen om {n} s.",
   "Turkish": "tyrkisk",
   "Turn it on here to start.": "Slå den til her for at begynde.",
+  "Turn on at least one Quest type below.": "Slå mindst én type Quest til herunder.",
   "Turn on at least one place below.": "Slå mindst én placering til nedenfor.",
   "Turn on at least one thing to be notified about.": "Slå mindst én hændelse til, som du vil have besked om.",
   "Turn on emojis or stickers below.": "Slå emojis eller klistermærker til nedenfor.",
@@ -645,7 +654,6 @@
   "Video Quests": "Video-Quests",
   "Vietnamese": "vietnamesisk",
   "View Anyway": "Vis alligevel",
-  "Waiting for new Quests.": "Venter på nye Quests.",
   "Watch": "Se",
   "Watching all {n} friends": {
    "one": "Holder øje med {n} ven",
@@ -676,6 +684,11 @@
   "You": "Dig",
   "You can read reviews. Sign in to write your own.": "Du kan læse anmeldelser. Log ind for at skrive din egen.",
   "You can read, write, delete and report reviews.": "Du kan læse, skrive, slette og rapportere anmeldelser.",
+  "You can save up to {n} account.": "Du kan gemme op til {n} konto.",
+  "You can save up to {n} accounts.": {
+   "one": "Du kan gemme op til {n} konto.",
+   "other": "Du kan gemme op til {n} konti."
+  },
   "You change your mind and tap your message three times": "Du ombestemmer dig og trykker tre gange på din besked",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Du har ikke tilladelse til at se denne kanal. Oplysningerne kommer fra det, Discord allerede har sendt til din app.",
   "You double-tap Sam's message": "Du dobbelttrykker på Sams besked",
@@ -694,6 +707,7 @@
   "Your phone's language": "Telefonens sprog",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Dine valgte venner og bruger-ID'er ryddes, og Alle venner slås til igen.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Dine gemte indstillinger kunne ikke læses, så standardindstillingerne bruges.",
+  "Your settings and kept deleted messages are saved on this phone.": "Dine indstillinger og gemte slettede beskeder opbevares på denne telefon.",
   "Your settings are saved on this phone.": "Dine indstillinger gemmes på denne telefon.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Dine indstillinger kan ikke gemmes lige nu. Ændringer gælder, indtil Discord genstarter.",
   "a link": "et link",
@@ -729,14 +743,9 @@
    "other": "{n} Quests fuldført"
   },
   "{n} account": "{n} konto",
-  "{n} account saved (up to {max}).": "{n} konto gemt (op til {max}).",
   "{n} accounts": {
    "one": "{n} konto",
    "other": "{n} konti"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} konto gemt (op til {max}).",
-   "other": "{n} konti gemt (op til {max})."
   },
   "{n} chosen people": {
    "one": "{n} valgt person",

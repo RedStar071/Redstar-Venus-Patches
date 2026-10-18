@@ -200,7 +200,6 @@
  "Jump to top": "Remonter tout en haut",
  "Keep deleted messages": "Conserver les messages supprimés",
  "Keep up to": "Limite de conservation",
- "Kept deleted messages are saved on this phone.": "Les messages supprimés conservés sont enregistrés sur ce téléphone.",
  "Kept deleted messages couldn't be saved.": "Impossible d'enregistrer les messages supprimés conservés.",
  "Kept messages cleared": "Messages conservés effacés",
  "Language": "Langue",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus l'envoie sous forme de {link}, et tout le monde voit l'émoji",
  "Venus settings": "Paramètres de Venus",
  "View Anyway": "Voir quand même",
- "Waiting for new Quests.": "En attente de nouvelles quêtes.",
  "Watch": "Voir",
  "Watching all {n} friends": {
   "one": "Suivi de {n} ami",
@@ -601,14 +599,9 @@
   "other": "{n} quêtes terminées"
  },
  "{n} account": "{n} compte",
- "{n} account saved (up to {max}).": "{n} compte enregistré (jusqu'à {max}).",
  "{n} accounts": {
   "one": "{n} compte",
   "other": "{n} comptes"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} compte enregistré (jusqu'à {max}).",
-  "other": "{n} comptes enregistrés (jusqu'à {max})."
  },
  "{n} chosen people": {
   "one": "{n} personne choisie",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} fonctionnalité activée",
  "Themes": "Thèmes",
  "Default": "Par défaut",
- "Hold a theme to remove it.": "Maintenez un thème appuyé pour le supprimer."
+ "Hold a theme to remove it.": "Maintenez un thème appuyé pour le supprimer.",
+ "Your settings and kept deleted messages are saved on this phone.": "Vos paramètres et les messages supprimés conservés sont enregistrés sur ce téléphone.",
+ "Turn on at least one Quest type below.": "Activez au moins un type de quête ci-dessous.",
+ "Starts the next Quest by itself as soon as one is available.": "Lance seul la quête suivante dès qu'il y en a une.",
+ "Starts as soon as you accept a Quest.": "Démarre dès que vous acceptez une quête.",
+ "Nothing to complete": "Rien à terminer",
+ "You can save up to {n} accounts.": {
+  "one": "Vous pouvez enregistrer jusqu'à {n} compte.",
+  "other": "Vous pouvez enregistrer jusqu'à {n} comptes."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Efface {n} personne choisie ou ajoutée par identifiant.",
+  "other": "Efface {n} personnes choisies ou ajoutées par identifiant."
+ },
+ "The people you picked and added by ID will be cleared.": "Les personnes que vous avez choisies ou ajoutées par identifiant seront effacées.",
+ "You can save up to {n} account.": "Vous pouvez enregistrer jusqu'à {n} compte.",
+ "Clears {n} person you picked or added by ID.": "Efface {n} personne choisie ou ajoutée par identifiant."
 }

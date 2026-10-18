@@ -81,6 +81,11 @@
   "Clear kept messages?": "Bewaarde berichten wissen?",
   "Clear saved translations": "Opgeslagen vertalingen wissen",
   "Clear saved translations?": "Opgeslagen vertalingen wissen?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Wist {n} persoon die je hebt gekozen of via ID hebt toegevoegd.",
+   "other": "Wist {n} personen die je hebt gekozen of via ID hebt toegevoegd."
+  },
+  "Clears {n} person you picked or added by ID.": "Wist {n} persoon die je hebt gekozen of via ID hebt toegevoegd.",
   "Close expression picker": "Expressiekiezer sluiten",
   "Color message text": "Berichttekst meekleuren",
   "Colors": "Kleuren",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Bewaren na herstart",
   "Keep deleted messages": "Verwijderde berichten bewaren",
   "Keep up to": "Maximaal bewaren",
-  "Kept deleted messages are saved on this phone.": "Bewaarde verwijderde berichten worden op deze telefoon opgeslagen.",
   "Kept deleted messages couldn't be saved.": "Bewaarde verwijderde berichten konden niet worden opgeslagen.",
   "Kept messages cleared": "Bewaarde berichten gewist",
   "Khmer": "Khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Er wordt niets gevolgd en alles werkt offline, behalve de functies waarbij vermeld staat dat ze een externe dienst gebruiken.",
   "Nothing saved yet.": "Nog niets opgeslagen.",
   "Nothing sent yet": "Nog niets verstuurd",
+  "Nothing to complete": "Niets te voltooien",
   "Nothing to notify about": "Niets om te melden",
   "Nothing translated yet since Discord opened.": "Nog niets vertaald sinds Discord is geopend.",
   "Nothing unread": "Niets ongelezen",
@@ -529,6 +534,8 @@
   "Start over": "Opnieuw",
   "Start typing": "Beginnen met typen",
   "Start with the essentials": "Begin met de basis",
+  "Starts as soon as you accept a Quest.": "Start zodra je een Quest accepteert.",
+  "Starts the next Quest by itself as soon as one is available.": "Start zelf de volgende Quest zodra er een beschikbaar is.",
   "Status": "Status",
   "Stickers": "Stickers",
   "Stickers from other servers. Animated ones may not move.": "Stickers van andere servers. Geanimeerde stickers bewegen mogelijk niet.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Dat is je eigen gebruikers-ID",
   "The link returned an empty file.": "De link leverde een leeg bestand op.",
   "The note under it says what it was in, with the original quoted below": "De regel eronder vermeldt de oorspronkelijke taal, met daaronder het origineel als citaat",
+  "The people you picked and added by ID will be cleared.": "De mensen die je hebt gekozen of via ID hebt toegevoegd, worden gewist.",
   "The small note under it says what language it was in": "Het kleine regeltje eronder geeft aan uit welke taal het bericht komt",
   "The untranslated message, in a quote under the translation.": "Het onvertaalde bericht, weergegeven als citaat onder de vertaling.",
   "Theme JSON link": "JSON-link van thema",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Over {n} s opnieuw proberen.",
   "Turkish": "Turks",
   "Turn it on here to start.": "Zet dit hier aan om te beginnen.",
+  "Turn on at least one Quest type below.": "Zet hieronder minstens één soort Quest aan.",
   "Turn on at least one place below.": "Zet hieronder minstens één weergaveplek aan.",
   "Turn on at least one thing to be notified about.": "Zet hieronder minstens één activiteit aan waarvoor je meldingen wilt ontvangen.",
   "Turn on emojis or stickers below.": "Zet hieronder emoji's of stickers aan.",
@@ -645,7 +654,6 @@
   "Video Quests": "Video-Quests",
   "Vietnamese": "Vietnamees",
   "View Anyway": "Toch bekijken",
-  "Waiting for new Quests.": "Wachten op nieuwe Quests.",
   "Watch": "Bekijken",
   "Watching all {n} friends": {
    "one": "{n} vriend volgen",
@@ -676,6 +684,11 @@
   "You": "Jij",
   "You can read reviews. Sign in to write your own.": "Je kunt reviews lezen. Log in om er zelf een te schrijven.",
   "You can read, write, delete and report reviews.": "Je kunt reviews lezen, schrijven, verwijderen en rapporteren.",
+  "You can save up to {n} account.": "Je kunt maximaal {n} account opslaan.",
+  "You can save up to {n} accounts.": {
+   "one": "Je kunt maximaal {n} account opslaan.",
+   "other": "Je kunt maximaal {n} accounts opslaan."
+  },
   "You change your mind and tap your message three times": "Je bedenkt je en tikt drie keer op je bericht",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Je hebt geen toegang tot dit kanaal. Deze gegevens komen uit wat Discord al naar je app heeft gestuurd.",
   "You double-tap Sam's message": "Je dubbeltikt op het bericht van Sam",
@@ -694,6 +707,7 @@
   "Your phone's language": "Taal van je telefoon",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Je gekozen vrienden en toegevoegde gebruikers-ID's worden gewist en Alle vrienden wordt weer ingeschakeld.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Je opgeslagen instellingen konden niet worden gelezen, dus de standaardinstellingen worden gebruikt.",
+  "Your settings and kept deleted messages are saved on this phone.": "Je instellingen en bewaarde verwijderde berichten worden op deze telefoon opgeslagen.",
   "Your settings are saved on this phone.": "Je instellingen zijn opgeslagen op deze telefoon.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Je instellingen kunnen momenteel niet worden opgeslagen. Wijzigingen blijven actief totdat Discord opnieuw start.",
   "a link": "een link",
@@ -729,14 +743,9 @@
    "other": "{n} Quests voltooid"
   },
   "{n} account": "{n} account",
-  "{n} account saved (up to {max}).": "{n} account opgeslagen (maximaal {max}).",
   "{n} accounts": {
    "one": "{n} account",
    "other": "{n} accounts"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} account opgeslagen (maximaal {max}).",
-   "other": "{n} accounts opgeslagen (maximaal {max})."
   },
   "{n} chosen people": {
    "one": "{n} gekozen persoon",

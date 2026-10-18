@@ -40,6 +40,11 @@
 * **Discord - Message highlights:** The preview shows one chat picture that updates live and glows only the highlight you just changed
 * **Discord - Keep deleted messages:** The preview shows an edited message's history and an outlined deleted message, updating live as you flip Show edit history
 * **Discord - Pastel name colors:** The preview shows one chat picture that updates live as you flip Replace role colors or Color message text
+* **Discord - Complete Quests automatically:** The status card no longer says it's waiting while a Quest runs, and says what to do when every Quest type is off
+* **Discord - Account switcher:** The status card no longer repeats the account count from its title, and shows who you're signed in as first
+* **Discord - User activity notifications:** Turning All friends back on reads Watching all friends again, and Reset chosen people says what it clears
+* **Discord - Keep deleted messages:** Hide the Manage section while nothing is kept, instead of showing a greyed-out Clear row
+* **Discord - Venus settings:** The About page says once that your settings and kept deleted messages are saved, not in two matching lines
 
 ### 🚀 Updated App Support
 

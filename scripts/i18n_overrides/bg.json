@@ -200,7 +200,6 @@
  "Jump to top": "Към началото",
  "Keep deleted messages": "Запазване на изтритите съобщения",
  "Keep up to": "Запазване до",
- "Kept deleted messages are saved on this phone.": "Запазените изтрити съобщения се съхраняват на този телефон.",
  "Kept deleted messages couldn't be saved.": "Запазените изтрити съобщения не можаха да бъдат съхранени.",
  "Kept messages cleared": "Запазените съобщения са изчистени",
  "Language": "Език",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus го изпраща като {link} и всички виждат емоджито",
  "Venus settings": "Настройки на Venus",
  "View Anyway": "Преглед въпреки това",
- "Waiting for new Quests.": "Изчакване на нови Quest мисии.",
  "Watch": "Демонстрация",
  "Watching all {n} friends": {
   "one": "Следи се {n} приятел",
@@ -601,14 +599,9 @@
   "other": "{n} изпълнени Quest мисии"
  },
  "{n} account": "{n} профил",
- "{n} account saved (up to {max}).": "{n} запазен профил (до {max}).",
  "{n} accounts": {
   "one": "{n} профил",
   "other": "{n} профила"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} запазен профил (до {max}).",
-  "other": "{n} запазени профила (до {max})."
  },
  "{n} chosen people": {
   "one": "{n} избран човек",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} функция е включена",
  "Themes": "Теми",
  "Default": "По подразбиране",
- "Hold a theme to remove it.": "Задръжте тема, за да я премахнете."
+ "Hold a theme to remove it.": "Задръжте тема, за да я премахнете.",
+ "Your settings and kept deleted messages are saved on this phone.": "Настройките ви и запазените изтрити съобщения се съхраняват на този телефон.",
+ "Turn on at least one Quest type below.": "Включете поне един вид Quest мисии по-долу.",
+ "Starts the next Quest by itself as soon as one is available.": "Започва следващата Quest мисия сама, щом има такава.",
+ "Starts as soon as you accept a Quest.": "Започва веднага щом приемете Quest мисия.",
+ "Nothing to complete": "Няма какво да се изпълнява",
+ "You can save up to {n} accounts.": {
+  "one": "Можете да запазите до {n} профил.",
+  "other": "Можете да запазите до {n} профила."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Изчиства {n} човек, избран от вас или добавен по ID.",
+  "other": "Изчиства {n} души, избрани от вас или добавени по ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Хората, които сте избрали или добавили по ID, ще бъдат изчистени.",
+ "You can save up to {n} account.": "Можете да запазите до {n} профил.",
+ "Clears {n} person you picked or added by ID.": "Изчиства {n} човек, избран от вас или добавен по ID."
 }

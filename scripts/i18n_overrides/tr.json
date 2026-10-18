@@ -200,7 +200,6 @@
  "Jump to top": "En üste çık",
  "Keep deleted messages": "Silinen mesajları sakla",
  "Keep up to": "En fazla saklanacak",
- "Kept deleted messages are saved on this phone.": "Saklanan silinmiş mesajlar bu telefona kaydedilir.",
  "Kept deleted messages couldn't be saved.": "Saklanan silinmiş mesajlar kaydedilemedi.",
  "Kept messages cleared": "Saklanan mesajlar temizlendi",
  "Language": "Dil",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus bunu {link} olarak gönderir ve herkes emojiyi görür",
  "Venus settings": "Venus ayarları",
  "View Anyway": "Yine de Görüntüle",
- "Waiting for new Quests.": "Yeni Görevler bekleniyor.",
  "Watch": "İzle",
  "Watching all {n} friends": {
   "one": "{n} arkadaş takip ediliyor",
@@ -601,14 +599,9 @@
   "other": "{n} Görev tamamlandı"
  },
  "{n} account": "{n} hesap",
- "{n} account saved (up to {max}).": "{n} hesap kaydedildi (en fazla {max}).",
  "{n} accounts": {
   "one": "{n} hesap",
   "other": "{n} hesap"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} hesap kaydedildi (en fazla {max}).",
-  "other": "{n} hesap kaydedildi (en fazla {max})."
  },
  "{n} chosen people": {
   "one": "seçilen {n} kişi",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} özellik açıldı",
  "Themes": "Temalar",
  "Default": "Varsayılan",
- "Hold a theme to remove it.": "Bir temayı kaldırmak için basılı tut."
+ "Hold a theme to remove it.": "Bir temayı kaldırmak için basılı tut.",
+ "Your settings and kept deleted messages are saved on this phone.": "Ayarların ve saklanan silinmiş mesajlar bu telefona kaydedilir.",
+ "Turn on at least one Quest type below.": "Aşağıdan en az bir Görev türünü aç.",
+ "Starts the next Quest by itself as soon as one is available.": "Uygun bir Görev çıkar çıkmaz sonrakini kendisi başlatır.",
+ "Starts as soon as you accept a Quest.": "Bir Görevi kabul ettiğin anda başlar.",
+ "Nothing to complete": "Tamamlanacak bir şey yok",
+ "You can save up to {n} accounts.": {
+  "one": "En fazla {n} hesap kaydedebilirsin.",
+  "other": "En fazla {n} hesap kaydedebilirsin."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Seçtiğin veya ID ile eklediğin {n} kişiyi temizler.",
+  "other": "Seçtiğin veya ID ile eklediğin {n} kişiyi temizler."
+ },
+ "The people you picked and added by ID will be cleared.": "Seçtiğin ve ID ile eklediğin kişiler temizlenecek.",
+ "You can save up to {n} account.": "En fazla {n} hesap kaydedebilirsin.",
+ "Clears {n} person you picked or added by ID.": "Seçtiğin veya ID ile eklediğin {n} kişiyi temizler."
 }

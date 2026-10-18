@@ -200,7 +200,6 @@
  "Jump to top": "Gå til toppen",
  "Keep deleted messages": "Behold slettede beskeder",
  "Keep up to": "Behold op til",
- "Kept deleted messages are saved on this phone.": "Gemte slettede beskeder opbevares på denne telefon.",
  "Kept deleted messages couldn't be saved.": "Gemte slettede beskeder kunne ikke opbevares.",
  "Kept messages cleared": "Gemte beskeder ryddet",
  "Language": "Sprog",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus sender den som {link}, og alle ser emojien",
  "Venus settings": "Venus-indstillinger",
  "View Anyway": "Vis alligevel",
- "Waiting for new Quests.": "Venter på nye Quests.",
  "Watch": "Se",
  "Watching all {n} friends": {
   "one": "Holder øje med {n} ven",
@@ -601,14 +599,9 @@
   "other": "{n} Quests fuldført"
  },
  "{n} account": "{n} konto",
- "{n} account saved (up to {max}).": "{n} konto gemt (op til {max}).",
  "{n} accounts": {
   "one": "{n} konto",
   "other": "{n} konti"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} konto gemt (op til {max}).",
-  "other": "{n} konti gemt (op til {max})."
  },
  "{n} chosen people": {
   "one": "{n} valgt person",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} funktion slået til",
  "Themes": "Temaer",
  "Default": "Standard",
- "Hold a theme to remove it.": "Hold et tema nede for at fjerne det."
+ "Hold a theme to remove it.": "Hold et tema nede for at fjerne det.",
+ "Your settings and kept deleted messages are saved on this phone.": "Dine indstillinger og gemte slettede beskeder opbevares på denne telefon.",
+ "Turn on at least one Quest type below.": "Slå mindst én type Quest til herunder.",
+ "Starts the next Quest by itself as soon as one is available.": "Starter selv den næste Quest, så snart der er en.",
+ "Starts as soon as you accept a Quest.": "Starter, så snart du accepterer en Quest.",
+ "Nothing to complete": "Intet at fuldføre",
+ "You can save up to {n} accounts.": {
+  "one": "Du kan gemme op til {n} konto.",
+  "other": "Du kan gemme op til {n} konti."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Rydder {n} person, du har valgt eller tilføjet med ID.",
+  "other": "Rydder {n} personer, du har valgt eller tilføjet med ID."
+ },
+ "The people you picked and added by ID will be cleared.": "De personer, du har valgt eller tilføjet med ID, ryddes.",
+ "You can save up to {n} account.": "Du kan gemme op til {n} konto.",
+ "Clears {n} person you picked or added by ID.": "Rydder {n} person, du har valgt eller tilføjet med ID."
 }

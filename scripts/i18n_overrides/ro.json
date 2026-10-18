@@ -203,7 +203,6 @@
  "Jump to top": "Mergi la început",
  "Keep deleted messages": "Păstrează mesajele șterse",
  "Keep up to": "Păstrează până la",
- "Kept deleted messages are saved on this phone.": "Mesajele șterse păstrate sunt salvate pe acest telefon.",
  "Kept deleted messages couldn't be saved.": "Mesajele șterse păstrate nu au putut fi salvate.",
  "Kept messages cleared": "Mesajele păstrate au fost șterse",
  "Language": "Limbă",
@@ -528,7 +527,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus îl trimite ca {link}, iar toată lumea vede emoji-ul",
  "Venus settings": "Setări Venus",
  "View Anyway": "Vezi oricum",
- "Waiting for new Quests.": "Se așteaptă Quest-uri noi.",
  "Watch": "Urmărește",
  "Watching all {n} friends": {
   "one": "Urmărești {n} prieten",
@@ -611,16 +609,10 @@
   "other": "{n} de Quest-uri finalizate"
  },
  "{n} account": "{n} cont",
- "{n} account saved (up to {max}).": "{n} cont salvat (până la {max}).",
  "{n} accounts": {
   "one": "{n} cont",
   "few": "{n} conturi",
   "other": "{n} de conturi"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} cont salvat (până la {max}).",
-  "few": "{n} conturi salvate (până la {max}).",
-  "other": "{n} de conturi salvate (până la {max})."
  },
  "{n} chosen people": {
   "one": "{n} persoană aleasă",
@@ -763,5 +755,23 @@
  "{n} feature turned on": "{n} funcție activată",
  "Themes": "Teme",
  "Default": "Implicită",
- "Hold a theme to remove it.": "Ține apăsată o temă pentru a o elimina."
+ "Hold a theme to remove it.": "Ține apăsată o temă pentru a o elimina.",
+ "Your settings and kept deleted messages are saved on this phone.": "Setările tale și mesajele șterse păstrate sunt salvate pe acest telefon.",
+ "Turn on at least one Quest type below.": "Activează mai jos cel puțin un tip de Quest.",
+ "Starts the next Quest by itself as soon as one is available.": "Pornește singur următorul Quest imediat ce apare unul.",
+ "Starts as soon as you accept a Quest.": "Pornește imediat ce accepți un Quest.",
+ "Nothing to complete": "Nimic de finalizat",
+ "You can save up to {n} accounts.": {
+  "one": "Poți salva până la {n} cont.",
+  "few": "Poți salva până la {n} conturi.",
+  "other": "Poți salva până la {n} de conturi."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Golește {n} persoană aleasă de tine sau adăugată după ID.",
+  "few": "Golește {n} persoane alese de tine sau adăugate după ID.",
+  "other": "Golește {n} de persoane alese de tine sau adăugate după ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Persoanele alese de tine și cele adăugate după ID vor fi șterse.",
+ "You can save up to {n} account.": "Poți salva până la {n} cont.",
+ "Clears {n} person you picked or added by ID.": "Golește {n} persoană aleasă de tine sau adăugată după ID."
 }

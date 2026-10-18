@@ -200,7 +200,6 @@
  "Jump to top": "Ir para o início",
  "Keep deleted messages": "Manter mensagens excluídas",
  "Keep up to": "Manter até",
- "Kept deleted messages are saved on this phone.": "As mensagens excluídas mantidas são salvas neste celular.",
  "Kept deleted messages couldn't be saved.": "Não foi possível salvar as mensagens excluídas mantidas.",
  "Kept messages cleared": "Mensagens mantidas limpas",
  "Language": "Idioma",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "O Venus envia como {link}, e todo mundo vê o emoji",
  "Venus settings": "Configurações do Venus",
  "View Anyway": "Ver mesmo assim",
- "Waiting for new Quests.": "Aguardando novas Missões.",
  "Watch": "Assistir",
  "Watching all {n} friends": {
   "one": "Acompanhando {n} amigo",
@@ -601,14 +599,9 @@
   "other": "{n} Missões concluídas"
  },
  "{n} account": "{n} conta",
- "{n} account saved (up to {max}).": "{n} conta salva (até {max}).",
  "{n} accounts": {
   "one": "{n} conta",
   "other": "{n} contas"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} conta salva (até {max}).",
-  "other": "{n} contas salvas (até {max})."
  },
  "{n} chosen people": {
   "one": "{n} pessoa escolhida",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} recurso ativado",
  "Themes": "Temas",
  "Default": "Padrão",
- "Hold a theme to remove it.": "Segure um tema para removê-lo."
+ "Hold a theme to remove it.": "Segure um tema para removê-lo.",
+ "Your settings and kept deleted messages are saved on this phone.": "Suas configurações e as mensagens excluídas mantidas são salvas neste celular.",
+ "Turn on at least one Quest type below.": "Ative abaixo pelo menos um tipo de Missão.",
+ "Starts the next Quest by itself as soon as one is available.": "Começa sozinho a próxima Missão assim que houver uma.",
+ "Starts as soon as you accept a Quest.": "Começa assim que você aceitar uma Missão.",
+ "Nothing to complete": "Nada para concluir",
+ "You can save up to {n} accounts.": {
+  "one": "Você pode salvar até {n} conta.",
+  "other": "Você pode salvar até {n} contas."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Limpa {n} pessoa que você escolheu ou adicionou por ID.",
+  "other": "Limpa {n} pessoas que você escolheu ou adicionou por ID."
+ },
+ "The people you picked and added by ID will be cleared.": "As pessoas que você escolheu e adicionou por ID serão limpas.",
+ "You can save up to {n} account.": "Você pode salvar até {n} conta.",
+ "Clears {n} person you picked or added by ID.": "Limpa {n} pessoa que você escolheu ou adicionou por ID."
 }

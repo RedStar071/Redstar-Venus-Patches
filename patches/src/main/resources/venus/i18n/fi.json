@@ -81,6 +81,11 @@
   "Clear kept messages?": "Tyhjennetäänkö säilytetyt viestit?",
   "Clear saved translations": "Tyhjennä tallennetut käännökset",
   "Clear saved translations?": "Tyhjennetäänkö tallennetut käännökset?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Tyhjentää {n} henkilön, jonka valitsit tai lisäsit ID:llä.",
+   "other": "Tyhjentää {n} henkilöä, jotka valitsit tai lisäsit ID:llä."
+  },
+  "Clears {n} person you picked or added by ID.": "Tyhjentää {n} henkilön, jonka valitsit tai lisäsit ID:llä.",
   "Close expression picker": "Sulje ilmevalitsin",
   "Color message text": "Väritä viestien teksti",
   "Colors": "Värit",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Säilytä uudelleenkäynnistyksen jälkeen",
   "Keep deleted messages": "Säilytä poistetut viestit",
   "Keep up to": "Säilytysraja",
-  "Kept deleted messages are saved on this phone.": "Säilytetyt poistetut viestit tallennetaan tähän puhelimeen.",
   "Kept deleted messages couldn't be saved.": "Säilytettyjä poistettuja viestejä ei voitu tallentaa.",
   "Kept messages cleared": "Säilytetyt viestit tyhjennetty",
   "Khmer": "khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Mitään ei seurata, ja kaikki toimii ilman verkkoyhteyttä lukuun ottamatta ominaisuuksia, joiden kohdalla mainitaan ulkoinen palvelu.",
   "Nothing saved yet.": "Mitään ei ole vielä tallennettu.",
   "Nothing sent yet": "Mitään ei ole vielä lähetetty",
+  "Nothing to complete": "Ei suoritettavaa",
   "Nothing to notify about": "Ei ilmoitettavaa",
   "Nothing translated yet since Discord opened.": "Mitään ei ole käännetty Discordin avaamisen jälkeen.",
   "Nothing unread": "Ei lukemattomia",
@@ -529,6 +534,8 @@
   "Start over": "Aloita alusta",
   "Start typing": "Alkavat kirjoittaa",
   "Start with the essentials": "Aloita olennaisista",
+  "Starts as soon as you accept a Quest.": "Alkaa heti, kun hyväksyt Questin.",
+  "Starts the next Quest by itself as soon as one is available.": "Aloittaa seuraavan Questin itse heti, kun sellainen on saatavilla.",
   "Status": "Tila",
   "Stickers": "Tarrat",
   "Stickers from other servers. Animated ones may not move.": "Muiden palvelinten tarrat. Animoidut tarrat eivät välttämättä liiku.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Tuo on oma käyttäjä-ID:si",
   "The link returned an empty file.": "Linkki palautti tyhjän tiedoston.",
   "The note under it says what it was in, with the original quoted below": "Alla oleva merkintä kertoo alkuperäisen kielen, ja alkuperäinen viesti näkyy lainattuna",
+  "The people you picked and added by ID will be cleared.": "Valitsemasi ja ID:llä lisäämäsi henkilöt tyhjennetään.",
   "The small note under it says what language it was in": "Alla oleva pieni merkintä kertoo, millä kielellä viesti oli",
   "The untranslated message, in a quote under the translation.": "Alkuperäinen viesti lainauksena käännöksen alla.",
   "Theme JSON link": "Teeman JSON-linkki",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Yritetään uudelleen {n} s kuluttua.",
   "Turkish": "turkki",
   "Turn it on here to start.": "Ota se käyttöön tästä.",
+  "Turn on at least one Quest type below.": "Ota alta käyttöön vähintään yksi Quest-tyyppi.",
   "Turn on at least one place below.": "Ota käyttöön vähintään yksi sijainti alta.",
   "Turn on at least one thing to be notified about.": "Ota käyttöön vähintään yksi ilmoitustyyppi.",
   "Turn on emojis or stickers below.": "Ota emojit tai tarrat käyttöön alta.",
@@ -645,7 +654,6 @@
   "Video Quests": "Video-Questit",
   "Vietnamese": "vietnam",
   "View Anyway": "Näytä silti",
-  "Waiting for new Quests.": "Odotetaan uusia Questeja.",
   "Watch": "Katso",
   "Watching all {n} friends": {
    "one": "Seurataan {n} kaveria",
@@ -676,6 +684,11 @@
   "You": "sinä",
   "You can read reviews. Sign in to write your own.": "Voit lukea arvosteluja. Kirjaudu sisään kirjoittaaksesi omasi.",
   "You can read, write, delete and report reviews.": "Voit lukea, kirjoittaa, poistaa ja ilmiantaa arvosteluja.",
+  "You can save up to {n} account.": "Voit tallentaa enintään {n} tilin.",
+  "You can save up to {n} accounts.": {
+   "one": "Voit tallentaa enintään {n} tilin.",
+   "other": "Voit tallentaa enintään {n} tiliä."
+  },
   "You change your mind and tap your message three times": "Muutat mielesi ja napautat viestiäsi kolmesti",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Sinulla ei ole oikeutta nähdä tätä kanavaa. Nämä tiedot ovat peräisin siitä, mitä Discord on jo lähettänyt sovelluksellesi.",
   "You double-tap Sam's message": "Kaksoisnapautat Samin viestiä",
@@ -694,6 +707,7 @@
   "Your phone's language": "Puhelimen kieli",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Valitut kaverit ja lisätyt käyttäjä-ID:t tyhjennetään, ja Kaikki kaverit otetaan taas käyttöön.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Tallennettuja asetuksiasi ei voitu lukea, joten oletusasetukset ovat käytössä.",
+  "Your settings and kept deleted messages are saved on this phone.": "Asetuksesi ja säilytetyt poistetut viestit tallennetaan tähän puhelimeen.",
   "Your settings are saved on this phone.": "Asetuksesi on tallennettu tähän puhelimeen.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Asetuksiasi ei voida tallentaa juuri nyt. Muutokset pysyvät voimassa, kunnes Discord käynnistetään uudelleen.",
   "a link": "linkki",
@@ -729,14 +743,9 @@
    "other": "{n} Questia suoritettu"
   },
   "{n} account": "{n} tili",
-  "{n} account saved (up to {max}).": "{n} tili tallennettu (enintään {max}).",
   "{n} accounts": {
    "one": "{n} tili",
    "other": "{n} tiliä"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} tili tallennettu (enintään {max}).",
-   "other": "{n} tiliä tallennettu (enintään {max})."
   },
   "{n} chosen people": {
    "one": "{n} valittu henkilö",

@@ -708,8 +708,9 @@
             storage === "waiting" || storage === "loading" ? "Loading your settings…" :
             /^read failed/.test(storage) ? "Your saved settings couldn't be read, so the defaults are in use." :
             "Your settings can't be saved right now. Changes last until Discord restarts.")];
-        const archive = {"saved locally":"Kept deleted messages are saved on this phone.", "save failed":"Kept deleted messages couldn't be saved.",
-            "restore failed":"Saved deleted messages couldn't be loaded."}[status.archive];
+        // Settings and kept messages both saved: one line, not the same sentence twice.
+        if (status.archive === "saved locally" && (storage === "ready" || storage === "saved")) lines[0] = tr("Your settings and kept deleted messages are saved on this phone.");
+        const archive = {"save failed":"Kept deleted messages couldn't be saved.", "restore failed":"Saved deleted messages couldn't be loaded."}[status.archive];
         if (archive) lines.push(tr(archive));
         if (status.audioError) lines.push(tr("Last problem: {problem}", {problem:status.audioError}));
         return lines.join("\n");
@@ -3448,11 +3449,14 @@
     }
     function questStatusText() {
         if (!enabled("quests")) return "Turned off. Switch it on in Features to start.";
-        const lines = [quest.completed ? pl(quest.completed, "Completed {n} Quest since Discord opened.", "Completed {n} Quests since Discord opened.") : tr("Waiting for new Quests.")];
+        // The card's title already says what's happening, so the first line adds to it instead of repeating it.
+        const lines = [];
         if (quest.running) {
             const share = questShare(), left = share != null ? Math.ceil((quest.running.task.target - quest.running.progress) / 60) : 0;
             lines.push(tr("Now: {name}.", {name:quest.running.name}) + (share != null && left > 0 ? " " + pl(left, "About {n} minute left.", "About {n} minutes left.") : ""));
-        }
+        } else if (!questTypesOn()) lines.push(tr("Turn on at least one Quest type below."));
+        else if (!quest.completed) lines.push(tr(settings.questsEnroll ? "Starts the next Quest by itself as soon as one is available." : "Starts as soon as you accept a Quest."));
+        if (quest.completed) lines.push(pl(quest.completed, "Completed {n} Quest since Discord opened.", "Completed {n} Quests since Discord opened."));
         if (quest.last) lines.push(tr("Last: {name}", {name:tr(quest.last.text, quest.last.vars)}));
         if (quest.error) lines.push(tr(quest.error.text, quest.error.vars));
         return lines.join("\n");
@@ -3462,9 +3466,11 @@
         const entry = quest.running, target = entry && entry.task && entry.task.target;
         return entry && target > 0 && typeof entry.progress === "number" ? entry.progress / target : null;
     }
+    function questTypesOn() { return !!(settings.questsVideo || settings.questsPlay || settings.questsActivity); }
     function questStatusTitle() {
         if (quest.error) return tr("Something went wrong");
         if (quest.running) return tr("Completing a Quest");
+        if (!questTypesOn()) return tr("Nothing to complete");
         return quest.completed ? pl(quest.completed, "{n} Quest done", "{n} Quests done") : tr("Watching for Quests");
     }
     // Settings page: the Quest types, a status card and what to know.
@@ -4919,8 +4925,8 @@
                 venusSegmented({key:"choice",value:nearest,disabled:!settings.noDelete,onChange:value => setSetting("noDeleteLimit",value),
                     items:NODELETE_LIMITS.map(n => ({value:n,label:String(n)}))}),
                 footnote("hint","When it's full, the oldest is removed first.")),
-            el(Group,{key:"clear",title:tr("Manage")},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
-                () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),!kept && !changed,true)),
+            hasKept ? el(Group,{key:"clear",title:tr("Manage")},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
+                () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),false,true)) : null,
             footnote("note","Delete a kept message again to hide just that one.")];
         return settingsBody(ui,groups);
         function toggle(key,label,subLabel,icon) { return switchRow(Switch,key,label,subLabel,icon); }
@@ -5966,7 +5972,8 @@
         const watched = userNotifWatchedIds().length;
         if (!watched) return tr("No one chosen yet");
         if (!userNotifAnyEvent()) return tr("Nothing to notify about");
-        return settings.userNotifFriends && !userNotif.ids.size ? pl(watched, "Watching {n} friend", "Watching all {n} friends") :
+        // People picked earlier stay saved for People I pick; while they're all friends anyway, it's still "all friends".
+        return settings.userNotifFriends && watched === userNotifFriendIds().length ? pl(watched, "Watching {n} friend", "Watching all {n} friends") :
             pl(watched, "Watching {n} person", "Watching {n} people");
     }
     function userNotifSummary() {
@@ -6106,8 +6113,11 @@
                 el(RN.View, {key:"input", style:{padding:12}}, idInput),
                 customRows),
             userNotif.ids.size || !allFriends ? el(Group, {key:"manage", title:tr("Manage")},
-                actionRow(ui, "reset", "Reset chosen people", tr("Switches All friends back on and clears {count}.", {count:pl(userNotif.ids.size, "{n} chosen person", "{n} chosen people")}),
-                    () => confirmAction("Reset chosen people?", "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.", "Reset", userNotifClearIds),
+                // With All friends already on, resetting only forgets who was picked or added by ID.
+                actionRow(ui, "reset", "Reset chosen people", allFriends ? pl(userNotif.ids.size, "Clears {n} person you picked or added by ID.", "Clears {n} people you picked or added by ID.") :
+                    tr("Switches All friends back on and clears {count}.", {count:pl(userNotif.ids.size, "{n} chosen person", "{n} chosen people")}),
+                    () => confirmAction("Reset chosen people?", allFriends ? "The people you picked and added by ID will be cleared." :
+                        "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.", "Reset", userNotifClearIds),
                     false, true)) : null,
             footnote("note", "Notifications show as banners while Discord is open. For people who aren't your friends, Discord only sends what happens in servers you share.")];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
@@ -6362,10 +6372,10 @@
         const accounts = accountSwitcherUsers();
         const me = currentUser();
         const limit = multiAccountLimit();
-        const countText = accounts.length ? pl(accounts.length, "{n} account saved (up to {max}).", "{n} accounts saved (up to {max}).", {max:limit}) :
-            tr("No accounts saved yet (up to {max}).", {max:limit});
+        // The card's title already gives the count, so the details say who you are and how many fit.
+        const room = accounts.length ? pl(limit, "You can save up to {n} account.", "You can save up to {n} accounts.") : tr("No accounts saved yet (up to {max}).", {max:limit});
         const activeName = me && (me.globalName || me.global_name || me.username);
-        return activeName ? countText + "\n" + tr("Signed in as {name}.", {name:activeName}) : countText;
+        return activeName ? tr("Signed in as {name}.", {name:activeName}) + "\n" + room : room;
     }
     function AccountSwitcherSettings() {
         useSettings("accountSwitcher");

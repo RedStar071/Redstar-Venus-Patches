@@ -82,6 +82,12 @@
   "Clear kept messages?": "Ștergi mesajele păstrate?",
   "Clear saved translations": "Șterge traducerile salvate",
   "Clear saved translations?": "Ștergi traducerile salvate?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Golește {n} persoană aleasă de tine sau adăugată după ID.",
+   "few": "Golește {n} persoane alese de tine sau adăugate după ID.",
+   "other": "Golește {n} de persoane alese de tine sau adăugate după ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Golește {n} persoană aleasă de tine sau adăugată după ID.",
   "Close expression picker": "Închide selectorul de expresii",
   "Color message text": "Colorează textul mesajelor",
   "Colors": "Culori",
@@ -253,7 +259,6 @@
   "Keep after restarting": "Păstrează după repornire",
   "Keep deleted messages": "Păstrează mesajele șterse",
   "Keep up to": "Păstrează până la",
-  "Kept deleted messages are saved on this phone.": "Mesajele șterse păstrate sunt salvate pe acest telefon.",
   "Kept deleted messages couldn't be saved.": "Mesajele șterse păstrate nu au putut fi salvate.",
   "Kept messages cleared": "Mesajele păstrate au fost șterse",
   "Khmer": "khmeră",
@@ -333,6 +338,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nimic nu este urmărit și totul funcționează offline, cu excepția funcțiilor care menționează explicit că folosesc un serviciu extern.",
   "Nothing saved yet.": "Nimic salvat încă.",
   "Nothing sent yet": "Nimic trimis încă",
+  "Nothing to complete": "Nimic de finalizat",
   "Nothing to notify about": "Nimic de notificat",
   "Nothing translated yet since Discord opened.": "Nimic tradus de la deschiderea Discord.",
   "Nothing unread": "Nimic necitit",
@@ -534,6 +540,8 @@
   "Start over": "De la capăt",
   "Start typing": "Încep să scrie",
   "Start with the essentials": "Începe cu esențialul",
+  "Starts as soon as you accept a Quest.": "Pornește imediat ce accepți un Quest.",
+  "Starts the next Quest by itself as soon as one is available.": "Pornește singur următorul Quest imediat ce apare unul.",
   "Status": "Stare",
   "Stickers": "Stickere",
   "Stickers from other servers. Animated ones may not move.": "Stickere de pe alte servere. Cele animate s-ar putea să nu se miște.",
@@ -582,6 +590,7 @@
   "That's your own user ID": "Acesta este propriul tău ID de utilizator",
   "The link returned an empty file.": "Linkul a returnat un fișier gol.",
   "The note under it says what it was in, with the original quoted below": "Nota de dedesubt arată în ce limbă a fost scris, cu textul original citat mai jos",
+  "The people you picked and added by ID will be cleared.": "Persoanele alese de tine și cele adăugate după ID vor fi șterse.",
   "The small note under it says what language it was in": "Nota mică de dedesubt arată în ce limbă era mesajul",
   "The untranslated message, in a quote under the translation.": "Mesajul netradus, afișat ca citat sub traducere.",
   "Theme JSON link": "Link JSON către temă",
@@ -619,6 +628,7 @@
   "Trying again in {n} s.": "Se încearcă din nou în {n} s.",
   "Turkish": "turcă",
   "Turn it on here to start.": "Activează aici pentru a începe.",
+  "Turn on at least one Quest type below.": "Activează mai jos cel puțin un tip de Quest.",
   "Turn on at least one place below.": "Activează cel puțin un loc mai jos.",
   "Turn on at least one thing to be notified about.": "Activează cel puțin un tip de activitate mai jos.",
   "Turn on emojis or stickers below.": "Activează emoji-urile sau stickerele mai jos.",
@@ -651,7 +661,6 @@
   "Video Quests": "Misiuni Quest video",
   "Vietnamese": "vietnameză",
   "View Anyway": "Vezi oricum",
-  "Waiting for new Quests.": "Se așteaptă Quest-uri noi.",
   "Watch": "Urmărește",
   "Watching all {n} friends": {
    "one": "Urmărești {n} prieten",
@@ -684,6 +693,12 @@
   "You": "Tu",
   "You can read reviews. Sign in to write your own.": "Poți citi recenziile. Conectează-te pentru a scrie una.",
   "You can read, write, delete and report reviews.": "Poți citi, scrie, șterge și raporta recenzii.",
+  "You can save up to {n} account.": "Poți salva până la {n} cont.",
+  "You can save up to {n} accounts.": {
+   "one": "Poți salva până la {n} cont.",
+   "few": "Poți salva până la {n} conturi.",
+   "other": "Poți salva până la {n} de conturi."
+  },
   "You change your mind and tap your message three times": "Te răzgândești și îți atingi mesajul de trei ori",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nu ai permisiunea de a vedea acest canal. Aceste detalii provin din datele pe care Discord le-a trimis deja aplicației tale.",
   "You double-tap Sam's message": "Atingi de două ori mesajul lui Sam",
@@ -702,6 +717,7 @@
   "Your phone's language": "Limba telefonului",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Prietenii aleși și ID-urile de utilizator personalizate vor fi șterse, iar opțiunea Toți prietenii va fi reactivată.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Setările tale salvate nu au putut fi citite, așa că sunt folosite valorile implicite.",
+  "Your settings and kept deleted messages are saved on this phone.": "Setările tale și mesajele șterse păstrate sunt salvate pe acest telefon.",
   "Your settings are saved on this phone.": "Setările tale sunt salvate pe acest telefon.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Setările tale nu pot fi salvate în acest moment. Modificările rămân active până la repornirea Discord.",
   "a link": "un link",
@@ -739,16 +755,10 @@
    "other": "{n} de Quest-uri finalizate"
   },
   "{n} account": "{n} cont",
-  "{n} account saved (up to {max}).": "{n} cont salvat (până la {max}).",
   "{n} accounts": {
    "one": "{n} cont",
    "few": "{n} conturi",
    "other": "{n} de conturi"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} cont salvat (până la {max}).",
-   "few": "{n} conturi salvate (până la {max}).",
-   "other": "{n} de conturi salvate (până la {max})."
   },
   "{n} chosen people": {
    "one": "{n} persoană aleasă",

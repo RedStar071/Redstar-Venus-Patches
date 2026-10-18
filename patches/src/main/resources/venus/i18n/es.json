@@ -81,6 +81,11 @@
   "Clear kept messages?": "¿Borrar mensajes guardados?",
   "Clear saved translations": "Borrar traducciones guardadas",
   "Clear saved translations?": "¿Borrar traducciones guardadas?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Borra {n} persona que elegiste o añadiste por ID.",
+   "other": "Borra {n} personas que elegiste o añadiste por ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Borra {n} persona que elegiste o añadiste por ID.",
   "Close expression picker": "Cerrar el selector de expresiones",
   "Color message text": "Colorear el texto de los mensajes",
   "Colors": "Colores",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Conservar al reiniciar",
   "Keep deleted messages": "Conservar mensajes eliminados",
   "Keep up to": "Conservar hasta",
-  "Kept deleted messages are saved on this phone.": "Los mensajes eliminados conservados se guardan en este teléfono.",
   "Kept deleted messages couldn't be saved.": "No se pudieron guardar los mensajes eliminados conservados.",
   "Kept messages cleared": "Mensajes guardados borrados",
   "Khmer": "jemer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "No se rastrea nada y todo funciona sin conexión, salvo las funciones que indican que usan un servicio.",
   "Nothing saved yet.": "Aún no hay nada guardado.",
   "Nothing sent yet": "Aún no se ha enviado nada",
+  "Nothing to complete": "Nada que completar",
   "Nothing to notify about": "Nada sobre lo que avisar",
   "Nothing translated yet since Discord opened.": "Nada traducido desde que se abrió Discord.",
   "Nothing unread": "Nada sin leer",
@@ -529,6 +534,8 @@
   "Start over": "Empezar de nuevo",
   "Start typing": "Empiecen a escribir",
   "Start with the essentials": "Empieza por lo esencial",
+  "Starts as soon as you accept a Quest.": "Empieza en cuanto aceptes una misión.",
+  "Starts the next Quest by itself as soon as one is available.": "Empieza sola la siguiente misión en cuanto haya una.",
   "Status": "Estado",
   "Stickers": "Stickers",
   "Stickers from other servers. Animated ones may not move.": "Stickers de otros servidores. Puede que los animados no se muevan.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Ese es tu propio ID de usuario",
   "The link returned an empty file.": "El enlace devolvió un archivo vacío.",
   "The note under it says what it was in, with the original quoted below": "La nota debajo indica en qué idioma estaba y muestra el original citado debajo",
+  "The people you picked and added by ID will be cleared.": "Se borrarán las personas que elegiste o añadiste por ID.",
   "The small note under it says what language it was in": "La pequeña nota debajo indica en qué idioma estaba",
   "The untranslated message, in a quote under the translation.": "El mensaje sin traducir, en una cita bajo la traducción.",
   "Theme JSON link": "Enlace JSON del tema",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Reintentando en {n} s.",
   "Turkish": "turco",
   "Turn it on here to start.": "Actívalo aquí para empezar.",
+  "Turn on at least one Quest type below.": "Activa abajo al menos un tipo de misión.",
   "Turn on at least one place below.": "Activa al menos una ubicación abajo.",
   "Turn on at least one thing to be notified about.": "Activa al menos una opción sobre la que recibir avisos.",
   "Turn on emojis or stickers below.": "Activa abajo los emojis o los stickers.",
@@ -645,7 +654,6 @@
   "Video Quests": "Misiones de vídeo",
   "Vietnamese": "vietnamita",
   "View Anyway": "Ver de todos modos",
-  "Waiting for new Quests.": "Esperando misiones nuevas.",
   "Watch": "Ver",
   "Watching all {n} friends": {
    "one": "Siguiendo a {n} amigo",
@@ -676,6 +684,11 @@
   "You": "Tú",
   "You can read reviews. Sign in to write your own.": "Puedes leer reseñas. Inicia sesión para escribir la tuya.",
   "You can read, write, delete and report reviews.": "Puedes leer, escribir, eliminar y denunciar reseñas.",
+  "You can save up to {n} account.": "Puedes guardar hasta {n} cuenta.",
+  "You can save up to {n} accounts.": {
+   "one": "Puedes guardar hasta {n} cuenta.",
+   "other": "Puedes guardar hasta {n} cuentas."
+  },
   "You change your mind and tap your message three times": "Cambias de idea y tocas tu mensaje tres veces",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "No tienes permiso para ver este canal. Estos datos vienen de lo que Discord ya envió a tu cliente.",
   "You double-tap Sam's message": "Tocas dos veces el mensaje de Sam",
@@ -694,6 +707,7 @@
   "Your phone's language": "Idioma de tu teléfono",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Se borrarán tus amigos elegidos e IDs de usuario y se volverá a activar «Todos los amigos».",
   "Your saved settings couldn't be read, so the defaults are in use.": "No se pudieron leer tus ajustes guardados, así que se usan los predeterminados.",
+  "Your settings and kept deleted messages are saved on this phone.": "Tus ajustes y los mensajes eliminados conservados se guardan en este teléfono.",
   "Your settings are saved on this phone.": "Tus ajustes se guardan en este teléfono.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Tus ajustes no se pueden guardar ahora mismo. Los cambios duran hasta que Discord se reinicie.",
   "a link": "un enlace",
@@ -729,14 +743,9 @@
    "other": "{n} misiones completadas"
   },
   "{n} account": "{n} cuenta",
-  "{n} account saved (up to {max}).": "{n} cuenta guardada (hasta {max}).",
   "{n} accounts": {
    "one": "{n} cuenta",
    "other": "{n} cuentas"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} cuenta guardada (hasta {max}).",
-   "other": "{n} cuentas guardadas (hasta {max})."
   },
   "{n} chosen people": {
    "one": "{n} persona elegida",

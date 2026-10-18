@@ -82,6 +82,12 @@
   "Clear kept messages?": "Очистити збережені повідомлення?",
   "Clear saved translations": "Очистити збережені переклади",
   "Clear saved translations?": "Очистити збережені переклади?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Скидає {n} людину, яку ви вибрали або додали за ID.",
+   "few": "Скидає {n} людини, яких ви вибрали або додали за ID.",
+   "many": "Скидає {n} людей, яких ви вибрали або додали за ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Скидає {n} людину, яку ви вибрали або додали за ID.",
   "Close expression picker": "Закрити панель емодзі й стікерів",
   "Color message text": "Забарвлювати текст повідомлень",
   "Colors": "Кольори",
@@ -253,7 +259,6 @@
   "Keep after restarting": "Зберігати після перезапуску",
   "Keep deleted messages": "Зберігати видалені повідомлення",
   "Keep up to": "Зберігати до",
-  "Kept deleted messages are saved on this phone.": "Збережені видалені повідомлення зберігаються на цьому телефоні.",
   "Kept deleted messages couldn't be saved.": "Не вдалося зберегти видалені повідомлення.",
   "Kept messages cleared": "Збережені повідомлення очищено",
   "Khmer": "кхмерська",
@@ -333,6 +338,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Жодного стеження: усе працює локально, крім функцій, де прямо вказано використання зовнішнього сервісу.",
   "Nothing saved yet.": "Поки нічого не збережено.",
   "Nothing sent yet": "Поки нічого не надіслано",
+  "Nothing to complete": "Нічого виконувати",
   "Nothing to notify about": "Нема про що сповіщати",
   "Nothing translated yet since Discord opened.": "З моменту запуску Discord ще нічого не перекладено.",
   "Nothing unread": "Немає непрочитаного",
@@ -534,6 +540,8 @@
   "Start over": "Спочатку",
   "Start typing": "Починають друкувати",
   "Start with the essentials": "Почніть з головного",
+  "Starts as soon as you accept a Quest.": "Запускається, щойно ви приймете завдання.",
+  "Starts the next Quest by itself as soon as one is available.": "Сам запускає наступне завдання, щойно воно з'явиться.",
   "Status": "Статус",
   "Stickers": "Наліпки",
   "Stickers from other servers. Animated ones may not move.": "Наліпки з інших серверів. Анімовані наліпки можуть бути статичними.",
@@ -582,6 +590,7 @@
   "That's your own user ID": "Це ваш власний ID користувача",
   "The link returned an empty file.": "За посиланням отримано порожній файл.",
   "The note under it says what it was in, with the original quoted below": "У підписі під перекладом вказано мову оригіналу, а нижче наведено вихідний текст",
+  "The people you picked and added by ID will be cleared.": "Людей, яких ви вибрали або додали за ID, буде прибрано зі списку.",
   "The small note under it says what language it was in": "Невеликий підпис під повідомленням вказує, якою мовою був оригінал",
   "The untranslated message, in a quote under the translation.": "Неперекладене повідомлення у вигляді цитати під перекладом.",
   "Theme JSON link": "Посилання на JSON теми",
@@ -619,6 +628,7 @@
   "Trying again in {n} s.": "Повторна спроба через {n} с.",
   "Turkish": "турецька",
   "Turn it on here to start.": "Увімкніть тут, щоб почати.",
+  "Turn on at least one Quest type below.": "Увімкніть нижче хоча б один тип завдань.",
   "Turn on at least one place below.": "Увімкніть хоча б одне місце відображення нижче.",
   "Turn on at least one thing to be notified about.": "Виберіть хоча б одну подію для сповіщень.",
   "Turn on emojis or stickers below.": "Увімкніть емодзі або наліпки нижче.",
@@ -651,7 +661,6 @@
   "Video Quests": "Завдання з відео",
   "Vietnamese": "вʼєтнамська",
   "View Anyway": "Усе одно відкрити",
-  "Waiting for new Quests.": "Очікування нових завдань.",
   "Watch": "Демонстрація",
   "Watching all {n} friends": {
    "one": "Відстежується {n} друг",
@@ -684,6 +693,12 @@
   "You": "Ви",
   "You can read reviews. Sign in to write your own.": "Ви можете читати відгуки. Увійдіть, щоб залишати власні.",
   "You can read, write, delete and report reviews.": "Ви можете читати, писати, видаляти відгуки та скаржитися на них.",
+  "You can save up to {n} account.": "Можна зберегти до {n} акаунта.",
+  "You can save up to {n} accounts.": {
+   "one": "Можна зберегти до {n} акаунта.",
+   "few": "Можна зберегти до {n} акаунтів.",
+   "many": "Можна зберегти до {n} акаунтів."
+  },
   "You change your mind and tap your message three times": "Ви передумали й тричі торкаєтеся свого повідомлення",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "У вас немає доступу до цього каналу. Ці відомості отримано з даних, які Discord уже передав вашому клієнту.",
   "You double-tap Sam's message": "Ви двічі торкаєтеся повідомлення Сема",
@@ -702,6 +717,7 @@
   "Your phone's language": "Мова телефона",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Список вибраних друзів і доданих ID користувачів буде очищено, і знову увімкнеться режим «Усі друзі».",
   "Your saved settings couldn't be read, so the defaults are in use.": "Не вдалося прочитати збережені налаштування, тому використовуються стандартні значення.",
+  "Your settings and kept deleted messages are saved on this phone.": "Налаштування та збережені видалені повідомлення зберігаються на цьому телефоні.",
   "Your settings are saved on this phone.": "Налаштування збережено на цьому телефоні.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Зараз не вдається зберегти налаштування. Зміни діятимуть до перезапуску Discord.",
   "a link": "посилання",
@@ -739,16 +755,10 @@
    "many": "Виконано {n} завдань"
   },
   "{n} account": "{n} акаунт",
-  "{n} account saved (up to {max}).": "Збережено {n} акаунт (максимум — {max}).",
   "{n} accounts": {
    "one": "{n} акаунт",
    "few": "{n} акаунти",
    "many": "{n} акаунтів"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "Збережено {n} акаунт (максимум — {max}).",
-   "few": "Збережено {n} акаунти (максимум — {max}).",
-   "many": "Збережено {n} акаунтів (максимум — {max})."
   },
   "{n} chosen people": {
    "one": "{n} вибрану людину",

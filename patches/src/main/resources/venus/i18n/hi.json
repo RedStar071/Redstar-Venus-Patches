@@ -81,6 +81,11 @@
   "Clear kept messages?": "रखे गए मैसेज साफ़ करें?",
   "Clear saved translations": "सहेजे गए अनुवाद साफ़ करें",
   "Clear saved translations?": "सहेजे गए अनुवाद साफ़ करें?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "आपके चुने गए या ID से जोड़े गए {n} व्यक्ति को साफ़ करता है।",
+   "other": "आपके चुने गए या ID से जोड़े गए {n} लोगों को साफ़ करता है।"
+  },
+  "Clears {n} person you picked or added by ID.": "आपके चुने गए या ID से जोड़े गए {n} व्यक्ति को साफ़ करता है।",
   "Close expression picker": "एक्सप्रेशन पिकर बंद करें",
   "Color message text": "मैसेज के टेक्स्ट को भी रंगें",
   "Colors": "रंग",
@@ -250,7 +255,6 @@
   "Keep after restarting": "रीस्टार्ट के बाद भी रखें",
   "Keep deleted messages": "हटाए गए मैसेज बचाकर रखें",
   "Keep up to": "अधिकतम सीमा",
-  "Kept deleted messages are saved on this phone.": "रखे गए हटाए गए मैसेज इस फ़ोन पर सहेजे जाते हैं।",
   "Kept deleted messages couldn't be saved.": "रखे गए हटाए गए मैसेज सहेजे नहीं जा सके।",
   "Kept messages cleared": "रखे गए मैसेज साफ़ किए गए",
   "Khmer": "खमेर",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "कुछ भी ट्रैक नहीं किया जाता, और बाहरी सेवा का उल्लेख करने वाले फ़ीचर को छोड़कर बाकी सब कुछ ऑफ़लाइन काम करता है।",
   "Nothing saved yet.": "अभी तक कुछ सहेजा नहीं गया है।",
   "Nothing sent yet": "अभी तक कुछ नहीं भेजा गया",
+  "Nothing to complete": "पूरा करने के लिए कुछ नहीं",
   "Nothing to notify about": "सूचित करने के लिए कुछ नहीं है",
   "Nothing translated yet since Discord opened.": "Discord खुलने के बाद से अभी तक कुछ भी अनुवादित नहीं हुआ है।",
   "Nothing unread": "कुछ भी अनपढ़ा नहीं है",
@@ -529,6 +534,8 @@
   "Start over": "फिर से शुरू करें",
   "Start typing": "टाइप करना शुरू करें",
   "Start with the essentials": "ज़रूरी चीज़ों से शुरुआत करें",
+  "Starts as soon as you accept a Quest.": "आपके Quest स्वीकार करते ही शुरू होता है।",
+  "Starts the next Quest by itself as soon as one is available.": "कोई Quest मिलते ही अगला Quest अपने आप शुरू करता है।",
   "Status": "स्टेटस",
   "Stickers": "स्टिकर",
   "Stickers from other servers. Animated ones may not move.": "दूसरे सर्वरों के स्टिकर। एनिमेटेड स्टिकर शायद स्थिर दिखें।",
@@ -577,6 +584,7 @@
   "That's your own user ID": "यह आपकी अपनी यूज़र ID है",
   "The link returned an empty file.": "उस लिंक से एक खाली फ़ाइल मिली।",
   "The note under it says what it was in, with the original quoted below": "इसके नीचे लिखा नोट मूल भाषा बताता है, और उसके नीचे मूल मैसेज कोट में दिखता है",
+  "The people you picked and added by ID will be cleared.": "आपके चुने गए और ID से जोड़े गए लोग साफ़ कर दिए जाएँगे।",
   "The small note under it says what language it was in": "इसके नीचे लिखा छोटा नोट बताता है कि यह किस भाषा में था",
   "The untranslated message, in a quote under the translation.": "बिना अनुवाद वाला मूल मैसेज, अनुवाद के नीचे कोट के रूप में।",
   "Theme JSON link": "थीम का JSON लिंक",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "{n} सेकंड में फिर कोशिश की जा रही है।",
   "Turkish": "तुर्की",
   "Turn it on here to start.": "शुरू करने के लिए इसे यहीं चालू करें।",
+  "Turn on at least one Quest type below.": "नीचे कम से कम एक तरह का Quest चालू करें।",
   "Turn on at least one place below.": "नीचे कम से कम एक स्थान चालू करें।",
   "Turn on at least one thing to be notified about.": "सूचना पाने के लिए नीचे कम से कम एक विकल्प चालू करें।",
   "Turn on emojis or stickers below.": "नीचे इमोजी या स्टिकर चालू करें।",
@@ -645,7 +654,6 @@
   "Video Quests": "वीडियो Quest",
   "Vietnamese": "वियतनामी",
   "View Anyway": "फिर भी देखें",
-  "Waiting for new Quests.": "नए Quest का इंतज़ार है।",
   "Watch": "देखें",
   "Watching all {n} friends": {
    "one": "{n} दोस्त पर नज़र रखी जा रही है",
@@ -676,6 +684,11 @@
   "You": "आप",
   "You can read reviews. Sign in to write your own.": "आप रिव्यू पढ़ सकते हैं। अपना रिव्यू लिखने के लिए साइन इन करें।",
   "You can read, write, delete and report reviews.": "आप रिव्यू पढ़ सकते हैं, लिख सकते हैं, हटा सकते हैं और उनकी रिपोर्ट कर सकते हैं।",
+  "You can save up to {n} account.": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।",
+  "You can save up to {n} accounts.": {
+   "one": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।",
+   "other": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।"
+  },
   "You change your mind and tap your message three times": "आप अपना मन बदलते हैं और अपने मैसेज पर तीन बार टैप करते हैं",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "आपको यह चैनल देखने की अनुमति नहीं है। ये विवरण उस डेटा से हैं जो Discord पहले ही आपके ऐप को भेज चुका है।",
   "You double-tap Sam's message": "आप सैम के मैसेज पर डबल-टैप करते हैं",
@@ -694,6 +707,7 @@
   "Your phone's language": "आपके फ़ोन की भाषा",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "आपके चुने हुए दोस्त और कस्टम यूज़र ID साफ़ कर दिए जाएँगे, और 'सभी दोस्त' फिर से चालू हो जाएगा।",
   "Your saved settings couldn't be read, so the defaults are in use.": "आपकी सहेजी गई सेटिंग पढ़ी नहीं जा सकीं, इसलिए डिफ़ॉल्ट सेटिंग लागू हैं।",
+  "Your settings and kept deleted messages are saved on this phone.": "आपकी सेटिंग और रखे गए हटाए गए मैसेज इस फ़ोन पर सहेजे जाते हैं।",
   "Your settings are saved on this phone.": "आपकी सेटिंग इस फ़ोन पर सहेजी गई हैं।",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "आपकी सेटिंग अभी सहेजी नहीं जा सकतीं। ये बदलाव Discord के रीस्टार्ट होने तक ही रहेंगे।",
   "a link": "एक लिंक",
@@ -729,14 +743,9 @@
    "other": "{n} Quest पूरे हुए"
   },
   "{n} account": "{n} अकाउंट",
-  "{n} account saved (up to {max}).": "{n} अकाउंट सेव है (अधिकतम {max})।",
   "{n} accounts": {
    "one": "{n} अकाउंट",
    "other": "{n} अकाउंट"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} अकाउंट सेव है (अधिकतम {max})।",
-   "other": "{n} अकाउंट सेव हैं (अधिकतम {max})।"
   },
   "{n} chosen people": {
    "one": "{n} चुना गया व्यक्ति",

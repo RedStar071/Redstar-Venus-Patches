@@ -200,7 +200,6 @@
  "Jump to top": "Μετάβαση στην αρχή",
  "Keep deleted messages": "Διατήρηση διαγραμμένων μηνυμάτων",
  "Keep up to": "Διατήρηση έως",
- "Kept deleted messages are saved on this phone.": "Τα διατηρημένα διαγραμμένα μηνύματα αποθηκεύονται σε αυτό το τηλέφωνο.",
  "Kept deleted messages couldn't be saved.": "Δεν ήταν δυνατή η αποθήκευση των διατηρημένων διαγραμμένων μηνυμάτων.",
  "Kept messages cleared": "Τα διατηρημένα μηνύματα εκκαθαρίστηκαν",
  "Language": "Γλώσσα",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Το Venus το στέλνει ως {link} και όλοι βλέπουν το emoji",
  "Venus settings": "Ρυθμίσεις Venus",
  "View Anyway": "Προβολή ούτως ή άλλως",
- "Waiting for new Quests.": "Αναμονή για νέα Quests.",
  "Watch": "Προβολή",
  "Watching all {n} friends": {
   "one": "Παρακολούθηση {n} φίλου",
@@ -601,14 +599,9 @@
   "other": "{n} Quests ολοκληρώθηκαν"
  },
  "{n} account": "{n} λογαριασμός",
- "{n} account saved (up to {max}).": "{n} αποθηκευμένος λογαριασμός (έως {max}).",
  "{n} accounts": {
   "one": "{n} λογαριασμός",
   "other": "{n} λογαριασμοί"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} αποθηκευμένος λογαριασμός (έως {max}).",
-  "other": "{n} αποθηκευμένοι λογαριασμοί (έως {max})."
  },
  "{n} chosen people": {
   "one": "{n} επιλεγμένο άτομο",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "Ενεργοποιήθηκε {n} λειτουργία",
  "Themes": "Θέματα",
  "Default": "Προεπιλογή",
- "Hold a theme to remove it.": "Κράτησε πατημένο ένα θέμα για να το αφαιρέσεις."
+ "Hold a theme to remove it.": "Κράτησε πατημένο ένα θέμα για να το αφαιρέσεις.",
+ "Your settings and kept deleted messages are saved on this phone.": "Οι ρυθμίσεις σου και τα διατηρημένα διαγραμμένα μηνύματα αποθηκεύονται σε αυτό το τηλέφωνο.",
+ "Turn on at least one Quest type below.": "Ενεργοποίησε παρακάτω τουλάχιστον ένα είδος Quest.",
+ "Starts the next Quest by itself as soon as one is available.": "Ξεκινά μόνο του το επόμενο Quest μόλις υπάρξει κάποιο.",
+ "Starts as soon as you accept a Quest.": "Ξεκινά μόλις αποδεχτείς ένα Quest.",
+ "Nothing to complete": "Τίποτα για ολοκλήρωση",
+ "You can save up to {n} accounts.": {
+  "one": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμό.",
+  "other": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμούς."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Εκκαθαρίζει {n} άτομο που επέλεξες ή πρόσθεσες με ID.",
+  "other": "Εκκαθαρίζει {n} άτομα που επέλεξες ή πρόσθεσες με ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Τα άτομα που επέλεξες ή πρόσθεσες με ID θα εκκαθαριστούν.",
+ "You can save up to {n} account.": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμό.",
+ "Clears {n} person you picked or added by ID.": "Εκκαθαρίζει {n} άτομο που επέλεξες ή πρόσθεσες με ID."
 }

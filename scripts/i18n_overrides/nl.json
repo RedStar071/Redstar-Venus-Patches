@@ -200,7 +200,6 @@
  "Jump to top": "Naar het begin springen",
  "Keep deleted messages": "Verwijderde berichten bewaren",
  "Keep up to": "Maximaal bewaren",
- "Kept deleted messages are saved on this phone.": "Bewaarde verwijderde berichten worden op deze telefoon opgeslagen.",
  "Kept deleted messages couldn't be saved.": "Bewaarde verwijderde berichten konden niet worden opgeslagen.",
  "Kept messages cleared": "Bewaarde berichten gewist",
  "Language": "Taal",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus verstuurt het als {link}, en iedereen ziet de emoji",
  "Venus settings": "Venus-instellingen",
  "View Anyway": "Toch bekijken",
- "Waiting for new Quests.": "Wachten op nieuwe Quests.",
  "Watch": "Bekijken",
  "Watching all {n} friends": {
   "one": "{n} vriend volgen",
@@ -601,14 +599,9 @@
   "other": "{n} Quests voltooid"
  },
  "{n} account": "{n} account",
- "{n} account saved (up to {max}).": "{n} account opgeslagen (maximaal {max}).",
  "{n} accounts": {
   "one": "{n} account",
   "other": "{n} accounts"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} account opgeslagen (maximaal {max}).",
-  "other": "{n} accounts opgeslagen (maximaal {max})."
  },
  "{n} chosen people": {
   "one": "{n} gekozen persoon",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} functie aangezet",
  "Themes": "Thema's",
  "Default": "Standaard",
- "Hold a theme to remove it.": "Houd een thema ingedrukt om het te verwijderen."
+ "Hold a theme to remove it.": "Houd een thema ingedrukt om het te verwijderen.",
+ "Your settings and kept deleted messages are saved on this phone.": "Je instellingen en bewaarde verwijderde berichten worden op deze telefoon opgeslagen.",
+ "Turn on at least one Quest type below.": "Zet hieronder minstens één soort Quest aan.",
+ "Starts the next Quest by itself as soon as one is available.": "Start zelf de volgende Quest zodra er een beschikbaar is.",
+ "Starts as soon as you accept a Quest.": "Start zodra je een Quest accepteert.",
+ "Nothing to complete": "Niets te voltooien",
+ "You can save up to {n} accounts.": {
+  "one": "Je kunt maximaal {n} account opslaan.",
+  "other": "Je kunt maximaal {n} accounts opslaan."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Wist {n} persoon die je hebt gekozen of via ID hebt toegevoegd.",
+  "other": "Wist {n} personen die je hebt gekozen of via ID hebt toegevoegd."
+ },
+ "The people you picked and added by ID will be cleared.": "De mensen die je hebt gekozen of via ID hebt toegevoegd, worden gewist.",
+ "You can save up to {n} account.": "Je kunt maximaal {n} account opslaan.",
+ "Clears {n} person you picked or added by ID.": "Wist {n} persoon die je hebt gekozen of via ID hebt toegevoegd."
 }

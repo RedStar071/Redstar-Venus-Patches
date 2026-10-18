@@ -82,6 +82,12 @@
   "Clear kept messages?": "Išvalyti išsaugotas žinutes?",
   "Clear saved translations": "Išvalyti išsaugotus vertimus",
   "Clear saved translations?": "Išvalyti išsaugotus vertimus?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Išvalo {n} žmogų, kurį pasirinkai ar pridėjai pagal ID.",
+   "few": "Išvalo {n} žmones, kuriuos pasirinkai ar pridėjai pagal ID.",
+   "other": "Išvalo {n} žmonių, kuriuos pasirinkai ar pridėjai pagal ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Išvalo {n} žmogų, kurį pasirinkai ar pridėjai pagal ID.",
   "Close expression picker": "Uždaryti išraiškų parinkiklį",
   "Color message text": "Spalvinti žinučių tekstą",
   "Colors": "Spalvos",
@@ -253,7 +259,6 @@
   "Keep after restarting": "Išsaugoti po paleidimo iš naujo",
   "Keep deleted messages": "Išsaugoti ištrintas žinutes",
   "Keep up to": "Saugoti iki",
-  "Kept deleted messages are saved on this phone.": "Išsaugotos ištrintos žinutės laikomos šiame telefone.",
   "Kept deleted messages couldn't be saved.": "Nepavyko įrašyti išsaugotų ištrintų žinučių.",
   "Kept messages cleared": "Išsaugotos žinutės išvalytos",
   "Khmer": "khmerų",
@@ -333,6 +338,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Niekas nėra sekamas ir viskas veikia be interneto, išskyrus funkcijas, kuriose nurodyta, kad jos naudoja išorinę paslaugą.",
   "Nothing saved yet.": "Kol kas nieko neišsaugota.",
   "Nothing sent yet": "Dar nieko neišsiųsta",
+  "Nothing to complete": "Nėra ką atlikti",
   "Nothing to notify about": "Nėra apie ką pranešti",
   "Nothing translated yet since Discord opened.": "Nuo Discord atidarymo dar nieko neišversta.",
   "Nothing unread": "Nėra nieko neperskaityto",
@@ -534,6 +540,8 @@
   "Start over": "Iš pradžių",
   "Start typing": "Pradeda rašyti",
   "Start with the essentials": "Pradėk nuo svarbiausių",
+  "Starts as soon as you accept a Quest.": "Pradeda, kai tik priimi Quest užduotį.",
+  "Starts the next Quest by itself as soon as one is available.": "Kitą Quest užduotį pradeda pats, kai tik tokia atsiranda.",
   "Status": "Būsena",
   "Stickers": "Lipdukai",
   "Stickers from other servers. Animated ones may not move.": "Lipdukai iš kitų serverių. Animuoti lipdukai gali nejudėti.",
@@ -582,6 +590,7 @@
   "That's your own user ID": "Tai tavo paties naudotojo ID",
   "The link returned an empty file.": "Nuoroda grąžino tuščią failą.",
   "The note under it says what it was in, with the original quoted below": "Prieraše po vertimu nurodoma originalo kalba, o žemiau cituojamas originalas",
+  "The people you picked and added by ID will be cleared.": "Žmonės, kuriuos pasirinkai ar pridėjai pagal ID, bus išvalyti.",
   "The small note under it says what language it was in": "Mažame prieraše po vertimu nurodoma, kokia kalba buvo parašyta žinutė",
   "The untranslated message, in a quote under the translation.": "Neišversta žinutė, rodoma kaip citata po vertimu.",
   "Theme JSON link": "Temos JSON nuoroda",
@@ -619,6 +628,7 @@
   "Trying again in {n} s.": "Bandoma dar kartą po {n} sek.",
   "Turkish": "turkų",
   "Turn it on here to start.": "Įjunk čia, kad pradėtum.",
+  "Turn on at least one Quest type below.": "Žemiau įjunk bent vieną Quest užduočių tipą.",
   "Turn on at least one place below.": "Žemiau įjunk bent vieną vietą.",
   "Turn on at least one thing to be notified about.": "Žemiau įjunk bent vieną įvykį, apie kurį nori gauti pranešimus.",
   "Turn on emojis or stickers below.": "Žemiau įjunk jaustukus arba lipdukus.",
@@ -651,7 +661,6 @@
   "Video Quests": "Vaizdo įrašų Quest užduotys",
   "Vietnamese": "vietnamiečių",
   "View Anyway": "Vis tiek peržiūrėti",
-  "Waiting for new Quests.": "Laukiama naujų Quest užduočių.",
   "Watch": "Žiūrėti",
   "Watching all {n} friends": {
    "one": "Stebimas {n} draugas",
@@ -684,6 +693,12 @@
   "You": "Tu",
   "You can read reviews. Sign in to write your own.": "Gali skaityti atsiliepimus. Prisijunk, kad parašytum savo.",
   "You can read, write, delete and report reviews.": "Gali skaityti, rašyti, ištrinti ir pranešti apie atsiliepimus.",
+  "You can save up to {n} account.": "Gali išsaugoti iki {n} paskyros.",
+  "You can save up to {n} accounts.": {
+   "one": "Gali išsaugoti iki {n} paskyros.",
+   "few": "Gali išsaugoti iki {n} paskyrų.",
+   "other": "Gali išsaugoti iki {n} paskyrų."
+  },
   "You change your mind and tap your message three times": "Persigalvoji ir baksteli savo žinutę tris kartus",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Neturi leidimo peržiūrėti šio kanalo. Ši informacija gauta iš duomenų, kuriuos Discord jau atsiuntė tavo programėlei.",
   "You double-tap Sam's message": "Dukart baksteli Sam žinutę",
@@ -702,6 +717,7 @@
   "Your phone's language": "Telefono kalba",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Pasirinkti draugai ir pridėti naudotojų ID bus išvalyti, o parinktis „Visi draugai“ vėl bus įjungta.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Nepavyko nuskaityti išsaugotų nustatymų, todėl naudojami numatytieji.",
+  "Your settings and kept deleted messages are saved on this phone.": "Tavo nustatymai ir išsaugotos ištrintos žinutės laikomos šiame telefone.",
   "Your settings are saved on this phone.": "Tavo nustatymai išsaugoti šiame telefone.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Šiuo metu tavo nustatymų išsaugoti negalima. Pakeitimai galios iki Discord paleidimo iš naujo.",
   "a link": "nuoroda",
@@ -739,16 +755,10 @@
    "other": "Atlikta {n} Quest užduočių"
   },
   "{n} account": "{n} paskyra",
-  "{n} account saved (up to {max}).": "Išsaugota {n} paskyra (iki {max}).",
   "{n} accounts": {
    "one": "{n} paskyra",
    "few": "{n} paskyros",
    "other": "{n} paskyrų"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "Išsaugota {n} paskyra (iki {max}).",
-   "few": "Išsaugotos {n} paskyros (iki {max}).",
-   "other": "Išsaugota {n} paskyrų (iki {max})."
   },
   "{n} chosen people": {
    "one": "{n} pasirinktas žmogus",

@@ -81,6 +81,11 @@
   "Clear kept messages?": "Törlöd a megőrzött üzeneteket?",
   "Clear saved translations": "Mentett fordítások törlése",
   "Clear saved translations?": "Törlöd a mentett fordításokat?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Töröl {n} személyt, akit kiválasztottál vagy azonosítóval adtál hozzá.",
+   "other": "Töröl {n} személyt, akiket kiválasztottál vagy azonosítóval adtál hozzá."
+  },
+  "Clears {n} person you picked or added by ID.": "Töröl {n} személyt, akit kiválasztottál vagy azonosítóval adtál hozzá.",
   "Close expression picker": "Kifejezés-választó bezárása",
   "Color message text": "Üzenetszöveg színezése",
   "Colors": "Színek",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Megőrzés újraindítás után",
   "Keep deleted messages": "Törölt üzenetek megőrzése",
   "Keep up to": "Megőrzési korlát",
-  "Kept deleted messages are saved on this phone.": "A megőrzött törölt üzenetek ezen a telefonon vannak mentve.",
   "Kept deleted messages couldn't be saved.": "A megőrzött törölt üzeneteket nem sikerült elmenteni.",
   "Kept messages cleared": "Megőrzött üzenetek törölve",
   "Khmer": "khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Semmit sem követünk nyomon, és minden működik offline is, kivéve azokat a funkciókat, amelyeknél fel van tüntetve, hogy külső szolgáltatást használnak.",
   "Nothing saved yet.": "Még nincs mentve semmi.",
   "Nothing sent yet": "Még nem küldtél semmit",
+  "Nothing to complete": "Nincs mit teljesíteni",
   "Nothing to notify about": "Nincs miről értesíteni",
   "Nothing translated yet since Discord opened.": "A Discord megnyitása óta még nem lett lefordítva üzenet.",
   "Nothing unread": "Nincs olvasatlan üzenet",
@@ -529,6 +534,8 @@
   "Start over": "Újrakezdés",
   "Start typing": "Gépelni kezdenek",
   "Start with the essentials": "Kezdd a legfontosabbakkal",
+  "Starts as soon as you accept a Quest.": "Amint elfogadsz egy Questet, elindul.",
+  "Starts the next Quest by itself as soon as one is available.": "Magától elindítja a következő Questet, amint van elérhető.",
   "Status": "Állapot",
   "Stickers": "Matricák",
   "Stickers from other servers. Animated ones may not move.": "Más szerverek matricái. Előfordulhat, hogy az animált matricák nem mozognak.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Ez a saját felhasználói azonosítód",
   "The link returned an empty file.": "A link üres fájlt adott vissza.",
   "The note under it says what it was in, with the original quoted below": "Az alatta lévő megjegyzés mutatja az eredeti nyelvet, alatta pedig idézetként látható az eredeti szöveg",
+  "The people you picked and added by ID will be cleared.": "A kiválasztott és azonosítóval hozzáadott személyek törlődnek.",
   "The small note under it says what language it was in": "Az alatta lévő rövid megjegyzés mutatja, milyen nyelven íródott",
   "The untranslated message, in a quote under the translation.": "A lefordítatlan üzenet idézetként a fordítás alatt.",
   "Theme JSON link": "Téma JSON-linkje",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Újrapróbálkozás {n} mp múlva.",
   "Turkish": "török",
   "Turn it on here to start.": "A használathoz kapcsold be itt.",
+  "Turn on at least one Quest type below.": "Kapcsolj be alább legalább egy Quest-típust.",
   "Turn on at least one place below.": "Kapcsolj be alább legalább egy megjelenítési helyet.",
   "Turn on at least one thing to be notified about.": "Kapcsolj be alább legalább egy értesítési típust.",
   "Turn on emojis or stickers below.": "Kapcsold be alább az emojikat vagy a matricákat.",
@@ -645,7 +654,6 @@
   "Video Quests": "Videós Questek",
   "Vietnamese": "vietnámi",
   "View Anyway": "Megtekintés mégis",
-  "Waiting for new Quests.": "Várakozás új Questekre.",
   "Watch": "Megnézem",
   "Watching all {n} friends": {
    "one": "{n} ismerős figyelése",
@@ -676,6 +684,11 @@
   "You": "te",
   "You can read reviews. Sign in to write your own.": "Olvashatod az értékeléseket. Saját értékelés írásához jelentkezz be.",
   "You can read, write, delete and report reviews.": "Olvashatsz, írhatsz, törölhetsz és jelenthetsz értékeléseket.",
+  "You can save up to {n} account.": "Legfeljebb {n} fiókot menthetsz.",
+  "You can save up to {n} accounts.": {
+   "one": "Legfeljebb {n} fiókot menthetsz.",
+   "other": "Legfeljebb {n} fiókot menthetsz."
+  },
   "You change your mind and tap your message three times": "Meggondolod magad, és háromszor rákoppintasz az üzenetedre",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nincs jogosultságod megtekinteni ezt a csatornát. Ezek az adatok abból származnak, amit a Discord már elküldött az alkalmazásodnak.",
   "You double-tap Sam's message": "Duplán koppintasz Sam üzenetére",
@@ -694,6 +707,7 @@
   "Your phone's language": "A telefon nyelve",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "A kiválasztott ismerősök és egyéni felhasználói azonosítók törlődnek, és a Minden ismerős lehetőség újra bekapcsol.",
   "Your saved settings couldn't be read, so the defaults are in use.": "A mentett beállításaidat nem sikerült beolvasni, ezért az alapértelmezett értékek vannak érvényben.",
+  "Your settings and kept deleted messages are saved on this phone.": "A beállításaid és a megőrzött törölt üzenetek ezen a telefonon vannak mentve.",
   "Your settings are saved on this phone.": "A beállításaid ezen a telefonon vannak mentve.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "A beállításaidat jelenleg nem lehet menteni. A módosítások a Discord újraindításáig maradnak érvényben.",
   "a link": "egy link",
@@ -729,14 +743,9 @@
    "other": "{n} Quest teljesítve"
   },
   "{n} account": "{n} fiók",
-  "{n} account saved (up to {max}).": "{n} mentett fiók (legfeljebb {max}).",
   "{n} accounts": {
    "one": "{n} fiók",
    "other": "{n} fiók"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} mentett fiók (legfeljebb {max}).",
-   "other": "{n} mentett fiók (legfeljebb {max})."
   },
   "{n} chosen people": {
    "one": "{n} kiválasztott személy",

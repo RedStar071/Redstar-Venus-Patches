@@ -200,7 +200,6 @@
  "Jump to top": "सबसे ऊपर जाएँ",
  "Keep deleted messages": "हटाए गए मैसेज बचाकर रखें",
  "Keep up to": "अधिकतम सीमा",
- "Kept deleted messages are saved on this phone.": "रखे गए हटाए गए मैसेज इस फ़ोन पर सहेजे जाते हैं।",
  "Kept deleted messages couldn't be saved.": "रखे गए हटाए गए मैसेज सहेजे नहीं जा सके।",
  "Kept messages cleared": "रखे गए मैसेज साफ़ किए गए",
  "Language": "भाषा",
@@ -522,7 +521,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus इसे {link} के रूप में भेजता है, और सभी को इमोजी दिखता है",
  "Venus settings": "Venus सेटिंग",
  "View Anyway": "फिर भी देखें",
- "Waiting for new Quests.": "नए Quest का इंतज़ार है।",
  "Watch": "देखें",
  "Watching all {n} friends": {
   "one": "{n} दोस्त पर नज़र रखी जा रही है",
@@ -601,14 +599,9 @@
   "other": "{n} Quest पूरे हुए"
  },
  "{n} account": "{n} अकाउंट",
- "{n} account saved (up to {max}).": "{n} अकाउंट सेव है (अधिकतम {max})।",
  "{n} accounts": {
   "one": "{n} अकाउंट",
   "other": "{n} अकाउंट"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "{n} अकाउंट सेव है (अधिकतम {max})।",
-  "other": "{n} अकाउंट सेव हैं (अधिकतम {max})।"
  },
  "{n} chosen people": {
   "one": "{n} चुना गया व्यक्ति",
@@ -738,5 +731,21 @@
  "{n} feature turned on": "{n} फ़ीचर चालू हुआ",
  "Themes": "थीम",
  "Default": "डिफ़ॉल्ट",
- "Hold a theme to remove it.": "किसी थीम को हटाने के लिए उसे दबाकर रखें।"
+ "Hold a theme to remove it.": "किसी थीम को हटाने के लिए उसे दबाकर रखें।",
+ "Your settings and kept deleted messages are saved on this phone.": "आपकी सेटिंग और रखे गए हटाए गए मैसेज इस फ़ोन पर सहेजे जाते हैं।",
+ "Turn on at least one Quest type below.": "नीचे कम से कम एक तरह का Quest चालू करें।",
+ "Starts the next Quest by itself as soon as one is available.": "कोई Quest मिलते ही अगला Quest अपने आप शुरू करता है।",
+ "Starts as soon as you accept a Quest.": "आपके Quest स्वीकार करते ही शुरू होता है।",
+ "Nothing to complete": "पूरा करने के लिए कुछ नहीं",
+ "You can save up to {n} accounts.": {
+  "one": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।",
+  "other": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।"
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "आपके चुने गए या ID से जोड़े गए {n} व्यक्ति को साफ़ करता है।",
+  "other": "आपके चुने गए या ID से जोड़े गए {n} लोगों को साफ़ करता है।"
+ },
+ "The people you picked and added by ID will be cleared.": "आपके चुने गए और ID से जोड़े गए लोग साफ़ कर दिए जाएँगे।",
+ "You can save up to {n} account.": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।",
+ "Clears {n} person you picked or added by ID.": "आपके चुने गए या ID से जोड़े गए {n} व्यक्ति को साफ़ करता है।"
 }

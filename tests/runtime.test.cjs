@@ -3899,7 +3899,7 @@ test('Clear kept messages removes kept deletions from chat and the saved file, a
     b.api.setSetting('noDelete',true);
     const page=()=>registry.VENUS_NODELETE.screen.getComponent()();
     const clear=()=>pageNodes(page()).find(n=>n.type==='Row'&&n.props.label==='Clear kept messages');
-    assert.equal(clear().props.disabled,true,'nothing to clear yet');
+    assert.equal(clear(),undefined,'Manage is hidden while nothing is kept');
     b.messages.set('c:1',{content:'one',state:'SENT'});b.messages.set('c:2',{content:'two',state:'SENT'});
     b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'2'});
     assert.equal(b.messages.size,2,'kept');
@@ -3909,7 +3909,7 @@ test('Clear kept messages removes kept deletions from chat and the saved file, a
     alerts[0][2].find(button=>button.text==='Clear').onPress();
     assert.equal(b.messages.size,0,'gone from chat');assert.equal(b.events.at(-1).type,'MESSAGE_DELETE_BULK');
     b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});assert.equal(b.messages.size,0,'and not kept again');
-    assert.equal(clear().props.disabled,true);
+    assert.equal(clear(),undefined,'and hidden again once cleared');
 });
 test('Clear saved translations forgets them on the phone and translates the screen again',async()=>{
     const b=fastHarness();const {RN}=reactHarness(b);const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
@@ -4240,6 +4240,19 @@ test('User activity notifications friend picker and user ID backup persist and w
     const resetPage=()=>pageNodes(restored.registry.VENUS_USERNOTIF.screen.getComponent()());
     const resetRow=resetPage().find(n=>n.type==='Row'&&n.props.label==='Reset chosen people');
     assert.ok(resetRow && !resetRow.props.disabled);
+    // Back on All friends with people still picked: a stranger added by ID makes it more than "all friends", and the reset
+    // row says it only clears who was picked or added.
+    restored.api.setSetting('userNotifFriends',true);
+    const strings=()=>resetPage().filter(n=>typeof n.props.children==='string').map(n=>n.props.children);
+    assert.ok(strings().includes('Watching 3 people'),'two friends plus a stranger: '+strings().join(' / '));
+    const allRow=resetPage().find(n=>n.type==='Row'&&n.props.label==='Reset chosen people');
+    assert.match(allRow.props.subLabel,/^Clears 2 people you picked or added by ID\.$/);
+    restored.api.setSetting('userNotifFriends',false);
+    // Only friends picked, then All friends turned back on: still "all friends", not "people".
+    const friendsOnly=userNotifHarness();await flush();await flush();friendsOnly.api.setSetting('userNotif',true);
+    friendsOnly.api.setSetting('userNotifFriends',false);friendsOnly.api.setSetting('userNotifFriends',true);
+    const own=pageNodes(friendsOnly.registry.VENUS_USERNOTIF.screen.getComponent()()).filter(n=>typeof n.props.children==='string').map(n=>n.props.children);
+    assert.ok(own.includes('Watching all 2 friends'),own.join(' / '));
     const toastsBefore=restored.toasts.length;
     resetRow.props.onPress();
     assert.equal(restored.api.settings.userNotifFriends,true,'Reset watched people turns All friends back on');
@@ -4438,8 +4451,9 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     storeState.users.push({id:'222',username:'venus_alt',discriminator:'0',avatar:'av2',tokenStatus:2});
     const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14409).SETTING_RENDERER_CONFIG;
     const page=()=>pageNodes(registry.VENUS_ACCOUNTSWITCHER.screen.getComponent()());
-    const statusText=page().find(n=>n.type===RN.Text&&typeof n.props.children==='string'&&n.props.children.includes('accounts saved'));
-    assert.ok(statusText && statusText.props.children.includes('(up to 50)'),'pl() interpolates {max} in account switcher status card');
+    const statusText=page().find(n=>n.type===RN.Text&&typeof n.props.children==='string'&&n.props.children.includes('You can save up to'));
+    assert.ok(statusText && statusText.props.children.includes('up to 50 accounts'),'pl() gives the account limit in the status card');
+    assert.ok(!statusText.props.children.includes('accounts saved'),'the details don\'t repeat the count the title already shows');
     const altRow=page().find(n=>n.type==='Row'&&n.props.label==='venus_alt');
     assert.ok(altRow,'saved secondary account listed in settings');
     altRow.props.onPress();
@@ -5175,6 +5189,12 @@ test('the Quests status card shows the running Quest\'s progress and the minutes
     await b.run(30 * 60 * 1000);
     const after = pageNodes(registry.VENUS_QUESTS.screen.getComponent()());
     assert.equal(after.filter(n => n.type && n.type.name === 'VenusProgress').length, 0, 'no bar once nothing runs');
+    const texts = list => list.filter(n => typeof n.props.children === 'string').map(n => n.props.children);
+    assert.ok(!texts(nodes).some(t => /Waiting for new Quests|as soon as one is available/.test(t)), 'while a Quest runs, the card never says it is waiting');
+    assert.ok(texts(after).some(t => t.startsWith('Completed 1 Quest since Discord opened.')), 'after one is done, the card says so on its own: ' + texts(after).join(' / '));
+    b.api.setSetting('questsVideo', false); b.api.setSetting('questsPlay', false); b.api.setSetting('questsActivity', false);
+    const none = texts(pageNodes(registry.VENUS_QUESTS.screen.getComponent()()));
+    assert.ok(none.includes('Nothing to complete') && none.some(t => t.startsWith('Turn on at least one Quest type below.')), 'with every type off, the card says what to do');
 });
 test('Read all shows a check for a moment after it clears something, and its label stays for screen readers', () => {
     const b = readAllHarness(); const timers = []; b.context.setTimeout = (fn, ms) => { timers.push(fn); return timers.length; };

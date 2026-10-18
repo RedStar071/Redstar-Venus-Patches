@@ -203,7 +203,6 @@
  "Jump to top": "Przejdź na początek",
  "Keep deleted messages": "Zachowuj usunięte wiadomości",
  "Keep up to": "Zachowuj maksymalnie",
- "Kept deleted messages are saved on this phone.": "Zachowane usunięte wiadomości są zapisywane na tym telefonie.",
  "Kept deleted messages couldn't be saved.": "Nie udało się zapisać zachowanych usuniętych wiadomości.",
  "Kept messages cleared": "Wyczyszczono zachowane wiadomości",
  "Language": "Język",
@@ -528,7 +527,6 @@
  "Venus sends it as {link}, and everyone sees the emoji": "Venus wysyła je jako {link} i wszyscy widzą emoji",
  "Venus settings": "Ustawienia Venus",
  "View Anyway": "Pokaż mimo to",
- "Waiting for new Quests.": "Oczekiwanie na nowe Questy.",
  "Watch": "Obejrzyj",
  "Watching all {n} friends": {
   "one": "Obserwowanie {n} znajomego",
@@ -611,16 +609,10 @@
   "many": "Ukończono {n} Questów"
  },
  "{n} account": "{n} konto",
- "{n} account saved (up to {max}).": "Zapisano {n} konto (maksymalnie {max}).",
  "{n} accounts": {
   "one": "{n} konto",
   "few": "{n} konta",
   "many": "{n} kont"
- },
- "{n} accounts saved (up to {max}).": {
-  "one": "Zapisano {n} konto (maksymalnie {max}).",
-  "few": "Zapisano {n} konta (maksymalnie {max}).",
-  "many": "Zapisano {n} kont (maksymalnie {max})."
  },
  "{n} chosen people": {
   "one": "{n} wybrana osoba",
@@ -763,5 +755,23 @@
  "{n} feature turned on": "Włączono {n} funkcję",
  "Themes": "Motywy",
  "Default": "Domyślny",
- "Hold a theme to remove it.": "Przytrzymaj motyw, aby go usunąć."
+ "Hold a theme to remove it.": "Przytrzymaj motyw, aby go usunąć.",
+ "Your settings and kept deleted messages are saved on this phone.": "Twoje ustawienia i zachowane usunięte wiadomości są zapisywane na tym telefonie.",
+ "Turn on at least one Quest type below.": "Włącz poniżej co najmniej jeden rodzaj Questów.",
+ "Starts the next Quest by itself as soon as one is available.": "Sam rozpoczyna kolejny Quest, gdy tylko jakiś będzie dostępny.",
+ "Starts as soon as you accept a Quest.": "Rusza, gdy tylko przyjmiesz Quest.",
+ "Nothing to complete": "Nie ma czego wykonywać",
+ "You can save up to {n} accounts.": {
+  "one": "Możesz zapisać maksymalnie {n} konto.",
+  "few": "Możesz zapisać maksymalnie {n} konta.",
+  "many": "Możesz zapisać maksymalnie {n} kont."
+ },
+ "Clears {n} people you picked or added by ID.": {
+  "one": "Czyści {n} osobę wybraną przez ciebie lub dodaną przez ID.",
+  "few": "Czyści {n} osoby wybrane przez ciebie lub dodane przez ID.",
+  "many": "Czyści {n} osób wybranych przez ciebie lub dodanych przez ID."
+ },
+ "The people you picked and added by ID will be cleared.": "Osoby wybrane przez ciebie i dodane przez ID zostaną wyczyszczone.",
+ "You can save up to {n} account.": "Możesz zapisać maksymalnie {n} konto.",
+ "Clears {n} person you picked or added by ID.": "Czyści {n} osobę wybraną przez ciebie lub dodaną przez ID."
 }

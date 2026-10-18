@@ -81,6 +81,11 @@
   "Clear kept messages?": "Tømme lagrede meldinger?",
   "Clear saved translations": "Tøm lagrede oversettelser",
   "Clear saved translations?": "Tømme lagrede oversettelser?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Tømmer {n} person du har valgt eller lagt til med ID.",
+   "other": "Tømmer {n} personer du har valgt eller lagt til med ID."
+  },
+  "Clears {n} person you picked or added by ID.": "Tømmer {n} person du har valgt eller lagt til med ID.",
   "Close expression picker": "Lukk uttrykksvelgeren",
   "Color message text": "Fargelegg meldingstekst",
   "Colors": "Farger",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Behold etter omstart",
   "Keep deleted messages": "Behold slettede meldinger",
   "Keep up to": "Behold opptil",
-  "Kept deleted messages are saved on this phone.": "Beholdte slettede meldinger lagres på denne telefonen.",
   "Kept deleted messages couldn't be saved.": "Beholdte slettede meldinger kunne ikke lagres.",
   "Kept messages cleared": "Beholdte meldinger er tømt",
   "Khmer": "khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Ingenting spores, og alt fungerer frakoblet bortsett fra funksjonene som oppgir at de bruker en tjeneste.",
   "Nothing saved yet.": "Ingenting lagret ennå.",
   "Nothing sent yet": "Ingenting sendt ennå",
+  "Nothing to complete": "Ingenting å fullføre",
   "Nothing to notify about": "Ingenting å varsle om",
   "Nothing translated yet since Discord opened.": "Ingenting er oversatt siden Discord ble åpnet.",
   "Nothing unread": "Ingenting ulest",
@@ -529,6 +534,8 @@
   "Start over": "Start på nytt",
   "Start typing": "Begynner å skrive",
   "Start with the essentials": "Start med det viktigste",
+  "Starts as soon as you accept a Quest.": "Starter så snart du godtar en Quest.",
+  "Starts the next Quest by itself as soon as one is available.": "Starter neste Quest av seg selv så snart det finnes en.",
   "Status": "Status",
   "Stickers": "Klistremerker",
   "Stickers from other servers. Animated ones may not move.": "Klistremerker fra andre servere. Animerte klistremerker beveger seg kanskje ikke.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "Det er din egen bruker-ID",
   "The link returned an empty file.": "Lenken returnerte en tom fil.",
   "The note under it says what it was in, with the original quoted below": "Linjen under viser hvilket språk meldingen var på, med originalteksten sitert nedenfor",
+  "The people you picked and added by ID will be cleared.": "Personene du har valgt eller lagt til med ID, tømmes.",
   "The small note under it says what language it was in": "Den lille linjen under viser hvilket språk meldingen var på",
   "The untranslated message, in a quote under the translation.": "Den uoversatte meldingen, vist som et sitat under oversettelsen.",
   "Theme JSON link": "JSON-lenke til tema",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Prøver igjen om {n} s.",
   "Turkish": "tyrkisk",
   "Turn it on here to start.": "Slå det på her for å starte.",
+  "Turn on at least one Quest type below.": "Slå på minst én type Quest nedenfor.",
   "Turn on at least one place below.": "Slå på minst ett visningssted nedenfor.",
   "Turn on at least one thing to be notified about.": "Slå på minst én hendelse du vil varsles om nedenfor.",
   "Turn on emojis or stickers below.": "Slå på emojier eller klistremerker nedenfor.",
@@ -645,7 +654,6 @@
   "Video Quests": "Video-Quests",
   "Vietnamese": "vietnamesisk",
   "View Anyway": "Vis likevel",
-  "Waiting for new Quests.": "Venter på nye Quests.",
   "Watch": "Se",
   "Watching all {n} friends": {
    "one": "Følger med på {n} venn",
@@ -676,6 +684,11 @@
   "You": "Deg",
   "You can read reviews. Sign in to write your own.": "Du kan lese anmeldelser. Logg inn for å skrive dine egne.",
   "You can read, write, delete and report reviews.": "Du kan lese, skrive, slette og rapportere anmeldelser.",
+  "You can save up to {n} account.": "Du kan lagre opptil {n} konto.",
+  "You can save up to {n} accounts.": {
+   "one": "Du kan lagre opptil {n} konto.",
+   "other": "Du kan lagre opptil {n} kontoer."
+  },
   "You change your mind and tap your message three times": "Du ombestemmer deg og trykker tre ganger på meldingen din",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Du har ikke tilgang til å se denne kanalen. Disse detaljene kommer fra data Discord allerede har sendt til appen din.",
   "You double-tap Sam's message": "Du dobbelttrykker på meldingen til Sam",
@@ -694,6 +707,7 @@
   "Your phone's language": "Telefonens språk",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Valgte venner og egendefinerte bruker-ID-er tømmes, og Alle venner slås på igjen.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Kunne ikke lese de lagrede innstillingene dine, så standardinnstillingene brukes.",
+  "Your settings and kept deleted messages are saved on this phone.": "Innstillingene dine og beholdte slettede meldinger lagres på denne telefonen.",
   "Your settings are saved on this phone.": "Innstillingene dine er lagret på denne telefonen.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Innstillingene dine kan ikke lagres akkurat nå. Endringer gjelder til Discord starter på nytt.",
   "a link": "en lenke",
@@ -729,14 +743,9 @@
    "other": "{n} Quests fullført"
   },
   "{n} account": "{n} konto",
-  "{n} account saved (up to {max}).": "{n} konto lagret (opptil {max}).",
   "{n} accounts": {
    "one": "{n} konto",
    "other": "{n} kontoer"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} konto lagret (opptil {max}).",
-   "other": "{n} kontoer lagret (opptil {max})."
   },
   "{n} chosen people": {
    "one": "{n} valgt person",

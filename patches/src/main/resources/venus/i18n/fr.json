@@ -81,6 +81,11 @@
   "Clear kept messages?": "Effacer les messages conservés ?",
   "Clear saved translations": "Effacer les traductions enregistrées",
   "Clear saved translations?": "Effacer les traductions enregistrées ?",
+  "Clears {n} people you picked or added by ID.": {
+   "one": "Efface {n} personne choisie ou ajoutée par identifiant.",
+   "other": "Efface {n} personnes choisies ou ajoutées par identifiant."
+  },
+  "Clears {n} person you picked or added by ID.": "Efface {n} personne choisie ou ajoutée par identifiant.",
   "Close expression picker": "Fermer le sélecteur d'expressions",
   "Color message text": "Colorer le texte des messages",
   "Colors": "Couleurs",
@@ -250,7 +255,6 @@
   "Keep after restarting": "Conserver après un redémarrage",
   "Keep deleted messages": "Conserver les messages supprimés",
   "Keep up to": "Limite de conservation",
-  "Kept deleted messages are saved on this phone.": "Les messages supprimés conservés sont enregistrés sur ce téléphone.",
   "Kept deleted messages couldn't be saved.": "Impossible d'enregistrer les messages supprimés conservés.",
   "Kept messages cleared": "Messages conservés effacés",
   "Khmer": "khmer",
@@ -330,6 +334,7 @@
   "Nothing is tracked, and everything works offline except the features that say they use a service.": "Aucune donnée n'est pistée et tout fonctionne hors ligne, à l'exception des fonctionnalités qui mentionnent utiliser un service externe.",
   "Nothing saved yet.": "Rien d'enregistré pour l'instant.",
   "Nothing sent yet": "Rien n'a encore été envoyé",
+  "Nothing to complete": "Rien à terminer",
   "Nothing to notify about": "Rien à signaler",
   "Nothing translated yet since Discord opened.": "Aucune traduction effectuée depuis l'ouverture de Discord.",
   "Nothing unread": "Rien de non lu",
@@ -529,6 +534,8 @@
   "Start over": "Recommencer",
   "Start typing": "Commencent à écrire",
   "Start with the essentials": "Commencez par l'essentiel",
+  "Starts as soon as you accept a Quest.": "Démarre dès que vous acceptez une quête.",
+  "Starts the next Quest by itself as soon as one is available.": "Lance seul la quête suivante dès qu'il y en a une.",
   "Status": "Statut",
   "Stickers": "Autocollants",
   "Stickers from other servers. Animated ones may not move.": "Autocollants d'autres serveurs. Les autocollants animés peuvent rester fixes.",
@@ -577,6 +584,7 @@
   "That's your own user ID": "C'est votre propre identifiant utilisateur",
   "The link returned an empty file.": "Ce lien a renvoyé un fichier vide.",
   "The note under it says what it was in, with the original quoted below": "La mention juste en dessous indique la langue d'origine, suivie du texte original en citation",
+  "The people you picked and added by ID will be cleared.": "Les personnes que vous avez choisies ou ajoutées par identifiant seront effacées.",
   "The small note under it says what language it was in": "La petite mention en dessous indique dans quelle langue était le message",
   "The untranslated message, in a quote under the translation.": "Le message non traduit, affiché en citation sous la traduction.",
   "Theme JSON link": "Lien JSON du thème",
@@ -613,6 +621,7 @@
   "Trying again in {n} s.": "Nouvel essai dans {n} s.",
   "Turkish": "turc",
   "Turn it on here to start.": "Activez-la ici pour commencer.",
+  "Turn on at least one Quest type below.": "Activez au moins un type de quête ci-dessous.",
   "Turn on at least one place below.": "Activez au moins un emplacement ci-dessous.",
   "Turn on at least one thing to be notified about.": "Activez au moins un type d'alerte ci-dessous.",
   "Turn on emojis or stickers below.": "Activez les émojis ou les autocollants ci-dessous.",
@@ -645,7 +654,6 @@
   "Video Quests": "Quêtes vidéo",
   "Vietnamese": "vietnamien",
   "View Anyway": "Voir quand même",
-  "Waiting for new Quests.": "En attente de nouvelles quêtes.",
   "Watch": "Voir",
   "Watching all {n} friends": {
    "one": "Suivi de {n} ami",
@@ -676,6 +684,11 @@
   "You": "vous",
   "You can read reviews. Sign in to write your own.": "Vous pouvez lire les avis. Connectez-vous pour en publier un.",
   "You can read, write, delete and report reviews.": "Vous pouvez lire, publier, supprimer et signaler des avis.",
+  "You can save up to {n} account.": "Vous pouvez enregistrer jusqu'à {n} compte.",
+  "You can save up to {n} accounts.": {
+   "one": "Vous pouvez enregistrer jusqu'à {n} compte.",
+   "other": "Vous pouvez enregistrer jusqu'à {n} comptes."
+  },
   "You change your mind and tap your message three times": "Vous changez d'avis et appuyez trois fois sur votre message",
   "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Vous n'avez pas la permission de voir ce salon. Ces informations proviennent de ce que Discord a déjà envoyé à votre application.",
   "You double-tap Sam's message": "Vous appuyez deux fois sur le message de Sam",
@@ -694,6 +707,7 @@
   "Your phone's language": "Langue de votre téléphone",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Vos amis sélectionnés et les identifiants ajoutés seront effacés, et Tous les amis sera réactivé.",
   "Your saved settings couldn't be read, so the defaults are in use.": "Vos paramètres enregistrés n'ont pas pu être lus ; les valeurs par défaut sont donc utilisées.",
+  "Your settings and kept deleted messages are saved on this phone.": "Vos paramètres et les messages supprimés conservés sont enregistrés sur ce téléphone.",
   "Your settings are saved on this phone.": "Vos paramètres sont enregistrés sur ce téléphone.",
   "Your settings can't be saved right now. Changes last until Discord restarts.": "Vos paramètres ne peuvent pas être enregistrés pour le moment. Les changements resteront actifs jusqu'au redémarrage de Discord.",
   "a link": "un lien",
@@ -729,14 +743,9 @@
    "other": "{n} quêtes terminées"
   },
   "{n} account": "{n} compte",
-  "{n} account saved (up to {max}).": "{n} compte enregistré (jusqu'à {max}).",
   "{n} accounts": {
    "one": "{n} compte",
    "other": "{n} comptes"
-  },
-  "{n} accounts saved (up to {max}).": {
-   "one": "{n} compte enregistré (jusqu'à {max}).",
-   "other": "{n} comptes enregistrés (jusqu'à {max})."
   },
   "{n} chosen people": {
    "one": "{n} personne choisie",
