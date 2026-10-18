@@ -4642,7 +4642,9 @@
             if (owns(values,key)) throw new Error("Invalid authorization redirect");
             values[key] = decodeURIComponent((index < 0 ? "" : part.slice(index+1)).replace(/\+/g," "));
         });
-        if (values.error) throw new Error(values.error === "access_denied" ? "Authorization cancelled" : "Discord did not authorize ReviewDB");
+        // Tapping Cancel on Discord's authorize screen is a choice, not a problem: no red toast for it.
+        if (values.error === "access_denied") return null;
+        if (values.error) throw new Error("Discord did not authorize ReviewDB");
         if (!values.code || values.code.length > 2048 || /[\s\u0000-\u001f]/.test(values.code)) throw new Error("Invalid authorization redirect");
         return REVIEW_API+"/auth?code="+encodeURIComponent(values.code)+"&returnType=json&clientMod=vendetta";
     }
@@ -4859,6 +4861,7 @@
                 if (!live() || !result || result.canceled===true) return;
                 let url;
                 try { url=authorizationUrl(result); } catch (error) { fail(error); return; }
+                if (!url) return;
                 reviewAuthState="exchanging";notify("reviewDB");
                 reviewJson(url,{method:"GET"},"ReviewDB took too long to authorize. Try again.").then(auth => {
                     if (!live()) return;

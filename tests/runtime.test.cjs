@@ -1549,6 +1549,10 @@ test('ReviewDB cancellation, malformed redirects and account switches never sign
     assert.equal(b.requests.length,0);assert.equal(walkElements(b.Settings(),n=>n.props.label==='Sign in to ReviewDB').length,1);
     for(const location of ['https://evil.example/api/reviewdb/auth?code=x','https://manti.vendicated.dev/api/reviewdb/auth?error=access_denied','not a URL']){props=openReviewAuth(b);props.callback({location});await flush();}
     assert.equal(b.requests.length,0);
+    // Denying on Discord's authorize screen is a cancel: nothing to fix, so no error under the sign-in row.
+    props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?error=access_denied'});await flush();
+    const row=walkElements(b.Settings(),n=>n.props.label==='Sign in to ReviewDB')[0];
+    assert.doesNotMatch(String(row.props.subLabel),/cancel/i);
     let resolve;b.context.fetch=()=>new Promise(done=>{resolve=done;});
     props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=late'});await flush();
     b.account.id='222222222222222222';resolve({ok:true,json:async()=>({success:true,token:'must-not-survive'})});await flush();await flush();
