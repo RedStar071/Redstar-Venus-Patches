@@ -2692,7 +2692,7 @@ for (const mobile of [false, true]) test(`Quest Completer waits for server compl
     b.connect(); await b.run();
     const sent = b.requests.filter(r => r.url === '/quests/confirm/heartbeat');
     assert.equal(sent.length, 3, 'target progress alone is not a completed Quest; send the confirmation beat');
-    assert.equal(sent[2].at - sent[1].at, 60000, 'wait a normal heartbeat interval, not a one-second retry loop');
+    assert.equal(sent[2].at - sent[1].at, 1000, "at the target, beat again after one second like Discord's calculateHeartbeatDurationMs");
     assert.ok(b.map.get('confirm').userStatus.completedAt, 'Discord actually confirmed completion');
     assert.equal(b.events.filter(e => e.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS' && e.userStatus.completedAt).length, 1);
     assert.deepEqual(b.ui, []);
@@ -2707,7 +2707,7 @@ test('Quest Completer bounds unconfirmed Activity heartbeats and moves to the ne
     b.connect(); await b.run(10 * 60 * 1000);
     const sent = b.requests.filter(r => r.url === '/quests/stalled/heartbeat');
     assert.equal(sent.length, 6, 'initial target report and at most five unchanged confirmation beats');
-    for (let i = 1; i < sent.length; i++) assert.equal(sent[i].at - sent[i - 1].at, 60000);
+    for (let i = 1; i < sent.length; i++) assert.equal(sent[i].at - sent[i - 1].at, 1000, "Discord's own pace at the target");
     assert.equal(b.map.get('stalled').userStatus.completedAt, null, 'never report an unconfirmed Quest as completed');
     assert.ok(b.map.get('next').userStatus.completedAt, 'one stalled Quest does not block the queue');
 });
@@ -2716,7 +2716,8 @@ test('Quest Completer can stop Activity Quests while waiting for completion conf
         const b = questHarness({quests:[activityFixture('stop', 60, enrolledAgo(5))]});
         const post = b.http.post;
         b.http.post = request => post(request).then(response => { response.body.completed_at = null; return response; });
-        b.connect(); await b.run(10 * 1000);
+        // The first beat (at 9 s) reaches the target unconfirmed; stop before the one-second confirmation beat.
+        b.connect(); await b.run(9500);
         assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1);
         if (stop === 'LOGOUT') b.subs.get('LOGOUT').forEach(fn => fn({type:'LOGOUT'}));
         else b.api.setSetting(stop, false);

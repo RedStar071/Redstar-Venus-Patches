@@ -3364,9 +3364,11 @@
             // A Quest Discord stops counting used to get a heartbeat every minute for as long as Discord stayed open.
             if (beat.value > best) { best = beat.value; stalled = 0; }
             else if (++stalled >= QUEST_STALLED_BEATS) throw new Error("Discord stopped counting time");
+            // Exactly QuestProgressManager.calculateHeartbeatDurationMs (18086): max(0, left) plus a second when a
+            // minute or less is left, so a beat at the target that Discord hasn't confirmed yet is followed one
+            // second later, like Discord's own app. A 60 s wait there was a pattern no Discord client sends.
             const left = Math.max(0, (target - beat.value) * 1000);
-            // At the target, wait a normal interval for confirmation instead of hammering once a second.
-            await questSleep(left > 0 && left <= QUEST_HEARTBEAT_MS ? left + QUEST_HEARTBEAT_TAIL_MS : QUEST_HEARTBEAT_MS);
+            await questSleep(left <= QUEST_HEARTBEAT_MS ? left + QUEST_HEARTBEAT_TAIL_MS : QUEST_HEARTBEAT_MS);
         }
         return false;
     }
