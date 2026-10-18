@@ -4773,8 +4773,16 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
     const swatches = label => page().filter(n => n.type === RN.Pressable && n.props.accessibilityRole === 'radio' && n.props.accessibilityLabel === label);
     assert.equal(swatches('Purple').length, 2, 'swatches rendered for replies & mentions and for kept deleted messages');
     assert.equal(swatches('Any color').length, 2, 'an any-color swatch for each highlight');
+    // Picking gives Discord's own haptic ticks: SELECTION for a swatch, IMPACT_MEDIUM for the segmented control
+    // (like Discord's), and tapping what's already picked stays still.
+    const felt = [], prevHaptic = b.context.__r;
+    b.context.__r = id => id === 4855 ? {triggerHapticFeedback:t => felt.push(t)} : id === 4856 ? {default:{IMPACT_LIGHT:0, IMPACT_MEDIUM:1, SELECTION:8}} : prevHaptic(id);
     swatches('Blurple')[0].props.onPress();
     assert.equal(b.api.settings.messageHighlightPingColor, 'blurple', 'tapping Blurple swatch updates ping color immediately');
+    swatches('Blurple')[0].props.onPress();
+    page().find(n => n.props && n.props.accessibilityRole === 'tab' && n.props.accessibilityLabel === '4 dp').props.onPress();
+    assert.deepEqual(felt, [8, 1], 'one SELECTION tick for the new swatch, none for the same one, IMPACT_MEDIUM for the width');
+    b.context.__r = prevHaptic;
     assert.equal(swatches('Blurple')[0].props.accessibilityState.selected, true);
 
     // Bar width is a segmented choice.

@@ -2653,7 +2653,7 @@
     // the double-tap. A second double-tap (tap four) still counts too.
     const GESTURE_TRIPLE_MS = 650, GESTURE_PAIR_MS = 1500, GESTURE_DELETED_MS = 3000;
     const gesture = {timer:undefined, pending:null, channel:null, chatInputRef:null, pendingAt:0, deleted:null, deletedAt:0, handlers:null,
-        replyFn:null, editFn:null, canEditFn:null, canReplyFn:null, hapticFn:null, hapticType:undefined};
+        replyFn:null, editFn:null, canEditFn:null, canReplyFn:null};
     function gestureCancel() { if (gesture.timer !== undefined && global.clearTimeout) global.clearTimeout(gesture.timer); gesture.timer = undefined; gesture.pending = null; gesture.channel = null; gesture.chatInputRef = null; }
     function gestureOwn(message) {
         const user = userStore && userStore.getCurrentUser();
@@ -2667,17 +2667,21 @@
             return params.chatInputRef || null;
         } catch (_) { return null; }
     }
-    function gestureHaptic() {
+    // Tactile feedback through Discord's own haptics (HapticUtils 4855 / HapticFeedbackTypes 4856), so it feels like Discord's
+    // controls and follows Discord's and Android's vibration settings. Kinds are Discord's names: IMPACT_LIGHT for gestures,
+    // SELECTION for picking a choice, IMPACT_MEDIUM for its segmented control, NOTIFICATION_SUCCESS / NOTIFICATION_ERROR for results.
+    const haptics = {trigger:null, types:null};
+    function haptic(kind) {
         try {
-            const trigger = gesture.hapticFn || (gesture.hapticFn = inspectedExport(4855, "triggerHapticFeedback"));
+            const trigger = haptics.trigger || (haptics.trigger = inspectedExport(4855, "triggerHapticFeedback"));
             if (typeof trigger !== "function") return;
-            if (gesture.hapticType === undefined) {
-                const types = inspectedExport(4856, "default") || inspectedExport(4855, "HapticFeedbackTypes");
-                gesture.hapticType = types && types.IMPACT_LIGHT !== undefined ? types.IMPACT_LIGHT : 0;
-            }
-            trigger(gesture.hapticType);
+            const types = haptics.types || (haptics.types = inspectedExport(4856, "default") || inspectedExport(4855, "HapticFeedbackTypes"));
+            const type = types && types[kind || "IMPACT_LIGHT"];
+            if (type !== undefined) trigger(type);
+            else if (!kind || kind === "IMPACT_LIGHT") trigger(0);
         } catch (_) {}
     }
+    function gestureHaptic() { haptic("IMPACT_LIGHT"); }
     function gestureCanReply(channel, message) {
         const canReply = gesture.canReplyFn || (gesture.canReplyFn = inspectedExport(7635, "canReplyToMessage"));
         if (typeof canReply !== "function") return true;
@@ -3729,7 +3733,7 @@
     function radioGroup(ui,key,title,setting,on,choices,raw) {
         title=tr(title); if (!raw) choices=choices.map(([value,label,subLabel,icon]) => [value,tr(label),subLabel && tr(subLabel),icon]);
         const RadioGroup=inspectedExport(6072,"TableRadioGroup"), RadioRow=inspectedExport(6071,"TableRadioRow");
-        if (RadioGroup && RadioRow) return el(RadioGroup,{key,title,value:settings[setting],onChange:value => setSetting(setting,value)},
+        if (RadioGroup && RadioRow) return el(RadioGroup,{key,title,value:settings[setting],onChange:value => { if (value!==settings[setting]) haptic("SELECTION"); setSetting(setting,value); }},
             choices.map(([value,label,subLabel,icon]) => el(RadioRow,{key:value,value,label,subLabel,icon,disabled:!on})));
         return el(ui.TableRowGroup || RN.View,{key,title},choices.map(([value,label,subLabel,icon]) => ui.TableRow &&
             el(ui.TableRow,{key:value,label:(settings[setting]===value ? "\u2713 " : "")+label,subLabel,icon,disabled:!on,onPress:() => setSetting(setting,value)})));
@@ -3858,7 +3862,7 @@
     // A choice of two to four, drawn like Discord's segmented control (its MOBILE_SEGMENTED_CONTROL tokens).
     function venusSegmented(props) {
         const index=Math.max(0,props.items.findIndex(item => item.value===props.value));
-        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { animateLayout(); props.onChange(item.value); } };
+        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { haptic("IMPACT_MEDIUM"); animateLayout(); props.onChange(item.value); } };
         const pill={flex:1,paddingVertical:9,borderRadius:20,alignItems:"center"};
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
             on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill}),
@@ -4735,6 +4739,8 @@
     let reviewToastSeq = 0;
     // Discord's own toasts carry an icon for what just happened; IconComponent is optional (venusIcon).
     function reviewToast(ui,content,IconComponent) {
+        if (IconComponent && IconComponent === venusIcon(4797,"CircleXIcon")) haptic("NOTIFICATION_ERROR");
+        else if (IconComponent && IconComponent === venusIcon(4792,"CircleCheckIcon")) haptic("NOTIFICATION_SUCCESS");
         try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open(Object.assign({key:"venus-toast:" + (++reviewToastSeq),content:tr(content)},IconComponent ? {IconComponent} : null)); } catch (_) {}
     }
     function hideReviewSheet(ui,key) { try { if (ui.sheets && typeof ui.sheets.hideActionSheet==="function") ui.sheets.hideActionSheet(key); } catch (_) {} }
@@ -7953,7 +7959,7 @@
                 el(RN.View, {style:{width:10, height:10, borderRadius:5, backgroundColor:activeHex}}),
                 Text ? el(Text, {variant:"text-sm/medium", color:"text-muted"}, activeName) : el(RN.Text, {style:{color:"#949ba4", fontSize:13}}, activeName)),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center"}, accessibilityRole:"radiogroup"},
-                props.choices.map(([choice, label, hex]) => swatch(choice, tr(label), hex, value === choice, () => { if (on) setSetting(props.setting, choice); },
+                props.choices.map(([choice, label, hex]) => swatch(choice, tr(label), hex, value === choice, () => { if (on && value !== choice) { haptic("SELECTION"); setSetting(props.setting, choice); } },
                     value === choice ? popIn("tick:" + choice, tick(hex)) : null)),
                 swatch("custom", tr("Any color"), custom ? value : null, custom, pickAny, custom ? popIn("tick:" + value, tick(value)) : el(Dropper, {size:"xs"}))));
     }

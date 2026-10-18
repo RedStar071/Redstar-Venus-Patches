@@ -61,7 +61,7 @@ BOOTSTRAP_MODULES = [
     (4847, 'design/components/Icon/native/redesign/generated/TrashIcon.tsx', ['TrashIcon'], 'TrashIcon'),
     (4854, 'modules/action_sheet/native/ActionSheetActionCreators.tsx', ['default', 'ACTION_SHEET_HEIGHT_HALF', 'ACTION_SHEET_HEIGHT_EXPANDED'], 'ActionSheetActionCreators'),
     (4855, 'modules/haptics/HapticUtils.native.tsx', ['HapticFeedbackTypes', 'triggerHapticFeedback'], 'HapticUtils'),
-    (4856, 'modules/haptics/HapticFeedbackTypes.tsx', ['IMPACT_LIGHT', 'default'], 'HapticFeedbackTypes'),
+    (4856, 'modules/haptics/HapticFeedbackTypes.tsx', ['IMPACT_LIGHT', 'IMPACT_MEDIUM', 'SELECTION', 'NOTIFICATION_SUCCESS', 'NOTIFICATION_ERROR', 'default'], 'HapticFeedbackTypes'),
     (4886, 'design/components/Text/native/Text.tsx', ['TextStyleSheet', 'Text', 'Heading'], 'Design Text'),
     (4890, 'design/components/Styles/native/createStyles.tsx', ['experimental_createToken', 'createStyles', 'createLegacyClassComponentStyles'], 'createStyles'),
     (4905, 'stores/ReadStateStore.tsx', ['IS_GUILD_CHANNEL', 'IS_THREAD', 'IS_MENTION_LOW_IMPORTANCE'], 'ReadStateStore'),
