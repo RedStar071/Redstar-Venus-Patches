@@ -2644,6 +2644,26 @@ function activityFixture(id, target, extra = {}, app = '1124225423214485597', fe
     q.config.taskConfigV2.tasks.PLAY_ACTIVITY.applications = [{id:app}]; q.config.features = features;
     return q;
 }
+// Public quest 1551980932276293683 (VALORANT Aces Round 3) uses ACHIEVEMENT_IN_ACTIVITY,
+// target 1 and event_name "progress", not PLAY_ACTIVITY seconds. Keep fixture dates relative to
+// the harness clock so expiry cannot accidentally explain why this task is skipped.
+for (const accepted of [false, true]) test(`Quest Completer does not mistake ${accepted ? 'enrolled' : 'new'} VALORANT Aces achievement tasks for timed Activity Quests`, async () => {
+    const id = '1551980932276293683', app = '1536318183873454090';
+    const achievement = questFixture(id, 'ACHIEVEMENT_IN_ACTIVITY', 1, accepted ? enrolledAgo(5) : {});
+    achievement.config.messages.questName = 'VALORANT Aces Round 3';
+    achievement.config.application = {id:app, name:'Spades'};
+    achievement.config.features = [27, 36, 15];
+    achievement.config.taskConfigV2.tasks.ACHIEVEMENT_IN_ACTIVITY.applications = [{id:app}];
+    achievement.config.taskConfigV2.tasks.ACHIEVEMENT_IN_ACTIVITY.eventName = 'progress';
+    achievement.config.taskConfigV2.joinOperator = 'or';
+    const b = questHarness({quests:[achievement, activityFixture('timed', 60, enrolledAgo(5), app, [36])]});
+    b.connect(); await b.run();
+    assert.equal(b.requests.some(r => r.url.startsWith('/quests/' + id + '/')), false,
+        'achievement automation is not implemented; a one-count target must not be treated as one second');
+    assert.equal(b.events.some(e => e.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS' && e.questId === id), false);
+    assert.equal(!!(b.map.get(id).userStatus && b.map.get(id).userStatus.completedAt), false, 'never claim the achievement completed');
+    assert.ok(b.map.get('timed').userStatus.completedAt, 'the unsupported task must not block timed Activities');
+});
 const desktopProperties = r => JSON.parse(Buffer.from(r.headers['X-Super-Properties'], 'base64').toString());
 test('Quest Completer completes Activity Quests as the desktop app, like Discord does', async () => {
     const b = questHarness({quests:[activityFixture('a1', 180, enrolledAgo(5))]});
