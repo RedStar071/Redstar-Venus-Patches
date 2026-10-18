@@ -139,7 +139,7 @@ def build():
         *sorted((ROOT / "extensions/voice/stubs").rglob("*.kt")), "-d", stubs)
     voice_classes = BUILD / "voice-classes.jar"
     voice_sources = sorted((ROOT / "extensions/voice/src/main/kotlin").rglob("*.kt"))
-    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1", "-Xsuppress-version-warnings",
         "-jvm-target", "11", "-Xlambdas=class", "-cp",
         f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
         *voice_sources, "-d", voice_classes)
@@ -167,7 +167,7 @@ def build():
         "--output", voice_dex, voice_classes)
     # Force system font: the same Java-only rules as the voice extension.
     font_classes = BUILD / "font-classes.jar"
-    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1", "-Xsuppress-version-warnings",
         "-jvm-target", "11", "-Xlambdas=class", "-cp", f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
         *sorted((ROOT / "extensions/font/src/main/kotlin").rglob("*.kt")), "-d", font_classes)
     with zipfile.ZipFile(font_classes) as native:
@@ -187,7 +187,7 @@ def build():
         "--classpath", stubs, "--output", font_dex, font_classes)
     # Force system emojis: the same Java-only rules again.
     emoji_classes = BUILD / "emoji-classes.jar"
-    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1", "-Xsuppress-version-warnings",
         "-jvm-target", "11", "-Xlambdas=class", "-cp", f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
         *sorted((ROOT / "extensions/emoji/src/main/kotlin").rglob("*.kt")), "-d", emoji_classes)
     with zipfile.ZipFile(emoji_classes) as native:
@@ -207,7 +207,7 @@ def build():
         "--classpath", stubs, "--output", emoji_dex, emoji_classes)
     # Settings languages: the same Java-only rules again.
     i18n_classes = BUILD / "i18n-classes.jar"
-    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1",
+    run(compiler, "-no-stdlib", "-no-reflect", "-language-version", "2.1", "-api-version", "2.1", "-Xsuppress-version-warnings",
         "-jvm-target", "11", "-Xlambdas=class", "-cp", f"{TOOLS / 'android.jar'}:{TOOLS / 'morphe.jar'}:{stubs}",
         *sorted((ROOT / "extensions/i18n/src/main/kotlin").rglob("*.kt")), "-d", i18n_classes)
     with zipfile.ZipFile(i18n_classes) as native:

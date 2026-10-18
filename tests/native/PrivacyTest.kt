@@ -431,8 +431,8 @@ fun main(args: Array<String>) {
                         val r = i as FiveRegisterInstruction
                         when (method.name) {
                             "createMap" -> lastResult = linkedMapOf<String, Any?>()
-                            "putNull" -> (regs[r.registerC] as MutableMap<String, Any?>)[regs[r.registerD] as String] = null
-                            "putBoolean" -> (regs[r.registerC] as MutableMap<String, Any?>)[regs[r.registerD] as String] = regs[r.registerE] == 1
+                            "putNull" -> map(regs[r.registerC])[regs[r.registerD] as String] = null
+                            "putBoolean" -> map(regs[r.registerC])[regs[r.registerD] as String] = regs[r.registerE] == 1
                             "resolve" -> { check(regs[r.registerC] === promise); resolved = regs[r.registerD]; resolveCount++ }
                             else -> error("Unexpected map-stub call")
                         }
@@ -441,7 +441,7 @@ fun main(args: Array<String>) {
                 }
             }
             when (target.result) {
-                NativePrivacy.Result.EMPTY_MAP -> check(returned is Map<*, *> && (returned as Map<*, *>).isEmpty())
+                NativePrivacy.Result.EMPTY_MAP -> check(returned is Map<*, *> && returned.isEmpty())
                 NativePrivacy.Result.PROFILE_START -> check(returned == mapOf("started" to false))
                 NativePrivacy.Result.AD_ID_MAP -> check(resolveCount == 1 && resolved == mapOf("googleAdvertisingId" to null, "isLimitAdTrackingEnabled" to true))
                 else -> error("Unexpected result")
@@ -598,3 +598,7 @@ private fun checkHermesComposition(original: ByteArray, groups: List<List<HbcPri
         fixture.delete()
     }
 }
+
+/** A WritableMap stand-in built by the interpreted `createMap` above. */
+@Suppress("UNCHECKED_CAST")
+private fun map(value: Any?): MutableMap<String, Any?> = value as MutableMap<String, Any?>
