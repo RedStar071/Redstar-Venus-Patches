@@ -333,6 +333,10 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - The Features list is Discord's own `SettingsList` with `FeatureSearchBar` as its `ListHeaderComponent` (#68). Every
   `toggle`/`withOptions` row is added to `featureSearch.rows` automatically; when a new feature page has options people would
   search for by name, add their labels to `FEATURE_KEYWORDS`.
+- **Start with the essentials** (`STARTER_FEATURES`, `starterCard`) sits above the Features search on a fresh install, until any
+  feature has been on, Not now is tapped (`setupDone` in the settings file), or you search. Only add a feature there if it works
+  on its own: no sign-in, no outside service (ReviewDB, Google Translate), no restart, nothing that acts for you (Quests,
+  Skip delete confirmation) or changes what others see (Hide typing indicator). The runtime test lists the ones that must stay out.
 - **Backup and restore** saves `settings` (plus watched people and installed themes). A new setting needs nothing extra as long
   as `acceptedSetting` can validate it: add a check there for any setting with a fixed list of values, so a hand-edited backup
   can't put a page in a state it can't show. Never add sign-ins, tokens, saved accounts or kept messages to `backupText`.

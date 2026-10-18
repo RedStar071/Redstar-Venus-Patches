@@ -759,5 +759,18 @@
  "Show edit history": "Rodyti redagavimo istoriją",
  "Keep after restarting": "Išsaugoti po paleidimo iš naujo",
  "Settings reset to defaults": "Nustatymai atstatyti į numatytuosius",
- "Turn it on here to start.": "Įjunk čia, kad pradėtum."
+ "Turn it on here to start.": "Įjunk čia, kad pradėtum.",
+ "Start with the essentials": "Pradėk nuo svarbiausių",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Populiarios funkcijos, veikiančios savaime: be prisijungimo, be išorinių paslaugų ir be paleidimo iš naujo. Bet kurią galėsi pakeisti vėliau.",
+ "Turn them on": "Įjungti",
+ "Not now": "Ne dabar",
+ "Undo": "Anuliuoti",
+ "Done": "Atlikta",
+ "They're switched on below. Open any of them to fine-tune it.": "Jos įjungtos žemiau. Atidaryk bet kurią ir pritaikyk.",
+ "{n} features turned on": {
+  "one": "Įjungta {n} funkcija",
+  "few": "Įjungtos {n} funkcijos",
+  "other": "Įjungta {n} funkcijų"
+ },
+ "{n} feature turned on": "Įjungta {n} funkcija"
 }

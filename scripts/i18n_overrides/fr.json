@@ -734,5 +734,17 @@
  "Show edit history": "Afficher l'historique des modifications",
  "Keep after restarting": "Conserver après un redémarrage",
  "Settings reset to defaults": "Paramètres réinitialisés",
- "Turn it on here to start.": "Activez-la ici pour commencer."
+ "Turn it on here to start.": "Activez-la ici pour commencer.",
+ "Start with the essentials": "Commencez par l'essentiel",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Des fonctionnalités populaires qui marchent toutes seules : aucune connexion, aucun service externe et aucun redémarrage. Vous pourrez les modifier plus tard.",
+ "Turn them on": "Les activer",
+ "Not now": "Pas maintenant",
+ "Undo": "Annuler",
+ "Done": "Terminé",
+ "They're switched on below. Open any of them to fine-tune it.": "Elles sont activées ci-dessous. Ouvrez-en une pour l'ajuster.",
+ "{n} features turned on": {
+  "one": "{n} fonctionnalité activée",
+  "other": "{n} fonctionnalités activées"
+ },
+ "{n} feature turned on": "{n} fonctionnalité activée"
 }

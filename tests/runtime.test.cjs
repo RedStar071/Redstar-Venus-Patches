@@ -5341,3 +5341,63 @@ test('Reopen Discord is asked in Discord\'s own dialog when it can, not Android\
     assert.equal(shown[0].title,"Use your phone's font");assert.equal(shown[0].confirmText,'Reopen now');assert.equal(shown[0].cancelText,'Later');
     shown[0].onConfirm();await flush();await flush();await flush();assert.equal(sizes.at(-1),'venus-font-v1:restart');
 });
+
+// First-run setup on the Features list.
+function starterHarness({disk=null, features=allFeatures}={}) {
+    const b=boot(features,true,false); const {React}=reactHarness(b); React.useState=init=>[typeof init==='function'?init():init,()=>{}];
+    function SettingsList(){} b.load({SettingsList},null,14500);
+    const exports=b.load({SETTING_RENDERER_CONFIG:Object.freeze({ACCOUNT:Object.freeze({type:'route',IconComponent:function Icon(){}})})},null,14409);
+    b.load({createList(config,extra){return {...config,type:'list',extra};}},null,11129);
+    function Button(){} function Text(){} function SearchField(){}
+    const prev=b.context.__r; b.context.__r=id=>({5594:{Button},4886:{Text},6547:{SearchField}}[id]||(prev?prev(id):null));
+    const writes=[];
+    b.load(native({fileExists:async()=>disk!==null,readFile:async()=>JSON.stringify(disk||{}),writeFile:async(dir,name,data)=>{writes.push(JSON.parse(data));}}));
+    const registry=exports.SETTING_RENDERER_CONFIG;
+    const header=()=>{ const node=registry.VENUS_PLUGINS.screen.getComponent()().props.node.ListHeaderComponent; return pageNodes(node.type(node.props)); };
+    const card=()=>header().find(n=>n.props&&n.props.key==='starter');
+    const buttons=()=>header().filter(n=>n.type===Button).map(n=>n.props);
+    const press=text=>buttons().find(p=>p.text===text).onPress();
+    return {...b,registry,header,card,buttons,press,writes,Button,Text};
+}
+const STARTER_KEYS=['copyBios','freeNitro','jumpToTop','noDelete','picker','platformIndicators','readAll','validUser'];
+const starterOn=b=>STARTER_KEYS.filter(k=>b.api.settings[k]===true);
+test('a fresh install opens the Features list on one-tap essentials, made of safe offline features',async()=>{
+    const b=starterHarness(); await flush(); await flush();
+    assert.ok(b.card(),'shown before anything is on');
+    assert.deepEqual(b.buttons().map(p=>p.text),['Not now','Turn them on']);
+    assert.equal(b.buttons()[1].variant,'primary');
+    assert.match(JSON.stringify(b.card()),/Start with the essentials/);
+    b.press('Turn them on'); await flush();
+    assert.deepEqual(starterOn(b),STARTER_KEYS,'every essential is on');
+    // Never anything that signs in, sends text out, needs a restart, acts for you or changes what others see.
+    for (const risky of ['reviewDB','translate','quests','userNotif','accountSwitcher','systemFont','systemEmoji','quickDelete','noTyping','customThemes','gestures'])
+        assert.equal(b.api.settings[risky],false,risky+' is never in the essentials');
+    assert.match(JSON.stringify(b.card()),/8 features turned on/,'says what happened');
+    assert.deepEqual(b.buttons().map(p=>p.text),['Undo','Done']);
+    assert.equal(b.writes.at(-1).setupDone,true,'remembered on this phone');
+});
+test('Undo switches back exactly what the essentials turned on, and the offer comes back',async()=>{
+    const b=starterHarness(); await flush(); await flush();
+    b.press('Turn them on'); await flush(); b.press('Undo'); await flush();
+    assert.deepEqual(starterOn(b),[],'every essential is off again');
+    assert.deepEqual(b.buttons().map(p=>p.text),['Not now','Turn them on'],'offered again');
+    b.press('Turn them on'); b.press('Done'); await flush();
+    assert.equal(b.card(),undefined,'Done closes it'); assert.equal(starterOn(b).length,8,'and keeps them on');
+});
+test('the essentials stay out of the way: Not now, any feature already on, or searching hides them',async()=>{
+    let b=starterHarness(); await flush(); await flush();
+    b.press('Not now'); await flush(); assert.equal(b.card(),undefined); assert.equal(starterOn(b).length,0,'Not now turns nothing on');
+    assert.equal(b.writes.at(-1).setupDone,true);
+    b=starterHarness({disk:{setupDone:true}}); await flush(); await flush(); assert.equal(b.card(),undefined,'stays dismissed after a restart');
+    b=starterHarness({disk:{gestures:true}}); await flush(); await flush(); assert.equal(b.card(),undefined,'someone who already uses Venus never sees it');
+    b=starterHarness(); await flush(); await flush(); b.api.setSetting('dashless',true); assert.equal(b.card(),undefined,'turning one on yourself is enough');
+    b.api.setSetting('dashless',false); assert.equal(b.card(),undefined,'and it doesn\'t come back');
+    b=starterHarness(); await flush(); await flush();
+    const bar=b.header().find(n=>n.props&&typeof n.props.onChange==='function'&&'value' in n.props); bar.props.onChange('font');
+    assert.equal(b.card(),undefined,'hidden while you search');
+});
+test('the essentials wait for saved settings and only show when enough of them were patched in',async()=>{
+    const b=starterHarness(); assert.equal(b.card(),undefined,'nothing while settings are still loading');
+    const few=starterHarness({features:{noDelete:true,jumpToTop:true,dashless:true}}); await flush(); await flush();
+    assert.equal(few.card(),undefined,'two essentials patched in is not worth a card');
+});

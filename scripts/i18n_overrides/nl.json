@@ -734,5 +734,17 @@
  "Show edit history": "Bewerkingsgeschiedenis tonen",
  "Keep after restarting": "Bewaren na herstart",
  "Settings reset to defaults": "Instellingen teruggezet",
- "Turn it on here to start.": "Zet dit hier aan om te beginnen."
+ "Turn it on here to start.": "Zet dit hier aan om te beginnen.",
+ "Start with the essentials": "Begin met de basis",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Populaire functies die vanzelf werken: geen inloggen, geen externe diensten en geen herstart. Je kunt ze later altijd aanpassen.",
+ "Turn them on": "Zet ze aan",
+ "Not now": "Niet nu",
+ "Undo": "Ongedaan maken",
+ "Done": "Klaar",
+ "They're switched on below. Open any of them to fine-tune it.": "Ze staan hieronder aan. Open er een om hem bij te stellen.",
+ "{n} features turned on": {
+  "one": "{n} functie aangezet",
+  "other": "{n} functies aangezet"
+ },
+ "{n} feature turned on": "{n} functie aangezet"
 }

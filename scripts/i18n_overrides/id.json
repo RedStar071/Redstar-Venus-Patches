@@ -659,5 +659,14 @@
  "Show edit history": "Tampilkan riwayat edit",
  "Keep after restarting": "Simpan setelah dimulai ulang",
  "Settings reset to defaults": "Pengaturan dikembalikan ke default",
- "Turn it on here to start.": "Aktifkan di sini untuk memulai."
+ "Turn it on here to start.": "Aktifkan di sini untuk memulai.",
+ "Start with the essentials": "Mulai dari yang penting",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Fitur populer yang langsung berjalan: tanpa login, tanpa layanan luar, dan tanpa mulai ulang. Semuanya bisa diubah nanti.",
+ "Turn them on": "Aktifkan",
+ "Not now": "Nanti saja",
+ "Undo": "Urungkan",
+ "Done": "Selesai",
+ "They're switched on below. Open any of them to fine-tune it.": "Fitur-fitur ini sudah aktif di bawah. Buka salah satunya untuk menyesuaikannya.",
+ "{n} features turned on": "{n} fitur diaktifkan",
+ "{n} feature turned on": "{n} fitur diaktifkan"
 }

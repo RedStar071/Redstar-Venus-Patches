@@ -734,5 +734,17 @@
  "Show edit history": "Düzenleme geçmişini göster",
  "Keep after restarting": "Yeniden başlatınca da sakla",
  "Settings reset to defaults": "Ayarlar varsayılana sıfırlandı",
- "Turn it on here to start.": "Başlamak için buradan aç."
+ "Turn it on here to start.": "Başlamak için buradan aç.",
+ "Start with the essentials": "Temel özelliklerle başla",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Kendi başına çalışan popüler özellikler: giriş yok, dış hizmet yok, yeniden başlatma yok. Hepsini sonra değiştirebilirsin.",
+ "Turn them on": "Aç",
+ "Not now": "Şimdi değil",
+ "Undo": "Geri al",
+ "Done": "Tamam",
+ "They're switched on below. Open any of them to fine-tune it.": "Aşağıda açıldılar. İnce ayar için herhangi birini aç.",
+ "{n} features turned on": {
+  "one": "{n} özellik açıldı",
+  "other": "{n} özellik açıldı"
+ },
+ "{n} feature turned on": "{n} özellik açıldı"
 }

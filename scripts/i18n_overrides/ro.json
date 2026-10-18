@@ -759,5 +759,18 @@
  "Show edit history": "Afișează istoricul editărilor",
  "Keep after restarting": "Păstrează după repornire",
  "Settings reset to defaults": "Setările au fost resetate",
- "Turn it on here to start.": "Activează aici pentru a începe."
+ "Turn it on here to start.": "Activează aici pentru a începe.",
+ "Start with the essentials": "Începe cu esențialul",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Funcții populare care merg singure: fără autentificare, fără servicii externe și fără repornire. Le poți schimba oricând.",
+ "Turn them on": "Activează-le",
+ "Not now": "Nu acum",
+ "Undo": "Anulează",
+ "Done": "Gata",
+ "They're switched on below. Open any of them to fine-tune it.": "Sunt activate mai jos. Deschide oricare ca s-o ajustezi.",
+ "{n} features turned on": {
+  "one": "{n} funcție activată",
+  "few": "{n} funcții activate",
+  "other": "{n} de funcții activate"
+ },
+ "{n} feature turned on": "{n} funcție activată"
 }

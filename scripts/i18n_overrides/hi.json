@@ -734,5 +734,17 @@
  "Show edit history": "एडिट हिस्ट्री दिखाएँ",
  "Keep after restarting": "रीस्टार्ट के बाद भी रखें",
  "Settings reset to defaults": "सेटिंग डिफ़ॉल्ट पर रीसेट हो गईं",
- "Turn it on here to start.": "शुरू करने के लिए इसे यहीं चालू करें।"
+ "Turn it on here to start.": "शुरू करने के लिए इसे यहीं चालू करें।",
+ "Start with the essentials": "ज़रूरी चीज़ों से शुरुआत करें",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "लोकप्रिय फ़ीचर जो अपने आप काम करते हैं: न साइन इन, न बाहरी सेवाएँ और न रीस्टार्ट। इनमें से किसी को भी बाद में बदल सकते हैं।",
+ "Turn them on": "इन्हें चालू करें",
+ "Not now": "अभी नहीं",
+ "Undo": "पहले जैसा करें",
+ "Done": "हो गया",
+ "They're switched on below. Open any of them to fine-tune it.": "ये नीचे चालू हैं। किसी को भी खोलकर उसे अपने हिसाब से सेट करें।",
+ "{n} features turned on": {
+  "one": "{n} फ़ीचर चालू हुआ",
+  "other": "{n} फ़ीचर चालू हुए"
+ },
+ "{n} feature turned on": "{n} फ़ीचर चालू हुआ"
 }

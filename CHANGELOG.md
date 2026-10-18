@@ -4,6 +4,7 @@
 
 * **Discord - Venus settings:** Add Backup and restore to save every Venus setting to a file or the clipboard and bring it back after patching again ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
 * **Discord - Venus settings:** Add a search bar to the Features list that finds features by name, description or option ([#68](https://github.com/VenusIsJaded/Venus-Patches/issues/68))
+* **Discord - Venus settings:** Add Start with the essentials, a one-tap setup on a fresh install that turns on eight popular offline features, with Undo
 * **Discord - Venus settings:** Turn a feature on right from its own page: the Turned off card now has a switch, so you don't have to go back to Features
 * **Discord - Venus settings:** Picking a choice, a color or a segment gives Discord's own light haptic tick, like its switches already do
 

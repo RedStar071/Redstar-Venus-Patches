@@ -659,5 +659,14 @@
  "Show edit history": "Hiện lịch sử chỉnh sửa",
  "Keep after restarting": "Giữ lại sau khi khởi động lại",
  "Settings reset to defaults": "Đã đặt lại cài đặt về mặc định",
- "Turn it on here to start.": "Bật ngay tại đây để bắt đầu."
+ "Turn it on here to start.": "Bật ngay tại đây để bắt đầu.",
+ "Start with the essentials": "Bắt đầu với những thứ cần thiết",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Các tính năng phổ biến hoạt động ngay: không cần đăng nhập, không dùng dịch vụ bên ngoài và không cần khởi động lại. Bạn có thể đổi bất kỳ lúc nào.",
+ "Turn them on": "Bật",
+ "Not now": "Để sau",
+ "Undo": "Hoàn tác",
+ "Done": "Xong",
+ "They're switched on below. Open any of them to fine-tune it.": "Chúng đã được bật bên dưới. Mở từng mục để tinh chỉnh.",
+ "{n} features turned on": "Đã bật {n} tính năng",
+ "{n} feature turned on": "Đã bật {n} tính năng"
 }

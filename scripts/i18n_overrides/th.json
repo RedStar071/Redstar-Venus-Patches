@@ -659,5 +659,14 @@
  "Show edit history": "แสดงประวัติการแก้ไข",
  "Keep after restarting": "เก็บไว้หลังรีสตาร์ท",
  "Settings reset to defaults": "รีเซ็ตการตั้งค่าเป็นค่าเริ่มต้นแล้ว",
- "Turn it on here to start.": "เปิดสวิตช์ตรงนี้เพื่อเริ่มใช้งาน"
+ "Turn it on here to start.": "เปิดสวิตช์ตรงนี้เพื่อเริ่มใช้งาน",
+ "Start with the essentials": "เริ่มจากฟีเจอร์หลัก",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "ฟีเจอร์ยอดนิยมที่ใช้ได้ทันที ไม่ต้องลงชื่อเข้าใช้ ไม่ใช้บริการภายนอก และไม่ต้องรีสตาร์ท เปลี่ยนได้ทุกเมื่อ",
+ "Turn them on": "เปิดใช้งาน",
+ "Not now": "ไว้ทีหลัง",
+ "Undo": "เลิกทำ",
+ "Done": "เสร็จสิ้น",
+ "They're switched on below. Open any of them to fine-tune it.": "เปิดอยู่ในรายการด้านล่างแล้ว แตะเพื่อปรับแต่งแต่ละรายการได้",
+ "{n} features turned on": "เปิดใช้ {n} ฟีเจอร์แล้ว",
+ "{n} feature turned on": "เปิดใช้ {n} ฟีเจอร์แล้ว"
 }

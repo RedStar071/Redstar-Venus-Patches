@@ -61,6 +61,9 @@
     const DEFAULT_SETTINGS = Object.freeze(Object.assign({}, settings));
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
     const backup = {last:0, busy:"", restoring:false};
+    // First-run setup on the Features list: done once any feature has been on, or after Not now. justOn is this session's
+    // one-tap result (the keys it switched on), so Undo can put exactly those back.
+    const starter = {done:false, justOn:null};
     // What you typed in the Features list's search bar (#68).
     const featureSearch = {query:"", rows:[], listeners:new Set(), cache:null};
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
@@ -222,6 +225,7 @@
         if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
         if (features.userNotif && userNotif.ids.size) extra.userNotifIds = Array.from(userNotif.ids);
         if (backup.last) extra.lastBackup = backup.last;
+        if (starter.done) extra.setupDone = true;
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
     }
     function save() {
@@ -315,6 +319,7 @@
         if (key === "splitMessages" && !value && features.splitMessages) split.generation++;
         if ((key === "noDeleteEdits" || key === "noDelete") && !value && edits.size) { edits.clear(); persistDeleted(); }
         settings[key] = value;
+        if (value && !starter.done && owns(FEATURE_ICONS, key)) starter.done = true;
         if (key === "noDeleteSave") { if (value) restoreDeleted(); else archiveRestored = false; persistDeleted(); }
         if (key === "noDelete" && value) restoreDeleted();
         dirty.add(key);
@@ -360,6 +365,7 @@
                     if (value !== undefined) settings[key] = value;
                 }
                 if (typeof loaded.lastBackup === "number" && Number.isFinite(loaded.lastBackup) && !backup.last) backup.last = loaded.lastBackup;
+                if (loaded.setupDone === true) starter.done = true;
                 const auth = loaded.reviewAuth;
                 // Restore a saved ReviewDB sign-in (a ReviewDB token, never the Discord token).
                 if (features.reviewDB && !reviewToken && auth && typeof auth.token === "string" && auth.token.length <= 8192 &&
@@ -370,6 +376,7 @@
                 }
             }
             status.storage = "ready";
+            if (!starter.done && Object.keys(FEATURE_ICONS).some(key => features[key] && settings[key])) starter.done = true;
             fontInUse = settings.systemFont;
             emojiInUse = settings.systemEmoji;
             if (!enabled("picker")) clearSizes();
@@ -791,7 +798,7 @@
     // Discord's own search field (SearchField 6547, the one its settings and friends lists use) above the Features list.
     // It is one stable element in the list's header, so the keyboard stays up while the rows below it filter.
     function FeatureSearchBar() {
-        useFeatureSearch(); useLanguage();
+        useFeatureSearch(); useSettings();
         if (!React || !RN) return null;
         const ui = reviewUI(), SearchField = inspectedExport(6547, "SearchField"), Text = inspectedExport(4886, "Text");
         const s = useThemed("featureSearch", c => ({badge:Object.assign({}, SEARCH_EMPTY_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), SEARCH_EMPTY_DARK);
@@ -801,12 +808,77 @@
             el(RN.TextInput, Object.assign({}, props, {onChangeText:setFeatureSearch, style:{fontSize:16, padding:12}}));
         const none = !!query.trim() && !featureMatches(query).size;
         const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color, style:{textAlign:"center"}}, value) : el(RN.Text, {style:[fallback, {textAlign:"center"}]}, value);
+        // Called directly (not as its own component), so the header keeps the same hooks whether the card shows or not.
+        const setup = starterCard();
         return el(RN.View, {style:{paddingTop:12, paddingBottom:4}},
+            query.trim() ? null : setup,
             field,
             none ? el(RN.View, {key:"none", style:{alignItems:"center", gap:6, paddingTop:40, paddingBottom:24}, accessibilityLiveRegion:"polite"},
                 popIn("none", el(RN.View, {style:[s.badge, {marginBottom:6}]}, el(venusIcon(6548, "MagnifyingGlassIcon"), {size:"md"}))),
                 text(tr("No features found"), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                 text(tr("Try a different word."), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})) : null);
+    }
+    // First-run setup. Every feature starts off, so a fresh install opens on a long list of switches. Until you've turned
+    // anything on, the top of the list offers a short, safe set in one tap: nothing to sign in to, no outside service,
+    // no restart. Undo switches back exactly what it turned on; Not now (or turning on anything yourself) hides it for good.
+    const STARTER_FEATURES = ["noDelete", "freeNitro", "platformIndicators", "readAll", "jumpToTop", "validUser", "copyBios", "picker"];
+    function starterKeys() { return STARTER_FEATURES.filter(key => features[key]); }
+    function starterVisible() {
+        if (starter.justOn) return true;
+        if (starter.done || status.storage === "waiting" || status.storage === "loading") return false;
+        return starterKeys().length >= 3 && !Object.keys(FEATURE_ICONS).some(key => features[key] && settings[key]);
+    }
+    function starterTurnOn() {
+        const keys = starterKeys().filter(key => !settings[key]);
+        if (!keys.length) return;
+        animateLayout();
+        keys.forEach(key => setSetting(key, true));
+        starter.done = true; starter.justOn = keys; save(); notify("*");
+    }
+    function starterUndo() {
+        const keys = starter.justOn || [];
+        animateLayout();
+        starter.justOn = null; starter.done = false;
+        keys.forEach(key => setSetting(key, false));
+        save(); notify("*");
+    }
+    function starterClose() { animateLayout(); starter.done = true; starter.justOn = null; save(); notify("*"); }
+    const STARTER_DARK = {card:{backgroundColor:"#2b2d31", borderRadius:16, padding:16, gap:14, marginBottom:12},
+        badge:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        done:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#23a55a"},
+        chip:{width:34, height:34, borderRadius:17, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"},
+        button:{flex:1, height:40, borderRadius:20, alignItems:"center", justifyContent:"center"}};
+    function starterCard() {
+        const s = useThemed("starter", c => ({card:Object.assign({}, STARTER_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            badge:Object.assign({}, STARTER_DARK.badge, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
+            done:Object.assign({}, STARTER_DARK.done, {backgroundColor:c.STATUS_POSITIVE || c.TEXT_POSITIVE || "#23a55a"}),
+            chip:Object.assign({}, STARTER_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}), button:STARTER_DARK.button}), STARTER_DARK);
+        if (!starterVisible()) return null;
+        const Text = inspectedExport(4886, "Text"), Button = inspectedExport(5594, "Button"), Press = RN.Pressable || RN.View;
+        const line = (value, variant, color, fallback, extra) => Text ? el(Text, Object.assign({variant, color}, extra), value) : el(RN.Text, Object.assign({style:fallback}, extra), value);
+        const done = !!starter.justOn, keys = done ? starter.justOn : starterKeys();
+        const title = done ? pl(keys.length, "{n} feature turned on", "{n} features turned on") : tr("Start with the essentials");
+        const titleOf = key => { const row = featureSearch.rows.find(entry => entry.key === key); return row ? tr(row.title) : key; };
+        const starterAction = (key, label, variant, onPress) => Button ? el(RN.View, {key, style:{flex:1}}, el(Button, {text:label, size:"md", variant, grow:true, onPress})) :
+            el(Press, {key, onPress, accessibilityRole:"button", accessibilityLabel:label,
+                style:[s.button, {backgroundColor:variant === "primary" ? "#5865f2" : "#4e505899"}]},
+                el(RN.Text, {style:{color:"#ffffff", fontWeight:"600", fontSize:14}}, label));
+        return el(RN.View, {key:"starter", style:s.card},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:14}},
+                // The badge pops when the card turns into its done state.
+                popIn(done ? "starter:done" : "starter:offer", el(RN.View, {style:done ? s.done : s.badge},
+                    el(done ? venusIcon(6628, "CheckmarkSmallIcon") : venusIcon(16603, "SparklesIcon"), {size:"md", color:"#ffffff"}))),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    line(title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}, {accessibilityRole:"header"}),
+                    line(tr(done ? "They're switched on below. Open any of them to fine-tune it." :
+                        "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later."),
+                        "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
+            // What you get, shown as the features' own icons rather than a list of names.
+            el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8}, accessible:true, accessibilityLabel:joinAnd(keys.map(titleOf))},
+                keys.map(key => { const found = FEATURE_ICONS[key]; return el(RN.View, {key, style:s.chip}, found ? el(venusIcon(found[0], found[1]), {size:"sm"}) : null); })),
+            el(RN.View, {style:{flexDirection:"row", gap:10}},
+                done ? [starterAction("undo", tr("Undo"), "secondary", starterUndo), starterAction("ok", tr("Done"), "primary", starterClose)] :
+                    [starterAction("later", tr("Not now"), "secondary", starterClose), starterAction("on", tr("Turn them on"), "primary", starterTurnOn)]));
     }
     // The Features list: Discord's own settings list, with the search bar as its header. While you search it only keeps
     // the rows that match, still under their group titles, and the search clears when you leave the page.

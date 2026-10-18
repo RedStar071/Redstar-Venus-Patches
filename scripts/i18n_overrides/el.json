@@ -734,5 +734,17 @@
  "Show edit history": "Εμφάνιση ιστορικού επεξεργασίας",
  "Keep after restarting": "Διατήρηση μετά την επανεκκίνηση",
  "Settings reset to defaults": "Έγινε επαναφορά των ρυθμίσεων",
- "Turn it on here to start.": "Ενεργοποίησέ το εδώ για να ξεκινήσεις."
+ "Turn it on here to start.": "Ενεργοποίησέ το εδώ για να ξεκινήσεις.",
+ "Start with the essentials": "Ξεκίνα με τα βασικά",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Δημοφιλείς λειτουργίες που δουλεύουν μόνες τους: χωρίς σύνδεση, χωρίς εξωτερικές υπηρεσίες και χωρίς επανεκκίνηση. Μπορείς να αλλάξεις οποιαδήποτε αργότερα.",
+ "Turn them on": "Ενεργοποίηση",
+ "Not now": "Όχι τώρα",
+ "Undo": "Αναίρεση",
+ "Done": "Τέλος",
+ "They're switched on below. Open any of them to fine-tune it.": "Είναι ενεργές παρακάτω. Άνοιξε όποια θέλεις για να τη ρυθμίσεις.",
+ "{n} features turned on": {
+  "one": "Ενεργοποιήθηκε {n} λειτουργία",
+  "other": "Ενεργοποιήθηκαν {n} λειτουργίες"
+ },
+ "{n} feature turned on": "Ενεργοποιήθηκε {n} λειτουργία"
 }

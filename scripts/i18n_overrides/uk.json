@@ -759,5 +759,18 @@
  "Show edit history": "Показувати історію змін",
  "Keep after restarting": "Зберігати після перезапуску",
  "Settings reset to defaults": "Налаштування скинуто",
- "Turn it on here to start.": "Увімкніть тут, щоб почати."
+ "Turn it on here to start.": "Увімкніть тут, щоб почати.",
+ "Start with the essentials": "Почніть з головного",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Популярні функції, що працюють самі: без входу, без сторонніх сервісів і без перезапуску. Будь-яку можна змінити пізніше.",
+ "Turn them on": "Увімкнути",
+ "Not now": "Не зараз",
+ "Undo": "Скасувати",
+ "Done": "Готово",
+ "They're switched on below. Open any of them to fine-tune it.": "Їх увімкнено нижче. Відкрийте будь-яку, щоб налаштувати її.",
+ "{n} features turned on": {
+  "one": "Увімкнено {n} функцію",
+  "few": "Увімкнено {n} функції",
+  "many": "Увімкнено {n} функцій"
+ },
+ "{n} feature turned on": "Увімкнено {n} функцію"
 }

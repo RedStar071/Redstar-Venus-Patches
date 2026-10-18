@@ -734,5 +734,17 @@
  "Show edit history": "Näytä muokkaushistoria",
  "Keep after restarting": "Säilytä uudelleenkäynnistyksen jälkeen",
  "Settings reset to defaults": "Asetukset palautettu oletuksiin",
- "Turn it on here to start.": "Ota se käyttöön tästä."
+ "Turn it on here to start.": "Ota se käyttöön tästä.",
+ "Start with the essentials": "Aloita olennaisista",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Suosittuja ominaisuuksia, jotka toimivat itsestään: ei kirjautumista, ei ulkoisia palveluita eikä uudelleenkäynnistystä. Voit muuttaa niitä myöhemmin.",
+ "Turn them on": "Ota käyttöön",
+ "Not now": "Ei nyt",
+ "Undo": "Kumoa",
+ "Done": "Valmis",
+ "They're switched on below. Open any of them to fine-tune it.": "Ne ovat päällä alla. Avaa mikä tahansa ja hienosäädä sitä.",
+ "{n} features turned on": {
+  "one": "{n} ominaisuus otettu käyttöön",
+  "other": "{n} ominaisuutta otettu käyttöön"
+ },
+ "{n} feature turned on": "{n} ominaisuus otettu käyttöön"
 }

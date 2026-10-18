@@ -659,5 +659,14 @@
  "Show edit history": "顯示編輯紀錄",
  "Keep after restarting": "重新啟動後保留",
  "Settings reset to defaults": "已恢復預設設定",
- "Turn it on here to start.": "在此開啟即可開始使用。"
+ "Turn it on here to start.": "在此開啟即可開始使用。",
+ "Start with the essentials": "從必備功能開始",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "無需登入、不使用外部服務、無需重新啟動即可使用的熱門功能。之後可以隨時更改。",
+ "Turn them on": "開啟",
+ "Not now": "暫不",
+ "Undo": "復原",
+ "Done": "完成",
+ "They're switched on below. Open any of them to fine-tune it.": "已在下方開啟。開啟任一項即可微調。",
+ "{n} features turned on": "已開啟 {n} 項功能",
+ "{n} feature turned on": "已開啟 {n} 項功能"
 }

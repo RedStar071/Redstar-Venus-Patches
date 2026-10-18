@@ -759,5 +759,18 @@
  "Show edit history": "Показывать историю правок",
  "Keep after restarting": "Сохранять после перезапуска",
  "Settings reset to defaults": "Настройки сброшены",
- "Turn it on here to start.": "Включите здесь, чтобы начать."
+ "Turn it on here to start.": "Включите здесь, чтобы начать.",
+ "Start with the essentials": "Начните с главного",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Популярные функции, которые работают сами: без входа, без сторонних сервисов и без перезапуска. Любую можно изменить позже.",
+ "Turn them on": "Включить",
+ "Not now": "Не сейчас",
+ "Undo": "Отменить",
+ "Done": "Готово",
+ "They're switched on below. Open any of them to fine-tune it.": "Они включены ниже. Откройте любую, чтобы настроить её.",
+ "{n} features turned on": {
+  "one": "Включена {n} функция",
+  "few": "Включены {n} функции",
+  "many": "Включено {n} функций"
+ },
+ "{n} feature turned on": "Включена {n} функция"
 }

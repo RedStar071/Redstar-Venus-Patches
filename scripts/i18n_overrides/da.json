@@ -734,5 +734,17 @@
  "Show edit history": "Vis redigeringshistorik",
  "Keep after restarting": "Bevar efter genstart",
  "Settings reset to defaults": "Indstillingerne er nulstillet",
- "Turn it on here to start.": "Slå den til her for at begynde."
+ "Turn it on here to start.": "Slå den til her for at begynde.",
+ "Start with the essentials": "Kom i gang med det vigtigste",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Populære funktioner, der virker af sig selv: intet login, ingen eksterne tjenester og ingen genstart. Du kan ændre dem når som helst.",
+ "Turn them on": "Slå dem til",
+ "Not now": "Ikke nu",
+ "Undo": "Fortryd",
+ "Done": "Færdig",
+ "They're switched on below. Open any of them to fine-tune it.": "De er slået til nedenfor. Åbn en af dem for at finjustere den.",
+ "{n} features turned on": {
+  "one": "{n} funktion slået til",
+  "other": "{n} funktioner slået til"
+ },
+ "{n} feature turned on": "{n} funktion slået til"
 }

@@ -759,5 +759,18 @@
  "Show edit history": "Prikaži povijest uređivanja",
  "Keep after restarting": "Zadrži nakon ponovnog pokretanja",
  "Settings reset to defaults": "Postavke su vraćene na zadane",
- "Turn it on here to start.": "Uključite je ovdje kako biste započeli."
+ "Turn it on here to start.": "Uključite je ovdje kako biste započeli.",
+ "Start with the essentials": "Počnite s osnovama",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Popularne značajke koje rade same: bez prijave, bez vanjskih usluga i bez ponovnog pokretanja. Svaku možete kasnije promijeniti.",
+ "Turn them on": "Uključi ih",
+ "Not now": "Ne sada",
+ "Undo": "Poništi",
+ "Done": "Gotovo",
+ "They're switched on below. Open any of them to fine-tune it.": "Uključene su ispod. Otvorite bilo koju da je prilagodite.",
+ "{n} features turned on": {
+  "one": "Uključena je {n} značajka",
+  "few": "Uključene su {n} značajke",
+  "other": "Uključeno je {n} značajki"
+ },
+ "{n} feature turned on": "Uključena je {n} značajka"
 }

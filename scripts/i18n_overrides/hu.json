@@ -734,5 +734,17 @@
  "Show edit history": "Szerkesztési előzmények megjelenítése",
  "Keep after restarting": "Megőrzés újraindítás után",
  "Settings reset to defaults": "Beállítások visszaállítva alapértékre",
- "Turn it on here to start.": "A használathoz kapcsold be itt."
+ "Turn it on here to start.": "A használathoz kapcsold be itt.",
+ "Start with the essentials": "Kezdd a legfontosabbakkal",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Népszerű funkciók, amelyek maguktól működnek: nincs bejelentkezés, külső szolgáltatás vagy újraindítás. Bármelyiket később módosíthatod.",
+ "Turn them on": "Bekapcsolás",
+ "Not now": "Most nem",
+ "Undo": "Visszavonás",
+ "Done": "Kész",
+ "They're switched on below. Open any of them to fine-tune it.": "Lent be vannak kapcsolva. Nyisd meg bármelyiket a finomhangoláshoz.",
+ "{n} features turned on": {
+  "one": "{n} funkció bekapcsolva",
+  "other": "{n} funkció bekapcsolva"
+ },
+ "{n} feature turned on": "{n} funkció bekapcsolva"
 }

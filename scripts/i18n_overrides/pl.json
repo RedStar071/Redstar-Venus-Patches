@@ -759,5 +759,18 @@
  "Show edit history": "Pokazuj historię edycji",
  "Keep after restarting": "Zachowaj po ponownym uruchomieniu",
  "Settings reset to defaults": "Przywrócono ustawienia domyślne",
- "Turn it on here to start.": "Włącz tutaj, aby zacząć."
+ "Turn it on here to start.": "Włącz tutaj, aby zacząć.",
+ "Start with the essentials": "Zacznij od podstaw",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Popularne funkcje, które działają same: bez logowania, bez usług zewnętrznych i bez ponownego uruchamiania. Każdą możesz później zmienić.",
+ "Turn them on": "Włącz je",
+ "Not now": "Nie teraz",
+ "Undo": "Cofnij",
+ "Done": "Gotowe",
+ "They're switched on below. Open any of them to fine-tune it.": "Są włączone poniżej. Otwórz dowolną, aby ją dostosować.",
+ "{n} features turned on": {
+  "one": "Włączono {n} funkcję",
+  "few": "Włączono {n} funkcje",
+  "many": "Włączono {n} funkcji"
+ },
+ "{n} feature turned on": "Włączono {n} funkcję"
 }

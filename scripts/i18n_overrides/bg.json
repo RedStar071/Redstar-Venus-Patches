@@ -734,5 +734,17 @@
  "Show edit history": "Показване на историята на редакциите",
  "Keep after restarting": "Запазване след рестарт",
  "Settings reset to defaults": "Настройките са върнати по подразбиране",
- "Turn it on here to start.": "Включете го оттук, за да започнете."
+ "Turn it on here to start.": "Включете го оттук, за да започнете.",
+ "Start with the essentials": "Започнете с основното",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Популярни функции, които работят сами: без вход, без външни услуги и без рестарт. Можете да промените всяка по-късно.",
+ "Turn them on": "Включване",
+ "Not now": "Не сега",
+ "Undo": "Отмяна",
+ "Done": "Готово",
+ "They're switched on below. Open any of them to fine-tune it.": "Включени са по-долу. Отворете някоя, за да я настроите.",
+ "{n} features turned on": {
+  "one": "{n} функция е включена",
+  "other": "{n} функции са включени"
+ },
+ "{n} feature turned on": "{n} функция е включена"
 }

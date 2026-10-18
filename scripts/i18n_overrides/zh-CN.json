@@ -659,5 +659,14 @@
  "Show edit history": "显示编辑历史",
  "Keep after restarting": "重启后保留",
  "Settings reset to defaults": "已恢复默认设置",
- "Turn it on here to start.": "在此开启即可开始使用。"
+ "Turn it on here to start.": "在此开启即可开始使用。",
+ "Start with the essentials": "从必备功能开始",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "无需登录、不使用外部服务、无需重启即可使用的热门功能。之后可以随时更改。",
+ "Turn them on": "开启",
+ "Not now": "暂不",
+ "Undo": "撤销",
+ "Done": "完成",
+ "They're switched on below. Open any of them to fine-tune it.": "已在下方开启。打开任意一项即可微调。",
+ "{n} features turned on": "已开启 {n} 项功能",
+ "{n} feature turned on": "已开启 {n} 项功能"
 }

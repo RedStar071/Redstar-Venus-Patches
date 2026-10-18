@@ -734,5 +734,17 @@
  "Show edit history": "Visa redigeringshistorik",
  "Keep after restarting": "Behåll efter omstart",
  "Settings reset to defaults": "Inställningarna har återställts",
- "Turn it on here to start.": "Slå på den här för att börja."
+ "Turn it on here to start.": "Slå på den här för att börja.",
+ "Start with the essentials": "Börja med det viktigaste",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Populära funktioner som fungerar av sig själva: ingen inloggning, inga externa tjänster och ingen omstart. Du kan ändra dem senare.",
+ "Turn them on": "Slå på dem",
+ "Not now": "Inte nu",
+ "Undo": "Ångra",
+ "Done": "Klar",
+ "They're switched on below. Open any of them to fine-tune it.": "De är påslagna nedan. Öppna någon av dem för att finjustera den.",
+ "{n} features turned on": {
+  "one": "{n} funktion påslagen",
+  "other": "{n} funktioner påslagna"
+ },
+ "{n} feature turned on": "{n} funktion påslagen"
 }

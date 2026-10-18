@@ -659,5 +659,14 @@
  "Show edit history": "수정 기록 표시",
  "Keep after restarting": "다시 시작해도 유지",
  "Settings reset to defaults": "설정을 기본값으로 초기화했습니다",
- "Turn it on here to start.": "시작하려면 여기에서 켜세요."
+ "Turn it on here to start.": "시작하려면 여기에서 켜세요.",
+ "Start with the essentials": "필수 기능부터 시작하기",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "로그인, 외부 서비스, 재시작 없이 바로 쓸 수 있는 인기 기능입니다. 언제든지 바꿀 수 있습니다.",
+ "Turn them on": "켜기",
+ "Not now": "나중에",
+ "Undo": "실행 취소",
+ "Done": "완료",
+ "They're switched on below. Open any of them to fine-tune it.": "아래에서 켜져 있습니다. 하나씩 열어 세부 설정을 바꿔 보세요.",
+ "{n} features turned on": "기능 {n}개를 켰습니다",
+ "{n} feature turned on": "기능 {n}개를 켰습니다"
 }

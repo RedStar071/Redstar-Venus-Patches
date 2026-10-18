@@ -659,5 +659,14 @@
  "Show edit history": "編集履歴を表示",
  "Keep after restarting": "再起動後も保持",
  "Settings reset to defaults": "設定を初期状態に戻しました",
- "Turn it on here to start.": "ここでオンにすると使えます。"
+ "Turn it on here to start.": "ここでオンにすると使えます。",
+ "Start with the essentials": "まずは定番から",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "サインイン不要、外部サービス不使用、再起動も不要で使える人気の機能です。あとからいつでも変更できます。",
+ "Turn them on": "オンにする",
+ "Not now": "今はしない",
+ "Undo": "元に戻す",
+ "Done": "完了",
+ "They're switched on below. Open any of them to fine-tune it.": "下の一覧でオンになっています。それぞれ開いて細かく調整できます。",
+ "{n} features turned on": "{n} 個の機能をオンにしました",
+ "{n} feature turned on": "{n} 個の機能をオンにしました"
 }

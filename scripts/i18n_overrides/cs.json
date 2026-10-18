@@ -759,5 +759,18 @@
  "Show edit history": "Zobrazit historii úprav",
  "Keep after restarting": "Zachovat i po restartu",
  "Settings reset to defaults": "Nastavení obnoveno na výchozí",
- "Turn it on here to start.": "Pro spuštění ji zapněte tady."
+ "Turn it on here to start.": "Pro spuštění ji zapněte tady.",
+ "Start with the essentials": "Začněte tím nejdůležitějším",
+ "Popular features that work on their own: nothing to sign in to, no outside services and no restart. Change any of them later.": "Oblíbené funkce, které fungují samy: bez přihlašování, bez externích služeb a bez restartu. Kteroukoli můžete později změnit.",
+ "Turn them on": "Zapnout je",
+ "Not now": "Teď ne",
+ "Undo": "Zpět",
+ "Done": "Hotovo",
+ "They're switched on below. Open any of them to fine-tune it.": "Jsou zapnuté níže. Otevřete kteroukoli a dolaďte ji.",
+ "{n} features turned on": {
+  "one": "Zapnuta {n} funkce",
+  "few": "Zapnuty {n} funkce",
+  "other": "Zapnuto {n} funkcí"
+ },
+ "{n} feature turned on": "Zapnuta {n} funkce"
 }
