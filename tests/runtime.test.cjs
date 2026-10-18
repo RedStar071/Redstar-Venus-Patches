@@ -2639,6 +2639,21 @@ test('Quest Completer never reports video progress faster than real time allows'
     assert.equal(video.at(-1).body.timestamp, 60);
     assert.ok(b.map.get('q1').userStatus.completedAt);
 });
+test('Quest Completer reports video progress at 1x like VideoQuestPlayer, even for a Quest accepted long ago', async () => {
+    // VideoQuestPlayer (14937) sends progress when currentTime passes the last report + 6-8 s of playback.
+    // A Quest accepted an hour ago used to get a report every ~1.25 s, about five times real speed.
+    const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 120, enrolledAgo(3600))]});
+    b.connect(); await b.run();
+    const video = b.requests.filter(r => r.url === '/quests/q1/video-progress');
+    assert.ok(video.length >= 10);
+    for (let i = 1; i < video.length; i++) {
+        const watched = video[i].body.timestamp - video[i - 1].body.timestamp, wall = (video[i].at - video[i - 1].at) / 1000;
+        assert.ok(wall + 0.5 >= watched, `report ${i}: ${watched.toFixed(2)} s of video in ${wall.toFixed(2)} s`);
+    }
+    const first = video[0], last = video.at(-1);
+    assert.ok((last.at - first.at) / 1000 + 8.5 >= last.body.timestamp - first.body.timestamp + 0, 'whole video takes at least its own length');
+    assert.ok(b.map.get('q1').userStatus.completedAt);
+});
 function activityFixture(id, target, extra = {}, app = '1124225423214485597', features = []) {
     const q = questFixture(id, 'PLAY_ACTIVITY', target, extra);
     q.config.taskConfigV2.tasks.PLAY_ACTIVITY.applications = [{id:app}]; q.config.features = features;
@@ -4348,9 +4363,14 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     }[id]||null);
     await flush();await flush();
     b.api.setSetting('quests',true);
-    // Run the initial scan timer (at most 5 steps, since questsRefetchLoop re-schedules itself every 30 min).
-    for (let i=0;i<5 && timers.length;i++) timers.shift().fn();
-    await flush();
+    // Fire timers in time order with a fake clock, until the first progress report goes out: video plays at 1x,
+    // so that is ~5 s of playback after the Quest starts (questsRefetchLoop re-schedules itself every 30 min).
+    let clock=Date.now();b.context.__clock=()=>clock;vm.runInContext('Date.now=function(){return __clock();}',b.context);
+    for (let i=0;i<50 && timers.length && !requests.length;i++) {
+        timers.sort((x,y)=>(x.ms||0)-(y.ms||0));const t=timers.shift();clock+=t.ms||0;
+        for (const o of timers) o.ms=Math.max(0,(o.ms||0)-(t.ms||0));
+        t.fn();await flush();await flush();
+    }
     assert.equal(requests.length,1,'Quest progress request started');
     assert.ok(fgActive.has('venus-background'),'Foreground service active while Quest is running');
     // Leaving the app while Quest is running must not close the Gateway socket.

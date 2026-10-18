@@ -3265,19 +3265,22 @@
         if (!Number.isFinite(enrolled)) throw new Error("no accepted time");
         let done = questProgress(item, entry.task.type), completed = false;
         questProgressed(entry, done);
+        // Like VideoQuestPlayer (14937): playback resumes where Discord last saved it and runs at 1x from now, and a
+        // report goes out once currentTime passes the last one by 6-8 s, carrying currentTime itself. Time since
+        // accepting alone let a Quest accepted long ago report 6-8 s of video every ~1.3 s, about five times 1x.
+        const started = Date.now(), from = done;
         while (questActive(entry) && done < target) {
-            const step = 6 + Math.random() * 2;
-            const allowed = (Date.now() - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, next = Math.min(target, done + step);
-            if (allowed < next) { await questSleep(Math.max(1000, Math.ceil((next - allowed) * 1000))); continue; }
-            const timestamp = next < target ? Math.min(target, next + Math.random() * 0.5) : target;
+            const next = Math.min(target, done + 6 + Math.random() * 2);
+            const now = Date.now(), playing = Math.min((now - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, from + (now - started) / 1000);
+            if (playing < next) { await questSleep(Math.max(250, Math.ceil((next - playing) * 1000))); continue; }
+            const timestamp = Math.min(target, playing);
             questOptimisticProgress(entry.id, entry.task.type, timestamp);
             const response = await questRequest("/quests/" + entry.id + "/video-progress", {timestamp});
             if (!questActive(entry)) return false;
             completed = questVideoStatus(response);
-            done = next;
+            done = timestamp;
             questProgressed(entry, done);
             if (completed) break;
-            await questSleep(1000 + Math.floor(Math.random() * 500));
         }
         if (!questActive(entry)) return false;
         if (!completed) {
