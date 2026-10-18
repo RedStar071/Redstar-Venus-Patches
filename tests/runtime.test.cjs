@@ -4826,8 +4826,8 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
 
 test('every option page renders in the shared design: status card only when useful, row icons, and no crash on or off',()=>{
     const b=settingsHarness();const {React}=reactHarness(b);React.useState=init=>[init,()=>{}];
-    function TableSwitchRow(){} function TableRowGroup(){} function TableRadioGroup(){} function TableRadioRow(){} function TableRowIcon(){} function Text(){}
-    b.context.__r=id=>({6698:{TableSwitchRow},6074:{TableRowGroup},6072:{TableRadioGroup},6071:{TableRadioRow},5999:{TableRowIcon},4886:{Text},5993:{TableRow:'Row'},
+    function TableSwitchRow(){} function TableRowGroup(){} function TableRadioGroup(){} function TableRadioRow(){} function TableRowIcon(){} function Text(){} function FormSwitch(){}
+    b.context.__r=id=>({6699:{FormSwitch},6698:{TableSwitchRow},6074:{TableRowGroup},6072:{TableRadioGroup},6071:{TableRadioRow},5999:{TableRowIcon},4886:{Text},5993:{TableRow:'Row'},
         1377:{default:{getCurrentUser:()=>({id:'1',username:'me'}),getUser:()=>null}}}[id]||null);
     const pages={VENUS_NODELETE:'noDelete',VENUS_MESSAGEHIGHLIGHT:'messageHighlight',VENUS_TRANSLATE:'translate',VENUS_GESTURES:'gestures',VENUS_FREENITRO:'freeNitro',
         VENUS_PASTELIZE:'pastelize',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_REVIEWDB:'reviewDB',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',
@@ -4844,6 +4844,9 @@ test('every option page renders in the shared design: status card only when usef
         const titles=nodes.filter(n=>n.type===Text&&n.props.variant==='text-md/semibold').map(n=>n.props.children);
         if (liveStatus.has(id) && (on || !key)) assert.ok(titles.length,id+' shows its live status card');
         if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
+        // ...and carries Discord's own switch to turn it on right there.
+        if (!on && key) { const sw=nodes.find(n=>n.type===FormSwitch);assert.ok(sw,id+' has a switch on its off card');
+            sw.props.onValueChange(true);assert.equal(b.api.settings[key],true,id+' turns on from its page');b.api.setSetting(key,false); }
     }
 });
 

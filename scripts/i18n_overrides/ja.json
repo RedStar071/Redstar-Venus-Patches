@@ -658,5 +658,6 @@
  "Accept new Quests": "新しいクエストを受注",
  "Show edit history": "編集履歴を表示",
  "Keep after restarting": "再起動後も保持",
- "Settings reset to defaults": "設定を初期状態に戻しました"
+ "Settings reset to defaults": "設定を初期状態に戻しました",
+ "Turn it on here to start.": "ここでオンにすると使えます。"
 }

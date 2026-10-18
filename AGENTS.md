@@ -271,7 +271,8 @@ design") renders each page on and off and fails when a page breaks the rules bel
 **Page order, top to bottom**
 
 1. **Status card** (`statusCard(key, text, {title, IconComponent, leading})`): shown at the top of a page only when the
-   feature is off (`offCard(key, Icon)` — "Turned off" / "Switch it on in Features to start."), when a sub-option state
+   feature is off (`offCard(key, Icon, feature)` — "Turned off" / "Turn it on here to start.", with Discord's own switch on the
+   card so you never have to go back to Features), when a sub-option state
    needs calling out (e.g. every device indicator location turned off, or both emojis and stickers turned off), or when the
    feature has genuine live runtime state to report (who you're watching in User activity notifications, which account is
    signed in, Quest progress, ReviewDB account, active custom theme, translation engine status, or a non-zero count of kept

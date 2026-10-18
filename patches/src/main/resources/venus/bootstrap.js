@@ -2880,7 +2880,7 @@
         if (!RN) return null;
         const on = enabled("gestures");
         const groups = [
-            on ? null : offCard("status", venusIcon(8411, "ReactionIcon")),
+            on ? null : offCard("status", venusIcon(8411, "ReactionIcon"), "gestures"),
             el(GesturePreview, {key:"preview", on}),
             radioGroup(ui, "own", "Double-tap your own message", "gestureOwn", on, [
                 ["edit", "Edit it", "Opens it for editing, when Discord lets you.", rowIcon(10058, "PencilIcon")],
@@ -3395,7 +3395,7 @@
         const groups = [
             on ? statusCard("status", questStatusText(), {title:questStatusTitle(), IconComponent:venusIcon(quest.error ? 12095 : quest.running ? 11227 : 14803,
                 quest.error ? "ChatWarningIcon" : quest.running ? "TimerIcon" : "QuestsIcon"),
-                footer:questShare() != null ? el(VenusProgress, {key:"progress:" + quest.running.id, value:questShare()}) : null}) : offCard("status", venusIcon(14803, "QuestsIcon")),
+                footer:questShare() != null ? el(VenusProgress, {key:"progress:" + quest.running.id, value:questShare()}) : null}) : offCard("status", venusIcon(14803, "QuestsIcon"), "quests"),
             el(Group, {key:"types", title:tr("Quests to complete")},
                 toggle("questsVideo", "Video Quests", "Reported as watched at normal speed, without playing the video.", rowIcon(11234, "VideoIcon")),
                 toggle("questsPlay", "Play Quests", "Play time counts without installing or opening the game.", rowIcon(8739, "GameControllerIcon")),
@@ -3781,7 +3781,8 @@
             el(RN.View, {style:{flex:1, gap:2}},
                 title ? line(title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}) : null,
                 body ? line(body, "text-sm/medium", title ? "text-muted" : "text-default", {color:title ? "#949ba4" : "#dbdee1", fontSize:14}) : null,
-                props.footer || null));
+                props.footer || null),
+            props.trailing || null);
     }
     // A thin rounded progress bar in the theme's brand color that glides to each new value.
     function VenusProgress(props) {
@@ -3809,8 +3810,13 @@
         return VenusStatusCard(Object.assign({key,body:tr(text)},extra));
     }
     // Pages share one look for "off": a muted title and the hint to switch it on.
-    function offCard(key,IconComponent) {
-        return VenusStatusCard({key,title:tr("Turned off"),body:tr("Switch it on in Features to start."),IconComponent});
+    // With the feature's key, the card carries Discord's own switch, so you can turn it on right here instead of going back to
+    // Features. The page fills in below as it turns on (animateLayout), and the switch gives Discord's own haptic tick.
+    function offCard(key,IconComponent,feature) {
+        const FormSwitch=feature && features[feature] ? inspectedExport(6699,"FormSwitch") : null;
+        const title=tr("Turned off");
+        return VenusStatusCard({key,title,IconComponent,body:tr(FormSwitch ? "Turn it on here to start." : "Switch it on in Features to start."),
+            trailing:FormSwitch ? el(FormSwitch,{value:false,accessibilityLabel:title,onValueChange:value => { if (!value) return; animateLayout(); setSetting(feature,true); }}) : null});
     }
     // A small chat surface for page previews, in the theme's chat colors (same tokens as the Message highlights one).
     const CHAT_PREVIEW_DARK = {chat:{borderRadius:16, overflow:"hidden", backgroundColor:"#1a1a1e", borderWidth:1, borderColor:"#ffffff14", paddingVertical:8},
@@ -3992,7 +3998,7 @@
         if (!React || !RN) return null;
         const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5879,"LockIcon");
         const groups=[
-            on ? null : offCard("status",lock),
+            on ? null : offCard("status",lock,"hiddenChannels"),
             el(HiddenChannelsPreview,{key:"preview",on}),
             el(Group,{key:"tap",title:tr("When you tap a locked channel")},
                 switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4812,"CircleInformationIcon"))),
@@ -4005,7 +4011,7 @@
         if (!React || !RN) return null;
         const on=enabled("readAll");
         const groups=[
-            on ? null : offCard("status",venusIcon(15447,"DoubleCheckmarkIcon")),
+            on ? null : offCard("status",venusIcon(15447,"DoubleCheckmarkIcon"), "readAll"),
             radioGroup(ui,"mode","When you tap Read all","readAllMode",on,[["guilds","Servers","Marks every unread server as read.",rowIcon(8791,"ServerIcon")],
                 ["dms","Direct messages","Marks every unread DM and group DM as read.",rowIcon(4817,"EnvelopeIcon")],
                 ["both","Servers and DMs","Marks everything as read in one tap.",rowIcon(15447,"DoubleCheckmarkIcon")]]),
@@ -4149,7 +4155,7 @@
         if (!React || !RN) return null;
         const on=enabled("freeNitro"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, hasAny=!!(settings.emojis || settings.stickers);
         const groups=[
-            !on ? offCard("status",venusIcon(8313,"NitroWheelIcon")) : !hasAny ? statusCard("status","Turn on emojis or stickers below.",
+            !on ? offCard("status",venusIcon(8313,"NitroWheelIcon"), "freeNitro") : !hasAny ? statusCard("status","Turn on emojis or stickers below.",
                 {title:tr("Sending as links"),IconComponent:venusIcon(8313,"NitroWheelIcon")}) : null,
             el(NitroPreview,{key:"preview",on}),
             el(Group,{key:"send",title:tr("Send as links")},
@@ -4185,7 +4191,7 @@
         if (!React || !RN) return null;
         const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const groups=[
-            on ? null : offCard("status",venusIcon(15080,"PaintPaletteIcon")),
+            on ? null : offCard("status",venusIcon(15080,"PaintPaletteIcon"), "pastelize"),
             el(PastelPreview,{key:"preview",on}),
             el(Group,{key:"colors",title:tr("Colors")},
                 switchRow(Switch,"pastelAll","Replace role colors","Every name uses its pastel color, even with a role color.",rowIcon(10631,"CrownIcon")),
@@ -4281,7 +4287,7 @@
         const on=enabled("platformIndicators"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const hasPlace=!!(settings.piDmHeader || settings.piUserList || settings.piProfile);
         const groups=[
-            !on ? offCard("status",venusIcon(14754,"LaptopPhoneIcon")) : !hasPlace ? statusCard("status","Turn on at least one place below.",
+            !on ? offCard("status",venusIcon(14754,"LaptopPhoneIcon"), "platformIndicators") : !hasPlace ? statusCard("status","Turn on at least one place below.",
                 {title:tr("Device indicators"),IconComponent:venusIcon(14754,"LaptopPhoneIcon")}) : null,
             el(PlatformPreview,{key:"preview",on}),
             el(Group,{key:"where",title:tr("Show icons")},
@@ -4773,7 +4779,7 @@
         const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const me=currentUser(), myName=me && (me.globalName || me.global_name || me.username);
         const groups=[
-            !on ? offCard("status",venusIcon(7571,"ThumbsUpIcon")) :
+            !on ? offCard("status",venusIcon(7571,"ThumbsUpIcon"), "reviewDB") :
                 statusCard("status",authenticated ? "You can read, write, delete and report reviews." : "You can read reviews. Sign in to write your own.",
                     {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in…" : "Reading reviews"),
                         IconComponent:venusIcon(7571,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
@@ -4820,7 +4826,7 @@
         const summary=hasKept ? tr(settings.noDeleteSave ? "{deleted} and {edited} kept, saved on this phone." : "{deleted} and {edited} kept until Discord restarts.",
             {deleted:count(kept,"deleted message"),edited:count(changed,"edited message")}) : "";
         const groups=[
-            !settings.noDelete ? offCard("status",venusIcon(4847,"TrashIcon")) : hasKept ? statusCard("status",summary,{title:pl(kept+changed,"{n} message kept","{n} messages kept"),
+            !settings.noDelete ? offCard("status",venusIcon(4847,"TrashIcon"), "noDelete") : hasKept ? statusCard("status",summary,{title:pl(kept+changed,"{n} message kept","{n} messages kept"),
                 IconComponent:venusIcon(4847,"TrashIcon")}) : null,
             el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits,on:!!settings.noDelete}),
             el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(10058,"PencilIcon"))),
@@ -5990,8 +5996,9 @@
         });
         const watchedUsers = userNotifWatchedIds().slice(0, 4).map(lookup).map(e => e.user || {id:e.id, username:e.name});
         const groups = [
-            VenusStatusCard({key:"status", title:userNotifSummaryTitle(), IconComponent:venusIcon(9266, "BellIcon"),
-                leading:on && userNotifAnyEvent() && watchedUsers.length ? avatarPile(watchedUsers, ringColor) : null, body:userNotifSummary()}),
+            on ? VenusStatusCard({key:"status", title:userNotifSummaryTitle(), IconComponent:venusIcon(9266, "BellIcon"),
+                leading:userNotifAnyEvent() && watchedUsers.length ? avatarPile(watchedUsers, ringColor) : null, body:userNotifSummary()}) :
+                offCard("status", venusIcon(9266, "BellIcon"), "userNotif"),
             el(Group, {key:"events", title:tr("Notify me when they")},
                 switchRow(Switch, "userNotifStatus", "Change status", "Online, Idle, Do Not Disturb or Offline.", rowIcon(10654, "UserCircleIcon")),
                 switchRow(Switch, "userNotifMessages", "Send a message", "In DMs or in any server channel your client receives.", rowIcon(5855, "ChatIcon")),
@@ -6312,7 +6319,7 @@
         const groups = [
             on ? statusCard("status", accountSwitcherSummary(), {title:accounts.length > 1 ? pl(accounts.length, "{n} account", "{n} accounts") : tr("One account so far"),
                 IconComponent:venusIcon(5873, "GroupIcon"), leading:accounts.length ? avatarPile(accounts.slice(0, 4).map(acc => (myId && acc.id === myId ? me : userStore && userStore.getUser(acc.id)) || acc)) : null}) :
-                offCard("status", venusIcon(5873, "GroupIcon")),
+                offCard("status", venusIcon(5873, "GroupIcon"), "accountSwitcher"),
             el(Group, {key:"accounts", title:tr("Accounts")},
                 accountRows,
                 Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."), icon:rowIcon(4833, "UserPlusIcon"),
@@ -7056,7 +7063,7 @@
         let saved = 0; translate.cache.forEach(entry => { if (entry.state === "done") saved++; });
         const groups = [
             on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:name(settings.translateTarget === "phone" ? "phone" : "discord")}), IconComponent:venusIcon(15243, "LanguageIcon")}) :
-                offCard("status", venusIcon(15243, "LanguageIcon")),
+                offCard("status", venusIcon(15243, "LanguageIcon"), "translate"),
             el(TranslatePreview, {key:"preview", on}),
             radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(16603, "SparklesIcon")],
                 ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8411, "ReactionIcon")]]),
@@ -7828,7 +7835,7 @@
         const groups = [
             on ? statusCard("status", customThemesSummary(), {title:customThemes.error ? tr("Couldn't install the theme") : customThemesActiveEntry() ? customThemesActiveEntry().name : tr("Discord's colors"),
                 IconComponent:venusIcon(15172, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
-                offCard("status", venusIcon(15172, "EyeDropperIcon")),
+                offCard("status", venusIcon(15172, "EyeDropperIcon"), "customThemes"),
             el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
             el(Group, {key:"install", title:tr("Add from link"), description:tr("Downloads the theme once and keeps it on this phone.")},
                 el(RN.View, {key:"input", style:{padding:12}}, urlInput),
@@ -7997,7 +8004,7 @@
         const picker = (setting, title, choices, defaultHex) => highlightColorPicker({ setting, title, choices, defaultHex, on, value:settings[setting],
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
-            on ? null : offCard("status", venusIcon(16425, "PaintbrushThinIcon")),
+            on ? null : offCard("status", venusIcon(16425, "PaintbrushThinIcon"), "messageHighlight"),
             el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),

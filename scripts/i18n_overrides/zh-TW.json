@@ -658,5 +658,6 @@
  "Accept new Quests": "接取新 Quest",
  "Show edit history": "顯示編輯紀錄",
  "Keep after restarting": "重新啟動後保留",
- "Settings reset to defaults": "已恢復預設設定"
+ "Settings reset to defaults": "已恢復預設設定",
+ "Turn it on here to start.": "在此開啟即可開始使用。"
 }
