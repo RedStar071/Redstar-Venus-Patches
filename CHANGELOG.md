@@ -16,6 +16,7 @@
 
 ### 🔧 Improvements
 
+* **Discord - Custom themes:** The page is now a theme gallery: Discord's colors and every installed theme appear as tiles that preview each theme in its own colors, with the one in use ringed and checked, and a tile to browse more. Install errors show right under the link field
 * **Discord - Venus settings:** Slimmer Features rows: feature titles get the full width, the divider and round button beside each switch are now a small arrow, and every description fits on one or two lines, in every language
 * **Discord - Venus settings:** The reopen-Discord question and voice-message problems use Discord's own dialogs instead of Android's plain alert
 * **Discord - Venus settings:** Clearer wording for review actions, connection problems and the notification permission message

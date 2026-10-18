@@ -370,6 +370,14 @@ design") renders each page on and off and fails when a page breaks the rules bel
     perfectly translated (both as accurate and as natural as possible), commit and push that language to the open pull
     request, and only then move on to the next language.
 
+**Custom themes** (since 1.16.0)
+
+- The page leads with a gallery (`themeTile` + `themeMiniChat`), not a status card: Discord's colors first, then each installed
+  theme drawn in its own colors (`themePalette`), then a Browse tile. The tile in use has the brand ring and a check.
+- Tiles are radios (`accessibilityRole:"radio"`): tapping one uses it (`customThemesUse`), holding one asks to remove it.
+  Discord's colors is the way back, so tapping the theme in use does nothing.
+- Install problems show under the link field, never at the top of the page.
+
 **Motion** (since 1.14.0)
 
 - `settingsBody` wraps each group in `VenusReveal`: groups rise in one after another when a page opens. Don't add a
