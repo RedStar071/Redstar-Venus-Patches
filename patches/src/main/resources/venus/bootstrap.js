@@ -697,7 +697,7 @@
     function aboutText() {
         const storage = status.storage;
         const lines = [tr(storage === "ready" || storage === "saved" ? "Your settings are saved on this phone." :
-            storage === "waiting" || storage === "loading" ? "Loading your settings..." :
+            storage === "waiting" || storage === "loading" ? "Loading your settings…" :
             /^read failed/.test(storage) ? "Your saved settings couldn't be read, so the defaults are in use." :
             "Your settings can't be saved right now. Changes last until Discord restarts.")];
         const archive = {"saved locally":"Kept deleted messages are saved on this phone.", "save failed":"Kept deleted messages couldn't be saved.",
@@ -1110,7 +1110,7 @@
         const choices = [["auto", tr("Same as Discord"), tr("Follows Discord's Language setting.")]].concat(UI_LANGUAGES.map(([code, name, english]) => [code, name, english]));
         const groups = [
             radioGroup(ui, "language", "Show Venus settings in", "language", true, choices, true),
-            footnote("note", i18n.loading.has(uiLanguage()) ? "Loading the language..." : "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.")];
+            footnote("note", i18n.loading.has(uiLanguage()) ? "Loading the language…" : "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.")];
         return settingsBody(ui, groups);
     }
     // Backup and restore (#68): every Venus setting in one small JSON file, so patching again or a new phone doesn't
@@ -1309,10 +1309,10 @@
                 {title:backup.last ? backupAgo() : tr("No backup yet"), IconComponent:venusIcon(11775, "ArrowsUpDownIcon"),
                  footer:el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:10}}, chips)}),
             el(Group, {key:"save", title:tr("Back up")},
-                canFile ? backupRow("file", busy === "save" ? "Saving..." : "Save to a file", "Choose where to keep it, like Downloads or Drive.", 4845, "DownloadIcon", backupToFile) : null,
+                canFile ? backupRow("file", busy === "save" ? "Saving…" : "Save to a file", "Choose where to keep it, like Downloads or Drive.", 4845, "DownloadIcon", backupToFile) : null,
                 backupRow("copy", "Copy to clipboard", "Paste it into a note or a message to yourself.", 4843, "CopyIcon", backupToClipboard)),
             el(Group, {key:"restore", title:tr("Restore")},
-                canFile ? backupRow("open", busy === "restore" ? "Opening..." : "Restore from a file", "Pick a Venus backup you saved before.", 8878, "UploadIcon", backupFromFile) : null,
+                canFile ? backupRow("open", busy === "restore" ? "Opening…" : "Restore from a file", "Pick a Venus backup you saved before.", 8878, "UploadIcon", backupFromFile) : null,
                 backupRow("paste", "Paste from clipboard", "Restore a backup you copied.", 5928, "ClipboardListIcon", backupFromClipboard)),
             backupIsDefault() ? null : el(Group, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "reset", "Reset to defaults", "Turns every feature off and puts every option back.", backupReset, !!busy, true)),
@@ -4765,13 +4765,13 @@
         const groups=[
             !on ? offCard("status",venusIcon(7571,"ThumbsUpIcon")) :
                 statusCard("status",authenticated ? "You can read, write, delete and report reviews." : "You can read reviews. Sign in to write your own.",
-                    {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in..." : "Reading reviews"),
+                    {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in…" : "Reading reviews"),
                         IconComponent:venusIcon(7571,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
             // One row: the action you can take now. The status card already says whether you're signed in.
             el(Group,{key:"auth",title:tr("Account")},
                 authenticated ? el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9576,"DoorExitIcon"),variant:"danger",onPress:clearReviewAuth,
                     subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")}) :
-                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : "Sign in to ReviewDB"),icon:rowIcon(6446,"KeyIcon"),
+                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in…" : "Sign in to ReviewDB"),icon:rowIcon(6446,"KeyIcon"),
                     arrow:true,disabled:!on || pending,onPress:authenticateReviews,subLabel:reviewAuthError || tr("Needed to post, delete or report reviews. Never uses your Discord token.")})),
             el(Group,{key:"settings",title:tr("Display")},
                 switchRow(Switch,"reviewWarning","Show the be-respectful note","ReviewDB's reminder to be kind, shown above reviews.",rowIcon(8923,"ShieldIcon"))),
@@ -5005,7 +5005,7 @@
         const rows=error ? el(RN.View,{style:{gap:8}},
             el(RN.Text,{accessibilityRole:"alert",style:styles.text},tr("Couldn't load reviews: {problem}",{problem:error})),
             reviewRetry(refetch)) :
-            reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},tr("Loading reviews...")) :
+            reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},tr("Loading reviews…")) :
             !shown.length ? el(RN.Text,{style:styles.muted},tr("No reviews yet.")) :
             shown.map((review,index) => el(ReviewRow,{key:(review.id==null ? "" : String(review.id))+":"+index,review,owner:userId,ui,styles,refetch}));
         return el(RN.View,{style:[styles.card]},
@@ -6286,7 +6286,7 @@
             const handle = acc.username && acc.username !== displayName ? "@" + acc.username + " \u00b7 " : "";
             const statusText = active ? tr("Active account \u00b7 Tap for the quick switcher") :
                 acc.tokenStatus === invalidStatus ? tr("Session expired \u00b7 Tap to sign in again") :
-                acc.tokenStatus === validatingStatus ? tr("Checking session...") : tr("Tap to switch");
+                acc.tokenStatus === validatingStatus ? tr("Checking session…") : tr("Tap to switch");
             return el(Row, {key:"acc:" + acc.id, label:displayName, subLabel:handle + statusText,
                 icon:avatarBubble(fullUser, 32, active ? "online" : acc.tokenStatus === invalidStatus ? "dnd" : null), disabled:!on,
                 trailing:active ? popIn("on:" + acc.id, el(venusIcon(6628, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
@@ -7793,7 +7793,7 @@
         // One field and one button: Paste while the box is empty, Install once it has a link.
         const empty = !urlDraft.trim();
         const urlInput = inputWithButton(ui, "input", Object.assign({label:tr("Theme JSON link")}, inputProps), text => setUrlDraft(String(text || "")),
-            customThemes.installing ? "Installing..." : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || customThemes.installing : !canInstall);
+            customThemes.installing ? "Installing…" : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || customThemes.installing : !canInstall);
         const themeRows = customThemes.list.length ? customThemes.list.map(item => {
             if (!item || !Row) return null;
             const isSelected = customThemes.active === item.id;
