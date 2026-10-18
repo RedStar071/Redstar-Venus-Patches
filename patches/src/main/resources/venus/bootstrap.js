@@ -1033,51 +1033,51 @@
             next[id] = node; return id;
         };
         // Messages
-        withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, outlined in red. Also shows what edited messages said before.", "Deleted messages", NoDeleteSettings);
-        withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Change the left bar thickness and highlight colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
-        withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Messages in other languages show in yours. Their text is sent to Google Translate.", "Translate messages", TranslateSettings);
-        withOptions("messages", "gestures", "VENUS_GESTURES", "Double-tap to reply", "Double-tap a message to reply, or your own to edit it, instead of reacting.", "Tap gestures", GestureSettings);
-        toggle("messages", "quickDelete", "Skip delete confirmation", "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.");
-        toggle("messages", "jumpToTop", "Jump to first message", "A button to go straight to the start of a chat, channel or thread.");
-        toggle("messages", "favouriteAnything", "Favourite any image or video", "Star any image or video in the media viewer to keep it in your GIF favourites.");
+        withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
+        withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
+        withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
+        withOptions("messages", "gestures", "VENUS_GESTURES", "Double-tap to reply", "Double-tap to reply, or to edit your own message.", "Tap gestures", GestureSettings);
+        toggle("messages", "quickDelete", "Skip delete confirmation", "Deletes messages without asking first. Can't be undone.");
+        toggle("messages", "jumpToTop", "Jump to first message", "A button to jump to the start of any chat.");
+        toggle("messages", "favouriteAnything", "Favourite any image or video", "Star any image or video to keep it in your GIF favourites.");
         // Sending
-        withOptions("sending", "freeNitro", "VENUS_FREENITRO", "Send Nitro stickers and emojis as links", "Stickers and emojis you'd need Nitro for are sent as a link, which shows up in chat as the sticker or emoji image.", "Nitro stickers and emojis",
+        withOptions("sending", "freeNitro", "VENUS_FREENITRO", "Send Nitro stickers and emojis as links", "Sends Nitro emojis and stickers as links that show as the image.", "Nitro stickers and emojis",
             () => ({page:FreeNitroSettings, sections:[section("Send as links", [option("emojis", "Emojis", "Emojis from other servers, and animated emojis.", "VENUS_FREENITRO"),
                 option("stickers", "Stickers", "Stickers from other servers. Animated ones may not move.", "VENUS_FREENITRO")]),
              section("Link style", [option("hyperlinks", "Short links", "In chat it looks the same either way. Short links only change what's copied or quoted.", "VENUS_FREENITRO")])]}));
-        toggle("sending", "voice", "Send audio as voice messages", "An audio file sent on its own becomes a real voice message, with a waveform. Needs Android 10 or newer.");
-        toggle("sending", "splitMessages", "Send long messages", "Type past the character limit. Long messages are sent in parts, split between lines or words.");
-        toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing. You still see when they are.");
-        toggle("sending", "picker", "Show file sizes when attaching", "Each photo and video in the attachment picker shows its size.");
+        toggle("sending", "voice", "Send audio as voice messages", "Audio files are sent as voice messages. Android 10 or newer.");
+        toggle("sending", "splitMessages", "Send long messages", "Type past the limit. Long messages are sent in parts.");
+        toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing.");
+        toggle("sending", "picker", "Show file sizes when attaching", "Photos and videos in the picker show their size.");
         // People
-        withOptions("people", "pastelize", "VENUS_PASTELIZE", "Pastel name colors", "Names without a role color get a soft pastel color, always the same for each person.", "Pastel names",
+        withOptions("people", "pastelize", "VENUS_PASTELIZE", "Pastel name colors", "Names without a role color get a soft pastel one.", "Pastel names",
             () => ({page:PastelSettings, sections:[section("Colors", [option("pastelAll", "Replace role colors", "Every name uses its pastel color, even with a role color.", "VENUS_PASTELIZE"),
                 option("pastelContent", "Color message text", "What people write is colored too, in a lighter shade of their name.", "VENUS_PASTELIZE")])]}));
-        withOptions("people", "platformIndicators", "VENUS_PLATFORMINDICATORS", "Show device indicators", "Desktop, mobile, web, console or VR icons next to names, colored by status.", "Device indicators",
+        withOptions("people", "platformIndicators", "VENUS_PLATFORMINDICATORS", "Show device indicators", "Shows which devices people are on, next to their names.", "Device indicators",
             () => ({page:PlatformSettings, sections:[section("Show icons", [option("piDmHeader", "In DMs", "Next to the name at the top of a DM.", "VENUS_PLATFORMINDICATORS"),
                 option("piUserList", "In lists", "Member list, friends, DM list and voice channels.", "VENUS_PLATFORMINDICATORS"),
                 option("piProfile", "On profiles", "Next to the name on a profile.", "VENUS_PLATFORMINDICATORS")]),
              section("Avatars", [option("piHideMobile", "Hide the phone badge", "Avatars show a plain status dot, since the icons already show mobile.", "VENUS_PLATFORMINDICATORS")])]}));
-        toggle("people", "validUser", "Fix unknown mentions", "@unknown-user mentions are looked up and show the person's name.");
-        toggle("people", "copyBios", "Copy profile bios", "Hold a bio to select and copy its text. Links still work.");
-        withOptions("people", "reviewDB", "VENUS_REVIEWDB", "User and server reviews", "Read and write reviews on profiles and servers, from the community ReviewDB service.", "Reviews", ReviewSettings);
-        withOptions("people", "userNotif", "VENUS_USERNOTIF", "User activity notifications", "Shows a notice when chosen friends or users change status, start typing or send a message.", "Activity notifications", UserNotifSettings);
-        withOptions("people", "accountSwitcher", "VENUS_ACCOUNTSWITCHER", "Account switcher", "Switch between multiple Discord accounts from the You tab, your profile bar or Settings.", "Account switcher", AccountSwitcherSettings);
+        toggle("people", "validUser", "Fix unknown mentions", "Shows names instead of @unknown-user.");
+        toggle("people", "copyBios", "Copy profile bios", "Hold a bio to select and copy it.");
+        withOptions("people", "reviewDB", "VENUS_REVIEWDB", "User and server reviews", "Read and write ReviewDB reviews on profiles and servers.", "Reviews", ReviewSettings);
+        withOptions("people", "userNotif", "VENUS_USERNOTIF", "User activity notifications", "Get notified when chosen people change status, type or message.", "Activity notifications", UserNotifSettings);
+        withOptions("people", "accountSwitcher", "VENUS_ACCOUNTSWITCHER", "Account switcher", "Switch between Discord accounts in one tap.", "Account switcher", AccountSwitcherSettings);
         // Servers
-        withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button under Direct Messages that marks everything as read. Hold it to choose what.", "Read all", ReadAllSettings);
-        withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open appear with a lock. Only their name and dates show, not messages.", "Hidden channels", HiddenChannelsSettings);
-        toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\". Only changes how names look.");
+        withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button that marks servers and DMs as read.", "Read all", ReadAllSettings);
+        withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open show with a lock. Messages stay hidden.", "Hidden channels", HiddenChannelsSettings);
+        toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\".");
         // Appearance
-        toggle("appearance", "systemFont", "Use your phone's font", "Replaces Discord's font everywhere. Discord reopens to apply it. Needs Android 9 or newer.");
-        toggle("appearance", "systemEmoji", "Use your phone's emojis", "In chat, reactions and the emoji picker. Discord reopens to apply it.");
-        toggle("appearance", "hideGift", "Hide the gift button", "Removes the Nitro gift button from the message bar.");
-        toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles. Message fills the space.");
-        toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus, next to the notifications bell.");
-        toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon in Settings without Nitro.");
-        withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.", "Custom themes", CustomThemesSettings);
+        toggle("appearance", "systemFont", "Use your phone's font", "Replaces Discord's font everywhere. Android 9 or newer.");
+        toggle("appearance", "systemEmoji", "Use your phone's emojis", "In chat, reactions and the emoji picker.");
+        toggle("appearance", "hideGift", "Hide the gift button", "Removes the gift button from the message bar.");
+        toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles.");
+        toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus next to the notifications bell.");
+        toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon without Nitro.");
+        withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install Revenge and Vendetta color themes from a link.", "Custom themes", CustomThemesSettings);
         // Quests
-        withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background. You still claim the rewards.", "Quests", QuestSettings);
-        toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar. Quests still work.");
+        withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
+        toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests]];
         const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);

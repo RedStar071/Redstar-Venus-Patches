@@ -2965,7 +2965,8 @@ test('the new switches sit in their groups with one-line titles',()=>{
     const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
     assert.ok(rows.Appearance.includes('Hide the gift button'));assert.ok(rows.Quests.includes('Hide the Quests banner'));
     assert.deepEqual(rows.Appearance.slice(0,2),["Use your phone's font","Use your phone's emojis"]);
-    assert.match(b.registry.VENUS_SYSTEMEMOJI.useDescription(),/reopens/);
+    // The Reopen Discord dialog explains the restart, so the row only says where it applies.
+    assert.equal(b.registry.VENUS_SYSTEMEMOJI.useDescription(),'In chat, reactions and the emoji picker.');
     const only=settingsHarness({hideGift:true});assert.deepEqual(settingsRows(only),[['Appearance',['Hide the gift button']]]);
 });
 
