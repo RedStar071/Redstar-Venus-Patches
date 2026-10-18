@@ -106,7 +106,7 @@ Instead, Venus uses **single-bundle HBC98 bytecode injection** (`HbcPrelude.kt`)
 ## Upgrading to a new Discord Android version
 
 Every Discord version upgrade touches four layers that are pinned to the exact APK and `assets/index.android.bundle`:
-1. **Supported version string** (`349.9 - Stable`) in `DiscordPatches.kt`.
+1. **Supported version string** (`349.9 - Stable`) in `DiscordPatches.kt`, `DISCORD_VERSION` in `bootstrap.js` (shown on the About page) and `README.md`. A test fails if they differ.
 2. **HBC98 bundle & global `#0` constants** in `HbcPrelude.kt` and `HbcPrivacy.kt`.
 3. **Metro module IDs** in `patches/src/main/resources/venus/bootstrap.js` (and `tests/runtime.test.cjs`).
 4. **Pinned HBC98 privacy targets (104 functions)** in `HbcPrivacy.kt` and **pinned native DEX methods (137 methods)** in `PrivacyPatches.kt`.

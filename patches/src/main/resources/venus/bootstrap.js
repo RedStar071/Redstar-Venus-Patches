@@ -39,6 +39,8 @@
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2116]);
     const revision = "1.16.0";
+    // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
+    const DISCORD_VERSION = "349.9";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
     let environmentReady = false;
@@ -1079,7 +1081,7 @@
             el(RN.View, {key:"hero", style:s.hero, accessible:true},
                 popIn("logo", el(RN.View, {style:s.logo}, el(Sparkles, {size:"lg", color:"#ffffff"}))),
                 text("Venus Patches " + revision, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
-                text(tr("For Discord {version}", {version:"349.9"}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+                text(tr("For Discord {version}", {version:DISCORD_VERSION}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
             el(RN.View, {key:"features", style:s.card},
                 text(keys.length ? tr("{on} of {total} turned on", {on, total:keys.length}) : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                 keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
