@@ -5306,7 +5306,7 @@ test('Save to a file goes through Android\'s Save to screen, and cancelling it i
     assert.equal(b.alerts.length,alerts,'cancelling says nothing');
     // Reset to defaults only shows when something differs, and asks first.
     assert.ok(b.row('Reset to defaults'),'settings differ from the defaults here');
-    b.row('Reset to defaults').props.onPress(); b.alerts.at(-1).onConfirm();
+    b.row('Reset to defaults').props.onPress(); b.alerts.at(-1).onConfirm(); assert.equal(b.toasts.at(-1).content,'Settings reset to defaults','reset says reset, not restored');
     assert.ok(Object.keys(b.api.features).every(k=>!(k in b.api.settings)||b.api.settings[k]===false),'every feature off');
     assert.equal(b.row('Reset to defaults'),undefined,'hidden once there\'s nothing to reset');
 });

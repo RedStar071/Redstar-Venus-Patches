@@ -13,6 +13,7 @@
 ### 🔧 Improvements
 
 * **Discord - Venus settings:** Remove redundant top status cards on option pages when a feature is on and its preview or options speak for themselves
+* **Discord - Venus settings:** Reset to defaults confirms with "Settings reset to defaults" instead of "Settings restored"
 * **Discord - Venus settings:** In-progress labels like Saving…, Opening… and Signing in… use one consistent ellipsis in every language
 * **Discord - Venus settings:** Remove Catalan as a settings language; Venus settings now come in 30 languages
 * **Discord - Venus settings:** Tapping the emoji button in preview message bars opens the expression picker, like in Discord

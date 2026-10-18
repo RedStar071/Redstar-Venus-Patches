@@ -1175,7 +1175,7 @@
     }
     // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
     // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
-    function backupApply(parsed) {
+    function backupApply(parsed, reset) {
         const fontWas = fontInUse, emojiWas = emojiInUse;
         backup.restoring = true;
         try {
@@ -1194,7 +1194,7 @@
             }
         } finally { backup.restoring = false; }
         notify("*");
-        reviewToast(reviewUI(), "Settings restored", venusIcon(4792, "CircleCheckIcon"));
+        reviewToast(reviewUI(), reset ? "Settings reset to defaults" : "Settings restored", venusIcon(4792, "CircleCheckIcon"));
         // One question to reopen, only when the font or emojis actually changed.
         if (features.systemFont && settings.systemFont !== fontWas) later(() => askRestart("font"), 0);
         else if (features.systemEmoji && settings.systemEmoji !== emojiWas) later(() => askRestart("emoji"), 0);
@@ -1284,7 +1284,7 @@
     }
     function backupReset() {
         confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes and people stay.", "Reset",
-            () => backupApply({values:Object.assign({}, DEFAULT_SETTINGS, {language:settings.language}), people:null, themes:null}));
+            () => backupApply({values:Object.assign({}, DEFAULT_SETTINGS, {language:settings.language}), people:null, themes:null}, true));
     }
     const BACKUP_DARK = {chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"}};
     // Backup and restore: what a backup holds right now, two ways to save it, two ways to bring one back.
