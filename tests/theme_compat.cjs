@@ -92,9 +92,14 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
         const landed = new Set(dark.map(k => String(after[k]).split('@')[0].toLowerCase()));
         // A declared semantic key "lands" when some token now draws that key's color.
         const unlanded = Object.entries(theme.semanticColors || {}).filter(([, v]) => { const h = hexOf(v); return h && !landed.has(h); }).map(([k]) => k);
+        // Theme switch cost on its own: off then on again recompiles the whole theme into the tables.
+        let switchMs = 0;
+        if (!error) { const reps = 20, s0 = process.hrtime.bigint();
+            for (let i = 0; i < reps; i++) { b.api.setSetting('customThemes', false); b.api.setSetting('customThemes', true); }
+            switchMs = Number(process.hrtime.bigint() - s0) / 1e6 / reps; }
         b.api.setSetting('customThemes', false);
         const restored = JSON.stringify(snapshot(tables)) === JSON.stringify(base);
-        results.push({name:entry.name, error, ms, declared:Object.keys(theme.semanticColors || {}).length, darkTokens:dark.length, restored, unlanded});
+        results.push({name:entry.name, error, ms, declared:Object.keys(theme.semanticColors || {}).length, darkTokens:dark.length, restored, unlanded, switchMs});
     }
     const ok = results.filter(r => !r.error), times = ok.map(r => r.ms).sort((a, b) => a - b);
     const pct = p => times.length ? times[Math.min(times.length - 1, Math.floor(times.length * p))].toFixed(2) : '-';
@@ -106,6 +111,7 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
         medianTokensThemed:ok.map(r => r.darkTokens).sort((a, b) => a - b)[Math.floor(ok.length / 2)],
         declaredKeysPlaced:declared ? ((1 - unplaced / declared) * 100).toFixed(1) + '%' : '-', unplacedKeyUses:unplaced,
         installMs:{median:pct(0.5), p95:pct(0.95), max:pct(1)},
+        switchMs:(() => { const s = ok.map(r => r.switchMs).sort((x, y) => x - y); return {median:s[Math.floor(s.length / 2)].toFixed(3), p95:s[Math.floor(s.length * 0.95)].toFixed(3), max:s[s.length - 1].toFixed(3)}; })(),
         topUnplaced:Object.entries(misses).sort((a, b) => b[1] - a[1]).slice(0, process.argv.includes('--all') ? 999 : 40)}, null, 1));
     if (process.argv.includes('--each')) for (const r of results) console.log(r.name.padEnd(40), r.error || `${r.darkTokens} tokens, ${r.unlanded.length} unplaced, ${r.ms.toFixed(2)} ms`);
 })();
