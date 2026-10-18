@@ -5430,3 +5430,42 @@ test('dispatcher features hook the dispatcher instance (584), never the class-on
     patched.dispatch({type:'MESSAGE_DELETE',channelId:'c1',id:'m1'});
     assert.deepEqual(seen,['MESSAGE_UPDATE'],'a deletion by someone else is kept: only a redraw reaches the store');
 });
+
+// 349.9 Custom themes module audit: SemanticColorExperiments (590) wins over SemanticColors (589) in
+// resolveSemanticColor (587) while an experiment such as mobile-visual-refresh is on, and Discord's root theme
+// providers (9758 RootThemeContextProvider) memoize their context value, so both must follow the theme.
+test('Custom themes also themes experiment color overrides (590) and re-keys the root theme provider (9758)', async () => {
+    const b = boot({customThemes:true});
+    const {React} = reactHarness(b);
+    assert.match(raw, /features\.customThemes\)\s*selectModules\(\[589,\s*590,\s*591,\s*1193,\s*4593,\s*9758,\s*9769\]\)/);
+    const rawColors = {NEUTRAL_86:'#313338', OPACITY_4:'#ffffff'};
+    const slot = r => ({raw:r, opacity:1});
+    const sem = {MOBILE_CHATINPUT_BORDER_DEFAULT:{category:'border', dark:slot('NEUTRAL_86'), darker:slot('NEUTRAL_86'), light:slot('NEUTRAL_86'), midnight:slot('NEUTRAL_86')}};
+    // 349.9's real shape: {token: {experiment: {theme: {raw, opacity}}}}, theme keys from Themes (588).
+    const exp = {MOBILE_CHATINPUT_BORDER_DEFAULT:{'mobile-visual-refresh':{dark:{raw:'OPACITY_4', opacity:0.04}, darker:{raw:'OPACITY_4', opacity:0.04},
+        light:{raw:'OPACITY_4', opacity:0.04}, midnight:{raw:'OPACITY_4', opacity:0.04}}}};
+    b.load({_private:{RawColors:rawColors}}, null, 591);
+    b.load({_private:{SemanticColors:sem}}, null, 589);
+    b.load({_private:{SemanticColorExperiments:exp}}, null, 590);
+    const themeStore = {emitChange(){}}; b.load({default:themeStore}, null, 1193);
+    const Provider = b.load({RootThemeContextProvider(props) { return React.createElement('Provider', {value:{key:'{"theme":"dark"}', theme:'dark'}}, props.children); },
+        DisableCustomTheme(){}}, null, 9758).RootThemeContextProvider;
+    b.context.__r = id => ({591:{_private:{RawColors:rawColors}}, 589:{_private:{SemanticColors:sem}}, 590:{_private:{SemanticColorExperiments:exp}},
+        1193:{default:themeStore}, 5993:{TableRow:'Row'}, 6074:{TableRowGroup:'Group'}, 6098:{TextInput:'Input'}, 4568:{default:{open(){}}}}[id] || null);
+    assert.equal(Provider({children:'app'}).props.value.key, '{"theme":"dark"}', 'untouched before any theme');
+    b.load({default:native({fileExists:async () => false, readFile:async () => '{}', writeFile:async () => {}})});
+    b.context.fetch = async () => ({ok:true, status:200, text:async () => JSON.stringify({name:'T', semanticColors:{MOBILE_CHATINPUT_BORDER_DEFAULT:['#ff0000']}})});
+    b.api.setSetting('customThemes', true);
+    let draft = 'https://example.com/t.json';
+    React.useState = init => typeof init === 'string' ? [draft, v => { draft = v; }] : [init, () => {}];
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
+    pageNodes(registry.VENUS_CUSTOMTHEMES.screen.getComponent()()).find(n => n.props && n.props.accessibilityLabel === 'Install').props.onPress();
+    await flush(); await flush(); await flush();
+    const themed = exp.MOBILE_CHATINPUT_BORDER_DEFAULT['mobile-visual-refresh'];
+    assert.equal(rawColors[themed.dark.raw], '#ff0000', 'experiment override follows the themed token');
+    assert.equal(themed.midnight.raw, sem.MOBILE_CHATINPUT_BORDER_DEFAULT.midnight.raw, 'every theme slot, Onyx included');
+    assert.match(Provider({children:'app'}).props.value.key, /#v\d+$/, 'root provider value re-keyed so createStyles caches refresh');
+    b.api.setSetting('customThemes', false);
+    assert.deepEqual(themed.dark, {raw:'OPACITY_4', opacity:0.04}, 'experiment override restored when turned off');
+    assert.equal(Provider({children:'app'}).props.value.key.split('#v')[0], '{"theme":"dark"}');
+});
