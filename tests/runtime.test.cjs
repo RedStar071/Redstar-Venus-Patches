@@ -871,7 +871,7 @@ test('attachment tools and all five ports live in Features, never About', () => 
 });
 test('unselected new plugins do not wrap any optional factory or expose switches', () => {
     const b=boot({});const factory=()=>{};
-    for (const id of [11604,5708,1126,578,5110,6965,11896,9804,10418,4507,4509,13797,1085,1112]) {
+    for (const id of [11604,5708,1126,584,5110,6965,11896,9804,10418,4507,4509,13797,1085,1112]) {
         b.context.__d(factory,id,[]);assert.equal(b.factories.get(id),factory);
     }
     const settings=settingsHarness({});assert.equal(settings.registry.VENUS_NOTYPING,undefined);
@@ -908,7 +908,7 @@ function deletionHarness() {
         if (event.type==='MESSAGE_DELETE') messages.delete(event.channelId+':'+event.id);
         if (event.type==='MESSAGE_DELETE_BULK') event.ids.forEach(id=>messages.delete(event.channelId+':'+id));
         return 'dispatched';}};
-    const dispatch=b.load({default:flux},null,578).default;
+    const dispatch=b.load({default:flux},null,584).default;
     const actions=b.load({default:{deleteMessage(...args){network.push(args);return 'remote';}}},null,6965).default;
     return {...b,messages,events,network,dispatch,actions};
 }
@@ -1009,7 +1009,7 @@ test('Hidden Channels adds cached metadata immutably, deduplicates categories an
 test('Hidden Channels caches READY names while toggle is off so enabling later still resolves',()=>{
     const b=hiddenHarness();
     // Default toggle is off; READY arrives before the user enables.
-    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,584).default;
     b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1377);
     dispatch.dispatch({type:'CONNECTION_OPEN',user:{id:'me'},guilds:[{id:'g',channels:[{id:'hidden',name:'staff-chat',type:0},{id:'cat',name:'private',type:4}]}]});
     b.api.setSetting('hiddenChannels',true);
@@ -1125,7 +1125,7 @@ test('prototype Flux methods are shadowed on the same live instance, preserving 
         dispatch(event){this.#dispatches++;calls++;return event;}
         count(){return this.#dispatches;}
     }
-    const flux=new Flux();const patched=b.load({default:flux},null,578).default;
+    const flux=new Flux();const patched=b.load({default:flux},null,584).default;
     assert.equal(patched,flux);const event={type:'OTHER'};assert.equal(patched.dispatch(event),event);
     assert.equal(flux.count(),1);assert.equal(calls,1);
 });
@@ -1300,7 +1300,7 @@ test('NoDelete replaces a damaged archive instead of blocking saving, and keeps 
     const b=boot(allFeatures);let disk='{broken';const writes=[],messages=new Map([['c:1',{id:'1',channel_id:'c',author:{id:'u'},content:'gone',state:'SENT'}]]);
     b.load({default:{getMessage:(c,id)=>messages.get(c+':'+id),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110);
     b.load({createMessageRecord:raw=>({...raw})},null,5112);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
-    const dispatch=b.load({default:{dispatch(){return undefined;}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){return undefined;}}},null,584).default;
     b.load({default:native({fileExists:async path=>path.endsWith('venus-deleted-messages.json'),readFile:async()=>disk,
         writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-deleted-messages.json')disk=text;}})});
     await flush();await flush();b.api.setSetting('noDelete',true);b.api.setSetting('noDeleteSave',true);await flush();await flush();
@@ -1687,7 +1687,7 @@ test('Hidden Channels harvests real names from message mention_channels',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
     b.channels.hidden={...b.channels.hidden,name:'hidden'};
     let account='me';b.load({default:{getCurrentUser:()=>({id:account})}},null,1377);
-    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,584).default;
     assert.match(b.label(b.channels.hidden),/unavailable/);
     dispatch.dispatch({type:'MESSAGE_CREATE',message:{id:'m',channel_id:'public',mention_channels:[{id:'hidden',guild_id:'g',type:0,name:'staff-chat'}]}});
     assert.equal(b.label(b.channels.hidden),'staff chat');
@@ -1739,7 +1739,7 @@ test('Hidden Channels never presents a server redaction as a real name or fetche
 test('Hidden Channels cached gateway names clear on logout, account switch and channel removal but survive disabling',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};
     let account='first';b.load({default:{getCurrentUser:()=>({id:account})}},null,1377);
-    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,584).default;
     function remember(){dispatch.dispatch({type:'CHANNEL_UPDATE',channel:{...b.channels.hidden,name:'received-name'}});assert.equal(b.label(b.channels.hidden),'received name');}
     remember();dispatch.dispatch({type:'LOGOUT'});assert.match(b.label(b.channels.hidden),/name unavailable/);
     remember();account='second';assert.match(b.label(b.channels.hidden),/name unavailable/);
@@ -1791,7 +1791,7 @@ test('PlatformIndicators excludes groups and guild channel lists from single-use
 // therefore could not reproduce the reported native close-before-auth race.
 test('Hidden Channels captures initial READY and supplemental names before native records are redacted',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};b.channels.cat={...b.channels.cat,name:'__hidden__'};
-    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,584).default;
     dispatch.dispatch({type:'CONNECTION_OPEN',guilds:[{id:'g',channels:[{id:'hidden',name:'staff-chat'},{id:'cat',name:'PRIVATE STAFF'}]}]});
     assert.equal(b.label(b.channels.hidden),'staff chat');assert.equal(b.label(b.channels.cat),'PRIVATE STAFF');
     dispatch.dispatch({type:'CONNECTION_OPEN_SUPPLEMENTAL',guilds:[{id:'g',channels:[{id:'hidden',name:'renamed-staff'}]}]});assert.equal(b.label(b.channels.hidden),'renamed staff');
@@ -1839,7 +1839,7 @@ test('Hidden Channels respects native formatter escaping and uppercase categorie
 test('Hidden Channels READY cache belongs to the incoming account before UserStore reducer runs',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};
     let account=null;b.load({default:{getCurrentUser:()=>account}},null,1377);
-    const dispatch=b.load({default:{dispatch(event){if(event.type==='CONNECTION_OPEN')account=event.user;}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(event){if(event.type==='CONNECTION_OPEN')account=event.user;}}},null,584).default;
     dispatch.dispatch({type:'CONNECTION_OPEN',user:{id:'111111111111111111'},guilds:[{id:'g',channels:[{id:'hidden',name:'first-staff'}]}]});
     assert.equal(b.label(b.channels.hidden),'first staff');
     dispatch.dispatch({type:'CONNECTION_OPEN',user:{id:'222222222222222222'},guilds:[{id:'g',channels:[{id:'hidden',name:'second-staff'}]}]});
@@ -2264,7 +2264,7 @@ test('NoDelete does not rewrite an already erased archive for every deletion',as
     b.api.setSetting('noDeleteSave',false);await flush();await flush();
     const erased=b.writes.filter(([name])=>name==='venus-deleted-messages.json').length;
     assert.equal(b.api.status.archive,'erased');
-    const flux={dispatch(){return 'ok';}};const dispatch=b.load({default:flux},null,578).default;
+    const flux={dispatch(){return 'ok';}};const dispatch=b.load({default:flux},null,584).default;
     for (let i=0;i<5;i++) dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:String(i)});
     await flush();await flush();
     assert.equal(b.writes.filter(([name])=>name==='venus-deleted-messages.json').length,erased);
@@ -2272,7 +2272,7 @@ test('NoDelete does not rewrite an already erased archive for every deletion',as
 test('logging out of Discord without a ReviewDB sign-in does not rewrite preferences',async()=>{
     const b=boot(allFeatures);let writes=0;
     b.load({default:native({writeFile:async()=>{writes++;}})});await flush();await flush();
-    const dispatch=b.load({default:{dispatch(){return 'ok';}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){return 'ok';}}},null,584).default;
     writes=0;dispatch.dispatch({type:'LOGOUT'});await flush();await flush();assert.equal(writes,0);
 });
 test('own deletions no longer schedule bookkeeping timers',()=>{
@@ -2431,7 +2431,7 @@ test('NoDelete removes kept messages with one bulk event per channel when switch
 test('NoDelete builds archive copies only when saving',async()=>{
     const b=await archiveHarness(null);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
     const store=b.load({default:{getMessage:()=>({id:'5',content:'hi',author:{id:'x'}}),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110).default;
-    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,584).default;
     dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'5'});await new Promise(r=>setTimeout(r,900));await flush();
     assert.equal(JSON.parse(b.getDisk()).messages[0].message.content,'hi');assert.ok(store);
 });
@@ -2451,7 +2451,7 @@ test('Hidden Channels asks the real permission store once and keeps canBasicChan
 });
 test('Hidden Channels ignores unrelated Flux events without account lookups',()=>{
     const b=boot(allFeatures);let lookups=0;b.load({default:{getCurrentUser:()=>{lookups++;return {id:'me'};}}},null,1377);
-    const dispatch=b.load({default:{dispatch(){}}},null,578).default;b.api.setSetting('hiddenChannels',true);lookups=0;
+    const dispatch=b.load({default:{dispatch(){}}},null,584).default;b.api.setSetting('hiddenChannels',true);lookups=0;
     for(const type of ['TYPING_START','PRESENCE_UPDATES','VOICE_STATE_UPDATES'])dispatch.dispatch({type});
     dispatch.dispatch({type:'MESSAGE_CREATE',message:{content:'hi'}});assert.equal(lookups,0);
 });
@@ -2582,7 +2582,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         4568:{default:{open:value => ui.push('toast ' + value.content)}}, 5708:{default:{show:() => ui.push('alert')}},
         4736:{pushModal:() => ui.push('modal')}};
     b.context.__r = id => native[id] || null;
-    b.load({default:dispatcher}, null, 578);
+    b.load({default:dispatcher}, null, 584);
     b.load({default:store}, null, 7187);
     // Quest Completer is patched in but starts switched off; these tests switch it on like a user would.
     for (const [key, value] of Object.entries(Object.assign({quests:true}, settings))) b.api.setSetting(key, value);
@@ -2808,7 +2808,7 @@ test('Quest Completer starts off in Discord and sends nothing until you turn it 
     b.context.setTimeout = (fn, ms) => { timers.push(fn); return timers.length; };
     b.context.clearTimeout = () => {};
     const subs = new Map();
-    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 578);
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 584);
     assert.equal(b.api.settings.quests, false);
     subs.get('CONNECTION_OPEN')({user:{id:'1'}});
     assert.equal(timers.length, 0);
@@ -2818,7 +2818,7 @@ test('Quest Completer starts off in Discord and sends nothing until you turn it 
 test('unselected Quest Completer never touches QuestStore or the dispatcher', () => {
     const b = boot({readAll:true});
     let subscribed = 0, listened = 0;
-    b.load({default:{subscribe:() => subscribed++, dispatch(){}}}, null, 578);
+    b.load({default:{subscribe:() => subscribed++, dispatch(){}}}, null, 584);
     b.load({default:{getQuest(){}, addChangeListener:() => listened++}}, null, 7187);
     assert.equal(subscribed, 0); assert.equal(listened, 0);
     assert.equal(b.api.setSetting('quests', true), false);
@@ -3124,7 +3124,7 @@ function editHarness(saved) {
     b.load({createMessageRecord:raw=>({...raw})},null,5112);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
     const flux={dispatch(event){if(event.type==='MESSAGE_UPDATE'&&event.message.edited_timestamp){const old=store.get(event.message.channel_id+':'+event.message.id);
         store.set(event.message.channel_id+':'+event.message.id,{...old,content:event.message.content,editedTimestamp:event.message.edited_timestamp});}}};
-    const dispatch=b.load({default:flux},null,578).default;
+    const dispatch=b.load({default:flux},null,584).default;
     class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);
     b.load(native({fileExists:async p=>p.endsWith('venus-deleted-messages.json')&&!!disk,readFile:async()=>disk,
         writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-deleted-messages.json')disk=text;}}));
@@ -3189,7 +3189,7 @@ test('Quest Completer saved on starts even when Discord connects before settings
     b.context.setTimeout = (fn, ms) => { timers.push(ms); return timers.length; };
     b.context.clearTimeout = () => {};
     const subs = new Map();
-    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 578);
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 584);
     let release;
     const saved = new Promise(resolve => { release = resolve; });
     b.load({default:native({fileExists:async () => true, readFile:() => saved})});
@@ -3303,7 +3303,7 @@ function validHarness(users = {}) {
     const dispatcher={subscribe(type,fn){(subs[type]||(subs[type]=[])).push(fn);},dispatch(event){dispatched.push(event);
         if (event.type==='USER_UPDATE') known.set(event.user.id,event.user);(subs[event.type]||[]).forEach(fn=>fn(event));}};
     b.load({default:{getUser:id=>known.get(id),getCurrentUser:()=>({id:'me'})}},null,1377);
-    b.load({default:dispatcher},null,578);
+    b.load({default:dispatcher},null,584);
     const asked=[];let answer=id=>{known.set(id,{id,username:'u'+id});return Promise.resolve({id});};
     b.context.__r=id=>id===7852?{getUser:userId=>{asked.push(userId);return answer(userId);}}:null;
     return {...b,dispatcher,dispatched,known,asked,run,setAnswer:fn=>{answer=fn;},subs};
@@ -3348,7 +3348,7 @@ test('Fix unknown mentions does nothing while switched off',async()=>{
     const b=validHarness();b.api.setSetting('validUser',false);
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',message:{id:'m',channel_id:'c',content:'<@22222222222222222>'}});
     await b.run();assert.deepEqual(b.asked,[]);
-    const off=boot({});const subs=[];off.load({default:{subscribe:t=>subs.push(t),dispatch(){}}},null,578);assert.deepEqual(subs,[]);
+    const off=boot({});const subs=[];off.load({default:{subscribe:t=>subs.push(t),dispatch(){}}},null,584);assert.deepEqual(subs,[]);
 });
 test('profile bar gets a settings button next to the notifications bell',()=>{
     const b=boot({youBarSettings:true});const {React}=reactHarness(b);React.Fragment='Fragment';
@@ -3505,7 +3505,7 @@ function translateHarness({answer, locale='en-US', system='de-DE', on=true}={}) 
     const localeStore={locale,systemLocale:system,listeners:[],addChangeListener(fn){this.listeners.push(fn);}};
     b.load({default:localeStore},null,2116);
     const dispatched=[];const subs={};
-    b.load({default:{dispatch(e){dispatched.push(e);},subscribe(t,fn){(subs[t]||(subs[t]=[])).push(fn);}}},null,578);
+    b.load({default:{dispatch(e){dispatched.push(e);},subscribe(t,fn){(subs[t]||(subs[t]=[])).push(fn);}}},null,584);
     class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);
     // Switching on asks for a redraw a moment later: let that happen before the test's messages exist.
     if (on) { b.api.setSetting('translate',true); while (timers.length) timers.shift()(); }
@@ -3587,7 +3587,7 @@ test('Translate messages starts off, sends nothing while off and redraws when sw
     b.row('1',content,'hola amigo');await b.run();assert.equal(b.requests.length,1);
     b.api.setSetting('translate',false);await b.run();
     assert.equal(b.row('1',content,'hola amigo').content,content,'switched off: the original again');
-    const off=boot({});const unpatched=[];off.load({default:{dispatch(){},subscribe:t=>unpatched.push(t)}},null,578);assert.deepEqual(unpatched,[]);
+    const off=boot({});const unpatched=[];off.load({default:{dispatch(){},subscribe:t=>unpatched.push(t)}},null,584);assert.deepEqual(unpatched,[]);
 });
 test('Translate messages has a settings row with its own page in Messages',()=>{
     const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
@@ -3636,7 +3636,7 @@ function fastHarness({answer, disk=null, files={}}={}) {
         writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-translations.json')saved=text;},...files})});
     b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1377);
     b.load({default:{locale:'en-US',systemLocale:'en-US'}},null,2116);
-    const dispatched=[];b.load({default:{dispatch(e){dispatched.push(e);},subscribe(){}}},null,578);
+    const dispatched=[];b.load({default:{dispatch(e){dispatched.push(e);},subscribe(){}}},null,584);
     class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);
     const run=async(rounds=60)=>{for (let i=0;i<rounds;i++){await flush();if(!timers.length)break;timers.shift().fn();}await flush();await flush();};
     const row=(id,text)=>new Rows().generate({rowType:1,message:{id,channel_id:'c',content:text,author:{id:'them'}},
@@ -3910,7 +3910,7 @@ function userNotifHarness({friends=['111111111111111111','222222222222222222'], 
     b.load({default:{getGuild:id=>guilds[id],getGuildIds:()=>Object.keys(guilds)}},null,2074);
     b.load({default:{getFriendIDs:()=>friends,isFriend:id=>friends.includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4519);
     b.load({default:{getStatus:id=>statuses[id],addChangeListener(){},removeChangeListener(){}}},null,4930);
-    b.load({default:dispatcher},null,578);
+    b.load({default:dispatcher},null,584);
     function TableCheckboxRow(props){return {type:TableCheckboxRow,props};}
     function SearchField(props){return {type:SearchField,props};}
     b.context.__r=id=>({4568:{default:{open:t=>toasts.push(t.content)}},5993:{TableRow:'Row'},6074:{TableRowGroup:'Group'},
@@ -4103,7 +4103,7 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     };
     const store={quests:new Map([['q1',questItem]]),getQuest:id=>id==='q1'?questItem:null,addChangeListener(){}};
     b.load({default:store},null,7187);
-    b.load({default:{subscribe(){},dispatch(){}}},null,578);
+    b.load({default:{subscribe(){},dispatch(){}}},null,584);
     b.load({default:native({fileExists:async()=>false,readFile:async()=>'{}',writeFile:async()=>{}})});
     let resolveProgress;
     b.context.__r=id=>({
@@ -4688,7 +4688,7 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
         return 0;
     };
     const dispatched = [];
-    const flux = b.load({default:{dispatch(e){ dispatched.push(e); }}}, null, 578).default;
+    const flux = b.load({default:{dispatch(e){ dispatched.push(e); }}}, null, 584).default;
     b.load({default:{getCurrentUser:() => ({id:'me_123', username:'fariz70', globalName:'FaRiz70', avatar:'av_hash'})}}, null, 1377);
     b.load({default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}}, null, 1402);
     const liveMessages = new Map();
@@ -5401,4 +5401,21 @@ test('the essentials wait for saved settings and only show when enough of them w
     const b=starterHarness(); assert.equal(b.card(),undefined,'nothing while settings are still loading');
     const few=starterHarness({features:{noDelete:true,jumpToTop:true,dashless:true}}); await flush(); await flush();
     assert.equal(few.card(),undefined,'two essentials patched in is not worth a card');
+});
+
+// 349.9 regression: module 578 is flux/Dispatcher.tsx, which exports only the Dispatcher class (no default).
+// The app's dispatcher instance is 584. Hooking 578 left Keep deleted messages (and every feature that listens
+// for dispatches) without a single event, so deletions were never kept.
+test('dispatcher features hook the dispatcher instance (584), never the class-only module 578',()=>{
+    assert.doesNotMatch(raw,/\b578\b/);
+    assert.match(raw,/features\.noDelete\)\s*selectModules\(\[584,/);
+    assert.match(raw,/id\s*===\s*584\)\s*\{\s*dispatcher\s*=\s*exports\.default\.dispatch\.bind/);
+    const b=boot({noDelete:true});const seen=[];
+    const flux={dispatch(e){seen.push(e.type);return 'ok';}};
+    const store={getMessage:(c,id)=>id==='m1'?{id:'m1',channel_id:c,content:'hi',state:'SENT',flags:0}:null,getMessages:()=>null};
+    b.load({default:store},null,5110);
+    const patched=b.load({default:flux},null,584).default;
+    b.api.setSetting('noDelete',true);
+    patched.dispatch({type:'MESSAGE_DELETE',channelId:'c1',id:'m1'});
+    assert.deepEqual(seen,['MESSAGE_UPDATE'],'a deletion by someone else is kept: only a redraw reaches the store');
 });

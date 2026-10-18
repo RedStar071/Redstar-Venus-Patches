@@ -10,6 +10,7 @@
 
 ### 🐛 Bug Fixes
 
+* **Discord - Keep deleted messages:** Fixed deleted messages and edits not being kept on Discord 349.9. Venus listened to the wrong module for Discord's events, which also stopped Show hidden channels, User and server reviews, Complete Quests automatically, Fix unknown mentions, Translate messages, User activity notifications and Message highlights from receiving them
 * **Discord - Venus settings:** Fixed six switches on the Quests and Deleted messages pages staying in English in every other language
 * **Discord - User and server reviews:** Fixed tapping Cancel on Discord's authorize screen showing a "Couldn't sign in" error instead of just closing
 

@@ -14,28 +14,28 @@
     if (features.freeNitro) selectModules([1377, 2051, 5638, 5687, 4528, 13797, 6840, 6965]);
     if (features.noTyping) selectModules([11604]);
     if (features.quickDelete) selectModules([5708, 1126]);
-    if (features.noDelete) selectModules([578, 5110, 5112, 1377, 2051, 6965, 7591]);
+    if (features.noDelete) selectModules([584, 5110, 5112, 1377, 2051, 6965, 7591]);
     if (features.jumpToTop) selectModules([11896, 11897, 11898, 9064, 6965, 5110]);
-    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2051, 2103, 4507, 7039, 4509, 5043, 6965, 578, 1377, 16157, 5879]);
+    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2051, 2103, 4507, 7039, 4509, 5043, 6965, 584, 1377, 16157, 5879]);
     if (features.pastelize) selectModules([7591, 1251, 2112]);
     if (features.platformIndicators) selectModules([4930, 4908, 1377, 2051, 10843, 10602, 13107, 15962, 9334, 13920, 12849]);
-    if (features.reviewDB) selectModules([12872, 13790, 14259, 8716, 6074, 6698, 1377, 578]);
+    if (features.reviewDB) selectModules([12872, 13790, 14259, 8716, 6074, 6698, 1377, 584]);
     if (features.readAll) selectModules([16232]);
-    if (features.quests) selectModules([578, 7187, 7252, 13439, 13477]);
+    if (features.quests) selectModules([584, 7187, 7252, 13439, 13477]);
     if (features.hideGift) selectModules([11864, 12071]);
     if (features.hideQuestDock) selectModules([14892, 14985]);
     if (features.systemEmoji) selectModules([6625]);
     if (features.gestures) selectModules([7627, 9878, 11363, 11918, 1377, 11159]);
     if (features.hideCall) selectModules([12956]);
-    if (features.validUser) selectModules([578, 1377]);
+    if (features.validUser) selectModules([584, 1377]);
     if (features.youBarSettings) selectModules([16335]);
     if (features.splitMessages) selectModules([1085, 1377, 2051, 6965, 8809]);
-    if (features.translate) selectModules([578, 1377, 7591, 11281]);
-    if (features.userNotif) selectModules([578, 1377, 2051, 2074, 4519, 4930, 7252, 13439, 13477]);
+    if (features.translate) selectModules([584, 1377, 7591, 11281]);
+    if (features.userNotif) selectModules([584, 1377, 2051, 2074, 4519, 4930, 7252, 13439, 13477]);
     if (features.accountSwitcher) selectModules([1377, 12056, 12057, 12058, 16335]);
     if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
     if (features.customThemes) selectModules([589, 591, 1193, 4593, 9769]);
-    if (features.messageHighlight) selectModules([578, 1377, 5110, 7591]);
+    if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2116]);
     const revision = "1.16.0";
@@ -3094,7 +3094,7 @@
         try { const value = store[key]; return typeof value === "function" ? value.call(store) : value; } catch (_) { return undefined; }
     }
     function questDispatch(action) {
-        const dispatcher = quest.dispatcher || inspectedExport(578, "default");
+        const dispatcher = quest.dispatcher || inspectedExport(584, "default");
         try {
             if (!dispatcher || typeof dispatcher.dispatch !== "function") return false;
             const result = dispatcher.dispatch(action);
@@ -4418,7 +4418,7 @@
     function messageHighlightRedraw() {
         let d = dispatcher;
         if (!d) {
-            const mod = inspectedExport(578, "default");
+            const mod = inspectedExport(584, "default");
             if (mod && typeof mod.dispatch === "function") d = mod.dispatch.bind(mod);
         }
         if (typeof d !== "function" || !highlightRecent.size) return;
@@ -8101,17 +8101,17 @@
         if (features.customThemes && id === 9769) return hookComponent(exports, chatViewWrapperThemeBackground);
         if (features.accountSwitcher && id === 12056) return hookMultiAccountStore(exports);
         if (features.accountSwitcher && id === 12058) return hookIsStaffForMultiAccount(exports);
-        if (features.userNotif && id === 578 && exports && exports.default) userNotifInit(exports.default);
+        if (features.userNotif && id === 584 && exports && exports.default) userNotifInit(exports.default);
         if (features.userNotif && id === 4519 && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
         if (features.userNotif && id === 2074 && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); }
         if ((features.quests || features.userNotif) && id === 7252 && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); }
         if ((features.quests || features.userNotif) && id === 13439) return hookGatewaySocket(exports);
         if ((features.quests || features.userNotif) && id === 13477) return hookPauseGateway(exports);
-        if (features.translate && id === 578 && exports && exports.default) translateInit(exports.default);
+        if (features.translate && id === 584 && exports && exports.default) translateInit(exports.default);
         if (features.translate && id === 11281) return hookComponent(exports, translateSheet);
         if (features.splitMessages && id === 8809) return maxLengthModule(exports);
         if ((features.youBarSettings || features.accountSwitcher) && id === 16335) return hookComponent(exports, youBarButtons);
-        if (features.validUser && id === 578 && exports && exports.default) validInit(exports.default);
+        if (features.validUser && id === 584 && exports && exports.default) validInit(exports.default);
         // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
         if (features.pastelize && id === 1251) pastelHash = typeof exports === "function" ? exports : exports.default;
         if (features.pastelize && id === 2112) guildMembers = exports.default;
@@ -8203,10 +8203,10 @@
             restoreDeleted(); return exports;
         }
         if (features.quests && id === 7187) questAttach(exports.default);
-        if (features.quests && id === 578) questsInit(exports.default);
-        if (features.messageHighlight && id === 578 && exports && exports.default && !dispatcher)
+        if (features.quests && id === 584) questsInit(exports.default);
+        if (features.messageHighlight && id === 584 && exports && exports.default && !dispatcher)
             dispatcher = exports.default.dispatch.bind(exports.default);
-        if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 578) {
+        if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
             dispatcher = exports.default.dispatch.bind(exports.default);
             return replaceValue(exports, "default", hookExport(exports.default, "dispatch", dispatchEvent));
         }
