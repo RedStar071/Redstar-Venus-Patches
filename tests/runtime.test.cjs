@@ -41,14 +41,14 @@ var registry = {
     post:function(value) { check(this === registry, 'post receiver changed'); return value; }
 };
 // Multiple operations in one export exercise independent per-iteration bindings.
-load(1283, registry);
+load(1282, registry);
 check(registry.registerComponent('Discord', function(){return function(){return 'root';};}) === 'Discord', 'registration result');
 check(providers[0]()({}) === 'root', 'root provider');
 var payload = {};
 check(registry.getAttachmentPayload(payload) === payload, 'serializer dispatch');
 check(registry.post(payload) === payload, 'HTTP dispatch');
 var seen = [];
-load(1163, {default:{
+load(1162, {default:{
     getConstants:function(){return {};}, readFile:function(){}, writeFile:function(){},
     getSize:function(uri){seen.push(uri);return Promise.resolve(Number(uri.slice(7)));}
 }});
@@ -90,9 +90,9 @@ function boot(features = {picker:true, voice:true}, ready = true, oldDefaults = 
         const value = explicitId === undefined ? exports && exports.default || exports : exports;
         let id = explicitId;
         if (id === undefined) {
-            id = value.getSize ? 1163 : value.createElement ? 19 : value.View ? 17 :
-                value.registerComponent ? 245 : value.CloudUpload ? 5440 : value.getAttachmentPayload ? 5442 :
-                value.post ? 1283 : value.type || value.render || value.name === 'Pressable' ? 414 : 9999;
+            id = value.getSize ? 1162 : value.createElement ? 19 : value.View ? 17 :
+                value.registerComponent ? 245 : value.CloudUpload ? 7268 : value.getAttachmentPayload ? 7243 :
+                value.post ? 1282 : value.type || value.render || value.name === 'Pressable' ? 414 : 9999;
         }
         context.__d(factory || function(g, r, i, a, module) { module.exports = exports; }, id, []);
         const module = {exports:{}};
@@ -167,9 +167,9 @@ test('pre-existing Metro definition is decorated', () => {
     const factories = new Map();
     const context = vm.createContext({__d:(f,id) => factories.set(id,f), console});
     vm.runInContext(raw.replace('/*__FEATURES__*/', '{picker:true,voice:true}'), context);
-    context.__d((g,r,i,a,module) => { module.exports = {getAttachmentPayload:() => ({})}; }, 5442, []);
+    context.__d((g,r,i,a,module) => { module.exports = {getAttachmentPayload:() => ({})}; }, 7243, []);
     const module = {exports:{}};
-    factories.get(5442)(context,null,null,null,module,module.exports);
+    factories.get(7243)(context,null,null,null,module,module.exports);
     assert.equal(context.__venusPatches.status.attachment, false);
     context.__d((g,r,i,a,module) => { module.exports = {default(){}}; }, 120, []);
     const setup = {exports:{}};
@@ -425,7 +425,7 @@ test('native file HostObject-style accessors are supported at its verified ID', 
     const b=boot(); const implementation=native(); const host={};
     for (const key of Object.keys(implementation))
         Object.defineProperty(host,key,{get:() => implementation[key],enumerable:true});
-    b.load({default:host},undefined,1163);
+    b.load({default:host},undefined,1162);
     assert.equal(await b.api.getSize('content://host'),1024);
     await flush(); assert.equal(b.api.status.storage,'ready');
 });
@@ -494,8 +494,8 @@ test('RN environment initialization finishes before any feature hook reads nativ
     Object.defineProperty(nativeExport,'default',{get(){ assert.equal(initialized,true); return bridge; }});
     const registry={SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}};
     const setup=b.load({default(){
-        b.load(nativeExport,null,1163);
-        assert.equal(b.load(registry,null,14130),registry);
+        b.load(nativeExport,null,1162);
+        assert.equal(b.load(registry,null,14409),registry);
         assert.equal(b.api.status.menu,false);
         assert.equal(reads,0);
         initialized=true;
@@ -510,7 +510,7 @@ test('RN environment initialization finishes before any feature hook reads nativ
 test('failed or reentrant environment setup never activates hooks prematurely', () => {
     const b=boot({picker:true,voice:true},false);
     const registry={SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}};
-    b.load(registry,null,14130);
+    b.load(registry,null,14409);
     const failed=b.load({default(){throw Error('original RN setup failure');}},null,120);
     assert.throws(()=>failed.default(),/original RN setup failure/);
     assert.equal(b.api.status.menu,false);
@@ -554,10 +554,10 @@ function reactHarness(b) {
 function settingsHarness(features = allFeatures) {
     const b = boot(features); const {React}=reactHarness(b);
     function SettingsList() {}
-    b.load({SettingsList},null,14236);
+    b.load({SettingsList},null,14500);
     const original=Object.freeze({ACCOUNT:Object.freeze({type:'route',IconComponent:function Icon(){}})});
-    const exports=b.load({SETTING_RENDERER_CONFIG:original},null,14130);
-    const builder=b.load({createList(config,extra){ assert.equal(this,builder); return {...config,type:'list',extra};}},null,10874);
+    const exports=b.load({SETTING_RENDERER_CONFIG:original},null,14409);
+    const builder=b.load({createList(config,extra){ assert.equal(this,builder); return {...config,type:'list',extra};}},null,11129);
     return {...b,React,SettingsList,original,registry:exports.SETTING_RENDERER_CONFIG,builder};
 }
 function nitroHarness() {
@@ -571,20 +571,20 @@ function nitroHarness() {
         '40':{id:'40',guild_id:'other',format_type:3,name:'lottie',available:true},
         '50':{id:'50',guild_id:'other',format_type:2,name:'apng',available:true},
         '60':{id:'60',guild_id:'other',format_type:1,name:'disabled',available:false} };
-    b.load({default:{getCurrentUser:() => user}},null,1378);
+    b.load({default:{getCurrentUser:() => user}},null,1377);
     b.load({default:{getChannel:id => id === 'channel' ? channel : undefined}},null,2051);
-    b.load({default:{getCustomEmojiById:id => emojis[id]}},null,5772);
-    b.load({default:{getStickerById:id => stickers[id]}},null,5815);
+    b.load({default:{getCustomEmojiById:id => emojis[id]}},null,5638);
+    b.load({default:{getStickerById:id => stickers[id]}},null,5687);
     const premium=b.load({default:{canUseEmojisEverywhere:user => user.premiumType===2,
         canUseAnimatedEmojis:user => user.premiumType===2,
-        canUseCustomStickersEverywhere:user => user.premiumType===2}},null,4491).default;
+        canUseCustomStickersEverywhere:user => user.premiumType===2}},null,4528).default;
     const rules=b.load({StickerSendability:{SENDABLE:0,SENDABLE_WITH_PREMIUM:1,NONSENDABLE:2},
         getStickerSendability:sticker => !sticker || sticker.available === false ? 2 : sticker.guild_id==='home' || user.premiumType===2 ? 0 : 1,
-        isSendableSticker:sticker => !!sticker && (sticker.guild_id==='home' || user.premiumType===2)},null,6756);
+        isSendableSticker:sticker => !!sticker && (sticker.guild_id==='home' || user.premiumType===2)},null,6840);
     const sent=[];
     const actions=b.load({default:{sendMessage(...args){assert.equal(this,actions);sent.push(args);return 'sent';},
         _sendMessage(...args){assert.equal(this,actions);sent.push(args);return 'upload';},
-        sendStickers(...args){assert.equal(this,actions);sent.push(args);return 'stickers';}}},null,6880).default;
+        sendStickers(...args){assert.equal(this,actions);sent.push(args);return 'stickers';}}},null,6965).default;
     return {...b,user,channel,emojis,stickers,premium,rules,actions,sent};
 }
 test('native registry adds authorless About, Settings and option-page routes without changing stock config', () => {
@@ -638,7 +638,7 @@ test('new plugin preferences persist and late restores cannot overwrite edits', 
 });
 test('unselected plugin factories remain completely unwrapped', () => {
     const b=boot({picker:false,voice:false});const factory=()=>{};
-    for (const id of [245,414,1283,5440,5442,10742,4990,12662,12524,9861,9864,1378,2051,5772,5815,4491,6756,6880]) {
+    for (const id of [245,414,1282,7268,7243,10987,5043,12662,12767,10090,10093,1377,2051,5638,5687,4528,6840,6965]) {
         b.context.__d(factory,id,[]);assert.equal(b.factories.get(id),factory);
     }
 });
@@ -647,14 +647,14 @@ test('CopyBios clones frozen text nodes while preserving links, handlers and non
     const text=Object.freeze(React.createElement(RN.Text,Object.freeze({children:'bio',onPress})));
     const icon=React.createElement('Image',{uri:'x'});
     const tree=Object.freeze(React.createElement(RN.View,{children:Object.freeze([text,icon])}));
-    const bio=b.load({default:()=>tree},null,10742);
+    const bio=b.load({default:()=>tree},null,10987);
     const result=bio.default({});assert.notEqual(result,tree);
     assert.equal(text.props.selectable,undefined);assert.equal(result.props.children[0].props.selectable,true);
     assert.equal(result.props.children[0].props.onPress,onPress);assert.equal(result.props.children[1],icon);
     b.api.setSetting('copyBios',false);assert.equal(bio.default({}),tree);
 });
 test('Dashless changes only display labels and leaves messages, channel models and DM names untouched', () => {
-    const b=boot(allFeatures);const label=b.load({default:channel=>channel.name,computeChannelName:channel=>channel.name},null,4990);
+    const b=boot(allFeatures);const label=b.load({default:channel=>channel.name,computeChannelName:channel=>channel.name},null,5043);
     const channel=Object.freeze({type:0,name:'hello-world'});
     assert.equal(label.default(channel),'hello world');assert.equal(channel.name,'hello-world');
     for (const type of [0, 5, 6, 14, 15, 16, 21]) {
@@ -676,15 +676,15 @@ test('Dashless formats cross-server channel mentions, preserves #slug-name typin
     React.useEffect=fn=>{effectRegistered=true;fn();};
     const channelsById={'100':Object.freeze({id:'100',type:0,name:'general-chat'}),'200':Object.freeze({id:'200',type:2,name:'voice-lounge'})};
     b.load({default:{getChannel:id=>channelsById[id]||null,emitChange(){emitted++;}}},null,2051);
-    const label=b.load({default:ch=>ch.name,computeChannelName:ch=>ch.name},null,4990);
+    const label=b.load({default:ch=>ch.name,computeChannelName:ch=>ch.name},null,5043);
     const mentionRule=b.load({getChannel:(id,mentionChannels)=>{
         const found=mentionChannels&&mentionChannels.find(c=>c.id===id);
         return found?Object.freeze({type:found.type,id:found.id,guild_id:found.guild_id,name:found.name}):null;
-    }},null,5314);
+    }},null,5796);
     const parserMod=b.load({
         default:{createParserState:()=>({channels:[{id:'100',text:label.computeChannelName(channelsById['100'])},{id:'200',text:'voice-lounge'}]})},
         createParserState:()=>({channels:[{id:'100',text:label.computeChannelName(channelsById['100'])},{id:'200',text:'voice-lounge'}]})
-    },null,7099);
+    },null,7166);
 
     // 1. Cross-server channel mention (not in local ChannelStore, resolved via message.mention_channels)
     const crossMention=mentionRule.getChannel('999',[{id:'999',guild_id:'g2',type:5,name:'patch-notes'}]);
@@ -714,7 +714,7 @@ test('Dashless formats cross-server channel mentions, preserves #slug-name typin
 });
 test('FavouriteAnything preserves memo metadata and original source objects', () => {
     const b=boot(allFeatures);const memo=Object.freeze({$$typeof:Symbol.for('react.memo'),type:props=>props,compare:()=>true});
-    const exports=b.load({default:memo},null,12524);
+    const exports=b.load({default:memo},null,12767);
     assert.equal(exports.default.compare,memo.compare);
     const source=Object.freeze({uri:'https://cdn.discordapp.com/image.png',width:10,height:20});
     const props=Object.freeze({source,extra:'keep'});const result=exports.default.type(props);
@@ -722,7 +722,7 @@ test('FavouriteAnything preserves memo metadata and original source objects', ()
     b.api.setSetting('favouriteAnything',false);assert.equal(exports.default.type(props),props);
 });
 test('favourite media format correction uses copies and handles signed URLs case-insensitively', () => {
-    const b=boot(allFeatures);const action=b.load({addFavoriteGIF:value=>value},null,9861);
+    const b=boot(allFeatures);const action=b.load({addFavoriteGIF:value=>value},null,10090);
     const item=Object.freeze({url:'https://cdn.discordapp.com/movie.MP4?ex=1',format:1});
     assert.equal(action.addFavoriteGIF(item).format,2);assert.equal(item.format,1);
     const image=Object.freeze({url:'https://example.com/photo.png',format:2});
@@ -733,12 +733,12 @@ test('video favourite previews cache weakly, preserve signed queries and update 
     const b=boot(allFeatures);
     const item=Object.freeze({url:'https://cdn.discordapp.com/a.MP4?ex=1&hm=signature',src:'https://cdn.discordapp.com/a.MP4?ex=1&hm=signature&format=webp#keep'});
     const favorites=Object.freeze([item]);const result=Object.freeze({favorites,favoritesCategory:{src:item.src},extra:'keep'});
-    const utils=b.load({useFavoriteGIFsMobile:()=>result},null,9864);
+    const utils=b.load({useFavoriteGIFsMobile:()=>result},null,10093);
     const a=utils.useFavoriteGIFsMobile(),c=utils.useFavoriteGIFsMobile();assert.equal(a.favorites,c.favorites);
     assert.match(a.favorites[0].src,/media\.discordapp\.net\/a.MP4\?ex=1&hm=signature&format=jpeg#keep$/);
     assert.equal(a.favoritesCategory.src,a.favorites[0].src);assert.equal(result.favorites[0],item);assert.equal(a.extra,'keep');
     const evil={url:'https://evil.test/a.mp4',src:'https://cdn.discordapp.com.evil.test/a.mp4'};
-    const external=b.load({useFavoriteGIFsMobile:()=>({favorites:[evil]})},null,9864).useFavoriteGIFsMobile();assert.equal(external.favorites[0],evil);
+    const external=b.load({useFavoriteGIFsMobile:()=>({favorites:[evil]})},null,10093).useFavoriteGIFsMobile();assert.equal(external.favorites[0],evil);
 });
 test('FreeNitro only overrides emoji eligibility for the current user and each switch is independent', () => {
     const b=nitroHarness();assert.equal(b.premium.canUseEmojisEverywhere(b.user),true);
@@ -813,14 +813,14 @@ test('shared native attachment send boundary converts emoji captions without cha
     assert.match(b.sent[0][1].content,/emojis\/2.webp/);assert.equal(b.sent[0][1].attachments,message.attachments);assert.equal(b.sent[0][2],options);
 });
 test('native opaque-provider video favourites retain their original format', () => {
-    const b=boot(allFeatures);const action=b.load({addFavoriteGIF:value=>value},null,9861);
+    const b=boot(allFeatures);const action=b.load({addFavoriteGIF:value=>value},null,10090);
     const item=Object.freeze({url:'https://tenor.com/view/provider-id',gifSrc:'https://media.tenor.com/opaque',format:2});
     assert.equal(action.addFavoriteGIF(item),item);
 });
 test('nested bio markup makes the outer Discord Text selectable without changing children or link presses', () => {
     const b=boot(allFeatures);const {React}=reactHarness(b);const link=React.createElement('Link',{children:'click',onPress:()=>{}});
     const tree=React.createElement('DiscordText',{children:[link]});
-    const bio=b.load({default:()=>tree},null,10742);const result=bio.default({});
+    const bio=b.load({default:()=>tree},null,10987);const result=bio.default({});
     assert.equal(result.props.selectable,true);assert.equal(result.props.children[0].props.onPress,link.props.onPress);assert.equal(tree.props.selectable,undefined);
 });
 test('double-backtick inline code and empty sticker sends remain unchanged', () => {
@@ -834,7 +834,7 @@ test('Metro default imports preserve non-enumerable module markers for media vie
     const b=boot(allFeatures);
     const memo={$$typeof:Symbol.for('react.memo'),type:props=>props,compare:null};
     const exports={default:memo};Object.defineProperty(exports,'__esModule',{value:true});
-    const patched=b.load(exports,null,12524);
+    const patched=b.load(exports,null,12767);
     const metroDefault=patched.__esModule ? patched.default : patched;
     assert.equal(patched,exports);assert.equal(patched.__esModule,true);
     assert.equal(metroDefault.$$typeof,Symbol.for('react.memo'));
@@ -847,7 +847,7 @@ test('frozen component exports preserve React tags, symbols and lazy getter desc
     Object.defineProperty(memo,'displayName',{get(){reads++;return 'GIFFavButton';}});
     memo[symbol]='preserved';Object.freeze(memo);
     const exports={default:memo};Object.defineProperty(exports,'__esModule',{value:true});Object.freeze(exports);
-    const patched=b.load(exports,null,12524);assert.equal(reads,0);
+    const patched=b.load(exports,null,12767);assert.equal(reads,0);
     assert.equal(patched.__esModule,true);assert.equal(patched.default.$$typeof,Symbol.for('react.memo'));
     assert.equal(patched.default[symbol],'preserved');assert.equal(patched.default.compare,memo.compare);
     assert.equal(Object.getOwnPropertyDescriptor(patched.default,'displayName').get,Object.getOwnPropertyDescriptor(memo,'displayName').get);
@@ -856,7 +856,7 @@ test('immutable function export hooks retain the Metro module marker and stock d
     const b=boot(allFeatures);const exports={};
     Object.defineProperty(exports,'__esModule',{value:true});
     Object.defineProperty(exports,'addFavoriteGIF',{value:item=>item});
-    const patched=b.load(exports,null,9861);assert.equal(patched.__esModule,true);
+    const patched=b.load(exports,null,10090);assert.equal(patched.__esModule,true);
     assert.equal(patched.addFavoriteGIF({url:'https://example.com/movie.mp4',format:1}).format,2);
 });
 
@@ -871,7 +871,7 @@ test('attachment tools and all five ports live in Features, never About', () => 
 });
 test('unselected new plugins do not wrap any optional factory or expose switches', () => {
     const b=boot({});const factory=()=>{};
-    for (const id of [11348,5205,1127,585,5057,6880,11642,9804,10418,4470,4472,13528,1086,1113]) {
+    for (const id of [11604,5708,1126,578,5110,6965,11896,9804,10418,4507,4509,13797,1085,1112]) {
         b.context.__d(factory,id,[]);assert.equal(b.factories.get(id),factory);
     }
     const settings=settingsHarness({});assert.equal(settings.registry.VENUS_NOTYPING,undefined);
@@ -880,7 +880,7 @@ test('No typing restores both original methods and receiver when switched off', 
     const b=boot(allFeatures);const calls=[];
     const actions={startTyping(...args){assert.equal(this,actions);calls.push(args);return 'start';},
         stopTyping(...args){assert.equal(this,actions);calls.push(args);return 'stop';}};
-    const patched=b.load({default:actions},null,11348).default;
+    const patched=b.load({default:actions},null,11604).default;
     patched.startTyping('123');patched.stopTyping('123');assert.equal(calls.length,0);
     b.api.setSetting('noTyping',false);
     assert.equal(patched.startTyping('123'),'start');assert.equal(patched.stopTyping('456'),'stop');
@@ -889,9 +889,9 @@ test('No typing restores both original methods and receiver when switched off', 
 test('QuickDelete uses exact localized strings, one switch for messages and link previews, and stock fallback', () => {
     const b=boot(allFeatures);let shown=0,confirmed=0;
     const tokens={AMvpS4:'message', 'vXZ+Fo':'embed'};const translations={message:'Supprimer le message ?',embed:'Supprimer cet aperçu ?'};
-    b.load({t:tokens,intl:{string:key=>translations[key]}},null,1127);
+    b.load({t:tokens,intl:{string:key=>translations[key]}},null,1126);
     const popup={show(value){shown++;return value;}};
-    const action=b.load({default:popup},null,5205).default;
+    const action=b.load({default:popup},null,5708).default;
     const message={children:{props:{title:translations.message}},onConfirm(){confirmed++;return 'confirmed';}};
     assert.equal(action.show(message),message);b.api.setSetting('quickDelete',true);
     assert.equal(action.show(message),'confirmed');assert.equal(confirmed,1);
@@ -903,13 +903,13 @@ test('QuickDelete uses exact localized strings, one switch for messages and link
 });
 function deletionHarness() {
     const b=boot(allFeatures), messages=new Map(),events=[],network=[];
-    b.load({default:{getMessage:(channel,id)=>messages.get(channel+':'+id)}},null,5057);
+    b.load({default:{getMessage:(channel,id)=>messages.get(channel+':'+id)}},null,5110);
     const flux={dispatch(event){assert.equal(this,flux);events.push(event);
         if (event.type==='MESSAGE_DELETE') messages.delete(event.channelId+':'+event.id);
         if (event.type==='MESSAGE_DELETE_BULK') event.ids.forEach(id=>messages.delete(event.channelId+':'+id));
         return 'dispatched';}};
-    const dispatch=b.load({default:flux},null,585).default;
-    const actions=b.load({default:{deleteMessage(...args){network.push(args);return 'remote';}}},null,6880).default;
+    const dispatch=b.load({default:flux},null,578).default;
+    const actions=b.load({default:{deleteMessage(...args){network.push(args);return 'remote';}}},null,6965).default;
     return {...b,messages,events,network,dispatch,actions};
 }
 test('NoDelete retains only cached messages, marks once and dismisses locally without server traffic', async () => {
@@ -941,9 +941,9 @@ test('NoDelete clears session state at logout and lets unrelated events and argu
 test('real default-export capability hooks unlock emoji selection but preserve native conversion checks', () => {
     const b=nitroHarness();const animation={},everywhere={},unrelated={};
     const catalog=b.load({ANIMATED_EMOJIS:animation,EMOJIS_EVERYWHERE:everywhere,
-        canUserUse:(feature,user)=>user.premiumType===2},null,13528);
+        canUserUse:(feature,user)=>user.premiumType===2},null,13797);
     const premium=b.load({default:{canUseEmojisEverywhere:user=>catalog.canUserUse(everywhere,user),
-        canUseAnimatedEmojis:user=>catalog.canUserUse(animation,user),canUseCustomStickersEverywhere:()=>false}},null,4491).default;
+        canUseAnimatedEmojis:user=>catalog.canUserUse(animation,user),canUseCustomStickersEverywhere:()=>false}},null,4528).default;
     assert.equal(premium.canUseEmojisEverywhere(b.user),true);assert.equal(catalog.canUserUse(animation,b.user),true);
     assert.equal(catalog.canUserUse(unrelated,b.user),false);assert.equal(catalog.canUserUse(animation,{id:'other',premiumType:null}),false);
     b.actions.sendMessage('channel',{content:'<a:test:3> <:other:2>'});assert.match(b.sent[0][1].content,/3.gif/);assert.match(b.sent[0][1].content,/2.webp/);
@@ -952,10 +952,10 @@ test('real default-export capability hooks unlock emoji selection but preserve n
 });
 test('JumpToTop clones frozen controls, keeps Jump to Present and uses each current channel ID', () => {
     const b=boot(allFeatures);const {React}=reactHarness(b),jumps=[];let present=0;
-    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6880);
+    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6965);
     const child=Object.freeze(React.createElement('Button',{onPress:()=>present++,icon:'down'}));
     const result=Object.freeze(React.createElement('View',{children:child}));
-    const component=b.load({default:()=>result},null,11642).default;
+    const component=b.load({default:()=>result},null,11896).default;
     const first=component({channelId:'100'});const controls=first.props.children.props.children;
     controls[0].props.children.props.onPress();controls[1].props.onPress();
     assert.equal(present,1);assert.equal(jumps[0].channelId,'100');assert.equal(jumps[0].messageId,'100');assert.equal(result.props.children,child);
@@ -964,10 +964,10 @@ test('JumpToTop clones frozen controls, keeps Jump to Present and uses each curr
 });
 test('JumpToTop is available when Jump to Present is absent without wrapping unrelated voice controls', () => {
     const b=boot(allFeatures);reactHarness(b);const jumps=[];
-    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6880);
-    b.load({default:'NativeFloatingButton'},null,11643);b.load({default:'NativeArrow'},null,11644);
-    b.load({useChatInputContainerHeight:()=>140,useSmallSuggestionBarHeight:()=>28},null,8838);
-    const component=b.load({default:()=>null},null,11642).default;
+    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6965);
+    b.load({default:'NativeFloatingButton'},null,11897);b.load({default:'NativeArrow'},null,11898);
+    b.load({useChatInputContainerHeight:()=>140,useSmallSuggestionBarHeight:()=>28},null,9064);
+    const component=b.load({default:()=>null},null,11896).default;
     const result=component({channelId:'123',screenIndex:0});assert.equal(result.props.style.bottom,180);
     assert.equal(result.props.children.props.children.type,'NativeFloatingButton');
     result.props.children.props.children.props.onPress();assert.equal(jumps[0].messageId,'123');
@@ -983,15 +983,15 @@ function hiddenHarness() {
     const channels={cat:category,hidden:text,second:other,voice,public:visible};const allowed=new Set(['public']);
     b.load({default:{getChannel:id=>channels[id],getMutableGuildChannelsForGuild:()=>channels}},null,2051);
     const viewPermission={nativeBit:1024};
-    b.load({Permissions:{VIEW_CHANNEL:viewPermission}},null,1086);
+    b.load({Permissions:{VIEW_CHANNEL:viewPermission}},null,1085);
     const permission={can:(permission,channel)=>{assert.equal(permission,viewPermission);return allowed.has(channel.id);}};
-    b.load({default:permission},null,4472);
+    b.load({default:permission},null,4509);
     const result=Object.freeze({id:'g',SELECTABLE:Object.freeze([{channel:visible,comparator:0}]),VOCAL:Object.freeze([]),4:Object.freeze([])});
-    const store=b.load({default:{getChannels:()=>result}},null,4470).default;
-    const fetched=[];const actions=b.load({default:{fetchMessages:value=>fetched.push(value)}},null,6880).default;
-    const label=b.load({default:channel=>channel.name},null,4990).default;
-    // A real tap on a channel row: Discord navigates (transitionToChannel -> router_utils.transitionTo 1113).
-    const navigated=[];const routes=b.load({transitionTo:r=>navigated.push(r),replaceWith:r=>navigated.push(r),transitionToGuild:(g,c)=>navigated.push([g,c])},null,1113);
+    const store=b.load({default:{getChannels:()=>result}},null,4507).default;
+    const fetched=[];const actions=b.load({default:{fetchMessages:value=>fetched.push(value)}},null,6965).default;
+    const label=b.load({default:channel=>channel.name},null,5043).default;
+    // A real tap on a channel row: Discord navigates (transitionToChannel -> router_utils.transitionTo 1112).
+    const navigated=[];const routes=b.load({transitionTo:r=>navigated.push(r),replaceWith:r=>navigated.push(r),transitionToGuild:(g,c)=>navigated.push([g,c])},null,1112);
     const tap=id=>routes.transitionTo('/channels/g/'+id);
     return {...b,channels,allowed,permission,viewPermission,result,store,actions,fetched,alerts,label,routes,navigated,tap};
 }
@@ -1009,8 +1009,8 @@ test('Hidden Channels adds cached metadata immutably, deduplicates categories an
 test('Hidden Channels caches READY names while toggle is off so enabling later still resolves',()=>{
     const b=hiddenHarness();
     // Default toggle is off; READY arrives before the user enables.
-    const dispatch=b.load({default:{dispatch(){}}},null,585).default;
-    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1378);
+    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
+    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1377);
     dispatch.dispatch({type:'CONNECTION_OPEN',user:{id:'me'},guilds:[{id:'g',channels:[{id:'hidden',name:'staff-chat',type:0},{id:'cat',name:'private',type:4}]}]});
     b.api.setSetting('hiddenChannels',true);
     // Store later redacts to server marker; cached gateway names must win.
@@ -1023,8 +1023,8 @@ test('Hidden Channels with the switch off walks a server\'s channels once, not o
     const b=hiddenHarness();let reads=0;
     const channels=new Proxy(b.channels,{ownKeys(t){reads++;return Reflect.ownKeys(t);}});
     b.load({default:{getChannel:id=>b.channels[id],getMutableGuildChannelsForGuild:()=>channels}},null,2051);
-    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1378);
-    const store=b.load({default:{getChannels:()=>b.result}},null,4470).default;
+    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1377);
+    const store=b.load({default:{getChannels:()=>b.result}},null,4507).default;
     for(let i=0;i<20;i++) assert.equal(store.getChannels('g'),b.result);
     assert.equal(reads,1,'unchanged records are remembered once');
     b.channels.hidden={...b.channels.hidden,name:'__hidden__'};
@@ -1065,11 +1065,11 @@ test('Hidden Channels: opening a server or the app never lands on a locked chann
         getChannels(){return {SELECTABLE:[{channel:b.channels.hidden,comparator:-1},{channel:b.channels.public,comparator:0}]};},
         getFirstChannel(guild,predicate){return (this.getChannels(guild).SELECTABLE.find(predicate)||{}).channel||null;},
         getDefaultChannel(guild){return this.getFirstChannel(guild,e=>view(b.viewPermission,e.channel));}
-    }},null,4470).default;
+    }},null,4507).default;
     assert.equal(guildStore.getDefaultChannel('g').id,'public','a locked channel is never the first channel over a real one');
     // Discord remembers the locked channel as the last one picked in the server, and as the current channel at startup.
     let last='hidden';
-    const selected=b.load({default:{getChannelId:guild=>last}},null,2102).default;
+    const selected=b.load({default:{getChannelId:guild=>last}},null,2103).default;
     assert.equal(selected.getChannelId('g'),'public','opening the server lands on its first real channel');
     assert.equal(selected.getChannelId(),'public','opening the app lands on a real channel');
     last='public';assert.equal(selected.getChannelId('g'),'public');
@@ -1082,7 +1082,7 @@ test('Hidden Channels: opening a server or the app never lands on a locked chann
 
 test('Hidden Channels blocks only locked channel navigation, including voice, with real native flag objects', () => {
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);const calls=[];
-    const navigation=b.load({transitionTo:(...args)=>calls.push(args),replaceWith:(...args)=>calls.push(args),transitionToGuild:(...args)=>calls.push(args)},null,1113);
+    const navigation=b.load({transitionTo:(...args)=>calls.push(args),replaceWith:(...args)=>calls.push(args),transitionToGuild:(...args)=>calls.push(args)},null,1112);
     navigation.transitionTo('/channels/g/hidden');navigation.replaceWith('/channels/g/voice');navigation.transitionTo('/channels/g/hidden');
     // The still-open prompt for 'hidden' is not stacked a second time.
     assert.equal(calls.length,0);assert.equal(b.alerts.length,2);assert.equal(b.alerts[1][0],'Locked voice channel');
@@ -1107,10 +1107,10 @@ test('JumpToTop does not wrap channel, DM, thread or forum long-press action she
 test('JumpToTop passes returnMessageId so Jump to Present appears at the top and hides in empty chats', () => {
     const b=boot({jumpToTop:true});reactHarness(b);const jumps=[];
     let msgs={ready:true,hasMoreBefore:false,length:5,last:()=>({id:'999'})};
-    b.load({default:{getMessages:()=>msgs}},null,5057);
-    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6880);
-    b.load({default:'NativeFloatingButton'},null,11643);b.load({default:'NativeArrow'},null,11644);
-    const component=b.load({default:()=>null},null,11642).default;
+    b.load({default:{getMessages:()=>msgs}},null,5110);
+    b.load({default:{jumpToMessage:value=>jumps.push(value)}},null,6965);
+    b.load({default:'NativeFloatingButton'},null,11897);b.load({default:'NativeArrow'},null,11898);
+    const component=b.load({default:()=>null},null,11896).default;
     const btn=component({channelId:'123',screenIndex:0});
     btn.props.children.props.children.props.onPress();
     assert.equal(jumps[0].returnMessageId,'999');
@@ -1125,7 +1125,7 @@ test('prototype Flux methods are shadowed on the same live instance, preserving 
         dispatch(event){this.#dispatches++;calls++;return event;}
         count(){return this.#dispatches;}
     }
-    const flux=new Flux();const patched=b.load({default:flux},null,585).default;
+    const flux=new Flux();const patched=b.load({default:flux},null,578).default;
     assert.equal(patched,flux);const event={type:'OTHER'};assert.equal(patched.dispatch(event),event);
     assert.equal(flux.count(),1);assert.equal(calls,1);
 });
@@ -1136,7 +1136,7 @@ test('prototype channel-store hooks retain store identity and inherited subscrip
         getChannels(){return this.#result;}
         subscribe(){return this;}
     }
-    const store=new Store();const patched=b.load({default:store},null,4470).default;
+    const store=new Store();const patched=b.load({default:store},null,4507).default;
     assert.equal(patched,store);assert.equal(patched.subscribe(),store);assert.equal(patched.getChannels('g'),b.result);
     b.api.setSetting('hiddenChannels',true);assert.equal(patched.getChannels('g').SELECTABLE.length,3);
 });
@@ -1268,7 +1268,7 @@ class MessageCollection {
 }
 test('NoDelete snapshots survive incoming messages, cache replacement, reconnect and truncation',()=>{
     const b=deletionHarness();let collection=new MessageCollection([{id:'1',content:'original',author:{id:'u'}}]);
-    const store=b.load({default:{getMessage:(c,id)=>collection.toArray().find(m=>m.id===id),getMessages:()=>collection}},null,5057).default;
+    const store=b.load({default:{getMessage:(c,id)=>collection.toArray().find(m=>m.id===id),getMessages:()=>collection}},null,5110).default;
     b.api.setSetting('noDelete',true);b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});
     assert.equal(store.getMessage('c','1').content,'original');
     collection=new MessageCollection([{id:'2',content:'new'}]);b.dispatch.dispatch({type:'MESSAGE_CREATE',channelId:'c',message:{id:'2'}});
@@ -1279,8 +1279,8 @@ test('NoDelete snapshots survive incoming messages, cache replacement, reconnect
 });
 async function archiveHarness(saved,account='owner') {
     const b=boot(allFeatures);let disk=saved,writes=[];
-    const store=b.load({default:{getMessage:()=>undefined,getMessages:()=>new MessageCollection(),emitChange(){}}},null,5057).default;
-    b.load({createMessageRecord:raw=>({...raw})},null,5059);b.load({default:{getCurrentUser:()=>({id:account})}},null,1378);
+    const store=b.load({default:{getMessage:()=>undefined,getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110).default;
+    b.load({createMessageRecord:raw=>({...raw})},null,5112);b.load({default:{getCurrentUser:()=>({id:account})}},null,1377);
     b.load({default:native({fileExists:async path=>path.endsWith('venus-deleted-messages.json')&&!!disk,
         readFile:async()=>disk,writeFile:async(dir,name,text)=>{writes.push([name,text]);if(name==='venus-deleted-messages.json')disk=text;}})});
     await flush();await flush();b.api.setSetting('noDelete',true);b.api.setSetting('noDeleteSave',true);await flush();await flush();
@@ -1298,9 +1298,9 @@ test('NoDelete archive is opt-in, account-scoped, restores original content and 
 test('NoDelete replaces a damaged archive instead of blocking saving, and keeps one it could not read',async()=>{
     // Damaged: newly kept messages are saved over it in this same session.
     const b=boot(allFeatures);let disk='{broken';const writes=[],messages=new Map([['c:1',{id:'1',channel_id:'c',author:{id:'u'},content:'gone',state:'SENT'}]]);
-    b.load({default:{getMessage:(c,id)=>messages.get(c+':'+id),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5057);
-    b.load({createMessageRecord:raw=>({...raw})},null,5059);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1378);
-    const dispatch=b.load({default:{dispatch(){return undefined;}}},null,585).default;
+    b.load({default:{getMessage:(c,id)=>messages.get(c+':'+id),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110);
+    b.load({createMessageRecord:raw=>({...raw})},null,5112);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
+    const dispatch=b.load({default:{dispatch(){return undefined;}}},null,578).default;
     b.load({default:native({fileExists:async path=>path.endsWith('venus-deleted-messages.json'),readFile:async()=>disk,
         writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-deleted-messages.json')disk=text;}})});
     await flush();await flush();b.api.setSetting('noDelete',true);b.api.setSetting('noDeleteSave',true);await flush();await flush();
@@ -1309,8 +1309,8 @@ test('NoDelete replaces a damaged archive instead of blocking saving, and keeps 
     assert.equal(JSON.parse(disk).messages[0].message.content,'gone');assert.equal(b.api.status.archive,'saved locally');
     // Unreadable: the file is never overwritten, so a passing read error can't erase saved messages.
     const u=boot(allFeatures);let kept='{"version":1}';
-    u.load({default:{getMessage:()=>undefined,getMessages:()=>new MessageCollection(),emitChange(){}}},null,5057);
-    u.load({createMessageRecord:raw=>({...raw})},null,5059);u.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1378);
+    u.load({default:{getMessage:()=>undefined,getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110);
+    u.load({createMessageRecord:raw=>({...raw})},null,5112);u.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
     u.load({default:native({fileExists:async path=>path.endsWith('venus-deleted-messages.json'),readFile:async path=>{if(path.endsWith('venus-deleted-messages.json'))throw new Error('busy');return null;},
         writeFile:async(dir,name,text)=>{if(name==='venus-deleted-messages.json')kept=text;}})});
     await flush();await flush();u.api.setSetting('noDelete',true);u.api.setSetting('noDeleteSave',true);await flush();await flush();
@@ -1329,25 +1329,25 @@ test('Hidden Channels mobile list facade handles named/default imports without c
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
     // boot's require mocks return nothing; load a realistic factory directly through __d instead.
     const real=b.permission;let captured;
-    b.context.__d(function(g,req,imp,all,m){captured=[req(4472).default,imp(4472),all(4472).default];m.exports={};},6952,[]);
-    b.factories.get(6952)(b.context,()=>({default:real}),()=>real,()=>({default:real}),{exports:{}},{},[]);
+    b.context.__d(function(g,req,imp,all,m){captured=[req(4509).default,imp(4509),all(4509).default];m.exports={};},7039,[]);
+    b.factories.get(7039)(b.context,()=>({default:real}),()=>real,()=>({default:real}),{exports:{}},{},[]);
     // Global bypass is active when enabled; realCheck reveals the true false.
     for(const facade of captured){assert.equal(facade.can(b.viewPermission,b.channels.hidden),true);assert.equal(real.can(b.viewPermission,b.channels.hidden),true);}
     assert.equal(real.can(b.viewPermission,Object.assign({},b.channels.hidden,{realCheck:true})),false);
     b.api.setSetting('hiddenChannels',false);for(const facade of captured)assert.equal(facade.can(b.viewPermission,b.channels.hidden),false);
 });
 test('Hidden Channels fills numeric native channel-type buckets and gets direct permission constants',()=>{
-    const b=hiddenHarness();b.load({Permissions:{VIEW_CHANNEL:b.viewPermission}},null,1097);b.load({},null,1086);
-    const original={0:[],2:[],4:[],SELECTABLE:[],VOCAL:[]};const store=b.load({default:{getChannels:()=>original}},null,4470).default;
+    const b=hiddenHarness();b.load({Permissions:{VIEW_CHANNEL:b.viewPermission}},null,1096);b.load({},null,1085);
+    const original={0:[],2:[],4:[],SELECTABLE:[],VOCAL:[]};const store=b.load({default:{getChannels:()=>original}},null,4507).default;
     b.api.setSetting('hiddenChannels',true);const value=store.getChannels('g');assert.equal(value[0].length,2);assert.equal(value[2].length,1);assert.equal(original[0].length,0);
 });
 
 test('Pastelize preserves role colors and immutable mentions, supports webhook and content controls',()=>{
     const b=boot(allFeatures);const {RN}=reactHarness(b);RN.processColor=hex=>parseInt(hex.slice(1),16)|0xff000000;
-    // Pinned module 1252 is CommonJS: a direct function, not {default:fn}.
-    b.load(seed=>Array.from(seed).reduce((a,c)=>a+c.charCodeAt(0),0),null,1252);
+    // Pinned module 1251 is CommonJS: a direct function, not {default:fn}.
+    b.load(seed=>Array.from(seed).reduce((a,c)=>a+c.charCodeAt(0),0),null,1251);
     class Rows {generate(row){return row.result;}}
-    b.load({default:Rows},null,7378);
+    b.load({default:Rows},null,7591);
     const message=Object.freeze({authorId:'123',username:'Test',roleColor:null,content:Object.freeze([Object.freeze({type:'mention',userId:'456',content:'test'})])});
     const row={rowType:1,message:{},result:Object.freeze({message})}, rows=new Rows();
     const result=rows.generate(row);assert.notEqual(result,row.result);assert.equal(message.roleColor,null);assert.equal(typeof result.message.colorString,'number');assert.equal(result.message.colorString,result.message.roleColor);assert.equal(message.content[0].colorString,undefined);
@@ -1361,10 +1361,10 @@ test('Pastelize preserves role colors and immutable mentions, supports webhook a
 });
 test('PlatformIndicators uses real client status, hides unknown/offline clients and preserves immutable profiles',()=>{
     const b=boot(allFeatures),{React}=reactHarness(b);const clients={desktop:'online',mobile:'idle',web:'offline',unknown:'dnd'};
-    b.load({default:{getClientStatus:()=>clients,addChangeListener(){},removeChangeListener(){}}},null,4877);
+    b.load({default:{getClientStatus:()=>clients,addChangeListener(){},removeChangeListener(){}}},null,4930);
     function DisplayName(props){return Object.freeze(React.createElement('Name',{children:props.user.id}));}
     const profile=Object.freeze(React.createElement('View',{children:React.createElement(DisplayName,{user:{id:'u'}})}));
-    const exports=b.load({DisplayName,default:()=>profile},null,10603);
+    const exports=b.load({DisplayName,default:()=>profile},null,10843);
     const tree=exports.default({});assert.notEqual(tree,profile);const named=tree.props.children.type(tree.props.children.props);
     const badges=named.props.children[1];const rendered=badges.type(badges.props);
     assert.deepEqual(Array.from(rendered.props.children,c=>c.props.children.props.platform),['desktop','mobile']);
@@ -1380,24 +1380,24 @@ function reviewHarness() {
         url.endsWith('/admins')?['999999999999999999']:{success:true,reviews:[{id:0,type:3,comment:'Be nice',sender:{discordID:'1',username:'Warning',badges:[]}},
             {id:1,comment:'hello',timestamp:1700000000,sender:{discordID:'333333333333333333',username:'Other',profilePhoto:'https://cdn.discordapp.com/a.png',badges:[{name:'Donor',icon:'https://cdn.discordapp.com/b.webp'}]}}]}};};
     const account={id:'111111111111111111'};const toasts=[],confirms=[],sheets=[],simple=[],pushed=[],popped=[],copied=[];
-    // 4801 exports showActionSheet by NAME, not on its default action creators.
+    // 4854 exports showActionSheet by NAME, not on its default action creators.
     // Execute the show/close boundary instead of only recording lazy-loader inputs.
     const sheetEvents=[],hiddenSheets=[];
     const showActionSheet=config=>{sheets.push(config);sheetEvents.push({type:'SHOW_ACTION_SHEET',...config});};
-    const native={5916:{TableRow:'NativeRow'},5997:{TableRowGroup:'RowGroup'},6621:{TableSwitchRow:'SwitchRow'},5280:{Stack:'Stack'},5918:{Card:'UserProfileCard'},
-        8057:{FormRow:'FormRow',FormLabel:'FormLabel',FormSubLabel:'FormSubLabel'},6021:{TextInput:'NativeTextInput'},4778:{SendMessageIcon:'SendIcon'},
-        6624:{ActionSheet:'ActionSheet'},6571:{BottomSheetTitleHeader:'SheetHeader'},6619:{ActionSheetCloseButton:'SheetClose'},
-        4801:{showActionSheet,default:{openLazy(){throw new Error('Bundled reviews must not use a lazy importer');},hideActionSheet:key=>hiddenSheets.push(key)}},6616:{showSimpleActionSheet:value=>simple.push(value)},
-        6614:{Clipboard:{setString:value=>copied.push(value)}},5205:{default:{show:value=>confirms.push(value)}},4531:{default:{open:value=>toasts.push(value)}},
-        4694:{pushModal:value=>pushed.push(value),popModal:key=>popped.push(key)},8510:{default:'OAuth2AuthorizeModal'},4551:{useThemeContext:()=>({primaryColor:'#123456'})}};
+    const native={5993:{TableRow:'NativeRow'},6074:{TableRowGroup:'RowGroup'},6698:{TableSwitchRow:'SwitchRow'},5593:{Stack:'Stack'},5995:{Card:'UserProfileCard'},
+        8895:{FormRow:'FormRow',FormLabel:'FormLabel',FormSubLabel:'FormSubLabel'},6098:{TextInput:'NativeTextInput'},4841:{SendMessageIcon:'SendIcon'},
+        6701:{ActionSheet:'ActionSheet'},6644:{BottomSheetTitleHeader:'SheetHeader'},6696:{ActionSheetCloseButton:'SheetClose'},
+        4854:{showActionSheet,default:{openLazy(){throw new Error('Bundled reviews must not use a lazy importer');},hideActionSheet:key=>hiddenSheets.push(key)}},6693:{showSimpleActionSheet:value=>simple.push(value)},
+        6691:{Clipboard:{setString:value=>copied.push(value)}},5708:{default:{show:value=>confirms.push(value)}},4568:{default:{open:value=>toasts.push(value)}},
+        4736:{pushModal:value=>pushed.push(value),popModal:key=>popped.push(key)},8716:{default:'OAuth2AuthorizeModal'},4593:{useThemeContext:()=>({primaryColor:'#123456'})}};
     b.context.__r=id=>native[id]||null;
-    b.load({default:{getCurrentUser:()=>account}},null,1378);
+    b.load({default:{getCurrentUser:()=>account}},null,1377);
     const noteOriginal=React.createElement('Note',null);
-    const note=b.load({default:()=>noteOriginal},null,12627).default;
+    const note=b.load({default:()=>noteOriginal},null,12872).default;
     const progressOriginal=React.createElement('Progress',null);
-    const guild=b.load({default:()=>progressOriginal},null,13521).default;
-    const menuCalls=[];const menu=b.load({ContextMenuPopout:props=>{menuCalls.push(props);return 'menu';}},null,13987);
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}},null,14130).SETTING_RENDERER_CONFIG;
+    const guild=b.load({default:()=>progressOriginal},null,13790).default;
+    const menuCalls=[];const menu=b.load({ContextMenuPopout:props=>{menuCalls.push(props);return 'menu';}},null,14259);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}},null,14409).SETTING_RENDERER_CONFIG;
     const Settings=registry.VENUS_REVIEWDB.screen.getComponent();
     return {...b,React,RN,requests,alerts,account,toasts,confirms,sheets,simple,pushed,popped,copied,note,noteOriginal,guild,progressOriginal,menu,menuCalls,Settings,native,sheetEvents,hiddenSheets};
 }
@@ -1414,7 +1414,7 @@ class NativeChannelMessages {
 }
 test('NoDelete supports immutable ChannelMessages and refreshes identity without changing content',()=>{
     const b=deletionHarness();let collection=new NativeChannelMessages([{id:'1',channel_id:'c',content:'kept',author:{id:'u'}}]);
-    const store=b.load({default:{getMessage:(c,id)=>collection.toArray().find(message=>message.id===id),getMessages:()=>collection}},null,5057).default;
+    const store=b.load({default:{getMessage:(c,id)=>collection.toArray().find(message=>message.id===id),getMessages:()=>collection}},null,5110).default;
     b.api.setSetting('noDelete',true);b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});
     assert.equal(b.events.at(-1).type,'MESSAGE_UPDATE');assert.equal(b.events.at(-1).message.content,'kept');
     assert.equal(typeof collection.clone,'undefined');assert.equal(collection.messages[0].content,'kept');
@@ -1427,7 +1427,7 @@ test('NoDelete independently renders a native red gutter without altering conten
     const b=deletionHarness(),{RN}=reactHarness(b);RN.processColor=color=>color;
     b.load({createAutomodBlockedMessageEmbed:({errorMessage,colors})=>Object.freeze({type:1,messageSendError:errorMessage,bodyTextColor:colors.automodBlockedBodyTextColor})},null,8455);
     class Rows {generate(row){return row.result;}}
-    b.load({default:Rows},null,7378);const rows=new Rows();
+    b.load({default:Rows},null,7591);const rows=new Rows();
     const message=Object.freeze({id:'1',channelId:'c',authorId:'u',content:[],embeds:Object.freeze([{type:'attachment'}])});
     const original=Object.freeze({message});const row={rowType:1,message:{id:'1',channel_id:'c'},result:original};
     assert.equal(rows.generate(row).message.embeds.length,1);
@@ -1444,7 +1444,7 @@ test('NoDelete independently renders a native red gutter without altering conten
 });
 test('Hidden Channels replaces obfuscated names in both native formatters, including empty locked sections',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
-    const names=b.load({default:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name,computeChannelName:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name},null,4990);
+    const names=b.load({default:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name,computeChannelName:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name},null,5043);
     const category={id:'empty',type:4,guild_id:'g',name:'PRIVATE STAFF',position:9};b.channels.empty=category;
     assert.equal(names.computeChannelName(b.channels.hidden),'staff chat');
     assert.equal(names.default(b.channels.hidden),'staff chat');assert.equal(names.computeChannelName(category),'PRIVATE STAFF');
@@ -1453,16 +1453,16 @@ test('Hidden Channels replaces obfuscated names in both native formatters, inclu
     assert.equal(b.permission.can(b.viewPermission,category),true);
     assert.equal(b.permission.can(b.viewPermission,Object.assign({},category,{realCheck:true})),false);
     b.permission.can=(bit,channel)=>bit===b.viewPermission && b.allowed.has(channel.id);
-    let facade;b.context.__d((g,r,i,a,m)=>{facade=i(4472);m.exports={};},6952,[]);
-    b.factories.get(6952)(b.context,()=>b.permission,()=>b.permission,()=>b.permission,{exports:{}},{},[]);
+    let facade;b.context.__d((g,r,i,a,m)=>{facade=i(4509);m.exports={};},7039,[]);
+    b.factories.get(7039)(b.context,()=>b.permission,()=>b.permission,()=>b.permission,{exports:{}},{},[]);
     assert.equal(facade.can(b.viewPermission,category),true);assert.equal(facade.can('CONNECT',category),false);
     category.isObfuscated=()=>true;b.api.setSetting('hiddenChannels',false);assert.equal(names.computeChannelName(category),'No Access');assert.equal(facade.can(b.viewPermission,category),false);
 });
 test('Pastelize respects source role colors and unknown members, and colors webhook names and nested reply mentions',()=>{
     const b=boot(allFeatures),{RN}=reactHarness(b);RN.processColor=color=>color;
-    const seeds=[];b.load(seed=>{seeds.push(seed);return seed.length*23;},null,1252);
-    b.load({default:{getMember:(guild,id)=>id==='missing'?null:{id}}},null,2111);
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);const rows=new Rows();
+    const seeds=[];b.load(seed=>{seeds.push(seed);return seed.length*23;},null,1251);
+    b.load({default:{getMember:(guild,id)=>id==='missing'?null:{id}}},null,2112);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);const rows=new Rows();
     const message={authorId:'author',guildId:'g',username:'Name',roleColor:null,content:[{type:'strong',content:[{type:'mention',userId:'member'},{type:'mention',userId:'missing'}]}]};
     const row={rowType:1,message:{colorString:'#123456'},result:{message}};
     let result=rows.generate(row);assert.equal(result.message.roleColor,null);assert.equal(result.message.shouldShowRoleOnName,true);
@@ -1479,7 +1479,7 @@ test('Pastelize respects source role colors and unknown members, and colors webh
 function platformFixture() {
     const b=boot({platformIndicators:true}),{React}=reactHarness(b);
     function DisplayName(props){return React.createElement('Name',{children:props.user.id});}
-    const profile=b.load({DisplayName,default:()=>React.createElement('Profile',{children:React.createElement(DisplayName,{user:{id:'self'}})})},null,10603);
+    const profile=b.load({DisplayName,default:()=>React.createElement('Profile',{children:React.createElement(DisplayName,{user:{id:'self'}})})},null,10843);
     const tree=profile.default({}),name=tree.props.children.type(tree.props.children.props);
     return {...b,React,badges:name.props.children[1]};
 }
@@ -1487,8 +1487,8 @@ test('PlatformIndicators uses own sessions and cleans up both subscriptions',()=
     const b=platformFixture(),listeners=new Set(),removals=[];let sessions={one:{clientInfo:{client:'mobile'},status:'idle'},two:{clientInfo:{client:'web'},status:'dnd'},unknown:{clientInfo:{client:'unknown'},status:'online'}};
     const presence={getClientStatus:()=>({desktop:'online'}),addChangeListener:fn=>listeners.add(fn),removeChangeListener:fn=>{removals.push('presence');listeners.delete(fn);}};
     const store={getSessions:()=>sessions,addChangeListener:fn=>listeners.add(fn),removeChangeListener:fn=>{removals.push('sessions');listeners.delete(fn);}};
-    b.load({default:presence},null,4877);b.load({default:{getCurrentUser:()=>({id:'self'})}},null,1378);
-    b.context.__r=id=>({4855:{default:store}}[id]);
+    b.load({default:presence},null,4930);b.load({default:{getCurrentUser:()=>({id:'self'})}},null,1377);
+    b.context.__r=id=>({4908:{default:store}}[id]);
     let cleanup;b.React.useEffect=fn=>cleanup=fn();
     let tree=b.badges.type(b.badges.props);assert.deepEqual(Array.from(tree.props.children,c=>c.props.children.props.platform),['mobile','web']);
     cleanup();assert.deepEqual(removals,['presence','sessions']);
@@ -1535,7 +1535,7 @@ test('ReviewDB OAuth follows the traced 347.12 order: dismissOAuthModal BEFORE c
     assert.equal(typeof b.toasts.at(-1).IconComponent,'function','sign-in toast has an icon');
     // Success toasts use Discord's CircleCheckIcon; failures use CircleXIcon.
     const Before=b.context.__r;let asked=[];b.context.__r=id=>{asked.push(id);return Before(id);};
-    b.toasts.at(-1).IconComponent({});assert.ok(asked.includes(4793),'success toast uses CircleCheckIcon');b.context.__r=Before;
+    b.toasts.at(-1).IconComponent({});assert.ok(asked.includes(4792),'success toast uses CircleCheckIcon');b.context.__r=Before;
 });
 test('ReviewDB sign-in survives disabling the plugin and logs out explicitly, and stays signed in',async()=>{
     const b=reviewHarness();const props=openReviewAuth(b);props.callback({location:'https://manti.vendicated.dev/api/reviewdb/auth?code=x'});await flush();await flush();
@@ -1628,7 +1628,7 @@ test('NoDelete reorders restored native records exactly without sharing the stoc
         mutate(callback,clone){assert.equal(clone,true);const next=Object.assign(Object.create(UnsortedNative.prototype),this);next._array=this._array.slice();callback(next);return next;}
     }
     let original=new UnsortedNative([{id:'999999999999999999',content:'old'}]);
-    const store=b.load({default:{getMessage:(channel,id)=>original.toArray().find(m=>m.id===id),getMessages:()=>original}},null,5057).default;
+    const store=b.load({default:{getMessage:(channel,id)=>original.toArray().find(m=>m.id===id),getMessages:()=>original}},null,5110).default;
     b.api.setSetting('noDelete',true);b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'999999999999999999'});
     original=new UnsortedNative([{id:'1000000000000000000',content:'new'}]);b.dispatch.dispatch({type:'CACHE_LOADED'});
     const view=store.getMessages('c');assert.deepEqual(Array.from(view.toArray(),m=>m.id),['999999999999999999','1000000000000000000']);
@@ -1657,7 +1657,7 @@ test('NoDelete preserves literal deletion-like text, attachment-only content, li
         const b=deletionHarness();b.api.setSetting('noDelete',true);
         const message=Object.freeze({id:'x',channel_id:'c',content,attachments:Object.freeze([{id:'a'}])});
         b.messages.set('c:x',message);b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'x'});
-        const store=b.load({default:{getMessage:()=>message}},null,5057).default;
+        const store=b.load({default:{getMessage:()=>message}},null,5110).default;
         const kept=store.getMessage('c','x');assert.notEqual(kept,message);assert.equal(kept.content,content);assert.equal(kept.attachments,message.attachments);
         assert.equal(b.events.at(-1).message.content,content);
         b.api.setSetting('noDelete',false);b.api.setSetting('noDelete',true);
@@ -1668,10 +1668,10 @@ test('Hidden Channels resolves real basic record names and immutable numeric sec
     b.channels.hidden={...b.channels.hidden,name:'__hidden__'};b.channels.cat={...b.channels.cat,name:'__hidden__'};
     const basic={hidden:{...b.channels.hidden,name:'staff-chat'},cat:{...b.channels.cat,name:'PRIVATE STAFF'}};
     b.load({default:{getChannel:id=>b.channels[id],getBasicChannel:id=>basic[id],getMutableGuildChannelsForGuild:()=>b.channels,getMutableBasicGuildChannelsForGuild:()=>basic}},null,2051);
-    const names=b.load({default:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name,computeChannelName:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name},null,4990);
+    const names=b.load({default:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name,computeChannelName:c=>c.isObfuscated && c.isObfuscated() ? 'No Access' : c.name},null,5043);
     assert.equal(names.default(b.channels.hidden),'staff chat');assert.equal(names.computeChannelName(b.channels.cat),'PRIVATE STAFF');
     const original=Object.freeze({0:Object.freeze([{channel:b.channels.hidden,comparator:3}]),4:Object.freeze([{channel:b.channels.cat,comparator:2}])});
-    const store=b.load({default:{getChannels:()=>original}},null,4470).default;const list=store.getChannels('g');
+    const store=b.load({default:{getChannels:()=>original}},null,4507).default;const list=store.getChannels('g');
     assert.equal(list[0][0].channel.name,'staff-chat');assert.equal(list[4][0].channel.name,'PRIVATE STAFF');assert.equal(original[0][0].channel.name,'__hidden__');
     assert.equal(b.permission.can(b.viewPermission,b.channels.hidden),true);
     assert.equal(b.permission.can(b.viewPermission,Object.assign({},b.channels.hidden,{realCheck:true})),false);
@@ -1682,8 +1682,8 @@ test('Hidden Channels resolves real basic record names and immutable numeric sec
 test('Hidden Channels harvests real names from message mention_channels',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
     b.channels.hidden={...b.channels.hidden,name:'hidden'};
-    let account='me';b.load({default:{getCurrentUser:()=>({id:account})}},null,1378);
-    const dispatch=b.load({default:{dispatch(){}}},null,585).default;
+    let account='me';b.load({default:{getCurrentUser:()=>({id:account})}},null,1377);
+    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
     assert.match(b.label(b.channels.hidden),/unavailable/);
     dispatch.dispatch({type:'MESSAGE_CREATE',message:{id:'m',channel_id:'public',mention_channels:[{id:'hidden',guild_id:'g',type:0,name:'staff-chat'}]}});
     assert.equal(b.label(b.channels.hidden),'staff chat');
@@ -1702,13 +1702,13 @@ test('Hidden Channels popup uses Discord\'s native AlertModal with themed Text t
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);
     const shown=[];const required=[];
     function NativeText(){}
-    b.context.__r=id=>{required.push(id);return id===5205?{default:{show:value=>shown.push(value)}}:id===4833?{Text:NativeText}:null;};
+    b.context.__r=id=>{required.push(id);return id===5708?{default:{show:value=>shown.push(value)}}:id===4886?{Text:NativeText}:null;};
     const minute=60000, hour=60*minute, day=24*hour;
     const ago = 8*day + 7*hour + 7*minute;
     const id = String((BigInt(Date.now()-ago-1420070400000)<<22n)+1n);
     b.channels.timed={...b.channels.hidden,id,lastMessageId:id,lastPinTimestamp:new Date(Date.now()-ago).toISOString()};
     b.tap('timed');
-    assert.equal(shown.length,1);assert.equal(b.alerts.length,0);assert.deepEqual(required.sort(),[4833,5205]);
+    assert.equal(shown.length,1);assert.equal(b.alerts.length,0);assert.deepEqual(required.sort(),[4886,5708]);
     const alert=shown[0];
     // Strings + element children select the modern AlertModal path in AlertActionCreators.show.
     assert.equal(alert.title,'Locked channel');assert.equal(typeof alert.body,'string');
@@ -1734,8 +1734,8 @@ test('Hidden Channels never presents a server redaction as a real name or fetche
 });
 test('Hidden Channels cached gateway names clear on logout, account switch and channel removal but survive disabling',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};
-    let account='first';b.load({default:{getCurrentUser:()=>({id:account})}},null,1378);
-    const dispatch=b.load({default:{dispatch(){}}},null,585).default;
+    let account='first';b.load({default:{getCurrentUser:()=>({id:account})}},null,1377);
+    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
     function remember(){dispatch.dispatch({type:'CHANNEL_UPDATE',channel:{...b.channels.hidden,name:'received-name'}});assert.equal(b.label(b.channels.hidden),'received name');}
     remember();dispatch.dispatch({type:'LOGOUT'});assert.match(b.label(b.channels.hidden),/name unavailable/);
     remember();account='second';assert.match(b.label(b.channels.hidden),/name unavailable/);
@@ -1746,40 +1746,40 @@ test('Hidden Channels cached gateway names clear on logout, account switch and c
 });
 test('Hidden Channels adds no second lock and preserves frozen ChannelInfo and stock disabled output',()=>{
     const b=hiddenHarness(),{React}=reactHarness(b);b.api.setSetting('hiddenChannels',true);
-    b.load({LockIcon:'NativeLock'},null,5410);const original=Object.freeze(React.createElement('ChannelInfo',{children:'staff'}));
-    const info=b.load({default:()=>original},null,15859).default;
+    b.load({LockIcon:'NativeLock'},null,5879);const original=Object.freeze(React.createElement('ChannelInfo',{children:'staff'}));
+    const info=b.load({default:()=>original},null,16157).default;
     // Discord draws its own TextLockIcon for the row; Venus no longer adds a second, bigger lock beside the name.
     const tree=info({channel:b.channels.hidden});assert.equal(tree.props.children,original);assert.match(tree.props.accessibilityLabel,/locked/);
     b.api.setSetting('hiddenChannels',false);assert.equal(info({channel:b.channels.hidden}),original);
 });
 test('PlatformIndicators uses the bundled tinted PNG glyphs for desktop and mobile',()=>{
-    const b=platformFixture();b.load({default:{getClientStatus:()=>({desktop:'online',mobile:'idle'})}},null,4877);
+    const b=platformFixture();b.load({default:{getClientStatus:()=>({desktop:'online',mobile:'idle'})}},null,4930);
     const icons=b.badges.type({userId:'other'}).props.children;const desktop=icons[0].props.children;const image=desktop.type(desktop.props);
     assert.match(image.props.source.uri,/^data:image\/png;base64,/);assert.equal(image.props.style.tintColor,'#23a55a');assert.equal(image.props.style.width,16);
     const mobile=icons[1].props.children;assert.equal(mobile.type(mobile.props).props.style.tintColor,'#f0b232');
 });
 test('PlatformIndicators covers memoized DM headers, DM content, friend labels and voice member titles without mutating props',()=>{
-    const b=boot({platformIndicators:true}),{React,RN}=reactHarness(b);b.load({default:{getClientStatus:()=>({desktop:'online'})}},null,4877);
+    const b=boot({platformIndicators:true}),{React,RN}=reactHarness(b);b.load({default:{getClientStatus:()=>({desktop:'online'})}},null,4930);
     const channel={id:'dm',type:1,recipients:['recipient']};b.load({default:{getChannel:()=>channel}},null,2051);
     const onPress=()=>{},name=Object.freeze(React.createElement(RN.Text,{variant:'redesign/channel-title/semibold',children:'User'}));
-    for(const module of [12845,15667,9108]) {
+    for(const module of [13107,15962,9334]) {
         const original=Object.freeze(React.createElement(RN.View,{onPress,children:Object.freeze([name,React.createElement('Subtitle',{children:'Activity'})])}));
         const component=Object.freeze({$$typeof:Symbol.for('react.memo'),type:()=>original,compare:()=>false});
-        // 348.10 voice panel rows are FormComponents' named MemberRowItem export, not a default.
-        const key=module===9108?'MemberRowItem':'default';
-        const exports=b.load({[key]:component},null,module);const props=module===12845?{channelId:'dm'}:module===15667?{channel}:{user:{id:'recipient'}};
+        // 349.9 voice panel rows are FormComponents' named MemberRowItem export, not a default.
+        const key=module===9334?'MemberRowItem':'default';
+        const exports=b.load({[key]:component},null,module);const props=module===13107?{channelId:'dm'}:module===15962?{channel}:{user:{id:'recipient'}};
         const tree=exports[key].type(props),badges=walkElements(tree,n=>n.type && n.type.name==='PlatformBadges');
         assert.equal(badges.length,1);assert.equal(badges[0].props.userId,'recipient');assert.equal(original.props.children[0],name);assert.equal(tree.props.onPress,onPress);assert.equal(exports[key].compare,component.compare);
         assert.equal(walkElements(tree,n=>n.type===RN.Text && walkElements(n,x=>x.type===RN.View).length).length,0);
         b.api.setSetting('platformIndicators',false);assert.equal(exports[key].type(props),original);b.api.setSetting('platformIndicators',true);
     }
     const original=Object.freeze(React.createElement('NativeRow',{label:name,onPress,subLabel:'Playing'}));
-    const row=b.load({default:()=>original},null,10371).default;const tree=row({user:{id:'friend'}});
+    const row=b.load({default:()=>original},null,10602).default;const tree=row({user:{id:'friend'}});
     assert.equal(walkElements(tree,n=>n.type && n.type.name==='PlatformBadges')[0].props.userId,'friend');assert.equal(tree.props.subLabel,'Playing');assert.equal(tree.props.onPress,onPress);assert.equal(original.props.label,name);
 });
 test('PlatformIndicators excludes groups and guild channel lists from single-user DM placements',()=>{
     const b=boot({platformIndicators:true}),{React,RN}=reactHarness(b);const original=React.createElement(RN.View,{children:React.createElement(RN.Text,{children:'Group'})});
-    const content=b.load({default:()=>original},null,15667).default;
+    const content=b.load({default:()=>original},null,15962).default;
     for(const channel of [{type:3,recipients:['a','b']},{type:0,recipients:['a']},{type:1,recipients:[]}])assert.equal(content({channel}),original);
 });
 // HBC98 #124513: Call2(callback, result) at 0xf7, no Promise yield for that
@@ -1787,7 +1787,7 @@ test('PlatformIndicators excludes groups and guild channel lists from single-use
 // therefore could not reproduce the reported native close-before-auth race.
 test('Hidden Channels captures initial READY and supplemental names before native records are redacted',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};b.channels.cat={...b.channels.cat,name:'__hidden__'};
-    const dispatch=b.load({default:{dispatch(){}}},null,585).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
     dispatch.dispatch({type:'CONNECTION_OPEN',guilds:[{id:'g',channels:[{id:'hidden',name:'staff-chat'},{id:'cat',name:'PRIVATE STAFF'}]}]});
     assert.equal(b.label(b.channels.hidden),'staff chat');assert.equal(b.label(b.channels.cat),'PRIVATE STAFF');
     dispatch.dispatch({type:'CONNECTION_OPEN_SUPPLEMENTAL',guilds:[{id:'g',channels:[{id:'hidden',name:'renamed-staff'}]}]});assert.equal(b.label(b.channels.hidden),'renamed staff');
@@ -1801,7 +1801,7 @@ test('Hidden Channels includes basic-only native metadata and blocks its message
     b.load({default:{getChannel:id=>b.channels[id],getBasicChannel:id=>basic[id],getMutableGuildChannelsForGuild:()=>b.channels,getMutableBasicGuildChannelsForGuild:()=>basic}},null,2051);
     const list=b.store.getChannels('g');assert.equal(list.SELECTABLE.find(entry=>entry.channel.id===extra.id).channel.name,'private-basic');assert.equal(list[4].find(entry=>entry.channel.id===parent.id).channel.name,'BASIC CATEGORY');
     assert.equal(b.store.getChannels('g'),list);await b.actions.fetchMessages({channelId:extra.id});assert.equal(b.fetched.length,0);
-    const calls=[];const routes=b.load({transitionTo:r=>calls.push(r),transitionToGuild:(g,c)=>calls.push(c)},null,1113);
+    const calls=[];const routes=b.load({transitionTo:r=>calls.push(r),transitionToGuild:(g,c)=>calls.push(c)},null,1112);
     routes.transitionTo('/channels/g/basic-only');assert.equal(calls.length,0);assert.match(b.alerts.at(-1)[1],/Created: Unavailable/);
     routes.transitionToGuild('g','basic-only');assert.equal(calls.length,1);assert.notEqual(calls[0],'basic-only');
     assert.equal(b.permission.can(b.viewPermission,extra),true);
@@ -1816,8 +1816,8 @@ test('Hidden Channels renderer-scoped ChannelStore facade preserves real singlet
         subscribe(){return this.#value;}
     }
     const real=new NativeStore();b.load({default:real},null,2051);const original=b.channels.hidden;
-    let imported;b.context.__d((g,r,i,a,m)=>{imported=i(2051).default;m.exports={};},6952,[]);
-    b.factories.get(6952)(b.context,()=>({default:real}),()=>({default:real}),()=>({default:real}),{exports:{}},{},[]);
+    let imported;b.context.__d((g,r,i,a,m)=>{imported=i(2051).default;m.exports={};},7039,[]);
+    b.factories.get(7039)(b.context,()=>({default:real}),()=>({default:real}),()=>({default:real}),{exports:{}},{},[]);
     assert.equal(imported.getChannel('hidden').name,'native-staff');assert.equal(imported.getChannel('hidden').flags,32768);assert.equal(imported.subscribe(),'live-store');assert.equal(real.getChannel('hidden'),original);assert.equal(original.name,'__hidden__');
     b.api.setSetting('hiddenChannels',false);assert.equal(imported.getChannel('hidden'),original);
 });
@@ -1826,7 +1826,7 @@ test('Hidden Channels respects native formatter escaping and uppercase categorie
     const channel=Object.freeze({...b.channels.hidden,name:'staff-\\"chat',flags:32768,isObfuscated:()=>true});
     const category=Object.freeze({...b.channels.cat,name:'private staff',flags:32768,isObfuscated:()=>true});
     function nativeFormatter(c,quoted){if(c.isObfuscated())return '__hidden__';const name=c.type===4?c.name.toUpperCase():c.name;return quoted?JSON.stringify(name):name;}
-    const names=b.load({default:nativeFormatter,computeChannelName:nativeFormatter},null,4990);
+    const names=b.load({default:nativeFormatter,computeChannelName:nativeFormatter},null,5043);
     assert.equal(names.computeChannelName(channel,true),JSON.stringify(channel.name));assert.equal(names.default(category),'PRIVATE STAFF');
     assert.equal(channel.isObfuscated(),true);assert.equal(channel.flags,32768);assert.equal(category.isObfuscated(),true);
     b.api.setSetting('hiddenChannels',false);assert.equal(names.default(category),'__hidden__');
@@ -1834,8 +1834,8 @@ test('Hidden Channels respects native formatter escaping and uppercase categorie
 
 test('Hidden Channels READY cache belongs to the incoming account before UserStore reducer runs',()=>{
     const b=hiddenHarness();b.api.setSetting('hiddenChannels',true);b.channels.hidden={...b.channels.hidden,name:'__hidden__'};
-    let account=null;b.load({default:{getCurrentUser:()=>account}},null,1378);
-    const dispatch=b.load({default:{dispatch(event){if(event.type==='CONNECTION_OPEN')account=event.user;}}},null,585).default;
+    let account=null;b.load({default:{getCurrentUser:()=>account}},null,1377);
+    const dispatch=b.load({default:{dispatch(event){if(event.type==='CONNECTION_OPEN')account=event.user;}}},null,578).default;
     dispatch.dispatch({type:'CONNECTION_OPEN',user:{id:'111111111111111111'},guilds:[{id:'g',channels:[{id:'hidden',name:'first-staff'}]}]});
     assert.equal(b.label(b.channels.hidden),'first staff');
     dispatch.dispatch({type:'CONNECTION_OPEN',user:{id:'222222222222222222'},guilds:[{id:'g',channels:[{id:'hidden',name:'second-staff'}]}]});
@@ -1844,7 +1844,7 @@ test('Hidden Channels READY cache belongs to the incoming account before UserSto
 });
 test('PlatformIndicators hides the stock mobile badge and exposes its settings',()=>{
     const b=boot({platformIndicators:true});reactHarness(b);
-    const seen=[];const status=b.load({default:props=>{seen.push(props.isMobileOnline);return null;},StatusWithTyping:props=>{seen.push(props.isMobileOnline);return null;}},null,13649);
+    const seen=[];const status=b.load({default:props=>{seen.push(props.isMobileOnline);return null;},StatusWithTyping:props=>{seen.push(props.isMobileOnline);return null;}},null,13920);
     status.default({status:'online',isMobileOnline:true});status.StatusWithTyping({status:'online',isMobileOnline:true});
     b.api.setSetting('piHideMobile',false);status.default({status:'online',isMobileOnline:true});
     assert.deepEqual(seen,[false,false,true]);
@@ -1853,31 +1853,31 @@ test('PlatformIndicators hides the stock mobile badge and exposes its settings',
 
 test('PlatformIndicators adds badges to profile voice-channel user rows',()=>{
     const b=boot({platformIndicators:true}),{React}=reactHarness(b);
-    b.load({default:{getClientStatus:()=>({desktop:'online'}),addChangeListener(){},removeChangeListener(){}}},null,4877);
+    b.load({default:{getClientStatus:()=>({desktop:'online'}),addChangeListener(){},removeChangeListener(){}}},null,4930);
     function Row(props){return React.createElement('TableRow',{user:props.user,label:React.createElement('Name',{children:props.user.id})});}
     const list=React.createElement('List',{data:[{id:'u'}],renderItem:({item})=>React.createElement(Row,{user:item})});
-    const exports=b.load({default:()=>React.createElement('Sheet',{children:list})},null,12602);
+    const exports=b.load({default:()=>React.createElement('Sheet',{children:list})},null,12849);
     const renderItem=exports.default({}).props.children.props.renderItem;
     const row=renderItem({item:{id:'u'}});const tree=row.type(row.props);
     assert.equal(tree.props.label.props.children[1].props.userId,'u');
     b.api.setSetting('piUserList',false);assert.equal(row.type(row.props).props.label.props.children,'u');
 });
 test('PlatformIndicators places DM list icons beside the mute icon and DM header icons inside ChannelTitle',()=>{
-    const b=boot({platformIndicators:true}),{React,RN}=reactHarness(b);b.load({default:{getClientStatus:()=>({desktop:'online'})}},null,4877);
+    const b=boot({platformIndicators:true}),{React,RN}=reactHarness(b);b.load({default:{getClientStatus:()=>({desktop:'online'})}},null,4930);
     const channel={id:'dm',type:1,recipients:['friend']};
     const icon=React.createElement('ChannelIcon',{muted:false,favorite:false,ignored:false,blocked:false,selected:false});
     const row=Object.freeze(React.createElement(RN.View,{children:[React.createElement(RN.View,{children:icon}),React.createElement(RN.Text,{children:'23h'})]}));
-    const content=b.load({default:()=>row},null,15667).default;const tree=content({channel});
+    const content=b.load({default:()=>row},null,15962).default;const tree=content({channel});
     const icons=tree.props.children[0].props.children;assert.equal(icons[0],icon);assert.equal(walkElements(icons[1],n=>n.type&&n.type.name==='PlatformBadges')[0].props.userId,'friend');
     function ChannelTitle(){return React.createElement(RN.View,{children:React.createElement(RN.Text,{variant:'redesign/heading-18/semibold',children:'User'})});}
-    const header=b.load({default:()=>React.createElement(RN.View,{children:React.createElement(ChannelTitle,{title:'User',accessibleTitle:'User',userId:'friend'})})},null,12845).default;
+    const header=b.load({default:()=>React.createElement(RN.View,{children:React.createElement(ChannelTitle,{title:'User',accessibleTitle:'User',userId:'friend'})})},null,13107).default;
     const title=header({channelId:'dm'}).props.children;assert.notEqual(title.type,ChannelTitle);
     const inner=title.type(title.props);assert.equal(walkElements(inner,n=>n.type&&n.type.name==='PlatformBadges')[0].props.userId,'friend');
 });
 test('NoDelete retained records differ from the live record so the native row re-renders immediately',()=>{
     const b=deletionHarness();b.api.setSetting('noDelete',true);const live={id:'1',content:'x'};b.messages.set('c:1',live);
     b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});
-    const kept=b.load({default:{getMessage:()=>live}},null,5057).default.getMessage('c','1');
+    const kept=b.load({default:{getMessage:()=>live}},null,5110).default.getMessage('c','1');
     assert.notEqual(kept,live);assert.equal(kept.content,'x');assert.equal(kept.venusDeleted,true);assert.notDeepEqual(Object.keys(kept),Object.keys(live));
 });
 
@@ -1896,7 +1896,7 @@ test('PlatformIndicators DM header hook order survives title, fallback, null and
     const native=()=>{calls++;React.useState(0);React.useEffect(()=>{},[]);
         if(mode==='empty')return null;
         return React.createElement(RN.View,{children:mode==='title'?React.createElement(ChannelTitle,{title:'Name',accessibleTitle:'Name',userId:'friend'}):React.createElement(RN.Text,{children:'Name'})});};
-    const header=b.load({default:{$$typeof:Symbol.for('react.memo'),type:native}},null,12845).default.type;
+    const header=b.load({default:{$$typeof:Symbol.for('react.memo'),type:native}},null,13107).default.type;
     const render=hookSequenceProbe(React,header),expected=['state','effect','state','effect'];
     for(const next of ['fallback','title','fallback','empty','title']){mode=next;assert.deepEqual(render({userId:'friend'}).sequence,expected,next);}
     for(const key of ['piDmHeader','platformIndicators']){b.api.setSetting(key,false);assert.deepEqual(render({userId:'friend'}).sequence,expected);b.api.setSetting(key,true);assert.deepEqual(render({userId:'friend'}).sequence,expected);}
@@ -1907,23 +1907,23 @@ test('PlatformIndicators DM row hook order survives loading, icon, fallback, gro
     const native=()=>{React.useState(0);React.useEffect(()=>{},[]);if(mode==='empty')return null;
         const child=mode==='icon'?React.createElement('ChannelIcon',{muted:false,selected:false,blocked:false}):React.createElement(RN.Text,{children:'Name'});
         return React.createElement(RN.View,{children:child});};
-    const row=b.load({default:native},null,15667).default,render=hookSequenceProbe(React,row),expected=['state','effect','state','effect'];
+    const row=b.load({default:native},null,15962).default,render=hookSequenceProbe(React,row),expected=['state','effect','state','effect'];
     const dm={type:1,recipients:['friend']};
     for(const next of ['fallback','icon','empty','fallback','icon']){mode=next;assert.deepEqual(render({channel:dm}).sequence,expected,next);}
     for(const channel of [null,{type:3,recipients:['a','b']},{type:0,recipients:[]},dm])assert.deepEqual(render({channel}).sequence,expected);
     for(const key of ['piUserList','platformIndicators']){b.api.setSetting(key,false);assert.deepEqual(render({channel:dm}).sequence,expected);b.api.setSetting(key,true);assert.deepEqual(render({channel:dm}).sequence,expected);}
 });
 test('ReviewDB user-menu sheet retries unavailable exports after an earlier UI lookup',()=>{
-    const b=reviewHarness(),sheetModule=b.native[4801];delete b.native[4801];
+    const b=reviewHarness(),sheetModule=b.native[4854];delete b.native[4854];
     b.api.setSetting('reviewDB',true);b.Settings();
     b.menu.ContextMenuPopout({menu:{key:'444444444444444444',items:[1,2,3]}});b.menuCalls.at(-1).menu.items.at(-1).action();
     assert.equal(b.sheets.length,0);assert.match(b.toasts.at(-1).content,/unavailable/);
-    b.native[4801]=sheetModule;
+    b.native[4854]=sheetModule;
     b.menu.ContextMenuPopout({menu:{key:'444444444444444444',items:[1,2,3]}});b.menuCalls.at(-1).menu.items.at(-1).action();
     assert.equal(b.sheetEvents.length,1);assert.equal(b.sheetEvents[0].content.props.userId,'444444444444444444');
 });
 test('ReviewDB user-menu sheet reports opening failures and ignores stale disabled presses',()=>{
-    const b=reviewHarness();b.native[4801].showActionSheet=()=>{throw new Error('native opener failed');};
+    const b=reviewHarness();b.native[4854].showActionSheet=()=>{throw new Error('native opener failed');};
     b.api.setSetting('reviewDB',true);b.menu.ContextMenuPopout({menu:{key:'444444444444444444',items:[1,2,3]}});const press=b.menuCalls.at(-1).menu.items.at(-1).action;
     press();assert.match(b.toasts.at(-1).content,/native opener failed/);
     b.api.setSetting('reviewDB',false);const count=b.toasts.length;press();assert.equal(b.toasts.length,count);assert.equal(b.sheets.length,0);
@@ -1937,10 +1937,10 @@ test('PlatformIndicators reconciles repeated DM transitions with real React with
         const React=require(path.join(directory,'react')),Renderer=require(path.join(directory,'react-test-renderer'));
         const previous=global.IS_REACT_ACT_ENVIRONMENT;global.IS_REACT_ACT_ENVIRONMENT=true;
         try {
-            for(const id of [12845,15667])for(const memoized of [false,true]){
+            for(const id of [13107,15962])for(const memoized of [false,true]){
                 const b=boot({platformIndicators:true});b.load(React,null,19);
                 b.load({View:'View',Text:'Text',Image:'Image',Modal:'Modal'},null,17);
-                b.load({default:{getClientStatus:()=>({desktop:'online'})}},null,4877);
+                b.load({default:{getClientStatus:()=>({desktop:'online'})}},null,4930);
                 function ChannelTitle(){React.useState(0);return React.createElement('View',null,React.createElement('Text',null,'Name'));}
                 function Native(props){
                     React.useState(0);React.useEffect(()=>{},[]);
@@ -1957,7 +1957,7 @@ test('PlatformIndicators reconciles repeated DM transitions with real React with
                     await Renderer.act(()=>{root=Renderer.create(element('fallback'));});
                     for(const mode of ['title','fallback','icon','fallback','empty','title','icon','fallback'])
                         await Renderer.act(()=>{root.update(element(mode));});
-                    for(const key of [id===12845?'piDmHeader':'piUserList','platformIndicators']){
+                    for(const key of [id===13107?'piDmHeader':'piUserList','platformIndicators']){
                         await Renderer.act(()=>{b.api.setSetting(key,false);root.update(element('fallback'));});
                         await Renderer.act(()=>{b.api.setSetting(key,true);root.update(element('fallback'));});
                     }
@@ -1968,7 +1968,7 @@ test('PlatformIndicators reconciles repeated DM transitions with real React with
     });
 
 test('ReviewDB late theme availability never adds hooks to an already-mounted review input',()=>{
-    const b=reviewHarness();delete b.native[4551];b.api.setSetting('reviewDB',true);
+    const b=reviewHarness();delete b.native[4593];b.api.setSetting('reviewDB',true);
     const m=mountReviews(b,'444444444444444444');
     const input=walkElements(m.render(),n=>n.type&&n.type.name==='ReviewInput')[0];
     const render=hookSequenceProbe(b.React,input.type);
@@ -1978,14 +1978,14 @@ test('ReviewDB late theme availability never adds hooks to an already-mounted re
 });
 
 test('ReviewDB server button works without any overlay helper and ignores stale disabled presses',()=>{
-    const b=reviewHarness();delete b.native[4801];delete b.native[6624];delete b.native[4694];
+    const b=reviewHarness();delete b.native[4854];delete b.native[6701];delete b.native[4736];
     b.api.setSetting('reviewDB',true);const element=b.guild({guild:{id:'444444444444444444'}}),m=mountReviewElement(b,element);
     const press=walkElements(m.render(),n=>n.props.label==='Reviews')[0].props.onPress;
     press();assert.equal(walkElements(m.render(),n=>n.type&&n.type.name==='ReviewSection').length,1);
     b.api.setSetting('reviewDB',false);press();assert.equal(m.render(),null);assert.equal(b.sheets.length,0);
 });
 test('ReviewDB input tolerates the native missing ThemeContext.Provider error without changing hook calls',()=>{
-    const b=reviewHarness();b.native[4551].useThemeContext=()=>{b.React.useState(0);throw Error('useThemeContext must be used within a ThemeContext.Provider');};
+    const b=reviewHarness();b.native[4593].useThemeContext=()=>{b.React.useState(0);throw Error('useThemeContext must be used within a ThemeContext.Provider');};
     b.api.setSetting('reviewDB',true);const m=mountReviews(b,'444444444444444444');
     const input=walkElements(m.render(),n=>n.type&&n.type.name==='ReviewInput')[0],render=hookSequenceProbe(b.React,input.type);
     assert.deepEqual(render(input.props).sequence,['state','state','state']);assert.deepEqual(render(input.props).sequence,['state','state','state']);
@@ -1997,9 +1997,9 @@ test('ReviewDB server fetch errors are visible and retry can recover to an empty
     m.render();m.effects.splice(0).forEach(fn=>fn());await flush();await flush();
     let tree=m.render();assert.match(JSON.stringify(tree),/Service unavailable/);
     let retry=walkElements(tree,n=>n.props.accessibilityLabel==='Retry reviews')[0];assert.ok(retry);
-    // With Discord's Button (5282) loaded, Retry is a real small secondary button, not bare text.
+    // With Discord's Button (5594) loaded, Retry is a real small secondary button, not bare text.
     function Button(props){return {type:Button,props};}
-    b.native[5282]={Button};tree=m.render();retry=walkElements(tree,n=>n.props.accessibilityLabel==='Retry reviews')[0];
+    b.native[5594]={Button};tree=m.render();retry=walkElements(tree,n=>n.props.accessibilityLabel==='Retry reviews')[0];
     assert.equal(retry.type,Button);assert.equal(retry.props.variant,'secondary');assert.equal(retry.props.text,'Retry');
     b.context.fetch=async()=>({ok:true,json:async()=>({reviews:[]})});retry.props.onPress();m.render();m.effects.splice(0).forEach(fn=>fn());await flush();await flush();
     assert.match(JSON.stringify(m.render()),/No reviews yet/);
@@ -2012,12 +2012,12 @@ test('ReviewDB real React server press expands, loads, retries, collapses and re
         const previous=global.IS_REACT_ACT_ENVIRONMENT;global.IS_REACT_ACT_ENVIRONMENT=true;
         const b=reviewHarness(),ThemeContext=React.createContext(null);b.load(React,null,19);
         // fn31267's actual contract, omitted by the old successful theme mock.
-        b.native[4551].useThemeContext=()=>{const theme=React.useContext(ThemeContext);
+        b.native[4593].useThemeContext=()=>{const theme=React.useContext(ThemeContext);
             if(theme==null)throw Error('useThemeContext must be used within a ThemeContext.Provider');return theme;};
-        b.native[5918].Card=()=>{throw Error('Server reviews must not render a profile-only Card');};
-        b.native[5916].TableRow=props=>React.createElement('ServerReviewButton',props,props.label);
-        b.native[8057].FormRow=props=>React.createElement('FormRow',{onLongPress:props.onLongPress},props.label,props.subLabel,props.leading);
-        delete b.native[4801];delete b.native[6624];delete b.native[4694];
+        b.native[5995].Card=()=>{throw Error('Server reviews must not render a profile-only Card');};
+        b.native[5993].TableRow=props=>React.createElement('ServerReviewButton',props,props.label);
+        b.native[8895].FormRow=props=>React.createElement('FormRow',{onLongPress:props.onLongPress},props.label,props.subLabel,props.leading);
+        delete b.native[4854];delete b.native[6701];delete b.native[4736];
         b.api.setSetting('reviewDB',true);
         let fail=false;const requests=[],pending=[];
         b.context.fetch=url=>{requests.push(url);
@@ -2025,7 +2025,7 @@ test('ReviewDB real React server press expands, loads, retries, collapses and re
             return new Promise(resolve=>pending.push(()=>resolve({ok:!fail,status:fail?503:200,json:async()=>fail?{message:'Service unavailable'}:
                 {reviews:[{id:1,comment:'Actual server content',sender:{discordID:'111111111111111111',username:'Reviewer',badges:[]}}]}})));
         };
-        const Guild=b.load({default:()=>React.createElement('Progress')},null,13521).default;
+        const Guild=b.load({default:()=>React.createElement('Progress')},null,13790).default;
         let root;const element=id=>React.createElement(Guild,{guild:{id}});
         const button=()=>root.root.findByType('ServerReviewButton');
         const text=()=>JSON.stringify(root.toJSON());
@@ -2081,20 +2081,20 @@ test('voice audio detection tolerates MIME case/parameters and audio-only files 
 });
 test('Pastelize color cache returns identical colors and follows a replaced hash helper',()=>{
     const b=boot(allFeatures),{RN}=reactHarness(b);let processed=0;RN.processColor=hex=>{processed++;return hex;};
-    b.load(seed=>seed.length*23,null,1252);
-    b.load({default:{getMember:()=>({})}},null,2111);
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);const rows=new Rows();
+    b.load(seed=>seed.length*23,null,1251);
+    b.load({default:{getMember:()=>({})}},null,2112);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);const rows=new Rows();
     const row={rowType:1,message:{},result:{message:{authorId:'author',guildId:'g',username:'Name',roleColor:null,content:[]}}};
     const first=rows.generate(row).message.roleColor;const count=processed;
     for (let i=0;i<20;i++) assert.equal(rows.generate(row).message.roleColor,first);
     assert.equal(processed,count,'repeat renders reuse the cached color');
-    b.load(seed=>seed.length*97,null,1252);
+    b.load(seed=>seed.length*97,null,1251);
     assert.notEqual(rows.generate(row).message.roleColor,first,'a new hash helper is not served stale colors');
     b.api.setSetting('pastelize',false);assert.equal(rows.generate(row),row.result);
 });
 test('NoDelete outline colors are computed once and still follow a replaced processColor',()=>{
     const b=deletionHarness(),{RN}=reactHarness(b);let calls=0;RN.processColor=color=>{calls++;return color;};
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);const rows=new Rows();
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);const rows=new Rows();
     b.api.setSetting('pastelize',false);b.api.setSetting('noDelete',true);
     b.messages.set('c:1',{id:'1',content:'original',state:'SENT'});
     b.dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'1'});
@@ -2122,8 +2122,8 @@ test('a sub-option change wakes components subscribed to its plugin',()=>{
     const React={createElement(type,props,...children){return {type,props:{...props,children}};},cloneElement(n,p){return {...n,props:{...n.props,...p}};},
         useState:v=>[v,()=>{renders++;}],useEffect(fn){fn();}};
     b.load(React,null,19);b.load({View:'View',Text:'Text',Modal:'Modal'},null,17);
-    function SettingsList(){} b.load({SettingsList},null,14236);
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}},null,14130).SETTING_RENDERER_CONFIG;
+    function SettingsList(){} b.load({SettingsList},null,14500);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}},null,14409).SETTING_RENDERER_CONFIG;
     // The Settings row's switch subscribes to "platformIndicators"; its options must wake it too.
     b.context.__r=()=>null;
     const trailing=registry.VENUS_PLATFORMINDICATORS_ROW.useTrailing();trailing.type(trailing.props);
@@ -2161,18 +2161,18 @@ test('row icons are Discord\'s own, loaded when drawn, with a fallback',()=>{
     const b=settingsHarness();function TrashIcon(props){return {icon:'trash',props};}
     const Icon=b.registry.VENUS_NODELETE_ROW.IconComponent;
     b.context.__r=()=>null;assert.equal(Icon({size:'md'}).type,b.original.ACCOUNT.IconComponent,'missing module: the Account icon');
-    b.context.__r=id=>id===4791?{TrashIcon}:null;assert.equal(Icon({size:'md'}).type,TrashIcon);
+    b.context.__r=id=>id===4847?{TrashIcon}:null;assert.equal(Icon({size:'md'}).type,TrashIcon);
     assert.equal(b.registry.VENUS_NODELETE.IconComponent,Icon,'its page uses the same icon');
 });
 test('About shows the version, features on, status and links',()=>{
     const b=settingsHarness();const opened=[];
     // About is a designed page: the version up top, features on with a bar and a chip per group, a status line, and links.
     function Text(){} function TableRow(){}
-    b.context.__r=id=>({4833:{Text},5916:{TableRow}}[id]||null);
+    b.context.__r=id=>({4886:{Text},5993:{TableRow}}[id]||null);
     const about=()=>pageNodes(b.registry.VENUS_GENERAL.screen.getComponent()());
     const texts=()=>about().filter(n=>n.type===Text).map(n=>n.props.children);
     assert.ok(texts().some(t=>/^Venus Patches \d/.test(t)),'version in the header');
-    assert.ok(texts().includes('For Discord 348.10'));
+    assert.ok(texts().includes('For Discord 349.9'));
     assert.ok(about().some(n=>n.type&&n.type.name==='VenusProgress'&&n.props.value>=0&&n.props.value<=1),'a bar for features on');
     assert.ok(about().some(n=>n.props&&/^Messages: \d+\/\d+$/.test(n.props.accessibilityLabel||'')),'a chip per group');
     assert.deepEqual(about().filter(n=>n.type===TableRow).map(n=>n.props.label),["What's new",'Report a problem','Source code']);
@@ -2190,8 +2190,8 @@ test('settings with more options have a switch and a separate button to their pa
     const b=settingsHarness();
     function FormSwitch(){} function ChevronSmallRightIcon(){}
     const navigated=[];const navigation={navigate:route=>navigated.push(route)};
-    b.context.__r=id=>({6622:{FormSwitch},6631:{ChevronSmallRightIcon},1491:{useStackNavigation:()=>navigation},
-        14239:{onRouteSettingOnPress:({navigation:nav,screen})=>nav.navigate(screen.route)}}[id]||null);
+    b.context.__r=id=>({6699:{FormSwitch},6708:{ChevronSmallRightIcon},1490:{useStackNavigation:()=>navigation},
+        14503:{onRouteSettingOnPress:({navigation:nav,screen})=>nav.navigate(screen.route)}}[id]||null);
     const pages={VENUS_PASTELIZE:'pastelize',VENUS_FREENITRO:'freeNitro',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_TRANSLATE:'translate',
         VENUS_NODELETE:'noDelete',VENUS_READALL:'readAll',VENUS_REVIEWDB:'reviewDB',VENUS_QUESTS:'quests',VENUS_GESTURES:'gestures',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',VENUS_HIDDENCHANNELS:'hiddenChannels'};
     for (const [page,key] of Object.entries(pages)) {
@@ -2211,7 +2211,7 @@ test('settings with more options have a switch and a separate button to their pa
     assert.equal(b.registry.VENUS_PASTELALL.parent,'VENUS_PASTELIZE');assert.equal(b.registry.VENUS_EMOJIS.parent,'VENUS_FREENITRO');
     // Pastel names draws its own page (switches + a preview); the option nodes still exist for search.
     function TableSwitchRow(){}
-    const prev=b.context.__r;b.context.__r=id=>id===6621?{TableSwitchRow}:prev(id);
+    const prev=b.context.__r;b.context.__r=id=>id===6698?{TableSwitchRow}:prev(id);
     const pastel=pageNodes(b.registry.VENUS_PASTELIZE.screen.getComponent()());
     assert.deepEqual(pastel.filter(n=>n.type===TableSwitchRow).map(n=>n.props.key),['pastelAll','pastelContent']);
     assert.ok(pastel.some(n=>n.type&&n.type.name==='PastelPreview'));
@@ -2260,7 +2260,7 @@ test('NoDelete does not rewrite an already erased archive for every deletion',as
     b.api.setSetting('noDeleteSave',false);await flush();await flush();
     const erased=b.writes.filter(([name])=>name==='venus-deleted-messages.json').length;
     assert.equal(b.api.status.archive,'erased');
-    const flux={dispatch(){return 'ok';}};const dispatch=b.load({default:flux},null,585).default;
+    const flux={dispatch(){return 'ok';}};const dispatch=b.load({default:flux},null,578).default;
     for (let i=0;i<5;i++) dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:String(i)});
     await flush();await flush();
     assert.equal(b.writes.filter(([name])=>name==='venus-deleted-messages.json').length,erased);
@@ -2268,7 +2268,7 @@ test('NoDelete does not rewrite an already erased archive for every deletion',as
 test('logging out of Discord without a ReviewDB sign-in does not rewrite preferences',async()=>{
     const b=boot(allFeatures);let writes=0;
     b.load({default:native({writeFile:async()=>{writes++;}})});await flush();await flush();
-    const dispatch=b.load({default:{dispatch(){return 'ok';}}},null,585).default;
+    const dispatch=b.load({default:{dispatch(){return 'ok';}}},null,578).default;
     writes=0;dispatch.dispatch({type:'LOGOUT'});await flush();await flush();assert.equal(writes,0);
 });
 test('own deletions no longer schedule bookkeeping timers',()=>{
@@ -2279,21 +2279,21 @@ function readAllHarness(state = {}) {
     const calls={guilds:[],acks:[],toasts:[]};
     const unread=new Set(state.unreadGuilds||['g1','g3']), mentions={g2:state.mentionG2||0};
     const native={
-        5751:{default:{getFlattenedGuildIds:()=>['g1','g2','g3','g4']}},
-        7054:{default:{hasUnread:id=>unread.has(id),getMentionCount:id=>mentions[id]||0}},
-        13507:{default:(ids,source)=>calls.guilds.push([ids,source])},
-        1086:{AnalyticsSections:{GUILD_LIST:'guild list'}},
-        13299:{default:{getUnreadPrivateChannelIds:()=>state.dms||['d1','d2']}},
-        4852:{default:{lastMessageId:id=>'m-'+id}},
-        6532:{bulkAck:entries=>calls.acks.push(entries)},
-        5019:{ReadStateTypes:{CHANNEL:0}},
-        15919:{FastListRenderSections:{SEPARATOR:6,GUILDS:7}},
-        4531:{default:{open:toast=>calls.toasts.push(toast.content)}},
+        5616:{default:{getFlattenedGuildIds:()=>['g1','g2','g3','g4']}},
+        7121:{default:{hasUnread:id=>unread.has(id),getMentionCount:id=>mentions[id]||0}},
+        13773:{default:(ids,source)=>calls.guilds.push([ids,source])},
+        1085:{AnalyticsSections:{GUILD_LIST:'guild list'}},
+        13564:{default:{getUnreadPrivateChannelIds:()=>state.dms||['d1','d2']}},
+        4905:{default:{lastMessageId:id=>'m-'+id}},
+        6605:{bulkAck:entries=>calls.acks.push(entries)},
+        5072:{ReadStateTypes:{CHANNEL:0}},
+        16222:{FastListRenderSections:{SEPARATOR:6,GUILDS:7}},
+        4568:{default:{open:toast=>calls.toasts.push(toast.content)}},
     };
     b.context.__r=id=>native[id]||null;
     const data={itemSize:section=>section===6?18:48,renderItem:section=>({type:'Native',props:{section}}),sections:[1,0,0,0,0,2,1,4]};
     const result=Object.freeze({listProps:{},listDataProps:Object.freeze(data)});
-    const hook=b.load({default:()=>result},null,15929);
+    const hook=b.load({default:()=>result},null,16232);
     return {...b,React,RN,calls,data,result,props:()=>hook.default({})};
 }
 function findReadAll(node){
@@ -2337,7 +2337,7 @@ test('Read All only accepts its three modes and says when nothing is unread',()=
 test('Read All settings use Discord\'s native radio list with three choices',()=>{
     const b=settingsHarness();
     function TableRadioGroup(){} function TableRadioRow(){}
-    b.context.__r=id=>({5995:{TableRadioGroup},5994:{TableRadioRow}}[id]||null);
+    b.context.__r=id=>({6072:{TableRadioGroup},6071:{TableRadioRow}}[id]||null);
     assert.equal(b.registry.VENUS_READALL.type,'route');assert.equal(b.registry.VENUS_READALL.parent,'VENUS_PLUGINS');
     const page=b.registry.VENUS_READALL.screen.getComponent()();
     const nodes=[];(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);nodes.push(n);walk(n.props&&n.props.children);})(page);
@@ -2348,7 +2348,7 @@ test('Read All settings use Discord\'s native radio list with three choices',()=
 test('option page switches are greyed out while their main switch is off',()=>{
     const b=settingsHarness();
     function TableSwitchRow(){} function TableRowGroup(){}
-    b.context.__r=id=>({6621:{TableSwitchRow},5997:{TableRowGroup}}[id]||null);
+    b.context.__r=id=>({6698:{TableSwitchRow},6074:{TableRowGroup}}[id]||null);
     const rows=key=>{const found=[];(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);
         if(n.type===TableSwitchRow)found.push(n);walk(n.props&&n.props.children);})(b.registry[key].screen.getComponent()());return found;};
     const row=(key,setting)=>rows(key).find(n=>n.props.key===setting);
@@ -2377,7 +2377,7 @@ test('Read All mode persists and an invalid saved mode falls back to Servers',as
 });
 test('unselected Read All never wraps the server bar module',()=>{
     const b=boot({picker:true});const original=()=>'stock';
-    assert.equal(b.load({default:original},null,15929).default,original);
+    assert.equal(b.load({default:original},null,16232).default,original);
 });
 
 test('PlatformIndicators badges re-render only when that user\'s own clients change', () => {
@@ -2386,11 +2386,11 @@ test('PlatformIndicators badges re-render only when that user\'s own clients cha
     React.useEffect = fn => effects.push(fn);
     React.useState = () => [0, () => { renders++; }];
     const listeners = new Set(); const status = {friend:{desktop:'online'}, other:{mobile:'idle'}};
-    b.load({default:{getClientStatus:id => status[id], addChangeListener:fn => listeners.add(fn), removeChangeListener:fn => listeners.delete(fn)}}, null, 4877);
-    b.load({default:{getCurrentUser:() => ({id:'me'})}}, null, 1378);
+    b.load({default:{getClientStatus:id => status[id], addChangeListener:fn => listeners.add(fn), removeChangeListener:fn => listeners.delete(fn)}}, null, 4930);
+    b.load({default:{getCurrentUser:() => ({id:'me'})}}, null, 1377);
     // Render a profile name so PlatformBadges mounts through the real placement path.
     const name = React.createElement(RN.Text, {children:'Friend'});
-    const row = b.load({default:() => React.createElement('Row', {label:name})}, null, 10371).default;
+    const row = b.load({default:() => React.createElement('Row', {label:name})}, null, 10602).default;
     const badge = walkElements(row({user:{id:'friend'}}), n => n.type && n.type.name === 'PlatformBadges')[0];
     effects.length = 0; badge.type(badge.props);
     const cleanup = effects.map(fn => fn()).filter(Boolean);
@@ -2425,9 +2425,9 @@ test('NoDelete removes kept messages with one bulk event per channel when switch
     assert.equal(b.messages.size,0);
 });
 test('NoDelete builds archive copies only when saving',async()=>{
-    const b=await archiveHarness(null);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1378);
-    const store=b.load({default:{getMessage:()=>({id:'5',content:'hi',author:{id:'x'}}),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5057).default;
-    const dispatch=b.load({default:{dispatch(){}}},null,585).default;
+    const b=await archiveHarness(null);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
+    const store=b.load({default:{getMessage:()=>({id:'5',content:'hi',author:{id:'x'}}),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110).default;
+    const dispatch=b.load({default:{dispatch(){}}},null,578).default;
     dispatch.dispatch({type:'MESSAGE_DELETE',channelId:'c',id:'5'});await new Promise(r=>setTimeout(r,900));await flush();
     assert.equal(JSON.parse(b.getDisk()).messages[0].message.content,'hi');assert.ok(store);
 });
@@ -2438,16 +2438,16 @@ test('NoDelete limit edits that change nothing do not rewrite settings',async()=
 });
 test('Hidden Channels asks the real permission store once and keeps canBasicChannel separate',()=>{
     const b=boot(allFeatures);let can=0,basic=0;const VIEW={bit:1};
-    b.load({Permissions:{VIEW_CHANNEL:VIEW}},null,1086);
-    const store=b.load({default:{can:()=>{can++;return true;},canBasicChannel:()=>{basic++;return false;}}},null,4472).default;
+    b.load({Permissions:{VIEW_CHANNEL:VIEW}},null,1085);
+    const store=b.load({default:{can:()=>{can++;return true;},canBasicChannel:()=>{basic++;return false;}}},null,4509).default;
     b.api.setSetting('hiddenChannels',true);
     assert.equal(store.can(VIEW,{id:'x',guild_id:'g',type:0}),true);assert.equal(can,1);
     assert.equal(store.canBasicChannel(VIEW,{id:'y',guild_id:'g',type:0}),true);assert.equal(basic,1);assert.equal(can,1);
     assert.equal(store.canBasicChannel(VIEW,{id:'y',guild_id:'g',type:0,realCheck:true}),false);
 });
 test('Hidden Channels ignores unrelated Flux events without account lookups',()=>{
-    const b=boot(allFeatures);let lookups=0;b.load({default:{getCurrentUser:()=>{lookups++;return {id:'me'};}}},null,1378);
-    const dispatch=b.load({default:{dispatch(){}}},null,585).default;b.api.setSetting('hiddenChannels',true);lookups=0;
+    const b=boot(allFeatures);let lookups=0;b.load({default:{getCurrentUser:()=>{lookups++;return {id:'me'};}}},null,1377);
+    const dispatch=b.load({default:{dispatch(){}}},null,578).default;b.api.setSetting('hiddenChannels',true);lookups=0;
     for(const type of ['TYPING_START','PRESENCE_UPDATES','VOICE_STATE_UPDATES'])dispatch.dispatch({type});
     dispatch.dispatch({type:'MESSAGE_CREATE',message:{content:'hi'}});assert.equal(lookups,0);
 });
@@ -2455,9 +2455,9 @@ test('PlatformIndicators shares one store listener for many badges',()=>{
     const b=boot({platformIndicators:true}),{React,RN}=reactHarness(b);const effects=[];let renders=0;
     React.useEffect=fn=>effects.push(fn);React.useState=()=>[0,()=>{renders++;}];
     const listeners=new Set(),status={a:{desktop:'online'},b:{mobile:'idle'}};
-    b.load({default:{getClientStatus:id=>status[id],addChangeListener:fn=>listeners.add(fn),removeChangeListener:fn=>listeners.delete(fn)}},null,4877);
-    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1378);
-    const row=b.load({default:()=>React.createElement('Row',{label:React.createElement(RN.Text,{children:'x'})})},null,10371).default;
+    b.load({default:{getClientStatus:id=>status[id],addChangeListener:fn=>listeners.add(fn),removeChangeListener:fn=>listeners.delete(fn)}},null,4930);
+    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1377);
+    const row=b.load({default:()=>React.createElement('Row',{label:React.createElement(RN.Text,{children:'x'})})},null,10602).default;
     const badges=['a','b','a'].map(id=>walkElements(row({user:{id}}),n=>n.type&&n.type.name==='PlatformBadges')[0]);
     effects.length=0;badges.forEach(badge=>badge.type(badge.props));const cleanup=effects.map(fn=>fn());
     assert.equal(listeners.size,1);status.a={desktop:'dnd'};listeners.forEach(fn=>fn());assert.equal(renders,2);
@@ -2466,22 +2466,22 @@ test('PlatformIndicators shares one store listener for many badges',()=>{
 test('PlatformIndicators voice-user list keeps a stable renderItem',()=>{
     const b=boot({platformIndicators:true}),{React}=reactHarness(b);
     const render=()=>null;const list=React.createElement('List',{renderItem:render});
-    const exports=b.load({default:()=>React.createElement('View',{children:list})},null,12602);
+    const exports=b.load({default:()=>React.createElement('View',{children:list})},null,12849);
     const one=exports.default({}).props.children.props.renderItem,two=exports.default({}).props.children.props.renderItem;
     assert.equal(one,two);
 });
 test('Read All skips DMs without a last message and acknowledges in batches of 100',()=>{
     const dms=Array.from({length:150},(_,i)=>'d'+i).concat(['empty']);
-    const b=readAllHarness({dms});b.context.__r=(old=>id=>id===4852?{default:{lastMessageId:id=>id==='empty'?null:'m-'+id}}:old(id))(b.context.__r);
+    const b=readAllHarness({dms});b.context.__r=(old=>id=>id===4905?{default:{lastMessageId:id=>id==='empty'?null:'m-'+id}}:old(id))(b.context.__r);
     b.api.setSetting('readAllMode','dms');pressReadAll(b);
     assert.deepEqual(b.calls.acks.map(a=>a.length),[100,50]);assert.equal(b.calls.acks.flat().some(a=>a.channelId==='empty'),false);
     assert.equal(b.calls.toasts.at(-1),'Marked 150 DMs as read');
 });
 test('ReviewDB views share one UserStore listener that wakes only on account changes',()=>{
     const b=boot(allFeatures),{React}=reactHarness(b);const listeners=new Set();let account={id:'111111111111111111'};
-    b.load({default:{getCurrentUser:()=>account,addChangeListener:fn=>listeners.add(fn),removeChangeListener:fn=>listeners.delete(fn)}},null,1378);
+    b.load({default:{getCurrentUser:()=>account,addChangeListener:fn=>listeners.add(fn),removeChangeListener:fn=>listeners.delete(fn)}},null,1377);
     const effects=[];React.useEffect=fn=>effects.push(fn);let wakes=0;React.useState=()=>[0,()=>{wakes++;}];
-    const note=b.load({default:()=>null},null,12627).default;b.api.setSetting('reviewDB',true);
+    const note=b.load({default:()=>null},null,12872).default;b.api.setSetting('reviewDB',true);
     for(const id of ['222222222222222222','333333333333333333']){const s=note({userId:id}).props.children[1];try{s.type(s.props);}catch(_){}}
     const cleanup=effects.splice(0).map(fn=>fn()).filter(Boolean);
     assert.equal(listeners.size,1);wakes=0;listeners.forEach(fn=>fn());assert.equal(wakes,0,'unrelated user updates must not re-render reviews');
@@ -2533,7 +2533,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         addChangeListener: fn => listeners.add(fn), removeChangeListener: fn => listeners.delete(fn),
     };
     const progress = new Map();
-    // Like 348.10's sendRequest: onRequestCreated gets the superagent request, then prepareRequest sets the phone's headers.
+    // Like 349.9's sendRequest: onRequestCreated gets the superagent request, then prepareRequest sets the phone's headers.
     function headersFor(request) {
         const headers = {};
         const agent = {set(name, value) {
@@ -2541,7 +2541,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
             headers[name] = value; return agent;
         }};
         if (typeof request.onRequestCreated === 'function') request.onRequestCreated(agent);
-        agent.set('User-Agent', 'Discord-Android/348010;RNA');
+        agent.set('User-Agent', 'Discord-Android/349009;RNA');
         agent.set('X-Super-Properties', 'cGhvbmU=');
         agent.set('Authorization', 'token');
         return headers;
@@ -2567,19 +2567,19 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         return Promise.resolve({body:{quest_id:id, completed_at:value >= target ? 'now' : null, progress:{[type]:{value}}}});
     }};
     let fetches = 0; const optimistic = [];
-    const native = {1283:{HTTP:http, encodeProperties:value => Buffer.from(JSON.stringify(value)).toString('base64')},
-        1348:{getSuperProperties:() => ({os:'Android', system_locale:'en-GB'})},
-        7116:{getAdDecisionData:() => ({decision_id:null, is_targeted:false}), getAdMetadataSealed:() => null, getAdTrafficMetadataSealed:() => null},
-        7127:{questUserStatusFromServer:body => ({questId:body.quest_id, enrolledAt:body.enrolled_at ? new Date(body.enrolled_at) : null,
+    const native = {1282:{HTTP:http, encodeProperties:value => Buffer.from(JSON.stringify(value)).toString('base64')},
+        1347:{getSuperProperties:() => ({os:'Android', system_locale:'en-GB'})},
+        7183:{getAdDecisionData:() => ({decision_id:null, is_targeted:false}), getAdMetadataSealed:() => null, getAdTrafficMetadataSealed:() => null},
+        7194:{questUserStatusFromServer:body => ({questId:body.quest_id, enrolledAt:body.enrolled_at ? new Date(body.enrolled_at) : null,
             completedAt:body.completed_at || null, progress:body.progress || {}})},
-        9765:{fetchCurrentQuests:() => { fetches++; return Promise.resolve(); },
+        9994:{fetchCurrentQuests:() => { fetches++; return Promise.resolve(); },
             updateOptimisticProgress:(id, type, val) => { optimistic.push([id, type, val]); }},
         2051:{default:{getSortedPrivateChannels:() => [{id:'dm1'}]}},
-        4531:{default:{open:value => ui.push('toast ' + value.content)}}, 5205:{default:{show:() => ui.push('alert')}},
-        4694:{pushModal:() => ui.push('modal')}};
+        4568:{default:{open:value => ui.push('toast ' + value.content)}}, 5708:{default:{show:() => ui.push('alert')}},
+        4736:{pushModal:() => ui.push('modal')}};
     b.context.__r = id => native[id] || null;
-    b.load({default:dispatcher}, null, 585);
-    b.load({default:store}, null, 7120);
+    b.load({default:dispatcher}, null, 578);
+    b.load({default:store}, null, 7187);
     // Quest Completer is patched in but starts switched off; these tests switch it on like a user would.
     for (const [key, value] of Object.entries(Object.assign({quests:true}, settings))) b.api.setSetting(key, value);
     // Runs fake time forward up to `horizon` (default 20 minutes), firing timers in order.
@@ -2650,7 +2650,7 @@ test('Quest Completer reports mobile Activity Quests from the phone', async () =
     b.connect(); await b.run();
     const beats = b.requests.filter(r => r.url === '/quests/m1/heartbeat');
     assert.ok(beats.length >= 2);
-    assert.ok(beats.every(r => r.headers['User-Agent'] === 'Discord-Android/348010;RNA' && r.headers['X-Super-Properties'] === 'cGhvbmU='));
+    assert.ok(beats.every(r => r.headers['User-Agent'] === 'Discord-Android/349009;RNA' && r.headers['X-Super-Properties'] === 'cGhvbmU='));
 });
 function playFixture(id, target, extra = {}, app = '1402418491272986635') {
     const q = questFixture(id, 'PLAY_ON_DESKTOP', target, extra);
@@ -2692,7 +2692,7 @@ test('Quest Completer sends Play heartbeats as Discord for Windows and nothing e
     assert.equal(new Set(beats.map(r => desktopProperties(r).client_launch_id)).size, 1, 'one desktop launch, not a new one each beat');
     const others = b.requests.filter(r => !r.url.endsWith('/heartbeat') && !r.url.startsWith('/applications/'));
     assert.ok(others.length > 0);
-    assert.ok(others.every(r => r.headers['User-Agent'] === 'Discord-Android/348010;RNA' && r.headers['X-Super-Properties'] === 'cGhvbmU='), 'video progress stays the phone');
+    assert.ok(others.every(r => r.headers['User-Agent'] === 'Discord-Android/349009;RNA' && r.headers['X-Super-Properties'] === 'cGhvbmU='), 'video progress stays the phone');
 });
 test("Quest Completer names the game's real executable, never a test build or launcher", async () => {
     const app = {id:'1402418491272986635', name:'Marvel Rivals', executables:[
@@ -2804,7 +2804,7 @@ test('Quest Completer starts off in Discord and sends nothing until you turn it 
     b.context.setTimeout = (fn, ms) => { timers.push(fn); return timers.length; };
     b.context.clearTimeout = () => {};
     const subs = new Map();
-    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 585);
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 578);
     assert.equal(b.api.settings.quests, false);
     subs.get('CONNECTION_OPEN')({user:{id:'1'}});
     assert.equal(timers.length, 0);
@@ -2814,8 +2814,8 @@ test('Quest Completer starts off in Discord and sends nothing until you turn it 
 test('unselected Quest Completer never touches QuestStore or the dispatcher', () => {
     const b = boot({readAll:true});
     let subscribed = 0, listened = 0;
-    b.load({default:{subscribe:() => subscribed++, dispatch(){}}}, null, 585);
-    b.load({default:{getQuest(){}, addChangeListener:() => listened++}}, null, 7120);
+    b.load({default:{subscribe:() => subscribed++, dispatch(){}}}, null, 578);
+    b.load({default:{getQuest(){}, addChangeListener:() => listened++}}, null, 7187);
     assert.equal(subscribed, 0); assert.equal(listened, 0);
     assert.equal(b.api.setSetting('quests', true), false);
 });
@@ -2823,7 +2823,7 @@ test('unselected Quest Completer never touches QuestStore or the dispatcher', ()
 // ---- 1.4.4 regressions ----
 test('Read All hands back the newest server bar props, not an older result sharing the same list data',()=>{
     const b=readAllHarness();
-    const hook=b.load({default:props=>props},null,15929);
+    const hook=b.load({default:props=>props},null,16232);
     const older=Object.freeze({listProps:{scroll:1},listDataProps:b.data}), newer=Object.freeze({listProps:{scroll:2},listDataProps:b.data});
     const a=hook.default(older), c=hook.default(newer);
     assert.equal(a.listProps.scroll,1);assert.equal(c.listProps.scroll,2,'the newer render must keep its own listProps');
@@ -2868,7 +2868,7 @@ test('Quest Completer settings page has no 5-second redraw timer', async () => {
     const React = {createElement:(type, props, ...children) => ({type, props:{...props, children:children.length > 1 ? children : children[0]}}),
         useState:v => [v, () => {}], useEffect:fn => { fn(); }, useRef:v => ({current:v}), useMemo:f => f(), useCallback:f => f, Fragment:'Fragment'};
     b.load(React, null, 17); b.load({View:'View', Text:'Text', Modal:'Modal', ScrollView:'ScrollView'}, null, 19);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route'}}}, null, 14409).SETTING_RENDERER_CONFIG;
     registry.VENUS_QUESTS.screen.getComponent()();
     assert.equal(intervals, 0, 'no 5-second polling');
 });
@@ -2916,7 +2916,7 @@ async function emojiOn() {
 test('Force system emojis draws only Unicode emojis with the phone font in React Native',async()=>{
     const b=await emojiOn();const seen=[];
     const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
-    const exports=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:Emoji})},null,6552);
+    const exports=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:Emoji})},null,6625);
     const render=props=>exports.default.type(props);
     const twemoji={name:'\u{1F600}',src:'asset:/emoji-1f600.png',textEmojiStyle:{fontSize:16}};
     render(twemoji);assert.equal(seen.at(-1).forceTextEmoji,true);assert.equal(twemoji.forceTextEmoji,undefined);
@@ -2924,13 +2924,13 @@ test('Force system emojis draws only Unicode emojis with the phone font in React
     const custom={name:'blobwave',src:'https://cdn.discordapp.com/emojis/1.webp'};render(custom);assert.equal(seen.at(-1),custom);
     const customUnicodeName={name:'\u{1F600}',src:{uri:'https://cdn.discordapp.com/emojis/2.png'}};render(customUnicodeName);assert.equal(seen.at(-1),customUnicodeName);
     const plain={name:'\u2764\uFE0F'};render(plain);assert.equal(seen.at(-1).forceTextEmoji,true);
-    const off=boot({});const untouched={default:Emoji};assert.equal(off.load(untouched,null,6552).default,Emoji);
+    const off=boot({});const untouched={default:Emoji};assert.equal(off.load(untouched,null,6625).default,Emoji);
 });
 test('Hide gift button removes it from both message bar sides and comes back when switched off',()=>{
     const b=boot({hideGift:true});reactHarness(b);const seen=[];
     const left=b.load({displayName:'ChatInputActions',default:Object.freeze({$$typeof:Symbol.for('react.memo'),
-        type:Object.freeze({$$typeof:Symbol.for('react.forward_ref'),render(props,ref){seen.push(['left',props,ref]);return 'left';}})})},null,11609);
-    const right=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:function Right(props){seen.push(['right',props]);return 'right';}})},null,11817);
+        type:Object.freeze({$$typeof:Symbol.for('react.forward_ref'),render(props,ref){seen.push(['left',props,ref]);return 'left';}})})},null,11864);
+    const right=b.load({default:Object.freeze({$$typeof:Symbol.for('react.memo'),type:function Right(props){seen.push(['right',props]);return 'right';}})},null,12071);
     const props=Object.freeze({channel:{id:'1'},shouldShowGiftButton:true,canStartThreads:true});
     assert.equal(left.default.type.render(props,'ref'),'left');
     assert.equal(seen.at(-1)[1].shouldShowGiftButton,false);assert.equal(seen.at(-1)[1].canStartThreads,true);assert.equal(seen.at(-1)[2],'ref');
@@ -2938,24 +2938,24 @@ test('Hide gift button removes it from both message bar sides and comes back whe
     right.default.type(props);assert.equal(seen.at(-1)[1].shouldShowGiftButton,false);
     const none={shouldShowGiftButton:false};right.default.type(none);assert.equal(seen.at(-1)[1],none);
     b.api.setSetting('hideGift',false);right.default.type(props);assert.equal(seen.at(-1)[1],props);
-    const off=boot({});const stock={default:function Right(){}};assert.equal(off.load(stock,null,11817).default,stock.default);
+    const off=boot({});const stock={default:function Right(){}};assert.equal(off.load(stock,null,12071).default,stock.default);
 });
 test('Hide Quests promotion gives Discord its own empty-dock answer and unmounts the dock',()=>{
     const b=boot({hideQuestDock:true});const {React}=reactHarness(b);
-    b.context.__r=id=>id===5764?{AdCreativeType:{QUEST:1,BOUNTY:3,NO_FILL:4}}:null;
+    b.context.__r=id=>id===5630?{AdCreativeType:{QUEST:1,BOUNTY:3,NO_FILL:4}}:null;
     const quest={type:1,quest:{id:'q'}};
     const hooks=b.load({useMobileQuestDock:()=>quest,useMobileQuestDockHeight:()=>88,useIsMobileQuestDockRendered:()=>true,
-        useIsMobileQuestDockRenderedBase:()=>true,useIsMobileQuestDockVisibleToUser:()=>true,useQuestDockHeroAsset:()=>'hero'},null,14608);
+        useIsMobileQuestDockRenderedBase:()=>true,useIsMobileQuestDockVisibleToUser:()=>true,useQuestDockHeroAsset:()=>'hero'},null,14892);
     assert.deepEqual({...hooks.useMobileQuestDock()},{type:4});assert.equal(hooks.useMobileQuestDockHeight(),0);
     assert.equal(hooks.useIsMobileQuestDockRendered(),false);assert.equal(hooks.useIsMobileQuestDockRenderedBase(),false);
     assert.equal(hooks.useIsMobileQuestDockVisibleToUser(),false);assert.equal(hooks.useQuestDockHeroAsset(),'hero');
     function QuestDock(){return 'dock';}
-    const dock=b.load({default:QuestDock,QuestDockQuestContent:function(){}},null,14700);
+    const dock=b.load({default:QuestDock,QuestDockQuestContent:function(){}},null,14985);
     assert.equal(dock.default({}),null);assert.equal(typeof dock.QuestDockQuestContent,'function');
     b.api.setSetting('hideQuestDock',false);
     assert.equal(hooks.useMobileQuestDock(),quest);assert.equal(hooks.useMobileQuestDockHeight(),88);assert.equal(hooks.useIsMobileQuestDockRendered(),true);
     const element=dock.default({a:1});assert.equal(element.type,QuestDock);assert.equal(element.props.a,1);
-    const off=boot({});const stock={useMobileQuestDock:()=>quest};assert.equal(off.load(stock,null,14608).useMobileQuestDock,stock.useMobileQuestDock);
+    const off=boot({});const stock={useMobileQuestDock:()=>quest};assert.equal(off.load(stock,null,14892).useMobileQuestDock,stock.useMobileQuestDock);
 });
 test('the new switches sit in their groups with one-line titles',()=>{
     const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
@@ -2967,20 +2967,20 @@ test('the new switches sit in their groups with one-line titles',()=>{
 
 function gestureHarness(features={gestures:true}) {
     const b=boot(features);const calls=[];let me='me';
-    b.load({default:{getCurrentUser:()=>({id:me})}},null,1378);
+    b.load({default:{getCurrentUser:()=>({id:me})}},null,1377);
     const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push(fn);return timers.length;};b.context.clearTimeout=id=>{timers[id-1]=null;};
-    const modules={11047:{default:o=>calls.push(['reply',o.message.id,o.actionSource])},
-        11032:{handleEdit:(m,c,ref,source)=>calls.push(['edit',m.id,source])},
-        11120:{default:(m,uid)=>m.author.id===uid&&m.state!=='SENDING'},
-        6880:{default:{deleteMessage:(c,id)=>{calls.push(['delete',id]);return Promise.resolve();}}}};
+    const modules={11305:{default:o=>calls.push(['reply',o.message.id,o.actionSource])},
+        11290:{handleEdit:(m,c,ref,source)=>calls.push(['edit',m.id,source])},
+        11378:{default:(m,uid)=>m.author.id===uid&&m.state!=='SENDING'},
+        6965:{default:{deleteMessage:(c,id)=>{calls.push(['delete',id]);return Promise.resolve();}}}};
     b.context.__r=id=>modules[id];
-    let reacted=0;const utils=b.load({handleAddDefaultDoubleTapReaction(){reacted++;return 'react';}},null,7414);
+    let reacted=0;const utils=b.load({handleAddDefaultDoubleTapReaction(){reacted++;return 'react';}},null,7627);
     const tap=(m,c={id:'c'})=>utils.handleAddDefaultDoubleTapReaction(m,c);
     const flushTimers=()=>{timers.splice(0).forEach(fn=>fn&&fn());};
     // Discord builds one MessagesHandlers per chat and defines handleTapMessage on it in the constructor.
     let singles=0;
     class MessagesHandlers { constructor(){this.handleTapMessage=e=>{singles++;return 'tap:'+e.nativeEvent.messageId;};} get params(){return 'p';} }
-    const Wrapped=b.load({MessagesHandlers},null,10905).MessagesHandlers;const handlers=new Wrapped();
+    const Wrapped=b.load({MessagesHandlers},null,11159).MessagesHandlers;const handlers=new Wrapped();
     const single=m=>handlers.handleTapMessage({nativeEvent:{messageId:m.id,channelId:'c'}});
     return {...b,calls,tap,single,handlers,flushTimers,reacted:()=>reacted,singles:()=>singles,setMe:id=>{me=id;}};
 }
@@ -3015,42 +3015,42 @@ test('Message tap gestures: the third tap, which Discord reports as a single tap
     g.api.setSetting('gestureTripleDelete',false);const four={id:'4',author:{id:'me'},state:'SENT'};g.tap(four);
     assert.equal(g.single(four),'tap:4','with three taps off, a single tap is Discord\'s');assert.deepEqual(g.calls.at(-1),['edit','4','message_swipe']);
     assert.equal(g.handlers.params,'p','Discord\'s own handler class still works');
-    const off=boot({});class Stock{};assert.equal(off.load({MessagesHandlers:Stock},null,10905).MessagesHandlers,Stock,'untouched without the patch');
+    const off=boot({});class Stock{};assert.equal(off.load({MessagesHandlers:Stock},null,11159).MessagesHandlers,Stock,'untouched without the patch');
 });
 test('Message tap gestures: a message you can\'t edit gets a reply, and the reaction tip is hidden',()=>{
     const g=gestureHarness();g.api.setSetting('gestures',true);g.api.setSetting('gestureTripleDelete',false);
     g.tap({id:'4',author:{id:'me'},state:'SENDING'});assert.deepEqual(g.calls.at(-1),['reply','4','message_swipe']);
-    const nudge=g.load({DoubleTapEmojiEditNudge:()=>'tip'},null,11105);assert.equal(nudge.DoubleTapEmojiEditNudge(),null);
-    const toast=g.load({maybeShowDoubleTapReminderToast:()=>'toast'},null,9652);assert.equal(toast.maybeShowDoubleTapReminderToast(),undefined);
-    const banner=g.load({DoubleTapToReactChatInputBanner:()=>'banner'},null,11666);assert.equal(banner.DoubleTapToReactChatInputBanner(),null);
+    const nudge=g.load({DoubleTapEmojiEditNudge:()=>'tip'},null,11363);assert.equal(nudge.DoubleTapEmojiEditNudge(),null);
+    const toast=g.load({maybeShowDoubleTapReminderToast:()=>'toast'},null,9878);assert.equal(toast.maybeShowDoubleTapReminderToast(),undefined);
+    const banner=g.load({DoubleTapToReactChatInputBanner:()=>'banner'},null,11918);assert.equal(banner.DoubleTapToReactChatInputBanner(),null);
     g.api.setSetting('gestures',false);assert.equal(nudge.DoubleTapEmojiEditNudge(),'tip');
     assert.equal(toast.maybeShowDoubleTapReminderToast(),'toast');
     assert.equal(banner.DoubleTapToReactChatInputBanner(),'banner');
-    const off=boot({});const untouched={handleAddDefaultDoubleTapReaction(){return 'react';}};assert.equal(off.load(untouched,null,7414).handleAddDefaultDoubleTapReaction,untouched.handleAddDefaultDoubleTapReaction);
+    const off=boot({});const untouched={handleAddDefaultDoubleTapReaction(){return 'react';}};assert.equal(off.load(untouched,null,7627).handleAddDefaultDoubleTapReaction,untouched.handleAddDefaultDoubleTapReaction);
 });
 test('Message tap gestures: passes chatInputRef & invertible, checks canReplyToMessage, triggers haptic feedback, and never triple-deletes unsent messages',()=>{
     const b=boot({gestures:true});b.api.setSetting('gestures',true);
-    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1378);
+    b.load({default:{getCurrentUser:()=>({id:'me'})}},null,1377);
     const timers=[];b.context.setTimeout=(fn,ms)=>{timers.push(fn);return timers.length;};b.context.clearTimeout=id=>{timers[id-1]=null;};
     let canReply=true,haptics=0,keyboardOpened=0;
     const chatInputRef={current:{openSystemKeyboard(){keyboardOpened++;}}};
     const replyPayloads=[],editCalls=[],deletedIds=[];
     const modules={
-        4802:{triggerHapticFeedback:t=>{haptics++;assert.equal(t,0);},HapticFeedbackTypes:{IMPACT_LIGHT:0}},
-        4803:{default:{IMPACT_LIGHT:0}},
-        7422:{canReplyToMessage:(c,m)=>canReply&&m.state!=='SENDING'},
-        11047:{default:o=>{replyPayloads.push(o);if(o.chatInputRef&&o.chatInputRef.current)o.chatInputRef.current.openSystemKeyboard();}},
-        11032:{handleEdit:(m,c,ref,source,inv)=>{editCalls.push({m,c,ref,source,inv});if(ref&&ref.current)ref.current.openSystemKeyboard();}},
-        11120:{default:(m,uid)=>m.author.id===uid&&m.state==='SENT'},
-        6880:{default:{deleteMessage:(c,id)=>{deletedIds.push(id);return Promise.resolve();}}}
+        4855:{triggerHapticFeedback:t=>{haptics++;assert.equal(t,0);},HapticFeedbackTypes:{IMPACT_LIGHT:0}},
+        4856:{default:{IMPACT_LIGHT:0}},
+        7635:{canReplyToMessage:(c,m)=>canReply&&m.state!=='SENDING'},
+        11305:{default:o=>{replyPayloads.push(o);if(o.chatInputRef&&o.chatInputRef.current)o.chatInputRef.current.openSystemKeyboard();}},
+        11290:{handleEdit:(m,c,ref,source,inv)=>{editCalls.push({m,c,ref,source,inv});if(ref&&ref.current)ref.current.openSystemKeyboard();}},
+        11378:{default:(m,uid)=>m.author.id===uid&&m.state==='SENT'},
+        6965:{default:{deleteMessage:(c,id)=>{deletedIds.push(id);return Promise.resolve();}}}
     };
     b.context.__r=id=>modules[id];
-    const utils=b.load({handleAddDefaultDoubleTapReaction(){return 'react';}},null,7414);
+    const utils=b.load({handleAddDefaultDoubleTapReaction(){return 'react';}},null,7627);
     class MessagesHandlers {
         constructor(){this.handleTapMessage=()=>'tap';this.handleDoubleTapMessage=e=>utils.handleAddDefaultDoubleTapReaction(e.message,e.channel);}
         get params(){return {chatInputRef,selectedChannelId:'c1'};}
     }
-    const Wrapped=b.load({MessagesHandlers},null,10905).MessagesHandlers;
+    const Wrapped=b.load({MessagesHandlers},null,11159).MessagesHandlers;
     const handlers=new Wrapped();
     const channel={id:'c1'};
     const theirs={id:'10',author:{id:'other'},state:'SENT'};
@@ -3091,7 +3091,7 @@ test('Hide call button removes Call from profiles, and Message takes the whole r
     function PhoneCallIcon(){} function ChatIcon(){} function Button(){} function IconButton(){}
     let animated=0;RN.LayoutAnimation={Presets:{easeInEaseOut:'ease'},configureNext:p=>{assert.equal(p,'ease');animated++;}};
     let refValue;React.useRef=v=>{if(refValue===undefined)refValue={current:v};return refValue;};
-    b.context.__r=id=>({7309:{PhoneCallIcon}}[id]||null);
+    b.context.__r=id=>({7523:{PhoneCallIcon}}[id]||null);
     const el=(type,props,...children)=>React.createElement(type,props,...children);
     // Discord's two-button layout: each button in its own flex:1 slot, side by side.
     const two=()=>el('View',{style:{flexDirection:'row',gap:12}},
@@ -3100,7 +3100,7 @@ test('Hide call button removes Call from profiles, and Message takes the whole r
     // With a friend button: Message and Call are icon buttons in one group.
     const three=()=>el('View',null,el('View',{style:{flexGrow:1}},el(Button,{text:'Add Friend'})),
         el('View',{style:{flexDirection:'row'}},el(IconButton,{icon:el(ChatIcon,{})}),el(IconButton,{icon:el(PhoneCallIcon,{})})));
-    let layout=two;const Buttons=b.load({default:function UserProfileContactButtons(){return layout();}},null,12696).default;
+    let layout=two;const Buttons=b.load({default:function UserProfileContactButtons(){return layout();}},null,12956).default;
     const types=n=>{const out=[];(function walk(v){if(!v||typeof v!=='object')return;if(Array.isArray(v))return v.forEach(walk);out.push(v.type);walk(v.props&&v.props.children);walk(v.props&&v.props.icon);})(n);return out;};
     let tree=Buttons({});const row=tree.props.children;
     assert.ok(!types(tree).includes(PhoneCallIcon),'no Call button');assert.ok(types(tree).includes(ChatIcon),'Message stays');
@@ -3109,18 +3109,18 @@ test('Hide call button removes Call from profiles, and Message takes the whole r
     assert.equal(animated,0,'nothing animates on first open');
     b.api.setSetting('hideCall',false);layout=two;tree=Buttons({});assert.ok(types(tree).includes(PhoneCallIcon),'switched off: Call is back');
     assert.equal(animated,1,'Message slides across when the setting changes');
-    const off=boot({});const stock={default:function C(){}};assert.equal(off.load(stock,null,12696).default,stock.default,'untouched without the patch');
+    const off=boot({});const stock={default:function C(){}};assert.equal(off.load(stock,null,12956).default,stock.default,'untouched without the patch');
     const rows=Object.fromEntries(settingsRows(settingsHarness({hideCall:true})));assert.deepEqual(rows.Appearance,['Hide the call button']);
 });
 function editHarness(saved) {
     const b=boot(allFeatures);const store=new Map();let disk=saved;const writes=[];
     store.set('c:1',{id:'1',channel_id:'c',author:{id:'u'},content:'first',timestamp:'2026-10-01T00:00:00.000Z',state:'SENT'});
-    b.load({default:{getMessage:(c,id)=>store.get(c+':'+id),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5057);
-    b.load({createMessageRecord:raw=>({...raw})},null,5059);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1378);
+    b.load({default:{getMessage:(c,id)=>store.get(c+':'+id),getMessages:()=>new MessageCollection(),emitChange(){}}},null,5110);
+    b.load({createMessageRecord:raw=>({...raw})},null,5112);b.load({default:{getCurrentUser:()=>({id:'owner'})}},null,1377);
     const flux={dispatch(event){if(event.type==='MESSAGE_UPDATE'&&event.message.edited_timestamp){const old=store.get(event.message.channel_id+':'+event.message.id);
         store.set(event.message.channel_id+':'+event.message.id,{...old,content:event.message.content,editedTimestamp:event.message.edited_timestamp});}}};
-    const dispatch=b.load({default:flux},null,585).default;
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);
+    const dispatch=b.load({default:flux},null,578).default;
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);
     b.load(native({fileExists:async p=>p.endsWith('venus-deleted-messages.json')&&!!disk,readFile:async()=>disk,
         writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-deleted-messages.json')disk=text;}}));
     const edit=(content,at)=>dispatch.dispatch({type:'MESSAGE_UPDATE',message:{id:'1',channel_id:'c',content,edited_timestamp:at||'2026-10-02T00:00:00.000Z'}});
@@ -3165,8 +3165,8 @@ test('NoDelete saves edit history with Save permanently and restores it for the 
 test('QuickDelete link previews ask again once QuickDelete itself is off',()=>{
     const b=boot(allFeatures);let confirmed=0;
     const translations={message:'Delete Message',embed:'Remove all embeds'};
-    b.load({t:{AMvpS4:'message','vXZ+Fo':'embed'},intl:{string:key=>translations[key]}},null,1127);
-    const action=b.load({default:{show(value){return value;}}},null,5205).default;
+    b.load({t:{AMvpS4:'message','vXZ+Fo':'embed'},intl:{string:key=>translations[key]}},null,1126);
+    const action=b.load({default:{show(value){return value;}}},null,5708).default;
     const embed={body:translations.embed,onConfirm(){confirmed++;}};
     b.api.setSetting('quickDelete',true);b.api.setSetting('quickDeleteEmbeds',true);
     action.show(embed);assert.equal(confirmed,1);
@@ -3184,7 +3184,7 @@ test('Quest Completer saved on starts even when Discord connects before settings
     b.context.setTimeout = (fn, ms) => { timers.push(ms); return timers.length; };
     b.context.clearTimeout = () => {};
     const subs = new Map();
-    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 585);
+    b.load({default:{subscribe:(event, fn) => subs.set(event, fn), dispatch(){}}}, null, 578);
     let release;
     const saved = new Promise(resolve => { release = resolve; });
     b.load({default:native({fileExists:async () => true, readFile:() => saved})});
@@ -3198,12 +3198,12 @@ test('Quest Completer saved on starts even when Discord connects before settings
 test('Force system emojis also draws keycap emojis with the phone font',async()=>{
     const b=await emojiOn();const seen=[];
     const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
-    const exports=b.load({default:Emoji},null,6552);
+    const exports=b.load({default:Emoji},null,6625);
     for (const name of ['1\uFE0F\u20E3','#\uFE0F\u20E3','*\u20E3']) {exports.default({name});assert.equal(seen.at(-1).forceTextEmoji,true,name);}
     for (const name of ['12','emoji_1','1','#']) {const props={name};exports.default(props);assert.equal(seen.at(-1),props,name);}
 });
 test('Read All says the DMs could not be cleared instead of "Nothing unread"',()=>{
-    const b=readAllHarness();b.context.__r=(old=>id=>id===6532?null:old(id))(b.context.__r);
+    const b=readAllHarness();b.context.__r=(old=>id=>id===6605?null:old(id))(b.context.__r);
     b.api.setSetting('readAllMode','both');pressReadAll(b);
     assert.equal(b.calls.guilds.length,1);
     assert.match(b.calls.toasts.at(-1),/^Couldn't mark as read: .*\(2 servers were marked as read\)$/);
@@ -3213,7 +3213,7 @@ test('Read All says the DMs could not be cleared instead of "Nothing unread"',()
 test('Force system emojis matches Discord\'s native emojis when saved settings are damaged',async()=>{
     const b=boot({systemEmoji:true});const seen=[];
     const Emoji=function Emoji(props){seen.push(props);return 'emoji';};
-    const exports=b.load({default:Emoji},null,6552);
+    const exports=b.load({default:Emoji},null,6625);
     b.load({default:native({fileExists:async()=>true,readFile:async()=>'{broken'})});
     await flush();await flush();await flush();
     assert.equal(b.api.status.storage,'read failed (defaults)');
@@ -3221,14 +3221,14 @@ test('Force system emojis matches Discord\'s native emojis when saved settings a
 });
 test('Hidden Channels hands the channel list the same renamed record each time',()=>{
     const b=boot(allFeatures);b.api.setSetting('hiddenChannels',true);
-    b.load({Permissions:{VIEW_CHANNEL:1024}},null,1086);
+    b.load({Permissions:{VIEW_CHANNEL:1024}},null,1085);
     const record=Object.freeze({id:'c1',guild_id:'g',type:0,name:'hidden'});
     b.load({default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}},null,2051);
-    b.load({default:{can:()=>false,canBasicChannel:()=>false}},null,4472);
+    b.load({default:{can:()=>false,canBasicChannel:()=>false}},null,4509);
     let list;
-    b.context.__d((g,r,importDefault,importAll,module)=>{module.exports={store:importDefault(2051)};},6952,[]);
+    b.context.__d((g,r,importDefault,importAll,module)=>{module.exports={store:importDefault(2051)};},7039,[]);
     const module={exports:{}};
-    b.factories.get(6952)(b.context,()=>{},id=>id===2051?{default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}}:{},()=>{},module,module.exports,[]);
+    b.factories.get(7039)(b.context,()=>{},id=>id===2051?{default:{getChannel:id=>id==='c1'?record:null,getBasicChannel:()=>null}}:{},()=>{},module,module.exports,[]);
     list=module.exports.store.default||module.exports.store;
     const first=list.getChannel('c1'),second=list.getChannel('c1');
     assert.notEqual(first,record);assert.equal(first,second);assert.equal(first.id,'c1');
@@ -3297,10 +3297,10 @@ function validHarness(users = {}) {
     const known=new Map(Object.entries(users));const subs={};const dispatched=[];
     const dispatcher={subscribe(type,fn){(subs[type]||(subs[type]=[])).push(fn);},dispatch(event){dispatched.push(event);
         if (event.type==='USER_UPDATE') known.set(event.user.id,event.user);(subs[event.type]||[]).forEach(fn=>fn(event));}};
-    b.load({default:{getUser:id=>known.get(id),getCurrentUser:()=>({id:'me'})}},null,1378);
-    b.load({default:dispatcher},null,585);
+    b.load({default:{getUser:id=>known.get(id),getCurrentUser:()=>({id:'me'})}},null,1377);
+    b.load({default:dispatcher},null,578);
     const asked=[];let answer=id=>{known.set(id,{id,username:'u'+id});return Promise.resolve({id});};
-    b.context.__r=id=>id===7630?{getUser:userId=>{asked.push(userId);return answer(userId);}}:null;
+    b.context.__r=id=>id===7852?{getUser:userId=>{asked.push(userId);return answer(userId);}}:null;
     return {...b,dispatcher,dispatched,known,asked,run,setAnswer:fn=>{answer=fn;},subs};
 }
 test('Fix unknown mentions looks up unknown people automatically and redraws the message',async()=>{
@@ -3343,7 +3343,7 @@ test('Fix unknown mentions does nothing while switched off',async()=>{
     const b=validHarness();b.api.setSetting('validUser',false);
     b.dispatcher.dispatch({type:'MESSAGE_CREATE',message:{id:'m',channel_id:'c',content:'<@22222222222222222>'}});
     await b.run();assert.deepEqual(b.asked,[]);
-    const off=boot({});const subs=[];off.load({default:{subscribe:t=>subs.push(t),dispatch(){}}},null,585);assert.deepEqual(subs,[]);
+    const off=boot({});const subs=[];off.load({default:{subscribe:t=>subs.push(t),dispatch(){}}},null,578);assert.deepEqual(subs,[]);
 });
 test('profile bar gets a settings button next to the notifications bell',()=>{
     const b=boot({youBarSettings:true});const {React}=reactHarness(b);React.Fragment='Fragment';
@@ -3352,13 +3352,13 @@ test('profile bar gets a settings button next to the notifications bell',()=>{
     const registryMod={SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}};
     const listMod={SettingsList};
     b.context.__r=id=>{
-        if (id===14130) return b.load(registryMod,null,14130);
-        if (id===14236) return b.load(listMod,null,14236);
-        return ({16031:{default:YouBarButton},6799:{SettingsIcon},14615:{YOU_BAR_BUTTON_ICON_SIZE:20},6801:{openUserSettings:options=>opened.push(options)}})[id];
+        if (id===14409) return b.load(registryMod,null,14409);
+        if (id===14500) return b.load(listMod,null,14500);
+        return ({16334:{default:YouBarButton},6883:{SettingsIcon},14899:{YOU_BAR_BUTTON_ICON_SIZE:20},6885:{openUserSettings:options=>opened.push(options)}})[id];
     };
     function Bell(){return 'bell';}
     const memo={$$typeof:Symbol.for('react.memo'),type:Bell,compare:null};
-    const exports=b.load({default:memo},null,16032);
+    const exports=b.load({default:memo},null,16335);
     assert.equal(exports.default.$$typeof,Symbol.for('react.memo'));
     const tree=exports.default.type({hasNameplate:true});
     assert.equal(tree.type,'Fragment');assert.equal(tree.props.children[0],'bell');
@@ -3366,7 +3366,7 @@ test('profile bar gets a settings button next to the notifications bell',()=>{
     assert.equal(button.type,YouBarButton);assert.equal(button.props.accessibilityLabel,'Venus settings');
     assert.equal(button.props.icon.type,SettingsIcon);assert.equal(button.props.hasNameplate,true);
     // Even on first tap after restart (before Discord Settings was ever opened), openSettings() lazily
-    // initializes 14130 (SettingsRendererConfig) and 14236 (SettingListRenderer) so it opens VENUS_PLUGINS
+    // initializes 14409 (SettingsRendererConfig) and 14500 (SettingListRenderer) so it opens VENUS_PLUGINS
     // directly instead of Discord account settings or a blank black screen (#58).
     assert.equal(b.context.__venusPatches.status.menu,false,'settings menu not yet loaded before first tap');
     button.props.onPress();
@@ -3382,11 +3382,11 @@ function splitHarness(premium=false) {
     const b=boot({splitMessages:true});const sent=[];
     const timers=[];b.context.setTimeout=(fn)=>{timers.push(fn);return 1;};
     const run=async()=>{for (let i=0;i<50;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();};
-    const constants=b.load({MAX_MESSAGE_LENGTH:2000,MAX_MESSAGE_LENGTH_PREMIUM:4000,OTHER:1},null,1086);
-    b.load({default:{getCurrentUser:()=>({id:'me',premiumType:premium?2:0}),getUser(){}}},null,1378);
+    const constants=b.load({MAX_MESSAGE_LENGTH:2000,MAX_MESSAGE_LENGTH_PREMIUM:4000,OTHER:1},null,1085);
+    b.load({default:{getCurrentUser:()=>({id:'me',premiumType:premium?2:0}),getUser(){}}},null,1377);
     b.load({default:{getChannel:()=>({id:'c',rateLimitPerUser:0})}},null,2051);
-    const actions=b.load({default:{sendMessage(channel,message,a,b2){sent.push([channel,message,a,b2]);return Promise.resolve();}}},null,6880).default;
-    const length=b.load({default:()=>premium?4000:2000,getMaxMessageLength:()=>premium?4000:2000},null,8602);
+    const actions=b.load({default:{sendMessage(channel,message,a,b2){sent.push([channel,message,a,b2]);return Promise.resolve();}}},null,6965).default;
+    const length=b.load({default:()=>premium?4000:2000,getMaxMessageLength:()=>premium?4000:2000},null,8809);
     return {...b,sent,actions,constants,length,run};
 }
 test('long messages are split into parts within the limit, code blocks kept closed',async()=>{
@@ -3411,19 +3411,19 @@ test('short messages, premium limits and the off switch are left alone',async()=
     assert.equal(b.length.getMaxMessageLength(),4000);
     assert.equal(b.constants.MAX_MESSAGE_LENGTH,1<<30,'Constants (1086) keeps SPLIT_UNLIMITED while features.splitMessages is built in so DraftStore (5201) never truncates drafts at startup');
     const big={content:'y '.repeat(5000)};b.actions.sendMessage('c',big);await b.run();assert.equal(b.sent.at(-1)[1],big);
-    const off=boot({});const stock={MAX_MESSAGE_LENGTH:2000};assert.equal(off.load(stock,null,1086).MAX_MESSAGE_LENGTH,2000);
+    const off=boot({});const stock={MAX_MESSAGE_LENGTH:2000};assert.equal(off.load(stock,null,1085).MAX_MESSAGE_LENGTH,2000);
 });
 test('Send long messages: restores real limit when 8602 captured SPLIT_UNLIMITED at startup, preserves tts/flags/allowedMentions, bypasses slowmode when permitted, and stops on error or toggle off',async()=>{
     const b=boot({splitMessages:true});
-    // Simulate startup before venus-patches.json finishes loading: features.splitMessages is true, but settings.splitMessages is still false when 1086 and 8602 load!
+    // Simulate startup before venus-patches.json finishes loading: features.splitMessages is true, but settings.splitMessages is still false when 1085 and 8809 load!
     b.api.setSetting('splitMessages',false);
-    const constants=b.load({MAX_MESSAGE_LENGTH:2000,MAX_MESSAGE_LENGTH_PREMIUM:4000},null,1086);
+    const constants=b.load({MAX_MESSAGE_LENGTH:2000,MAX_MESSAGE_LENGTH_PREMIUM:4000},null,1085);
     assert.equal(constants.MAX_MESSAGE_LENGTH,1<<30,'DraftStore and 8602 capture SPLIT_UNLIMITED even before settings finish loading');
     let isPremium=false;
-    b.load({default:{getCurrentUser:()=>({id:'me',premiumType:isPremium?2:0}),getUser(){}}},null,1378);
-    // 8602 captures constants.MAX_MESSAGE_LENGTH / MAX_MESSAGE_LENGTH_PREMIUM in its closure at factory time:
+    b.load({default:{getCurrentUser:()=>({id:'me',premiumType:isPremium?2:0}),getUser(){}}},null,1377);
+    // 8809 captures constants.MAX_MESSAGE_LENGTH / MAX_MESSAGE_LENGTH_PREMIUM in its closure at factory time:
     const capturedNormal=constants.MAX_MESSAGE_LENGTH, capturedPremium=constants.MAX_MESSAGE_LENGTH_PREMIUM;
-    const length=b.load({default:()=>isPremium?capturedPremium:capturedNormal,getMaxMessageLength:()=>isPremium?capturedPremium:capturedNormal},null,8602);
+    const length=b.load({default:()=>isPremium?capturedPremium:capturedNormal,getMaxMessageLength:()=>isPremium?capturedPremium:capturedNormal},null,8809);
     assert.equal(length.getMaxMessageLength(),2000,'returns real 2000 limit when splitMessages setting is off even though 8602 captured SPLIT_UNLIMITED');
     isPremium=true;
     assert.equal(length.getMaxMessageLength(),4000,'returns real 4000 premium limit when splitMessages setting is off');
@@ -3437,12 +3437,12 @@ test('Send long messages: restores real limit when 8602 captured SPLIT_UNLIMITED
     const run=async()=>{for (let i=0;i<50;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();};
     b.load({default:{getChannel:()=>null,getBasicChannel:id=>id==='slow'?{id:'slow',rateLimitPerUser:30}:null}},null,2051);
     let canBypass=true;
-    b.context.__r=id=>id===7105?{canBypassSlowmode:()=>canBypass}:null;
+    b.context.__r=id=>id===7172?{canBypassSlowmode:()=>canBypass}:null;
     const sent=[];let failFirst=false;
     const actions=b.load({default:{sendMessage(ch,msg,wait,opts){
         sent.push([ch,msg,wait,opts]);
         return Promise.resolve(failFirst && sent.length===1 ? {ok:false,hasErr:true} : {ok:true,hasErr:false});
-    }}},null,6880).default;
+    }}},null,6965).default;
 
     const longText='a'.repeat(1500)+'\n'+'b'.repeat(1500);
     // 1. Scheduled messages are not split:
@@ -3496,12 +3496,12 @@ function translateHarness({answer, locale='en-US', system='de-DE', on=true}={}) 
         if (result && result.status) return {ok:false,status:result.status,json:async()=>({})};
         return {ok:true,status:200,json:async()=>result};
     };
-    b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1378);
+    b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1377);
     const localeStore={locale,systemLocale:system,listeners:[],addChangeListener(fn){this.listeners.push(fn);}};
-    b.load({default:localeStore},null,2115);
+    b.load({default:localeStore},null,2116);
     const dispatched=[];const subs={};
-    b.load({default:{dispatch(e){dispatched.push(e);},subscribe(t,fn){(subs[t]||(subs[t]=[])).push(fn);}}},null,585);
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);
+    b.load({default:{dispatch(e){dispatched.push(e);},subscribe(t,fn){(subs[t]||(subs[t]=[])).push(fn);}}},null,578);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);
     // Switching on asks for a redraw a moment later: let that happen before the test's messages exist.
     if (on) { b.api.setSetting('translate',true); while (timers.length) timers.shift()(); }
     const run=async()=>{for (let i=0;i<40;i++){await flush();if(!timers.length)break;timers.shift()();}await flush();await flush();};
@@ -3582,7 +3582,7 @@ test('Translate messages starts off, sends nothing while off and redraws when sw
     b.row('1',content,'hola amigo');await b.run();assert.equal(b.requests.length,1);
     b.api.setSetting('translate',false);await b.run();
     assert.equal(b.row('1',content,'hola amigo').content,content,'switched off: the original again');
-    const off=boot({});const unpatched=[];off.load({default:{dispatch(){},subscribe:t=>unpatched.push(t)}},null,585);assert.deepEqual(unpatched,[]);
+    const off=boot({});const unpatched=[];off.load({default:{dispatch(){},subscribe:t=>unpatched.push(t)}},null,578);assert.deepEqual(unpatched,[]);
 });
 test('Translate messages has a settings row with its own page in Messages',()=>{
     const b=settingsHarness();const rows=Object.fromEntries(settingsRows(b));
@@ -3591,8 +3591,8 @@ test('Translate messages has a settings row with its own page in Messages',()=>{
 });
 test('Pastelize colors the text of the message a reply quotes when Color message text is on (#45)',()=>{
     const b=boot(allFeatures);const {RN}=reactHarness(b);RN.processColor=hex=>parseInt(hex.slice(1),16)|0xff000000;
-    b.load(seed=>Array.from(seed).reduce((a,c)=>a+c.charCodeAt(0),0),null,1252);
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);const rows=new Rows();
+    b.load(seed=>Array.from(seed).reduce((a,c)=>a+c.charCodeAt(0),0),null,1251);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);const rows=new Rows();
     // Discord gives every message, quoted ones too, its theme text color.
     const quoted={authorId:'111',username:'Ana',roleColor:null,textColor:-1,content:[{type:'text',content:'Hi'}]};
     const row={rowType:1,message:{},result:{message:{authorId:'222',username:'Bo',roleColor:null,textColor:-1,content:[],referencedMessage:{state:'LOADED',message:quoted}}}};
@@ -3629,10 +3629,10 @@ function fastHarness({answer, disk=null, files={}}={}) {
     });
     b.load({default:native({fileExists:async p=>p.endsWith('venus-translations.json')&&saved!==null,readFile:async p=>p.endsWith('venus-translations.json')?saved:'{}',
         writeFile:async(dir,name,text)=>{writes.push(name);if(name==='venus-translations.json')saved=text;},...files})});
-    b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1378);
-    b.load({default:{locale:'en-US',systemLocale:'en-US'}},null,2115);
-    const dispatched=[];b.load({default:{dispatch(e){dispatched.push(e);},subscribe(){}}},null,585);
-    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7378);
+    b.load({default:{getCurrentUser:()=>({id:'me'}),getUser(){}}},null,1377);
+    b.load({default:{locale:'en-US',systemLocale:'en-US'}},null,2116);
+    const dispatched=[];b.load({default:{dispatch(e){dispatched.push(e);},subscribe(){}}},null,578);
+    class Rows{generate(row){return row.result;}}b.load({default:Rows},null,7591);
     const run=async(rounds=60)=>{for (let i=0;i<rounds;i++){await flush();if(!timers.length)break;timers.shift().fn();}await flush();await flush();};
     const row=(id,text)=>new Rows().generate({rowType:1,message:{id,channel_id:'c',content:text,author:{id:'them'}},
         result:{message:{id,channelId:'c',authorId:'them',content:[{type:'text',content:text}]}}}).message.content;
@@ -3670,8 +3670,8 @@ test('Translate messages keeps translations on the phone, so a chat opened after
 function pageNodes(tree){const out=[];(function walk(n){if(!n||typeof n!=='object')return;if(Array.isArray(n))return n.forEach(walk);out.push(n);walk(n.props&&n.props.children);})(tree);return out;}
 test('Clear kept messages removes kept deletions from chat and the saved file, after asking',async()=>{
     const b=deletionHarness();const {RN}=reactHarness(b);const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
-    b.context.__r=id=>({5916:{TableRow:'Row'}}[id]||null);
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    b.context.__r=id=>({5993:{TableRow:'Row'}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14409).SETTING_RENDERER_CONFIG;
     b.api.setSetting('noDelete',true);
     const page=()=>registry.VENUS_NODELETE.screen.getComponent()();
     const clear=()=>pageNodes(page()).find(n=>n.type==='Row'&&n.props.label==='Clear kept messages');
@@ -3689,8 +3689,8 @@ test('Clear kept messages removes kept deletions from chat and the saved file, a
 });
 test('Clear saved translations forgets them on the phone and translates the screen again',async()=>{
     const b=fastHarness();const {RN}=reactHarness(b);const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
-    b.context.__r=id=>({5916:{TableRow:'Row'}}[id]||null);
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    b.context.__r=id=>({5993:{TableRow:'Row'}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14409).SETTING_RENDERER_CONFIG;
     const clear=()=>pageNodes(registry.VENUS_TRANSLATE.screen.getComponent()()).find(n=>n.type==='Row'&&n.props.label==='Clear saved translations');
     assert.equal(clear().props.disabled,true);assert.equal(clear().props.subLabel,'Nothing saved yet.');
     await flush();await flush();b.api.setSetting('translate',true);await b.run(5);
@@ -3702,7 +3702,7 @@ test('Clear saved translations forgets them on the phone and translates the scre
 });
 test('choice pages use Discord\'s radio list: tap gestures, Read all and Translate',()=>{
     const b=settingsHarness();function TableRadioGroup(){} function TableRadioRow(){}
-    b.context.__r=id=>({5995:{TableRadioGroup},5994:{TableRadioRow}}[id]||null);
+    b.context.__r=id=>({6072:{TableRadioGroup},6071:{TableRadioRow}}[id]||null);
     const radios=key=>pageNodes(b.registry[key].screen.getComponent()()).filter(n=>n.type===TableRadioGroup);
     const [own]=radios('VENUS_GESTURES');assert.equal(own.props.title,'Double-tap your own message');assert.equal(own.props.value,'edit');
     own.props.onChange('reply');assert.equal(b.api.settings.gestureOwn,'reply');
@@ -3747,7 +3747,7 @@ test('a reply shows the message it quotes translated, like that message in chat 
     const unquoted={id:'q3',authorId:'them',content:[T('hola amigo')]};
     englishReply('r-man','me',unquoted);
     b2.dispatched.length=0;
-    const sheet=b2.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',key:'copy',props:{label:'Copy Text',onPress(){}}}]}};}},null,11023);
+    const sheet=b2.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',key:'copy',props:{label:'Copy Text',onPress(){}}}]}};}},null,11281);
     sheet.default({message:{id:'q3',channel_id:'c',content:'hola amigo',author:{id:'them'}}}).props.children[1].props.onPress();
     assert.ok(b2.dispatched.some(e=>e.type==='MESSAGE_UPDATE'&&e.message.id==='r-man'),'toggling a quoted message in manual mode redraws the reply');
 });
@@ -3756,9 +3756,9 @@ test('Only when you ask: nothing is sent until you tap Translate in the hold men
     const content=[T('hola amigo')];
     assert.equal(b.row('1',content,'hola amigo').content,content);await b.run();
     assert.equal(b.requests.length,0,'manual: nothing sent');
-    // The hold menu (LongPressMessageActionSheet 11023) gets a Translate row next to Discord's own.
+    // The hold menu (LongPressMessageActionSheet 11281) gets a Translate row next to Discord's own.
     const own={label:'Copy Text',onPress(){},icon:{props:{IconComponent(){}}}};
-    const sheet=b.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',key:'copy',props:own}]}};}},null,11023);
+    const sheet=b.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',key:'copy',props:own}]}};}},null,11281);
     const message={id:'1',channel_id:'c',content:'hola amigo',author:{id:'them'}};
     const rowsOf=tree=>tree.props.children.map(child=>child.props.label);
     let tree=sheet.default({message});assert.deepEqual(rowsOf(tree),['Copy Text','Translate']);
@@ -3783,8 +3783,8 @@ test('Only when you ask: nothing is sent until you tap Translate in the hold men
 });
 test('your own message can be translated from the hold menu, and a message in your language says so',async()=>{
     const b=translateHarness({answer:texts=>texts.map(t=>t==='good morning everyone'?[t,'en']:[t.replace(/hola/g,'hello'),'es'])});
-    const toasts=[];b.context.__r=id=>id===4531?{default:{open:t=>toasts.push(t.content)}}:null;
-    const sheet=b.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',props:{label:'Copy Text',onPress(){}}}]}};}},null,11023);
+    const toasts=[];b.context.__r=id=>id===4568?{default:{open:t=>toasts.push(t.content)}}:null;
+    const sheet=b.load({default(props){return {type:'Sheet',props:{children:[{type:'Row',props:{label:'Copy Text',onPress(){}}}]}};}},null,11281);
     const label=message=>sheet.default({message}).props.children[1].props.label;
     const mine={id:'m',channel_id:'c',content:'hola',author:{id:'me'}};
     assert.equal(label(mine),'Translate','your own message starts as written');
@@ -3817,7 +3817,7 @@ function languageHarness({locale='en-US', packs={}}={}) {
     const timers=[];b.context.setTimeout=(fn)=>{timers.push(fn);return timers.length;};
     b.load({default:native({readAsset:async(uri,encoding)=>{reads.push([uri,encoding]);const code=uri.split(':')[1];
         if (!packs[code]) throw new Error('missing');return JSON.stringify({code,strings:packs[code]});}})});
-    const store={locale,listeners:[],addChangeListener(fn){this.listeners.push(fn);}};b.load({default:store},null,2115);
+    const store={locale,listeners:[],addChangeListener(fn){this.listeners.push(fn);}};b.load({default:store},null,2116);
     const run=async()=>{for (let i=0;i<10;i++){await flush();while (timers.length) timers.shift()();}};
     return {...b,reads,store,run};
 }
@@ -3844,7 +3844,7 @@ test('Venus settings follow Discord\'s language, and Language picks another one'
     assert.equal(title('VENUS_PLUGINS'),'Features');assert.ok(b.reads.some(r=>r[0]==='venus-i18n-v1:de'));
     // The Language page lists every language in its own words.
     function TableRadioGroup(){} function TableRadioRow(){}
-    b.context.__r=id=>({5995:{TableRadioGroup},5994:{TableRadioRow}}[id]||null);
+    b.context.__r=id=>({6072:{TableRadioGroup},6071:{TableRadioRow}}[id]||null);
     const page=pageNodes(b.registry.VENUS_LANGUAGE.screen.getComponent()());
     const group=page.find(n=>n.type===TableRadioGroup);assert.equal(group.props.value,'auto');
     const labels=page.filter(n=>n.type===TableRadioRow).map(n=>n.props.label);
@@ -3854,8 +3854,8 @@ test('Venus settings follow Discord\'s language, and Language picks another one'
 test('plural forms come from the language file, for every form its language has',async()=>{
     const b=fastHarness({files:{readAsset:async()=>JSON.stringify({code:'ru',strings:RU})}});
     await flush();await flush();b.api.setSetting('translate',true);b.api.setSetting('language','ru');await b.run(5);
-    b.context.__r=id=>({5916:{TableRow:'Row'}}[id]||null);
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    b.context.__r=id=>({5993:{TableRow:'Row'}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14409).SETTING_RENDERER_CONFIG;
     const sub=()=>pageNodes(registry.VENUS_TRANSLATE.screen.getComponent()()).find(n=>n.type==='Row'&&n.props.label==='Clear saved translations').props.subLabel;
     for (const n of [1,3,5]) b.row('p'+n,'hola amigo numero '+n);
     await b.run();
@@ -3896,18 +3896,18 @@ function userNotifHarness({friends=['111111111111111111','222222222222222222'], 
         dispatch(event){(subs[event.type]||[]).slice().forEach(fn=>fn(event));}
     };
     b.load({default:native({fileExists:async()=>saved!==null,readFile:async()=>saved||'{}',writeFile:async(d,n,t)=>{writes.push([n,t]);saved=t;}})});
-    b.load({default:{getCurrentUser:()=>({id:'999999999999999999'}),getUser:id=>users[id],addChangeListener(){},removeChangeListener(){}}},null,1378);
+    b.load({default:{getCurrentUser:()=>({id:'999999999999999999'}),getUser:id=>users[id],addChangeListener(){},removeChangeListener(){}}},null,1377);
     b.load({default:{getChannel:id=>channels[id],getBasicChannel:id=>basicChannels[id]}},null,2051);
-    b.load({default:{getGuild:id=>guilds[id],getGuildIds:()=>Object.keys(guilds)}},null,2073);
-    b.load({default:{getFriendIDs:()=>friends,isFriend:id=>friends.includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4482);
-    b.load({default:{getStatus:id=>statuses[id],addChangeListener(){},removeChangeListener(){}}},null,4877);
-    b.load({default:dispatcher},null,585);
+    b.load({default:{getGuild:id=>guilds[id],getGuildIds:()=>Object.keys(guilds)}},null,2074);
+    b.load({default:{getFriendIDs:()=>friends,isFriend:id=>friends.includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4519);
+    b.load({default:{getStatus:id=>statuses[id],addChangeListener(){},removeChangeListener(){}}},null,4930);
+    b.load({default:dispatcher},null,578);
     function TableCheckboxRow(props){return {type:TableCheckboxRow,props};}
     function SearchField(props){return {type:SearchField,props};}
-    b.context.__r=id=>({4531:{default:{open:t=>toasts.push(t.content)}},5916:{TableRow:'Row'},5997:{TableRowGroup:'Group'},
-        6621:{TableSwitchRow:'Switch'},5913:{TableCheckboxRow},6472:{SearchField},9044:{BellIcon(){}},
-        6731:{subscribeGuild:gid=>subscribedGuilds.push(gid)}}[id]||null);
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    b.context.__r=id=>({4568:{default:{open:t=>toasts.push(t.content)}},5993:{TableRow:'Row'},6074:{TableRowGroup:'Group'},
+        6698:{TableSwitchRow:'Switch'},5990:{TableCheckboxRow},6547:{SearchField},9266:{BellIcon(){}},
+        6815:{subscribeGuild:gid=>subscribedGuilds.push(gid)}}[id]||null);
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14409).SETTING_RENDERER_CONFIG;
     return {...b,React,RN,toasts,subs,dispatcher,users,statuses,subscribedGuilds,registry,TableCheckboxRow,SearchField,writes,getSaved:()=>saved,advance:ms=>{clock+=ms;}};
 }
 test('User activity notifications watches friends and custom user IDs for status, typing and messages with cooldowns',async()=>{
@@ -3936,7 +3936,7 @@ test('User activity notifications watches friends and custom user IDs for status
     assert.equal(b.toasts.length,2,'no false online notification after CONNECTION_OPEN_SUPPLEMENTAL');
     // Unseeded friend whose PresenceStore already updated before subscriber ran:
     b.users['555555555555555555']={id:'555555555555555555',username:'eve',globalName:'Eve'};
-    b.load({default:{getFriendIDs:()=>['111111111111111111','222222222222222222','555555555555555555'],isFriend:id=>['111111111111111111','222222222222222222','555555555555555555'].includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4482);
+    b.load({default:{getFriendIDs:()=>['111111111111111111','222222222222222222','555555555555555555'],isFriend:id=>['111111111111111111','222222222222222222','555555555555555555'].includes(id),getNickname:id=>id==='111111111111111111'?'Ally':null,addChangeListener(){},removeChangeListener(){}}},null,4519);
     // Simulate unseeded status transition where PresenceStore updated to 'online' before subscriber ran:
     b.statuses['555555555555555555']='online';
     b.dispatcher.dispatch({type:'PRESENCE_UPDATES',updates:[{user:{id:'555555555555555555'},status:'online'}]});
@@ -4029,15 +4029,15 @@ test('User activity notifications push option requests permissions, sends local 
         openSettings:()=>{settingsOpened++;}
     }};
     const socket={close(clean){socketCloses++;}};
-    b.load({socket},null,13174);
-    const pauseMod=b.load({setIsPaused:v=>{pausedState=v;},getIsPaused:()=>pausedState},null,13212);
+    b.load({socket},null,13439);
+    const pauseMod=b.load({setIsPaused:v=>{pausedState=v;},getIsPaused:()=>pausedState},null,13477);
     const origR=b.context.__r;
     b.context.__r=id=>({
         1986:{default:{getState:()=>appState}},
-        7179:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
-        8741:{default:{presentLocalNotification:n=>localPushes.push(n),openNotificationSettings:()=>{settingsOpened++;}}},
-        13212:pauseMod,
-        5205:{default:{show:a=>alerts.push(a)}}
+        7252:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
+        8966:{default:{presentLocalNotification:n=>localPushes.push(n),openNotificationSettings:()=>{settingsOpened++;}}},
+        13477:pauseMod,
+        5708:{default:{show:a=>alerts.push(a)}}
     }[id]||origR(id));
     b.api.setSetting('userNotif',true);
     assert.equal(fgActive.size,0,'foreground service idle while push is off');
@@ -4086,23 +4086,23 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     let appState='background', socketCloses=0;
     const fgActive=new Map(), requests=[];
     const socket={close(clean){socketCloses++;}};
-    b.load({socket},null,13174);
+    b.load({socket},null,13439);
     const questItem={
         id:'q1',
         config:{expiresAt:'2099-01-01T00:00:00.000Z',messages:{questName:'Background Quest'},taskConfigV2:{tasks:{WATCH_VIDEO_ON_MOBILE:{target:5}}}},
         userStatus:{enrolledAt:'2020-01-01T00:00:00.000Z',completedAt:null,progress:{WATCH_VIDEO_ON_MOBILE:{value:0}}}
     };
     const store={quests:new Map([['q1',questItem]]),getQuest:id=>id==='q1'?questItem:null,addChangeListener(){}};
-    b.load({default:store},null,7120);
-    b.load({default:{subscribe(){},dispatch(){}}},null,585);
+    b.load({default:store},null,7187);
+    b.load({default:{subscribe(){},dispatch(){}}},null,578);
     b.load({default:native({fileExists:async()=>false,readFile:async()=>'{}',writeFile:async()=>{}})});
     let resolveProgress;
     b.context.__r=id=>({
         1986:{default:{getState:()=>appState}},
-        7179:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
-        13212:{default:{setIsPaused(){}}},
-        7120:{default:store},
-        1283:{HTTP:{post:req=>{requests.push(req);return new Promise(r=>{resolveProgress=r;});}}}
+        7252:{default:{updateServiceHandler:(k,v)=>fgActive.set(k,v),removeServiceHandler:k=>fgActive.delete(k)}},
+        13477:{default:{setIsPaused(){}}},
+        7187:{default:store},
+        1282:{HTTP:{post:req=>{requests.push(req);return new Promise(r=>{resolveProgress=r;});}}}
     }[id]||null);
     await flush();await flush();
     b.api.setSetting('quests',true);
@@ -4125,17 +4125,17 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
 test('Account switcher unlocks MultiAccountStore, seeds active token, raises limit, and injects You bar button',()=>{
     const b=boot({accountSwitcher:true,youBarSettings:true});const {React,RN}=reactHarness(b);React.Fragment='Fragment';
     const alerts=[];RN.Alert={alert:(...args)=>alerts.push(args)};
-    // 11801 Constants: MAX_ACCOUNTS is raised to 50 as soon as 11801 loads (even before venus-patches.json finishes
-    // restoring settings.accountSwitcher) because MultiAccountStore (11800) caches MAX_ACCOUNTS once at module factory
+    // 12057 Constants: MAX_ACCOUNTS is raised to 50 as soon as 12057 loads (even before venus-patches.json finishes
+    // restoring settings.accountSwitcher) because MultiAccountStore (12056) caches MAX_ACCOUNTS once at module factory
     // evaluation time and would otherwise splice >5 accounts on CONNECTION_OPEN (#59).
-    const constants=b.load({MAX_ACCOUNTS:5,MAX_PUSH_SYNC_ACCOUNTS:5,SWITCH_ACCOUNTS_MODAL_KEY:'switch-accounts-modal',MultiAccountSwitchLocation:{YOU_ACCOUNT_ACTION_SHEET:'you_account_action_sheet'}},null,11801);
+    const constants=b.load({MAX_ACCOUNTS:5,MAX_PUSH_SYNC_ACCOUNTS:5,SWITCH_ACCOUNTS_MODAL_KEY:'switch-accounts-modal',MultiAccountSwitchLocation:{YOU_ACCOUNT_ACTION_SHEET:'you_account_action_sheet'}},null,12057);
     assert.equal(constants.MAX_ACCOUNTS,50,'limit raised to 50 at module load time so MultiAccountStore never caches 5 (#59)');
     assert.equal(constants.MAX_PUSH_SYNC_ACCOUNTS,50,'push sync limit raised to 50 at module load time (#59)');
     b.api.setSetting('accountSwitcher',true);
     assert.equal(constants.MAX_ACCOUNTS,50,'limit remains 50 when Account switcher is enabled');
 
-    // 11802 Staff check and 11800 MultiAccountStore + 1112 TokenManager seeding.
-    const staffMod=b.load({isStaffFromRawUser:()=>false},null,11802);
+    // 12058 Staff check and 12056 MultiAccountStore + 1111 TokenManager seeding.
+    const staffMod=b.load({isStaffFromRawUser:()=>false},null,12058);
     assert.equal(staffMod.isStaffFromRawUser({id:'111',flags:0}),true,'staff gate bypassed while Account switcher is enabled');
 
     const storedTokens=new Map();
@@ -4145,7 +4145,7 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     };
     const me={id:'111',username:'venus_main',discriminator:'0',avatar:'av1',email:'main@example.com',phone:null};
     const alt={id:'222',username:'venus_alt',discriminator:'0',avatar:'av2'};
-    b.load({default:{getCurrentUser:()=>me,getUser:id=>id==='111'?me:id==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},null,1378);
+    b.load({default:{getCurrentUser:()=>me,getUser:id=>id==='111'?me:id==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},null,1377);
 
     let storeState={users:[],canUseMultiAccountMobile:false};
     const multiStore={
@@ -4164,34 +4164,34 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     function GroupIcon(props){return {type:GroupIcon,props};}
     function SettingsIcon(props){return {type:SettingsIcon,props};}
     b.context.__r=id=>({
-        1112:{default:tokenManager},
-        1378:{default:{getCurrentUser:()=>me,getUser:uid=>uid==='111'?me:uid==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},
-        5404:{GroupIcon},
-        6799:{SettingsIcon},
-        11800:{default:multiStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},
-        11801:constants,
-        11804:{default:{
+        1111:{default:tokenManager},
+        1377:{default:{getCurrentUser:()=>me,getUser:uid=>uid==='111'?me:uid==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},
+        5873:{GroupIcon},
+        6883:{SettingsIcon},
+        12056:{default:multiStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},
+        12057:constants,
+        12059:{default:{
             validateMultiAccountTokens(){},
             switchAccount:(uid,cb,loc)=>switched.push([uid,loc]),
             removeAccount:uid=>removed.push(uid)
         }},
-        14615:{YOU_BAR_BUTTON_ICON_SIZE:20},
-        16007:{showYouAccountActionSheet:arg=>sheetCalls.push(arg)},
-        16012:{default:route=>modalCalls.push(route)},
-        16014:{ManageAccountsModalRoutes:{MANAGE_ACCOUNTS:'manage_accounts',LOGIN:'login'}},
-        16031:{default:YouBarButton},
-        5916:{TableRow:'Row'},5997:{TableRowGroup:'Group'},6621:{TableSwitchRow:'Switch'},5280:{Stack:'Stack'},5918:{Card:'Card'}
+        14899:{YOU_BAR_BUTTON_ICON_SIZE:20},
+        16310:{showYouAccountActionSheet:arg=>sheetCalls.push(arg)},
+        16315:{default:route=>modalCalls.push(route)},
+        16317:{ManageAccountsModalRoutes:{MANAGE_ACCOUNTS:'manage_accounts',LOGIN:'login'}},
+        16334:{default:YouBarButton},
+        5993:{TableRow:'Row'},6074:{TableRowGroup:'Group'},6698:{TableSwitchRow:'Switch'},5593:{Stack:'Stack'},5995:{Card:'Card'}
     }[id]||null);
 
-    b.load({default:multiStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
+    b.load({default:multiStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,12056);
     assert.equal(multiStore.getCanUseMultiAccountMobile(),true,'MultiAccountStore unlocked');
     assert.equal(storedTokens.get('111'),'active-user-token','active user token seeded into TokenManager by userId');
     assert.equal(multiStore.getUsers().length,1,'current user seeded into MultiAccountStore');
     assert.equal(multiStore.getUsers()[0].id,'111');
 
-    // YouBarNotificationsButton (16032): YouBarAccountSwitcherButton starts on by default and can be toggled with accountSwitcherYouBar.
+    // YouBarNotificationsButton (16335): YouBarAccountSwitcherButton starts on by default and can be toggled with accountSwitcherYouBar.
     function Bell(){return 'bell';}
-    const barMod=b.load({default:{$$typeof:Symbol.for('react.memo'),type:Bell,compare:null}},null,16032);
+    const barMod=b.load({default:{$$typeof:Symbol.for('react.memo'),type:Bell,compare:null}},null,16335);
     const barTree=barMod.default.type({hasNameplate:false});
     const swComp=barTree.props.children[1];
     const barBtn=swComp.type(swComp.props);
@@ -4206,7 +4206,7 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
 
     // AccountSwitcherSettings page: shows saved accounts, switches on tap, removes on long-press, and opens Add/Manage modals.
     storeState.users.push({id:'222',username:'venus_alt',discriminator:'0',avatar:'av2',tokenStatus:2});
-    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14130).SETTING_RENDERER_CONFIG;
+    const registry=b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route',IconComponent(){}}}},null,14409).SETTING_RENDERER_CONFIG;
     const page=()=>pageNodes(registry.VENUS_ACCOUNTSWITCHER.screen.getComponent()());
     const statusText=page().find(n=>n.type===RN.Text&&typeof n.props.children==='string'&&n.props.children.includes('accounts saved'));
     assert.ok(statusText && statusText.props.children.includes('(up to 50)'),'pl() interpolates {max} in account switcher status card');
@@ -4239,7 +4239,7 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
         asyncPersist(){persistedSaved++;},
         emitChange(){}
     };
-    b.load({default:fullStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800);
+    b.load({default:fullStore,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,12056);
     assert.ok(persistedSaved>=1,'asyncPersist called after adding the current user (#59)');
     assert.equal(fullStore.state.users.length,7,'all 6 persisted accounts + active account preserved without 5-account truncation (#59)');
     const savesBefore=persistedSaved;b.api.setSetting('accountSwitcherYouBar',true);
@@ -4263,11 +4263,11 @@ test('Account switcher never wipes saved accounts on a cold start before Discord
         emitChange(){}
     };
     let me=null;
-    b.context.__r=id=>({510:{Storage:storage},1112:{default:{getToken:()=>null,setToken(){}}},
-        1378:{default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},
-        11800:{default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}}}[id]||null);
-    b.load({default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},null,1378);
-    const patched=b.load({default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,11800).default;
+    b.context.__r=id=>({510:{Storage:storage},1111:{default:{getToken:()=>null,setToken(){}}},
+        1377:{default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},
+        12056:{default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}}}[id]||null);
+    b.load({default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}},null,1377);
+    const patched=b.load({default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,12056).default;
     // Venus's own settings finish loading while Discord's storage is still being read.
     me={id:'111',username:'main'};
     b.api.setSetting('accountSwitcherYouBar',false);
@@ -4283,10 +4283,10 @@ test('Account switcher never wipes saved accounts on a cold start before Discord
 test('Unlock app icons marks all alternate icons non-premium, blocks background reset, and strips the Nitro upsell button and header',()=>{
     const b=boot({appIcons:true});const {React,RN}=reactHarness(b);
     const me={id:'me',premiumType:null};
-    b.load({default:{getCurrentUser:()=>me}},null,1378);
+    b.load({default:{getCurrentUser:()=>me}},null,1377);
     const appIconsProduct={};
-    const catalog=b.load({APP_ICONS:appIconsProduct,canUserUse:(feat,u)=>u?.premiumType===2},null,13528);
-    const premium=b.load({default:{canUsePremiumAppIcons:u=>u?.premiumType===2},canUsePremiumAppIcons:u=>u?.premiumType===2},null,4491);
+    const catalog=b.load({APP_ICONS:appIconsProduct,canUserUse:(feat,u)=>u?.premiumType===2},null,13797);
+    const premium=b.load({default:{canUsePremiumAppIcons:u=>u?.premiumType===2},canUsePremiumAppIcons:u=>u?.premiumType===2},null,4528);
 
     const defaultIcon=Object.freeze({id:'Default',name:'Default',isPremium:false});
     const officialIcons=Object.freeze([Object.freeze({id:'BrandInverted',name:'Blurple Twilight',isPremium:true}),Object.freeze({id:'Manga',name:'Manga',isPremium:true})]);
@@ -4298,25 +4298,25 @@ test('Unlock app icons marks all alternate icons non-premium, blocks background 
         getLimitedAlternateIcons:()=>limitedIcons,
         getIcons:()=>allIcons,
         getIconById:id=>allIcons.find(i=>i.id===id)
-    },null,8621);
+    },null,8828);
 
     let resetCalls=0,validateCalls=0;
     const managerObj={
         validateAndResetIfNeeded(){validateCalls++;},
         resetIcon(reason){resetCalls++;}
     };
-    const managerMod=b.load({default:managerObj},null,17096);
+    const managerMod=b.load({default:managerObj},null,17455);
 
     function NitroUpsellButton(props){return {type:NitroUpsellButton,props};}
     function TableRowGroup(props){return {type:TableRowGroup,props};}
-    b.context.__r=id=>({9421:{NitroUpsellButton,default:NitroUpsellButton},5997:{TableRowGroup}}[id]||null);
+    b.context.__r=id=>({9648:{NitroUpsellButton,default:NitroUpsellButton},6074:{TableRowGroup}}[id]||null);
 
     const rowsMod=b.load({default:function AppIconRows(){
         return React.createElement(RN.View,null,
             React.createElement(TableRowGroup,null,'default-row'),
             React.createElement(TableRowGroup,{title:'Nitro'},'alt-rows')
         );
-    }},null,15066);
+    }},null,15352);
     const screenMod=b.load({default:function UserSettingsAppIcons(){
         return React.createElement(RN.View,{style:{flex:1}},
             React.createElement('ScrollView',null,rowsMod.default({})),
@@ -4324,7 +4324,7 @@ test('Unlock app icons marks all alternate icons non-premium, blocks background 
                 React.createElement(NitroUpsellButton,{text:'Unlock all icons with Nitro'})
             )
         );
-    }},null,15065);
+    }},null,15351);
 
     // Starts off: icons require Nitro and upsell is rendered.
     assert.equal(b.api.settings.appIcons,false);
@@ -4457,22 +4457,22 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
     };
     rawColorsTable.GREEN_360 = '#23a55a';
     rawColorsTable.RED_400 = '#f23f43';
-    b.load({_private:{RawColors:rawColorsTable}}, null, 592);
-    b.load({_private:{SemanticColors:semanticColorsTable}}, null, 590);
+    b.load({_private:{RawColors:rawColorsTable}}, null, 591);
+    b.load({_private:{SemanticColors:semanticColorsTable}}, null, 589);
     let themeStoreChanges = 0;
     const themeStore = {theme:'dark', emitChange(){ themeStoreChanges++; }};
-    b.load({default:themeStore}, null, 1194);
+    b.load({default:themeStore}, null, 1193);
     const themeCtxMod = b.load({
         FALLBACK_THEME_CONTEXT_VALUE: {key:'{"theme":"dark","flags":0}'},
         createThemedContext(ctx) {
             return Object.assign({}, ctx, {key:JSON.stringify(ctx)});
         }
-    }, null, 4551);
+    }, null, 4593);
     const chatWrapperMod = b.load({
         default: function ChatViewWrapper(props) {
             return React.createElement(RN.View, {testID:'chat-wrapper'}, props && props.children);
         }
-    }, null, 9542);
+    }, null, 9769);
 
     const fetchedUrls = [];
     const rosePineTheme = {
@@ -4513,18 +4513,18 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
         return {ok:true, status:200, text:async () => JSON.stringify(rosePineTheme)};
     };
     b.context.__r = id => ({
-        590: {_private:{SemanticColors:semanticColorsTable}},
-        592: {_private:{RawColors:rawColorsTable}},
-        1194: {default:themeStore},
-        4551: themeCtxMod,
-        4531: {default:{open:t => toasts.push(t.content)}},
-        5916: {TableRow:'Row'},
-        5997: {TableRowGroup:'Group'},
-        6621: {TableSwitchRow:'Switch'},
-        6021: {TextInput:'Input'},
-        5280: {Stack:'Stack'},
-        5918: {Card:'Card'},
-        6614: {Clipboard:{getString:async () => 'https://github.com/rose-pine/discord-mobile/blob/main/rosepinemoon.json'}}
+        589: {_private:{SemanticColors:semanticColorsTable}},
+        591: {_private:{RawColors:rawColorsTable}},
+        1193: {default:themeStore},
+        4593: themeCtxMod,
+        4568: {default:{open:t => toasts.push(t.content)}},
+        5993: {TableRow:'Row'},
+        6074: {TableRowGroup:'Group'},
+        6698: {TableSwitchRow:'Switch'},
+        6098: {TextInput:'Input'},
+        5593: {Stack:'Stack'},
+        5995: {Card:'Card'},
+        6691: {Clipboard:{getString:async () => 'https://github.com/rose-pine/discord-mobile/blob/main/rosepinemoon.json'}}
     }[id] || null);
 
     await flush(); await flush();
@@ -4532,7 +4532,7 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
     assert.equal(themeCtxMod.createThemedContext({theme:'dark'}).key, '{"theme":"dark"}', 'stock ThemeContext key untouched before any theme change');
 
     b.api.setSetting('customThemes', true);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
     const page = () => pageNodes(registry.VENUS_CUSTOMTHEMES.screen.getComponent()());
 
     // Paste link from clipboard and install via GitHub blob -> raw.githubusercontent.com normalization.
@@ -4579,7 +4579,7 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
     assert.match(themeCtxMod.createThemedContext({theme:'dark'}).key, /^\{.*\}#v\d+$/, 'ThemeContext key bumped with revision suffix to invalidate style caches once');
     assert.match(themeCtxMod.FALLBACK_THEME_CONTEXT_VALUE.key, /^\{.*\}#v\d+$/, 'FALLBACK_THEME_CONTEXT_VALUE.key also bumped so createLegacyClassComponentStyles invalidates cache');
 
-    // ChatViewWrapper (9542) renders the static RN.Image wallpaper behind chat when customThemesBackground is on.
+    // ChatViewWrapper (9769) renders the static RN.Image wallpaper behind chat when customThemesBackground is on.
     let chatTree = chatWrapperMod.default({children:'messages'});
     const bgImg = pageNodes(chatTree).find(n => n.type === RN.Image);
     assert.ok(bgImg, 'static RN.Image wallpaper rendered behind ChatViewWrapper');
@@ -4620,16 +4620,16 @@ test('Read All clears lurking, guest and event-only servers, >20 unread DMs, and
     const allDms=Array.from({length:25},(_,i)=>'d'+(i+1)).concat(['req_dm','spam_dm','read_dm']);
     const unreadDms=new Set(Array.from({length:25},(_,i)=>'d'+(i+1)).concat(['req_dm','spam_dm']));
     b.context.__r=id=>{
-        if (id===4473) return {default:{lurkingGuildIds:()=>['g_lurk']}};
-        if (id===2073) return {default:{getGuildIds:()=>['g1','g2','g3','g4','g_guest','g_event']}};
-        if (id===5019) return {ReadStateTypes:{CHANNEL:0,GUILD_EVENT:1}};
-        if (id===4852) return {default:{
+        if (id===4510) return {default:{lurkingGuildIds:()=>['g_lurk']}};
+        if (id===2074) return {default:{getGuildIds:()=>['g1','g2','g3','g4','g_guest','g_event']}};
+        if (id===5072) return {ReadStateTypes:{CHANNEL:0,GUILD_EVENT:1}};
+        if (id===4905) return {default:{
             lastMessageId:ch=>'m-'+ch,
             hasUnread:(targetId,type)=>type===1&&targetId==='g_event',
             hasUnreadOrMentions:ch=>unreadDms.has(ch)
         }};
         if (id===6640) return {default:{getPrivateChannelIds:()=>allDms}};
-        if (id===13384) return {filterOutMessageRequestsAndSpamById:ids=>ids.filter(ch=>ch!=='req_dm'&&ch!=='spam_dm')};
+        if (id===13650) return {filterOutMessageRequestsAndSpamById:ids=>ids.filter(ch=>ch!=='req_dm'&&ch!=='spam_dm')};
         return prev(id);
     };
     b.api.setSetting('readAllMode','both');
@@ -4645,9 +4645,9 @@ test('Read All reports an error when read state stores have not loaded yet and r
     const prev=b.context.__r;
     let tokensReady=false,createStylesCalls=0;
     b.context.__r=id=>{
-        if (id===7054||id===13299||id===6640) return null;
-        if (id===588) return tokensReady?{default:{colors:{BACKGROUND_MOD_NORMAL:'#111',BACKGROUND_MOD_STRONG:'#222',TEXT_DEFAULT:'#fff'}}}:null;
-        if (id===4837) return {createStyles:spec=>{createStylesCalls++;return ()=>spec;}};
+        if (id===7121||id===13564||id===6640) return null;
+        if (id===587) return tokensReady?{default:{colors:{BACKGROUND_MOD_NORMAL:'#111',BACKGROUND_MOD_STRONG:'#222',TEXT_DEFAULT:'#fff'}}}:null;
+        if (id===4890) return {createStyles:spec=>{createStylesCalls++;return ()=>spec;}};
         return prev(id);
     };
     pressReadAll(b);
@@ -4679,19 +4679,19 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
         return 0;
     };
     const dispatched = [];
-    const flux = b.load({default:{dispatch(e){ dispatched.push(e); }}}, null, 585).default;
-    b.load({default:{getCurrentUser:() => ({id:'me_123', username:'fariz70', globalName:'FaRiz70', avatar:'av_hash'})}}, null, 1378);
-    b.load({default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}}, null, 1403);
+    const flux = b.load({default:{dispatch(e){ dispatched.push(e); }}}, null, 578).default;
+    b.load({default:{getCurrentUser:() => ({id:'me_123', username:'fariz70', globalName:'FaRiz70', avatar:'av_hash'})}}, null, 1377);
+    b.load({default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}}, null, 1402);
     const liveMessages = new Map();
-    b.load({default:{getMessage:(ch, id) => liveMessages.get(ch + ':' + id)}}, null, 5057);
+    b.load({default:{getMessage:(ch, id) => liveMessages.get(ch + ':' + id)}}, null, 5110);
 
-    // Hook MessageRowGenerator.prototype.generate (7378)
+    // Hook MessageRowGenerator.prototype.generate (7591)
     class MessageRowGenerator {
         generate(row) {
             return row.result;
         }
     }
-    b.load({default:MessageRowGenerator}, null, 7378);
+    b.load({default:MessageRowGenerator}, null, 7591);
     const gen = new MessageRowGenerator();
 
     // 1. Default settings: messageHighlight starts off, options default to thickness 2 (4 dp) and default colors
@@ -4741,15 +4741,15 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
 
     // 4. Settings UI renders accurate Discord reply + deleted message preview card, thickness radio group, and visual color swatches + custom hex inputs
     b.context.__r = id => ({
-        1403: {default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}},
-        5916: {TableRow:'Row'},
-        5997: {TableRowGroup:'Group'},
-        5995: {TableRadioGroup:'RadioGroup'},
-        5994: {TableRadioRow:'RadioRow'},
-        6021: {TextInput:'Input'},
-        5280: {Stack:'Stack'}
+        1402: {default:{getUserAvatarURL:(u, anim, size) => `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=${size}`}},
+        5993: {TableRow:'Row'},
+        6074: {TableRowGroup:'Group'},
+        6072: {TableRadioGroup:'RadioGroup'},
+        6071: {TableRadioRow:'RadioRow'},
+        6098: {TextInput:'Input'},
+        5593: {Stack:'Stack'}
     }[id] || null);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
     const page = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()());
     const hp = page().find(n => n.type && n.type.name === 'HighlightPreview');
     const saved = {useState:React.useState, useRef:React.useRef, useEffect:React.useEffect};
@@ -4773,10 +4773,10 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
     page().find(n => n.props && n.props.accessibilityRole === 'tab' && n.props.accessibilityLabel === '6 dp').props.onPress();
     assert.equal(b.api.settings.messageHighlightThickness, 3);
 
-    // Any color opens Discord's color picker (14140) with the presets suggested; its pick is saved as hex.
+    // Any color opens Discord's color picker (14421) with the presets suggested; its pick is saved as hex.
     const picks = [];
     const prevR = b.context.__r;
-    b.context.__r = id => id === 14140 ? {default:opts => picks.push(opts)} : prevR(id);
+    b.context.__r = id => id === 14421 ? {default:opts => picks.push(opts)} : prevR(id);
     swatches('Any color')[0].props.onPress();
     assert.equal(picks.length, 1, 'native color picker opened');
     assert.ok(picks[0].suggestedColors.includes('#5865f2'));
@@ -4811,8 +4811,8 @@ test('Message highlights customizes left bar thickness and reply/mention & delet
 test('every option page renders in the shared design: status card only when useful, row icons, and no crash on or off',()=>{
     const b=settingsHarness();const {React}=reactHarness(b);React.useState=init=>[init,()=>{}];
     function TableSwitchRow(){} function TableRowGroup(){} function TableRadioGroup(){} function TableRadioRow(){} function TableRowIcon(){} function Text(){}
-    b.context.__r=id=>({6621:{TableSwitchRow},5997:{TableRowGroup},5995:{TableRadioGroup},5994:{TableRadioRow},5922:{TableRowIcon},4833:{Text},5916:{TableRow:'Row'},
-        1378:{default:{getCurrentUser:()=>({id:'1',username:'me'}),getUser:()=>null}}}[id]||null);
+    b.context.__r=id=>({6698:{TableSwitchRow},6074:{TableRowGroup},6072:{TableRadioGroup},6071:{TableRadioRow},5999:{TableRowIcon},4886:{Text},5993:{TableRow:'Row'},
+        1377:{default:{getCurrentUser:()=>({id:'1',username:'me'}),getUser:()=>null}}}[id]||null);
     const pages={VENUS_NODELETE:'noDelete',VENUS_MESSAGEHIGHLIGHT:'messageHighlight',VENUS_TRANSLATE:'translate',VENUS_GESTURES:'gestures',VENUS_FREENITRO:'freeNitro',
         VENUS_PASTELIZE:'pastelize',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_REVIEWDB:'reviewDB',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',
         VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_HIDDENCHANNELS:'hiddenChannels',VENUS_LANGUAGE:null,VENUS_BACKUP:null};
@@ -4846,7 +4846,7 @@ test('option pages reveal their groups in turn on the native driver, and a switc
     const b = settingsHarness(); const {React} = reactHarness(b); const RN = {View:'View', Text:'Text', Image:'Image', Modal:'Modal', Pressable:'Pressable', ScrollView:'Scroll'};
     const motion = animatedHarness(b, RN);
     const effects = []; React.useEffect = fn => effects.push(fn); let ref; React.useRef = v => ({current:v}); React.useState = init => [init, () => {}];
-    function TableSwitchRow(){} b.context.__r = id => ({6621:{TableSwitchRow}}[id] || null);
+    function TableSwitchRow(){} b.context.__r = id => ({6698:{TableSwitchRow}}[id] || null);
     b.api.setSetting('gestures', true);
     const page = b.registry.VENUS_GESTURES.screen.getComponent()();
     const reveals = pageNodes(page).filter(n => n.type && n.type.name === 'VenusReveal');
@@ -4875,8 +4875,8 @@ test('the Quests status card shows the running Quest\'s progress and the minutes
     b.connect();
     // Run until the first heartbeat is answered, not to the end.
     await b.run(30 * 1000);
-    b.load({SettingsList(){}},null,14236);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    b.load({SettingsList(){}},null,14500);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
     const nodes = pageNodes(registry.VENUS_QUESTS.screen.getComponent()());
     const bar = nodes.find(n => n.type && n.type.name === 'VenusProgress');
     assert.ok(bar, 'a progress bar while a Quest runs');
@@ -5044,7 +5044,7 @@ test('Message highlights preview glows only the highlight you just changed, neve
     const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
     const ref = {current:null}; React.useRef = () => ref; React.useState = init => [init, () => {}];
     b.api.setSetting('messageHighlight', true);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
     const fresh = () => { const f = pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview').props.fresh;
         return f ? [f.reply, f.deleted] : [false, false]; };
     assert.deepEqual(fresh(), [false, false], 'nothing glows when the page opens');
@@ -5057,7 +5057,7 @@ test('Message highlights preview glows only the highlight you just changed, neve
 test('Message highlights preview shows a clean static picture of your question, Sam\'s reply and Alex\'s kept deleted message, without a Watch player', () => {
     const b = boot({messageHighlight:true, noDelete:true}); const {React} = reactHarness(b);
     b.api.setSetting('messageHighlight', true);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
     const node = () => pageNodes(registry.VENUS_MESSAGEHIGHLIGHT.screen.getComponent()()).find(n => n.type && n.type.name === 'HighlightPreview');
     const host = hookHost(b, React, node());
     const glows = () => host.render().filter(n => n.type && n.type.name === 'HighlightGlow');
@@ -5068,7 +5068,7 @@ test('Message highlights preview shows a clean static picture of your question, 
 });
 test('Hidden channels preview uses Discord\'s locked-channel icon and tapping it does what a real tap does', () => {
     const b = settingsHarness(); const {React} = reactHarness(b); const shown = [];
-    b.context.__r = id => ({5393:{TextLockIcon:'TL'}, 5205:{default:{show:o => shown.push(o)}}, 4833:{Text(){}}}[id] || null);
+    b.context.__r = id => ({5862:{TextLockIcon:'TL'}, 5708:{default:{show:o => shown.push(o)}}, 4886:{Text(){}}}[id] || null);
     b.api.setSetting('hiddenChannels', true);
     const host = hookHost(b, React, previewNode(b, 'VENUS_HIDDENCHANNELS', 'HiddenChannelsPreview'));
     host.render(); host.render().find(n => n.props && n.props.accessibilityLabel === 'Try it').props.onPress(); host.timers.length = 0;
@@ -5115,8 +5115,8 @@ test('Device indicators preview shows the real screens around the icons and foll
 });
 test('Nitro preview shows Discord\'s own Wumpus, sent from Discord\'s expression picker without a lock badge; Try it guides you through an emoji and a sticker', () => {
     const b = nitroHarness(); const {React} = reactHarness(b);
-    let read = 0; b.load({default:{getCustomEmojiById:() => null, getGuilds:() => { read++; return {}; }}}, null, 5772);
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14130).SETTING_RENDERER_CONFIG;
+    let read = 0; b.load({default:{getCustomEmojiById:() => null, getGuilds:() => { read++; return {}; }}}, null, 5638);
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, null, 14409).SETTING_RENDERER_CONFIG;
     b.api.setSetting('freeNitro', true);
     const node = pageNodes(registry.VENUS_FREENITRO.screen.getComponent()()).find(x => x.type && x.type.name === 'NitroPreview');
     const host = hookHost(b, React, node);
@@ -5217,7 +5217,7 @@ function featuresPageHarness() {
     return {...b,React,page,ids,header,search};
 }
 test('the Features list has a search bar that keeps its group titles and finds rows by title, description, page and options',()=>{
-    const b=featuresPageHarness(); function SearchField(){} b.context.__r=id=>({6472:{SearchField}}[id]||null);
+    const b=featuresPageHarness(); function SearchField(){} b.context.__r=id=>({6547:{SearchField}}[id]||null);
     assert.equal(b.page().type,b.SettingsList,'still Discord\'s own settings list');
     assert.equal(b.ids().length,31,'every row until you type');
     const bar=b.header(); assert.equal(bar.type.name,'FeatureSearchBar'); assert.equal(b.header(),bar,'one stable header, so typing keeps the keyboard up');
@@ -5246,8 +5246,8 @@ function backupHarness() {
     const files=native({getConstants:()=>({DocumentsDirPath:'/data/discord/files',CacheDirPath:'/data/discord/cache'}),writeFile:async(dir,name,data)=>{writes.push([dir,name,data]);}});
     b.load({default:files});
     const picker={saveDocuments:async opts=>{saved.push(opts);return [{uri:'content://saved'}];},errorCodes:{OPERATION_CANCELED:'OPERATION_CANCELED'},isErrorWithCode:e=>!!(e&&e.code)};
-    b.context.__r=id=>({10776:picker,6614:{Clipboard:{setString:v=>{clip=v;},getString:async()=>clip}},
-        5205:{default:{show:a=>alerts.push(a)}},4531:{default:{open:t=>toasts.push(t)}},5916:{TableRow:'Row'}}[id]||null);
+    b.context.__r=id=>({11021:picker,6691:{Clipboard:{setString:v=>{clip=v;},getString:async()=>clip}},
+        5708:{default:{show:a=>alerts.push(a)}},4568:{default:{open:t=>toasts.push(t)}},5993:{TableRow:'Row'}}[id]||null);
     const page=()=>pageNodes(b.registry.VENUS_BACKUP.screen.getComponent()());
     const row=label=>page().find(n=>n.type==='Row'&&n.props.label===label);
     return {...b,React,writes,saved,alerts,toasts,picker,files,page,row,get clip(){return clip;},set clip(v){clip=v;}};

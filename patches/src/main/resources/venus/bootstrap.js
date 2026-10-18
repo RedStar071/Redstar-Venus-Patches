@@ -3,41 +3,41 @@
     "use strict";
     if (global.__venusPatches) return;
     const features = /*__FEATURES__*/;
-    // Inspected Metro IDs for the SHA-256-pinned 348.10 bundle; never scan or eagerly require modules.
-    const targetModules = new Set([17, 19, 1163, 10874, 14130, 14236]);
+    // Inspected Metro IDs for the SHA-256-pinned 349.9 bundle; never scan or eagerly require modules.
+    const targetModules = new Set([17, 19, 1162, 11129, 14409, 14500]);
     function selectModules(ids) { ids.forEach(id => targetModules.add(id)); }
     if (features.picker) selectModules([414]);
-    if (features.voice) selectModules([1283, 5440, 5442]);
-    if (features.copyBios) selectModules([10742]);
-    if (features.dashless) selectModules([2051, 4990, 5314, 7099]);
-    if (features.favouriteAnything) selectModules([12524, 9861, 9864]);
-    if (features.freeNitro) selectModules([1378, 2051, 5772, 5815, 4491, 13528, 6756, 6880]);
-    if (features.noTyping) selectModules([11348]);
-    if (features.quickDelete) selectModules([5205, 1127]);
-    if (features.noDelete) selectModules([585, 5057, 5059, 1378, 2051, 6880, 7378]);
-    if (features.jumpToTop) selectModules([11642, 11643, 11644, 8838, 6880, 5057]);
-    if (features.hiddenChannels) selectModules([1086, 1097, 1113, 2051, 2102, 4470, 6952, 4472, 4990, 6880, 585, 1378, 15859, 5410]);
-    if (features.pastelize) selectModules([7378, 1252, 2111]);
-    if (features.platformIndicators) selectModules([4877, 4855, 1378, 2051, 10603, 10371, 12845, 15667, 9108, 13649, 12602]);
-    if (features.reviewDB) selectModules([12627, 13521, 13987, 8510, 5997, 6621, 1378, 585]);
-    if (features.readAll) selectModules([15929]);
-    if (features.quests) selectModules([585, 7120, 7179, 13174, 13212]);
-    if (features.hideGift) selectModules([11609, 11817]);
-    if (features.hideQuestDock) selectModules([14608, 14700]);
-    if (features.systemEmoji) selectModules([6552]);
-    if (features.gestures) selectModules([7414, 9652, 11105, 11666, 1378, 10905]);
-    if (features.hideCall) selectModules([12696]);
-    if (features.validUser) selectModules([585, 1378]);
-    if (features.youBarSettings) selectModules([16032]);
-    if (features.splitMessages) selectModules([1086, 1378, 2051, 6880, 8602]);
-    if (features.translate) selectModules([585, 1378, 7378, 11023]);
-    if (features.userNotif) selectModules([585, 1378, 2051, 2073, 4482, 4877, 7179, 13174, 13212]);
-    if (features.accountSwitcher) selectModules([1378, 11800, 11801, 11802, 16032]);
-    if (features.appIcons) selectModules([1378, 4491, 8621, 13528, 15065, 15066, 16750, 17096]);
-    if (features.customThemes) selectModules([590, 592, 1194, 4551, 9542]);
-    if (features.messageHighlight) selectModules([585, 1378, 5057, 7378]);
+    if (features.voice) selectModules([1282, 7268, 7243]);
+    if (features.copyBios) selectModules([10987]);
+    if (features.dashless) selectModules([2051, 5043, 5796, 7166]);
+    if (features.favouriteAnything) selectModules([12767, 10090, 10093]);
+    if (features.freeNitro) selectModules([1377, 2051, 5638, 5687, 4528, 13797, 6840, 6965]);
+    if (features.noTyping) selectModules([11604]);
+    if (features.quickDelete) selectModules([5708, 1126]);
+    if (features.noDelete) selectModules([578, 5110, 5112, 1377, 2051, 6965, 7591]);
+    if (features.jumpToTop) selectModules([11896, 11897, 11898, 9064, 6965, 5110]);
+    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2051, 2103, 4507, 7039, 4509, 5043, 6965, 578, 1377, 16157, 5879]);
+    if (features.pastelize) selectModules([7591, 1251, 2112]);
+    if (features.platformIndicators) selectModules([4930, 4908, 1377, 2051, 10843, 10602, 13107, 15962, 9334, 13920, 12849]);
+    if (features.reviewDB) selectModules([12872, 13790, 14259, 8716, 6074, 6698, 1377, 578]);
+    if (features.readAll) selectModules([16232]);
+    if (features.quests) selectModules([578, 7187, 7252, 13439, 13477]);
+    if (features.hideGift) selectModules([11864, 12071]);
+    if (features.hideQuestDock) selectModules([14892, 14985]);
+    if (features.systemEmoji) selectModules([6625]);
+    if (features.gestures) selectModules([7627, 9878, 11363, 11918, 1377, 11159]);
+    if (features.hideCall) selectModules([12956]);
+    if (features.validUser) selectModules([578, 1377]);
+    if (features.youBarSettings) selectModules([16335]);
+    if (features.splitMessages) selectModules([1085, 1377, 2051, 6965, 8809]);
+    if (features.translate) selectModules([578, 1377, 7591, 11281]);
+    if (features.userNotif) selectModules([578, 1377, 2051, 2074, 4519, 4930, 7252, 13439, 13477]);
+    if (features.accountSwitcher) selectModules([1377, 12056, 12057, 12058, 16335]);
+    if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
+    if (features.customThemes) selectModules([589, 591, 1193, 4593, 9769]);
+    if (features.messageHighlight) selectModules([578, 1377, 5110, 7591]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
-    selectModules([2115]);
+    selectModules([2116]);
     const revision = "1.15.0";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
     // Defer every feature hook until that initializer returns successfully.
@@ -708,15 +708,15 @@
     }
     // Discord's own icon for each feature row, from its design system. Resolved when a row first draws, never
     // while Discord builds its settings, and the Account icon stands in if one ever goes missing.
-    const FEATURE_ICONS = {noDelete:[4791, "TrashIcon"], translate:[14958, "LanguageIcon"], gestures:[8216, "ReactionIcon"],
-        quickDelete:[6026, "CircleXIcon"], jumpToTop:[10827, "ArrowLargeUpIcon"], favouriteAnything:[9716, "StarIcon"],
-        freeNitro:[8119, "NitroWheelIcon"], voice:[12236, "WaveformIcon"], splitMessages:[7340, "PaperIcon"], noTyping:[10813, "KeyboardIcon"],
-        picker:[10140, "AttachmentIcon"], pastelize:[14795, "PaintPaletteIcon"], platformIndicators:[14470, "LaptopPhoneIcon"],
-        validUser:[5405, "AtIcon"], copyBios:[4780, "CopyIcon"], reviewDB:[7358, "ThumbsUpIcon"], readAll:[15161, "DoubleCheckmarkIcon"],
-        hiddenChannels:[5410, "LockIcon"], dashless:[15125, "HashmarkIcon"], systemFont:[15207, "LettersIcon"], systemEmoji:[8719, "ChatSmileIcon"],
-        hideGift:[10528, "GiftIcon"], hideCall:[7309, "PhoneCallIcon"], youBarSettings:[6799, "SettingsIcon"], quests:[14519, "QuestsIcon"],
-        hideQuestDock:[6384, "EyeSlashIcon"], userNotif:[9044, "BellIcon"], accountSwitcher:[5404, "GroupIcon"], appIcons:[5375, "AppsIcon"],
-        customThemes:[14887, "EyeDropperIcon"], messageHighlight:[16122, "PaintbrushThinIcon"]};
+    const FEATURE_ICONS = {noDelete:[4847, "TrashIcon"], translate:[15243, "LanguageIcon"], gestures:[8411, "ReactionIcon"],
+        quickDelete:[4797, "CircleXIcon"], jumpToTop:[11072, "ArrowLargeUpIcon"], favouriteAnything:[9943, "StarIcon"],
+        freeNitro:[8313, "NitroWheelIcon"], voice:[12490, "WaveformIcon"], splitMessages:[7553, "PaperIcon"], noTyping:[11058, "KeyboardIcon"],
+        picker:[10369, "AttachmentIcon"], pastelize:[15080, "PaintPaletteIcon"], platformIndicators:[14754, "LaptopPhoneIcon"],
+        validUser:[5874, "AtIcon"], copyBios:[4843, "CopyIcon"], reviewDB:[7571, "ThumbsUpIcon"], readAll:[15447, "DoubleCheckmarkIcon"],
+        hiddenChannels:[5879, "LockIcon"], dashless:[15411, "HashmarkIcon"], systemFont:[15493, "LettersIcon"], systemEmoji:[8944, "ChatSmileIcon"],
+        hideGift:[10766, "GiftIcon"], hideCall:[7523, "PhoneCallIcon"], youBarSettings:[6883, "SettingsIcon"], quests:[14803, "QuestsIcon"],
+        hideQuestDock:[6456, "EyeSlashIcon"], userNotif:[9266, "BellIcon"], accountSwitcher:[5873, "GroupIcon"], appIcons:[5890, "AppsIcon"],
+        customThemes:[15172, "EyeDropperIcon"], messageHighlight:[16425, "PaintbrushThinIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -742,7 +742,7 @@
     function settingsPage(sections) {
         const node = { type: "list", sections };
         return function VenusSettingsPage() {
-            const List = SettingsList || (SettingsList = inspectedExport(14236, "SettingsList"));
+            const List = SettingsList || (SettingsList = inspectedExport(14500, "SettingsList"));
             return React && List ? el(List, { node }) : null;
         };
     }
@@ -787,12 +787,12 @@
         }, []);
     }
     const SEARCH_EMPTY_DARK = {badge:{width:56, height:56, borderRadius:28, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}};
-    // Discord's own search field (SearchField 6472, the one its settings and friends lists use) above the Features list.
+    // Discord's own search field (SearchField 6547, the one its settings and friends lists use) above the Features list.
     // It is one stable element in the list's header, so the keyboard stays up while the rows below it filter.
     function FeatureSearchBar() {
         useFeatureSearch(); useLanguage();
         if (!React || !RN) return null;
-        const ui = reviewUI(), SearchField = inspectedExport(6472, "SearchField"), Text = inspectedExport(4833, "Text");
+        const ui = reviewUI(), SearchField = inspectedExport(6547, "SearchField"), Text = inspectedExport(4886, "Text");
         const s = useThemed("featureSearch", c => ({badge:Object.assign({}, SEARCH_EMPTY_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), SEARCH_EMPTY_DARK);
         const query = featureSearch.query, label = tr("Search features");
         const props = {placeholder:label, accessibilityLabel:label, value:query, onChange:setFeatureSearch, autoCorrect:false, autoCapitalize:"none", returnKeyType:"search"};
@@ -803,7 +803,7 @@
         return el(RN.View, {style:{paddingTop:12, paddingBottom:4}},
             field,
             none ? el(RN.View, {key:"none", style:{alignItems:"center", gap:6, paddingTop:40, paddingBottom:24}, accessibilityLiveRegion:"polite"},
-                popIn("none", el(RN.View, {style:[s.badge, {marginBottom:6}]}, el(venusIcon(6473, "MagnifyingGlassIcon"), {size:"md"}))),
+                popIn("none", el(RN.View, {style:[s.badge, {marginBottom:6}]}, el(venusIcon(6548, "MagnifyingGlassIcon"), {size:"md"}))),
                 text(tr("No features found"), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                 text(tr("Try a different word."), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})) : null);
     }
@@ -815,7 +815,7 @@
         return function VenusFeaturesPage() {
             useFeatureSearch();
             React.useEffect(() => () => { featureSearch.query = ""; featureSearch.cache = null; }, []);
-            const List = SettingsList || (SettingsList = inspectedExport(14236, "SettingsList"));
+            const List = SettingsList || (SettingsList = inspectedExport(14500, "SettingsList"));
             if (!React || !List) return null;
             if (!header) full.ListHeaderComponent = header = el(FeatureSearchBar, {key:"venus-search"});
             const query = featureSearch.query.trim();
@@ -878,8 +878,8 @@
         let styles; try { styles = subpageStyles()(); } catch (_) { styles = null; }
         styles = styles || {divider:{}, button:{}};
         // Kept once found; a missing one is looked up again next render, in case its module loads later.
-        const FormSwitch = trailingSwitch || (trailingSwitch = inspectedExport(6622, "FormSwitch"));
-        const Chevron = trailingChevron || (trailingChevron = inspectedExport(6631, "ChevronSmallRightIcon"));
+        const FormSwitch = trailingSwitch || (trailingSwitch = inspectedExport(6699, "FormSwitch"));
+        const Chevron = trailingChevron || (trailingChevron = inspectedExport(6708, "ChevronSmallRightIcon"));
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View;
         const on = !!settings[props.setting];
         return el(RN.View, {style:{flexDirection:"row", alignItems:"center"}},
@@ -899,9 +899,9 @@
                 screen: { route: key, getComponent: () => page } };
         }
         // About: the version and how many features are on, whether settings are saved, and where to get help.
-        next.VENUS_VERSION = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(8324, "TagIcon", icon),
+        next.VENUS_VERSION = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(8524, "TagIcon", icon),
             useTitle: () => "Venus Patches " + revision, useDescription: function () { useSettings(); return featureSummary(); } };
-        next.VENUS_STATUS = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(4788, "CircleInformationIcon", icon),
+        next.VENUS_STATUS = { type: "static", parent: "VENUS_GENERAL", IconComponent: venusIcon(4812, "CircleInformationIcon", icon),
             useTitle: () => { useLanguage(); return tr("Status"); }, useDescription: function () { useSettings(); return aboutText(); } };
         const links = [];
         function link(id, title, hint, url, iconId, iconName) {
@@ -909,11 +909,11 @@
             next[id] = { type: "pressable", parent: "VENUS_GENERAL", unsearchable: true, withArrow: true, useTitle: () => { useLanguage(); return tr(title); },
                 useDescription: () => tr(hint), onPress: () => openLink(url), IconComponent: venusIcon(iconId, iconName, icon) };
         }
-        link("VENUS_LINK_CHANGES", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16292, "SparklesIcon");
-        link("VENUS_LINK_ISSUES", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15329, "BugIcon");
-        link("VENUS_LINK_SOURCE", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8041, "LinkExternalSmallIcon");
+        link("VENUS_LINK_CHANGES", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16603, "SparklesIcon");
+        link("VENUS_LINK_ISSUES", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15620, "BugIcon");
+        link("VENUS_LINK_SOURCE", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8263, "LinkExternalSmallIcon");
         route("VENUS_GENERAL", "About", [section("Venus Patches", ["VENUS_VERSION", "VENUS_STATUS"]), section("Links", links)], undefined,
-            venusIcon(4788, "CircleInformationIcon", icon));
+            venusIcon(4812, "CircleInformationIcon", icon));
         // The nodes above stay for Discord's settings search; the page itself is the designed About page.
         next.VENUS_GENERAL.screen.getComponent = () => AboutSettings;
         // The features list: each row says what it does, grouped by where you'll notice it.
@@ -946,7 +946,7 @@
             const open = () => {
                 const navigation = navigators.get(rowId);
                 if (!navigation) return;
-                try { global.__r(14239).onRouteSettingOnPress({navigation, screen}); }
+                try { global.__r(14503).onRouteSettingOnPress({navigation, screen}); }
                 catch (_) { try { navigation.navigate(screen.route); } catch (__) {} }
             };
             groups[group].push(rowId);
@@ -955,7 +955,7 @@
                 useTrailing: function () {
                     // Called as a hook by Discord's row, so it can read the settings stack it's in.
                     // Resolved once, so the row always calls the same number of hooks.
-                    if (stackNavigation === undefined) stackNavigation = inspectedExport(1491, "useStackNavigation") || null;
+                    if (stackNavigation === undefined) stackNavigation = inspectedExport(1490, "useStackNavigation") || null;
                     navigators.set(rowId, stackNavigation ? stackNavigation() : null);
                     return el(SubpageTrailing, {setting:key, label:tr(title), open});
                 } };
@@ -1018,7 +1018,7 @@
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests]];
         const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);
-        route(P, "Features", sections, undefined, venusIcon(14478, "PuzzlePieceIcon", icon));
+        route(P, "Features", sections, undefined, venusIcon(14762, "PuzzlePieceIcon", icon));
         // The nodes above stay for Discord's settings search; the page itself adds the Features search bar.
         const FeaturesPage = featuresPage(listed);
         next[P].screen.getComponent = () => FeaturesPage;
@@ -1029,11 +1029,11 @@
             return tr("{on} of {total} turned on", {on:keys.filter(key => settings[key]).length, total:keys.length});
         };
         // Language: the language Venus settings are shown in, Discord's own by default.
-        route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(14958, "LanguageIcon", icon));
+        route("VENUS_LANGUAGE", "Language", [], undefined, venusIcon(15243, "LanguageIcon", icon));
         next.VENUS_LANGUAGE.screen.getComponent = () => LanguageSettings;
         next.VENUS_LANGUAGE.useDescription = function () { useLanguage(); return languageLabel(settings.language); };
         // Backup and restore (#68): save every Venus setting to a file or the clipboard and bring it back after patching again.
-        route("VENUS_BACKUP", "Backup and restore", [], undefined, venusIcon(11519, "ArrowsUpDownIcon", icon));
+        route("VENUS_BACKUP", "Backup and restore", [], undefined, venusIcon(11775, "ArrowsUpDownIcon", icon));
         next.VENUS_BACKUP.screen.getComponent = () => BackupSettings;
         next.VENUS_BACKUP.useDescription = function () { useSettings(); return backup.last ? backupAgo() : tr("Save your settings or bring them back."); };
         status.menu = true;
@@ -1041,8 +1041,8 @@
     }
     // Which patched features sit in which group of the Features list, for the About page.
     let featureGroups = null;
-    const FEATURE_GROUPS = [["messages", "Messages", 5386, "ChatIcon"], ["sending", "Sending", 4778, "SendMessageIcon"], ["people", "People", 4532, "FriendsIcon"],
-        ["servers", "Servers", 8584, "ServerIcon"], ["appearance", "Appearance", 14795, "PaintPaletteIcon"], ["quests", "Quests", 14519, "QuestsIcon"]];
+    const FEATURE_GROUPS = [["messages", "Messages", 5855, "ChatIcon"], ["sending", "Sending", 4841, "SendMessageIcon"], ["people", "People", 4831, "FriendsIcon"],
+        ["servers", "Servers", 8791, "ServerIcon"], ["appearance", "Appearance", 15080, "PaintPaletteIcon"], ["quests", "Quests", 14803, "QuestsIcon"]];
     // Is Venus working? One word and a colored dot, the way Discord shows a status.
     function aboutHealth() {
         const storage = status.storage;
@@ -1063,10 +1063,10 @@
             logo:Object.assign({}, ABOUT_DARK.logo, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
             chip:Object.assign({}, ABOUT_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
             card:Object.assign({}, ABOUT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT})}), ABOUT_DARK);
-        const Text = inspectedExport(4833, "Text"), Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
+        const Text = inspectedExport(4886, "Text"), Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
         const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
         const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]), on = keys.filter(key => settings[key]).length;
-        const health = aboutHealth(), Sparkles = venusIcon(16292, "SparklesIcon");
+        const health = aboutHealth(), Sparkles = venusIcon(16603, "SparklesIcon");
         const chips = FEATURE_GROUPS.map(([group, label, id, name]) => {
             const list = featureGroups && featureGroups[group] || [];
             if (!list.length) return null;
@@ -1079,7 +1079,7 @@
             el(RN.View, {key:"hero", style:s.hero, accessible:true},
                 popIn("logo", el(RN.View, {style:s.logo}, el(Sparkles, {size:"lg", color:"#ffffff"}))),
                 text("Venus Patches " + revision, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
-                text(tr("For Discord {version}", {version:"348.10"}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+                text(tr("For Discord {version}", {version:"349.9"}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
             el(RN.View, {key:"features", style:s.card},
                 text(keys.length ? tr("{on} of {total} turned on", {on, total:keys.length}) : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                 keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
@@ -1091,9 +1091,9 @@
                         "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                     text(aboutText(), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
             el(Group, {key:"links", title:tr("Links")},
-                linkRow("changes", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16292, "SparklesIcon"),
-                linkRow("issues", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15329, "BugIcon"),
-                linkRow("source", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8041, "LinkExternalSmallIcon")),
+                linkRow("changes", "What's new", "Changes in each release.", REPO + "/blob/main/CHANGELOG.md", 16603, "SparklesIcon"),
+                linkRow("issues", "Report a problem", "Opens a new issue on GitHub.", REPO + "/issues/new/choose", 15620, "BugIcon"),
+                linkRow("source", "Source code", "Venus Patches on GitHub. Free and open source (GPL-3.0).", REPO, 8263, "LinkExternalSmallIcon")),
             footnote("note", "Nothing is tracked, and everything works offline except the features that say they use a service.")];
         return settingsBody(ui, groups);
     }
@@ -1194,7 +1194,7 @@
             }
         } finally { backup.restoring = false; }
         notify("*");
-        reviewToast(reviewUI(), "Settings restored", venusIcon(4793, "CircleCheckIcon"));
+        reviewToast(reviewUI(), "Settings restored", venusIcon(4792, "CircleCheckIcon"));
         // One question to reopen, only when the font or emojis actually changed.
         if (features.systemFont && settings.systemFont !== fontWas) later(() => askRestart("font"), 0);
         else if (features.systemEmoji && settings.systemEmoji !== emojiWas) later(() => askRestart("emoji"), 0);
@@ -1220,7 +1220,7 @@
         backup.last = Date.now(); save(); backupBusy("");
     }
     const pickerCancelled = error => {
-        const codes = inspectedExport(10776, "errorCodes"), is = inspectedExport(10776, "isErrorWithCode");
+        const codes = inspectedExport(11021, "errorCodes"), is = inspectedExport(11021, "isErrorWithCode");
         try { if (codes && typeof is === "function" && is(error) && error.code === codes.OPERATION_CANCELED) return true; } catch (_) {}
         return /cancel/i.test(String(error && (error.code || error.message) || ""));
     };
@@ -1231,9 +1231,9 @@
         return typeof dir === "string" ? dir.replace(/\/$/, "") : null;
     }
     // Save to a file: written to Discord's cache first, then Android's own "Save to" screen (Discord's document picker
-    // 10776, saveDocuments) copies it wherever you choose: Downloads, Drive, a USB stick.
+    // 11021, saveDocuments) copies it wherever you choose: Downloads, Drive, a USB stick.
     function backupToFile() {
-        const saveDocuments = inspectedExport(10776, "saveDocuments"), dir = cacheDir();
+        const saveDocuments = inspectedExport(11021, "saveDocuments"), dir = cacheDir();
         if (!files || typeof saveDocuments !== "function" || !dir) { backupToClipboard(); return; }
         const name = "venus-backup-" + backupDate(Date.now()) + ".json";
         backupBusy("save");
@@ -1243,7 +1243,7 @@
                 const first = Array.isArray(result) ? result[0] : result;
                 if (first && first.error) throw new Error(String(first.error));
                 backupSaved();
-                reviewToast(reviewUI(), "Backup saved", venusIcon(4793, "CircleCheckIcon"));
+                reviewToast(reviewUI(), "Backup saved", venusIcon(4792, "CircleCheckIcon"));
             }).catch(error => {
                 backupBusy("");
                 if (!pickerCancelled(error)) showProblem("Couldn't save the backup", tr("Try Copy to clipboard instead."));
@@ -1253,11 +1253,11 @@
         const clip = reviewUI().clipboard || RN && RN.Clipboard;
         try { clip.setString(backupText()); } catch (_) { showProblem("Couldn't save the backup", tr("Try again in a moment.")); return; }
         backupSaved();
-        reviewToast(reviewUI(), "Backup copied", venusIcon(4780, "CopyIcon"));
+        reviewToast(reviewUI(), "Backup copied", venusIcon(4843, "CopyIcon"));
     }
     // Restore from a file: Android's file picker, then a local copy Discord can read (keepLocalCopy), then the backup.
     function backupFromFile() {
-        const pick = inspectedExport(10776, "pick"), keep = inspectedExport(10776, "keepLocalCopy"), types = inspectedExport(10776, "types");
+        const pick = inspectedExport(11021, "pick"), keep = inspectedExport(11021, "keepLocalCopy"), types = inspectedExport(11021, "types");
         if (!files || typeof pick !== "function" || typeof keep !== "function") { backupFromClipboard(); return; }
         backupBusy("restore");
         Promise.resolve().then(() => pick({type:[types && types.allFiles || "*/*"], allowMultiSelection:false, mode:"import"})).then(picked => {
@@ -1293,27 +1293,27 @@
         const ui = reviewUI();
         if (!React || !RN) return null;
         const s = useThemed("backup", c => ({chip:Object.assign({}, BACKUP_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), BACKUP_DARK);
-        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, Text = inspectedExport(4833, "Text");
-        const what = backupContents(), busy = backup.busy, canFile = !!inspectedExport(10776, "saveDocuments") && !!cacheDir();
+        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, Text = inspectedExport(4886, "Text");
+        const what = backupContents(), busy = backup.busy, canFile = !!inspectedExport(11021, "saveDocuments") && !!cacheDir();
         const chip = (key, id, name, label) => el(RN.View, {key, style:s.chip, accessible:true, accessibilityLabel:label},
             el(venusIcon(id, name), {size:"xs"}), Text ? el(Text, {variant:"text-xs/semibold", color:"text-strong"}, label) : el(RN.Text, {style:{color:"#dbdee1", fontSize:12}}, label));
-        const chips = [chip("features", 14478, "PuzzlePieceIcon", tr("{on} of {total} turned on", {on:what.on, total:what.total})),
-            what.changed ? chip("options", 6799, "SettingsIcon", pl(what.changed, "{n} option changed", "{n} options changed")) : null,
-            what.people ? chip("people", 4532, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
-            what.themes ? chip("themes", 14887, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
-            what.language ? chip("language", 14958, "LanguageIcon", languageLabel(settings.language)) : null];
+        const chips = [chip("features", 14762, "PuzzlePieceIcon", tr("{on} of {total} turned on", {on:what.on, total:what.total})),
+            what.changed ? chip("options", 6883, "SettingsIcon", pl(what.changed, "{n} option changed", "{n} options changed")) : null,
+            what.people ? chip("people", 4831, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
+            what.themes ? chip("themes", 15172, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
+            what.language ? chip("language", 15243, "LanguageIcon", languageLabel(settings.language)) : null];
         const backupRow = (key, label, sub, id, name, onPress, disabled) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true,
             onPress, disabled:!!busy || !!disabled}) : null;
         const groups = [
             statusCard("status", backup.last ? "Everything below goes into a backup." : "Save one now, so patching again or a new phone takes one tap to set up.",
-                {title:backup.last ? backupAgo() : tr("No backup yet"), IconComponent:venusIcon(11519, "ArrowsUpDownIcon"),
+                {title:backup.last ? backupAgo() : tr("No backup yet"), IconComponent:venusIcon(11775, "ArrowsUpDownIcon"),
                  footer:el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:10}}, chips)}),
             el(Group, {key:"save", title:tr("Back up")},
-                canFile ? backupRow("file", busy === "save" ? "Saving..." : "Save to a file", "Choose where to keep it, like Downloads or Drive.", 4782, "DownloadIcon", backupToFile) : null,
-                backupRow("copy", "Copy to clipboard", "Paste it into a note or a message to yourself.", 4780, "CopyIcon", backupToClipboard)),
+                canFile ? backupRow("file", busy === "save" ? "Saving..." : "Save to a file", "Choose where to keep it, like Downloads or Drive.", 4845, "DownloadIcon", backupToFile) : null,
+                backupRow("copy", "Copy to clipboard", "Paste it into a note or a message to yourself.", 4843, "CopyIcon", backupToClipboard)),
             el(Group, {key:"restore", title:tr("Restore")},
-                canFile ? backupRow("open", busy === "restore" ? "Opening..." : "Restore from a file", "Pick a Venus backup you saved before.", 8671, "UploadIcon", backupFromFile) : null,
-                backupRow("paste", "Paste from clipboard", "Restore a backup you copied.", 5851, "ClipboardListIcon", backupFromClipboard)),
+                canFile ? backupRow("open", busy === "restore" ? "Opening..." : "Restore from a file", "Pick a Venus backup you saved before.", 8878, "UploadIcon", backupFromFile) : null,
+                backupRow("paste", "Paste from clipboard", "Restore a backup you copied.", 5928, "ClipboardListIcon", backupFromClipboard)),
             backupIsDefault() ? null : el(Group, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "reset", "Reset to defaults", "Turns every feature off and puts every option back.", backupReset, !!busy, true)),
             footnote("note", "Restoring replaces your Venus settings. Your ReviewDB sign-in, saved accounts and kept deleted messages are never included.")];
@@ -1358,7 +1358,7 @@
             return props.selectable === true ? props : Object.assign({}, props, { selectable: true });
         }, 0);
     }
-    // All guild channel types formatted as lowercase hyphenated slugs in computeChannelName (4990 fn 33438):
+    // All guild channel types formatted as lowercase hyphenated slugs in computeChannelName (5043 fn 33781):
     // GUILD_TEXT (0), GUILD_ANNOUNCEMENT (5), GUILD_STORE (6), GUILD_DIRECTORY (14), GUILD_FORUM (15), GUILD_MEDIA (16), GUILD_APP (21).
     const DASHLESS_TYPES = new Set([0, 5, 6, 14, 15, 16, 21]);
     const FALSE_FN = () => false;
@@ -2066,7 +2066,7 @@
     function hiddenCan(orig, self, args) {
         // One real permission check per call. The old path ran it twice for every visible
         // channel, and re-checked canBasicChannel with the full can(), which reads a
-        // different record shape (348.10 PermissionStore: basicPermissions).
+        // different record shape (349.9 PermissionStore: basicPermissions).
         const real = orig.apply(self, args);
         if (real || !enabled("hiddenChannels")) return real;
         const bit = args[0], channel = args[1];
@@ -2081,7 +2081,7 @@
         if (typeof importer !== "function") return importer;
         return function () {
             const result = importer.apply(this,arguments);
-            if (!result || arguments[0] !== 2051 && arguments[0] !== 4472) return result;
+            if (!result || arguments[0] !== 2051 && arguments[0] !== 4509) return result;
             const real = result.default || result;
             if (arguments[0] === 2051) {
                 const methods=new Map();
@@ -2232,7 +2232,7 @@
         return Promise.resolve();
     }
     // Locked channels are listed among the selectable ones, and the facade says they can be viewed, so Discord's
-    // "first channel you can see" (GuildChannelStore 4470 getDefaultChannel/getSFWDefaultChannel -> getFirstChannel)
+    // "first channel you can see" (GuildChannelStore 4507 getDefaultChannel/getSFWDefaultChannel -> getFirstChannel)
     // picked a locked channel placed above the real ones. A locked channel never wins over a real one.
     function hiddenFirstChannel(orig, self, args) {
         if (!enabled("hiddenChannels") || typeof args[1] !== "function") return orig.apply(self, args);
@@ -2240,7 +2240,7 @@
         next[1] = function (entry) { return !(entry && hiddenChannel(entry.channel)) && predicate.apply(this, arguments); };
         return orig.apply(self, next);
     }
-    // The channel a server opens on (SelectedChannelStore 2102 getChannelId(guildId), used when you tap a server, by
+    // The channel a server opens on (SelectedChannelStore 2103 getChannelId(guildId), used when you tap a server, by
     // getChannelIdForGuildTransition 6639 and when Discord restores the last server at startup) is the last one
     // picked there; with no server given it is the current channel, which Discord restores when the app opens.
     // Opening a server or the app never lands on a locked channel: a remembered locked channel gives way to the
@@ -2340,10 +2340,10 @@
         const body = tr("You don't have permission to view this channel. These details come from what Discord already sent your client.");
         // Discord's native alert (the "Delete Message" dialog): blurred backdrop,
         // themed card, Discord buttons. String title/body/confirmText + children
-        // selects the modern AlertModal path in AlertActionCreators.show (module 5205).
+        // selects the modern AlertModal path in AlertActionCreators.show (module 5708).
         // Demand-loaded at tap time: no extra Metro factories are wrapped at startup.
-        const alerts = inspectedExport(5205, "default");
-        const Text = inspectedExport(4833, "Text");
+        const alerts = inspectedExport(5708, "default");
+        const Text = inspectedExport(4886, "Text");
         if (React && alerts && typeof alerts.show === "function" && Text) {
             try {
                 alerts.show({title, body, children:el(HiddenDetails, {rows, Text}),
@@ -2451,7 +2451,7 @@
         // One copy of the row's message, with every change in it.
         const changes = color ? {roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true} : {shouldShowRoleOnName:true};
         if (content !== message.content) changes.content = content;
-        // Native MessageView applies Message.textColor via TextView.setTextColor (348.10 bridge field).
+        // Native MessageView applies Message.textColor via TextView.setTextColor (349.9 bridge field).
         // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
         if (color && settings.pastelContent) {
             const text = pastelColor(seed,0.85,0.75);
@@ -2472,26 +2472,26 @@
         return plain;
     }
     // Read All: a ReadAllNotificationsButton port for the mobile server bar (GuildsBar 15920,
-    // useGuildsBarProps 15929). The button lives in the SEPARATOR row, below the DM button and
+    // useGuildsBarProps 16232). The button lives in the SEPARATOR row, below the DM button and
     // unread DMs and above the line, so the native FastList's sections, anchors and recycler
     // keys stay stock. Only that row's height grows, through the list's own itemSize.
     const READ_ALL_HEIGHT = 36;
     const readAllViews = new WeakMap(), readAllData = new WeakMap();
     const readAllCache = {api:null};
-    // ReadStateActionCreators (6532) exports ack/bulkAck by name, with no default object.
+    // ReadStateActionCreators (6605) exports ack/bulkAck by name, with no default object.
     function readActionsExport() {
         if (typeof global.__r !== "function") return null;
-        try { const m=global.__r(6532); return m && typeof m.bulkAck==="function" ? m : m && m.default; } catch (_) { return null; }
+        try { const m=global.__r(6605); return m && typeof m.bulkAck==="function" ? m : m && m.default; } catch (_) { return null; }
     }
     function readAllExports() {
         const c=readAllCache.api;
         if (c && c.sorted && c.guildStore && c.lurking && c.guildReads && c.markGuilds && c.privateReads && c.privateSort && c.requestUtils && c.reads && c.readActions && c.renderSections) return c;
         const x=(id,key) => inspectedExport(id,key);
-        const api={sorted:x(5751,"default"), guildStore:x(2073,"default"), lurking:x(4473,"default"),
-            guildReads:x(7054,"default"), markGuilds:x(13507,"default"), sections:x(1086,"AnalyticsSections"),
-            privateReads:x(13299,"default"), privateSort:x(6640,"default"), requestUtils:x(13384,"filterOutMessageRequestsAndSpamById"),
-            reads:x(4852,"default"), readActions:readActionsExport(), readTypes:x(5019,"ReadStateTypes"),
-            renderSections:x(15919,"FastListRenderSections")};
+        const api={sorted:x(5616,"default"), guildStore:x(2074,"default"), lurking:x(4510,"default"),
+            guildReads:x(7121,"default"), markGuilds:x(13773,"default"), sections:x(1085,"AnalyticsSections"),
+            privateReads:x(13564,"default"), privateSort:x(6640,"default"), requestUtils:x(13650,"filterOutMessageRequestsAndSpamById"),
+            reads:x(4905,"default"), readActions:readActionsExport(), readTypes:x(5072,"ReadStateTypes"),
+            renderSections:x(16222,"FastListRenderSections")};
         if (api.sorted && api.guildStore && api.lurking && api.guildReads && api.markGuilds && api.privateReads && api.privateSort && api.requestUtils && api.reads && api.readActions && api.renderSections) readAllCache.api=api;
         return api;
     }
@@ -2518,7 +2518,7 @@
             for (const id of list) if (typeof id==="string" && !seen.has(id)) { seen.add(id); candidates.push(id); }
         };
         if (api.privateReads && typeof api.privateReads.getUnreadPrivateChannelIds==="function") try { add(api.privateReads.getUnreadPrivateChannelIds()); } catch (_) {}
-        // PrivateChannelReadStateStore (13299) truncates getUnreadPrivateChannelIds() to 20 items (`r7.length = 20`);
+        // PrivateChannelReadStateStore (13564) truncates getUnreadPrivateChannelIds() to 20 items (`r7.length = 20`);
         // PrivateChannelSortStore (6640) holds the full list of non-request DMs when >20 DMs have unreads or mentions.
         if (api.privateSort && typeof api.privateSort.getPrivateChannelIds==="function") try { add(api.privateSort.getPrivateChannelIds()); } catch (_) {}
         const checkUnread=api.reads && (typeof api.reads.hasUnreadOrMentions==="function" || typeof api.reads.getMentionCount==="function");
@@ -2527,7 +2527,7 @@
         if (typeof api.requestUtils==="function") try { return api.requestUtils(unread); } catch (_) {}
         return unread;
     }
-    // Same native paths as Discord: the server menu's markGuildsAsRead (13507) with the
+    // Same native paths as Discord: the server menu's markGuildsAsRead (13773) with the
     // GUILD_LIST source, and a single BULK_ACK for DMs at each channel's last message.
     function readAll(mode) {
         if (!enabled("readAll") || !READ_ALL_MODES.includes(mode)) return;
@@ -2562,13 +2562,13 @@
         } catch (error) {
             // What was already cleared stays cleared; say so instead of only the error.
             const done=guilds ? " ("+pl(guilds,"{n} server was marked as read","{n} servers were marked as read")+")" : "";
-            reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(error && error.message || error)})+done,venusIcon(6026,"CircleXIcon")); return;
+            reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(error && error.message || error)})+done,venusIcon(4797,"CircleXIcon")); return;
         }
         if (guilds || dms) readAllDone();
         const parts=[];
         if (guilds) parts.push(pl(guilds,"{n} server","{n} servers"));
         if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
-        reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread",venusIcon(15161,"DoubleCheckmarkIcon"));
+        reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread",venusIcon(15447,"DoubleCheckmarkIcon"));
     }
     // Holding the button: Discord's own action sheet with the three one-time choices.
     function readAllChooser() {
@@ -2612,7 +2612,7 @@
                 hitSlop:6,onPress:readAllPress,onLongPress:readAllChooser,delayLongPress:350,
                 style:({pressed}) => [READ_ALL_PILL_BASE,styles.pill,
                     pressed ? styles.pressed : null,pressed ? READ_ALL_PRESSED_SCALE : null]},
-                done ? popIn("done",el(venusIcon(6555,"CheckmarkSmallIcon"),{size:"xs",color:styles.text && styles.text.color})) :
+                done ? popIn("done",el(venusIcon(6628,"CheckmarkSmallIcon"),{size:"xs",color:styles.text && styles.text.color})) :
                     el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
     }
     function readAllBarProps(orig, self, args) {
@@ -2642,12 +2642,12 @@
     }
     // Message tap gestures (a port of Geastures+ by kmmiio99o): double-tap replies, or edits your own
     // message; tapping a third time deletes your own message. It takes over Discord's double-tap handler
-    // (DoubleTapToReactUtils 7414, which every double-tap reaches), so Discord's own "double-tap to
+    // (DoubleTapToReactUtils 7627, which every double-tap reaches), so Discord's own "double-tap to
     // react" setting needs nothing changed. Reply and edit go through the same actions as swiping:
-    // replyToMessage (11047) and LongPressMessageActionSheetUtils.handleEdit (11032).
+    // replyToMessage (11305) and LongPressMessageActionSheetUtils.handleEdit (11290).
     // The third tap is not a second double-tap. Discord's native tap tracker (NestedScrollOnTouchTracker)
     // starts over once a double-tap fires, so the next touch is reported as a single tap
-    // (MessagesHandlers.handleTapMessage, 10905), and only after Android's double-tap timeout (300 ms)
+    // (MessagesHandlers.handleTapMessage, 11159), and only after Android's double-tap timeout (300 ms)
     // passes with no fourth tap. Waiting 260 ms for another double-tap meant the editor always opened
     // first. Edit now waits long enough for that single tap: a quick third tap lands 400-550 ms after
     // the double-tap. A second double-tap (tap four) still counts too.
@@ -2669,39 +2669,39 @@
     }
     function gestureHaptic() {
         try {
-            const trigger = gesture.hapticFn || (gesture.hapticFn = inspectedExport(4802, "triggerHapticFeedback"));
+            const trigger = gesture.hapticFn || (gesture.hapticFn = inspectedExport(4855, "triggerHapticFeedback"));
             if (typeof trigger !== "function") return;
             if (gesture.hapticType === undefined) {
-                const types = inspectedExport(4803, "default") || inspectedExport(4802, "HapticFeedbackTypes");
+                const types = inspectedExport(4856, "default") || inspectedExport(4855, "HapticFeedbackTypes");
                 gesture.hapticType = types && types.IMPACT_LIGHT !== undefined ? types.IMPACT_LIGHT : 0;
             }
             trigger(gesture.hapticType);
         } catch (_) {}
     }
     function gestureCanReply(channel, message) {
-        const canReply = gesture.canReplyFn || (gesture.canReplyFn = inspectedExport(7422, "canReplyToMessage"));
+        const canReply = gesture.canReplyFn || (gesture.canReplyFn = inspectedExport(7635, "canReplyToMessage"));
         if (typeof canReply !== "function") return true;
         try { return !!canReply(channel, message); } catch (_) { return true; }
     }
     function gestureReply(message, channel, chatInputRef) {
         if (!gestureCanReply(channel, message)) return false;
-        const reply = gesture.replyFn || (gesture.replyFn = inspectedExport(11047, "default"));
+        const reply = gesture.replyFn || (gesture.replyFn = inspectedExport(11305, "default"));
         if (typeof reply !== "function") return false;
         const ref = chatInputRef !== undefined ? chatInputRef : gestureChatInputRef(channel);
         try { gestureHaptic(); reply({message, channel, chatInputRef:ref, actionSource:"message_swipe", invertible:true}); return true; } catch (_) { return false; }
     }
     function gestureEdit(message, channel, chatInputRef) {
         // Only what Discord itself would let you edit (sent, yours, not a system message); otherwise reply.
-        const canEdit = gesture.canEditFn || (gesture.canEditFn = inspectedExport(11120, "default")), user = userStore && userStore.getCurrentUser();
+        const canEdit = gesture.canEditFn || (gesture.canEditFn = inspectedExport(11378, "default")), user = userStore && userStore.getCurrentUser();
         try { if (typeof canEdit === "function" && !canEdit(message, user && user.id)) return false; } catch (_) { return false; }
-        const edit = gesture.editFn || (gesture.editFn = inspectedExport(11032, "handleEdit"));
+        const edit = gesture.editFn || (gesture.editFn = inspectedExport(11290, "handleEdit"));
         if (typeof edit !== "function") return false;
         const ref = chatInputRef !== undefined ? chatInputRef : gestureChatInputRef(channel);
         try { gestureHaptic(); edit(message, channel, ref, "message_swipe", true); return true; } catch (_) { return false; }
     }
     function gestureDelete(message, channel) {
         if (message && message.state && message.state !== "SENT") return false;
-        const actions = msgActions || inspectedExport(6880, "default");
+        const actions = msgActions || inspectedExport(6965, "default");
         if (!actions || typeof actions.deleteMessage !== "function") return false;
         // Discord's own delete, with QuickDelete and NoDelete still applying to it.
         try { gestureHaptic(); const result = actions.deleteMessage(channel && channel.id || message.channel_id, message.id, false);
@@ -2827,7 +2827,7 @@
             if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
         };
         const switchMode = value => { setMode(value); setState(blank); };
-        const Trash = venusIcon(4791, "TrashIcon"), Spine = {borderColor:k.iconMuted.color};
+        const Trash = venusIcon(4847, "TrashIcon"), Spine = {borderColor:k.iconMuted.color};
         // Try it: a tip under the message to tap next, step by step, until you've tried everything your options allow.
         const done = state.done, next = !on || watching ? null : !done.reply ? ["theirs", tr("Double-tap Sam's message to reply")] :
             !done.own ? ["mine", tr(own ? "Now double-tap your message to edit it" : "Now double-tap your message to reply to it")] :
@@ -2870,21 +2870,21 @@
         if (!RN) return null;
         const on = enabled("gestures");
         const groups = [
-            on ? null : offCard("status", venusIcon(8216, "ReactionIcon")),
+            on ? null : offCard("status", venusIcon(8411, "ReactionIcon")),
             el(GesturePreview, {key:"preview", on}),
             radioGroup(ui, "own", "Double-tap your own message", "gestureOwn", on, [
-                ["edit", "Edit it", "Opens it for editing, when Discord lets you.", rowIcon(9829, "PencilIcon")],
-                ["reply", "Reply to it", "Same as someone else's message.", rowIcon(11108, "ArrowAngleLeftUpIcon")]]),
+                ["edit", "Edit it", "Opens it for editing, when Discord lets you.", rowIcon(10058, "PencilIcon")],
+                ["reply", "Reply to it", "Same as someone else's message.", rowIcon(11366, "ArrowAngleLeftUpIcon")]]),
             el(ui.TableRowGroup || RN.View, {key:"triple", title:tr("Triple-tap")},
                 switchRow(ui.TableSwitchRow, "gestureTripleDelete", "Triple-tap to delete", "Tap your own message three times to delete it, with no confirmation. Never affects other people's messages.",
-                    rowIcon(4791, "TrashIcon"))),
+                    rowIcon(4847, "TrashIcon"))),
             footnote("note", "Double-tapping no longer adds a reaction. Hold a message to react instead.")];
         return settingsBody(ui, groups);
     }
     // Quest Completer: finds unfinished Quests and completes them in the background, with no screen.
     // Based on the community quest scripts (aamiaa's gist, CompleteDiscordQuest, Questify), rebuilt on
-    // 348.10's own modules: QuestStore (7120), fetchCurrentQuests (9765), questUserStatusFromServer (7127)
-    // and the HTTP client (1283). Video, Play and Activity tasks are run; stream tasks need a real Go Live.
+    // 349.9's own modules: QuestStore (7187), fetchCurrentQuests (9994), questUserStatusFromServer (7194)
+    // and the HTTP client (1282). Video, Play and Activity tasks are run; stream tasks need a real Go Live.
     const QUEST_VIDEO_TASKS = ["WATCH_VIDEO_ON_MOBILE", "WATCH_VIDEO"], QUEST_ACTIVITY_TASK = "PLAY_ACTIVITY", QUEST_PLAY_TASK = "PLAY_ON_DESKTOP";
     // QuestContent.QUEST_HOME_MOBILE: where Discord's own app says a quest was accepted from.
     const QUEST_HOME_MOBILE = 12;
@@ -2911,7 +2911,7 @@
     function questSleep(ms) { return new Promise(resolve => { later(resolve, ms); }); }
     function questStore() {
         if (quest.store) return quest.store;
-        const store = inspectedExport(7120, "default");
+        const store = inspectedExport(7187, "default");
         if (!store || typeof store.getQuest !== "function") return null;
         questAttach(store);
         return store;
@@ -2946,7 +2946,7 @@
     // desktop: send this request as the Windows desktop app. Only Play and Activity heartbeats (and the game
     // lookup that names their executable) do; enrolling and video progress stay the phone, which Discord accepts.
     function questRequest(url, body, desktop, method) {
-        const http = inspectedExport(1283, "HTTP"), send = http && http[method || "post"];
+        const http = inspectedExport(1282, "HTTP"), send = http && http[method || "post"];
         if (typeof send !== "function") return Promise.reject(new Error("Discord's network client isn't ready"));
         const request = {url, interceptResponse:questIntercept};
         if (body !== undefined) request.body = body;
@@ -2975,7 +2975,7 @@
     }
     function questLocale() {
         try {
-            const read = inspectedExport(1348, "getSuperProperties"), own = typeof read === "function" ? read() : null;
+            const read = inspectedExport(1347, "getSuperProperties"), own = typeof read === "function" ? read() : null;
             const locale = own && own.system_locale;
             if (typeof locale === "string" && /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(locale)) return locale;
         } catch (_) {}
@@ -2996,7 +2996,7 @@
             client_event_source:null, launch_signature:identity.signature, client_heartbeat_session_id:identity.session,
             client_app_state:"unfocused"};
         try {
-            const encode = inspectedExport(1283, "encodeProperties"), encoded = typeof encode === "function" ? encode(properties) : null;
+            const encode = inspectedExport(1282, "encodeProperties"), encoded = typeof encode === "function" ? encode(properties) : null;
             if (typeof encoded === "string" && encoded) return encoded;
         } catch (_) {}
         return questBase64(JSON.stringify(properties));
@@ -3022,12 +3022,12 @@
         request.set("User-Agent", QUEST_DESKTOP_UA);
         request.set("X-Super-Properties", properties);
     }
-    // QuestStore exposes these as getters in 348.10; accept a method too.
+    // QuestStore exposes these as getters in 349.9; accept a method too.
     function questFlag(store, key) {
         try { const value = store[key]; return typeof value === "function" ? value.call(store) : value; } catch (_) { return undefined; }
     }
     function questDispatch(action) {
-        const dispatcher = quest.dispatcher || inspectedExport(585, "default");
+        const dispatcher = quest.dispatcher || inspectedExport(578, "default");
         try {
             if (!dispatcher || typeof dispatcher.dispatch !== "function") return false;
             const result = dispatcher.dispatch(action);
@@ -3036,7 +3036,7 @@
         } catch (_) { return false; }
     }
     function questUserStatus(body) {
-        const convert = inspectedExport(7127, "questUserStatusFromServer");
+        const convert = inspectedExport(7194, "questUserStatusFromServer");
         try { return body && typeof convert === "function" ? convert(body) : null; } catch (_) { return null; }
     }
     function questRetryAfter(error) {
@@ -3110,11 +3110,11 @@
         if (waiting.length && !quest.enrolling && !blocked) questEnroll(waiting[0]);
         if (!quest.running && ready.length) questRun(ready[0]);
     }
-    // Accepting one at a time, a few seconds apart. Includes Discord's own QuestDataUtils (7116) ad decision and
-    // sealed metadata fields (matching _enrollInQuest in 9765) so the enrollment body is identical to a manual tap.
+    // Accepting one at a time, a few seconds apart. Includes Discord's own QuestDataUtils (7183) ad decision and
+    // sealed metadata fields (matching _enrollInQuest in 9994) so the enrollment body is identical to a manual tap.
     function questEnrollBody(id) {
         const body = {location:QUEST_HOME_MOBILE};
-        const data = global.__r && global.__r(7116);
+        const data = global.__r && global.__r(7183);
         try {
             const decision = data && typeof data.getAdDecisionData === "function" ? data.getAdDecisionData(id, QUEST_HOME_MOBILE) : null;
             if (decision && typeof decision === "object") Object.assign(body, decision);
@@ -3186,7 +3186,7 @@
         return !!(body && body.completed_at);
     }
     function questOptimisticProgress(id, taskType, progress) {
-        const update = inspectedExport(9765, "updateOptimisticProgress");
+        const update = inspectedExport(9994, "updateOptimisticProgress");
         try { if (typeof update === "function") update(id, taskType, progress); } catch (_) {}
     }
     async function questVideo(entry, item) {
@@ -3247,7 +3247,7 @@
         // Unknown is fine: desktop sends no path for a game it can't place either.
         return path;
     }
-    // Same body as Discord's own sendHeartbeat (9765): application_id names the game or Activity, and a game
+    // Same body as Discord's own sendHeartbeat (9994): application_id names the game or Activity, and a game
     // also says which executable is running. Play and Activity heartbeats go out as Discord for Windows.
     async function questHeartbeat(entry, desktop) {
         const body = {application_id:entry.task.applicationId, terminal:false};
@@ -3287,7 +3287,7 @@
     }
     // Mobile only loads Quests when you open them; ask for them once in a while, through Discord's own fetch.
     function questsFetch(force) {
-        const store = questStore(), fetch = inspectedExport(9765, "fetchCurrentQuests");
+        const store = questStore(), fetch = inspectedExport(9994, "fetchCurrentQuests");
         if (!store || typeof fetch !== "function") return;
         try {
             if (questFlag(store, "isFetchingCurrentQuests") === true) return;
@@ -3383,15 +3383,15 @@
         const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, on = enabled("quests");
         const toggle = (key, label, subLabel, icon) => switchRow(Switch, key, label, subLabel, icon);
         const groups = [
-            on ? statusCard("status", questStatusText(), {title:questStatusTitle(), IconComponent:venusIcon(quest.error ? 11840 : quest.running ? 10968 : 14519,
+            on ? statusCard("status", questStatusText(), {title:questStatusTitle(), IconComponent:venusIcon(quest.error ? 12095 : quest.running ? 11227 : 14803,
                 quest.error ? "ChatWarningIcon" : quest.running ? "TimerIcon" : "QuestsIcon"),
-                footer:questShare() != null ? el(VenusProgress, {key:"progress:" + quest.running.id, value:questShare()}) : null}) : offCard("status", venusIcon(14519, "QuestsIcon")),
+                footer:questShare() != null ? el(VenusProgress, {key:"progress:" + quest.running.id, value:questShare()}) : null}) : offCard("status", venusIcon(14803, "QuestsIcon")),
             el(Group, {key:"types", title:tr("Quests to complete")},
-                toggle("questsVideo", "Video Quests", "Reported as watched at normal speed, without playing the video.", rowIcon(10976, "VideoIcon")),
-                toggle("questsPlay", "Play Quests", "Play time counts without installing or opening the game.", rowIcon(8532, "GameControllerIcon")),
-                toggle("questsActivity", "Activity Quests", "Activity time counts without starting the Activity.", rowIcon(12246, "MagicWandIcon"))),
+                toggle("questsVideo", "Video Quests", "Reported as watched at normal speed, without playing the video.", rowIcon(11234, "VideoIcon")),
+                toggle("questsPlay", "Play Quests", "Play time counts without installing or opening the game.", rowIcon(8739, "GameControllerIcon")),
+                toggle("questsActivity", "Activity Quests", "Activity time counts without starting the Activity.", rowIcon(12500, "MagicWandIcon"))),
             el(Group, {key:"enroll", title:tr("New Quests")},
-                toggle("questsEnroll", "Accept new Quests", "Accepts Quests you haven't started, one at a time. Off: only Quests you accept yourself.", rowIcon(4793, "CircleCheckIcon"))),
+                toggle("questsEnroll", "Accept new Quests", "Accepts Quests you haven't started, one at a time. Off: only Quests you accept yourself.", rowIcon(4792, "CircleCheckIcon"))),
             footnote("note", "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.")];
         return settingsBody(ui, groups);
     }
@@ -3488,13 +3488,13 @@
         const mode = props.mode, setMode = props.setMode;
         const s = useThemed("previewToggle", c => ({wrap:Object.assign({}, PREVIEW_TOGGLE_DARK.wrap, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND}),
             on:Object.assign({}, PREVIEW_TOGGLE_DARK.on, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}), off:PREVIEW_TOGGLE_DARK.off}), PREVIEW_TOGGLE_DARK);
-        const Text = inspectedExport(4833, "Text"), Press = RN.Pressable || RN.View;
+        const Text = inspectedExport(4886, "Text"), Press = RN.Pressable || RN.View;
         const pill = (value, label, Icon) => el(Press, {key:value, style:mode === value ? s.on : s.off, accessibilityRole:"button", accessibilityLabel:tr(label),
             accessibilityState:{selected:mode === value}, onPress:() => { if (mode !== value) setMode(value); }, hitSlop:{top:6, bottom:6, left:4, right:4}},
             el(Icon, {size:"xxs", color:mode === value ? undefined : "#949ba4"}),
             Text ? el(Text, {variant:"text-xs/semibold", color:mode === value ? "interactive-text-active" : "text-muted"}, tr(label)) :
                 el(RN.Text, {style:{fontSize:12, fontWeight:"600", color:mode === value ? "#ffffff" : "#949ba4"}}, tr(label)));
-        return el(RN.View, {key:"toggle", style:s.wrap}, pill("watch", "Watch", venusIcon(7726, "PlayIcon")), pill("try", "Try it", venusIcon(9370, "HandRequestSpeakIcon")));
+        return el(RN.View, {key:"toggle", style:s.wrap}, pill("watch", "Watch", venusIcon(7948, "PlayIcon")), pill("try", "Try it", venusIcon(9597, "HandRequestSpeakIcon")));
     }
     // Watch plays like a short video: a story is a list of [wait ms, step, caption?]. Each caption stays up long enough
     // to read (storyPlan stretches the wait before the next one), the clock ticks once a second, and a bar under the
@@ -3605,7 +3605,7 @@
     }
     // Discord's channel header: back arrow, the channel (or person) with its small right chevron, and circular 32px action buttons on the right.
     function previewHeader(k, props) {
-        const Back = venusIcon(5937, "ArrowLargeLeftIcon"), Hash = venusIcon(15125, "HashmarkIcon"), Chevron = venusIcon(6631, "ChevronSmallRightIcon");
+        const Back = venusIcon(6014, "ArrowLargeLeftIcon"), Hash = venusIcon(15411, "HashmarkIcon"), Chevron = venusIcon(6708, "ChevronSmallRightIcon");
         return el(RN.View, {key:"header", style:k.header},
             el(RN.View, {style:{width:32, height:32, alignItems:"center", justifyContent:"center"}}, el(Back, {size:"md", color:k.icon.color})),
             el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:8}},
@@ -3615,14 +3615,14 @@
                     props.badges || null,
                     el(Chevron, {size:"xxs", color:k.iconMuted.color}))),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8}},
-                (props.icons || [[5388, "ThreadIcon"], [6473, "MagnifyingGlassIcon"]]).map(([id, name]) =>
+                (props.icons || [[5857, "ThreadIcon"], [6548, "MagnifyingGlassIcon"]]).map(([id, name]) =>
                     el(RN.View, {key:name, style:k.headerPill}, el(venusIcon(id, name), {size:"sm", color:k.icon.color})))));
     }
     // Discord's message bar: the + button, the text pill with its gift and emoji/keyboard buttons, then the mic, or Send once there's text.
     function previewInput(k, s, props) {
-        const Plus = venusIcon(10455, "PlusLargeIcon"), Gift = venusIcon(10528, "GiftIcon"),
-            Expr = props.pickerOpen ? venusIcon(10813, "KeyboardIcon") : venusIcon(8216, "ReactionIcon"),
-            Mic = venusIcon(9461, "MicrophoneIcon"), Send = venusIcon(4778, "SendMessageIcon"), Press = RN.Pressable || RN.View, text = props.text || "";
+        const Plus = venusIcon(10689, "PlusLargeIcon"), Gift = venusIcon(10766, "GiftIcon"),
+            Expr = props.pickerOpen ? venusIcon(11058, "KeyboardIcon") : venusIcon(8411, "ReactionIcon"),
+            Mic = venusIcon(9689, "MicrophoneIcon"), Send = venusIcon(4841, "SendMessageIcon"), Press = RN.Pressable || RN.View, text = props.text || "";
         const showGift = !text && !(features.hideGift && enabled("hideGift"));
         const exprIcon = el(RN.View, {style:{justifyContent:"center", alignItems:"center"}},
             el(Expr, {size:"sm", color:props.pickerOpen ? s.name.color : k.icon.color}), props.smileRipple || null);
@@ -3639,7 +3639,7 @@
     }
     // The bar above the message box while replying or editing (ChatInputContextBar 11808): what it is, the @ ON toggle + vertical divider on replies, and the close X.
     function previewBar(k, s, Icon, text, onClose, key, mention) {
-        const X = venusIcon(5940, "XSmallIcon"), At = venusIcon(5405, "AtIcon"), Press = RN.Pressable || RN.View;
+        const X = venusIcon(6017, "XSmallIcon"), At = venusIcon(5874, "AtIcon"), Press = RN.Pressable || RN.View;
         return el(RN.View, {key:key || "bar", style:k.bar},
             Icon ? popIn("icon:" + text, el(Icon, {size:"xs", color:k.icon.color})) : null,
             el(RN.Text, {style:[s.muted, {flex:1, fontSize:14, fontWeight:"500"}], numberOfLines:1}, text),
@@ -3689,7 +3689,7 @@
     }
     // What Watch is showing (step 2 of 5), and the player: pause or play, the bar, the time, start over.
     function storyStrip(k, s, story) {
-        const Press = RN.Pressable || RN.View, Play = venusIcon(7726, "PlayIcon"), Pause = venusIcon(7728, "PauseIcon"), Again = venusIcon(11106, "RetryIcon");
+        const Press = RN.Pressable || RN.View, Play = venusIcon(7948, "PlayIcon"), Pause = venusIcon(7950, "PauseIcon"), Again = venusIcon(11364, "RetryIcon");
         const button = (key, Icon, label, onPress) => el(Press, {key, onPress, accessibilityRole:"button", accessibilityLabel:tr(label),
             hitSlop:{top:10, bottom:10, left:10, right:10}, style:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"}},
             el(Icon, {size:"xs", color:k.icon.color}));
@@ -3724,11 +3724,11 @@
         return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],
             onValueChange:value => { animateLayout(); setSetting(key,value); }}) : null;
     }
-    // One choice from a few: Discord's radio list (TableRadioGroup 5995 / TableRadioRow 5994), or check-marked rows.
+    // One choice from a few: Discord's radio list (TableRadioGroup 6072 / TableRadioRow 6071), or check-marked rows.
     // Each choice may carry a fourth item, its row icon (rowIcon), like Discord's own radio lists.
     function radioGroup(ui,key,title,setting,on,choices,raw) {
         title=tr(title); if (!raw) choices=choices.map(([value,label,subLabel,icon]) => [value,tr(label),subLabel && tr(subLabel),icon]);
-        const RadioGroup=inspectedExport(5995,"TableRadioGroup"), RadioRow=inspectedExport(5994,"TableRadioRow");
+        const RadioGroup=inspectedExport(6072,"TableRadioGroup"), RadioRow=inspectedExport(6071,"TableRadioRow");
         if (RadioGroup && RadioRow) return el(RadioGroup,{key,title,value:settings[setting],onChange:value => setSetting(setting,value)},
             choices.map(([value,label,subLabel,icon]) => el(RadioRow,{key:value,value,label,subLabel,icon,disabled:!on})));
         return el(ui.TableRowGroup || RN.View,{key,title},choices.map(([value,label,subLabel,icon]) => ui.TableRow &&
@@ -3737,11 +3737,11 @@
     // Small muted text under a page's groups: what else to know, without a row of its own.
     function footnote(key,text) {
         text=tr(text);
-        const Text=inspectedExport(4833,"Text");
+        const Text=inspectedExport(4886,"Text");
         return el(RN.View,{key,style:{paddingHorizontal:16}},
             Text ? el(Text,{variant:"text-xs/medium",color:"text-muted"},text) : el(RN.Text,{style:{color:"#949ba4",fontSize:12}},text));
     }
-    // Discord's color tokens (588 colors) are objects that only createStyles turns into real colors for the current
+    // Discord's color tokens (587 colors) are objects that only createStyles turns into real colors for the current
     // theme. Each style set is made once, so a mounted page always calls the same hooks; the fallback is the dark theme.
     const themedHooks = new Map();
     function useThemed(name, make, fallback) {
@@ -3763,7 +3763,7 @@
         // Called straight from a page render (not as its own component), so its texts stay part of the page.
         const s = useThemed("statusCard", c => ({card:Object.assign({}, STATUS_CARD_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
             badge:Object.assign({}, STATUS_CARD_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), STATUS_CARD_DARK);
-        const Text = inspectedExport(4833, "Text"), Icon = props.IconComponent, title = props.title, body = props.body;
+        const Text = inspectedExport(4886, "Text"), Icon = props.IconComponent, title = props.title, body = props.body;
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
         return el(RN.View, {key:props.key, style:s.card, accessible:true},
             // The badge pops in when the page opens, and again whenever the card's state (its title) changes.
@@ -3824,14 +3824,14 @@
                     el(RN.Text, {style:[s.muted, {marginLeft:8}]}, time)),
                 body));
     }
-    // Discord's own icon in a settings row (TableRowIcon 5922), the way its own settings pages show them.
+    // Discord's own icon in a settings row (TableRowIcon 5999), the way its own settings pages show them.
     function rowIcon(id,name) {
-        const RowIcon=inspectedExport(5922,"TableRowIcon");
+        const RowIcon=inspectedExport(5999,"TableRowIcon");
         return RowIcon ? el(RowIcon,{IconComponent:venusIcon(id,name)}) : undefined;
     }
-    // A group title on its own, above something that isn't a list of rows (TableRowGroupTitle 5997).
+    // A group title on its own, above something that isn't a list of rows (TableRowGroupTitle 6074).
     function groupTitle(key,title) {
-        const Title=inspectedExport(5997,"TableRowGroupTitle"), Text=inspectedExport(4833,"Text");
+        const Title=inspectedExport(6074,"TableRowGroupTitle"), Text=inspectedExport(4886,"Text");
         return Title ? el(Title,{key,title:tr(title)}) : el(RN.View,{key,style:{paddingHorizontal:16}},
             Text ? el(Text,{variant:"text-sm/semibold",color:"text-muted"},tr(title)) : el(RN.Text,{style:{color:"#949ba4",fontSize:13,fontWeight:"600"}},tr(title)));
     }
@@ -3863,7 +3863,7 @@
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
             on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill}),
             {wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:"#1e1f22"},on:Object.assign({},pill,{backgroundColor:"#4e5058"}),off:pill});
-        const Text=inspectedExport(4833,"Text"), Press=RN.Pressable || RN.View;
+        const Text=inspectedExport(4886,"Text"), Press=RN.Pressable || RN.View;
         // Once its slider has measured the track, the chosen pill slides to the new choice instead of jumping.
         const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
         const indicator=s.on && s.on.backgroundColor;
@@ -3874,9 +3874,9 @@
                 Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted"},item.label) :
                     el(RN.Text,{style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600"}},item.label))));
     }
-    // A text box with Discord's button (Button 5282) beside it, like its own "add" fields.
+    // A text box with Discord's button (Button 5594) beside it, like its own "add" fields.
     function inputWithButton(ui,key,inputProps,onChange,buttonText,onPress,disabled) {
-        const Button=inspectedExport(5282,"Button");
+        const Button=inspectedExport(5594,"Button");
         const input=ui.TextInput ? el(ui.TextInput,Object.assign({onChange},inputProps)) :
             el(RN.TextInput,Object.assign({onChangeText:onChange,style:{fontSize:16,padding:12}},inputProps));
         const button=Button ? el(Button,{text:tr(buttonText),size:"md",variant:"primary",disabled:!!disabled,onPress}) :
@@ -3904,7 +3904,7 @@
         if (RN && RN.Alert) RN.Alert.alert(title,body,[{text:tr("Cancel"),style:"cancel"},{text:confirmText,style:"destructive",onPress:onConfirm}]);
     }
     function count(n,word) { return pl(n,"{n} "+word,"{n} "+word+"s"); }
-    // Settings page: Discord's own radio list (TableRadioGroup 5995 / TableRadioRow 5994).
+    // Settings page: Discord's own radio list (TableRadioGroup 6072 / TableRadioRow 6071).
     // Hidden channels: one choice, whether tapping a locked channel shows its details or does nothing.
     // The locked channel in the preview: pressable like a real row, and it gives a small shake when tapping does nothing
     // (each time props.shake goes up).
@@ -3931,7 +3931,7 @@
     function HiddenChannelsPreview(props) {
         useSettings("hiddenChannels");
         const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on, menu = settings.hiddenChannelsMenu;
-        const Hash = venusIcon(15125, "HashmarkIcon"), TextLock = venusIcon(5393, "TextLockIcon"), Down = venusIcon(10604, "ChevronSmallDownIcon");
+        const Hash = venusIcon(15411, "HashmarkIcon"), TextLock = venusIcon(5862, "TextLockIcon"), Down = venusIcon(10844, "ChevronSmallDownIcon");
         const blank = {shake:0, pulse:null, card:false, scroll:0, tried:false};
         const [state, setState] = React.useState(blank), watching = on && mode === "watch";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
@@ -3965,13 +3965,13 @@
             channel("general", false, true), on ? channel("staff-only", true) : null, channel("memes", false), channel("clips", false));
         const tip = on && !watching ? previewTip(k, !state.tried ? tr(menu ? "Tap staff-only to see its details" : "Tap staff-only: nothing will open") :
             tr(menu ? "That's the dialog you'll see in Discord" : "Tapping a locked channel now does nothing")) : null;
-        const Chevron = venusIcon(6631, "ChevronSmallRightIcon"), Search = venusIcon(6473, "MagnifyingGlassIcon");
+        const Chevron = venusIcon(6708, "ChevronSmallRightIcon"), Search = venusIcon(6548, "MagnifyingGlassIcon");
         const server = el(RN.View, {key:"server", style:[k.header, {height:52, paddingHorizontal:16}]},
             el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:4}},
                 el(RN.Text, {style:[k.title, {fontSize:18}], numberOfLines:1}, tr("Game Night")),
                 el(Chevron, {size:"xxs", color:k.iconMuted.color})),
             el(RN.View, {style:k.headerPill}, el(Search, {size:"sm", color:k.icon.color})),
-            el(RN.View, {style:k.headerPill}, el(venusIcon(7364, "MoreHorizontalIcon"), {size:"sm", color:k.icon.color})));
+            el(RN.View, {style:k.headerPill}, el(venusIcon(7577, "MoreHorizontalIcon"), {size:"sm", color:k.icon.color})));
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
             previewScreen(s, "preview", "Hidden channels preview", [el(RN.View, {key:"body", style:{minHeight:210, overflow:"hidden"}}, list, card), tip],
                 {header:server, footer:watching ? storyStrip(k, s, story) : null}));
@@ -3980,12 +3980,12 @@
         useSettings("hiddenChannels");
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5410,"LockIcon");
+        const on=enabled("hiddenChannels"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, lock=venusIcon(5879,"LockIcon");
         const groups=[
             on ? null : offCard("status",lock),
             el(HiddenChannelsPreview,{key:"preview",on}),
             el(Group,{key:"tap",title:tr("When you tap a locked channel")},
-                switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4788,"CircleInformationIcon"))),
+                switchRow(Switch,"hiddenChannelsMenu","Show its details","Shows when it was created, its last message and last pin, with View Anyway.",rowIcon(4812,"CircleInformationIcon"))),
             footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];
         return settingsBody(ui,groups);
     }
@@ -3995,10 +3995,10 @@
         if (!React || !RN) return null;
         const on=enabled("readAll");
         const groups=[
-            on ? null : offCard("status",venusIcon(15161,"DoubleCheckmarkIcon")),
-            radioGroup(ui,"mode","When you tap Read all","readAllMode",on,[["guilds","Servers","Marks every unread server as read.",rowIcon(8584,"ServerIcon")],
-                ["dms","Direct messages","Marks every unread DM and group DM as read.",rowIcon(6503,"EnvelopeIcon")],
-                ["both","Servers and DMs","Marks everything as read in one tap.",rowIcon(15161,"DoubleCheckmarkIcon")]]),
+            on ? null : offCard("status",venusIcon(15447,"DoubleCheckmarkIcon")),
+            radioGroup(ui,"mode","When you tap Read all","readAllMode",on,[["guilds","Servers","Marks every unread server as read.",rowIcon(8791,"ServerIcon")],
+                ["dms","Direct messages","Marks every unread DM and group DM as read.",rowIcon(4817,"EnvelopeIcon")],
+                ["both","Servers and DMs","Marks everything as read in one tap.",rowIcon(15447,"DoubleCheckmarkIcon")]]),
             footnote("note","Hold the button to pick just once, without changing this.")];
         return settingsBody(ui,groups);
     }
@@ -4035,9 +4035,9 @@
     // Watch: you tap the emoji button in the message bar, pick a Nitro emoji from another server (unlocked by Venus, so
     // there's no lock icon on it), it's sent and everyone sees it; then the same with a sticker. Try it: send one yourself.
     function NitroPicker(props) {
-        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Down = venusIcon(10604, "ChevronSmallDownIcon"),
-            Search = venusIcon(6473, "MagnifyingGlassIcon"), Nitro = venusIcon(8119, "NitroWheelIcon"),
-            Smile = venusIcon(8216, "ReactionIcon"), Sticker = venusIcon(11937, "StickerIcon"), Backspace = venusIcon(9742, "BackspaceIcon");
+        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Down = venusIcon(10844, "ChevronSmallDownIcon"),
+            Search = venusIcon(6548, "MagnifyingGlassIcon"), Nitro = venusIcon(8313, "NitroWheelIcon"),
+            Smile = venusIcon(8411, "ReactionIcon"), Sticker = venusIcon(12190, "StickerIcon"), Backspace = venusIcon(9971, "BackspaceIcon");
         const kinds = props.kinds, tab = props.tab, item = NITRO_SAMPLES[tab], canSwitch = kinds.length > 1;
         const tabPill = (kind, label, enabledTab) => {
             const active = tab === kind;
@@ -4139,14 +4139,14 @@
         if (!React || !RN) return null;
         const on=enabled("freeNitro"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, hasAny=!!(settings.emojis || settings.stickers);
         const groups=[
-            !on ? offCard("status",venusIcon(8119,"NitroWheelIcon")) : !hasAny ? statusCard("status","Turn on emojis or stickers below.",
-                {title:tr("Sending as links"),IconComponent:venusIcon(8119,"NitroWheelIcon")}) : null,
+            !on ? offCard("status",venusIcon(8313,"NitroWheelIcon")) : !hasAny ? statusCard("status","Turn on emojis or stickers below.",
+                {title:tr("Sending as links"),IconComponent:venusIcon(8313,"NitroWheelIcon")}) : null,
             el(NitroPreview,{key:"preview",on}),
             el(Group,{key:"send",title:tr("Send as links")},
-                switchRow(Switch,"emojis","Emojis","Emojis from other servers, and animated emojis.",rowIcon(8719,"ChatSmileIcon")),
-                switchRow(Switch,"stickers","Stickers","Stickers from other servers. Animated ones may not move.",rowIcon(11937,"StickerIcon"))),
+                switchRow(Switch,"emojis","Emojis","Emojis from other servers, and animated emojis.",rowIcon(8944,"ChatSmileIcon")),
+                switchRow(Switch,"stickers","Stickers","Stickers from other servers. Animated ones may not move.",rowIcon(12190,"StickerIcon"))),
             el(Group,{key:"style",title:tr("Link style")},
-                switchRow(Switch,"hyperlinks","Short links","In chat it looks the same either way. Short links only change what's copied or quoted.",rowIcon(4776,"LinkIcon"))),
+                switchRow(Switch,"hyperlinks","Short links","In chat it looks the same either way. Short links only change what's copied or quoted.",rowIcon(4839,"LinkIcon"))),
             footnote("note","Everyone sees the image, but it's a link, not a real Nitro emoji or sticker.")];
         return settingsBody(ui,groups);
     }
@@ -4175,11 +4175,11 @@
         if (!React || !RN) return null;
         const on=enabled("pastelize"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const groups=[
-            on ? null : offCard("status",venusIcon(14795,"PaintPaletteIcon")),
+            on ? null : offCard("status",venusIcon(15080,"PaintPaletteIcon")),
             el(PastelPreview,{key:"preview",on}),
             el(Group,{key:"colors",title:tr("Colors")},
-                switchRow(Switch,"pastelAll","Replace role colors","Every name uses its pastel color, even with a role color.",rowIcon(10398,"CrownIcon")),
-                switchRow(Switch,"pastelContent","Color message text","What people write is colored too, in a lighter shade of their name.",rowIcon(5395,"TextIcon"))),
+                switchRow(Switch,"pastelAll","Replace role colors","Every name uses its pastel color, even with a role color.",rowIcon(10631,"CrownIcon")),
+                switchRow(Switch,"pastelContent","Color message text","What people write is colored too, in a lighter shade of their name.",rowIcon(5864,"TextIcon"))),
             footnote("note","Each person always gets the same color, on every device.")];
         return settingsBody(ui,groups);
     }
@@ -4221,7 +4221,7 @@
                 previewMessage(s, "a2", tr("You"), "#5865f2", tr("Today at 4:02 PM"), el(Text, {style:s.text}, tr("Yes, see you there!")))),
             previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"@Alex"})})];
         const dmHeader = () => el(RN.View, {key:"hd"}, previewHeader(k, {title:"Alex", leading:avatar("A", "#3ba55c", clients, 32, k.header.backgroundColor),
-            badges:icons("piDmHeader", clients), icons:[[7309, "PhoneCallIcon"], [10976, "VideoIcon"], [6473, "MagnifyingGlassIcon"]]}), ripple);
+            badges:icons("piDmHeader", clients), icons:[[7523, "PhoneCallIcon"], [11234, "VideoIcon"], [6548, "MagnifyingGlassIcon"]]}), ripple);
         // The member list: Discord's "Online — 3" header and a row per person, status under the name.
         const memberRow = (name, color, c, alex) => el(RN.View, {key:name, style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:6},
             alex ? {marginHorizontal:8, paddingHorizontal:8, borderRadius:8} : null]},
@@ -4240,11 +4240,11 @@
                 el(Text, {style:[s.muted, {fontSize:14, fontWeight:"600"}]}, "alex"),
                 el(RN.View, {style:{flexDirection:"row", gap:8, marginTop:4}},
                     el(RN.View, {style:[k.brand, {flex:1, borderRadius:20, paddingVertical:10, alignItems:"center", flexDirection:"row", justifyContent:"center", gap:8}]},
-                        el(venusIcon(5386, "ChatIcon"), {size:"sm", color:k.brandText.color}), el(Text, {style:[k.brandText, {fontWeight:"600"}]}, tr("Message"))),
+                        el(venusIcon(5855, "ChatIcon"), {size:"sm", color:k.brandText.color}), el(Text, {style:[k.brandText, {fontWeight:"600"}]}, tr("Message"))),
                     el(RN.View, {style:[k.secondary, {width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center"}]},
-                        el(venusIcon(7309, "PhoneCallIcon"), {size:"sm", color:k.secondaryText.color})),
+                        el(venusIcon(7523, "PhoneCallIcon"), {size:"sm", color:k.secondaryText.color})),
                     el(RN.View, {style:[k.secondary, {width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center"}]},
-                        el(venusIcon(10976, "VideoIcon"), {size:"sm", color:k.secondaryText.color})))))];
+                        el(venusIcon(11234, "VideoIcon"), {size:"sm", color:k.secondaryText.color})))))];
         const body = screen === "piDmHeader" ? dm() : screen === "piUserList" ? list() : profile();
         const header = screen === "piDmHeader" ? dmHeader() : screen === "piUserList" ? previewHeader(k, {title:"general"}) : null;
         const off = on && !settings[screen] ? el(RN.View, {key:"off", style:{marginHorizontal:12, marginBottom:8, padding:10, borderRadius:8, backgroundColor:"#4e505833"}},
@@ -4256,7 +4256,7 @@
             el(Press, {onPress:() => { animateLayout(); update(st => ({demo:st.demo + 1, pulse:{who:"alex", id:"t" + (st.demo + 1)}})); },
                 accessibilityRole:"button", accessibilityHint:tr("Tap to change Alex's devices"),
                 style:[k.secondary, {borderRadius:20, paddingVertical:10, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8}]},
-                el(venusIcon(14470, "LaptopPhoneIcon"), {size:"sm", color:k.secondaryText.color}),
+                el(venusIcon(14754, "LaptopPhoneIcon"), {size:"sm", color:k.secondaryText.color}),
                 el(Text, {style:[k.secondaryText, {fontWeight:"600"}]}, tr("Change Alex's devices"))),
             el(Text, {style:[s.muted, {fontSize:13}]}, tr("Alex is on: {devices}", {devices:now}))) : null;
         return el(RN.View, {key:"preview"},
@@ -4271,15 +4271,15 @@
         const on=enabled("platformIndicators"), Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const hasPlace=!!(settings.piDmHeader || settings.piUserList || settings.piProfile);
         const groups=[
-            !on ? offCard("status",venusIcon(14470,"LaptopPhoneIcon")) : !hasPlace ? statusCard("status","Turn on at least one place below.",
-                {title:tr("Device indicators"),IconComponent:venusIcon(14470,"LaptopPhoneIcon")}) : null,
+            !on ? offCard("status",venusIcon(14754,"LaptopPhoneIcon")) : !hasPlace ? statusCard("status","Turn on at least one place below.",
+                {title:tr("Device indicators"),IconComponent:venusIcon(14754,"LaptopPhoneIcon")}) : null,
             el(PlatformPreview,{key:"preview",on}),
             el(Group,{key:"where",title:tr("Show icons")},
-                switchRow(Switch,"piDmHeader","In DMs","Next to the name at the top of a DM.",rowIcon(6503,"EnvelopeIcon")),
-                switchRow(Switch,"piUserList","In lists","Member list, friends, DM list and voice channels.",rowIcon(5404,"GroupIcon")),
-                switchRow(Switch,"piProfile","On profiles","Next to the name on a profile.",rowIcon(11177,"UserIcon"))),
+                switchRow(Switch,"piDmHeader","In DMs","Next to the name at the top of a DM.",rowIcon(4817,"EnvelopeIcon")),
+                switchRow(Switch,"piUserList","In lists","Member list, friends, DM list and voice channels.",rowIcon(5873,"GroupIcon")),
+                switchRow(Switch,"piProfile","On profiles","Next to the name on a profile.",rowIcon(11435,"UserIcon"))),
             el(Group,{key:"avatars",title:tr("Avatars")},
-                switchRow(Switch,"piHideMobile","Hide the phone badge","Avatars show a plain status dot, since the icons already show mobile.",rowIcon(6376,"MobilePhoneIcon"))),
+                switchRow(Switch,"piHideMobile","Hide the phone badge","Avatars show a plain status dot, since the icons already show mobile.",rowIcon(6448,"MobilePhoneIcon"))),
             footnote("note","Icons are colored by status on each device: desktop, mobile, web, console or VR.")];
         return settingsBody(ui,groups);
     }
@@ -4345,7 +4345,7 @@
     function messageHighlightRedraw() {
         let d = dispatcher;
         if (!d) {
-            const mod = inspectedExport(585, "default");
+            const mod = inspectedExport(578, "default");
             if (mod && typeof mod.dispatch === "function") d = mod.dispatch.bind(mod);
         }
         if (typeof d !== "function" || !highlightRecent.size) return;
@@ -4488,9 +4488,9 @@
         const [,update] = React.useState(0);
         // SessionsStore is the upstream source for the current user's own clients.
         if (enabled("platformIndicators")) {
-            if (!sessionsStore) sessionsStore = inspectedExport(4855,"default");
-            if (!presenceStore) presenceStore = inspectedExport(4877,"default");
-            if (!userStore) userStore = inspectedExport(1378,"default");
+            if (!sessionsStore) sessionsStore = inspectedExport(4908,"default");
+            if (!presenceStore) presenceStore = inspectedExport(4930,"default");
+            if (!userStore) userStore = inspectedExport(1377,"default");
         }
         const userId = props.userId;
         React.useEffect(() => platformSubscribe(userId, () => update(n => n+1)),[presenceStore,sessionsStore,userId]);
@@ -4720,13 +4720,13 @@
             return value;
         };
         let tokens=null;
-        try { const t=typeof global.__r==="function" && global.__r(588); tokens=t && (t.default || t); } catch (_) {}
-        const parts={TableRow:x(5916,"TableRow"),TableRowGroup:nativeRowGroup || x(5997,"TableRowGroup"),TableSwitchRow:nativeSwitchRow || x(6621,"TableSwitchRow"),
-            Stack:x(5280,"Stack"),Card:x(5918,"Card"),FormRow:x(8057,"FormRow"),FormLabel:x(8057,"FormLabel"),FormSubLabel:x(8057,"FormSubLabel"),
-            TextInput:x(6021,"TextInput"),Send:x(4778,"SendMessageIcon"),ActionSheet:x(6624,"ActionSheet"),Header:x(6571,"BottomSheetTitleHeader"),
-            Close:x(6619,"ActionSheetCloseButton"),sheets:x(4801,"default"),showSheet:x(4801,"showActionSheet"),simpleSheet:x(6616,"showSimpleActionSheet"),clipboard:x(6614,"Clipboard"),
-            alerts:x(5205,"default"),toasts:x(4531,"default"),pushModal:x(4694,"pushModal"),popModal:x(4694,"popModal"),OAuth:oauthModal || x(8510,"default"),
-            createStyles:x(4837,"createStyles"),theme:x(4551,"useThemeContext"),colors:tokens && tokens.colors};
+        try { const t=typeof global.__r==="function" && global.__r(587); tokens=t && (t.default || t); } catch (_) {}
+        const parts={TableRow:x(5993,"TableRow"),TableRowGroup:nativeRowGroup || x(6074,"TableRowGroup"),TableSwitchRow:nativeSwitchRow || x(6698,"TableSwitchRow"),
+            Stack:x(5593,"Stack"),Card:x(5995,"Card"),FormRow:x(8895,"FormRow"),FormLabel:x(8895,"FormLabel"),FormSubLabel:x(8895,"FormSubLabel"),
+            TextInput:x(6098,"TextInput"),Send:x(4841,"SendMessageIcon"),ActionSheet:x(6701,"ActionSheet"),Header:x(6644,"BottomSheetTitleHeader"),
+            Close:x(6696,"ActionSheetCloseButton"),sheets:x(4854,"default"),showSheet:x(4854,"showActionSheet"),simpleSheet:x(6693,"showSimpleActionSheet"),clipboard:x(6691,"Clipboard"),
+            alerts:x(5708,"default"),toasts:x(4568,"default"),pushModal:x(4736,"pushModal"),popModal:x(4736,"popModal"),OAuth:oauthModal || x(8716,"default"),
+            createStyles:x(4890,"createStyles"),theme:x(4593,"useThemeContext"),colors:tokens && tokens.colors};
         if (Object.keys(parts).every(key => parts[key] != null)) reviewParts=parts;
         return parts;
     }
@@ -4761,18 +4761,18 @@
         const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
         const me=currentUser(), myName=me && (me.globalName || me.global_name || me.username);
         const groups=[
-            !on ? offCard("status",venusIcon(7358,"ThumbsUpIcon")) :
+            !on ? offCard("status",venusIcon(7571,"ThumbsUpIcon")) :
                 statusCard("status",authenticated ? "You can read, write, delete and report reviews." : "You can read reviews. Sign in to write your own.",
                     {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in..." : "Reading reviews"),
-                        IconComponent:venusIcon(7358,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
+                        IconComponent:venusIcon(7571,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
             // One row: the action you can take now. The status card already says whether you're signed in.
             el(Group,{key:"auth",title:tr("Account")},
-                authenticated ? el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9348,"DoorExitIcon"),variant:"danger",onPress:clearReviewAuth,
+                authenticated ? el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(9576,"DoorExitIcon"),variant:"danger",onPress:clearReviewAuth,
                     subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")}) :
-                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : "Sign in to ReviewDB"),icon:rowIcon(6374,"KeyIcon"),
+                el(ui.TableRow,{key:"login",label:tr(pending ? "Signing in..." : "Sign in to ReviewDB"),icon:rowIcon(6446,"KeyIcon"),
                     arrow:true,disabled:!on || pending,onPress:authenticateReviews,subLabel:reviewAuthError || tr("Needed to post, delete or report reviews. Never uses your Discord token.")})),
             el(Group,{key:"settings",title:tr("Display")},
-                switchRow(Switch,"reviewWarning","Show the be-respectful note","ReviewDB's reminder to be kind, shown above reviews.",rowIcon(8699,"ShieldIcon"))),
+                switchRow(Switch,"reviewWarning","Show the be-respectful note","ReviewDB's reminder to be kind, shown above reviews.",rowIcon(8923,"ShieldIcon"))),
             footnote("note","Reviews come from manti.vendicated.dev. Opening reviews sends that profile's or server's ID to ReviewDB.")];
         return settingsBody(ui,groups);
     }
@@ -4808,11 +4808,11 @@
         const summary=hasKept ? tr(settings.noDeleteSave ? "{deleted} and {edited} kept, saved on this phone." : "{deleted} and {edited} kept until Discord restarts.",
             {deleted:count(kept,"deleted message"),edited:count(changed,"edited message")}) : "";
         const groups=[
-            !settings.noDelete ? offCard("status",venusIcon(4791,"TrashIcon")) : hasKept ? statusCard("status",summary,{title:pl(kept+changed,"{n} message kept","{n} messages kept"),
-                IconComponent:venusIcon(4791,"TrashIcon")}) : null,
+            !settings.noDelete ? offCard("status",venusIcon(4847,"TrashIcon")) : hasKept ? statusCard("status",summary,{title:pl(kept+changed,"{n} message kept","{n} messages kept"),
+                IconComponent:venusIcon(4847,"TrashIcon")}) : null,
             el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits,on:!!settings.noDelete}),
-            el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(9829,"PencilIcon"))),
-            el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.",rowIcon(4782,"DownloadIcon"))),
+            el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(10058,"PencilIcon"))),
+            el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.",rowIcon(4845,"DownloadIcon"))),
             el(RN.View,{key:"limit",style:{gap:8}},
                 groupTitle("title","Keep up to"),
                 venusSegmented({key:"choice",value:nearest,disabled:!settings.noDelete,onChange:value => setSetting("noDeleteLimit",value),
@@ -4830,7 +4830,7 @@
         const events=Array.from(deleted.values());
         deleted.clear(); deletedByChannel.clear(); edits.clear(); invalidateDeleted();
         dispatchRemovals(events); persistDeleted(); notify("noDelete");
-        reviewToast(reviewUI(),"Kept messages cleared",venusIcon(4791,"TrashIcon"));
+        reviewToast(reviewUI(),"Kept messages cleared",venusIcon(4847,"TrashIcon"));
     }
     function authenticateReviews() {
         if (!enabled("reviewDB") || reviewAuthState==="exchanging") return;
@@ -4846,11 +4846,11 @@
         function fail(error) {
             if (!live()) return;
             reviewAuthState="idle";reviewAuthError=String(error && error.message || error);notify("reviewDB");
-            reviewToast(ui,tr("Couldn't sign in: {problem}",{problem:reviewAuthError}),venusIcon(6026,"CircleXIcon"));
+            reviewToast(ui,tr("Couldn't sign in: {problem}",{problem:reviewAuthError}),venusIcon(4797,"CircleXIcon"));
         }
         ui.pushModal({key,modal:{key,modal:ui.OAuth,animation:"slide-up",shouldPersistUnderModals:false,closable:true,props:{
             clientId:"915703782174752809",redirectUri:REVIEW_API+"/auth",scopes:["identify"],responseType:"code",permissions:BigInt(0),cancelCompletesFlow:false,
-            // Traced in 347.12 and 348.10 (useOAuth2AuthorizeForm, fn124513): after Authorize the form calls
+            // Traced in 347.12 and 349.9 (useOAuth2AuthorizeForm, fn124513): after Authorize the form calls
             // dismissOAuthModal FIRST, waits 100 ms, and only THEN calls callback({location}).
             // Dismissal is never a cancellation; treating it as one discarded every sign-in.
             dismissOAuthModal:close,
@@ -4864,7 +4864,7 @@
                     if (!live()) return;
                     if (auth.success!==true || typeof auth.token!=="string" || !auth.token.trim() || auth.token.length>8192) throw new Error(auth.message || "ReviewDB did not return a token");
                     reviewToken=auth.token;reviewAccount=accountId;reviewAuthState="idle";reviewAuthError="";reviewCache.clear();
-                    save();notify("reviewDB");reviewToast(ui,"Signed in to ReviewDB",venusIcon(4793,"CircleCheckIcon"));
+                    save();notify("reviewDB");reviewToast(ui,"Signed in to ReviewDB",venusIcon(4792,"CircleCheckIcon"));
                 }).catch(fail);
             }}}});
     }
@@ -4911,12 +4911,12 @@
             RN.Alert.alert(title,content,[{text:tr("No"),style:"cancel"},{text:tr("Yes"),style:"destructive",onPress:onConfirm}]);
         }
         function mutate(path, method, body, done) {
-            reviewRequest(path,method,body).then(result => {reviewCache.delete(owner);refetch();reviewToast(ui,result && result.message || done,venusIcon(4793,"CircleCheckIcon"));},
-                error => reviewToast(ui,String(error && error.message || error),venusIcon(6026,"CircleXIcon")));
+            reviewRequest(path,method,body).then(result => {reviewCache.delete(owner);refetch();reviewToast(ui,result && result.message || done,venusIcon(4792,"CircleCheckIcon"));},
+                error => reviewToast(ui,String(error && error.message || error),venusIcon(4797,"CircleXIcon")));
         }
         const options=[{label:tr("Copy Text"),onPress:() => {
             try { (ui.clipboard || RN.Clipboard).setString(review.comment); } catch (_) {}
-            reviewToast(ui,"Copied Review Text",venusIcon(4780,"CopyIcon"));
+            reviewToast(ui,"Copied Review Text",venusIcon(4843,"CopyIcon"));
         }}];
         if (reviewAuth() && !system) {
             if (sender.discordID===me || owner===me || reviewAdmins.has(me)) options.push({label:tr("Delete Review"),isDestructive:true,
@@ -4954,7 +4954,7 @@
         // Like the style hook, choose once. Retrying missing UI exports must not
         // add a theme hook to an input which already mounted without one.
         if (!reviewThemeTried) {reviewThemeTried=true;reviewThemeHook=typeof ui.theme==="function" ? ui.theme : null;}
-        // 348.10 useThemeContext (fn31267) throws outside its Provider. Reviews
+        // 349.9 useThemeContext (fn31267) throws outside its Provider. Reviews
         // on a server are not a user profile; keep the hook call but use the
         // standard send color when that optional context is absent.
         let theme=null;
@@ -4965,8 +4965,8 @@
             if (!canSend || !text.trim()) return;
             setBusy(true);
             reviewRequest("/users/"+props.userId+"/reviews","PUT",{comment:text.trim()}).then(result => {
-                setText("");props.refetch();reviewToast(ui,result && result.message || "Review posted",venusIcon(4793,"CircleCheckIcon"));
-            },error => reviewToast(ui,String(error && error.message || error),venusIcon(6026,"CircleXIcon"))).then(() => setBusy(false));
+                setText("");props.refetch();reviewToast(ui,result && result.message || "Review posted",venusIcon(4792,"CircleCheckIcon"));
+            },error => reviewToast(ui,String(error && error.message || error),venusIcon(4797,"CircleXIcon"))).then(() => setBusy(false));
         }
         const input=ui.TextInput ?
             el(ui.TextInput,{style:[{flex:1,fontSize:16},styles.text],isDisabled:!authenticated,placeholder,placeholderTextColor:styles.placeholder.color,
@@ -5012,7 +5012,7 @@
     }
     // Discord's own small secondary button (Button 5282), or a themed pill if it hasn't loaded.
     function reviewRetry(onPress) {
-        const Button=inspectedExport(5282,"Button");
+        const Button=inspectedExport(5594,"Button");
         if (Button) return el(RN.View,{style:{alignSelf:"flex-start"}},
             el(Button,{text:tr("Retry"),size:"sm",variant:"secondary",accessibilityLabel:tr("Retry reviews"),onPress}));
         return el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Retry reviews"),onPress,
@@ -5027,17 +5027,17 @@
     function openReviewSheet(userId) {
         if (!enabled("reviewDB") || !React || !RN || typeof userId!=="string" || !/^\d{17,20}$/.test(userId)) return;
         const ui=reviewUI();
-        if (!ui.ActionSheet || typeof ui.showSheet!=="function") { reviewToast(ui,"Reviews are unavailable. Reopen the server menu and try again.",venusIcon(6026,"CircleXIcon")); return; }
+        if (!ui.ActionSheet || typeof ui.showSheet!=="function") { reviewToast(ui,"Reviews are unavailable. Reopen the server menu and try again.",venusIcon(4797,"CircleXIcon")); return; }
         // 4801's NAMED showActionSheet (HBC fn32121) takes an already-created
         // element, then schedules SHOW_ACTION_SHEET through Dispatcher.wait.
         // Reviews are bundled, not lazy imports: avoid openLazy's detached Promise
         // chain entirely. The inspected store (fn31181) accepts "stack".
         const key="VenusReviews:"+userId;
         try { ui.showSheet({key,content:el(ReviewSheet,{userId,sheetKey:key}),stackingBehavior:"stack"}); }
-        catch (error) { reviewToast(ui,tr("Couldn't open reviews: {problem}",{problem:String(error && error.message || error)}),venusIcon(6026,"CircleXIcon")); }
+        catch (error) { reviewToast(ui,tr("Couldn't open reviews: {problem}",{problem:String(error && error.message || error)}),venusIcon(4797,"CircleXIcon")); }
     }
     // Profiles: reviews go in as the LAST card of the profile card stack
-    // (after the note). In 348.10 UserProfileNote (12627) is that last card in the normal, bot,
+    // (after the note). In 349.9 UserProfileNote (12872) is that last card in the normal, bot,
     // tabbed and You-screen layouts, so reviews render directly beneath it.
     function reviewNote(orig,self,args) {
         const tree=orig.apply(self,args), userId=args[0] && args[0].userId;
@@ -5096,8 +5096,8 @@
         return enabled("hideGift") && props && props.shouldShowGiftButton ? Object.assign({}, props, {shouldShowGiftButton:false}) : props;
     }
     // Unlock app icons: lets you pick any Discord app icon in Settings -> App Icon without Nitro, stops
-    // AppIconPremiumManager (17096) from resetting the icon on app state changes, and removes the "Unlock all
-    // icons with Nitro" upsell button and "Nitro" section heading on the App Icon screen (15065 / 15066).
+    // AppIconPremiumManager (17455) from resetting the icon on app state changes, and removes the "Unlock all
+    // icons with Nitro" upsell button and "Nitro" section heading on the App Icon screen (15351 / 15352).
     const appIconCache = new WeakMap();
     function appIconObject(icon) {
         if (!enabled("appIcons") || !icon || typeof icon !== "object" || !icon.isPremium) return icon;
@@ -5148,7 +5148,7 @@
         if (typeof node.props.text === "string" && typeof node.props.onPress === "function" &&
             node.type !== TableRow) return null;
         let props = node.props;
-        // AppIconRows (15066) sets title="Nitro" on the alternate icons TableRowGroup when !hasNitro.
+        // AppIconRows (15352) sets title="Nitro" on the alternate icons TableRowGroup when !hasNitro.
         if (typeof props.title === "string" && /nitro/i.test(props.title))
             props = Object.assign({}, props, {title:undefined});
         const children = props.children, next = withoutAppIconUpsell(children, depth + 1, UpsellButton, TableRow);
@@ -5161,9 +5161,9 @@
     function appIconsScreen(orig, self, args) {
         useSettings("appIcons");
         const rendered = orig.apply(self, args);
-        return enabled("appIcons") && React ? withoutAppIconUpsell(rendered, 0, inspectedExport(9421, "default"), inspectedExport(5916, "TableRow") || null) : rendered;
+        return enabled("appIcons") && React ? withoutAppIconUpsell(rendered, 0, inspectedExport(9648, "default"), inspectedExport(5993, "TableRow") || null) : rendered;
     }
-    // Hide call button: UserProfileContactButtons (12696) draws Message and Call side by side, each in a
+    // Hide call button: UserProfileContactButtons (12956) draws Message and Call side by side, each in a
     // flex:1 slot, or as icon buttons next to a friend button. Its disableCalls prop only greys Call out, so
     // the Call button and the slot it sat in are left out of what it renders. Message's slot then takes the
     // whole row, and the change animates when the setting flips while a profile is open.
@@ -5194,14 +5194,14 @@
         }
         const rendered = orig.apply(self, args);
         if (!hidden) return rendered;
-        const Phone = inspectedExport(7309, "PhoneCallIcon");
+        const Phone = inspectedExport(7523, "PhoneCallIcon");
         return Phone ? withoutCall(rendered, 0, Phone) : rendered;
     }
     // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
     let noQuestDock = null;
     function questDockHidden() { useSettings("hideQuestDock"); return enabled("hideQuestDock"); }
     function hideQuestHooks(exports) {
-        const types = inspectedExport(5764, "AdCreativeType");
+        const types = inspectedExport(5630, "AdCreativeType");
         if (!types || types.NO_FILL === undefined) return exports;
         noQuestDock = Object.freeze({type:types.NO_FILL});
         exports = hookExport(exports, "useMobileQuestDock", (orig, self, args) => { const dock = orig.apply(self, args); return questDockHidden() ? noQuestDock : dock; });
@@ -5365,7 +5365,7 @@
         valid.queued.delete(id);
         if (valid.tried.size >= 5000) valid.tried.delete(valid.tried.values().next().value);
         valid.tried.add(id);
-        const getUser = inspectedExport(7630, "getUser");
+        const getUser = inspectedExport(7852, "getUser");
         let wait = 400;
         Promise.resolve().then(() => {
             if (knownUser(id)) return;
@@ -5427,9 +5427,9 @@
     // people by user ID change status, start typing or send a message. Friends can be watched all at once or picked
     // one by one from the friend picker, and non-friends who share a server can be added by user ID as a backup.
     // Leaving the app on Android normally closes Discord's Gateway socket (GatewayConnectionStore 5590 ->
-    // GatewaySocketSingleton 13174 socket.close(true)) and lets Android suspend timers. While a Quest is running or
+    // GatewaySocketSingleton 13439 socket.close(true)) and lets Android suspend timers. While a Quest is running or
     // background push notifications are enabled, keep the socket open and hold Discord's ForegroundServiceManager
-    // (7179) wake lock so Quests finish and activity notifications arrive outside the app.
+    // (7252) wake lock so Quests finish and activity notifications arrive outside the app.
     const BACKGROUND_SERVICE_KEY = "venus-background";
     const bgKeepAlive = {active:false, title:"", content:"", socketHooked:false, pauseHooked:false, fg:null, setIsPaused:null};
     function isAppActive() {
@@ -5455,10 +5455,10 @@
     function unpauseGateway() {
         let fn = bgKeepAlive.setIsPaused;
         if (typeof fn !== "function") {
-            const named = inspectedExport(13212, "setIsPaused");
+            const named = inspectedExport(13477, "setIsPaused");
             if (typeof named === "function") fn = named;
             else {
-                const def = inspectedExport(13212, "default");
+                const def = inspectedExport(13477, "default");
                 if (def && typeof def.setIsPaused === "function") fn = def.setIsPaused.bind(def);
             }
         }
@@ -5469,7 +5469,7 @@
         const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
         const needed = questBusy || pushListening;
         if (needed) unpauseGateway();
-        const fg = bgKeepAlive.fg || inspectedExport(7179, "default");
+        const fg = bgKeepAlive.fg || inspectedExport(7252, "default");
         if (!needed) {
             if (!bgKeepAlive.active) return;
             bgKeepAlive.active = false; bgKeepAlive.title = ""; bgKeepAlive.content = "";
@@ -5541,7 +5541,7 @@
         return Promise.resolve(true);
     }
     function userNotifRequestPermissions(showFeedback) {
-        const ui = reviewUI(), pushMod = inspectedExport(8741, "default"), perm = userNotifNativePerm();
+        const ui = reviewUI(), pushMod = inspectedExport(8966, "default"), perm = userNotifNativePerm();
         const openSystemSettings = () => {
             try { if (pushMod && typeof pushMod.openNotificationSettings === "function") { pushMod.openNotificationSettings(); return; } } catch (_) {}
             try { if (perm && typeof perm.openSettings === "function") perm.openSettings(); } catch (_) {}
@@ -5554,7 +5554,7 @@
         };
         const checkStatus = () => userNotifCheckPermissions().then(ok => {
             if (!ok) askEnableInSystem();
-            else if (showFeedback) reviewToast(ui, "Notification permission granted", venusIcon(4793,"CircleCheckIcon"));
+            else if (showFeedback) reviewToast(ui, "Notification permission granted", venusIcon(4792,"CircleCheckIcon"));
             return ok;
         });
         if (perm && typeof perm.requestNotificationAuthorization === "function") {
@@ -5567,7 +5567,7 @@
                 const granted = !res || res === "granted" || (permsAndroid.RESULTS && res === permsAndroid.RESULTS.GRANTED);
                 userNotif.permissionGranted = granted; notify("userNotif");
                 if (!granted) askEnableInSystem();
-                else if (showFeedback) reviewToast(ui, "Notification permission granted", venusIcon(4793,"CircleCheckIcon"));
+                else if (showFeedback) reviewToast(ui, "Notification permission granted", venusIcon(4792,"CircleCheckIcon"));
                 return granted;
             }, () => checkStatus());
         }
@@ -5575,7 +5575,7 @@
     }
     function userNotifPushSend(content) {
         if (!settings.userNotifPush || isAppActive()) return;
-        const pushMod = inspectedExport(8741, "default");
+        const pushMod = inspectedExport(8966, "default");
         const mid = String(userNotif.shown);
         try {
             if (pushMod && typeof pushMod.presentLocalNotification === "function")
@@ -5584,14 +5584,14 @@
         } catch (_) {}
     }
     function userNotifFriendIds() {
-        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"));
         try {
             const list = store && typeof store.getFriendIDs === "function" ? store.getFriendIDs() : null;
             return Array.isArray(list) ? list.filter(id => typeof id === "string" && /^\d{17,20}$/.test(id)) : [];
         } catch (_) { return []; }
     }
     function userNotifIsFriend(id) {
-        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"));
         try {
             if (store && typeof store.isFriend === "function") return !!store.isFriend(id);
             if (store && typeof store.getFriendIDs === "function") {
@@ -5608,7 +5608,7 @@
         return userNotif.ids.has(id) || !!(settings.userNotifFriends && userNotifIsFriend(id));
     }
     function userNotifPersonName(id, fallbackUser) {
-        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"));
         try {
             const nick = store && typeof store.getNickname === "function" && store.getNickname(id);
             if (typeof nick === "string" && nick.trim()) return nick.trim();
@@ -5625,7 +5625,7 @@
     function userNotifPlace(channelId, guildId) {
         const channel = channelId ? receivedChannel(channelId) : null;
         const gId = guildId || channel && (channel.guild_id || channel.guildId);
-        const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2073, "default"));
+        const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2074, "default"));
         const guild = guilds && gId && typeof guilds.getGuild === "function" ? guilds.getGuild(gId) : null;
         const cName = channel && typeof channel.name === "string" && channel.name.trim() ? channel.name.trim() : "";
         const gName = guild && typeof guild.name === "string" && guild.name.trim() ? guild.name.trim() : "";
@@ -5634,7 +5634,7 @@
     }
     function userNotifSubscribeGuild(guildId, subFn) {
         if (typeof guildId !== "string" || !/^\d{17,20}$/.test(guildId)) return;
-        const sub = subFn !== undefined ? subFn : inspectedExport(6731, "subscribeGuild");
+        const sub = subFn !== undefined ? subFn : inspectedExport(6815, "subscribeGuild");
         try {
             if (typeof sub === "function") { sub(guildId); return; }
         } catch (_) {}
@@ -5643,7 +5643,7 @@
     }
     function userNotifSubscribeGuilds() {
         if (!userNotifHasTargets()) return;
-        const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2073, "default"));
+        const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2074, "default"));
         if (!guilds) return;
         let ids = null;
         try {
@@ -5654,7 +5654,7 @@
             }
         } catch (_) {}
         if (!Array.isArray(ids)) return;
-        const sub = inspectedExport(6731, "subscribeGuild");
+        const sub = inspectedExport(6815, "subscribeGuild");
         for (let i = 0; i < ids.length && i < 200; i++) userNotifSubscribeGuild(ids[i], sub);
     }
     function userNotifAllowed(id, kind) {
@@ -5668,7 +5668,7 @@
         userNotif.shown++;
         userNotif.last = {text, vars};
         const content = tr(text, vars);
-        const ui = reviewUI(), Icon = venusIcon(9044, "BellIcon");
+        const ui = reviewUI(), Icon = venusIcon(9266, "BellIcon");
         try {
             if (ui.toasts && typeof ui.toasts.open === "function")
                 ui.toasts.open({key:"venus-user-notif:" + userNotif.shown, content, IconComponent:Icon});
@@ -5688,7 +5688,7 @@
         };
         userNotif.ids.forEach(seedId);
         if (!settings.userNotifFriends) return;
-        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"));
+        const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"));
         try {
             const list = store && typeof store.getFriendIDs === "function" ? store.getFriendIDs() : null;
             if (Array.isArray(list)) for (let i = 0; i < list.length; i++) {
@@ -5812,12 +5812,12 @@
         if (enabled("userNotif")) userNotifSubscribeGuilds();
         backgroundSync();
         notify("userNotif");
-        reviewToast(reviewUI(), "People list reset", venusIcon(4793,"CircleCheckIcon"));
+        reviewToast(reviewUI(), "People list reset", venusIcon(4792,"CircleCheckIcon"));
     }
     function userNotifAvatarUri(user, size) {
         if (!user) return null;
         let uri = null;
-        const avatars = inspectedExport(1403, "default");
+        const avatars = inspectedExport(1402, "default");
         try { if (avatars && typeof avatars.getUserAvatarURL === "function") uri = avatars.getUserAvatarURL(user, false, size || 64); } catch (_) {}
         if ((typeof uri !== "string" || !/^https?:\/\//.test(uri)) && typeof user.id === "string" && typeof user.avatar === "string" && user.avatar)
             uri = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=" + (size || 64);
@@ -5882,7 +5882,7 @@
         const ui = reviewUI();
         const [query, setQuery] = React.useState(""), [idDraft, setIdDraft] = React.useState(""), [, redraw] = React.useState(0);
         React.useEffect(() => {
-            const stores = [userStore, presenceStore, userNotif.relationships || (userNotif.relationships = inspectedExport(4482, "default"))].filter(Boolean);
+            const stores = [userStore, presenceStore, userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"))].filter(Boolean);
             const wake = () => redraw(n => n + 1);
             stores.forEach(s => { try { if (typeof s.addChangeListener === "function") s.addChangeListener(wake); } catch (_) {} });
             return () => stores.forEach(s => { try { if (typeof s.removeChangeListener === "function") s.removeChangeListener(wake); } catch (_) {} });
@@ -5892,7 +5892,7 @@
             button:Object.assign({}, USER_NOTIF_DARK.button, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), USER_NOTIF_DARK);
         const ringColor = theme.ring && theme.ring.backgroundColor, rowColor = theme.row && theme.row.backgroundColor;
         const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Row = ui.TableRow, Press = RN.Pressable || RN.View;
-        const CheckboxRow = inspectedExport(5913, "TableCheckboxRow"), SearchField = inspectedExport(6472, "SearchField");
+        const CheckboxRow = inspectedExport(5990, "TableCheckboxRow"), SearchField = inspectedExport(6547, "SearchField");
         const on = enabled("userNotif"), allFriends = !!settings.userNotifFriends;
         const friends = userNotifFriendIds(), friendSet = new Set(friends);
         const lookup = id => {
@@ -5959,16 +5959,16 @@
         const addById = () => {
             if (!on || !validDraft) return;
             const me = currentUser();
-            if (me && me.id === idText) { reviewToast(ui, "That's your own user ID", venusIcon(4788,"CircleInformationIcon")); return; }
+            if (me && me.id === idText) { reviewToast(ui, "That's your own user ID", venusIcon(4812,"CircleInformationIcon")); return; }
             userNotifSetId(idText, true);
-            const getUser = inspectedExport(7630, "getUser");
+            const getUser = inspectedExport(7852, "getUser");
             if (!knownUser(idText) && typeof getUser === "function") try { Promise.resolve(getUser(idText)).catch(() => {}); } catch (_) {}
             setIdDraft("");
         };
         const idInput = inputWithButton(ui, "input", {value:idText, keyboardType:"number-pad", maxLength:20, placeholder:tr("17 to 20 digit user ID"),
             onSubmitEditing:addById, returnKeyType:"done", editable:on, isDisabled:!on}, onIdText, "Add", addById, !on || !validDraft);
         const removeButton = id => el(Press, {style:[theme.button, {opacity:on ? 1 : 0.5}], accessibilityRole:"button", accessibilityLabel:tr("Stop watching"),
-            disabled:!on, hitSlop:{top:6, bottom:6, left:6, right:6}, onPress:on ? () => userNotifSetId(id, false) : undefined}, el(venusIcon(5940, "XSmallIcon"), {size:"sm"}));
+            disabled:!on, hitSlop:{top:6, bottom:6, left:6, right:6}, onPress:on ? () => userNotifSetId(id, false) : undefined}, el(venusIcon(6017, "XSmallIcon"), {size:"sm"}));
         const customRows = customIds.map(id => {
             const entry = lookup(id), known = entry.name !== id;
             const sub = known ? [handle(entry), userNotifStatusName(entry.status)].filter(Boolean).join(" \u00b7 ") : tr("Not loaded yet");
@@ -5977,24 +5977,24 @@
         });
         const watchedUsers = userNotifWatchedIds().slice(0, 4).map(lookup).map(e => e.user || {id:e.id, username:e.name});
         const groups = [
-            VenusStatusCard({key:"status", title:userNotifSummaryTitle(), IconComponent:venusIcon(9044, "BellIcon"),
+            VenusStatusCard({key:"status", title:userNotifSummaryTitle(), IconComponent:venusIcon(9266, "BellIcon"),
                 leading:on && userNotifAnyEvent() && watchedUsers.length ? avatarPile(watchedUsers, ringColor) : null, body:userNotifSummary()}),
             el(Group, {key:"events", title:tr("Notify me when they")},
-                switchRow(Switch, "userNotifStatus", "Change status", "Online, Idle, Do Not Disturb or Offline.", rowIcon(10420, "UserCircleIcon")),
-                switchRow(Switch, "userNotifMessages", "Send a message", "In DMs or in any server channel your client receives.", rowIcon(5386, "ChatIcon")),
-                switchRow(Switch, "userNotifTyping", "Start typing", "In DMs or in a channel you have open.", rowIcon(10813, "KeyboardIcon"))),
+                switchRow(Switch, "userNotifStatus", "Change status", "Online, Idle, Do Not Disturb or Offline.", rowIcon(10654, "UserCircleIcon")),
+                switchRow(Switch, "userNotifMessages", "Send a message", "In DMs or in any server channel your client receives.", rowIcon(5855, "ChatIcon")),
+                switchRow(Switch, "userNotifTyping", "Start typing", "In DMs or in a channel you have open.", rowIcon(11058, "KeyboardIcon"))),
             el(Group, {key:"push", title:tr("Outside Discord")},
-                switchRow(Switch, "userNotifPush", "Phone notifications", "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.", rowIcon(6376, "MobilePhoneIcon")),
+                switchRow(Switch, "userNotifPush", "Phone notifications", "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.", rowIcon(6448, "MobilePhoneIcon")),
                 settings.userNotifPush && userNotif.permissionGranted === false && Row ?
                     el(Row, {key:"perm", label:tr("Allow notification permission"), subLabel:tr("Android notifications are turned off for Discord. Tap to check or open system settings."),
-                        icon:rowIcon(9586, "BellSlashIcon"), variant:"danger", arrow:true, disabled:!on, onPress:() => userNotifRequestPermissions(true)}) : null),
+                        icon:rowIcon(9813, "BellSlashIcon"), variant:"danger", arrow:true, disabled:!on, onPress:() => userNotifRequestPermissions(true)}) : null),
             el(RN.View, {key:"who", style:{gap:8}},
                 groupTitle("title", "Who to watch"),
                 venusSegmented({key:"choice", value:allFriends ? "all" : "picked", disabled:!on, onChange:setWho,
                     items:[{value:"all", label:tr("All friends")}, {value:"picked", label:tr("People I pick")}]}),
                 allFriends ? el(Group, {key:"all"},
                     Row ? el(Row, {key:"all", label:friends.length ? pl(friends.length, "{n} friend", "{n} friends") : tr("All friends"),
-                        subLabel:tr("Everyone on your friends list, new friends too."), icon:rowIcon(4532, "FriendsIcon"), disabled:!on,
+                        subLabel:tr("Everyone on your friends list, new friends too."), icon:rowIcon(4831, "FriendsIcon"), disabled:!on,
                         trailing:watchedUsers.length ? avatarPile(watchedUsers, rowColor) : undefined}) : null) : null),
             allFriends ? null : el(RN.View, {key:"friends", style:{gap:8}},
                 searchBox,
@@ -6011,16 +6011,16 @@
     }
 
     // Settings button on the profile bar ("You bar"), next to the notifications bell. Same button Discord uses for
-    // its own bar buttons (YouBarButton 16031), with Discord's settings icon, opening Discord's own settings.
+    // its own bar buttons (YouBarButton 16334), with Discord's settings icon, opening Discord's own settings.
     let youBarParts = null;
     function YouBarSettingsButton(props) {
         useSettings("youBarSettings");
         if (!enabled("youBarSettings") || !RN) return null;
         // Looked up once they've all loaded, not on every render of the bar.
         if (!youBarParts) {
-            const Button = inspectedExport(16031, "default"), Icon = inspectedExport(6799, "SettingsIcon");
+            const Button = inspectedExport(16334, "default"), Icon = inspectedExport(6883, "SettingsIcon");
             if (!Button || !Icon) return null;
-            const size = inspectedExport(14615, "YOU_BAR_BUTTON_ICON_SIZE") || 20;
+            const size = inspectedExport(14899, "YOU_BAR_BUTTON_ICON_SIZE") || 20;
             youBarParts = {Button, Icon, style:{width:size, height:size}};
         }
         const nameplate = !!(props && props.hasNameplate);
@@ -6028,18 +6028,18 @@
             icon:el(youBarParts.Icon, {size:"custom", style:youBarParts.style, color:nameplate ? "white" : undefined})});
     }
     // Opens Venus settings, not Discord's. openUserSettings (6801) opens the settings navigator on the screen it's
-    // given, and every settings route node, VENUS_PLUGINS too, is one of that navigator's screens (14239
+    // given, and every settings route node, VENUS_PLUGINS too, is one of that navigator's screens (14503
     // getSettingScreens), so Back goes to Discord's settings like when you open Venus from there.
     function openSettings() {
-        // Ensure SettingsRendererConfig (14130) and SettingListRenderer (14236) are initialized before
+        // Ensure SettingsRendererConfig (14409) and SettingListRenderer (14500) are initialized before
         // opening SettingsNavigator so VENUS_PLUGINS is registered even on first tap after app restart
         // and SettingsList is non-null so the page never renders a blank black screen (#58).
-        if (!status.menu) inspectedExport(14130, "SETTING_RENDERER_CONFIG");
-        if (!SettingsList) SettingsList = inspectedExport(14236, "SettingsList");
+        if (!status.menu) inspectedExport(14409, "SETTING_RENDERER_CONFIG");
+        if (!SettingsList) SettingsList = inspectedExport(14500, "SettingsList");
         const screen = status.menu ? "VENUS_PLUGINS" : undefined;
-        const open = inspectedExport(6801, "openUserSettings");
+        const open = inspectedExport(6885, "openUserSettings");
         try { if (typeof open === "function") { open(screen ? {screen} : undefined); return; } } catch (_) {}
-        try { const ref = inspectedExport(4695, "getRootNavigationRef"); const nav = ref && ref(); if (nav) nav.navigate("settings", screen ? {screen} : undefined); } catch (_) {}
+        try { const ref = inspectedExport(4737, "getRootNavigationRef"); const nav = ref && ref(); if (nav) nav.navigate("settings", screen ? {screen} : undefined); } catch (_) {}
     }
     function youBarButtons(orig, self, args) {
         // Always the same shape, so switching it on or off never remounts the bell.
@@ -6050,15 +6050,15 @@
         return el.apply(null, [React.Fragment, null].concat(children));
     }
 
-    // Account switcher: unlocks Discord's built-in mobile multi-account engine (MultiAccountStore 11800,
-    // MultiAccountActionCreators 11804, YouAccountActionSheet 16009 and ManageAccountsModal 16013), which Discord
-    // hides behind isStaffFromRawUser (11802) on mobile. Also places an optional button on the bottom profile bar
-    // (YouBarNotificationsButton 16032 / YouBarButton 16031).
+    // Account switcher: unlocks Discord's built-in mobile multi-account engine (MultiAccountStore 12056,
+    // MultiAccountActionCreators 12059, YouAccountActionSheet 16009 and ManageAccountsModal 16013), which Discord
+    // hides behind isStaffFromRawUser (12058) on mobile. Also places an optional button on the bottom profile bar
+    // (YouBarNotificationsButton 16335 / YouBarButton 16334).
     const ACCOUNT_SWITCHER_DEFAULT_LIMIT = 5, ACCOUNT_SWITCHER_RAISED_LIMIT = 50;
     const accountSwitcher = {store:null, origUsers:null, origValidUsers:null, realMaxAccounts:ACCOUNT_SWITCHER_DEFAULT_LIMIT,
         youBarParts:null};
     function multiAccountLimit() {
-        // MultiAccountStore (11800) and PushNotificationActionCreators (11799) read MAX_ACCOUNTS /
+        // MultiAccountStore (12056) and PushNotificationActionCreators (11799) read MAX_ACCOUNTS /
         // MAX_PUSH_SYNC_ACCOUNTS once at module evaluation time during startup (before venus-patches.json
         // finishes restoring settings.accountSwitcher) and permanently cache the number in a closure slot.
         // Always return the raised limit when the patch is built in so CONNECTION_OPEN never splices >5 accounts.
@@ -6077,7 +6077,7 @@
     function accountSwitcherCurrentEntry() {
         const me = currentUser();
         if (!me || !me.id) return null;
-        const statuses = inspectedExport(11800, "MultiAccountTokenStatus");
+        const statuses = inspectedExport(12056, "MultiAccountTokenStatus");
         const validStatus = statuses && typeof statuses.VALID === "number" ? statuses.VALID : 2;
         return {id:me.id, avatar:me.avatar || null, username:me.username || "", discriminator:me.discriminator || "0", tokenStatus:validStatus};
     }
@@ -6086,14 +6086,14 @@
         if (!enabled("accountSwitcher")) return base;
         const entry = accountSwitcherCurrentEntry();
         if (!entry) return base;
-        const statuses = inspectedExport(11800, "MultiAccountTokenStatus");
+        const statuses = inspectedExport(12056, "MultiAccountTokenStatus");
         const invalidStatus = statuses && typeof statuses.INVALID === "number" ? statuses.INVALID : 0;
         const filtered = validOnly ? base.filter(u => u && u.tokenStatus !== invalidStatus) : base;
         if (filtered.some(u => u && u.id === entry.id)) return filtered;
         return [entry].concat(filtered);
     }
     function accountSwitcherStore() {
-        return accountSwitcher.store || (accountSwitcher.store = inspectedExport(11800, "default"));
+        return accountSwitcher.store || (accountSwitcher.store = inspectedExport(12056, "default"));
     }
     function accountSwitcherUsers() {
         const store = accountSwitcherStore();
@@ -6118,7 +6118,7 @@
         // Venus adds the signed-in account afterwards, and only when it is missing.
         const me = enabled("accountSwitcher") ? currentUser() : null;
         if (me && me.id && accountSwitcherStorageReady()) {
-            const rawTokenMod = global.__r && global.__r(1112);
+            const rawTokenMod = global.__r && global.__r(1111);
             const tokenMgr = rawTokenMod && typeof rawTokenMod.setToken === "function" ? rawTokenMod :
                 rawTokenMod && rawTokenMod.default && typeof rawTokenMod.default.setToken === "function" ? rawTokenMod.default : null;
             try {
@@ -6186,21 +6186,21 @@
     }
     function openAccountSwitcherSheet() {
         accountSwitcherSync();
-        const showSheet = inspectedExport(16007, "showYouAccountActionSheet");
+        const showSheet = inspectedExport(16310, "showYouAccountActionSheet");
         try { if (typeof showSheet === "function") { showSheet(false); return; } } catch (_) {}
         openManageAccounts();
     }
     function openManageAccounts(screen) {
         accountSwitcherSync();
         if (!screen) {
-            const screens = inspectedExport(16014, "ManageAccountsScreens") || inspectedExport(16014, "ManageAccountsModalRoutes");
+            const screens = inspectedExport(16317, "ManageAccountsScreens") || inspectedExport(16317, "ManageAccountsModalRoutes");
             screen = screens && screens.MANAGE_ACCOUNTS || "manage_accounts";
         }
-        const openModal = inspectedExport(16012, "default");
+        const openModal = inspectedExport(16315, "default");
         try { if (typeof openModal === "function") { openModal(screen); return; } } catch (_) {}
     }
     function openAddAccountModal() {
-        const screens = inspectedExport(16014, "ManageAccountsScreens") || inspectedExport(16014, "ManageAccountsModalRoutes");
+        const screens = inspectedExport(16317, "ManageAccountsScreens") || inspectedExport(16317, "ManageAccountsModalRoutes");
         const loginRoute = screens && screens.LOGIN || "login";
         openManageAccounts(loginRoute);
     }
@@ -6209,9 +6209,9 @@
         const me = currentUser();
         if (me && me.id === userId) return;
         accountSwitcherSync();
-        const rawActions = global.__r && global.__r(11804);
+        const rawActions = global.__r && global.__r(12059);
         const actions = rawActions && typeof rawActions.switchAccount === "function" ? rawActions : rawActions && rawActions.default;
-        const locs = inspectedExport(11801, "MultiAccountSwitchLocation");
+        const locs = inspectedExport(12057, "MultiAccountSwitchLocation");
         const location = locs && (locs.MANAGE_ACCOUNTS_MODAL || locs.YOU_ACCOUNT_ACTION_SHEET) || "manage_accounts_modal";
         try {
             if (actions && typeof actions.switchAccount === "function") {
@@ -6224,7 +6224,7 @@
         if (typeof userId !== "string" || !userId) return;
         const me = currentUser();
         if (me && me.id === userId) return;
-        const rawActions = global.__r && global.__r(11804);
+        const rawActions = global.__r && global.__r(12059);
         const actions = rawActions && typeof rawActions.removeAccount === "function" ? rawActions : rawActions && rawActions.default;
         try { if (actions && typeof actions.removeAccount === "function") actions.removeAccount(userId); } catch (_) {}
         notify("accountSwitcher");
@@ -6234,9 +6234,9 @@
         useSettings("accountSwitcherYouBar");
         if (!enabled("accountSwitcher") || !settings.accountSwitcherYouBar || !RN) return null;
         if (!accountSwitcher.youBarParts) {
-            const Button = inspectedExport(16031, "default"), Icon = inspectedExport(5404, "GroupIcon") || inspectedExport(10420, "UserCircleIcon");
+            const Button = inspectedExport(16334, "default"), Icon = inspectedExport(5873, "GroupIcon") || inspectedExport(10654, "UserCircleIcon");
             if (!Button || !Icon) return null;
-            const size = inspectedExport(14615, "YOU_BAR_BUTTON_ICON_SIZE") || 20;
+            const size = inspectedExport(14899, "YOU_BAR_BUTTON_ICON_SIZE") || 20;
             accountSwitcher.youBarParts = {Button, Icon, style:{width:size, height:size}};
         }
         const nameplate = !!(props && props.hasNameplate);
@@ -6260,7 +6260,7 @@
         const ui = reviewUI();
         React.useEffect(() => {
             accountSwitcherSync();
-            const validate = inspectedExport(11804, "validateMultiAccountTokens");
+            const validate = inspectedExport(12059, "validateMultiAccountTokens");
             try { if (enabled("accountSwitcher") && typeof validate === "function") validate(); } catch (_) {}
             const wake = () => forceUpdate(n => n + 1);
             const stores = [userStore, accountSwitcherStore()].filter(Boolean);
@@ -6272,7 +6272,7 @@
         const on = enabled("accountSwitcher");
         const me = currentUser(), myId = me && me.id;
         const accounts = accountSwitcherUsers();
-        const statuses = inspectedExport(11800, "MultiAccountTokenStatus");
+        const statuses = inspectedExport(12056, "MultiAccountTokenStatus");
         const invalidStatus = statuses && typeof statuses.INVALID === "number" ? statuses.INVALID : 0;
         const validatingStatus = statuses && typeof statuses.VALIDATING === "number" ? statuses.VALIDATING : 1;
         const accountRows = accounts.length ? accounts.map(acc => {
@@ -6286,7 +6286,7 @@
                 acc.tokenStatus === validatingStatus ? tr("Checking session...") : tr("Tap to switch");
             return el(Row, {key:"acc:" + acc.id, label:displayName, subLabel:handle + statusText,
                 icon:avatarBubble(fullUser, 32, active ? "online" : acc.tokenStatus === invalidStatus ? "dnd" : null), disabled:!on,
-                trailing:active ? popIn("on:" + acc.id, el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
+                trailing:active ? popIn("on:" + acc.id, el(venusIcon(6628, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
                 onPress:() => {
                     if (active) { openAccountSwitcherSheet(); return; }
                     if (acc.tokenStatus === invalidStatus) { openAddAccountModal(); return; }
@@ -6298,17 +6298,17 @@
         }) : [Row ? el(Row, {key:"empty", label:tr("No saved accounts yet"), subLabel:tr("Tap Add account below to sign in to another account."), disabled:true}) : null];
         const groups = [
             on ? statusCard("status", accountSwitcherSummary(), {title:accounts.length > 1 ? pl(accounts.length, "{n} account", "{n} accounts") : tr("One account so far"),
-                IconComponent:venusIcon(5404, "GroupIcon"), leading:accounts.length ? avatarPile(accounts.slice(0, 4).map(acc => (myId && acc.id === myId ? me : userStore && userStore.getUser(acc.id)) || acc)) : null}) :
-                offCard("status", venusIcon(5404, "GroupIcon")),
+                IconComponent:venusIcon(5873, "GroupIcon"), leading:accounts.length ? avatarPile(accounts.slice(0, 4).map(acc => (myId && acc.id === myId ? me : userStore && userStore.getUser(acc.id)) || acc)) : null}) :
+                offCard("status", venusIcon(5873, "GroupIcon")),
             el(Group, {key:"accounts", title:tr("Accounts")},
                 accountRows,
-                Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."), icon:rowIcon(4770, "UserPlusIcon"),
+                Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."), icon:rowIcon(4833, "UserPlusIcon"),
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
-                Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(6799, "SettingsIcon"),
+                Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(6883, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
                 null),
             el(Group, {key:"shortcuts", title:tr("Shortcuts")},
-                switchRow(Switch, "accountSwitcherYouBar", "Button on the profile bar", "Shows a Switch accounts button next to the notifications bell on the bottom bar.", rowIcon(10420, "UserCircleIcon"))),
+                switchRow(Switch, "accountSwitcherYouBar", "Button on the profile bar", "Shows a Switch accounts button next to the notifications bell on the bottom bar.", rowIcon(10654, "UserCircleIcon"))),
             footnote("note", "Tap your avatar on the You tab, or hold the You tab, to switch from anywhere. Hold an account above to remove it.")];
         return settingsBody(ui, groups);
     }
@@ -6322,7 +6322,7 @@
         const user = currentUser();
         if (!user) return realLimits.normal;
         try {
-            const premium = split.premium || (split.premium = inspectedExport(4491, "default"));
+            const premium = split.premium || (split.premium = inspectedExport(4528, "default"));
             const check = premium && premium.canUseIncreasedMessageLength;
             if (typeof check === "function") return check.call(premium, user) ? realLimits.premium : realLimits.normal;
         } catch (_) {}
@@ -6366,7 +6366,7 @@
         const channel = receivedChannel(channelId);
         const slowmode = channel && Number(channel.rateLimitPerUser) || 0;
         if (slowmode <= 0) return 1000;
-        const canBypass = split.canBypassSlowmode || (split.canBypassSlowmode = inspectedExport(7105, "canBypassSlowmode"));
+        const canBypass = split.canBypassSlowmode || (split.canBypassSlowmode = inspectedExport(7172, "canBypassSlowmode"));
         try { if (typeof canBypass === "function" && canBypass(channel)) return 1000; } catch (_) {}
         return Math.max(1000, slowmode * 1000 + 500);
     }
@@ -6411,7 +6411,7 @@
         }
         return result;
     }
-    // useMessageMaxLength (8602): the message box, its counter and the "too long" check all ask it.
+    // useMessageMaxLength (8809): the message box, its counter and the "too long" check all ask it.
     // Its internal useStateFromStores closure (97597 / 97598) reads MAX_MESSAGE_LENGTH / MAX_MESSAGE_LENGTH_PREMIUM
     // from lexical environment slots [2, 4] and [2, 5] captured once when 8602's factory ran, so lengthConstants
     // always returns SPLIT_UNLIMITED when features.splitMessages is built in, and maxLengthModule restores the real
@@ -6428,7 +6428,7 @@
             return big(orig, self, args);
         });
     }
-    // Constants (1086): DraftStore (5201) and useMessageMaxLength (8602) both read MAX_MESSAGE_LENGTH and
+    // Constants (1085): DraftStore (7031) and useMessageMaxLength (8809) both read MAX_MESSAGE_LENGTH and
     // MAX_MESSAGE_LENGTH_PREMIUM once at module evaluation time during startup (before venus-patches.json finishes
     // loading settings.splitMessages) and cache the numbers in closure environment slots. Always return
     // SPLIT_UNLIMITED while features.splitMessages is built in so DraftStore never truncates long drafts to 4500
@@ -6684,7 +6684,7 @@
     // A message you asked to translate from the hold menu that has nothing to translate says so, once.
     function translateNothing(id) {
         if (!translate.asked.delete(id)) return;
-        later(() => reviewToast(reviewUI(), "This message is already in your language", venusIcon(14958,"LanguageIcon")), 0);
+        later(() => reviewToast(reviewUI(), "This message is already in your language", venusIcon(15243,"LanguageIcon")), 0);
     }
     // The message a reply quotes, above the reply. It was always shown as written, even when that message was
     // shown translated in chat (#51). It now gets the same translation, without the note or the original, since
@@ -6742,14 +6742,14 @@
         const mine = currentUser() && message.author && message.author.id === currentUser().id;
         return mine ? translate.choice.get(message.id) === true : translateWanted(message.id);
     }
-    // LongPressMessageActionSheet (11023): one more row, after Discord's own, styled like them.
+    // LongPressMessageActionSheet (11281): one more row, after Discord's own, styled like them.
     function translateSheet(orig, self, args) {
         const tree = orig.apply(self, args), props = args[0], message = props && props.message;
         const contentSource = translateContentSource(message);
         if (!enabled("translate") || !React || !tree || !message || !message.id || !contentSource || typeof contentSource.content !== "string" || !contentSource.content.trim()) return tree;
         const label = translateShownFor(message) ? tr("Show original") : tr("Translate");
         let added = false;
-        const Icon = venusIcon(14958, "LanguageIcon");
+        const Icon = venusIcon(15243, "LanguageIcon");
         return cloneTree(tree, function (node, nodeProps) {
             if (added || !Array.isArray(nodeProps.children)) return nodeProps;
             const rows = nodeProps.children.filter(child => child && child.props && typeof child.props.label === "string" && typeof child.props.onPress === "function");
@@ -6960,7 +6960,7 @@
     const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
     // A message's long-press menu (LongPressMessageActionSheet 6176 + EmojiRow 11970): 5 quick reactions + Add Reaction, and a rounded card of actions.
     function previewSheet(k, s, rows, pulse) {
-        const Press = RN.Pressable || RN.View, AddReaction = venusIcon(8216, "ReactionIcon");
+        const Press = RN.Pressable || RN.View, AddReaction = venusIcon(8411, "ReactionIcon");
         return el(RN.View, {key:"sheet", style:[k.sheet, {marginTop:6}]},
             el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66", marginBottom:8}}),
             el(RN.View, {style:{flexDirection:"row", justifyContent:"space-between", paddingHorizontal:16, paddingBottom:10}},
@@ -6994,7 +6994,7 @@
         }, [manual, settings.translateNote, settings.translateOriginal, target]);
         const startTry = () => Object.assign({}, blank, {done:!manual});
         const translated = on ? state.done : true;
-        const Lang = venusIcon(14958, "LanguageIcon");
+        const Lang = venusIcon(15243, "LanguageIcon");
         const body = !state.shown ? null : state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
                 el(RN.Text, {style:[s.muted, {marginTop:2}]}, tr("Translating\u2026"))) :
             !translated ? el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE) : el(RN.View, null,
@@ -7025,8 +7025,8 @@
             !doneStep2 ? tr(state.done ? "Hold it again to show the original" : "Hold it again to translate it") : null,
             state.menu ? "down" : undefined) : null;
         const sheet = (watching || on) && state.menu ? previewSheet(k, s, [
-            ["reply", venusIcon(11108, "ArrowAngleLeftUpIcon"), tr("Reply"), watching ? null : closeMenu],
-            ["copy", venusIcon(4780, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu],
+            ["reply", venusIcon(11366, "ArrowAngleLeftUpIcon"), tr("Reply"), watching ? null : closeMenu],
+            ["copy", venusIcon(4843, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu],
             ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate]], state.pulse) : null;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? startTry() : blank); }) : null,
             previewScreen(s, "preview", "Translation preview", [message, tip, sheet],
@@ -7042,16 +7042,16 @@
         const name = kind => languageName(localeCode(kind));
         let saved = 0; translate.cache.forEach(entry => { if (entry.state === "done") saved++; });
         const groups = [
-            on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:name(settings.translateTarget === "phone" ? "phone" : "discord")}), IconComponent:venusIcon(14958, "LanguageIcon")}) :
-                offCard("status", venusIcon(14958, "LanguageIcon")),
+            on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:name(settings.translateTarget === "phone" ? "phone" : "discord")}), IconComponent:venusIcon(15243, "LanguageIcon")}) :
+                offCard("status", venusIcon(15243, "LanguageIcon")),
             el(TranslatePreview, {key:"preview", on}),
-            radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(16292, "SparklesIcon")],
-                ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8216, "ReactionIcon")]]),
-            radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(8719, "ChatSmileIcon")],
-                ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6376, "MobilePhoneIcon")]], true),
+            radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(16603, "SparklesIcon")],
+                ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8411, "ReactionIcon")]]),
+            radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(8944, "ChatSmileIcon")],
+                ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6448, "MobilePhoneIcon")]], true),
             el(Group, {key:"show", title:tr("Display")},
-                switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation.", rowIcon(8351, "GlobeEarthIcon")),
-                switchRow(Switch, "translateOriginal", "Show the original text", "The untranslated message, in a quote under the translation.", rowIcon(8382, "QuoteIcon"))),
+                switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation.", rowIcon(8551, "GlobeEarthIcon")),
+                switchRow(Switch, "translateOriginal", "Show the original text", "The untranslated message, in a quote under the translation.", rowIcon(8585, "QuoteIcon"))),
             el(Group, {key:"clear", title:tr("Manage")}, actionRow(ui, "clear", "Clear saved translations",
                 saved ? tr("{count} kept on this phone, so chats you reopen show them at once.", {count:count(saved, "translation")}) : "Nothing saved yet.",
                 () => confirmAction("Clear saved translations?", "Messages on screen will be translated again.", "Clear", translateForget), !saved, true)),
@@ -7064,18 +7064,18 @@
         translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear();
         if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         translateChanged(); notify("translate");
-        reviewToast(reviewUI(), "Saved translations cleared", venusIcon(4791, "TrashIcon"));
+        reviewToast(reviewUI(), "Saved translations cleared", venusIcon(4847, "TrashIcon"));
     }
 
     // Custom themes: installs Revenge / Vendetta JSON themes from links and compiles their rawColors,
     // semanticColors, plus extensions and optional background alpha straight into Discord's native color token
-    // tables (RawColors 592 and SemanticColors 590) once when a theme is picked or toggled. Render-time color
-    // lookups (resolveSemanticColor 588, useToken 4535 and createStyles 4837) run Discord's unmodified native
+    // tables (RawColors 591 and SemanticColors 589) once when a theme is picked or toggled. Render-time color
+    // lookups (resolveSemanticColor 587, useToken 4580 and createStyles 4890) run Discord's unmodified native
     // bytecode and Map caches with zero wrapper functions and zero per-render work, and optional background
-    // wallpapers render as a single static native Image layer behind ChatViewWrapper (9542) outside the message list.
+    // wallpapers render as a single static native Image layer behind ChatViewWrapper (9769) outside the message list.
     const THEMES_FILE = "venus-themes.json", THEMES_MAX = 40, THEMES_MAX_BYTES = 512 * 1024, THEMES_TIMEOUT_MS = 10000;
     const THEME_SLOTS = ["dark", "light", "darker", "midnight"];
-    // Maps Vendetta / Revenge legacy semantic color names to Discord 348.10's Mana SemanticColors (590) keys.
+    // Maps Vendetta / Revenge legacy semantic color names to Discord 349.9's Mana SemanticColors (589) keys.
     const LEGACY_SEMANTIC_ALIASES = {
         BACKGROUND_PRIMARY: ["BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND", "PANEL_BG", "MOBILE_KEYBOARD_GAP_BACKGROUND", "MOBILE_TYPING_INDICATOR_BACKGROUND_DEFAULT"],
         BACKGROUND_MOBILE_PRIMARY: ["BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND", "PANEL_BG"],
@@ -7147,7 +7147,7 @@
         "MOBILE_TYPING_INDICATOR_BACKGROUND_DEFAULT",
         "MOBILE_KEYBOARD_GAP_BACKGROUND"
     ];
-    // Maps Vendetta Theme Plus (plus.icons) status keys to Discord's RawColors (592) and SemanticColors (590) tokens.
+    // Maps Vendetta Theme Plus (plus.icons) status keys to Discord's RawColors (591) and SemanticColors (589) tokens.
     const PLUS_STATUS_ICON_MAP = {
         StatusOnline: {raw:["GREEN_360"], sem:["STATUS_ONLINE", "ICON_STATUS_ONLINE", "TEXT_STATUS_ONLINE"]},
         StatusMobileOnline: {raw:["GREEN_360"], sem:["STATUS_ONLINE", "ICON_STATUS_ONLINE"]},
@@ -7158,7 +7158,7 @@
     };
     // Maps Discord's Neutral & Plum raw tokens to the corresponding legacy Primary / Brand / Neutral shades
     // so themes that mainly customize rawColors (PRIMARY_600..800, PRIMARY_100..400, BRAND_500, etc.) also
-    // theme Discord 348.10's Mana Neutral/Blurple palette without any runtime indirection.
+    // theme Discord 349.9's Mana Neutral/Blurple palette without any runtime indirection.
     const LEGACY_RAW_BRIDGES = [
         ["NEUTRAL_100", ["PLUM_24", "PLUM_23", "PRIMARY_830", "PRIMARY_800", "BLACK"]],
         ["NEUTRAL_96", ["PLUM_23", "PLUM_22", "PRIMARY_800", "PRIMARY_730"]],
@@ -7423,7 +7423,7 @@
             const parsed = parseThemeColor(rawIn[key]);
             if (parsed) raw[key] = parsed.hex;
         }
-        // 2. Bridge legacy PRIMARY / PLUM / BRAND raw colors to Discord 348.10's NEUTRAL / BLURPLE raw tokens
+        // 2. Bridge legacy PRIMARY / PLUM / BRAND raw colors to Discord 349.9's NEUTRAL / BLURPLE raw tokens
         // whenever the theme didn't already set the NEUTRAL / BLURPLE key directly.
         for (let i = 0; i < LEGACY_RAW_BRIDGES.length; i++) {
             const target = LEGACY_RAW_BRIDGES[i][0], sources = LEGACY_RAW_BRIDGES[i][1];
@@ -7530,7 +7530,7 @@
         return customThemes.list.find(t => t && t.id === customThemes.active) || null;
     }
     function customThemesBumpFallbackContextKey() {
-        const mod = customThemes.themeContextMod || (customThemes.themeContextMod = global.__r && global.__r(4551));
+        const mod = customThemes.themeContextMod || (customThemes.themeContextMod = global.__r && global.__r(4593));
         const fb = mod && mod.FALLBACK_THEME_CONTEXT_VALUE;
         if (fb && typeof fb === "object" && typeof fb.key === "string") {
             const base = fb.key.split("#v")[0];
@@ -7539,8 +7539,8 @@
     }
     function customThemesApply() {
         if (!customThemes.rawTable || !customThemes.semTable) {
-            const m592 = global.__r && global.__r(592);
-            const m590 = global.__r && global.__r(590);
+            const m592 = global.__r && global.__r(591);
+            const m590 = global.__r && global.__r(589);
             if (m592 && m592._private && m592._private.RawColors) customThemes.rawTable = m592._private.RawColors;
             if (m590 && m590._private && m590._private.SemanticColors) customThemes.semTable = m590._private.SemanticColors;
         }
@@ -7552,9 +7552,9 @@
         compileThemeIntoTables(active);
         customThemes.revision++;
         customThemesBumpFallbackContextKey();
-        // Notify ThemeStore (1194) so RootThemeContextProvider re-evaluates createThemedContext (4551) with the new
-        // revision key, invalidating createStyles (4837) and useToken (4535) caches once and keeping O(1) lookups.
-        const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1194, "default"));
+        // Notify ThemeStore (1193) so RootThemeContextProvider re-evaluates createThemedContext (4593) with the new
+        // revision key, invalidating createStyles (4890) and useToken (4580) caches once and keeping O(1) lookups.
+        const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1193, "default"));
         try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
         notify("customThemes");
     }
@@ -7691,7 +7691,7 @@
             customThemes.error = "";
             customThemesPersist();
             customThemesApply();
-            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4793, "CircleCheckIcon"));
+            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4792, "CircleCheckIcon"));
             if (typeof onDone === "function") onDone();
             return true;
         }).catch(err => {
@@ -7719,7 +7719,7 @@
         if (customThemes.active === id) customThemes.active = "";
         customThemesPersist();
         customThemesApply();
-        reviewToast(reviewUI(), tr("Removed {name}", {name:removed.name}), venusIcon(4791, "TrashIcon"));
+        reviewToast(reviewUI(), tr("Removed {name}", {name:removed.name}), venusIcon(4847, "TrashIcon"));
     }
     function customThemesClearAll() {
         customThemes.loaded = true;
@@ -7728,7 +7728,7 @@
         customThemes.error = "";
         customThemesPersist();
         customThemesApply();
-        reviewToast(reviewUI(), "Themes cleared", venusIcon(4791, "TrashIcon"));
+        reviewToast(reviewUI(), "Themes cleared", venusIcon(4847, "TrashIcon"));
     }
     function customThemesSummary() {
         if (!enabled("customThemes")) return tr("Turned off. Switch it on in Features to start.");
@@ -7803,7 +7803,7 @@
                 key:"theme:" + item.id,
                 label:item.name,
                 icon:themeSwatch(item),
-                trailing:isSelected ? popIn("on:" + item.id, el(venusIcon(6555, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
+                trailing:isSelected ? popIn("on:" + item.id, el(venusIcon(6628, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
                 subLabel:(byLine + descLine + bgBadge + stateLine).replace(/ \u00b7 $/, "") || undefined,
                 disabled:!on || customThemes.installing,
                 onPress:() => customThemesSelect(item.id),
@@ -7814,16 +7814,16 @@
         }) : [Row ? el(Row, {key:"empty", label:tr("No themes installed yet"), subLabel:tr("Paste a direct link to a Revenge or Vendetta .json theme below."), disabled:true}) : null];
         const groups = [
             on ? statusCard("status", customThemesSummary(), {title:customThemes.error ? tr("Couldn't install the theme") : customThemesActiveEntry() ? customThemesActiveEntry().name : tr("Discord's colors"),
-                IconComponent:venusIcon(14887, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
-                offCard("status", venusIcon(14887, "EyeDropperIcon")),
+                IconComponent:venusIcon(15172, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
+                offCard("status", venusIcon(15172, "EyeDropperIcon")),
             el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
             el(Group, {key:"install", title:tr("Add from link"), description:tr("Downloads the theme once and keeps it on this phone.")},
                 el(RN.View, {key:"input", style:{padding:12}}, urlInput),
-                Row ? el(Row, {key:"browse", label:tr("Browse Revenge themes"), icon:rowIcon(8041, "LinkExternalSmallIcon"),
+                Row ? el(Row, {key:"browse", label:tr("Browse Revenge themes"), icon:rowIcon(8263, "LinkExternalSmallIcon"),
                     subLabel:"plugins-list.pages.dev/Themes",
                     arrow:true, onPress:() => openLink("https://plugins-list.pages.dev/Themes/")}) : null),
             el(Group, {key:"display", title:tr("Display")},
-                switchRow(Switch, "customThemesBackground", "Show theme background image", "Shows the wallpaper behind chat, for themes that come with one.", rowIcon(5402, "ImageIcon"))),
+                switchRow(Switch, "customThemesBackground", "Show theme background image", "Shows the wallpaper behind chat, for themes that come with one.", rowIcon(5871, "ImageIcon"))),
             el(Group, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "clear", "Clear installed themes",
                     customThemes.list.length ? pl(customThemes.list.length, "Removes {n} saved theme and restores Discord's default colors.", "Removes {n} saved themes and restores Discord's default colors.") : "No themes installed.",
@@ -7833,7 +7833,7 @@
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
     // Message highlights settings: a live chat preview, the bar width as a segmented choice, and a row of color
-    // swatches per highlight, with Discord's own color picker (showCustomColorPickerActionSheet 14140) for any color.
+    // swatches per highlight, with Discord's own color picker (showCustomColorPickerActionSheet 14421) for any color.
     const HIGHLIGHT_PING_CHOICES = [["default", "Yellow", "#f0b232"], ["blurple", "Blurple", "#5865f2"], ["cyan", "Cyan", "#00a8fc"],
         ["green", "Green", "#23a55a"], ["pink", "Pink", "#eb459e"], ["purple", "Purple", "#9b59b6"]];
     const HIGHLIGHT_DELETED_CHOICES = [["default", "Red", "#f23f43"], ["orange", "Orange", "#e67e22"], ["yellow", "Yellow", "#f0b232"],
@@ -7845,7 +7845,7 @@
         ring:{borderColor:"#f2f3f5"}, dashed:{borderColor:"#949ba4"}};
     // Discord's own color picker sheet, the one its role and profile colors use. Returns false when it can't open.
     function highlightPickColor(current, presets, onPick) {
-        const show = inspectedExport(14140, "default");
+        const show = inspectedExport(14421, "default");
         if (typeof show !== "function") return false;
         try {
             show({color:hexInt(current), suggestedColors:presets.map(choice => choice[2]), onSelect:value => {
@@ -7931,7 +7931,7 @@
     // One highlight's colors: its name and current color, then a row of swatches and a last one for any color.
     function highlightColorPicker(props) {
         const s = useThemed("highlightPicker", c => ({ring:{borderColor:c.TEXT_STRONG}, dashed:{borderColor:c.TEXT_MUTED}}), HIGHLIGHT_DARK);
-        const Text = inspectedExport(4833, "Text"), Press = RN.Pressable || RN.View, Check = venusIcon(6555, "CheckmarkSmallIcon"), Dropper = venusIcon(14887, "EyeDropperIcon");
+        const Text = inspectedExport(4886, "Text"), Press = RN.Pressable || RN.View, Check = venusIcon(6628, "CheckmarkSmallIcon"), Dropper = venusIcon(15172, "EyeDropperIcon");
         const value = props.value, on = props.on, custom = typeof value === "string" && value.startsWith("#");
         const active = props.choices.find(choice => choice[0] === value), activeHex = highlightColorHex(value, props.defaultHex);
         const activeName = active ? tr(active[1]) : activeHex.toUpperCase();
@@ -7972,7 +7972,7 @@
         const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightDeletedColor !== "default";
         const resetAll = () => {
             setSetting("messageHighlightThickness", 2); setSetting("messageHighlightPingColor", "default"); setSetting("messageHighlightDeletedColor", "default");
-            setHexTarget(""); reviewToast(ui, "Highlights reset", venusIcon(4793,"CircleCheckIcon"));
+            setHexTarget(""); reviewToast(ui, "Highlights reset", venusIcon(4792,"CircleCheckIcon"));
         };
         // When Discord's color picker can't open, a hex box opens under the colors instead.
         const cleanHex = String(hexDraft || "").trim(), validHex = /^#?[0-9a-fA-F]{6}$/.test(cleanHex);
@@ -7984,7 +7984,7 @@
         const picker = (setting, title, choices, defaultHex) => highlightColorPicker({ setting, title, choices, defaultHex, on, value:settings[setting],
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
-            on ? null : offCard("status", venusIcon(16122, "PaintbrushThinIcon")),
+            on ? null : offCard("status", venusIcon(16425, "PaintbrushThinIcon")),
             el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
@@ -8005,8 +8005,8 @@
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
     function activatePlugins(id, exports) {
-        if ((features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight) && id === 1378 && exports && exports.default) userStore = exports.default;
-        if (id === 2115 && exports && exports.default && !localeStore) {
+        if ((features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight) && id === 1377 && exports && exports.default) userStore = exports.default;
+        if (id === 2116 && exports && exports.default && !localeStore) {
             localeStore = exports.default;
             // Following Discord's language: switching it there switches Venus too.
             try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
@@ -8014,45 +8014,45 @@
                 if (enabled("translate") && settings.translateTarget !== "phone") translateChanged();
             }); } catch (_) {}
         }
-        if (features.appIcons && id === 8621) return hookAppIconConstants(exports);
-        if (features.appIcons && id === 17096) return hookAppIconPremiumManager(exports);
-        if (features.appIcons && (id === 15065 || id === 15066 || id === 16750)) return hookComponent(exports, appIconsScreen);
-        if (features.customThemes && id === 590) return hookSemanticColorsModule(exports);
-        if (features.customThemes && id === 592) return hookRawColorsModule(exports);
-        if (features.customThemes && id === 1194 && exports && exports.default) customThemes.themeStore = exports.default;
-        if (features.customThemes && id === 4551) return hookCreateThemedContext(exports);
-        if (features.customThemes && id === 9542) return hookComponent(exports, chatViewWrapperThemeBackground);
-        if (features.accountSwitcher && id === 11800) return hookMultiAccountStore(exports);
-        if (features.accountSwitcher && id === 11802) return hookIsStaffForMultiAccount(exports);
-        if (features.userNotif && id === 585 && exports && exports.default) userNotifInit(exports.default);
-        if (features.userNotif && id === 4482 && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
-        if (features.userNotif && id === 2073 && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); }
-        if ((features.quests || features.userNotif) && id === 7179 && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); }
-        if ((features.quests || features.userNotif) && id === 13174) return hookGatewaySocket(exports);
-        if ((features.quests || features.userNotif) && id === 13212) return hookPauseGateway(exports);
-        if (features.translate && id === 585 && exports && exports.default) translateInit(exports.default);
-        if (features.translate && id === 11023) return hookComponent(exports, translateSheet);
-        if (features.splitMessages && id === 8602) return maxLengthModule(exports);
-        if ((features.youBarSettings || features.accountSwitcher) && id === 16032) return hookComponent(exports, youBarButtons);
-        if (features.validUser && id === 585 && exports && exports.default) validInit(exports.default);
+        if (features.appIcons && id === 8828) return hookAppIconConstants(exports);
+        if (features.appIcons && id === 17455) return hookAppIconPremiumManager(exports);
+        if (features.appIcons && (id === 15351 || id === 15352 || id === 17106)) return hookComponent(exports, appIconsScreen);
+        if (features.customThemes && id === 589) return hookSemanticColorsModule(exports);
+        if (features.customThemes && id === 591) return hookRawColorsModule(exports);
+        if (features.customThemes && id === 1193 && exports && exports.default) customThemes.themeStore = exports.default;
+        if (features.customThemes && id === 4593) return hookCreateThemedContext(exports);
+        if (features.customThemes && id === 9769) return hookComponent(exports, chatViewWrapperThemeBackground);
+        if (features.accountSwitcher && id === 12056) return hookMultiAccountStore(exports);
+        if (features.accountSwitcher && id === 12058) return hookIsStaffForMultiAccount(exports);
+        if (features.userNotif && id === 578 && exports && exports.default) userNotifInit(exports.default);
+        if (features.userNotif && id === 4519 && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
+        if (features.userNotif && id === 2074 && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); }
+        if ((features.quests || features.userNotif) && id === 7252 && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); }
+        if ((features.quests || features.userNotif) && id === 13439) return hookGatewaySocket(exports);
+        if ((features.quests || features.userNotif) && id === 13477) return hookPauseGateway(exports);
+        if (features.translate && id === 578 && exports && exports.default) translateInit(exports.default);
+        if (features.translate && id === 11281) return hookComponent(exports, translateSheet);
+        if (features.splitMessages && id === 8809) return maxLengthModule(exports);
+        if ((features.youBarSettings || features.accountSwitcher) && id === 16335) return hookComponent(exports, youBarButtons);
+        if (features.validUser && id === 578 && exports && exports.default) validInit(exports.default);
         // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
-        if (features.pastelize && id === 1252) pastelHash = typeof exports === "function" ? exports : exports.default;
-        if (features.pastelize && id === 2111) guildMembers = exports.default;
-        if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && id === 7378 && exports.default && exports.default.prototype) hookExport(exports.default.prototype,"generate",messageRow);
-        if ((features.platformIndicators || features.userNotif) && id === 4877) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); }
-        if (features.platformIndicators && id === 4855) sessionsStore = exports.default;
-        if (features.platformIndicators && id === 10603) {
+        if (features.pastelize && id === 1251) pastelHash = typeof exports === "function" ? exports : exports.default;
+        if (features.pastelize && id === 2112) guildMembers = exports.default;
+        if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && id === 7591 && exports.default && exports.default.prototype) hookExport(exports.default.prototype,"generate",messageRow);
+        if ((features.platformIndicators || features.userNotif) && id === 4930) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); }
+        if (features.platformIndicators && id === 4908) sessionsStore = exports.default;
+        if (features.platformIndicators && id === 10843) {
             displayNameType=exports.DisplayName;
             exports=hookExport(exports,"DisplayName",platformName);
             return hookComponent(exports,(orig,self,args)=>wrapProfileTree(orig.apply(self,args),displayNameType,platformName,platformWrappers));
         }
-        if (features.platformIndicators && id === 12845) return hookComponent(exports,platformHeader);
-        if (features.platformIndicators && id === 15667) return hookComponent(exports,platformDmRow);
+        if (features.platformIndicators && id === 13107) return hookComponent(exports,platformHeader);
+        if (features.platformIndicators && id === 15962) return hookComponent(exports,platformDmRow);
         // User list rows (UserRow, default export) and voice panel rows (FormComponents' named MemberRowItem).
-        if (features.platformIndicators && id === 10371) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"));
-        if (features.platformIndicators && id === 9108) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"),"MemberRowItem");
+        if (features.platformIndicators && id === 10602) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"));
+        if (features.platformIndicators && id === 9334) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"),"MemberRowItem");
         // Profile "in voice" users (UserProfileActivityVoiceChannelUsers): private UserRow rows.
-        if (features.platformIndicators && id === 12602) return hookComponent(exports,(orig,self,args)=>{
+        if (features.platformIndicators && id === 12849) return hookComponent(exports,(orig,self,args)=>{
             const tree=orig.apply(self,args);
             if (!enabled("platformIndicators") || !settings.piUserList || !React || !tree) return tree;
             return cloneTree(tree,(node,p)=>{
@@ -8065,8 +8065,8 @@
             },0);
         });
         // Plain status dot on avatars: avatar Status (design/void/Status,
-        // 13649) draws a phone badge when isMobileOnline; show the plain dot instead.
-        if (features.platformIndicators && id === 13649) {
+        // 13920) draws a phone badge when isMobileOnline; show the plain dot instead.
+        if (features.platformIndicators && id === 13920) {
             const plain = (orig,self,args) => {
                 const props = args[0];
                 if (!enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline) return orig.apply(self,args);
@@ -8074,74 +8074,74 @@
             };
             return hookExport(hookExport(exports,"default",plain),"StatusWithTyping",plain);
         }
-        if (features.readAll && id === 15929) return hookExport(exports,"default",readAllBarProps);
-        if (features.reviewDB && id === 8510) oauthModal=exports.default;
-        if (features.reviewDB && id === 5997) nativeRowGroup=exports.TableRowGroup;
-        if (features.reviewDB && id === 6621) nativeSwitchRow=exports.TableSwitchRow;
-        if (features.hiddenChannels && id === 15859) {
+        if (features.readAll && id === 16232) return hookExport(exports,"default",readAllBarProps);
+        if (features.reviewDB && id === 8716) oauthModal=exports.default;
+        if (features.reviewDB && id === 6074) nativeRowGroup=exports.TableRowGroup;
+        if (features.reviewDB && id === 6698) nativeSwitchRow=exports.TableSwitchRow;
+        if (features.hiddenChannels && id === 16157) {
             // ChannelInfo can be consumed as default export and as named export
             // (GuildRolesAndChannelsRow reads it by name); hook both.
             exports = hookComponent(exports,hiddenInfo);
             return hookExport(exports, "ChannelInfo", hiddenInfo);
         }
-        if (features.reviewDB && id === 12627) return hookComponent(exports,reviewNote);
-        if (features.reviewDB && id === 13987) return hookExport(exports,"ContextMenuPopout",reviewMenu);
+        if (features.reviewDB && id === 12872) return hookComponent(exports,reviewNote);
+        if (features.reviewDB && id === 14259) return hookExport(exports,"ContextMenuPopout",reviewMenu);
 
-        if (features.reviewDB && id === 13521) return hookComponent(exports,reviewGuild);
-        if (features.hideGift && (id === 11609 || id === 11817) && exports && exports.default)
+        if (features.reviewDB && id === 13790) return hookComponent(exports,reviewGuild);
+        if (features.hideGift && (id === 11864 || id === 12071) && exports && exports.default)
             return replaceValue(exports, "default", propsComponent(exports.default, withoutGift));
-        if (features.hideCall && id === 12696) return hookComponent(exports, profileButtons);
-        if (features.hideQuestDock && id === 14608) return hideQuestHooks(exports);
-        if (features.hideQuestDock && id === 14700) return hideQuestDock(exports);
-        if (features.systemEmoji && id === 6552 && exports && exports.default)
+        if (features.hideCall && id === 12956) return hookComponent(exports, profileButtons);
+        if (features.hideQuestDock && id === 14892) return hideQuestHooks(exports);
+        if (features.hideQuestDock && id === 14985) return hideQuestDock(exports);
+        if (features.systemEmoji && id === 6625 && exports && exports.default)
             return replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps));
-        if (id === 14130) exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG);
-        if (id === 10874) return hookExport(exports, "createList", settingsSections);
-        if (id === 14236) SettingsList = exports.SettingsList;
-        if (features.copyBios && id === 10742) return hookComponent(exports, copyBio);
-        if ((features.dashless || features.hiddenChannels) && id === 4990) {
+        if (id === 14409) exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG);
+        if (id === 11129) return hookExport(exports, "createList", settingsSections);
+        if (id === 14500) SettingsList = exports.SettingsList;
+        if (features.copyBios && id === 10987) return hookComponent(exports, copyBio);
+        if ((features.dashless || features.hiddenChannels) && id === 5043) {
             exports = hookExport(exports,"computeChannelName",channelLabel);
             return hookExport(exports, "default", useChannelLabel);
         }
-        if (features.dashless && id === 5314) return hookExport(exports, "getChannel", mentionChannelInfo);
-        if (features.dashless && id === 7099) {
+        if (features.dashless && id === 5796) return hookExport(exports, "getChannel", mentionChannelInfo);
+        if (features.dashless && id === 7166) {
             exports = hookExport(exports, "createParserState", parserStateChannels);
             if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
             return exports;
         }
-        if (features.favouriteAnything && id === 12524) return hookComponent(exports, favouriteButton);
-        if (features.favouriteAnything && id === 9861) return hookExport(exports, "addFavoriteGIF", favouriteAdd);
-        if (features.favouriteAnything && id === 9864) return hookExport(exports, "useFavoriteGIFsMobile", favouriteList);
+        if (features.favouriteAnything && id === 12767) return hookComponent(exports, favouriteButton);
+        if (features.favouriteAnything && id === 10090) return hookExport(exports, "addFavoriteGIF", favouriteAdd);
+        if (features.favouriteAnything && id === 10093) return hookExport(exports, "useFavoriteGIFsMobile", favouriteList);
         if (id === 2051) channelStore = exports.default;
-        if (features.noTyping && id === 11348) return replaceValue(exports, "default",
+        if (features.noTyping && id === 11604) return replaceValue(exports, "default",
             hookExport(hookExport(exports.default, "startTyping", typing), "stopTyping", typing));
-        if (features.quickDelete && id === 1127) locale = exports;
-        if (features.quickDelete && id === 5205) return replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm));
-        if (features.noDelete && id === 5059) {messageRecords = exports; restoreDeleted();}
-        if ((features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) && id === 1378) {userStore = exports.default; restoreDeleted();}
-        if ((features.jumpToTop || features.messageHighlight) && id === 5057) msgStore = exports.default;
-        if (features.noDelete && id === 5057) {
+        if (features.quickDelete && id === 1126) locale = exports;
+        if (features.quickDelete && id === 5708) return replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm));
+        if (features.noDelete && id === 5112) {messageRecords = exports; restoreDeleted();}
+        if ((features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) && id === 1377) {userStore = exports.default; restoreDeleted();}
+        if ((features.jumpToTop || features.messageHighlight) && id === 5110) msgStore = exports.default;
+        if (features.noDelete && id === 5110) {
             msgStore = exports.default;
             exports = replaceValue(exports,"default",hookExport(hookExport(msgStore,"getMessage",retainedMessage),"getMessages",retainedMessages));
             restoreDeleted(); return exports;
         }
-        if (features.quests && id === 7120) questAttach(exports.default);
-        if (features.quests && id === 585) questsInit(exports.default);
-        if (features.messageHighlight && id === 585 && exports && exports.default && !dispatcher)
+        if (features.quests && id === 7187) questAttach(exports.default);
+        if (features.quests && id === 578) questsInit(exports.default);
+        if (features.messageHighlight && id === 578 && exports && exports.default && !dispatcher)
             dispatcher = exports.default.dispatch.bind(exports.default);
-        if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 585) {
+        if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 578) {
             dispatcher = exports.default.dispatch.bind(exports.default);
             return replaceValue(exports, "default", hookExport(exports.default, "dispatch", dispatchEvent));
         }
-        if (features.hiddenChannels && [1086,1097].includes(id) && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
-        if (features.hiddenChannels && id === 1113) {
+        if (features.hiddenChannels && [1085,1096].includes(id) && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
+        if (features.hiddenChannels && id === 1112) {
             exports = hookExport(exports, "transitionTo", hiddenNavigation);
             exports = hookExport(exports, "replaceWith", hiddenNavigation);
             return hookExport(exports, "transitionToGuild", hiddenGuildNavigation);
         }
-        if (features.hiddenChannels && id === 4472) {
+        if (features.hiddenChannels && id === 4509) {
             // Lioncat6 finds permissions via findByProps("getChannelPermissions","can");
-            // In 348.10 PermissionStore (4472) is the only module exporting both.
+            // In 349.9 PermissionStore (4509) is the only module exporting both.
             // Candidate may be default export or the exports object itself.
             const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
                 exports && typeof exports.can === "function" ? exports : null;
@@ -8158,26 +8158,26 @@
                 }
             } catch (_) {}
         }
-        if (features.hiddenChannels && id === 4470) {
+        if (features.hiddenChannels && id === 4507) {
             const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
             guildChannels = store;
             return replaceValue(exports, "default", store);
         }
-        if (features.hiddenChannels && id === 2102 && exports && exports.default)
+        if (features.hiddenChannels && id === 2103 && exports && exports.default)
             return replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel));
-        if (features.jumpToTop && id === 8838) chatHeight = exports;
-        if (features.jumpToTop && id === 11643) jumpPill = exports.default;
-        // 348.10's arrow is a registered image asset: Metro exports the asset id itself, not a default.
-        if (features.jumpToTop && id === 11644) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports;
-        if (features.jumpToTop && id === 11642) return hookComponent(exports, jumpButton);
-        if (features.gestures && id === 7414) return hookExport(exports, "handleAddDefaultDoubleTapReaction", doubleTapMessage);
+        if (features.jumpToTop && id === 9064) chatHeight = exports;
+        if (features.jumpToTop && id === 11897) jumpPill = exports.default;
+        // 349.9's arrow is a registered image asset: Metro exports the asset id itself, not a default.
+        if (features.jumpToTop && id === 11898) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports;
+        if (features.jumpToTop && id === 11896) return hookComponent(exports, jumpButton);
+        if (features.gestures && id === 7627) return hookExport(exports, "handleAddDefaultDoubleTapReaction", doubleTapMessage);
         // Discord's "double-tap to react" tips, reminders and banners would point at a gesture that now replies.
-        if (features.gestures && id === 11105) return hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures);
-        if (features.gestures && id === 9652) return hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args));
-        if (features.gestures && id === 11666) return hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures);
-        if (features.gestures && id === 1378) userStore = exports.default;
-        if (features.gestures && id === 10905) return hookTapHandlers(exports);
-        if (id === 6880) {
+        if (features.gestures && id === 11363) return hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures);
+        if (features.gestures && id === 9878) return hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args));
+        if (features.gestures && id === 11918) return hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures);
+        if (features.gestures && id === 1377) userStore = exports.default;
+        if (features.gestures && id === 11159) return hookTapHandlers(exports);
+        if (id === 6965) {
             let actions = exports.default;
             if (!actions) return exports;
             if (features.noDelete) actions = hookExport(actions, "deleteMessage", deleteMessage);
@@ -8194,11 +8194,11 @@
             return replaceValue(exports, "default", actions);
         }
         if (!features.freeNitro && !features.appIcons) return exports;
-        if (id === 1378) userStore = exports.default;
-        if (id === 13528) { emojiCatalog = exports; return hookExport(exports, "canUserUse", catalogEligibility); }
-        if (features.freeNitro && id === 5772) emojiStore = exports.default;
-        if (features.freeNitro && id === 5815) stickerStore = exports.default;
-        if (id === 4491) {
+        if (id === 1377) userStore = exports.default;
+        if (id === 13797) { emojiCatalog = exports; return hookExport(exports, "canUserUse", catalogEligibility); }
+        if (features.freeNitro && id === 5638) emojiStore = exports.default;
+        if (features.freeNitro && id === 5687) stickerStore = exports.default;
+        if (id === 4528) {
             // The pinned build exports the capabilities on a default singleton;
             // named aliases are not used by its picker. Hook the inspected object.
             let capabilities = exports.default || exports;
@@ -8220,7 +8220,7 @@
             if (exports.default) exports = replaceValue(exports, "default", capabilities);
             else exports = capabilities;
         }
-        if (features.freeNitro && id === 6756) {
+        if (features.freeNitro && id === 6840) {
             stickerRules = exports;
             exports = hookExport(exports, "getStickerSendability", sendability);
             exports = hookExport(exports, "isSendableSticker", sendableSticker);
@@ -8299,14 +8299,14 @@
     }
     function activateModule(id, module) {
         try {
-            if (id === 1163) {
+            if (id === 1162) {
                 const nativeFiles = module.exports.default;
                 if (nativeFiles && typeof nativeFiles.getSize === "function" &&
                     typeof nativeFiles.readFile === "function" && typeof nativeFiles.writeFile === "function")
                     initFiles(nativeFiles);
             }
             module.exports = activatePlugins(id, module.exports);
-            if ([17, 19, 414, 1163, 1283, 5440, 5442].includes(id)) module.exports = instrument(module.exports, 0);
+            if ([17, 19, 414, 1162, 1282, 7268, 7243].includes(id)) module.exports = instrument(module.exports, 0);
         } catch (error) {
             status.audioError = "Hook unavailable: " + String(error);
             if (global.console && typeof global.console.warn === "function")
@@ -8322,17 +8322,17 @@
             const args = Array.from(arguments);
             args[0] = function () {
                 const factoryArgs = Array.from(arguments);
-                if (features.hiddenChannels && id === 6952) {
+                if (features.hiddenChannels && id === 7039) {
                     factoryArgs[1] = listImport(factoryArgs[1]);
                     factoryArgs[2] = listImport(factoryArgs[2]);
                     factoryArgs[3] = listImport(factoryArgs[3]);
                 }
                 const result = factory.apply(this, factoryArgs);
-                const module = arguments[4]; // Verified Metro factory ABI in Discord 348.10.
+                const module = arguments[4]; // Verified Metro factory ABI in Discord 349.9.
                 if (module && module.exports) {
                     // Before anything reads them: DraftStore keeps its length cap from the moment it loads.
-                    if (features.splitMessages && id === 1086) { try { lengthConstants(module.exports); } catch (_) {} }
-                    if (features.accountSwitcher && id === 11801) { try { multiAccountConstants(module.exports); } catch (_) {} }
+                    if (features.splitMessages && id === 1085) { try { lengthConstants(module.exports); } catch (_) {} }
+                    if (features.accountSwitcher && id === 12057) { try { multiAccountConstants(module.exports); } catch (_) {} }
                     if (id === 120) {
                         const initialize = module.exports.default;
                         let initializing = false;

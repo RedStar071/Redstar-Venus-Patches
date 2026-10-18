@@ -24,7 +24,7 @@ Venus Patches NOTICE
 ====================
 
 Some features are based on ideas from community Discord plugins. The code is written for this
-project: it hooks Discord's own pinned 348.10 JavaScript bundle and doesn't include or load
+project: it hooks Discord's own pinned 349.9 JavaScript bundle and doesn't include or load
 code from any other client mod.
 
 PlatformIndicators uses five device icons from Martinz64/vendetta-plugins, which are released
@@ -37,7 +37,7 @@ Discord is a trademark of Discord Inc.
 
 Quest Completer is based on the approach of community quest scripts: aamiaa's "Complete Recent
 Discord Quest" gist, nicola02nb's CompleteDiscordQuest and Equicord's Questify (all GPL-3.0). Its
-code is written for this project against Discord 348.10's own modules.
+code is written for this project against Discord 349.9's own modules.
 
 patches/src/main/kotlin/util/PatchListGenerator.kt is adapted from the Morphe patches
 template (https://github.com/MorpheApp/morphe-patches-template) and keeps its header.
@@ -45,7 +45,7 @@ template (https://github.com/MorpheApp/morphe-patches-template) and keeps its he
 ValidUser is based on the ValidUser Revenge plugin by fshin, o.oer and kmmiio99o
 (fshinz/Revenge-Plugins). Split Large Messages is based on the SplitLargeMessages Vendetta plugin by
 sunnie (sunnniee/vendetta-plugins). Double-tap to reply is based on Geastures+ by kmmiio99o
-(https://rksv.kmmiio99o.dev/GeasturesPlus). All three are rewritten for this project against Discord 348.10's modules.
+(https://rksv.kmmiio99o.dev/GeasturesPlus). All three are rewritten for this project against Discord 349.9's modules.
 
 Translate messages uses Google Translate's public web endpoint (translate.googleapis.com) at the user's
 request. No Google code is included; translations are Google's.

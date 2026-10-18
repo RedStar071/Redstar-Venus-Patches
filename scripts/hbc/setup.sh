@@ -1,5 +1,5 @@
 #!/bin/sh
-# Extract the 348.10 bundle into work/348 and build the HBC index (developer-only, never committed).
+# Extract the 349.9 bundle into work/348 and build the HBC index (developer-only, never committed).
 set -e
 cd "$(dirname "$0")/../.."
 APKM="${1:-$(ls /home/user/uploaded_files/*.apkm | head -1)}"

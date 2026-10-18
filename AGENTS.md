@@ -106,7 +106,7 @@ Instead, Venus uses **single-bundle HBC98 bytecode injection** (`HbcPrelude.kt`)
 ## Upgrading to a new Discord Android version
 
 Every Discord version upgrade touches four layers that are pinned to the exact APK and `assets/index.android.bundle`:
-1. **Supported version string** (`348.10 - Stable`) in `DiscordPatches.kt`.
+1. **Supported version string** (`349.9 - Stable`) in `DiscordPatches.kt`.
 2. **HBC98 bundle & global `#0` constants** in `HbcPrelude.kt` and `HbcPrivacy.kt`.
 3. **Metro module IDs** in `patches/src/main/resources/venus/bootstrap.js` (and `tests/runtime.test.cjs`).
 4. **Pinned HBC98 privacy targets (104 functions)** in `HbcPrivacy.kt` and **pinned native DEX methods (137 methods)** in `PrivacyPatches.kt`.
@@ -146,7 +146,7 @@ python3 scripts/hbc/port_check.py work/new/assets/index.android.bundle
    - Discord embeds source file paths (`fileFinishedImporting(moduleId, "path/to/File.tsx")`) in almost every module. If any module ID shifted in the new version, `port_check.py` prints `[MOVED/CHECK]` along with `candidate_in_new_bundle=<new_id>`.
    - For any shifted or newly added module ID:
      - Inspect the candidate with `B.show(new_id)` and `B.exports(new_id)` using `scripts/hbc/hbc.py`.
-     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/348.10-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js` and `tests/runtime.test.cjs`.
+     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/349.9-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js` and `tests/runtime.test.cjs`.
      - Also check the icon module IDs in `FEATURE_ICONS` inside `bootstrap.js`:
        ```bash
        python3 -c "
@@ -169,9 +169,9 @@ python3 scripts/hbc/port_check.py work/new/assets/index.android.bundle
      python3 scripts/hbc/privacy_targets.py work/new/assets/index.android.bundle --locate
      ```
    - For the 3 anonymous/unnamed targets (`#17776` `__timingFunction` in `metroRequire`, `#80849` `MetricReporter.send`, `#111344` `Rust Poller.send`), locate them if their function IDs shifted:
-     - `__timingFunction` (`#17776` in 348.10): disassemble global `#0` (`B.h.dis(B.h.func(0))[:150]`) and look for `PutByIdLoose ... '__timingFunction'` right after `CreateClosure`.
-     - `MetricReporter.send` (`#80849` in 348.10): check `B.tree(mid)` of `MetricReporter.tsx` and its dependencies for the `send` method.
-     - `Poller.send` (`#111344` in 348.10): search `B.fnmods('send')` for the module referencing `'NativePollerModule'` or crash reporting.
+     - `__timingFunction` (`#18142` in 349.9): disassemble global `#0` (`B.h.dis(B.h.func(0))[:150]`) and look for `PutByIdLoose ... '__timingFunction'` right after `CreateClosure`.
+     - `MetricReporter.send` (`#81910` in 349.9): check `B.tree(mid)` of `MetricReporter.tsx` and its dependencies for the `send` method.
+     - `Poller.send` (`#112524` in 349.9): search `B.fnmods('send')` for the module referencing `'NativePollerModule'` or crash reporting.
    - **Critical safety invariants for every `HbcPrivacy` target**:
      - Must have an expanded header (`flags & 0x20 != 0`) so its 32-bit `offset` and `size` live in the 40-byte large header.
      - Must NOT have exception handlers or generator/async flags (`flags & 0xc8 == 0`), because Hermes puts a `uint32 excCount` trailer immediately after `offset + size` when `hasExceptionHandler` (`0x40`) is set.
@@ -387,7 +387,7 @@ The page title is short ("Deleted messages", "Tap gestures").
 - Update `README.md` (features table) and the tests in `tests/runtime.test.cjs` whenever a
   title, group or option changes. The Features list test checks title and description length and that each icon
   is unique.
-- **Always keep both the module map file (`scripts/hbc/348.10-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
+- **Always keep both the module map file (`scripts/hbc/349.9-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
 
 ## Workflow for bug fixes, optimizations, and GitHub Actions `.mpp` artifacts
 

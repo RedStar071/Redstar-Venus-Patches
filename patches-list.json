@@ -20,16 +20,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -54,16 +54,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -88,16 +88,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -122,16 +122,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -157,16 +157,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -192,16 +192,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -227,16 +227,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -262,16 +262,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -297,16 +297,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -331,16 +331,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -365,16 +365,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -399,16 +399,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -433,16 +433,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -467,16 +467,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -501,16 +501,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -535,16 +535,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -569,16 +569,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -603,16 +603,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -637,16 +637,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -671,16 +671,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -705,16 +705,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -739,16 +739,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -773,16 +773,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -807,16 +807,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -841,16 +841,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -875,16 +875,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -909,16 +909,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -943,16 +943,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -977,16 +977,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1011,16 +1011,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1045,16 +1045,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1079,16 +1079,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1113,16 +1113,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1147,16 +1147,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1181,16 +1181,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1215,16 +1215,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
@@ -1252,16 +1252,16 @@
           "signatures": null,
           "targets": [
             {
-              "version": "348.10 - Stable",
+              "version": "349.9 - Stable",
               "versionCodes": {
-                "ARM64_V8A": 348010,
-                "ARMEABI_V7A": 348010,
-                "X86_64": 348010,
-                "X86": 348010
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
               },
               "isExperimental": false,
               "minSdk": 26,
-              "description": "Pinned Discord 348.10 bundle; Android device validation still required."
+              "description": "Pinned Discord 349.9 bundle; Android device validation still required."
             }
           ]
         }
