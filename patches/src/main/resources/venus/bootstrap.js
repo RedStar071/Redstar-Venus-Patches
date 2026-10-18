@@ -2959,7 +2959,7 @@
     // Video progress may run at most ~10 s ahead of the time since accepting; report about every 7 s like the player.
     // Play and Activity heartbeats follow Discord's desktop QuestProgressManager: one a minute, and when less
     // than a minute is left it waits exactly what's left plus one second.
-    const QUEST_VIDEO_LEEWAY = 10, QUEST_VIDEO_STEP = 7, QUEST_HEARTBEAT_MS = 60000, QUEST_HEARTBEAT_TAIL_MS = 1000;
+    const QUEST_VIDEO_LEEWAY = 10, QUEST_VIDEO_PAUSED_MS = 5000, QUEST_HEARTBEAT_MS = 60000, QUEST_HEARTBEAT_TAIL_MS = 1000;
     // QuestVariants.MOBILE_ACTIVITY_QUEST: an Activity Quest that Discord's phone app reports itself.
     const QUEST_MOBILE_ACTIVITY = 36;
     // Discord answers 401 when a phone reports play time, so Play and Activity heartbeats are sent as Discord
@@ -3268,11 +3268,17 @@
         // Like VideoQuestPlayer (14937): playback resumes where Discord last saved it and runs at 1x from now, and a
         // report goes out once currentTime passes the last one by 6-8 s, carrying currentTime itself. Time since
         // accepting alone let a Quest accepted long ago report 6-8 s of video every ~1.3 s, about five times 1x.
-        const started = Date.now(), from = done;
+        // The player only runs while Discord is on screen, and every phone request carries client_app_state, so
+        // the clock stops while Discord is in the background: a real video report never says "background".
+        let played = 0, tick = Date.now();
+        const from = done;
         while (questActive(entry) && done < target) {
-            const next = Math.min(target, done + 6 + Math.random() * 2);
-            const now = Date.now(), playing = Math.min((now - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, from + (now - started) / 1000);
-            if (playing < next) { await questSleep(Math.max(250, Math.ceil((next - playing) * 1000))); continue; }
+            const next = Math.min(target, done + 6 + Math.random() * 2), now = Date.now(), active = isAppActive();
+            if (active) played += now - tick;
+            tick = now;
+            if (!active) { await questSleep(QUEST_VIDEO_PAUSED_MS); continue; }
+            const playing = Math.min((now - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, from + played / 1000);
+            if (playing < next) { await questSleep(Math.min(QUEST_VIDEO_PAUSED_MS, Math.max(250, Math.ceil((next - playing) * 1000)))); continue; }
             const timestamp = Math.min(target, playing);
             questOptimisticProgress(entry.id, entry.task.type, timestamp);
             const response = await questRequest("/quests/" + entry.id + "/video-progress", {timestamp});

@@ -2654,6 +2654,25 @@ test('Quest Completer reports video progress at 1x like VideoQuestPlayer, even f
     assert.ok((last.at - first.at) / 1000 + 8.5 >= last.body.timestamp - first.body.timestamp + 0, 'whole video takes at least its own length');
     assert.ok(b.map.get('q1').userStatus.completedAt);
 });
+test('Quest Completer pauses video Quests while Discord is in the background, like the player', async () => {
+    // Every phone request carries client_app_state (updateDynamicSuperProperties 17420). The video player only plays
+    // on screen, so a video report saying "background" is one no Discord client sends.
+    const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 60, enrolledAgo(3600))]});
+    let state = 'active';
+    const r = b.context.__r; b.context.__r = id => id === 1986 ? {default:{getState:() => state}} : r(id);
+    b.connect(); await b.run(25 * 1000);
+    const before = b.requests.filter(x => x.url === '/quests/q1/video-progress');
+    assert.ok(before.length >= 1, 'plays while Discord is on screen');
+    state = 'background'; const left = b.clock;
+    await b.run(10 * 60 * 1000);
+    assert.equal(b.requests.filter(x => x.url === '/quests/q1/video-progress' && x.at > left).length, 0, 'no video report from the background');
+    assert.equal(b.map.get('q1').userStatus && b.map.get('q1').userStatus.completedAt || null, null);
+    state = 'active'; const back = b.clock; await b.run();
+    const after = b.requests.filter(x => x.url === '/quests/q1/video-progress' && x.at > back);
+    assert.ok(after.length >= 1 && b.map.get('q1').userStatus.completedAt, 'resumes and finishes once Discord is back on screen');
+    const watched = after.at(-1).body.timestamp - before.at(-1).body.timestamp, wall = (after.at(-1).at - back) / 1000;
+    assert.ok(wall + 1 >= watched, `the background time is not counted as watched (${watched.toFixed(1)} s in ${wall.toFixed(1)} s)`);
+});
 function activityFixture(id, target, extra = {}, app = '1124225423214485597', features = []) {
     const q = questFixture(id, 'PLAY_ACTIVITY', target, extra);
     q.config.taskConfigV2.tasks.PLAY_ACTIVITY.applications = [{id:app}]; q.config.features = features;
@@ -4346,8 +4365,10 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     b.load({socket},null,13439);
     const questItem={
         id:'q1',
-        config:{expiresAt:'2099-01-01T00:00:00.000Z',messages:{questName:'Background Quest'},taskConfigV2:{tasks:{WATCH_VIDEO_ON_MOBILE:{target:5}}}},
-        userStatus:{enrolledAt:'2020-01-01T00:00:00.000Z',completedAt:null,progress:{WATCH_VIDEO_ON_MOBILE:{value:0}}}
+        // An Activity Quest: its desktop heartbeats keep going in the background. (Video Quests pause there, like the player.)
+        config:{expiresAt:'2099-01-01T00:00:00.000Z',messages:{questName:'Background Quest'},features:[],
+            taskConfigV2:{tasks:{PLAY_ACTIVITY:{target:60,applications:[{id:'1124225423214485597'}]}}}},
+        userStatus:{enrolledAt:'2020-01-01T00:00:00.000Z',completedAt:null,progress:{PLAY_ACTIVITY:{value:0}}}
     };
     const store={quests:new Map([['q1',questItem]]),getQuest:id=>id==='q1'?questItem:null,addChangeListener(){}};
     b.load({default:store},null,7187);
@@ -4363,21 +4384,16 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     }[id]||null);
     await flush();await flush();
     b.api.setSetting('quests',true);
-    // Fire timers in time order with a fake clock, until the first progress report goes out: video plays at 1x,
-    // so that is ~5 s of playback after the Quest starts (questsRefetchLoop re-schedules itself every 30 min).
-    let clock=Date.now();b.context.__clock=()=>clock;vm.runInContext('Date.now=function(){return __clock();}',b.context);
-    for (let i=0;i<50 && timers.length && !requests.length;i++) {
-        timers.sort((x,y)=>(x.ms||0)-(y.ms||0));const t=timers.shift();clock+=t.ms||0;
-        for (const o of timers) o.ms=Math.max(0,(o.ms||0)-(t.ms||0));
-        t.fn();await flush();await flush();
-    }
-    assert.equal(requests.length,1,'Quest progress request started');
+    // Run the initial scan timer (at most 5 steps, since questsRefetchLoop re-schedules itself every 30 min).
+    for (let i=0;i<5 && timers.length;i++) timers.shift().fn();
+    await flush();
+assert.equal(requests.length,1,'Quest progress request started');
     assert.ok(fgActive.has('venus-background'),'Foreground service active while Quest is running');
     // Leaving the app while Quest is running must not close the Gateway socket.
     socket.close(true);
     assert.equal(socketCloses,0,'Gateway close(true) blocked while Quest is running in background');
     // Finish the Quest -> foreground service is released and Gateway can close normally when idle.
-    resolveProgress({ok:true,status:200,body:{quest_id:'q1',completed_at:'2026-10-14T00:00:00.000Z'}});
+    resolveProgress({ok:true,status:200,body:{quest_id:'q1',completed_at:'2026-10-14T00:00:00.000Z',progress:{PLAY_ACTIVITY:{value:60}}}});
     await flush();await flush();await flush();
     assert.equal(fgActive.size,0,'Foreground service stopped once Quest finishes');
     socket.close(true);
