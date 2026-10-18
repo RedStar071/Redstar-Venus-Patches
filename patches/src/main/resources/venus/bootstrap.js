@@ -6193,20 +6193,30 @@
         // Calling it (or initialize + asyncPersist) before Discord loaded its storage and signed in, as happens on a
         // cold start, read an empty list and saved it over every account (#63). Only Discord initializes the store;
         // Venus adds the signed-in account afterwards, and only when it is missing.
-        const me = enabled("accountSwitcher") ? currentUser() : null;
-        if (me && me.id && accountSwitcherStorageReady()) {
+        // A PersistedStore saves itself on every change (its constructor adds a change listener that calls
+        // asyncPersist), whether or not it has read its saved state yet. Before that, getState() is the empty list
+        // the module starts with, so even a bare emitChange() on a cold start saved [] over every account (#69).
+        // Nothing here touches the store until Discord has loaded its storage and initialized the store itself.
+        const storeReady = !!store && store._isInitialized === true && accountSwitcherStorageReady();
+        const me = enabled("accountSwitcher") && storeReady ? currentUser() : null;
+        if (me && me.id) {
             const rawTokenMod = global.__r && global.__r(1111);
             const tokenMgr = rawTokenMod && typeof rawTokenMod.setToken === "function" ? rawTokenMod :
                 rawTokenMod && rawTokenMod.default && typeof rawTokenMod.default.setToken === "function" ? rawTokenMod.default : null;
             try {
                 if (tokenMgr && typeof tokenMgr.getToken === "function") {
                     const activeToken = tokenMgr.getToken();
-                    if (typeof activeToken === "string" && activeToken && !tokenMgr.getToken(me.id))
+                    // While an account switch is under way, the active token already belongs to the next account but
+                    // UserStore still shows the last one. Saving it under the wrong id signs that account out, so
+                    // only save a token no other saved account already uses.
+                    const users = typeof store.getState === "function" && store.getState() && store.getState().users;
+                    const usedByOther = Array.isArray(users) && users.some(u => u && u.id && u.id !== me.id && tokenMgr.getToken(u.id) === activeToken);
+                    if (typeof activeToken === "string" && activeToken && !tokenMgr.getToken(me.id) && !usedByOther)
                         tokenMgr.setToken(activeToken, me.id);
                 }
             } catch (_) {}
             try {
-                if (store && store._isInitialized !== false && typeof store.initialize === "function" && typeof store.getState === "function") {
+                if (typeof store.initialize === "function" && typeof store.getState === "function") {
                     const state = store.getState() || {};
                     const saved = Array.isArray(state.users) ? state.users : [];
                     if (!saved.some(u => u && u.id === me.id)) {
@@ -6216,7 +6226,7 @@
                 }
             } catch (_) {}
         }
-        try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
+        try { if (storeReady && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
         notify("accountSwitcher");
     }
     function hookMultiAccountStore(exports) {

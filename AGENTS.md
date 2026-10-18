@@ -370,6 +370,15 @@ design") renders each page on and off and fails when a page breaks the rules bel
     perfectly translated (both as accurate and as natural as possible), commit and push that language to the open pull
     request, and only then move on to the next language.
 
+**Account switcher** (#63, #69)
+
+- MultiAccountStore (12056) is a PersistedStore (505). Its constructor adds a change listener that saves `getState()`
+  on every change, even before `initializeIfNeeded()` has read the saved list, when `users` is still `[]`. So never
+  call `emitChange()`, `initialize()`, `asyncPersist()` or `initializeIfNeeded()` on it until Discord has set
+  `_isInitialized` and Storage (510) `hasLoaded`. Doing so on a cold start wiped every saved account.
+- Only save the active token under the signed-in id when no other saved account already uses it: mid-switch, the token
+  belongs to the next account while UserStore still shows the last one.
+
 **Custom themes** (since 1.16.0)
 
 - The page leads with a gallery (`themeTile` + `themeMiniChat`), not a status card: Discord's colors first, then each installed

@@ -4157,7 +4157,9 @@ test('Account switcher unlocks MultiAccountStore, seeds active token, raises lim
     b.load({default:{getCurrentUser:()=>me,getUser:id=>id==='111'?me:id==='222'?alt:null,addChangeListener(){},removeChangeListener(){}}},null,1377);
 
     let storeState={users:[],canUseMultiAccountMobile:false};
+    // Already initialized by Discord (its saved list read), as on a warm start.
     const multiStore={
+        _isInitialized:true,
         getCanUseMultiAccountMobile:()=>storeState.canUseMultiAccountMobile,
         getHasLoggedInAccounts:()=>storeState.users.length>0,
         getUsers:()=>storeState.users,
@@ -4287,6 +4289,44 @@ test('Account switcher never wipes saved accounts on a cold start before Discord
     b.api.setSetting('accountSwitcherYouBar',true);
     assert.deepEqual(patched.getUsers().map(u=>u.id),['111','222','333'],'all three saved accounts survive the restart');
     assert.equal(writes,0,'the saved list is not rewritten when the active account is already in it');
+});
+
+// #69: Discord's PersistedStore saves itself on every change, from its constructor on, before it has read its saved
+// state. A change emitted on a cold start saved the module's empty account list over every saved account.
+test('Account switcher never emits a change on MultiAccountStore before Discord initialized it, so a cold start keeps every account (#69)',()=>{
+    const b=boot({accountSwitcher:true});reactHarness(b);
+    b.api.setSetting('accountSwitcher',true);
+    const saved=[{id:'111',username:'main',discriminator:'0',avatar:null,tokenStatus:2},{id:'222',username:'alt',discriminator:'0',avatar:null,tokenStatus:2},{id:'333',username:'alt2',discriminator:'0',avatar:null,tokenStatus:2}];
+    const storage={hasLoaded:true,data:{MultiAccountStore:{users:saved.slice()}}};
+    // Like 349.9's MultiAccountStore (12056) on PersistedStore (505): users start as [], the constructor's change
+    // listener persists getState() on every emitChange, and initializeIfNeeded reads storage once, lazily.
+    const store={
+        _isInitialized:false,users:[],
+        initializeIfNeeded(){if(this._isInitialized)return;this._isInitialized=true;this.users=(storage.data.MultiAccountStore||{users:[]}).users.slice();},
+        initialize(s){this.users=s&&Array.isArray(s.users)?s.users:[];},
+        getState(){return {users:this.users,canUseMultiAccountMobile:false};},
+        getUsers(){return this.users;},getValidUsers(){return this.users;},getCanUseMultiAccountMobile(){return false;},getHasLoggedInAccounts(){return this.users.length>0;},
+        asyncPersist(){storage.data.MultiAccountStore={users:this.getState().users.slice()};},
+        emitChange(){this.asyncPersist();}
+    };
+    const tokens={'111':'t1','222':'t2','333':'t3'};let active='t1';const setCalls=[];
+    let me={id:'111',username:'main'};
+    const users={default:{getCurrentUser:()=>me,getUser:()=>null,addChangeListener(){},removeChangeListener(){}}};
+    b.context.__r=id=>({510:{Storage:storage},1111:{getToken:id=>id==null?active:tokens[id]||null,setToken(t,id){setCalls.push([t,id]);tokens[id]=t;}},
+        1377:users,12056:{default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}}}[id]||null);
+    b.load(users,null,1377);
+    // Cold start: the store module loads and Venus's settings finish loading, all before anything reads the store.
+    const patched=b.load({default:store,MultiAccountTokenStatus:{INVALID:0,VALIDATING:1,VALID:2}},null,12056).default;
+    b.api.setSetting('accountSwitcherYouBar',false);
+    b.api.setSetting('accountSwitcherYouBar',true);
+    assert.deepEqual(storage.data.MultiAccountStore.users.map(u=>u.id),['111','222','333'],'the saved accounts are never overwritten with the empty starting list');
+    store.initializeIfNeeded();
+    assert.deepEqual(patched.getUsers().map(u=>u.id),['111','222','333'],'every account is still there once Discord reads the store');
+    // Mid-switch to 222: the active token is already 222's while UserStore still shows 111. It must not be saved as 111's.
+    delete tokens['111'];active='t2';
+    b.api.setSetting('accountSwitcherYouBar',false);
+    assert.deepEqual(setCalls,[],'another saved account\'s token is never saved under the signed-in id');
+    assert.deepEqual(storage.data.MultiAccountStore.users.map(u=>u.id),['111','222','333']);
 });
 
 test('Unlock app icons marks all alternate icons non-premium, blocks background reset, and strips the Nitro upsell button and header',()=>{
