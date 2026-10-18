@@ -377,6 +377,12 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - Tiles are radios (`accessibilityRole:"radio"`): tapping one uses it (`customThemesUse`), holding one asks to remove it.
   Discord's colors is the way back, so tapping the theme in use does nothing.
 - Install problems show under the link field, never at the top of the page.
+- Colors are compiled into four 349.9 tables: RawColors (591), SemanticColors (589) and SemanticColorExperiments
+  (590), plus the theme slot keys from Themes (588: ASH=`dark`, LIGHT=`light`, DARK=`darker`, ONYX=`midnight`).
+  590 wins over 589 while an experiment is on, so every themed token's overrides follow it. Changes reach the screen
+  through ThemeStore (1193), the ThemeContext key (4593) and the memoized RootThemeContextProvider (9758).
+- Parts of the chat list are drawn by Discord's native Android code with built-in theme colors (`ThemeModule`
+  accepts only a theme name), so a JS theme can't recolor everything there.
 
 **Motion** (since 1.14.0)
 
