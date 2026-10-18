@@ -3176,7 +3176,9 @@
         const soonest = (a, b) => expiry(a) - expiry(b);
         ready.sort(soonest); waiting.sort(soonest);
         const blocked = quest.enrollBlockedUntil > now || questTime(questFlag(store, "questEnrollmentBlockedUntil")) > now;
-        if (waiting.length && !quest.enrolling && !blocked) questEnroll(waiting[0]);
+        // An accept says it came from the Quests screen (QUEST_HOME_MOBILE), which you can only tap with Discord open.
+        // Sent from the background it carried client_app_state "background", which no real tap can. Wait for Discord.
+        if (waiting.length && !quest.enrolling && !blocked && isAppActive()) questEnroll(waiting[0]);
         if (!quest.running && ready.length) questRun(ready[0]);
     }
     // Accepting one at a time, a few seconds apart. Includes Discord's own QuestDataUtils (7183) ad decision and
@@ -3201,7 +3203,7 @@
         quest.enrolling = true;
         backgroundSync();
         questRequest("/quests/" + id + "/enroll", questEnrollBody(id), undefined, undefined,
-            () => generation === quest.generation && enabled("quests") && settings.questsEnroll && !!questTask(item) && questOpen(item, Date.now())).then(response => {
+            () => generation === quest.generation && enabled("quests") && settings.questsEnroll && isAppActive() && !!questTask(item) && questOpen(item, Date.now())).then(response => {
             if (!response || generation !== quest.generation) return;
             const status = questUserStatus(response && response.body);
             if (!status || !questDispatch({type:"QUESTS_ENROLL_SUCCESS", enrolledQuestUserStatus:status})) questsFetch(true);
@@ -3437,6 +3439,10 @@
         quest.dispatcher = dispatcher;
         dispatcher.subscribe("CONNECTION_OPEN", questsConnected);
         dispatcher.subscribe("LOGOUT", () => { questsReset(); quest.user = null; });
+        // AppStateStore (1986): coming back to Discord lets a waiting accept or a paused video go on.
+        dispatcher.subscribe("APP_STATE_UPDATE", event => {
+            if (event && event.state === "active" && quest.user && enabled("quests")) questsSchedule(2000 + Math.floor(Math.random() * 3000));
+        });
     }
     // Discord can connect before the saved settings finish loading. Quest Completer was still off at that
     // moment, so it never started until the next reconnect. Start it now if Discord is already connected.

@@ -2673,6 +2673,20 @@ test('Quest Completer pauses video Quests while Discord is in the background, li
     const watched = after.at(-1).body.timestamp - before.at(-1).body.timestamp, wall = (after.at(-1).at - back) / 1000;
     assert.ok(wall + 1 >= watched, `the background time is not counted as watched (${watched.toFixed(1)} s in ${wall.toFixed(1)} s)`);
 });
+test('Quest Completer only accepts Quests while Discord is on screen, and catches up when you come back', async () => {
+    // An accept says it came from the Quests screen (location 12), and every phone request carries client_app_state.
+    const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 30)]});
+    let state = 'background';
+    const r = b.context.__r; b.context.__r = id => id === 1986 ? {default:{getState:() => state}} : r(id);
+    b.connect(); await b.run(30 * 60 * 1000 - 1);
+    assert.equal(b.requests.some(x => x.url.endsWith('/enroll')), false, 'no accept from the background');
+    state = 'active';
+    (b.subs.get('APP_STATE_UPDATE') || []).forEach(fn => fn({type:'APP_STATE_UPDATE', state:'active'}));
+    const back = b.clock; await b.run(2 * 60 * 1000);
+    const enroll = b.requests.find(x => x.url === '/quests/q1/enroll');
+    assert.ok(enroll && enroll.at - back >= 2000 && enroll.at - back <= 60000, 'accepts a few seconds after Discord is back');
+    assert.ok(b.map.get('q1').userStatus.completedAt);
+});
 function activityFixture(id, target, extra = {}, app = '1124225423214485597', features = []) {
     const q = questFixture(id, 'PLAY_ACTIVITY', target, extra);
     q.config.taskConfigV2.tasks.PLAY_ACTIVITY.applications = [{id:app}]; q.config.features = features;
