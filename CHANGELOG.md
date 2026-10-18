@@ -16,6 +16,9 @@
 * **Discord - Account switcher:** Fixed saved accounts disappearing some time after adding one ([#69](https://github.com/VenusIsJaded/Venus-Patches/issues/69)). When Android had closed Discord in the background and started it again, Venus nudged Discord's saved-accounts list before Discord had read it, and Discord then saved its still-empty list over every account. Venus now waits until Discord has read the list, and never saves the token of the account you're switching to under the one you're leaving
 * **Discord - Keep deleted messages:** Fixed deleted messages and edits not being kept on Discord 349.9. Venus listened to the wrong module for Discord's events, which also stopped Show hidden channels, User and server reviews, Complete Quests automatically, Fix unknown mentions, Translate messages, User activity notifications and Message highlights from receiving them
 * **Discord - Complete Quests automatically:** Fixed Activity and Play Quests being reported complete before Discord confirmed completion
+* **Discord - Complete Quests automatically:** Fixed queued Activity requests and late replies continuing after switch-off, logout or account changes
+* **Discord - Complete Quests automatically:** Fixed Activity heartbeats continuing after expiry, suspension, removal or completion on another client
+* **Discord - Complete Quests automatically:** Fixed accepting Quests dropping sealed metadata by passing the Quest ID where Discord expects a decision ID
 * **Discord - Venus settings:** Fixed six switches on the Quests and Deleted messages pages staying in English in every other language
 * **Discord - User and server reviews:** Fixed tapping Cancel on Discord's authorize screen showing a "Couldn't sign in" error instead of just closing
 

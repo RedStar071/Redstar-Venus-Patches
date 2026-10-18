@@ -3012,13 +3012,14 @@
     }
     // desktop: send this request as the Windows desktop app. Only Play and Activity heartbeats (and the game
     // lookup that names their executable) do; enrolling and video progress stay the phone, which Discord accepts.
-    function questRequest(url, body, desktop, method) {
+    function questRequest(url, body, desktop, method, active) {
         const http = inspectedExport(1282, "HTTP"), send = http && http[method || "post"];
         if (typeof send !== "function") return Promise.reject(new Error("Discord's network client isn't ready"));
         const request = {url, interceptResponse:questIntercept};
         if (body !== undefined) request.body = body;
         if (desktop) request.onRequestCreated = questDesktopRequest;
-        return Promise.resolve().then(() => send.call(http, request));
+        // Check at the send boundary too: a queued microtask must not send for an account we just left.
+        return Promise.resolve().then(() => active && !active() ? null : send.call(http, request));
     }
     function questHex(count) { let hex = ""; for (let i = 0; i < count; i++) hex += Math.floor(Math.random() * 16).toString(16); return hex; }
     function questUuidText(hex) { return hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-" + hex.slice(12, 16) + "-" + hex.slice(16, 20) + "-" + hex.slice(20, 32); }
@@ -3187,7 +3188,8 @@
             if (decision && typeof decision === "object") Object.assign(body, decision);
         } catch (_) {}
         let meta = null, traffic = null;
-        try { if (data && typeof data.getAdMetadataSealed === "function") meta = data.getAdMetadataSealed(QUEST_HOME_MOBILE, id); } catch (_) {}
+        // The optional second argument is a decision ID, not the Quest ID. Like _enrollInQuest, omit it.
+        try { if (data && typeof data.getAdMetadataSealed === "function") meta = data.getAdMetadataSealed(QUEST_HOME_MOBILE); } catch (_) {}
         try { if (data && typeof data.getAdTrafficMetadataSealed === "function") traffic = data.getAdTrafficMetadataSealed(QUEST_HOME_MOBILE, id); } catch (_) {}
         body.metadata_sealed = meta != null ? meta : null;
         body.traffic_metadata_sealed = traffic != null ? traffic : null;
@@ -3197,8 +3199,9 @@
         const generation = quest.generation, id = item.id;
         quest.enrolling = true;
         backgroundSync();
-        questRequest("/quests/" + id + "/enroll", questEnrollBody(id)).then(response => {
-            if (generation !== quest.generation) return;
+        questRequest("/quests/" + id + "/enroll", questEnrollBody(id), undefined, undefined,
+            () => generation === quest.generation && enabled("quests") && settings.questsEnroll && !!questTask(item) && questOpen(item, Date.now())).then(response => {
+            if (!response || generation !== quest.generation) return;
             const status = questUserStatus(response && response.body);
             if (!status || !questDispatch({type:"QUESTS_ENROLL_SUCCESS", enrolledQuestUserStatus:status})) questsFetch(true);
         }, error => {
@@ -3316,10 +3319,26 @@
     }
     // Same body as Discord's own sendHeartbeat (9994): application_id names the game or Activity, and a game
     // also says which executable is running. Play and Activity heartbeats go out as Discord for Windows.
+    function questHeartbeatItem(entry) {
+        if (!questActive(entry)) return null;
+        try {
+            const store = questStore();
+            if (!store || questFlag(store, "isQuestAccessSuspended") === true) return null;
+            const item = store.getQuest(entry.id);
+            if (!item || !item.userStatus || !item.userStatus.enrolledAt || questTime(item.config && item.config.expiresAt) <= Date.now()) return null;
+            return item;
+        } catch (_) { return null; }
+    }
     async function questHeartbeat(entry, desktop) {
         const body = {application_id:entry.task.applicationId, terminal:false};
         if (entry.executablePath) body.executable_path = entry.executablePath;
-        const response = await questRequest("/quests/" + entry.id + "/heartbeat", body, desktop);
+        const response = await questRequest("/quests/" + entry.id + "/heartbeat", body, desktop, undefined, () => {
+            const item = questHeartbeatItem(entry);
+            return !!(item && !item.userStatus.completedAt);
+        });
+        // The HTTP response can arrive after stopping or switching accounts. Never write the old account's
+        // status into Discord's current QuestStore (questBeat's check after this call was too late).
+        if (!questActive(entry)) return {value:0, completed:false};
         const reply = response && response.body, status = questUserStatus(reply), type = entry.task.type;
         if (status) questDispatch({type:"QUESTS_SEND_HEARTBEAT_SUCCESS", questId:entry.id, userStatus:status});
         const value = Number(reply && reply.progress && reply.progress[type] && reply.progress[type].value);
@@ -3331,6 +3350,10 @@
         const target = entry.task.target;
         let best = -1, stalled = 0;
         while (questActive(entry)) {
+            // Eligibility can change while sleeping: Discord's own manager rechecks it before every beat.
+            const item = questHeartbeatItem(entry);
+            if (!item) return false;
+            if (item.userStatus.completedAt) return true;
             const beat = await questHeartbeat(entry, desktop);
             if (!questActive(entry)) return false;
             questProgressed(entry, beat.value);

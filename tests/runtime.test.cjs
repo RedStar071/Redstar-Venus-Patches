@@ -2505,7 +2505,7 @@ test('NoDelete lowering the maximum removes the oldest kept messages with one ev
 });
 
 // ---- 1.4.1 Quest Completer (Play Quests since 1.4.2, sent as Discord for Windows since 1.4.3) ----
-function questHarness({quests = [], settings = {}, fail = {}, fetched = true, apps = {}} = {}) {
+function questHarness({quests = [], settings = {}, fail = {}, fetched = true, apps = {}, elapsedHeartbeats = false} = {}) {
     const b = boot({quests:true});
     let clock = 1_800_000_000_000;
     b.context.__clock = () => clock;
@@ -2518,7 +2518,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
     const map = new Map(quests.map(q => [q.id, q]));
     const listeners = new Set();
     function apply(action) {
-        const set = (id, status) => { const q = map.get(id); if (q) map.set(id, Object.assign({}, q, {userStatus:Object.assign({}, q.userStatus, status)})); };
+        const set = (id, status) => { const q = map.get(id); if (q) map.set(id, Object.assign({}, q, {userStatus:status})); };
         if (action.type === 'QUESTS_ENROLL_SUCCESS') set(action.enrolledQuestUserStatus.questId, action.enrolledQuestUserStatus);
         if (action.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS') set(action.questId, action.userStatus);
         if (action.type === 'QUESTS_USER_STATUS_UPDATE') set(action.user_status.quest_id, {completedAt:action.user_status.completed_at});
@@ -2536,7 +2536,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         get isQuestAccessSuspended() { return false; },
         addChangeListener: fn => listeners.add(fn), removeChangeListener: fn => listeners.delete(fn),
     };
-    const progress = new Map();
+    const progress = new Map(), heartbeatAt = new Map();
     // Like 349.9's sendRequest: onRequestCreated gets the superagent request, then prepareRequest sets the phone's headers.
     function headersFor(request) {
         const headers = {};
@@ -2566,15 +2566,21 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         }
         if (kind === 'enroll') return Promise.resolve({body:{quest_id:id, enrolled_at:new Date(clock).toISOString()}});
         const tasks = q.config.taskConfigV2.tasks, type = Object.keys(tasks)[0], target = tasks[type].target;
-        const value = kind === 'video-progress' ? Math.min(target, request.body.timestamp) : Math.min(target, (progress.get(id) || 0) + 60);
+        const saved = q.userStatus && q.userStatus.progress && q.userStatus.progress[type];
+        const previous = progress.has(id) ? progress.get(id) : Number(saved && saved.value) || 0;
+        const elapsed = heartbeatAt.has(id) ? Math.max(0, clock - heartbeatAt.get(id)) / 1000 : 0;
+        const value = kind === 'video-progress' ? Math.min(target, request.body.timestamp) :
+            Math.min(target, previous + (elapsedHeartbeats ? elapsed : 60));
+        if (kind === 'heartbeat') heartbeatAt.set(id, clock);
         progress.set(id, value);
-        return Promise.resolve({body:{quest_id:id, completed_at:value >= target ? 'now' : null, progress:{[type]:{value}}}});
+        return Promise.resolve({body:{quest_id:id, enrolled_at:q.userStatus && q.userStatus.enrolledAt || new Date(clock).toISOString(),
+            completed_at:value >= target ? new Date(clock).toISOString() : null, progress:{[type]:{value}}}});
     }};
     let fetches = 0; const optimistic = [];
     const native = {1282:{HTTP:http, encodeProperties:value => Buffer.from(JSON.stringify(value)).toString('base64')},
         1347:{getSuperProperties:() => ({os:'Android', system_locale:'en-GB'})},
         7183:{getAdDecisionData:() => ({decision_id:null, is_targeted:false}), getAdMetadataSealed:() => null, getAdTrafficMetadataSealed:() => null},
-        7194:{questUserStatusFromServer:body => ({questId:body.quest_id, enrolledAt:body.enrolled_at ? new Date(body.enrolled_at) : null,
+        7194:{questUserStatusFromServer:body => ({questId:body.quest_id, enrolledAt:body.enrolled_at || null,
             completedAt:body.completed_at || null, progress:body.progress || {}})},
         9994:{fetchCurrentQuests:() => { fetches++; return Promise.resolve(); },
             updateOptimisticProgress:(id, type, val) => { optimistic.push([id, type, val]); }},
@@ -2599,7 +2605,7 @@ function questHarness({quests = [], settings = {}, fail = {}, fetched = true, ap
         await flush(); await flush();
     }
     function connect(id = 'me') { (subs.get('CONNECTION_OPEN') || []).forEach(fn => fn({type:'CONNECTION_OPEN', user:{id}})); }
-    return {...b, map, requests, events, ui, subs, run, connect, timers, http, optimistic,
+    return {...b, map, store, requests, events, ui, subs, run, connect, timers, http, optimistic,
         get fetches() { return fetches; }, get clock() { return clock; }, advance(ms) { clock += ms; }};
 }
 const QUEST_T0 = 1_800_000_000_000;
@@ -2698,6 +2704,156 @@ test('Quest Completer can stop Activity Quests while waiting for completion conf
         assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1, 'no more beats after ' + stop);
         assert.equal(b.map.get('stop').userStatus.completedAt, null);
     }
+});
+test('Quest Completer ignores Activity heartbeat replies after cancellation or an account change', async () => {
+    for (const stop of ['questsActivity', 'quests', 'LOGOUT', 'account']) {
+        const b = questHarness({quests:[activityFixture('late', 60, enrolledAgo(5))]});
+        const post = b.http.post; let release;
+        b.http.post = request => {
+            const response = post(request);
+            return new Promise(resolve => { release = () => response.then(resolve); });
+        };
+        b.connect('old-user'); await b.run(10 * 1000);
+        assert.equal(b.requests.length, 1, 'heartbeat is in flight');
+        if (stop === 'LOGOUT') b.subs.get('LOGOUT').forEach(fn => fn({type:'LOGOUT'}));
+        else if (stop === 'account') {
+            b.connect('new-user');
+            b.map.set('late', activityFixture('late', 60, enrolledAgo(5)));
+        } else b.api.setSetting(stop, false);
+        const before = b.events.length;
+        await release(); await flush(); await flush();
+        assert.equal(b.events.slice(before).filter(e => e.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS').length, 0,
+            'discard old heartbeat response after ' + stop);
+        assert.equal(b.map.get('late').userStatus.completedAt, null, 'old response must not overwrite current QuestStore');
+    }
+});
+test('Quest Completer does not send queued Activity enrollment or heartbeat requests after cancellation', async () => {
+    for (const accepted of [false, true]) for (const stop of ['questsActivity', 'quests', 'LOGOUT', 'account', ...(!accepted ? ['questsEnroll'] : [])]) {
+        const b = questHarness({quests:[activityFixture('queued', 60, accepted ? enrolledAgo(5) : {})]});
+        b.connect('old-user');
+        // Fire the scan synchronously, then stop before questRequest's send microtask runs.
+        let scanned = false;
+        for (let i = 0; i < 4 && !scanned; i++) {
+            b.timers.sort((a, c) => a.at - c.at);
+            const timer = b.timers.shift(); assert.ok(timer);
+            b.advance(Math.max(0, timer.at - b.clock)); timer.fn();
+            scanned = timer.fn.name === 'questsScan';
+        }
+        assert.ok(scanned); assert.equal(b.requests.length, 0);
+        if (stop === 'LOGOUT') b.subs.get('LOGOUT').forEach(fn => fn({type:'LOGOUT'}));
+        else if (stop === 'account') b.connect('new-user');
+        else b.api.setSetting(stop, false);
+        await flush(); await flush();
+        assert.equal(b.requests.length, 0, 'old ' + (accepted ? 'heartbeat' : 'enrollment') + ' must not start after ' + stop);
+    }
+});
+test('Quest Completer stops Activity heartbeats when the running Quest expires, disappears or is suspended', async () => {
+    for (const change of ['expires', 'removed', 'suspended', 'unenrolled', 'completed']) {
+        const q = activityFixture('running', 900, enrolledAgo(5));
+        if (change === 'expires') q.config.expiresAt = new Date(QUEST_T0 + 90000).toISOString();
+        const b = questHarness({quests:[q], settings:{questsEnroll:false}});
+        const handlers = new Map();
+        b.load({default:{updateServiceHandler:(key, value) => handlers.set(key, value), removeServiceHandler:key => handlers.delete(key)}}, null, 7252);
+        b.connect(); await b.run(10 * 1000);
+        assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1);
+        assert.equal(handlers.size, 1, 'holds foreground service while running');
+        if (change === 'removed') b.map.delete('running');
+        else if (change === 'suspended') Object.defineProperty(b.store, 'isQuestAccessSuspended', {get:() => true});
+        else if (change === 'unenrolled') b.map.set('running', activityFixture('running', 900));
+        else if (change === 'completed') b.map.set('running', Object.assign({}, b.map.get('running'),
+            {userStatus:Object.assign({}, b.map.get('running').userStatus, {completedAt:new Date(b.clock).toISOString()})}));
+        else b.advance(90000);
+        await b.run(3 * 60 * 1000);
+        assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1, 'no heartbeat after ' + change);
+        assert.equal(handlers.size, 0, 'releases foreground service after ' + change);
+    }
+});
+test('Quest Completer accepts Activity Quests with the same sealed metadata arguments as Discord 349.9', async () => {
+    const b = questHarness({quests:[activityFixture('sealed', 60)]});
+    const requireModule = b.context.__r, calls = [];
+    b.context.__r = id => id === 7183 ? {
+        getAdDecisionData:(...args) => { calls.push(['decision', ...args]); return {decision_id:'decision-123', is_targeted:true}; },
+        // Native getAdMetadataSealed's optional second argument is a decision ID, NOT a quest ID.
+        getAdMetadataSealed:(...args) => { calls.push(['metadata', ...args]); return args.length === 1 ? 'sealed-ad-metadata' : undefined; },
+        getAdTrafficMetadataSealed:(...args) => { calls.push(['traffic', ...args]); return 'sealed-traffic-metadata'; },
+    } : requireModule(id);
+    b.connect(); await b.run();
+    const enroll = b.requests.find(r => r.url === '/quests/sealed/enroll');
+    assert.ok(enroll);
+    assert.equal(enroll.body.metadata_sealed, 'sealed-ad-metadata', 'do not pass a quest ID as a decision ID and lose enrollment metadata');
+    assert.equal(enroll.body.traffic_metadata_sealed, 'sealed-traffic-metadata');
+    assert.deepEqual(calls, [['decision', 'sealed', 12], ['metadata', 12], ['traffic', 12, 'sealed']],
+        'matches original _enrollInQuest generator #140140 calls at offsets 913, 947 and 1056');
+    assert.ok(b.map.get('sealed').userStatus.completedAt);
+});
+for (const mobile of [false, true]) test(`Quest Completer counts real elapsed time for ${mobile ? 'mobile' : 'desktop'} Activity Quests and resumes partial progress`, async () => {
+    for (const initial of [0, 80]) {
+        const q = activityFixture('elapsed', 150, enrolledAgo(5), '1124225423214485597', mobile ? [36] : []);
+        q.userStatus.progress = {PLAY_ACTIVITY:{value:initial}};
+        const b = questHarness({quests:[q], elapsedHeartbeats:true});
+        b.connect(); await b.run();
+        const beats = b.requests.filter(r => r.url === '/quests/elapsed/heartbeat');
+        const events = b.events.filter(e => e.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS');
+        assert.equal(events[0].userStatus.progress.PLAY_ACTIVITY.value, initial, 'initial heartbeat cannot award a free minute');
+        assert.equal(beats.length, initial ? 3 : 4);
+        assert.ok(beats.at(-1).at - beats[0].at >= (150 - initial) * 1000, 'never completes before the elapsed target');
+        assert.deepEqual(events.map(e => e.userStatus.progress.PLAY_ACTIVITY.value), initial ? [80, 140, 150] : [0, 60, 120, 150]);
+        assert.equal(beats.at(-1).at - beats.at(-2).at, initial ? 11000 : 31000, 'wait remaining seconds plus one');
+        assert.ok(b.map.get('elapsed').userStatus.completedAt);
+        assert.equal(b.requests.some(r => r.url.endsWith('/enroll')), false, 'progress replies preserve enrollment; no repeated accepts');
+    }
+});
+test('Quest Completer keeps real-time Activity work single across gateway reconnects', async () => {
+    const b = questHarness({quests:[activityFixture('reconnect', 180, enrolledAgo(5))], elapsedHeartbeats:true});
+    b.connect(); await b.run(10 * 1000);
+    b.connect(); b.connect(); await b.run();
+    const beats = b.requests.filter(r => r.url === '/quests/reconnect/heartbeat');
+    assert.equal(beats.length, 4);
+    for (let i = 1; i < beats.length; i++) assert.ok(beats[i].at - beats[i - 1].at >= 60000, 'reconnect must not start a second runner');
+    assert.ok(b.map.get('reconnect').userStatus.completedAt);
+});
+test('Quest Completer honors a long Activity heartbeat rate limit without opening challenge UI', async () => {
+    const fail = {heartbeat:{ok:false, status:429, body:{retry_after:3600}}};
+    const b = questHarness({quests:[activityFixture('limited', 60, enrolledAgo(5))], fail});
+    b.connect(); await b.run(5 * 60 * 1000);
+    assert.equal(b.requests.length, 1);
+    b.advance(31 * 60 * 1000); b.connect(); await b.run(60 * 1000);
+    assert.equal(b.requests.length, 1, 'do not retry at the normal 30-minute cooldown while retry_after still applies');
+    delete fail.heartbeat;
+    b.advance(31 * 60 * 1000); b.connect(); await b.run();
+    assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 2);
+    assert.ok(b.map.get('limited').userStatus.completedAt);
+    assert.deepEqual(b.ui, [], 'no captcha, MFA or toast side effects');
+});
+test('Quest Completer Activity heartbeat refusals stay quiet and bounded', async () => {
+    for (const status of [400, 401, 403, 500]) {
+        const b = questHarness({quests:[activityFixture('refused', 120, enrolledAgo(5))],
+            fail:{heartbeat:{ok:false, status, body:{captcha_key:['captcha-required']}}}});
+        b.connect(); await b.run(20 * 60 * 1000);
+        assert.equal(b.requests.length, 1, 'no rapid retries after HTTP ' + status);
+        assert.deepEqual(b.ui, [], 'request interceptor must handle HTTP ' + status + ' before global UI');
+        assert.equal(b.map.get('refused').userStatus.completedAt, null);
+    }
+});
+test('Quest Completer holds the background service for Activity time and releases it on confirmed completion', async () => {
+    const b = questHarness({quests:[activityFixture('background', 120, enrolledAgo(5))], elapsedHeartbeats:true});
+    const handlers = new Map(); let closes = 0, paused = false;
+    const socket = {close:() => { closes++; }};
+    b.load({socket}, null, 13439);
+    const pause = b.load({setIsPaused:value => { paused = value; }, getIsPaused:() => paused}, null, 13477);
+    b.load({default:{updateServiceHandler:(key, value) => handlers.set(key, value), removeServiceHandler:key => handlers.delete(key)}}, null, 7252);
+    const requireModule = b.context.__r;
+    b.context.__r = id => id === 1986 ? {default:{getState:() => 'background'}} : requireModule(id);
+    b.connect(); await b.run(10 * 1000);
+    assert.equal(handlers.size, 1);
+    assert.equal(handlers.get('venus-background').usesGateway, true);
+    socket.close(true); pause.setIsPaused(true);
+    assert.equal(closes, 0); assert.equal(paused, false);
+    await b.run();
+    assert.ok(b.map.get('background').userStatus.completedAt);
+    assert.equal(handlers.size, 0, 'no lingering background service after completion');
+    socket.close(true); pause.setIsPaused(true);
+    assert.equal(closes, 1); assert.equal(paused, true, 'normal background behavior restored');
 });
 function playFixture(id, target, extra = {}, app = '1402418491272986635') {
     const q = questFixture(id, 'PLAY_ON_DESKTOP', target, extra);
@@ -2904,7 +3060,7 @@ test('Quest Completer gives up on a Quest Discord stops counting instead of send
     const post = b.http.post;
     // Discord keeps answering, but the Quest is stuck at two minutes.
     b.http.post = request => { const sent = post(request);
-        return request.url.endsWith('/heartbeat') ? sent.then(() => ({body:{quest_id:'p1', completed_at:null, progress:{PLAY_ON_DESKTOP:{value:120}}}})) : sent; };
+        return request.url.endsWith('/heartbeat') ? sent.then(response => ({body:{...response.body, completed_at:null, progress:{PLAY_ON_DESKTOP:{value:120}}}})) : sent; };
     b.connect(); await b.run(20 * 60 * 1000);
     const beats = b.requests.filter(r => r.url === '/quests/p1/heartbeat').length;
     assert.ok(beats >= 5 && beats <= 7, 'stopped after a few beats with no progress, sent ' + beats);
