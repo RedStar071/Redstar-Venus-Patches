@@ -383,6 +383,20 @@ design") renders each page on and off and fails when a page breaks the rules bel
   through ThemeStore (1193), the ThemeContext key (4593) and the memoized RootThemeContextProvider (9758).
 - Parts of the chat list are drawn by Discord's native Android code with built-in theme colors (`ThemeModule`
   accepts only a theme name), so a JS theme can't recolor everything there.
+- Revenge rules Venus follows: arrays are `[dark, light, midnight, darker]`; a slot the array doesn't reach borrows
+  index 0, but a slot written as `false` keeps Discord's own color, even if a legacy alias reached it first. When two
+  legacy keys feed one token, the key that lists it earlier (then the shorter list) wins. Values tolerate
+  `#transparent`, whitespace inside hex and stray spaces around keys.
+- Compile journals every key it writes, and switching undoes only those (`restoreOriginalColorTables`). Every raw
+  write in `compileThemeIntoTables` goes through `raw.set`, and every token write through `writeSemanticTarget` or
+  `touchedSem.add`, or turning a theme off won't undo it. `parseThemeColor` is cached and returns frozen objects:
+  copy before changing one.
+- Test any theme change against the real 349.9 tables and the published themes:
+  `python3 scripts/hbc/color_tables.py` (decodes 589/590/591 to `work/discord_colors.json`), `python3
+  tests/themes_fetch.py` (downloads every theme to `work/themes/`), then `node tests/theme_compat.cjs`. It must show
+  no errors, `notRestored`, `chainLeaks` or `falseSlotsChanged`. Keep install and switch times where they are
+  (1.16.0: install ~4 ms, switch ~1.2 ms median). `WHO=KEY` lists the themes where KEY didn't land; `--each` shows
+  every theme.
 
 **Motion** (since 1.14.0)
 
