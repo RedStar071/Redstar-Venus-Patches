@@ -95,13 +95,13 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
         // color. Targets the theme also sets by their own 349.9 name are the theme's choice, not a miss. Keys with
         // no target at all count as placed only if their color shows on some token (a plus/background rule).
         const declaredKeys = theme.semanticColors || {};
-        const drawn = new Set(Object.keys(after).filter(k => k.endsWith(':' + SLOTS[0])).map(k => String(after[k]).split('@')[0].toLowerCase()));
+        const drawn = new Set(Object.keys(after).filter(k => k.endsWith(':' + SLOTS[0])).map(k => String(after[k]).split('@')[0].toLowerCase().slice(0, 7)));
         const targetsOf = k => (k in TABLES.sem ? [k] : []).concat(ALIASES[k] || []);
         const unlanded = Object.entries(declaredKeys).filter(([k, v]) => {
             const h = hexOf(v); if (!h) return false;
             const all = targetsOf(k), own = all.filter(token => token === k || !(token in declaredKeys));
             if (all.length && !own.length) return false;
-            if (own.length) return !own.some(token => String(after[token + ':' + SLOTS[0]]).split('@')[0].toLowerCase() === h);
+            if (own.length) return !own.some(token => String(after[token + ':' + SLOTS[0]]).split('@')[0].toLowerCase().slice(0, 7) === h);
             return !drawn.has(h);
         }).map(([k]) => k);
         // Theme switch cost on its own: off then on again recompiles the whole theme into the tables.
