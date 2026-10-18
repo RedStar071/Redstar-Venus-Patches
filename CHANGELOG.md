@@ -15,6 +15,7 @@
 * **Discord - Custom themes:** Fixed 43 color keys used by published themes, like TEXT_SECONDARY and the button and status colors, doing nothing on Discord 349.9. When two keys color the same part, the more specific one now wins, whatever order the theme lists them in
 * **Discord - Account switcher:** Fixed saved accounts disappearing some time after adding one ([#69](https://github.com/VenusIsJaded/Venus-Patches/issues/69)). When Android had closed Discord in the background and started it again, Venus nudged Discord's saved-accounts list before Discord had read it, and Discord then saved its still-empty list over every account. Venus now waits until Discord has read the list, and never saves the token of the account you're switching to under the one you're leaving
 * **Discord - Keep deleted messages:** Fixed deleted messages and edits not being kept on Discord 349.9. Venus listened to the wrong module for Discord's events, which also stopped Show hidden channels, User and server reviews, Complete Quests automatically, Fix unknown mentions, Translate messages, User activity notifications and Message highlights from receiving them
+* **Discord - Complete Quests automatically:** Fixed Activity and Play Quests being reported complete before Discord confirmed completion
 * **Discord - Venus settings:** Fixed six switches on the Quests and Deleted messages pages staying in English in every other language
 * **Discord - User and server reviews:** Fixed tapping Cancel on Discord's authorize screen showing a "Couldn't sign in" error instead of just closing
 

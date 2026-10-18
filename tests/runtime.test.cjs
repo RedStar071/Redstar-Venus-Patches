@@ -2656,6 +2656,49 @@ test('Quest Completer reports mobile Activity Quests from the phone', async () =
     assert.ok(beats.length >= 2);
     assert.ok(beats.every(r => r.headers['User-Agent'] === 'Discord-Android/349009;RNA' && r.headers['X-Super-Properties'] === 'cGhvbmU='));
 });
+for (const mobile of [false, true]) test(`Quest Completer waits for server completion of ${mobile ? 'mobile' : 'desktop'} Activity Quests`, async () => {
+    const b = questHarness({quests:[activityFixture('confirm', 120, enrolledAgo(5), '1124225423214485597', mobile ? [36] : [])]});
+    const post = b.http.post; let beats = 0;
+    b.http.post = request => post(request).then(response => {
+        if (request.url.endsWith('/heartbeat') && ++beats <= 2) response.body.completed_at = null;
+        return response;
+    });
+    b.connect(); await b.run();
+    const sent = b.requests.filter(r => r.url === '/quests/confirm/heartbeat');
+    assert.equal(sent.length, 3, 'target progress alone is not a completed Quest; send the confirmation beat');
+    assert.equal(sent[2].at - sent[1].at, 60000, 'wait a normal heartbeat interval, not a one-second retry loop');
+    assert.ok(b.map.get('confirm').userStatus.completedAt, 'Discord actually confirmed completion');
+    assert.equal(b.events.filter(e => e.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS' && e.userStatus.completedAt).length, 1);
+    assert.deepEqual(b.ui, []);
+});
+test('Quest Completer bounds unconfirmed Activity heartbeats and moves to the next Quest', async () => {
+    const b = questHarness({quests:[activityFixture('stalled', 60, enrolledAgo(5)), activityFixture('next', 60, enrolledAgo(5))]});
+    const post = b.http.post;
+    b.http.post = request => post(request).then(response => {
+        if (request.url === '/quests/stalled/heartbeat') response.body.completed_at = null;
+        return response;
+    });
+    b.connect(); await b.run(10 * 60 * 1000);
+    const sent = b.requests.filter(r => r.url === '/quests/stalled/heartbeat');
+    assert.equal(sent.length, 6, 'initial target report and at most five unchanged confirmation beats');
+    for (let i = 1; i < sent.length; i++) assert.equal(sent[i].at - sent[i - 1].at, 60000);
+    assert.equal(b.map.get('stalled').userStatus.completedAt, null, 'never report an unconfirmed Quest as completed');
+    assert.ok(b.map.get('next').userStatus.completedAt, 'one stalled Quest does not block the queue');
+});
+test('Quest Completer can stop Activity Quests while waiting for completion confirmation', async () => {
+    for (const stop of ['questsActivity', 'quests', 'LOGOUT']) {
+        const b = questHarness({quests:[activityFixture('stop', 60, enrolledAgo(5))]});
+        const post = b.http.post;
+        b.http.post = request => post(request).then(response => { response.body.completed_at = null; return response; });
+        b.connect(); await b.run(10 * 1000);
+        assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1);
+        if (stop === 'LOGOUT') b.subs.get('LOGOUT').forEach(fn => fn({type:'LOGOUT'}));
+        else b.api.setSetting(stop, false);
+        await b.run(10 * 60 * 1000);
+        assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1, 'no more beats after ' + stop);
+        assert.equal(b.map.get('stop').userStatus.completedAt, null);
+    }
+});
 function playFixture(id, target, extra = {}, app = '1402418491272986635') {
     const q = questFixture(id, 'PLAY_ON_DESKTOP', target, extra);
     q.config.taskConfigV2.tasks.PLAY_ON_DESKTOP.applications = [{id:app}];
