@@ -5,8 +5,8 @@ Read this before writing a release, a changelog entry or a pull request.
 ## Release notes
 
 Morphe Manager shows "What's new" from `CHANGELOG.md` on `main` (it derives the URL from
-`patches-bundle.json`). It splits each release into cards — **New**, **Fixes**, **Improvements**,
-**Performance**, **App support** — with one row per bullet and the bold scope as the small label above
+`patches-bundle.json`). It splits each release into cards — **App support**, **New**, **Fixes**,
+**Improvements**, **Performance** — with one row per bullet and the bold scope as the small label above
 it, like Morphe Patches. That only works in the conventional-changelog format below. Anything else
 shows as one grey "Changes" block.
 
@@ -14,6 +14,10 @@ Every release, old or new, uses exactly this shape:
 
 ```markdown
 ## [1.6.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.6.0...v1.6.1) (2026-10-11)
+
+### 🚀 Updated App Support
+
+* **Discord:** Add support for `348.10 - Stable`
 
 ### ✨ New Features
 
@@ -26,16 +30,12 @@ Every release, old or new, uses exactly this shape:
 
 ### 🔧 Improvements
 
-* **Discord - Venus settings:** Clearer setting descriptions
+* **Discord - Venus settings:** Tons of UI changes across every settings page, including a theme gallery and livelier previews
 * **Discord - Disable analytics:** Also block session heartbeats, search tracking and impression events
 
 ### ⚡ Performance Improvements
 
 * **Discord - Hidden Channels:** Do less work while turned off
-
-### 🚀 Updated App Support
-
-* **Discord:** Add support for `348.10 - Stable`
 ```
 
 Rules:
@@ -43,6 +43,14 @@ Rules:
 - **Heading:** `## [X.Y.Z](compare link) (YYYY-MM-DD)`, newest at the top. The date is in UTC. Nothing goes above
   the first heading. Morphe ignores a heading without the date.
 - **Sections:** only the five above, in that order, each at most once. Leave out empty ones.
+- **App support always comes first.** `### 🚀 Updated App Support` is the first section of any release that has it,
+  so the Discord version a release works with is the first thing you read. `scripts/release_notes.py --check` fails
+  on any other order.
+- **Summarize UI changes in one bullet.** Looks, layout, previews, animations, page redesigns, wording and other
+  settings polish go in **one** bullet under 🔧 Improvements, like `* **Discord - Venus settings:** Tons of UI changes
+  across every settings page, including …`, naming at most three or four highlights. Never write a bullet per page,
+  per preview or per row. Still give their own bullets to new things you can do (✨ New Features), options that were
+  removed or changed behavior (🔧 Improvements), and UI bugs users actually hit (🐛 Bug Fixes).
 - **Bullets:** `* **Discord:** …` for the whole app, or `* **Discord - <Morphe patch name>:** …` for one patch.
   Use the patch name as it shows in Morphe (`NoDelete`, `Pastelize`, `Message tap gestures`, `Venus settings`…).
   One line, sentence case, no full stop, concise and informative (around 5–22 words).
@@ -64,6 +72,14 @@ Rules:
 - Compare with the **previous release**, not with earlier commits. A bug in a brand-new feature added in the same
   release was never seen by users, so don't list it as a separate bug fix; however, privacy additions, fixes to
   existing patches, and app/startup performance improvements shipped in the release should always be listed.
+- **Never list bugs that only existed inside the pull request.** Before writing a `Fixed …` bullet, check the
+  previous release's code (`git show vX.Y.Z:patches/src/main/resources/venus/bootstrap.js`) and confirm users really
+  had the bug. Breakage caused by work in the same pull request (a new feature, a refactor, or a port to a new Discord
+  version) that was fixed before release isn't a fix. Ports are the usual trap: the previous release supported the
+  old Discord version, so anything that only broke on the new one never reached users. For example, 1.16.0 ported to
+  Discord 349.9, and Keep deleted messages (and every feature listening to Discord's events) hooking the wrong module,
+  and theme colors 349.9 renamed, were only broken inside that pull request, so neither is in the 1.16.0 notes. The
+  same goes for ReviewDB cards failing to render on 348.10 in 1.3.7.
 
 ## The GitHub release
 
@@ -78,6 +94,7 @@ gh release create v1.6.1 patches/build/libs/patches-1.6.1.mpp --title "1.6.1" --
 - The title is just the version: `1.6.1`.
 - Attach only `patches-X.Y.Z.mpp`.
 - If you edit an entry in `CHANGELOG.md`, update that release's body to match with `gh release edit vX.Y.Z --notes-file`.
+  When a rule changes, rewrite every past entry to follow it and update every published release body.
 
 ## Releasing a version
 
