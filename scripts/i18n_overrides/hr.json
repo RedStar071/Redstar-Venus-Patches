@@ -193,7 +193,6 @@
  "In use": "U upotrebi",
  "Install": "Instaliraj",
  "Install Revenge and Vendetta color themes from a link.": "Instalirajte Revenge i Vendetta teme boja putem poveznice.",
- "Installed themes": "Instalirane teme",
  "Installing…": "Instaliranje…",
  "Into {language}": "Na {language}",
  "It opens for editing, so you can fix it": "Poruka se otvara za uređivanje kako biste je mogli ispraviti",
@@ -265,9 +264,6 @@
  "No pins yet": "Još nema prikvačenih poruka",
  "No reviews yet.": "Još nema recenzija.",
  "No saved accounts yet": "Još nema spremljenih računa",
- "No themes installed yet": "Još nema instaliranih tema",
- "No themes installed yet. Paste a theme .json link below to add one.": "Još nema instaliranih tema. Zalijepite poveznicu na .json datoteku teme ispod kako biste je dodali.",
- "No themes installed.": "Nema instaliranih tema.",
  "Not loaded yet": "Još nije učitano",
  "Nothing happens: you turned its details off": "Ništa se ne događa: isključili ste prikaz pojedinosti",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Ništa se ne prati i sve radi izvan mreže, osim značajki kod kojih je navedeno da koriste vanjsku uslugu.",
@@ -309,7 +305,6 @@
  "Others won't see when you're typing.": "Drugi neće vidjeti kad tipkate.",
  "Outside Discord": "Izvan Discorda",
  "Paste": "Zalijepi",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Ispod zalijepite izravnu poveznicu na .json datoteku Revenge ili Vendetta teme.",
  "Pastel name colors": "Pastelne boje imena",
  "Pastel names": "Pastelna imena",
  "Pastel names preview": "Pregled pastelnih imena",
@@ -457,7 +452,6 @@
  "Tap the Nitro emoji below to send it as a link": "Dodirni Nitro emoji ispod kako bi ga poslao kao poveznicu",
  "Tap the Nitro sticker below to send it as a link": "Dodirni Nitro naljepnicu ispod kako bi je poslao kao poveznicu",
  "Tap the emoji button in the message bar to try a sticker": "Dodirni gumb za emoji u traci za poruke kako bi isprobao naljepnicu",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Dodirnite aktivnu temu za povratak na Discordove boje. Držite temu pritisnutom kako biste je uklonili.",
  "Tap to add a review": "Dodirnite za dodavanje recenzije",
  "Tap to change Alex's devices": "Dodirnite za promjenu Alexovih uređaja",
  "Tap to close server reviews.": "Dodirnite za zatvaranje recenzija servera.",
@@ -671,12 +665,6 @@
   "few": "{n} servera označena su pročitanima",
   "other": "{n} servera označeno je pročitanima"
  },
- "{n} theme installed.": "Instalirana je {n} tema.",
- "{n} themes installed.": {
-  "one": "Instalirana je {n} tema.",
-  "few": "Instalirane su {n} teme.",
-  "other": "Instalirano je {n} tema."
- },
  "{n} translation": "{n} prijevod",
  "{n} translations": {
   "one": "{n} prijevod",
@@ -772,5 +760,8 @@
   "few": "Uključene su {n} značajke",
   "other": "Uključeno je {n} značajki"
  },
- "{n} feature turned on": "Uključena je {n} značajka"
+ "{n} feature turned on": "Uključena je {n} značajka",
+ "Themes": "Teme",
+ "Default": "Zadano",
+ "Hold a theme to remove it.": "Držite temu pritisnutom kako biste je uklonili."
 }

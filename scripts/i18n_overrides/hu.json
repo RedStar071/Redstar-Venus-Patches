@@ -190,7 +190,6 @@
  "In use": "Használatban",
  "Install": "Telepítés",
  "Install Revenge and Vendetta color themes from a link.": "Revenge- és Vendetta-színtémák telepítése linkről.",
- "Installed themes": "Telepített témák",
  "Installing…": "Telepítés…",
  "Into {language}": "Erre a nyelvre: {language}",
  "It opens for editing, so you can fix it": "Megnyílik szerkesztésre, így kijavíthatod",
@@ -262,9 +261,6 @@
  "No pins yet": "Még nincs kitűzött üzenet",
  "No reviews yet.": "Még nincsenek értékelések.",
  "No saved accounts yet": "Még nincs mentett fiók",
- "No themes installed yet": "Még nincs telepített téma",
- "No themes installed yet. Paste a theme .json link below to add one.": "Még nincs telepített téma. Illessz be alább egy téma .json-linkjét a hozzáadáshoz.",
- "No themes installed.": "Nincs telepített téma.",
  "Not loaded yet": "Még nincs betöltve",
  "Nothing happens: you turned its details off": "Nem történik semmi, mert kikapcsoltad a részletek megjelenítését",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Semmit sem követünk nyomon, és minden működik offline is, kivéve azokat a funkciókat, amelyeknél fel van tüntetve, hogy külső szolgáltatást használnak.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Mások nem látják, amikor gépelsz.",
  "Outside Discord": "A Discordon kívül",
  "Paste": "Beillesztés",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Illessz be alább egy közvetlen linket egy Revenge- vagy Vendetta-téma .json-fájljához.",
  "Pastel name colors": "Pasztell névszínek",
  "Pastel names": "Pasztell nevek",
  "Pastel names preview": "Pasztell nevek előnézete",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Koppints az alábbi Nitro emojira, hogy linkként küldd el",
  "Tap the Nitro sticker below to send it as a link": "Koppints az alábbi Nitro matricára, hogy linkként küldd el",
  "Tap the emoji button in the message bar to try a sticker": "Koppints az üzenetsáv emoji gombjára egy matrica kipróbálásához",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Koppints az éppen használt témára a Discord színeinek visszaállításához. Tartsd lenyomva a témát az eltávolításához.",
  "Tap to add a review": "Koppints értékelés írásához",
  "Tap to change Alex's devices": "Koppints Alex eszközeinek módosításához",
  "Tap to close server reviews.": "Koppints a szerverértékelések bezárásához.",
@@ -652,11 +646,6 @@
   "one": "{n} szerver olvasottnak jelölve",
   "other": "{n} szerver olvasottnak jelölve"
  },
- "{n} theme installed.": "{n} téma telepítve.",
- "{n} themes installed.": {
-  "one": "{n} téma telepítve.",
-  "other": "{n} téma telepítve."
- },
  "{n} translation": "{n} fordítás",
  "{n} translations": {
   "one": "{n} fordítás",
@@ -746,5 +735,8 @@
   "one": "{n} funkció bekapcsolva",
   "other": "{n} funkció bekapcsolva"
  },
- "{n} feature turned on": "{n} funkció bekapcsolva"
+ "{n} feature turned on": "{n} funkció bekapcsolva",
+ "Themes": "Témák",
+ "Default": "Alapértelmezett",
+ "Hold a theme to remove it.": "Tartsd lenyomva a témát az eltávolításához."
 }

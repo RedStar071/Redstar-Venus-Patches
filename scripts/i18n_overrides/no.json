@@ -190,7 +190,6 @@
  "In use": "I bruk",
  "Install": "Installer",
  "Install Revenge and Vendetta color themes from a link.": "Installer fargetemaer fra Revenge og Vendetta via en lenke.",
- "Installed themes": "Installerte temaer",
  "Installing…": "Installerer…",
  "Into {language}": "Til {language}",
  "It opens for editing, so you can fix it": "Meldingen åpnes for redigering, slik at du kan rette den",
@@ -262,9 +261,6 @@
  "No pins yet": "Ingen festede meldinger ennå",
  "No reviews yet.": "Ingen anmeldelser ennå.",
  "No saved accounts yet": "Ingen lagrede kontoer ennå",
- "No themes installed yet": "Ingen temaer installert ennå",
- "No themes installed yet. Paste a theme .json link below to add one.": "Ingen temaer er installert ennå. Lim inn en lenke til et .json-tema nedenfor for å legge til et.",
- "No themes installed.": "Ingen temaer installert.",
  "Not loaded yet": "Ikke lastet inn ennå",
  "Nothing happens: you turned its details off": "Ingenting skjer: du har slått av kanaldetaljer",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Ingenting spores, og alt fungerer frakoblet bortsett fra funksjonene som oppgir at de bruker en tjeneste.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Andre ser ikke når du skriver.",
  "Outside Discord": "Utenfor Discord",
  "Paste": "Lim inn",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Lim inn en direktelenke til et Revenge- eller Vendetta-tema (.json) nedenfor.",
  "Pastel name colors": "Pastellfarger på navn",
  "Pastel names": "Pastellnavn",
  "Pastel names preview": "Forhåndsvisning av pastellnavn",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Trykk på Nitro-emojien nedenfor for å sende den som en lenke",
  "Tap the Nitro sticker below to send it as a link": "Trykk på Nitro-klistremerket nedenfor for å sende det som en lenke",
  "Tap the emoji button in the message bar to try a sticker": "Trykk på emojiknappen i meldingsfeltet for å prøve et klistremerke",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Trykk på det aktive temaet for å gå tilbake til Discords farger. Hold inne et tema for å fjerne det.",
  "Tap to add a review": "Trykk for å skrive en anmeldelse",
  "Tap to change Alex's devices": "Trykk for å bytte enhetene til Alex",
  "Tap to close server reviews.": "Trykk for å lukke serveranmeldelser.",
@@ -652,11 +646,6 @@
   "one": "{n} server ble markert som lest",
   "other": "{n} servere ble markert som lest"
  },
- "{n} theme installed.": "{n} tema installert.",
- "{n} themes installed.": {
-  "one": "{n} tema installert.",
-  "other": "{n} temaer installert."
- },
  "{n} translation": "{n} oversettelse",
  "{n} translations": {
   "one": "{n} oversettelse",
@@ -746,5 +735,8 @@
   "one": "{n} funksjon slått på",
   "other": "{n} funksjoner slått på"
  },
- "{n} feature turned on": "{n} funksjon slått på"
+ "{n} feature turned on": "{n} funksjon slått på",
+ "Themes": "Temaer",
+ "Default": "Standard",
+ "Hold a theme to remove it.": "Hold inne et tema for å fjerne det."
 }

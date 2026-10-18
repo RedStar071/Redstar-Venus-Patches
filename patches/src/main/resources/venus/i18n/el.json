@@ -115,6 +115,7 @@
   "Czech": "Τσεχικά",
   "DM": "DM",
   "Danish": "Δανικά",
+  "Default": "Προεπιλογή",
   "Delete a kept message again to hide just that one.": "Διάγραψε ξανά ένα διατηρημένο μήνυμα για να κρύψεις μόνο αυτό.",
   "Delete review": "Διαγραφή κριτικής",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Τα διαγραμμένα και επεξεργασμένα μηνύματα παραμένουν και αφού κλείσει το Discord. Αποθηκεύονται μόνο σε αυτό το τηλέφωνο, για αυτόν τον λογαριασμό.",
@@ -211,6 +212,7 @@
   "Hindi": "Χίντι",
   "Hold a bio to select and copy it.": "Κράτησε πατημένο ένα βιογραφικό για να το επιλέξεις και να το αντιγράψεις.",
   "Hold a message and tap Translate. Nothing else is sent.": "Κράτησε πατημένο ένα μήνυμα και πάτησε Μετάφραση. Δεν στέλνεται τίποτε άλλο.",
+  "Hold a theme to remove it.": "Κράτησε πατημένο ένα θέμα για να το αφαιρέσεις.",
   "Hold it again to show the original": "Κράτησέ το ξανά πατημένο για εμφάνιση του πρωτοτύπου",
   "Hold it again to translate it": "Κράτησέ το ξανά πατημένο για μετάφραση",
   "Hold the button to pick just once, without changing this.": "Κράτησε πατημένο το κουμπί για να επιλέξεις μόνο αυτή τη φορά, χωρίς να αλλάξει η ρύθμιση.",
@@ -232,7 +234,6 @@
   "Indonesian": "Ινδονησιακά",
   "Install": "Εγκατάσταση",
   "Install Revenge and Vendetta color themes from a link.": "Εγκατάστησε θέματα χρωμάτων Revenge και Vendetta από σύνδεσμο.",
-  "Installed themes": "Εγκατεστημένα θέματα",
   "Installing…": "Εγκατάσταση…",
   "Into {language}": "Σε {language}",
   "Irish": "Ιρλανδικά",
@@ -322,9 +323,6 @@
   "No pins yet": "Δεν υπάρχουν καρφιτσώματα ακόμα",
   "No reviews yet.": "Δεν υπάρχουν κριτικές ακόμα.",
   "No saved accounts yet": "Δεν υπάρχουν αποθηκευμένοι λογαριασμοί",
-  "No themes installed yet": "Δεν έχουν εγκατασταθεί ακόμη θέματα",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Δεν έχουν εγκατασταθεί ακόμη θέματα. Επικόλλησε παρακάτω έναν σύνδεσμο θέματος .json για να προσθέσεις ένα.",
-  "No themes installed.": "Δεν έχουν εγκατασταθεί θέματα.",
   "Norwegian": "Νορβηγικά",
   "Not loaded yet": "Δεν έχει φορτωθεί ακόμα",
   "Not now": "Όχι τώρα",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Οι άλλοι δεν θα βλέπουν όταν πληκτρολογείς.",
   "Outside Discord": "Εκτός Discord",
   "Paste": "Επικόλληση",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Επικόλλησε παρακάτω έναν απευθείας σύνδεσμο σε θέμα .json για Revenge ή Vendetta.",
   "Paste from clipboard": "Επικόλληση από το πρόχειρο",
   "Paste it into a note or a message to yourself.": "Επικόλλησέ το σε μια σημείωση ή σε ένα μήνυμα προς τον εαυτό σου.",
   "Pastel name colors": "Παστέλ χρώματα ονομάτων",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Πάτησε το emoji Nitro παρακάτω για να το στείλεις ως σύνδεσμο",
   "Tap the Nitro sticker below to send it as a link": "Πάτησε το αυτοκόλλητο Nitro παρακάτω για να το στείλεις ως σύνδεσμο",
   "Tap the emoji button in the message bar to try a sticker": "Πάτησε το κουμπί emoji στη γραμμή μηνυμάτων για να δοκιμάσεις αυτοκόλλητο",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Πάτησε το ενεργό θέμα για να επιστρέψεις στα χρώματα του Discord. Κράτησε πατημένο ένα θέμα για να το αφαιρέσεις.",
   "Tap to add a review": "Πάτησε για να προσθέσεις κριτική",
   "Tap to change Alex's devices": "Πάτησε για να αλλάξεις τις συσκευές του Alex",
   "Tap to close server reviews.": "Πάτησε για να κλείσεις τις κριτικές διακομιστή.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Το αμετάφραστο μήνυμα, ως παράθεση κάτω από τη μετάφραση.",
   "Theme JSON link": "Σύνδεσμος θέματος JSON",
   "Theme download timed out.": "Λήξη χρόνου λήψης θέματος.",
+  "Themes": "Θέματα",
   "Themes cleared": "Τα θέματα διαγράφηκαν",
   "Then Sam says it starts at 6 AM": "Έπειτα ο Sam λέει ότι ξεκινά στις 6:00",
   "Then you open the sticker picker": "Στη συνέχεια ανοίγεις την επιλογή αυτοκόλλητων",
@@ -808,14 +805,9 @@
    "other": "{n} διακομιστές επισημάνθηκαν ως αναγνωσμένοι"
   },
   "{n} theme": "{n} θέμα",
-  "{n} theme installed.": "Εγκαταστάθηκε {n} θέμα.",
   "{n} themes": {
    "one": "{n} θέμα",
    "other": "{n} θέματα"
-  },
-  "{n} themes installed.": {
-   "one": "Εγκαταστάθηκε {n} θέμα.",
-   "other": "Εγκαταστάθηκαν {n} θέματα."
   },
   "{n} translation": "{n} μετάφραση",
   "{n} translations": {

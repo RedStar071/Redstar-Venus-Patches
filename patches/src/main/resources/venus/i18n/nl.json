@@ -115,6 +115,7 @@
   "Czech": "Tsjechisch",
   "DM": "DM",
   "Danish": "Deens",
+  "Default": "Standaard",
   "Delete a kept message again to hide just that one.": "Verwijder een bewaard bericht nogmaals om alleen dat bericht te verbergen.",
   "Delete review": "Review verwijderen",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Verwijderde en bewerkte berichten blijven bewaard nadat je Discord sluit. Alleen opgeslagen op deze telefoon, voor dit account.",
@@ -211,6 +212,7 @@
   "Hindi": "Hindi",
   "Hold a bio to select and copy it.": "Houd een bio ingedrukt om hem te selecteren en te kopiëren.",
   "Hold a message and tap Translate. Nothing else is sent.": "Houd een bericht ingedrukt en tik op Vertalen. Er wordt verder niets verstuurd.",
+  "Hold a theme to remove it.": "Houd een thema ingedrukt om het te verwijderen.",
   "Hold it again to show the original": "Houd het nog eens ingedrukt om het origineel te tonen",
   "Hold it again to translate it": "Houd het nog eens ingedrukt om het te vertalen",
   "Hold the button to pick just once, without changing this.": "Houd de knop ingedrukt om eenmalig te kiezen, zonder deze instelling te veranderen.",
@@ -232,7 +234,6 @@
   "Indonesian": "Indonesisch",
   "Install": "Installeren",
   "Install Revenge and Vendetta color themes from a link.": "Installeer kleurthema's van Revenge en Vendetta via een link.",
-  "Installed themes": "Geïnstalleerde thema's",
   "Installing…": "Installeren…",
   "Into {language}": "Naar het {language}",
   "Irish": "Iers",
@@ -322,9 +323,6 @@
   "No pins yet": "Nog geen vastgemaakte berichten",
   "No reviews yet.": "Nog geen reviews.",
   "No saved accounts yet": "Nog geen opgeslagen accounts",
-  "No themes installed yet": "Nog geen thema's geïnstalleerd",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Nog geen thema's geïnstalleerd. Plak hieronder een link naar een .json-thema om er een toe te voegen.",
-  "No themes installed.": "Geen thema's geïnstalleerd.",
   "Norwegian": "Noors",
   "Not loaded yet": "Nog niet geladen",
   "Not now": "Niet nu",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Anderen zien niet dat je typt.",
   "Outside Discord": "Buiten Discord",
   "Paste": "Plakken",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Plak hieronder een directe link naar een .json-thema van Revenge of Vendetta.",
   "Paste from clipboard": "Plakken van klembord",
   "Paste it into a note or a message to yourself.": "Plak hem in een notitie of een bericht aan jezelf.",
   "Pastel name colors": "Pastelkleuren voor namen",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Tik hieronder op de Nitro-emoji om hem als link te sturen",
   "Tap the Nitro sticker below to send it as a link": "Tik hieronder op de Nitro-sticker om hem als link te sturen",
   "Tap the emoji button in the message bar to try a sticker": "Tik op de emojiknop in de berichtenbalk om een sticker te proberen",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tik op het actieve thema om terug te gaan naar de kleuren van Discord. Houd een thema ingedrukt om het te verwijderen.",
   "Tap to add a review": "Tik om een review te schrijven",
   "Tap to change Alex's devices": "Tik om de apparaten van Alex te wijzigen",
   "Tap to close server reviews.": "Tik om de serverreviews te sluiten.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Het onvertaalde bericht, weergegeven als citaat onder de vertaling.",
   "Theme JSON link": "JSON-link van thema",
   "Theme download timed out.": "Time-out bij het downloaden van het thema.",
+  "Themes": "Thema's",
   "Themes cleared": "Thema's gewist",
   "Then Sam says it starts at 6 AM": "Daarna zegt Sam dat het om 6 uur 's ochtends begint",
   "Then you open the sticker picker": "Vervolgens open je de stickerkiezer",
@@ -808,14 +805,9 @@
    "other": "{n} servers zijn als gelezen gemarkeerd"
   },
   "{n} theme": "{n} thema",
-  "{n} theme installed.": "{n} thema geïnstalleerd.",
   "{n} themes": {
    "one": "{n} thema",
    "other": "{n} thema's"
-  },
-  "{n} themes installed.": {
-   "one": "{n} thema geïnstalleerd.",
-   "other": "{n} thema's geïnstalleerd."
   },
   "{n} translation": "{n} vertaling",
   "{n} translations": {

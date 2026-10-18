@@ -190,7 +190,6 @@
  "In use": "Aktiv",
  "Install": "Installieren",
  "Install Revenge and Vendetta color themes from a link.": "Installiere Revenge- und Vendetta-Farbthemes über einen Link.",
- "Installed themes": "Installierte Themes",
  "Installing…": "Wird installiert …",
  "Into {language}": "Auf {language}",
  "It opens for editing, so you can fix it": "Sie wird zum Bearbeiten geöffnet, damit du sie korrigieren kannst",
@@ -262,9 +261,6 @@
  "No pins yet": "Noch nichts angepinnt",
  "No reviews yet.": "Noch keine Bewertungen.",
  "No saved accounts yet": "Noch keine gespeicherten Accounts",
- "No themes installed yet": "Noch keine Themes installiert",
- "No themes installed yet. Paste a theme .json link below to add one.": "Noch keine Themes installiert. Füge unten einen Link zu einer Theme-.json-Datei ein, um eins hinzuzufügen.",
- "No themes installed.": "Keine Themes installiert.",
  "Not loaded yet": "Noch nicht geladen",
  "Nothing happens: you turned its details off": "Nichts passiert: Du hast die Kanaldetails ausgeschaltet",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nichts wird getrackt, und alles funktioniert offline – außer bei Funktionen, bei denen ausdrücklich ein externer Dienst genannt wird.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Andere sehen nicht, wenn du tippst.",
  "Outside Discord": "Außerhalb von Discord",
  "Paste": "Einfügen",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Füge unten einen direkten Link zu einem Revenge- oder Vendetta-.json-Theme ein.",
  "Pastel name colors": "Pastellfarben für Namen",
  "Pastel names": "Pastellnamen",
  "Pastel names preview": "Vorschau für Pastellnamen",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Tippe unten auf das Nitro-Emoji, um es als Link zu senden",
  "Tap the Nitro sticker below to send it as a link": "Tippe unten auf den Nitro-Sticker, um ihn als Link zu senden",
  "Tap the emoji button in the message bar to try a sticker": "Tippe auf das Emoji-Symbol in der Nachrichtenleiste, um einen Sticker auszuprobieren",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tippe auf das aktive Theme, um zu Discords Farben zurückzukehren. Halte ein Theme gedrückt, um es zu entfernen.",
  "Tap to add a review": "Tippe, um eine Bewertung zu schreiben",
  "Tap to change Alex's devices": "Tippe, um Alex' Geräte zu ändern",
  "Tap to close server reviews.": "Tippe, um die Serverbewertungen zu schließen.",
@@ -652,11 +646,6 @@
   "one": "{n} Server wurde als gelesen markiert",
   "other": "{n} Server wurden als gelesen markiert"
  },
- "{n} theme installed.": "{n} Theme installiert.",
- "{n} themes installed.": {
-  "one": "{n} Theme installiert.",
-  "other": "{n} Themes installiert."
- },
  "{n} translation": "{n} Übersetzung",
  "{n} translations": {
   "one": "{n} Übersetzung",
@@ -746,5 +735,8 @@
   "one": "{n} Funktion eingeschaltet",
   "other": "{n} Funktionen eingeschaltet"
  },
- "{n} feature turned on": "{n} Funktion eingeschaltet"
+ "{n} feature turned on": "{n} Funktion eingeschaltet",
+ "Themes": "Themes",
+ "Default": "Standard",
+ "Hold a theme to remove it.": "Halte ein Theme gedrückt, um es zu entfernen."
 }

@@ -115,6 +115,7 @@
   "Czech": "Tschechisch",
   "DM": "DM",
   "Danish": "Dänisch",
+  "Default": "Standard",
   "Delete a kept message again to hide just that one.": "Lösche eine behaltene Nachricht erneut, um nur diese auszublenden.",
   "Delete review": "Bewertung löschen",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Gelöschte und bearbeitete Nachrichten bleiben nach dem Schließen von Discord erhalten. Nur auf diesem Handy und für diesen Account gespeichert.",
@@ -211,6 +212,7 @@
   "Hindi": "Hindi",
   "Hold a bio to select and copy it.": "Halte eine Bio gedrückt, um sie zu markieren und zu kopieren.",
   "Hold a message and tap Translate. Nothing else is sent.": "Halte eine Nachricht gedrückt und tippe auf Übersetzen. Sonst wird nichts gesendet.",
+  "Hold a theme to remove it.": "Halte ein Theme gedrückt, um es zu entfernen.",
   "Hold it again to show the original": "Halte sie erneut gedrückt, um das Original anzuzeigen",
   "Hold it again to translate it": "Halte sie erneut gedrückt, um sie zu übersetzen",
   "Hold the button to pick just once, without changing this.": "Halte den Button gedrückt, um einmalig zu wählen, ohne dies zu ändern.",
@@ -232,7 +234,6 @@
   "Indonesian": "Indonesisch",
   "Install": "Installieren",
   "Install Revenge and Vendetta color themes from a link.": "Installiere Revenge- und Vendetta-Farbthemes über einen Link.",
-  "Installed themes": "Installierte Themes",
   "Installing…": "Wird installiert …",
   "Into {language}": "Auf {language}",
   "Irish": "Irisch",
@@ -322,9 +323,6 @@
   "No pins yet": "Noch nichts angepinnt",
   "No reviews yet.": "Noch keine Bewertungen.",
   "No saved accounts yet": "Noch keine gespeicherten Accounts",
-  "No themes installed yet": "Noch keine Themes installiert",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Noch keine Themes installiert. Füge unten einen Link zu einer Theme-.json-Datei ein, um eins hinzuzufügen.",
-  "No themes installed.": "Keine Themes installiert.",
   "Norwegian": "Norwegisch",
   "Not loaded yet": "Noch nicht geladen",
   "Not now": "Nicht jetzt",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Andere sehen nicht, wenn du tippst.",
   "Outside Discord": "Außerhalb von Discord",
   "Paste": "Einfügen",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Füge unten einen direkten Link zu einem Revenge- oder Vendetta-.json-Theme ein.",
   "Paste from clipboard": "Aus der Zwischenablage einfügen",
   "Paste it into a note or a message to yourself.": "Füge es in eine Notiz oder eine Nachricht an dich selbst ein.",
   "Pastel name colors": "Pastellfarben für Namen",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Tippe unten auf das Nitro-Emoji, um es als Link zu senden",
   "Tap the Nitro sticker below to send it as a link": "Tippe unten auf den Nitro-Sticker, um ihn als Link zu senden",
   "Tap the emoji button in the message bar to try a sticker": "Tippe auf das Emoji-Symbol in der Nachrichtenleiste, um einen Sticker auszuprobieren",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tippe auf das aktive Theme, um zu Discords Farben zurückzukehren. Halte ein Theme gedrückt, um es zu entfernen.",
   "Tap to add a review": "Tippe, um eine Bewertung zu schreiben",
   "Tap to change Alex's devices": "Tippe, um Alex' Geräte zu ändern",
   "Tap to close server reviews.": "Tippe, um die Serverbewertungen zu schließen.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Die unübersetzte Nachricht als Zitat unter der Übersetzung.",
   "Theme JSON link": "Theme-JSON-Link",
   "Theme download timed out.": "Zeitüberschreitung beim Herunterladen des Themes.",
+  "Themes": "Themes",
   "Themes cleared": "Themes gelöscht",
   "Then Sam says it starts at 6 AM": "Dann schreibt Sam, dass es um 6:00 Uhr losgeht",
   "Then you open the sticker picker": "Danach öffnest du die Sticker-Auswahl",
@@ -808,14 +805,9 @@
    "other": "{n} Server wurden als gelesen markiert"
   },
   "{n} theme": "{n} Theme",
-  "{n} theme installed.": "{n} Theme installiert.",
   "{n} themes": {
    "one": "{n} Theme",
    "other": "{n} Themes"
-  },
-  "{n} themes installed.": {
-   "one": "{n} Theme installiert.",
-   "other": "{n} Themes installiert."
   },
   "{n} translation": "{n} Übersetzung",
   "{n} translations": {

@@ -115,6 +115,7 @@
   "Czech": "tjekkisk",
   "DM": "DM",
   "Danish": "dansk",
+  "Default": "Standard",
   "Delete a kept message again to hide just that one.": "Slet en gemt besked igen for kun at skjule den.",
   "Delete review": "Slet anmeldelse",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Slettede og redigerede beskeder bliver bevaret, når Discord lukkes. Gemmes kun på denne telefon, for denne konto.",
@@ -211,6 +212,7 @@
   "Hindi": "hindi",
   "Hold a bio to select and copy it.": "Hold en beskrivelse nede for at markere og kopiere den.",
   "Hold a message and tap Translate. Nothing else is sent.": "Hold en besked nede, og tryk på Oversæt. Intet andet sendes.",
+  "Hold a theme to remove it.": "Hold et tema nede for at fjerne det.",
   "Hold it again to show the original": "Hold den nede igen for at vise originalen",
   "Hold it again to translate it": "Hold den nede igen for at oversætte den",
   "Hold the button to pick just once, without changing this.": "Hold knappen nede for kun at vælge denne gang, uden at ændre indstillingen.",
@@ -232,7 +234,6 @@
   "Indonesian": "indonesisk",
   "Install": "Installer",
   "Install Revenge and Vendetta color themes from a link.": "Installer farvetemaer fra Revenge og Vendetta via et link.",
-  "Installed themes": "Installerede temaer",
   "Installing…": "Installerer…",
   "Into {language}": "Til {language}",
   "Irish": "irsk",
@@ -322,9 +323,6 @@
   "No pins yet": "Intet fastgjort endnu",
   "No reviews yet.": "Ingen anmeldelser endnu.",
   "No saved accounts yet": "Ingen gemte konti endnu",
-  "No themes installed yet": "Ingen temaer installeret endnu",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Ingen temaer installeret endnu. Indsæt et tema .json-link nedenfor for at tilføje et.",
-  "No themes installed.": "Ingen temaer installeret.",
   "Norwegian": "norsk",
   "Not loaded yet": "Ikke indlæst endnu",
   "Not now": "Ikke nu",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Andre kan ikke se, når du skriver.",
   "Outside Discord": "Uden for Discord",
   "Paste": "Indsæt",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Indsæt et direkte link til et Revenge- eller Vendetta-tema (.json) nedenfor.",
   "Paste from clipboard": "Indsæt fra udklipsholder",
   "Paste it into a note or a message to yourself.": "Indsæt den i en note eller en besked til dig selv.",
   "Pastel name colors": "Pastelfarver til navne",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Tryk på Nitro-emojien nedenfor for at sende den som et link",
   "Tap the Nitro sticker below to send it as a link": "Tryk på Nitro-klistermærket nedenfor for at sende det som et link",
   "Tap the emoji button in the message bar to try a sticker": "Tryk på emoji-knappen i beskedfeltet for at prøve et klistermærke",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tryk på det aktive tema for at vende tilbage til Discords farver. Hold et tema nede for at fjerne det.",
   "Tap to add a review": "Tryk for at tilføje en anmeldelse",
   "Tap to change Alex's devices": "Tryk for at skifte Alex' enheder",
   "Tap to close server reviews.": "Tryk for at lukke serveranmeldelser.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Den uoversatte besked, som citat under oversættelsen.",
   "Theme JSON link": "Link til tema-JSON",
   "Theme download timed out.": "Download af temaet fik timeout.",
+  "Themes": "Temaer",
   "Themes cleared": "Temaer ryddet",
   "Then Sam says it starts at 6 AM": "Derefter skriver Sam, at det starter kl. 6:00",
   "Then you open the sticker picker": "Derefter åbner du klistermærkevælgeren",
@@ -808,14 +805,9 @@
    "other": "{n} servere blev markeret som læst"
   },
   "{n} theme": "{n} tema",
-  "{n} theme installed.": "{n} tema installeret.",
   "{n} themes": {
    "one": "{n} tema",
    "other": "{n} temaer"
-  },
-  "{n} themes installed.": {
-   "one": "{n} tema installeret.",
-   "other": "{n} temaer installeret."
   },
   "{n} translation": "{n} oversættelse",
   "{n} translations": {

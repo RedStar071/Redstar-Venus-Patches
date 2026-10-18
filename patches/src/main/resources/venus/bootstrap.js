@@ -7779,14 +7779,6 @@
             return false;
         });
     }
-    function customThemesSelect(id) {
-        if (!enabled("customThemes")) return;
-        customThemes.loaded = true;
-        customThemes.active = customThemes.active === id ? "" : id;
-        customThemes.error = "";
-        customThemesPersist();
-        customThemesApply();
-    }
     function customThemesRemove(id) {
         customThemes.loaded = true;
         const idx = customThemes.list.findIndex(t => t.id === id);
@@ -7807,13 +7799,7 @@
         customThemesApply();
         reviewToast(reviewUI(), "Themes cleared", venusIcon(4847, "TrashIcon"));
     }
-    function customThemesSummary() {
-        if (!enabled("customThemes")) return tr("Turned off. Switch it on in Features to start.");
-        if (customThemes.error) return customThemes.error;
-        const savedCount = customThemes.list.length;
-        return savedCount ? pl(savedCount, "{n} theme installed.", "{n} themes installed.") : tr("No themes installed yet. Paste a theme .json link below to add one.");
-    }
-    // A theme's own colors as a small round swatch: its background, its card color and its accent.
+    // A theme's own colors: the first key it sets wins, in Discord's newer names first.
     function themeColorOf(item, keys) {
         for (const key of keys) {
             const raw = item.rawColors && item.rawColors[key], sem = item.semanticColors && item.semanticColors[key];
@@ -7822,13 +7808,61 @@
         }
         return null;
     }
-    function themeSwatch(item) {
-        if (!RN) return undefined;
-        const bg = themeColorOf(item, ["BACKGROUND_PRIMARY", "BACKGROUND_BASE_LOWER", "BG_BASE_PRIMARY", "CHAT_BACKGROUND", "PRIMARY_600"]) || "#313338";
-        const card = themeColorOf(item, ["BACKGROUND_SECONDARY", "BACKGROUND_BASE_LOW", "CARD_PRIMARY_BG", "PRIMARY_630"]) || "#2b2d31";
-        const accent = themeColorOf(item, ["BRAND_500", "BRAND_EXPERIMENT", "BACKGROUND_BRAND", "TEXT_BRAND", "BLURPLE_50", "BRAND_360"]) || "#5865f2";
-        return el(RN.View, {style:{width:32, height:32, borderRadius:16, overflow:"hidden", flexDirection:"row", borderWidth:1, borderColor:"#ffffff1f"}},
-            el(RN.View, {style:{flex:1, backgroundColor:bg}}), el(RN.View, {style:{flex:1, backgroundColor:card}}), el(RN.View, {style:{flex:1, backgroundColor:accent}}));
+    // Discord's own dark colors, fixed: a theme rewrites the live tokens in place, so they can't be read back here.
+    const THEME_DISCORD_COLORS = {bg:"#313338", card:"#2b2d31", accent:"#5865f2", text:"#dbdee1", strong:"#f2f3f5"};
+    function themePalette(item) {
+        if (!item) return THEME_DISCORD_COLORS;
+        const D = THEME_DISCORD_COLORS;
+        return {bg:themeColorOf(item, ["BACKGROUND_PRIMARY", "BACKGROUND_BASE_LOWER", "BG_BASE_PRIMARY", "CHAT_BACKGROUND", "PRIMARY_600"]) || D.bg,
+            card:themeColorOf(item, ["BACKGROUND_SECONDARY", "BACKGROUND_BASE_LOW", "CARD_PRIMARY_BG", "BACKGROUND_TERTIARY", "PRIMARY_630"]) || D.card,
+            accent:themeColorOf(item, ["BRAND_500", "BRAND_EXPERIMENT", "BACKGROUND_BRAND", "TEXT_BRAND", "BLURPLE_50", "BRAND_360"]) || D.accent,
+            text:themeColorOf(item, ["TEXT_NORMAL", "TEXT_DEFAULT", "TEXT_PRIMARY", "PRIMARY_230"]) || D.text,
+            strong:themeColorOf(item, ["HEADER_PRIMARY", "TEXT_STRONG", "TEXT_PRIMARY", "PRIMARY_100"]) || D.strong};
+    }
+    // A tiny chat drawn in a theme's own colors: someone's message, your reply bubble and a button in the accent.
+    function themeMiniChat(p) {
+        const bar = (width, color, opacity) => el(RN.View, {style:{width, height:6, borderRadius:3, backgroundColor:color, opacity}});
+        return el(RN.View, {style:{height:84, borderRadius:12, backgroundColor:p.bg, padding:10, gap:6, overflow:"hidden"}},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
+                el(RN.View, {style:{width:16, height:16, borderRadius:8, backgroundColor:p.accent}}), bar("45%", p.strong, 0.95)),
+            el(RN.View, {style:{paddingLeft:22, gap:5}}, bar("85%", p.text, 0.6), bar("60%", p.text, 0.6)),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6, marginTop:"auto"}},
+                el(RN.View, {style:{flex:1, height:16, borderRadius:8, backgroundColor:p.card}}),
+                el(RN.View, {style:{width:16, height:16, borderRadius:8, backgroundColor:p.accent}})));
+    }
+    const THEME_TILE_DARK = {tile:{width:"48%", borderRadius:16, padding:4, borderWidth:2, borderColor:"transparent", backgroundColor:"#2b2d31"},
+        on:{borderColor:"#5865f2"}, check:{position:"absolute", top:10, right:10, width:22, height:22, borderRadius:11, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        add:{width:"48%", borderRadius:16, borderWidth:2, borderStyle:"dashed", borderColor:"#4e5058", alignItems:"center", justifyContent:"center", padding:12, gap:8, minHeight:132},
+        addIcon:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}};
+    function useThemeTileStyles() {
+        return useThemed("themeTile", c => ({tile:Object.assign({}, THEME_TILE_DARK.tile, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            on:{borderColor:c.BACKGROUND_BRAND || "#5865f2"}, check:Object.assign({}, THEME_TILE_DARK.check, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
+            add:Object.assign({}, THEME_TILE_DARK.add, {borderColor:c.BORDER_STRONG || c.BACKGROUND_MOD_STRONG || "#4e5058"}),
+            addIcon:Object.assign({}, THEME_TILE_DARK.addIcon, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), THEME_TILE_DARK);
+    }
+    // One theme in the gallery: its mini chat, its name and one short line. The one in use has a ring and a check.
+    function themeTile(s, opts) {
+        const Text = inspectedExport(4886, "Text"), Press = RN.Pressable || RN.View, Check = venusIcon(6628, "CheckmarkSmallIcon");
+        const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1, numberOfLines:1}, value) :
+            el(RN.Text, {style:fallback, numberOfLines:1}, value);
+        return el(Press, {key:opts.key, style:[s.tile, opts.selected ? s.on : null, {opacity:opts.disabled ? 0.5 : 1}],
+            accessibilityRole:"radio", accessibilityLabel:opts.name, accessibilityHint:opts.sub || undefined,
+            accessibilityState:{selected:!!opts.selected, disabled:!!opts.disabled}, disabled:!!opts.disabled,
+            onPress:opts.onPress, onLongPress:opts.onLongPress, delayLongPress:400},
+            themeMiniChat(opts.palette),
+            opts.selected ? el(RN.View, {style:s.check, pointerEvents:"none"}, popIn("check:" + opts.key, el(Check, {size:"xs", color:"#ffffff"}))) : null,
+            el(RN.View, {style:{paddingHorizontal:8, paddingTop:8, paddingBottom:6, gap:1}},
+                line(opts.name, "text-sm/semibold", "text-strong", {color:"#f2f3f5", fontSize:14, fontWeight:"600"}),
+                opts.sub ? line(opts.sub, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}) : null));
+    }
+    function customThemesUse(id) {
+        if (!enabled("customThemes") || customThemes.installing || customThemes.active === id) return;
+        haptic("SELECTION"); animateLayout();
+        customThemes.loaded = true;
+        customThemes.active = id;
+        customThemes.error = "";
+        customThemesPersist();
+        customThemesApply();
     }
     function CustomThemesSettings() {
         useSettings("customThemes");
@@ -7838,15 +7872,16 @@
             if (enabled("customThemes")) customThemesRestore();
         }, []);
         if (!React || !RN) return null;
-        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, Switch = ui.TableSwitchRow;
-        const on = enabled("customThemes");
-        const canInstall = on && !customThemes.installing && /^https?:\/\/\S+/i.test(urlDraft.trim());
+        const s = useThemeTileStyles();
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Text = inspectedExport(4886, "Text"), Press = RN.Pressable || RN.View;
+        const on = enabled("customThemes"), busy = customThemes.installing;
+        const canInstall = on && !busy && /^https?:\/\/\S+/i.test(urlDraft.trim());
         const onInstall = () => {
             if (!canInstall) return;
             customThemesInstallFromUrl(urlDraft, () => setUrlDraft(""));
         };
         const onPaste = () => {
-            if (!on || customThemes.installing) return;
+            if (!on || busy) return;
             const clip = ui.clipboard || RN.Clipboard;
             if (!clip || typeof clip.getString !== "function") return;
             Promise.resolve().then(() => clip.getString()).then(str => {
@@ -7861,52 +7896,52 @@
             placeholder:tr("https://.../theme.json"),
             onSubmitEditing:onInstall,
             returnKeyType:"go",
-            editable:on && !customThemes.installing,
-            isDisabled:!on || customThemes.installing
+            editable:on && !busy,
+            isDisabled:!on || busy
         };
         // One field and one button: Paste while the box is empty, Install once it has a link.
         const empty = !urlDraft.trim();
         const urlInput = inputWithButton(ui, "input", Object.assign({label:tr("Theme JSON link")}, inputProps), text => setUrlDraft(String(text || "")),
-            customThemes.installing ? "Installing…" : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || customThemes.installing : !canInstall);
-        const themeRows = customThemes.list.length ? customThemes.list.map(item => {
-            if (!item || !Row) return null;
-            const isSelected = customThemes.active === item.id;
-            const byLine = item.authors ? tr("by {author}", {author:item.authors}) + " \u00b7 " : "";
-            const descLine = item.description ? item.description + " \u00b7 " : "";
-            const bgBadge = item.background && item.background.url ? tr("Background image") + " \u00b7 " : "";
-            // The footnote says what a tap does; each row only says what's different about it.
-            const stateLine = isSelected ? tr("In use") : "";
-            return el(Row, {
-                key:"theme:" + item.id,
-                label:item.name,
-                icon:themeSwatch(item),
-                trailing:isSelected ? popIn("on:" + item.id, el(venusIcon(6628, "CheckmarkSmallIcon"), {size:"md"})) : undefined,
-                subLabel:(byLine + descLine + bgBadge + stateLine).replace(/ \u00b7 $/, "") || undefined,
-                disabled:!on || customThemes.installing,
-                onPress:() => customThemesSelect(item.id),
-                onLongPress:() => confirmAction("Remove theme?",
-                    tr("Remove {name} from this phone?", {name:item.name}),
-                    "Remove", () => customThemesRemove(item.id))
-            });
-        }) : [Row ? el(Row, {key:"empty", label:tr("No themes installed yet"), subLabel:tr("Paste a direct link to a Revenge or Vendetta .json theme below."), disabled:true}) : null];
+            busy ? "Installing…" : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || busy : !canInstall);
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
+        // The gallery: Discord's own colors first, then every installed theme, then a tile to find more.
+        const active = customThemesActiveEntry();
+        const tiles = [themeTile(s, {key:"discord", name:tr("Discord's colors"), sub:!active ? tr("In use") : tr("Default"), palette:THEME_DISCORD_COLORS,
+            selected:on && !active, disabled:!on || busy, onPress:() => customThemesUse("")})];
+        customThemes.list.forEach(item => {
+            if (!item) return;
+            const selected = !!active && active.id === item.id;
+            const sub = selected ? tr("In use") : item.authors ? tr("by {author}", {author:item.authors}) : item.background && item.background.url ? tr("Background image") : "";
+            tiles.push(themeTile(s, {key:"theme:" + item.id, name:item.name, sub, palette:themePalette(item), selected, disabled:!on || busy,
+                onPress:() => customThemesUse(item.id),
+                onLongPress:() => confirmAction("Remove theme?", tr("Remove {name} from this phone?", {name:item.name}), "Remove", () => customThemesRemove(item.id))}));
+        });
+        const Link = venusIcon(8263, "LinkExternalSmallIcon");
+        tiles.push(el(Press, {key:"browse", style:s.add, accessibilityRole:"link", accessibilityLabel:tr("Browse Revenge themes"),
+            onPress:() => openLink("https://plugins-list.pages.dev/Themes/")},
+            el(RN.View, {style:s.addIcon}, el(Link, {size:"sm"})),
+            Text ? el(Text, {variant:"text-sm/semibold", color:"text-default", style:{textAlign:"center"}}, tr("Browse Revenge themes")) :
+                el(RN.Text, {style:{color:"#dbdee1", fontSize:14, fontWeight:"600", textAlign:"center"}}, tr("Browse Revenge themes"))));
+        const gallery = el(RN.View, {key:"themes", style:{gap:8}},
+            groupTitle("title", "Themes"),
+            el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", justifyContent:"space-between", rowGap:12}, accessibilityRole:"radiogroup"}, tiles));
+        // A failed install is said right under the field it came from, in red, instead of at the top of the page.
+        const problem = on && customThemes.error ? el(RN.View, {key:"error", style:{paddingHorizontal:12, paddingBottom:12, gap:2}, accessibilityLiveRegion:"polite"},
+            text(tr("Couldn't install the theme"), "text-sm/semibold", "text-feedback-critical", {color:"#f23f43", fontSize:14, fontWeight:"600"}),
+            text(customThemes.error, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12})) : null;
         const groups = [
-            on ? statusCard("status", customThemesSummary(), {title:customThemes.error ? tr("Couldn't install the theme") : customThemesActiveEntry() ? customThemesActiveEntry().name : tr("Discord's colors"),
-                IconComponent:venusIcon(15172, "EyeDropperIcon"), leading:customThemesActiveEntry() ? themeSwatch(customThemesActiveEntry()) : null}) :
-                offCard("status", venusIcon(15172, "EyeDropperIcon"), "customThemes"),
-            el(Group, {key:"saved", title:tr("Installed themes")}, themeRows),
+            on ? null : offCard("status", venusIcon(15172, "EyeDropperIcon"), "customThemes"),
+            gallery,
             el(Group, {key:"install", title:tr("Add from link"), description:tr("Downloads the theme once and keeps it on this phone.")},
-                el(RN.View, {key:"input", style:{padding:12}}, urlInput),
-                Row ? el(Row, {key:"browse", label:tr("Browse Revenge themes"), icon:rowIcon(8263, "LinkExternalSmallIcon"),
-                    subLabel:"plugins-list.pages.dev/Themes",
-                    arrow:true, onPress:() => openLink("https://plugins-list.pages.dev/Themes/")}) : null),
+                el(RN.View, {key:"input", style:{padding:12}}, urlInput), problem),
             el(Group, {key:"display", title:tr("Display")},
                 switchRow(Switch, "customThemesBackground", "Show theme background image", "Shows the wallpaper behind chat, for themes that come with one.", rowIcon(5871, "ImageIcon"))),
-            el(Group, {key:"manage", title:tr("Manage")},
+            customThemes.list.length ? el(Group, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "clear", "Clear installed themes",
-                    customThemes.list.length ? pl(customThemes.list.length, "Removes {n} saved theme and restores Discord's default colors.", "Removes {n} saved themes and restores Discord's default colors.") : "No themes installed.",
+                    pl(customThemes.list.length, "Removes {n} saved theme and restores Discord's default colors.", "Removes {n} saved themes and restores Discord's default colors."),
                     () => confirmAction("Clear installed themes?", "Every installed theme will be removed from this phone and Discord's default colors will be restored.", "Clear", customThemesClearAll),
-                    !customThemes.list.length, true)),
-            footnote("note", "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.")];
+                    !on, true)) : null,
+            customThemes.list.length ? footnote("note", "Hold a theme to remove it.") : null];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
     // Message highlights settings: a live chat preview, the bar width as a segmented choice, and a row of color

@@ -193,7 +193,6 @@
  "In use": "Используется",
  "Install": "Установить",
  "Install Revenge and Vendetta color themes from a link.": "Устанавливайте цветовые темы Revenge и Vendetta по ссылке.",
- "Installed themes": "Установленные темы",
  "Installing…": "Установка…",
  "Into {language}": "На {language}",
  "It opens for editing, so you can fix it": "Оно открывается для редактирования, чтобы вы могли его исправить",
@@ -265,9 +264,6 @@
  "No pins yet": "Закреплённых сообщений пока нет",
  "No reviews yet.": "Отзывов пока нет.",
  "No saved accounts yet": "Сохранённых аккаунтов пока нет",
- "No themes installed yet": "Установленных тем пока нет",
- "No themes installed yet. Paste a theme .json link below to add one.": "Установленных тем пока нет. Вставьте ниже ссылку на JSON-файл темы, чтобы добавить её.",
- "No themes installed.": "Темы не установлены.",
  "Not loaded yet": "Ещё не загружено",
  "Nothing happens: you turned its details off": "Ничего не происходит: вы отключили просмотр сведений о канале",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Никакой слежки: всё работает локально, кроме функций, где прямо указано использование внешнего сервиса.",
@@ -309,7 +305,6 @@
  "Others won't see when you're typing.": "Другие не увидят, что вы печатаете.",
  "Outside Discord": "Вне Discord",
  "Paste": "Вставить",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Вставьте ниже прямую ссылку на JSON-файл темы Revenge или Vendetta.",
  "Pastel name colors": "Пастельные цвета имён",
  "Pastel names": "Пастельные имена",
  "Pastel names preview": "Предпросмотр пастельных имён",
@@ -457,7 +452,6 @@
  "Tap the Nitro emoji below to send it as a link": "Нажмите на эмодзи Nitro ниже, чтобы отправить его ссылкой",
  "Tap the Nitro sticker below to send it as a link": "Нажмите на стикер Nitro ниже, чтобы отправить его ссылкой",
  "Tap the emoji button in the message bar to try a sticker": "Нажмите кнопку эмодзи в строке сообщения, чтобы попробовать стикер",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Нажмите на активную тему, чтобы вернуть стандартные цвета Discord. Удерживайте тему, чтобы удалить её.",
  "Tap to add a review": "Нажмите, чтобы оставить отзыв",
  "Tap to change Alex's devices": "Нажмите, чтобы сменить устройства Алекса",
  "Tap to close server reviews.": "Нажмите, чтобы закрыть отзывы о сервере.",
@@ -671,12 +665,6 @@
   "few": "{n} сервера отмечены как прочитанные",
   "many": "{n} серверов отмечены как прочитанные"
  },
- "{n} theme installed.": "Установлена {n} тема.",
- "{n} themes installed.": {
-  "one": "Установлена {n} тема.",
-  "few": "Установлено {n} темы.",
-  "many": "Установлено {n} тем."
- },
  "{n} translation": "{n} перевод",
  "{n} translations": {
   "one": "{n} перевод",
@@ -772,5 +760,8 @@
   "few": "Включены {n} функции",
   "many": "Включено {n} функций"
  },
- "{n} feature turned on": "Включена {n} функция"
+ "{n} feature turned on": "Включена {n} функция",
+ "Themes": "Темы",
+ "Default": "По умолчанию",
+ "Hold a theme to remove it.": "Удерживайте тему, чтобы удалить её."
 }

@@ -190,7 +190,6 @@
  "In use": "उपयोग में",
  "Install": "इंस्टॉल करें",
  "Install Revenge and Vendetta color themes from a link.": "लिंक से Revenge और Vendetta कलर थीम इंस्टॉल करें।",
- "Installed themes": "इंस्टॉल की गई थीम",
  "Installing…": "इंस्टॉल हो रहा है…",
  "Into {language}": "{language} में",
  "It opens for editing, so you can fix it": "यह एडिट करने के लिए खुल जाता है, ताकि आप इसे सुधार सकें",
@@ -262,9 +261,6 @@
  "No pins yet": "अभी तक कोई पिन नहीं",
  "No reviews yet.": "अभी तक कोई रिव्यू नहीं है।",
  "No saved accounts yet": "अभी तक कोई अकाउंट सेव नहीं है",
- "No themes installed yet": "अभी तक कोई थीम इंस्टॉल नहीं है",
- "No themes installed yet. Paste a theme .json link below to add one.": "अभी तक कोई थीम इंस्टॉल नहीं है। थीम जोड़ने के लिए नीचे उसका .json लिंक पेस्ट करें।",
- "No themes installed.": "कोई थीम इंस्टॉल नहीं है।",
  "Not loaded yet": "अभी लोड नहीं हुआ",
  "Nothing happens: you turned its details off": "कुछ नहीं होता: आपने इसके विवरण बंद कर रखे हैं",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "कुछ भी ट्रैक नहीं किया जाता, और बाहरी सेवा का उल्लेख करने वाले फ़ीचर को छोड़कर बाकी सब कुछ ऑफ़लाइन काम करता है।",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "दूसरों को नहीं दिखेगा कि आप टाइप कर रहे हैं।",
  "Outside Discord": "Discord के बाहर",
  "Paste": "पेस्ट करें",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "नीचे किसी Revenge या Vendetta .json थीम का सीधा लिंक पेस्ट करें।",
  "Pastel name colors": "नामों के लिए पेस्टल रंग",
  "Pastel names": "पेस्टल नाम",
  "Pastel names preview": "पेस्टल नामों का प्रीव्यू",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "इसे लिंक के रूप में भेजने के लिए नीचे Nitro इमोजी पर टैप करें",
  "Tap the Nitro sticker below to send it as a link": "इसे लिंक के रूप में भेजने के लिए नीचे Nitro स्टिकर पर टैप करें",
  "Tap the emoji button in the message bar to try a sticker": "स्टिकर आज़माने के लिए मैसेज बार में इमोजी बटन पर टैप करें",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Discord के रंगों पर वापस जाने के लिए अभी लागू थीम पर टैप करें। किसी थीम को हटाने के लिए उसे दबाकर रखें।",
  "Tap to add a review": "रिव्यू जोड़ने के लिए टैप करें",
  "Tap to change Alex's devices": "एलेक्स के डिवाइस बदलने के लिए टैप करें",
  "Tap to close server reviews.": "सर्वर रिव्यू बंद करने के लिए टैप करें।",
@@ -652,11 +646,6 @@
   "one": "{n} सर्वर पढ़ा हुआ मार्क किया गया",
   "other": "{n} सर्वर पढ़े हुए मार्क किए गए"
  },
- "{n} theme installed.": "{n} थीम इंस्टॉल है।",
- "{n} themes installed.": {
-  "one": "{n} थीम इंस्टॉल है।",
-  "other": "{n} थीम इंस्टॉल हैं।"
- },
  "{n} translation": "{n} अनुवाद",
  "{n} translations": {
   "one": "{n} अनुवाद",
@@ -746,5 +735,8 @@
   "one": "{n} फ़ीचर चालू हुआ",
   "other": "{n} फ़ीचर चालू हुए"
  },
- "{n} feature turned on": "{n} फ़ीचर चालू हुआ"
+ "{n} feature turned on": "{n} फ़ीचर चालू हुआ",
+ "Themes": "थीम",
+ "Default": "डिफ़ॉल्ट",
+ "Hold a theme to remove it.": "किसी थीम को हटाने के लिए उसे दबाकर रखें।"
 }

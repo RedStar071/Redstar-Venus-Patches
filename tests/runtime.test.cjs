@@ -4613,11 +4613,19 @@ test('Custom themes installs Revenge JSON themes via links, compiles colors into
     b.api.setSetting('customThemes', true);
     assert.equal(rawColorsTable[semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw], '#232136', 'theme re-applied when turned back on');
 
-    // Tapping the active theme row toggles it off; long-pressing removes it.
-    const themeRow = withDraft().find(n => n.type === 'Row' && n.props.label === 'Rose Pine Moon' && n.props.trailing);
-    assert.ok(themeRow, 'installed theme listed as active');
+    // The gallery: Discord's colors first, then each installed theme as a tile drawn in its own colors.
+    const tiles = () => withDraft().filter(n => n.props && n.props.accessibilityRole === 'radio');
+    assert.deepEqual(tiles().map(n => n.props.accessibilityLabel), ["Discord's colors", 'Rose Pine Moon']);
+    const themeRow = tiles().find(n => n.props.accessibilityLabel === 'Rose Pine Moon');
+    assert.equal(themeRow.props.accessibilityState.selected, true, 'installed theme shown as in use');
+    assert.ok(pageNodes(themeRow).some(n => n.props && n.props.style && n.props.style.backgroundColor === '#232136'), 'tile drawn in the theme\'s own background');
+    assert.equal(withDraft().filter(n => n.type === 'Row').some(n => n.props.label === 'Rose Pine Moon'), false, 'themes are tiles, not rows');
+    // Tapping the theme in use does nothing; tapping Discord's colors goes back to stock colors.
     themeRow.props.onPress();
-    assert.equal(semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw, 'NEUTRAL_86', 'tapping active theme deselects it and restores stock colors');
+    assert.equal(rawColorsTable[semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw], '#232136', 'tapping the theme in use keeps it');
+    tiles()[0].props.onPress();
+    assert.equal(semanticColorsTable.BACKGROUND_BASE_LOWER.dark.raw, 'NEUTRAL_86', 'Discord\'s colors restores stock colors');
+    assert.equal(tiles()[0].props.accessibilityState.selected, true);
     themeRow.props.onLongPress();
     alerts.at(-1)[2].find(btn => btn.text === 'Remove').onPress();
     assert.equal(toasts.at(-1), 'Removed Rose Pine Moon');
@@ -4834,7 +4842,8 @@ test('every option page renders in the shared design: status card only when usef
         VENUS_PASTELIZE:'pastelize',VENUS_PLATFORMINDICATORS:'platformIndicators',VENUS_REVIEWDB:'reviewDB',VENUS_USERNOTIF:'userNotif',VENUS_ACCOUNTSWITCHER:'accountSwitcher',
         VENUS_READALL:'readAll',VENUS_CUSTOMTHEMES:'customThemes',VENUS_QUESTS:'quests',VENUS_HIDDENCHANNELS:'hiddenChannels',VENUS_LANGUAGE:null,VENUS_BACKUP:null};
     // Pages with live runtime status always show a status card when on; others lead directly with their preview or controls.
-    const liveStatus=new Set(['VENUS_TRANSLATE','VENUS_REVIEWDB','VENUS_USERNOTIF','VENUS_ACCOUNTSWITCHER','VENUS_CUSTOMTHEMES','VENUS_QUESTS','VENUS_BACKUP']);
+    // Custom themes has no status card: its gallery shows the theme in use.
+    const liveStatus=new Set(['VENUS_TRANSLATE','VENUS_REVIEWDB','VENUS_USERNOTIF','VENUS_ACCOUNTSWITCHER','VENUS_QUESTS','VENUS_BACKUP']);
     for (const on of [true,false]) for (const [id,key] of Object.entries(pages)) {
         if (key) b.api.setSetting(key,on);
         const nodes=pageNodes(b.registry[id].screen.getComponent()());
@@ -4845,6 +4854,8 @@ test('every option page renders in the shared design: status card only when usef
         const titles=nodes.filter(n=>n.type===Text&&n.props.variant==='text-md/semibold').map(n=>n.props.children);
         if (liveStatus.has(id) && (on || !key)) assert.ok(titles.length,id+' shows its live status card');
         if (!on && key) assert.ok(titles.includes('Turned off'),id+' says it is turned off');
+        if (id==='VENUS_CUSTOMTHEMES' && on) { assert.ok(!titles.length,'no status card above the theme gallery');
+            assert.ok(nodes.some(n=>n.props&&n.props.accessibilityRole==='radio'&&n.props.accessibilityLabel==="Discord's colors"&&n.props.accessibilityState.selected)); }
         // ...and carries Discord's own switch to turn it on right there.
         if (!on && key) { const sw=nodes.find(n=>n.type===FormSwitch);assert.ok(sw,id+' has a switch on its off card');
             sw.props.onValueChange(true);assert.equal(b.api.settings[key],true,id+' turns on from its page');b.api.setSetting(key,false); }

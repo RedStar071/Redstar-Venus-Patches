@@ -190,7 +190,6 @@
  "In use": "Σε χρήση",
  "Install": "Εγκατάσταση",
  "Install Revenge and Vendetta color themes from a link.": "Εγκατάστησε θέματα χρωμάτων Revenge και Vendetta από σύνδεσμο.",
- "Installed themes": "Εγκατεστημένα θέματα",
  "Installing…": "Εγκατάσταση…",
  "Into {language}": "Σε {language}",
  "It opens for editing, so you can fix it": "Ανοίγει για επεξεργασία, ώστε να μπορείς να το διορθώσεις",
@@ -262,9 +261,6 @@
  "No pins yet": "Δεν υπάρχουν καρφιτσώματα ακόμα",
  "No reviews yet.": "Δεν υπάρχουν κριτικές ακόμα.",
  "No saved accounts yet": "Δεν υπάρχουν αποθηκευμένοι λογαριασμοί",
- "No themes installed yet": "Δεν έχουν εγκατασταθεί ακόμη θέματα",
- "No themes installed yet. Paste a theme .json link below to add one.": "Δεν έχουν εγκατασταθεί ακόμη θέματα. Επικόλλησε παρακάτω έναν σύνδεσμο θέματος .json για να προσθέσεις ένα.",
- "No themes installed.": "Δεν έχουν εγκατασταθεί θέματα.",
  "Not loaded yet": "Δεν έχει φορτωθεί ακόμα",
  "Nothing happens: you turned its details off": "Δεν συμβαίνει τίποτα: έχεις απενεργοποιήσει τις λεπτομέρειές του",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Τίποτα δεν καταγράφεται και όλα λειτουργούν εκτός σύνδεσης, εκτός από τις λειτουργίες που αναφέρουν ότι χρησιμοποιούν κάποια υπηρεσία.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Οι άλλοι δεν θα βλέπουν όταν πληκτρολογείς.",
  "Outside Discord": "Εκτός Discord",
  "Paste": "Επικόλληση",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Επικόλλησε παρακάτω έναν απευθείας σύνδεσμο σε θέμα .json για Revenge ή Vendetta.",
  "Pastel name colors": "Παστέλ χρώματα ονομάτων",
  "Pastel names": "Παστέλ ονόματα",
  "Pastel names preview": "Προεπισκόπηση παστέλ ονομάτων",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Πάτησε το emoji Nitro παρακάτω για να το στείλεις ως σύνδεσμο",
  "Tap the Nitro sticker below to send it as a link": "Πάτησε το αυτοκόλλητο Nitro παρακάτω για να το στείλεις ως σύνδεσμο",
  "Tap the emoji button in the message bar to try a sticker": "Πάτησε το κουμπί emoji στη γραμμή μηνυμάτων για να δοκιμάσεις αυτοκόλλητο",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Πάτησε το ενεργό θέμα για να επιστρέψεις στα χρώματα του Discord. Κράτησε πατημένο ένα θέμα για να το αφαιρέσεις.",
  "Tap to add a review": "Πάτησε για να προσθέσεις κριτική",
  "Tap to change Alex's devices": "Πάτησε για να αλλάξεις τις συσκευές του Alex",
  "Tap to close server reviews.": "Πάτησε για να κλείσεις τις κριτικές διακομιστή.",
@@ -652,11 +646,6 @@
   "one": "{n} διακομιστής επισημάνθηκε ως αναγνωσμένος",
   "other": "{n} διακομιστές επισημάνθηκαν ως αναγνωσμένοι"
  },
- "{n} theme installed.": "Εγκαταστάθηκε {n} θέμα.",
- "{n} themes installed.": {
-  "one": "Εγκαταστάθηκε {n} θέμα.",
-  "other": "Εγκαταστάθηκαν {n} θέματα."
- },
  "{n} translation": "{n} μετάφραση",
  "{n} translations": {
   "one": "{n} μετάφραση",
@@ -746,5 +735,8 @@
   "one": "Ενεργοποιήθηκε {n} λειτουργία",
   "other": "Ενεργοποιήθηκαν {n} λειτουργίες"
  },
- "{n} feature turned on": "Ενεργοποιήθηκε {n} λειτουργία"
+ "{n} feature turned on": "Ενεργοποιήθηκε {n} λειτουργία",
+ "Themes": "Θέματα",
+ "Default": "Προεπιλογή",
+ "Hold a theme to remove it.": "Κράτησε πατημένο ένα θέμα για να το αφαιρέσεις."
 }

@@ -115,6 +115,7 @@
   "Czech": "чешки",
   "DM": "ЛС",
   "Danish": "датски",
+  "Default": "По подразбиране",
   "Delete a kept message again to hide just that one.": "Изтрийте отново запазено съобщение, за да скриете само него.",
   "Delete review": "Изтриване на отзива",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Изтритите и редактираните съобщения остават и след затваряне на Discord. Пазят се само на този телефон, за този профил.",
@@ -211,6 +212,7 @@
   "Hindi": "хинди",
   "Hold a bio to select and copy it.": "Задръжте описание, за да го изберете и копирате.",
   "Hold a message and tap Translate. Nothing else is sent.": "Задръжте съобщение и докоснете „Превод“. Нищо друго не се изпраща.",
+  "Hold a theme to remove it.": "Задръжте тема, за да я премахнете.",
   "Hold it again to show the original": "Задръжте го отново, за да се покаже оригиналът",
   "Hold it again to translate it": "Задръжте го отново, за да го преведете",
   "Hold the button to pick just once, without changing this.": "Задръжте бутона, за да изберете само за този път, без да променяте настройката.",
@@ -232,7 +234,6 @@
   "Indonesian": "индонезийски",
   "Install": "Инсталирай",
   "Install Revenge and Vendetta color themes from a link.": "Инсталирайте цветни теми за Revenge и Vendetta от връзка.",
-  "Installed themes": "Инсталирани теми",
   "Installing…": "Инсталиране…",
   "Into {language}": "На {language}",
   "Irish": "ирландски",
@@ -322,9 +323,6 @@
   "No pins yet": "Още няма закачени",
   "No reviews yet.": "Още няма отзиви.",
   "No saved accounts yet": "Все още няма запазени профили",
-  "No themes installed yet": "Все още няма инсталирани теми",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Все още няма инсталирани теми. Поставете .json връзка към тема по-долу, за да добавите такава.",
-  "No themes installed.": "Няма инсталирани теми.",
   "Norwegian": "норвежки",
   "Not loaded yet": "Още не е заредено",
   "Not now": "Не сега",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Другите не виждат, когато пишете.",
   "Outside Discord": "Извън Discord",
   "Paste": "Постави",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Поставете по-долу директна връзка към .json тема за Revenge или Vendetta.",
   "Paste from clipboard": "Поставяне от клипборда",
   "Paste it into a note or a message to yourself.": "Поставете го в бележка или в съобщение до себе си.",
   "Pastel name colors": "Пастелни цветове на имената",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Докосни Nitro емоджито отдолу, за да го изпратиш като линк",
   "Tap the Nitro sticker below to send it as a link": "Докосни Nitro стикера отдолу, за да го изпратиш като линк",
   "Tap the emoji button in the message bar to try a sticker": "Докосни бутона за емоджита в лентата за съобщения, за да пробваш стикер",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Докоснете активната тема, за да върнете цветовете на Discord. Задръжте тема, за да я премахнете.",
   "Tap to add a review": "Докоснете, за да добавите отзив",
   "Tap to change Alex's devices": "Докоснете, за да смените устройствата на Алекс",
   "Tap to close server reviews.": "Докоснете, за да затворите отзивите за сървъра.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Непреведеното съобщение като цитат под превода.",
   "Theme JSON link": "JSON връзка към темата",
   "Theme download timed out.": "Времето за изтегляне на темата изтече.",
+  "Themes": "Теми",
   "Themes cleared": "Темите са изчистени",
   "Then Sam says it starts at 6 AM": "После Сам казва, че започва в 6:00",
   "Then you open the sticker picker": "След това отваряте менюто със стикери",
@@ -808,14 +805,9 @@
    "other": "{n} сървъра са отбелязани като прочетени"
   },
   "{n} theme": "{n} тема",
-  "{n} theme installed.": "Инсталирана е {n} тема.",
   "{n} themes": {
    "one": "{n} тема",
    "other": "{n} теми"
-  },
-  "{n} themes installed.": {
-   "one": "Инсталирана е {n} тема.",
-   "other": "Инсталирани са {n} теми."
   },
   "{n} translation": "{n} превод",
   "{n} translations": {

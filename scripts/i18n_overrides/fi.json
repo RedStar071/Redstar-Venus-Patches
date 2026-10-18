@@ -190,7 +190,6 @@
  "In use": "Käytössä",
  "Install": "Asenna",
  "Install Revenge and Vendetta color themes from a link.": "Asenna Revenge- ja Vendetta-väriteemoja linkistä.",
- "Installed themes": "Asennetut teemat",
  "Installing…": "Asennetaan…",
  "Into {language}": "Kielelle {language}",
  "It opens for editing, so you can fix it": "Viesti avautuu muokattavaksi, jotta voit korjata sen",
@@ -262,9 +261,6 @@
  "No pins yet": "Ei vielä kiinnityksiä",
  "No reviews yet.": "Ei vielä arvosteluja.",
  "No saved accounts yet": "Ei vielä tallennettuja tilejä",
- "No themes installed yet": "Ei vielä asennettuja teemoja",
- "No themes installed yet. Paste a theme .json link below to add one.": "Teemoja ei ole vielä asennettu. Lisää teema liittämällä sen .json-linkki alle.",
- "No themes installed.": "Ei asennettuja teemoja.",
  "Not loaded yet": "Ei vielä ladattu",
  "Nothing happens: you turned its details off": "Mitään ei tapahdu, koska otit kanavan tiedot pois käytöstä",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Mitään ei seurata, ja kaikki toimii ilman verkkoyhteyttä lukuun ottamatta ominaisuuksia, joiden kohdalla mainitaan ulkoinen palvelu.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Muut eivät näe, kun kirjoitat.",
  "Outside Discord": "Discordin ulkopuolella",
  "Paste": "Liitä",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Liitä alle suora linkki Revenge- tai Vendetta-teeman .json-tiedostoon.",
  "Pastel name colors": "Pastellivärit nimille",
  "Pastel names": "Pastellinimet",
  "Pastel names preview": "Pastellinimien esikatselu",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Lähetä alla oleva Nitro-emoji linkkinä napauttamalla sitä",
  "Tap the Nitro sticker below to send it as a link": "Lähetä alla oleva Nitro-tarra linkkinä napauttamalla sitä",
  "Tap the emoji button in the message bar to try a sticker": "Kokeile tarraa napauttamalla viestipalkin emojipainiketta",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Palaa Discordin väreihin napauttamalla käytössä olevaa teemaa. Poista teema pitämällä sitä painettuna.",
  "Tap to add a review": "Lisää arvostelu napauttamalla",
  "Tap to change Alex's devices": "Vaihda Alexin laitteita napauttamalla",
  "Tap to close server reviews.": "Sulje palvelimen arvostelut napauttamalla.",
@@ -652,11 +646,6 @@
   "one": "{n} palvelin merkittiin luetuksi",
   "other": "{n} palvelinta merkittiin luetuiksi"
  },
- "{n} theme installed.": "{n} teema asennettu.",
- "{n} themes installed.": {
-  "one": "{n} teema asennettu.",
-  "other": "{n} teemaa asennettu."
- },
  "{n} translation": "{n} käännös",
  "{n} translations": {
   "one": "{n} käännös",
@@ -746,5 +735,8 @@
   "one": "{n} ominaisuus otettu käyttöön",
   "other": "{n} ominaisuutta otettu käyttöön"
  },
- "{n} feature turned on": "{n} ominaisuus otettu käyttöön"
+ "{n} feature turned on": "{n} ominaisuus otettu käyttöön",
+ "Themes": "Teemat",
+ "Default": "Oletus",
+ "Hold a theme to remove it.": "Poista teema pitämällä sitä painettuna."
 }

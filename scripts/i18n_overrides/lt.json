@@ -193,7 +193,6 @@
  "In use": "Naudojama",
  "Install": "Įdiegti",
  "Install Revenge and Vendetta color themes from a link.": "Įdiek Revenge ir Vendetta spalvų temas iš nuorodos.",
- "Installed themes": "Įdiegtos temos",
  "Installing…": "Diegiama…",
  "Into {language}": "Į kalbą: {language}",
  "It opens for editing, so you can fix it": "Ji atsidaro redagavimui, kad galėtum ją pataisyti",
@@ -265,9 +264,6 @@
  "No pins yet": "Prisegtų žinučių dar nėra",
  "No reviews yet.": "Atsiliepimų dar nėra.",
  "No saved accounts yet": "Išsaugotų paskyrų dar nėra",
- "No themes installed yet": "Įdiegtų temų dar nėra",
- "No themes installed yet. Paste a theme .json link below to add one.": "Įdiegtų temų dar nėra. Žemiau įklijuok temos .json nuorodą, kad ją pridėtum.",
- "No themes installed.": "Nėra įdiegtų temų.",
  "Not loaded yet": "Dar neįkelta",
  "Nothing happens: you turned its details off": "Nieko neįvyksta: išjungei kanalo informacijos rodymą",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Niekas nėra sekamas ir viskas veikia be interneto, išskyrus funkcijas, kuriose nurodyta, kad jos naudoja išorinę paslaugą.",
@@ -309,7 +305,6 @@
  "Others won't see when you're typing.": "Kiti nematys, kai rašai.",
  "Outside Discord": "Už Discord ribų",
  "Paste": "Įklijuoti",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Žemiau įklijuok tiesioginę nuorodą į Revenge arba Vendetta .json temą.",
  "Pastel name colors": "Pastelinės vardų spalvos",
  "Pastel names": "Pasteliniai vardai",
  "Pastel names preview": "Pastelinių vardų peržiūra",
@@ -457,7 +452,6 @@
  "Tap the Nitro emoji below to send it as a link": "Paliesk Nitro jaustuką žemiau, kad išsiųstum jį kaip nuorodą",
  "Tap the Nitro sticker below to send it as a link": "Paliesk Nitro lipduką žemiau, kad išsiųstum jį kaip nuorodą",
  "Tap the emoji button in the message bar to try a sticker": "Paliesk jaustuko mygtuką žinutės juostoje, kad išbandytum lipduką",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Bakstelėk naudojamą temą, kad grįžtum prie Discord spalvų. Palaikyk temą, kad ją pašalintum.",
  "Tap to add a review": "Bakstelėk, kad parašytum atsiliepimą",
  "Tap to change Alex's devices": "Bakstelėk, kad pakeistum Alex įrenginius",
  "Tap to close server reviews.": "Bakstelėk, kad uždarytum serverio atsiliepimus.",
@@ -671,12 +665,6 @@
   "few": "{n} serveriai pažymėti kaip perskaityti",
   "other": "{n} serverių pažymėta kaip perskaityta"
  },
- "{n} theme installed.": "Įdiegta {n} tema.",
- "{n} themes installed.": {
-  "one": "Įdiegta {n} tema.",
-  "few": "Įdiegtos {n} temos.",
-  "other": "Įdiegta {n} temų."
- },
  "{n} translation": "{n} vertimas",
  "{n} translations": {
   "one": "{n} vertimas",
@@ -772,5 +760,8 @@
   "few": "Įjungtos {n} funkcijos",
   "other": "Įjungta {n} funkcijų"
  },
- "{n} feature turned on": "Įjungta {n} funkcija"
+ "{n} feature turned on": "Įjungta {n} funkcija",
+ "Themes": "Temos",
+ "Default": "Numatytoji",
+ "Hold a theme to remove it.": "Palaikyk temą, kad ją pašalintum."
 }

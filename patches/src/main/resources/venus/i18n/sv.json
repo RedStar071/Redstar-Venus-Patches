@@ -115,6 +115,7 @@
   "Czech": "tjeckiska",
   "DM": "DM",
   "Danish": "danska",
+  "Default": "Standard",
   "Delete a kept message again to hide just that one.": "Ta bort ett sparat meddelande en gång till för att dölja just det meddelandet.",
   "Delete review": "Ta bort recension",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Borttagna och redigerade meddelanden finns kvar när Discord stängs. Sparas bara på den här telefonen, för det här kontot.",
@@ -211,6 +212,7 @@
   "Hindi": "hindi",
   "Hold a bio to select and copy it.": "Håll in en profilbeskrivning för att markera och kopiera den.",
   "Hold a message and tap Translate. Nothing else is sent.": "Håll in ett meddelande och tryck på Översätt. Inget annat skickas.",
+  "Hold a theme to remove it.": "Håll in ett tema för att ta bort det.",
   "Hold it again to show the original": "Håll in det igen för att visa originalet",
   "Hold it again to translate it": "Håll in det igen för att översätta det",
   "Hold the button to pick just once, without changing this.": "Håll in knappen för att välja bara den här gången, utan att ändra inställningen.",
@@ -232,7 +234,6 @@
   "Indonesian": "indonesiska",
   "Install": "Installera",
   "Install Revenge and Vendetta color themes from a link.": "Installera färgteman från Revenge och Vendetta via en länk.",
-  "Installed themes": "Installerade teman",
   "Installing…": "Installerar…",
   "Into {language}": "Till {language}",
   "Irish": "iriska",
@@ -322,9 +323,6 @@
   "No pins yet": "Inget nålat än",
   "No reviews yet.": "Inga recensioner än.",
   "No saved accounts yet": "Inga sparade konton än",
-  "No themes installed yet": "Inga teman installerade än",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Inga teman installerade än. Klistra in en länk till en .json-temafil nedan för att lägga till ett.",
-  "No themes installed.": "Inga teman installerade.",
   "Norwegian": "norska",
   "Not loaded yet": "Inte inläst än",
   "Not now": "Inte nu",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Andra ser inte när du skriver.",
   "Outside Discord": "Utanför Discord",
   "Paste": "Klistra in",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Klistra in en direktlänk till ett .json-tema för Revenge eller Vendetta nedan.",
   "Paste from clipboard": "Klistra in från urklipp",
   "Paste it into a note or a message to yourself.": "Klistra in den i en anteckning eller ett meddelande till dig själv.",
   "Pastel name colors": "Pastellfärger på namn",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Tryck på Nitro-emojin nedan för att skicka den som en länk",
   "Tap the Nitro sticker below to send it as a link": "Tryck på Nitro-dekalen nedan för att skicka den som en länk",
   "Tap the emoji button in the message bar to try a sticker": "Tryck på emojiknappen i meddelandefältet för att prova en dekal",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tryck på det aktiva temat för att återgå till Discords färger. Håll in ett tema för att ta bort det.",
   "Tap to add a review": "Tryck för att skriva en recension",
   "Tap to change Alex's devices": "Tryck för att byta Alex enheter",
   "Tap to close server reviews.": "Tryck för att stänga serverrecensioner.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Det oöversatta meddelandet, i ett citat under översättningen.",
   "Theme JSON link": "Länk till tema-JSON",
   "Theme download timed out.": "Tidsgränsen för nedladdning av temat överskreds.",
+  "Themes": "Teman",
   "Themes cleared": "Teman rensade",
   "Then Sam says it starts at 6 AM": "Sedan skriver Sam att det börjar kl. 18",
   "Then you open the sticker picker": "Sedan öppnar du klistermärkesväljaren",
@@ -808,14 +805,9 @@
    "other": "{n} servrar markerades som lästa"
   },
   "{n} theme": "{n} tema",
-  "{n} theme installed.": "{n} tema installerat.",
   "{n} themes": {
    "one": "{n} tema",
    "other": "{n} teman"
-  },
-  "{n} themes installed.": {
-   "one": "{n} tema installerat.",
-   "other": "{n} teman installerade."
   },
   "{n} translation": "{n} översättning",
   "{n} translations": {

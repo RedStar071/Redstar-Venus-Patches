@@ -115,6 +115,7 @@
   "Czech": "ceco",
   "DM": "MD",
   "Danish": "danese",
+  "Default": "Predefinito",
   "Delete a kept message again to hide just that one.": "Elimina di nuovo un messaggio conservato per nascondere solo quello.",
   "Delete review": "Elimina recensione",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "I messaggi eliminati e modificati restano visibili anche dopo aver chiuso Discord. Salvati solo su questo telefono, per questo account.",
@@ -211,6 +212,7 @@
   "Hindi": "hindi",
   "Hold a bio to select and copy it.": "Tieni premuta una bio per selezionarla e copiarla.",
   "Hold a message and tap Translate. Nothing else is sent.": "Tieni premuto un messaggio e tocca Traduci. Non viene inviato nient'altro.",
+  "Hold a theme to remove it.": "Tieni premuto un tema per rimuoverlo.",
   "Hold it again to show the original": "Tienilo premuto di nuovo per mostrare l'originale",
   "Hold it again to translate it": "Tienilo premuto di nuovo per tradurlo",
   "Hold the button to pick just once, without changing this.": "Tieni premuto il pulsante per scegliere solo per questa volta, senza cambiare questa impostazione.",
@@ -232,7 +234,6 @@
   "Indonesian": "indonesiano",
   "Install": "Installa",
   "Install Revenge and Vendetta color themes from a link.": "Installa temi di colore Revenge e Vendetta da un link.",
-  "Installed themes": "Temi installati",
   "Installing…": "Installazione…",
   "Into {language}": "In {language}",
   "Irish": "irlandese",
@@ -322,9 +323,6 @@
   "No pins yet": "Ancora nessun messaggio fissato",
   "No reviews yet.": "Ancora nessuna recensione.",
   "No saved accounts yet": "Ancora nessun account salvato",
-  "No themes installed yet": "Ancora nessun tema installato",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Ancora nessun tema installato. Incolla qui sotto il link .json di un tema per aggiungerne uno.",
-  "No themes installed.": "Nessun tema installato.",
   "Norwegian": "norvegese",
   "Not loaded yet": "Non ancora caricato",
   "Not now": "Non ora",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Gli altri non vedranno quando stai scrivendo.",
   "Outside Discord": "Fuori da Discord",
   "Paste": "Incolla",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Incolla qui sotto un link diretto a un tema .json di Revenge o Vendetta.",
   "Paste from clipboard": "Incolla dagli appunti",
   "Paste it into a note or a message to yourself.": "Incollalo in una nota o in un messaggio a te stesso.",
   "Pastel name colors": "Colori pastello per i nomi",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Tocca l'emoji Nitro qui sotto per inviarla come link",
   "Tap the Nitro sticker below to send it as a link": "Tocca l'adesivo Nitro qui sotto per inviarlo come link",
   "Tap the emoji button in the message bar to try a sticker": "Tocca il pulsante delle emoji nella barra dei messaggi per provare un adesivo",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tocca il tema in uso per tornare ai colori di Discord. Tieni premuto un tema per rimuoverlo.",
   "Tap to add a review": "Tocca per scrivere una recensione",
   "Tap to change Alex's devices": "Tocca per cambiare i dispositivi di Alex",
   "Tap to close server reviews.": "Tocca per chiudere le recensioni del server.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Il messaggio non tradotto, mostrato come citazione sotto la traduzione.",
   "Theme JSON link": "Link JSON del tema",
   "Theme download timed out.": "Tempo scaduto per il download del tema.",
+  "Themes": "Temi",
   "Themes cleared": "Temi rimossi",
   "Then Sam says it starts at 6 AM": "Poi Sam dice che si inizia alle 6:00",
   "Then you open the sticker picker": "Poi apri il selettore degli adesivi",
@@ -808,14 +805,9 @@
    "other": "{n} server sono stati segnati come letti"
   },
   "{n} theme": "{n} tema",
-  "{n} theme installed.": "{n} tema installato.",
   "{n} themes": {
    "one": "{n} tema",
    "other": "{n} temi"
-  },
-  "{n} themes installed.": {
-   "one": "{n} tema installato.",
-   "other": "{n} temi installati."
   },
   "{n} translation": "{n} traduzione",
   "{n} translations": {

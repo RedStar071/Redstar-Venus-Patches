@@ -115,6 +115,7 @@
   "Czech": "tchèque",
   "DM": "MP",
   "Danish": "danois",
+  "Default": "Par défaut",
   "Delete a kept message again to hide just that one.": "Supprimez à nouveau un message conservé pour ne masquer que celui-ci.",
   "Delete review": "Supprimer l'avis",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Les messages supprimés et modifiés sont conservés même après la fermeture de Discord. Enregistrés uniquement sur ce téléphone, pour ce compte.",
@@ -211,6 +212,7 @@
   "Hindi": "hindi",
   "Hold a bio to select and copy it.": "Maintenez une bio pour la sélectionner et la copier.",
   "Hold a message and tap Translate. Nothing else is sent.": "Maintenez un message appuyé et appuyez sur Traduire. Rien d'autre n'est envoyé.",
+  "Hold a theme to remove it.": "Maintenez un thème appuyé pour le supprimer.",
   "Hold it again to show the original": "Maintenez-le à nouveau appuyé pour voir l'original",
   "Hold it again to translate it": "Maintenez-le à nouveau appuyé pour le traduire",
   "Hold the button to pick just once, without changing this.": "Maintenez le bouton appuyé pour choisir une seule fois, sans modifier ce paramètre.",
@@ -232,7 +234,6 @@
   "Indonesian": "indonésien",
   "Install": "Installer",
   "Install Revenge and Vendetta color themes from a link.": "Installez des thèmes de couleurs Revenge et Vendetta depuis un lien.",
-  "Installed themes": "Thèmes installés",
   "Installing…": "Installation…",
   "Into {language}": "En {language}",
   "Irish": "irlandais",
@@ -322,9 +323,6 @@
   "No pins yet": "Aucun message épinglé",
   "No reviews yet.": "Aucun avis pour le moment.",
   "No saved accounts yet": "Aucun compte enregistré pour le moment",
-  "No themes installed yet": "Aucun thème installé pour le moment",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Aucun thème installé pour le moment. Collez un lien vers un fichier .json ci-dessous pour en ajouter un.",
-  "No themes installed.": "Aucun thème installé.",
   "Norwegian": "norvégien",
   "Not loaded yet": "Pas encore chargé",
   "Not now": "Pas maintenant",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Les autres ne voient pas quand vous écrivez.",
   "Outside Discord": "En dehors de Discord",
   "Paste": "Coller",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Collez ci-dessous un lien direct vers un thème .json Revenge ou Vendetta.",
   "Paste from clipboard": "Coller depuis le presse-papiers",
   "Paste it into a note or a message to yourself.": "Collez-la dans une note ou un message à vous-même.",
   "Pastel name colors": "Couleurs pastel pour les noms",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Touche l'émoji Nitro ci-dessous pour l'envoyer sous forme de lien",
   "Tap the Nitro sticker below to send it as a link": "Touche l'autocollant Nitro ci-dessous pour l'envoyer sous forme de lien",
   "Tap the emoji button in the message bar to try a sticker": "Touche le bouton émoji dans la barre de message pour essayer un autocollant",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Appuyez sur le thème actif pour revenir aux couleurs de Discord. Maintenez un thème appuyé pour le supprimer.",
   "Tap to add a review": "Appuyez pour laisser un avis",
   "Tap to change Alex's devices": "Appuyez pour changer les appareils d'Alex",
   "Tap to close server reviews.": "Appuyez pour fermer les avis du serveur.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Le message non traduit, affiché en citation sous la traduction.",
   "Theme JSON link": "Lien JSON du thème",
   "Theme download timed out.": "Le téléchargement du thème a expiré.",
+  "Themes": "Thèmes",
   "Themes cleared": "Thèmes supprimés",
   "Then Sam says it starts at 6 AM": "Puis Sam répond que ça commence à 6 h",
   "Then you open the sticker picker": "Ensuite, vous ouvrez le sélecteur d'autocollants",
@@ -823,14 +820,9 @@
    "other": "{n} serveurs ont été marqués comme lus"
   },
   "{n} theme": "{n} thème",
-  "{n} theme installed.": "{n} thème installé.",
   "{n} themes": {
    "one": "{n} thème",
    "other": "{n} thèmes"
-  },
-  "{n} themes installed.": {
-   "one": "{n} thème installé.",
-   "other": "{n} thèmes installés."
   },
   "{n} translation": "{n} traduction",
   "{n} translations": {

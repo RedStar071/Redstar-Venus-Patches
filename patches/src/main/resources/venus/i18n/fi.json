@@ -115,6 +115,7 @@
   "Czech": "tšekki",
   "DM": "YV",
   "Danish": "tanska",
+  "Default": "Oletus",
   "Delete a kept message again to hide just that one.": "Poista säilytetty viesti uudelleen piilottaaksesi vain kyseisen viestin.",
   "Delete review": "Poista arvostelu",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Poistetut ja muokatut viestit säilyvät, vaikka sulkisit Discordin. Ne tallennetaan vain tähän puhelimeen tälle tilille.",
@@ -211,6 +212,7 @@
   "Hindi": "hindi",
   "Hold a bio to select and copy it.": "Pidä profiilikuvausta painettuna valitaksesi ja kopioidaksesi sen.",
   "Hold a message and tap Translate. Nothing else is sent.": "Pidä viestiä painettuna ja napauta Käännä. Mitään muuta ei lähetetä.",
+  "Hold a theme to remove it.": "Poista teema pitämällä sitä painettuna.",
   "Hold it again to show the original": "Näytä alkuperäinen pitämällä viestiä uudelleen painettuna",
   "Hold it again to translate it": "Käännä viesti pitämällä sitä uudelleen painettuna",
   "Hold the button to pick just once, without changing this.": "Pidä painiketta painettuna valitaksesi vain kerran muuttamatta tätä asetusta.",
@@ -232,7 +234,6 @@
   "Indonesian": "indonesia",
   "Install": "Asenna",
   "Install Revenge and Vendetta color themes from a link.": "Asenna Revenge- ja Vendetta-väriteemoja linkistä.",
-  "Installed themes": "Asennetut teemat",
   "Installing…": "Asennetaan…",
   "Into {language}": "Kielelle {language}",
   "Irish": "iiri",
@@ -322,9 +323,6 @@
   "No pins yet": "Ei vielä kiinnityksiä",
   "No reviews yet.": "Ei vielä arvosteluja.",
   "No saved accounts yet": "Ei vielä tallennettuja tilejä",
-  "No themes installed yet": "Ei vielä asennettuja teemoja",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Teemoja ei ole vielä asennettu. Lisää teema liittämällä sen .json-linkki alle.",
-  "No themes installed.": "Ei asennettuja teemoja.",
   "Norwegian": "norja",
   "Not loaded yet": "Ei vielä ladattu",
   "Not now": "Ei nyt",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Muut eivät näe, kun kirjoitat.",
   "Outside Discord": "Discordin ulkopuolella",
   "Paste": "Liitä",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Liitä alle suora linkki Revenge- tai Vendetta-teeman .json-tiedostoon.",
   "Paste from clipboard": "Liitä leikepöydältä",
   "Paste it into a note or a message to yourself.": "Liitä se muistiinpanoon tai viestiin itsellesi.",
   "Pastel name colors": "Pastellivärit nimille",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Lähetä alla oleva Nitro-emoji linkkinä napauttamalla sitä",
   "Tap the Nitro sticker below to send it as a link": "Lähetä alla oleva Nitro-tarra linkkinä napauttamalla sitä",
   "Tap the emoji button in the message bar to try a sticker": "Kokeile tarraa napauttamalla viestipalkin emojipainiketta",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Palaa Discordin väreihin napauttamalla käytössä olevaa teemaa. Poista teema pitämällä sitä painettuna.",
   "Tap to add a review": "Lisää arvostelu napauttamalla",
   "Tap to change Alex's devices": "Vaihda Alexin laitteita napauttamalla",
   "Tap to close server reviews.": "Sulje palvelimen arvostelut napauttamalla.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Alkuperäinen viesti lainauksena käännöksen alla.",
   "Theme JSON link": "Teeman JSON-linkki",
   "Theme download timed out.": "Teeman lataus aikakatkaistiin.",
+  "Themes": "Teemat",
   "Themes cleared": "Teemat poistettu",
   "Then Sam says it starts at 6 AM": "Sitten Sam vastaa, että se alkaa klo 6",
   "Then you open the sticker picker": "Sitten avaat tarravalitsimen",
@@ -823,14 +820,9 @@
    "other": "{n} palvelinta merkittiin luetuiksi"
   },
   "{n} theme": "{n} teema",
-  "{n} theme installed.": "{n} teema asennettu.",
   "{n} themes": {
    "one": "{n} teema",
    "other": "{n} teemaa"
-  },
-  "{n} themes installed.": {
-   "one": "{n} teema asennettu.",
-   "other": "{n} teemaa asennettu."
   },
   "{n} translation": "{n} käännös",
   "{n} translations": {

@@ -190,7 +190,6 @@
  "In use": "Използва се",
  "Install": "Инсталирай",
  "Install Revenge and Vendetta color themes from a link.": "Инсталирайте цветни теми за Revenge и Vendetta от връзка.",
- "Installed themes": "Инсталирани теми",
  "Installing…": "Инсталиране…",
  "Into {language}": "На {language}",
  "It opens for editing, so you can fix it": "Отваря се за редакция, за да го поправите",
@@ -262,9 +261,6 @@
  "No pins yet": "Още няма закачени",
  "No reviews yet.": "Още няма отзиви.",
  "No saved accounts yet": "Все още няма запазени профили",
- "No themes installed yet": "Все още няма инсталирани теми",
- "No themes installed yet. Paste a theme .json link below to add one.": "Все още няма инсталирани теми. Поставете .json връзка към тема по-долу, за да добавите такава.",
- "No themes installed.": "Няма инсталирани теми.",
  "Not loaded yet": "Още не е заредено",
  "Nothing happens: you turned its details off": "Нищо не се случва: изключили сте подробностите му",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Нищо не се проследява и всичко работи офлайн, освен функциите, за които е посочено, че ползват външна услуга.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Другите не виждат, когато пишете.",
  "Outside Discord": "Извън Discord",
  "Paste": "Постави",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Поставете по-долу директна връзка към .json тема за Revenge или Vendetta.",
  "Pastel name colors": "Пастелни цветове на имената",
  "Pastel names": "Пастелни имена",
  "Pastel names preview": "Преглед на пастелните имена",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Докосни Nitro емоджито отдолу, за да го изпратиш като линк",
  "Tap the Nitro sticker below to send it as a link": "Докосни Nitro стикера отдолу, за да го изпратиш като линк",
  "Tap the emoji button in the message bar to try a sticker": "Докосни бутона за емоджита в лентата за съобщения, за да пробваш стикер",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Докоснете активната тема, за да върнете цветовете на Discord. Задръжте тема, за да я премахнете.",
  "Tap to add a review": "Докоснете, за да добавите отзив",
  "Tap to change Alex's devices": "Докоснете, за да смените устройствата на Алекс",
  "Tap to close server reviews.": "Докоснете, за да затворите отзивите за сървъра.",
@@ -652,11 +646,6 @@
   "one": "{n} сървър е отбелязан като прочетен",
   "other": "{n} сървъра са отбелязани като прочетени"
  },
- "{n} theme installed.": "Инсталирана е {n} тема.",
- "{n} themes installed.": {
-  "one": "Инсталирана е {n} тема.",
-  "other": "Инсталирани са {n} теми."
- },
  "{n} translation": "{n} превод",
  "{n} translations": {
   "one": "{n} превод",
@@ -746,5 +735,8 @@
   "one": "{n} функция е включена",
   "other": "{n} функции са включени"
  },
- "{n} feature turned on": "{n} функция е включена"
+ "{n} feature turned on": "{n} функция е включена",
+ "Themes": "Теми",
+ "Default": "По подразбиране",
+ "Hold a theme to remove it.": "Задръжте тема, за да я премахнете."
 }

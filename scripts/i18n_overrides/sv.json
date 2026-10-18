@@ -190,7 +190,6 @@
  "In use": "Används",
  "Install": "Installera",
  "Install Revenge and Vendetta color themes from a link.": "Installera färgteman från Revenge och Vendetta via en länk.",
- "Installed themes": "Installerade teman",
  "Installing…": "Installerar…",
  "Into {language}": "Till {language}",
  "It opens for editing, so you can fix it": "Det öppnas för redigering så att du kan ändra det",
@@ -262,9 +261,6 @@
  "No pins yet": "Inget nålat än",
  "No reviews yet.": "Inga recensioner än.",
  "No saved accounts yet": "Inga sparade konton än",
- "No themes installed yet": "Inga teman installerade än",
- "No themes installed yet. Paste a theme .json link below to add one.": "Inga teman installerade än. Klistra in en länk till en .json-temafil nedan för att lägga till ett.",
- "No themes installed.": "Inga teman installerade.",
  "Not loaded yet": "Inte inläst än",
  "Nothing happens: you turned its details off": "Inget händer: du har stängt av visning av detaljer",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Inget spåras, och allt fungerar offline förutom de funktioner där det står att en extern tjänst används.",
@@ -306,7 +302,6 @@
  "Others won't see when you're typing.": "Andra ser inte när du skriver.",
  "Outside Discord": "Utanför Discord",
  "Paste": "Klistra in",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Klistra in en direktlänk till ett .json-tema för Revenge eller Vendetta nedan.",
  "Pastel name colors": "Pastellfärger på namn",
  "Pastel names": "Pastellnamn",
  "Pastel names preview": "Förhandsvisning av pastellnamn",
@@ -452,7 +447,6 @@
  "Tap the Nitro emoji below to send it as a link": "Tryck på Nitro-emojin nedan för att skicka den som en länk",
  "Tap the Nitro sticker below to send it as a link": "Tryck på Nitro-dekalen nedan för att skicka den som en länk",
  "Tap the emoji button in the message bar to try a sticker": "Tryck på emojiknappen i meddelandefältet för att prova en dekal",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Tryck på det aktiva temat för att återgå till Discords färger. Håll in ett tema för att ta bort det.",
  "Tap to add a review": "Tryck för att skriva en recension",
  "Tap to change Alex's devices": "Tryck för att byta Alex enheter",
  "Tap to close server reviews.": "Tryck för att stänga serverrecensioner.",
@@ -652,11 +646,6 @@
   "one": "{n} server markerades som läst",
   "other": "{n} servrar markerades som lästa"
  },
- "{n} theme installed.": "{n} tema installerat.",
- "{n} themes installed.": {
-  "one": "{n} tema installerat.",
-  "other": "{n} teman installerade."
- },
  "{n} translation": "{n} översättning",
  "{n} translations": {
   "one": "{n} översättning",
@@ -746,5 +735,8 @@
   "one": "{n} funktion påslagen",
   "other": "{n} funktioner påslagna"
  },
- "{n} feature turned on": "{n} funktion påslagen"
+ "{n} feature turned on": "{n} funktion påslagen",
+ "Themes": "Teman",
+ "Default": "Standard",
+ "Hold a theme to remove it.": "Håll in ett tema för att ta bort det."
 }

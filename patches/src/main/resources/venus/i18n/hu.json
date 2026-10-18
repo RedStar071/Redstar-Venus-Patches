@@ -115,6 +115,7 @@
   "Czech": "cseh",
   "DM": "PÜ",
   "Danish": "dán",
+  "Default": "Alapértelmezett",
   "Delete a kept message again to hide just that one.": "Törölj újra egy megőrzött üzenetet, ha csak azt az egyet szeretnéd elrejteni.",
   "Delete review": "Értékelés törlése",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "A törölt és szerkesztett üzenetek a Discord bezárása után is megmaradnak. Csak ezen a telefonon, ehhez a fiókhoz mentve.",
@@ -211,6 +212,7 @@
   "Hindi": "hindi",
   "Hold a bio to select and copy it.": "Tarts lenyomva egy profilleírást a kijelöléshez és másoláshoz.",
   "Hold a message and tap Translate. Nothing else is sent.": "Tarts lenyomva egy üzenetet, és koppints a Fordítás gombra. Semmi más nem kerül elküldésre.",
+  "Hold a theme to remove it.": "Tartsd lenyomva a témát az eltávolításához.",
   "Hold it again to show the original": "Tartsd lenyomva újra az eredeti szöveg megjelenítéséhez",
   "Hold it again to translate it": "Tartsd lenyomva újra a lefordításához",
   "Hold the button to pick just once, without changing this.": "Tartsd lenyomva a gombot az egyszeri választáshoz a beállítás módosítása nélkül.",
@@ -232,7 +234,6 @@
   "Indonesian": "indonéz",
   "Install": "Telepítés",
   "Install Revenge and Vendetta color themes from a link.": "Revenge- és Vendetta-színtémák telepítése linkről.",
-  "Installed themes": "Telepített témák",
   "Installing…": "Telepítés…",
   "Into {language}": "Erre a nyelvre: {language}",
   "Irish": "ír",
@@ -322,9 +323,6 @@
   "No pins yet": "Még nincs kitűzött üzenet",
   "No reviews yet.": "Még nincsenek értékelések.",
   "No saved accounts yet": "Még nincs mentett fiók",
-  "No themes installed yet": "Még nincs telepített téma",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Még nincs telepített téma. Illessz be alább egy téma .json-linkjét a hozzáadáshoz.",
-  "No themes installed.": "Nincs telepített téma.",
   "Norwegian": "norvég",
   "Not loaded yet": "Még nincs betöltve",
   "Not now": "Most nem",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Mások nem látják, amikor gépelsz.",
   "Outside Discord": "A Discordon kívül",
   "Paste": "Beillesztés",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Illessz be alább egy közvetlen linket egy Revenge- vagy Vendetta-téma .json-fájljához.",
   "Paste from clipboard": "Beillesztés vágólapról",
   "Paste it into a note or a message to yourself.": "Illeszd be egy jegyzetbe vagy egy magadnak küldött üzenetbe.",
   "Pastel name colors": "Pasztell névszínek",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Koppints az alábbi Nitro emojira, hogy linkként küldd el",
   "Tap the Nitro sticker below to send it as a link": "Koppints az alábbi Nitro matricára, hogy linkként küldd el",
   "Tap the emoji button in the message bar to try a sticker": "Koppints az üzenetsáv emoji gombjára egy matrica kipróbálásához",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Koppints az éppen használt témára a Discord színeinek visszaállításához. Tartsd lenyomva a témát az eltávolításához.",
   "Tap to add a review": "Koppints értékelés írásához",
   "Tap to change Alex's devices": "Koppints Alex eszközeinek módosításához",
   "Tap to close server reviews.": "Koppints a szerverértékelések bezárásához.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "A lefordítatlan üzenet idézetként a fordítás alatt.",
   "Theme JSON link": "Téma JSON-linkje",
   "Theme download timed out.": "A téma letöltése időtúllépés miatt megszakadt.",
+  "Themes": "Témák",
   "Themes cleared": "Témák törölve",
   "Then Sam says it starts at 6 AM": "Ezután Sam megírja, hogy reggel 6-kor kezdődik",
   "Then you open the sticker picker": "Ezután megnyitod a matricaválasztót",
@@ -823,14 +820,9 @@
    "other": "{n} szerver olvasottnak jelölve"
   },
   "{n} theme": "{n} téma",
-  "{n} theme installed.": "{n} téma telepítve.",
   "{n} themes": {
    "one": "{n} téma",
    "other": "{n} téma"
-  },
-  "{n} themes installed.": {
-   "one": "{n} téma telepítve.",
-   "other": "{n} téma telepítve."
   },
   "{n} translation": "{n} fordítás",
   "{n} translations": {

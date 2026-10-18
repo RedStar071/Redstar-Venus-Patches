@@ -115,6 +115,7 @@
   "Czech": "Çekçe",
   "DM": "DM",
   "Danish": "Danca",
+  "Default": "Varsayılan",
   "Delete a kept message again to hide just that one.": "Yalnızca o mesajı gizlemek için saklanan bir mesajı tekrar sil.",
   "Delete review": "İncelemeyi sil",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "Silinen ve düzenlenen mesajlar Discord kapatıldığında da korunur. Yalnızca bu telefonda ve bu hesap için kaydedilir.",
@@ -211,6 +212,7 @@
   "Hindi": "Hintçe",
   "Hold a bio to select and copy it.": "Bir biyografiyi seçip kopyalamak için basılı tut.",
   "Hold a message and tap Translate. Nothing else is sent.": "Bir mesajı basılı tutup Çevir'e dokun. Başka hiçbir veri gönderilmez.",
+  "Hold a theme to remove it.": "Bir temayı kaldırmak için basılı tut.",
   "Hold it again to show the original": "Orijinalini görmek için tekrar basılı tut",
   "Hold it again to translate it": "Çevirmek için tekrar basılı tut",
   "Hold the button to pick just once, without changing this.": "Bu ayarı değiştirmeden yalnızca tek seferlik seçmek için düğmeyi basılı tut.",
@@ -232,7 +234,6 @@
   "Indonesian": "Endonezce",
   "Install": "Yükle",
   "Install Revenge and Vendetta color themes from a link.": "Bir bağlantıdan Revenge ve Vendetta renk temaları yükle.",
-  "Installed themes": "Yüklü temalar",
   "Installing…": "Yükleniyor…",
   "Into {language}": "{language} diline",
   "Irish": "İrlandaca",
@@ -322,9 +323,6 @@
   "No pins yet": "Henüz sabitlenen mesaj yok",
   "No reviews yet.": "Henüz inceleme yok.",
   "No saved accounts yet": "Henüz kayıtlı hesap yok",
-  "No themes installed yet": "Henüz yüklü tema yok",
-  "No themes installed yet. Paste a theme .json link below to add one.": "Henüz yüklü tema yok. Eklemek için aşağıya bir .json tema bağlantısı yapıştır.",
-  "No themes installed.": "Yüklü tema yok.",
   "Norwegian": "Norveççe",
   "Not loaded yet": "Henüz yüklenmedi",
   "Not now": "Şimdi değil",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "Yazdığını başkaları görmez.",
   "Outside Discord": "Discord dışında",
   "Paste": "Yapıştır",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "Aşağıya bir Revenge veya Vendetta .json temasının doğrudan bağlantısını yapıştır.",
   "Paste from clipboard": "Panodan yapıştır",
   "Paste it into a note or a message to yourself.": "Bir nota ya da kendine göndereceğin bir mesaja yapıştır.",
   "Pastel name colors": "Pastel isim renkleri",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "Bağlantı olarak göndermek için aşağıdaki Nitro emojisine dokun",
   "Tap the Nitro sticker below to send it as a link": "Bağlantı olarak göndermek için aşağıdaki Nitro çıkartmasına dokun",
   "Tap the emoji button in the message bar to try a sticker": "Çıkartma denemek için mesaj çubuğundaki emoji düğmesine dokun",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Discord'un kendi renklerine dönmek için kullanımdaki temaya dokun. Bir temayı kaldırmak için basılı tut.",
   "Tap to add a review": "İnceleme yazmak için dokun",
   "Tap to change Alex's devices": "Alex'in cihazlarını değiştirmek için dokun",
   "Tap to close server reviews.": "Sunucu incelemelerini kapatmak için dokun.",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "Çevrilmemiş orijinal mesaj, çevirinin altında alıntı olarak gösterilir.",
   "Theme JSON link": "Tema JSON bağlantısı",
   "Theme download timed out.": "Tema indirme işlemi zaman aşımına uğradı.",
+  "Themes": "Temalar",
   "Themes cleared": "Temalar temizlendi",
   "Then Sam says it starts at 6 AM": "Ardından Sam akşam 6'da başlayacağını söyler",
   "Then you open the sticker picker": "Ardından çıkartma seçiciyi açarsın",
@@ -808,14 +805,9 @@
    "other": "{n} sunucu okundu olarak işaretlendi"
   },
   "{n} theme": "{n} tema",
-  "{n} theme installed.": "{n} tema yüklendi.",
   "{n} themes": {
    "one": "{n} tema",
    "other": "{n} tema"
-  },
-  "{n} themes installed.": {
-   "one": "{n} tema yüklendi.",
-   "other": "{n} tema yüklendi."
   },
   "{n} translation": "{n} çeviri",
   "{n} translations": {

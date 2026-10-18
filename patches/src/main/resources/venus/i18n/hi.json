@@ -115,6 +115,7 @@
   "Czech": "चेक",
   "DM": "DM",
   "Danish": "डेनिश",
+  "Default": "डिफ़ॉल्ट",
   "Delete a kept message again to hide just that one.": "सिर्फ़ उस एक रखे गए मैसेज को छिपाने के लिए उसे दोबारा हटाएँ।",
   "Delete review": "रिव्यू हटाएँ",
   "Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.": "हटाए और एडिट किए गए मैसेज Discord बंद करने के बाद भी बने रहते हैं। ये सिर्फ़ इस फ़ोन पर इस अकाउंट के लिए सहेजे जाते हैं।",
@@ -211,6 +212,7 @@
   "Hindi": "हिन्दी",
   "Hold a bio to select and copy it.": "बायो को चुनने और कॉपी करने के लिए उसे दबाकर रखें।",
   "Hold a message and tap Translate. Nothing else is sent.": "किसी मैसेज को दबाकर रखें और 'अनुवाद करें' पर टैप करें। इसके अलावा कुछ नहीं भेजा जाता।",
+  "Hold a theme to remove it.": "किसी थीम को हटाने के लिए उसे दबाकर रखें।",
   "Hold it again to show the original": "मूल मैसेज देखने के लिए इसे फिर से दबाकर रखें",
   "Hold it again to translate it": "अनुवाद करने के लिए इसे फिर से दबाकर रखें",
   "Hold the button to pick just once, without changing this.": "इस सेटिंग को बदले बिना सिर्फ़ एक बार चुनने के लिए बटन को दबाकर रखें।",
@@ -232,7 +234,6 @@
   "Indonesian": "इंडोनेशियाई",
   "Install": "इंस्टॉल करें",
   "Install Revenge and Vendetta color themes from a link.": "लिंक से Revenge और Vendetta कलर थीम इंस्टॉल करें।",
-  "Installed themes": "इंस्टॉल की गई थीम",
   "Installing…": "इंस्टॉल हो रहा है…",
   "Into {language}": "{language} में",
   "Irish": "आयरिश",
@@ -322,9 +323,6 @@
   "No pins yet": "अभी तक कोई पिन नहीं",
   "No reviews yet.": "अभी तक कोई रिव्यू नहीं है।",
   "No saved accounts yet": "अभी तक कोई अकाउंट सेव नहीं है",
-  "No themes installed yet": "अभी तक कोई थीम इंस्टॉल नहीं है",
-  "No themes installed yet. Paste a theme .json link below to add one.": "अभी तक कोई थीम इंस्टॉल नहीं है। थीम जोड़ने के लिए नीचे उसका .json लिंक पेस्ट करें।",
-  "No themes installed.": "कोई थीम इंस्टॉल नहीं है।",
   "Norwegian": "नॉर्वेजियाई",
   "Not loaded yet": "अभी लोड नहीं हुआ",
   "Not now": "अभी नहीं",
@@ -370,7 +368,6 @@
   "Others won't see when you're typing.": "दूसरों को नहीं दिखेगा कि आप टाइप कर रहे हैं।",
   "Outside Discord": "Discord के बाहर",
   "Paste": "पेस्ट करें",
-  "Paste a direct link to a Revenge or Vendetta .json theme below.": "नीचे किसी Revenge या Vendetta .json थीम का सीधा लिंक पेस्ट करें।",
   "Paste from clipboard": "क्लिपबोर्ड से पेस्ट करें",
   "Paste it into a note or a message to yourself.": "इसे किसी नोट में या खुद को भेजे मैसेज में पेस्ट करें।",
   "Pastel name colors": "नामों के लिए पेस्टल रंग",
@@ -552,7 +549,6 @@
   "Tap the Nitro emoji below to send it as a link": "इसे लिंक के रूप में भेजने के लिए नीचे Nitro इमोजी पर टैप करें",
   "Tap the Nitro sticker below to send it as a link": "इसे लिंक के रूप में भेजने के लिए नीचे Nitro स्टिकर पर टैप करें",
   "Tap the emoji button in the message bar to try a sticker": "स्टिकर आज़माने के लिए मैसेज बार में इमोजी बटन पर टैप करें",
-  "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Discord के रंगों पर वापस जाने के लिए अभी लागू थीम पर टैप करें। किसी थीम को हटाने के लिए उसे दबाकर रखें।",
   "Tap to add a review": "रिव्यू जोड़ने के लिए टैप करें",
   "Tap to change Alex's devices": "एलेक्स के डिवाइस बदलने के लिए टैप करें",
   "Tap to close server reviews.": "सर्वर रिव्यू बंद करने के लिए टैप करें।",
@@ -585,6 +581,7 @@
   "The untranslated message, in a quote under the translation.": "बिना अनुवाद वाला मूल मैसेज, अनुवाद के नीचे कोट के रूप में।",
   "Theme JSON link": "थीम का JSON लिंक",
   "Theme download timed out.": "थीम डाउनलोड करने का समय समाप्त हो गया।",
+  "Themes": "थीम",
   "Themes cleared": "थीम हटा दी गईं",
   "Then Sam says it starts at 6 AM": "फिर सैम बताता है कि यह सुबह 6 बजे शुरू होगा",
   "Then you open the sticker picker": "फिर आप स्टिकर पिकर खोलते हैं",
@@ -823,14 +820,9 @@
    "other": "{n} सर्वर पढ़े हुए मार्क किए गए"
   },
   "{n} theme": "{n} थीम",
-  "{n} theme installed.": "{n} थीम इंस्टॉल है।",
   "{n} themes": {
    "one": "{n} थीम",
    "other": "{n} थीम"
-  },
-  "{n} themes installed.": {
-   "one": "{n} थीम इंस्टॉल है।",
-   "other": "{n} थीम इंस्टॉल हैं।"
   },
   "{n} translation": "{n} अनुवाद",
   "{n} translations": {

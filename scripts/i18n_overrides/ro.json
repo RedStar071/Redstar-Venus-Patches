@@ -193,7 +193,6 @@
  "In use": "În uz",
  "Install": "Instalează",
  "Install Revenge and Vendetta color themes from a link.": "Instalează teme de culoare Revenge și Vendetta dintr-un link.",
- "Installed themes": "Teme instalate",
  "Installing…": "Se instalează…",
  "Into {language}": "În {language}",
  "It opens for editing, so you can fix it": "Se deschide pentru editare, ca să-l poți corecta",
@@ -265,9 +264,6 @@
  "No pins yet": "Niciun mesaj fixat încă",
  "No reviews yet.": "Nicio recenzie încă.",
  "No saved accounts yet": "Niciun cont salvat încă",
- "No themes installed yet": "Nicio temă instalată încă",
- "No themes installed yet. Paste a theme .json link below to add one.": "Nicio temă instalată încă. Lipește mai jos un link către o temă .json pentru a o adăuga.",
- "No themes installed.": "Nicio temă instalată.",
  "Not loaded yet": "Neîncărcat încă",
  "Nothing happens: you turned its details off": "Nu se întâmplă nimic: ai dezactivat afișarea detaliilor",
  "Nothing is tracked, and everything works offline except the features that say they use a service.": "Nimic nu este urmărit și totul funcționează offline, cu excepția funcțiilor care menționează explicit că folosesc un serviciu extern.",
@@ -309,7 +305,6 @@
  "Others won't see when you're typing.": "Ceilalți nu vor vedea când scrii.",
  "Outside Discord": "În afara Discord",
  "Paste": "Lipește",
- "Paste a direct link to a Revenge or Vendetta .json theme below.": "Lipește mai jos un link direct către o temă .json Revenge sau Vendetta.",
  "Pastel name colors": "Culori pastelate pentru nume",
  "Pastel names": "Nume pastelate",
  "Pastel names preview": "Previzualizare nume pastelate",
@@ -457,7 +452,6 @@
  "Tap the Nitro emoji below to send it as a link": "Atinge emojiul Nitro de mai jos pentru a-l trimite ca link",
  "Tap the Nitro sticker below to send it as a link": "Atinge abțibildul Nitro de mai jos pentru a-l trimite ca link",
  "Tap the emoji button in the message bar to try a sticker": "Atinge butonul de emoji din bara de mesaje pentru a încerca un abțibild",
- "Tap the theme in use to go back to Discord's colors. Hold a theme to remove it.": "Atinge tema activă pentru a reveni la culorile Discord. Ține apăsată o temă pentru a o elimina.",
  "Tap to add a review": "Atinge pentru a adăuga o recenzie",
  "Tap to change Alex's devices": "Atinge pentru a schimba dispozitivele lui Alex",
  "Tap to close server reviews.": "Atinge pentru a închide recenziile serverului.",
@@ -671,12 +665,6 @@
   "few": "{n} servere au fost marcate ca citite",
   "other": "{n} de servere au fost marcate ca citite"
  },
- "{n} theme installed.": "{n} temă instalată.",
- "{n} themes installed.": {
-  "one": "{n} temă instalată.",
-  "few": "{n} teme instalate.",
-  "other": "{n} de teme instalate."
- },
  "{n} translation": "{n} traducere",
  "{n} translations": {
   "one": "{n} traducere",
@@ -772,5 +760,8 @@
   "few": "{n} funcții activate",
   "other": "{n} de funcții activate"
  },
- "{n} feature turned on": "{n} funcție activată"
+ "{n} feature turned on": "{n} funcție activată",
+ "Themes": "Teme",
+ "Default": "Implicită",
+ "Hold a theme to remove it.": "Ține apăsată o temă pentru a o elimina."
 }
