@@ -934,37 +934,22 @@
         } catch (_) {}
         if (RN.Alert) RN.Alert.alert(title, body, [{text:tr("Later"), style:"cancel"}, {text:tr("Reopen now"), onPress:reopen}]);
     }
-    // A main-list row with its own switch and a separate button that opens more options.
-    // Discord's pressable rows render an element from useTrailing; tapping the row also opens the page.
-    let rowStyles = null;
-    function subpageStyles() {
-        if (rowStyles) return rowStyles;
-        const ui = reviewUI(), c = ui.colors;
-        let hook = null;
-        if (typeof ui.createStyles === "function" && c) try {
-            hook = ui.createStyles({divider:{width:1, height:24, marginHorizontal:12, backgroundColor:c.BORDER_SUBTLE},
-                button:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:c.BACKGROUND_MOD_SUBTLE}});
-        } catch (_) { hook = null; }
-        rowStyles = hook || (() => ({divider:{width:1, height:24, marginHorizontal:12, backgroundColor:"#ffffff1f"},
-            button:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#ffffff14"}}));
-        return rowStyles;
-    }
+    // A main-list row with its own switch and a small arrow to its page. Tapping anywhere else on the row opens the page too,
+    // so the arrow only has to say "there's more": no divider and no filled circle, which used to take a third of the row
+    // and squeeze the title and description into a narrow column.
     let stackNavigation, trailingSwitch, trailingChevron;
     function SubpageTrailing(props) {
         useSettings(props.setting);
-        // Discord's own themed colors; the icon takes its themed default color itself.
-        let styles; try { styles = subpageStyles()(); } catch (_) { styles = null; }
-        styles = styles || {divider:{}, button:{}};
         // Kept once found; a missing one is looked up again next render, in case its module loads later.
         const FormSwitch = trailingSwitch || (trailingSwitch = inspectedExport(6699, "FormSwitch"));
         const Chevron = trailingChevron || (trailingChevron = inspectedExport(6708, "ChevronSmallRightIcon"));
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View;
         const on = !!settings[props.setting];
-        return el(RN.View, {style:{flexDirection:"row", alignItems:"center"}},
+        return el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:2}},
             FormSwitch ? el(FormSwitch, {value:on, accessibilityLabel:props.label, onValueChange:value => setSetting(props.setting, value)}) : null,
-            el(RN.View, {style:styles.divider}),
-            el(Press, {style:styles.button, onPress:props.open, accessibilityRole:"button", accessibilityLabel:tr("More options"),
-                hitSlop:{top:6, bottom:6, left:6, right:6}},
+            // A 24 dp arrow with a full 44 dp touch target, the same arrow Discord puts on rows that open a page.
+            el(Press, {style:{width:24, height:24, alignItems:"center", justifyContent:"center", marginRight:-4}, onPress:props.open,
+                accessibilityRole:"button", accessibilityLabel:tr("More options"), hitSlop:{top:10, bottom:10, left:8, right:10}},
                 Chevron ? el(Chevron, {size:"sm"}) : el(RN.Text, {style:{fontSize:18, color:"#b5bac1"}}, "\u203A")));
     }
     function nativeRegistry(registry) {
