@@ -4543,6 +4543,23 @@
         const clean = normalizeHighlightColor(choice);
         return clean.startsWith("#") ? clean : HIGHLIGHT_COLOR_MAP[clean] || defaultHex;
     }
+    const highlightPairCache = new Map();
+    function highlightCustomPair(choice, defaultHex, mult) {
+        if (!RN || typeof RN.processColor !== "function") return null;
+        if (highlightPairCache.owner !== RN.processColor) {
+            highlightPairCache.clear();
+            highlightPairCache.owner = RN.processColor;
+        }
+        const key = choice + ":" + defaultHex + ":" + mult;
+        const cached = highlightPairCache.get(key);
+        if (cached !== undefined) return cached;
+        const hex = highlightColorHex(choice, defaultHex);
+        const gutter = highlightProcess(hex);
+        const background = highlightProcess(hex + "1a");
+        const pair = gutter == null || background == null ? null : {backgroundColor:background, gutterColor:highlightEncodeGutter(gutter, mult)};
+        highlightPairCache.set(key, pair);
+        return pair;
+    }
     function highlightProcess(colorStr) {
         if (!RN || typeof RN.processColor !== "function") return null;
         if (highlightProcessed.owner !== RN.processColor) {
@@ -4560,12 +4577,6 @@
         if (!Number.isFinite(mult) || mult <= 1) return colorInt;
         const m = Math.max(2, Math.min(8, Math.floor(mult)));
         return ((256 - m) << 24) | (colorInt & 0x00ffffff);
-    }
-    function highlightCustomPair(hex, mult) {
-        const gutter = highlightProcess(hex);
-        const background = highlightProcess(hex + "1a");
-        if (gutter == null || background == null) return null;
-        return {backgroundColor:background, gutterColor:highlightEncodeGutter(gutter, mult)};
     }
     function highlightMentioned(source, message) {
         if (source && source.mentioned || message && message.mentioned) return true;
@@ -4666,8 +4677,7 @@
         if (isDeletedRow && RN && typeof RN.processColor === "function") {
             // Native row highlight schema from RowGeneratorConstants (7379). No injected notice, altered
             // message content, or AutoMod state. Only retained local rows are tinted.
-            const delHex = highlightOn ? highlightColorHex(settings.messageHighlightDeletedColor, "#f23f43") : "#f23f43";
-            const custom = highlightCustomPair(delHex, mult);
+            const custom = highlightCustomPair(highlightOn ? settings.messageHighlightDeletedColor : "default", "#f23f43", mult);
             if (custom) {
                 next = Object.assign({},next,{backgroundHighlight:custom});
             } else {
@@ -4681,8 +4691,7 @@
         } else if (highlightOn && RN && typeof RN.processColor === "function") {
             const existing = next.backgroundHighlight;
             if (isMentionRow && settings.messageHighlightPingColor !== "default") {
-                const pingHex = highlightColorHex(settings.messageHighlightPingColor, "#f0b232");
-                const custom = highlightCustomPair(pingHex, mult);
+                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult);
                 if (custom) next = Object.assign({},next,{backgroundHighlight:custom});
             } else if (existing && typeof existing.gutterColor === "number" && mult > 1) {
                 next = Object.assign({},next,{backgroundHighlight:Object.assign({},existing,{gutterColor:highlightEncodeGutter(existing.gutterColor, mult)})});
