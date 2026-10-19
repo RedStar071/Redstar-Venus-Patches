@@ -7670,12 +7670,21 @@
         parsedColorCache.set(value, hit);
         return hit;
     }
+    const HEX6_CLEAN_RE = /^#[0-9a-f]{6}$/;
+    const HEX8_CLEAN_RE = /^#[0-9a-f]{8}$/;
+    const WHITESPACE_RE = /\s/;
     function parseThemeColorUncached(value) {
+        const len = value.length;
+        if (len === 7 && value.charCodeAt(0) === 35 && HEX6_CLEAN_RE.test(value)) return {hex:value, opacity:1};
+        if (len === 9 && value.charCodeAt(0) === 35 && HEX8_CLEAN_RE.test(value)) {
+            const aFast = parseInt(value.slice(7, 9), 16) / 255;
+            return {hex:value.slice(0, 7), opacity:Math.round(aFast * 10000) / 10000};
+        }
         const s = value.trim();
         if (!s) return null;
         // Hex and keywords never contain spaces, so a value that a theme author wrapped across lines
         // ("#66006\n\n64d") or wrote as "#transparent" still reads as the color they meant.
-        const compact = s.replace(/\s+/g, "");
+        const compact = WHITESPACE_RE.test(s) ? s.replace(/\s+/g, "") : s;
         if (/^#?transparent$/i.test(compact)) return {hex:"#000000", opacity:0};
         let m = /^#([0-9a-f]{3,8})$/i.exec(compact) || /^([0-9a-f]{6}|[0-9a-f]{8})$/i.exec(compact);
         if (m) {
@@ -7683,12 +7692,12 @@
             if (hex.length === 3) return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:1};
             if (hex.length === 4) {
                 const a = parseInt(hex[3] + hex[3], 16) / 255;
-                return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:Number(a.toFixed(4))};
+                return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:Math.round(a * 10000) / 10000};
             }
             if (hex.length === 6) return {hex:"#" + hex, opacity:1};
             if (hex.length === 8) {
                 const a = parseInt(hex.slice(6, 8), 16) / 255;
-                return {hex:"#" + hex.slice(0, 6), opacity:Number(a.toFixed(4))};
+                return {hex:"#" + hex.slice(0, 6), opacity:Math.round(a * 10000) / 10000};
             }
             return null;
         }
@@ -7700,7 +7709,7 @@
             };
             const a = parseAlphaValue(m[4]);
             if (a === null) return null;
-            return {hex:"#" + chan(m[1]) + chan(m[2]) + chan(m[3]), opacity:Number(a.toFixed(4))};
+            return {hex:"#" + chan(m[1]) + chan(m[2]) + chan(m[3]), opacity:Math.round(a * 10000) / 10000};
         }
         m = /^hsla?\(\s*(-?[0-9.]+)(?:deg)?\s*(?:,\s*|\s+)([0-9.]+)%\s*(?:,\s*|\s+)([0-9.]+)%(?:\s*[,/]\s*([0-9.]+%?))?\s*\)$/i.exec(s);
         if (m) {
@@ -7723,7 +7732,7 @@
             const r = sat === 0 ? lig : hue2rgb(h + 1 / 3);
             const g = sat === 0 ? lig : hue2rgb(h);
             const b = sat === 0 ? lig : hue2rgb(h - 1 / 3);
-            return {hex:"#" + toHex(r) + toHex(g) + toHex(b), opacity:Number(a.toFixed(4))};
+            return {hex:"#" + toHex(r) + toHex(g) + toHex(b), opacity:Math.round(a * 10000) / 10000};
         }
         return null;
     }
