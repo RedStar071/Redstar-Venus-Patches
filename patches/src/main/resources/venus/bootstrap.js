@@ -2514,6 +2514,8 @@
     let reviewToken = "", reviewAccount = null, reviewAuthAttempt = 0, reviewAuthState = "idle", reviewAuthError = "";
     const reviewCache = new Map(), platformWrappers = new WeakMap();
     const REVIEW_API = "https://manti.vendicated.dev/api/reviewdb";
+    // One cache per tone (saturation, lightness), keyed by the seed: building "0.75:0.6:<id>" on every lookup cost
+    // 5.9x more than the lookup itself on Hermes (number-to-string). tests/bench/pastel_cache.js
     const pastelCache = new Map();
     let pastelCacheColor, pastelCacheHash;
     function pastelColor(seed, saturation, lightness) {
@@ -2522,12 +2524,15 @@
         if (pastelCacheColor !== RN.processColor || pastelCacheHash !== pastelHash) {
             pastelCache.clear(); pastelCacheColor = RN.processColor; pastelCacheHash = pastelHash;
         }
-        const cacheKey = saturation + ":" + lightness + ":" + seed;
-        const known = pastelCache.get(cacheKey);
+        const tone = saturation === 0.75 && lightness === 0.6 ? "name" : saturation === 0.85 && lightness === 0.75 ? "mention" :
+            saturation + ":" + lightness;
+        let table = pastelCache.get(tone);
+        if (!table) pastelCache.set(tone, table = new Map());
+        const known = table.get(seed);
         if (known) return known;
         const color = computePastel(seed, saturation, lightness);
-        if (pastelCache.size >= 1024) pastelCache.delete(pastelCache.keys().next().value);
-        pastelCache.set(cacheKey, color);
+        if (table.size >= 1024) table.delete(table.keys().next().value);
+        table.set(seed, color);
         return color;
     }
     function computePastel(seed, saturation, lightness) {
