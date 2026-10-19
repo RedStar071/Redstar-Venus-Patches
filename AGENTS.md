@@ -462,7 +462,8 @@ don't count: V8 has a JIT and Hermes on Android doesn't, so a change that is fas
 (in this repo, a hand-written `isDigits` loop measured slower on Hermes than the `/^\d+$/` regex it replaced). A change that isn't measurably
 faster on Hermes is not an optimization; revert it unless it's also simpler.
 
-1. **Get the VM once per sandbox:** `sh scripts/hbc/hermes_vm.sh`. It downloads a checksum-pinned prebuilt Hermes
+1. **Get the VM once per sandbox:** `sh scripts/hbc/bench_setup.sh [Discord.apkm]` sets up everything below in one go
+   (tools, compacted runtime, VM, Discord bundle). On its own, `sh scripts/hbc/hermes_vm.sh` It downloads a checksum-pinned prebuilt Hermes
    `250829098.0.16` (HBC98, the bytecode version Discord 349.9 runs) to `work/hermes/hermes-vm`, plus the ICU 70 it
    links against. Bytecode always comes from the pinned compiler, `work/tools/hermesc -emit-binary -O` (written by
    `python3 scripts/build.py`). Don't build Hermes yourself.
