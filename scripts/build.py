@@ -131,7 +131,7 @@ function lazyCoreRuntime(code) {
     const declToIdx = new Map();
     for (const it of items) for (const d of it.decls) declToIdx.set(d, it.idx);
 
-    const dsIdx = declToIdx.get('DEFAULT_SETTINGS');
+    const setIdx = declToIdx.get('settings');
     const stIdx = declToIdx.get('status');
     const ddIdx = declToIdx.get('decorateDefine');
     const hdIdx = declToIdx.get('holdDefine');
@@ -139,20 +139,39 @@ function lazyCoreRuntime(code) {
     const exIdx = declToIdx.get('existing');
 
     const eagerSet = new Set();
-    for (let i = 0; i <= dsIdx; i++) eagerSet.add(i);
+    for (let i = 0; i <= setIdx; i++) eagerSet.add(i);
     eagerSet.add(stIdx);
     for (let i = ddIdx; i <= exIdx + 2; i++) eagerSet.add(i);
 
     const stage2Items = items.filter(it => !eagerSet.has(it.idx));
-    const stage2Code = stage2Items.map(it => it.src).join('\n') +
+    let stage2Code = stage2Items.map(it => it.src).join('\n') +
         '\nreturn{listImport:listImport,lengthConstants:lengthConstants,multiAccountConstants:multiAccountConstants,activateModule:activateModule,setSetting:setSetting,formatSize:formatSize,getSize:getSize};';
-    const stage2Fn = '(function(global,features,revision,DISCORD_VERSION,settings,DEFAULT_SETTINGS,status){' + stage2Code + '})';
+    let nrStr = null;
+    const nrAst = acorn.parse('(function(){' + stage2Code + '})', {ecmaVersion: 'latest'});
+    const nrBody = nrAst.body[0].expression.body.body;
+    const nrAssign = nrBody[nrBody.length - 2];
+    let nrLit = null;
+    (function findLit(n) {
+        if (!n || typeof n !== 'object') return;
+        if (n.type === 'Literal' && typeof n.value === 'string' && n.value.length > 10000) { nrLit = n; return; }
+        for (const k of Object.keys(n)) if (k !== 'type' && k !== 'start' && k !== 'end') {
+            const v = n[k];
+            if (Array.isArray(v)) v.forEach(findLit);
+            else findLit(v);
+        }
+    })(nrAssign);
+    if (nrLit) {
+        const off = '(function(){'.length;
+        nrStr = stage2Code.slice(nrLit.start - off, nrLit.end - off);
+        stage2Code = stage2Code.slice(0, nrLit.start - off) + '$nrStr' + stage2Code.slice(nrLit.end - off);
+    }
+    const stage2Fn = '(function(global,features,revision,DISCORD_VERSION,settings,status' + (nrStr ? ',$nrStr' : '') + '){' + stage2Code + '})';
     const stage2Str = JSON.stringify(stage2Fn).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
 
     let eagerHeader = '';
-    for (let i = 0; i <= dsIdx; i++) eagerHeader += items[i].src;
+    for (let i = 0; i <= setIdx; i++) eagerHeader += items[i].src;
     eagerHeader += items[stIdx].src;
-    eagerHeader += 'let pastelHash,$c;function $core(){return $c||($c=(0,eval)(' + stage2Str + ')(global,features,revision,DISCORD_VERSION,settings,DEFAULT_SETTINGS,status));}';
+    eagerHeader += 'let pastelHash,$c;function $core(){return $c||($c=(0,eval)(' + stage2Str + ')(global,features,revision,DISCORD_VERSION,settings,status' + (nrStr ? ',' + nrStr : '') + '));}';
 
     const ddSrc = items[ddIdx].src
         .replace(/listImport\(/g, '$core().listImport(')

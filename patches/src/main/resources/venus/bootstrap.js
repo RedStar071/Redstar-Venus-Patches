@@ -9,14 +9,14 @@
     // IDs past the end read as undefined, so a module added in a later bundle is simply left alone.
     const targetModules = new Uint8Array(32768);
     function selectModules(ids) { for (let i = 0; i < ids.length; i++) targetModules[ids[i]] = 1; }
-    selectModules([17, 19, 120, 1162, 11129, 14409, 14500]);
-    if (features.picker) selectModules([414]);
+    selectModules([17, 19, 120, 1162, 2116, 11129, 14409, 14500]);
+    if (features.picker) targetModules[414] = 1;
     if (features.voice) selectModules([1282, 7268, 7243]);
-    if (features.copyBios) selectModules([10987]);
+    if (features.copyBios) targetModules[10987] = 1;
     if (features.dashless) selectModules([2051, 5043, 5796, 7166]);
     if (features.favouriteAnything) selectModules([12767, 10090, 10093]);
     if (features.freeNitro) selectModules([1377, 2051, 5638, 5687, 4528, 13797, 6840, 6965]);
-    if (features.noTyping) selectModules([11604]);
+    if (features.noTyping) targetModules[11604] = 1;
     if (features.quickDelete) selectModules([5708, 1126]);
     if (features.noDelete) selectModules([584, 5110, 5112, 1377, 2051, 6965, 7591]);
     if (features.jumpToTop) selectModules([11896, 11897, 11898, 9064, 6965, 5110]);
@@ -24,15 +24,15 @@
     if (features.pastelize) selectModules([7591, 1251, 2112]);
     if (features.platformIndicators) selectModules([4930, 4908, 1377, 2051, 10843, 10602, 13107, 15962, 9334, 13920, 12849]);
     if (features.reviewDB) selectModules([12872, 13790, 14259, 8716, 6074, 6698, 1377, 584]);
-    if (features.readAll) selectModules([16232]);
+    if (features.readAll) targetModules[16232] = 1;
     if (features.quests) selectModules([584, 7187, 7252, 13439, 13477]);
     if (features.hideGift) selectModules([11864, 12071]);
     if (features.hideQuestDock) selectModules([14892, 14985]);
-    if (features.systemEmoji) selectModules([6625]);
+    if (features.systemEmoji) targetModules[6625] = 1;
     if (features.gestures) selectModules([7627, 9878, 11363, 11918, 1377, 11159]);
-    if (features.hideCall) selectModules([12956]);
+    if (features.hideCall) targetModules[12956] = 1;
     if (features.validUser) selectModules([584, 1377]);
-    if (features.youBarSettings) selectModules([16335]);
+    if (features.youBarSettings) targetModules[16335] = 1;
     if (features.splitMessages) selectModules([1085, 1377, 2051, 6965, 8809]);
     if (features.translate) selectModules([584, 1377, 7591, 11281]);
     if (features.userNotif) selectModules([584, 1377, 2051, 2074, 4519, 4930, 7252, 13439, 13477]);
@@ -40,8 +40,6 @@
     if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
     if (features.customThemes) selectModules([589, 590, 591, 1193, 4593, 9758, 9769]);
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
-    // LocaleStore: Venus settings follow Discord's language unless you pick another one.
-    selectModules([2116]);
     const revision = "1.16.1";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "349.9";
@@ -9027,11 +9025,6 @@
     }
     const existing = global.__d;
     if (typeof existing === "function") defineValue(decorateDefine(existing));
-    else holdDefine(existing);
-    // Local diagnostics/test API; not a network endpoint and no client-mod globals.
-    global.__venusPatches = Object.freeze({ revision, settings, features, status, setSetting, formatSize, getSize });
-})(globalThis);
-efineValue(decorateDefine(existing));
     else holdDefine(existing);
     // Local diagnostics/test API; not a network endpoint and no client-mod globals.
     global.__venusPatches = Object.freeze({ revision, settings, features, status, setSetting, formatSize, getSize });
