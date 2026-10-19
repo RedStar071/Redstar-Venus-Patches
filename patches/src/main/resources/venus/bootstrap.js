@@ -42,7 +42,7 @@
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
     // LocaleStore: Venus settings follow Discord's language unless you pick another one.
     selectModules([2116]);
-    const revision = "1.16.0";
+    const revision = "1.16.1";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "349.9";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.

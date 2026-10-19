@@ -1,3 +1,30 @@
+## [1.16.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.16.0...v1.16.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **Discord - Complete Quests automatically:** Fixed video Quests accepted earlier or resumed after restarting reporting progress about five times faster than real playback
+* **Discord - Complete Quests automatically:** Fixed video Quests continuing to send progress reports while Discord was in the background instead of pausing like Discord's video player
+* **Discord - Complete Quests automatically:** Fixed new Quests being automatically accepted while Discord was in the background instead of waiting until Discord is open
+* **Discord - Complete Quests automatically:** Fixed Play and Activity Quests waiting a full minute instead of one second for the final confirmation heartbeat at the target
+
+### 🔧 Improvements
+
+* **Discord - Complete Quests automatically:** Keep Play and Activity Quests running in the background while a paused video Quest waits until you reopen Discord
+
+### ⚡ Performance Improvements
+
+* **Discord:** Defer compiling Venus feature hooks, stores and settings pages until first needed and parse constant tables as JSON, cutting startup runtime eval time by almost 7x
+* **Discord:** Speed up startup Metro module wrapping and HBC98 bytecode prelude string decomposition when patching and launching Discord
+* **Discord - Pastel name colors:** Cache pastel colors per tone by user ID and copy each message row once, speeding up color lookups by 5.8x and row coloring by 1.5x
+* **Discord - Custom themes:** Sync and restore only touched experiment color slots when switching themes, making experiment slot updates 5.6x faster
+* **Discord - Spaces in channel names:** Cache formatted channel names and mentions with direct 1/2-argument hook calls, speeding up channel label rendering by 2.8x
+* **Discord - Translate messages:** Cache the target language code per locale and setting, speeding up per-row language resolution by 18x
+* **Discord - Message highlights:** Cache custom highlight color pairs and key recent highlights by message ID, speeding up highlighted row rendering by 1.3x
+* **Discord - Show hidden channels:** Filter ignored Flux events early, partition hidden directory channels in one pass, and add a 2-argument fast path for permission checks
+* **Discord - Keep deleted messages:** Filter ignored Flux events early and add 1/2-argument fast paths for message lookups and chat row generation
+* **Discord - User activity notifications:** Check watched-user membership before running ID validation or store lookups, speeding up gateway event checks by 7.8x
+* **Discord - Complete Quests automatically:** Avoid duplicate task lookups, eager application checks and repeated expiry date parsing when scanning Quests
+
 ## [1.16.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.15.0...v1.16.0) (2026-10-18)
 
 ### 🚀 Updated App Support
