@@ -458,6 +458,9 @@ The page title is short ("Deleted messages", "Tap gestures").
 ## Workflow for bug fixes, optimizations, and GitHub Actions `.mpp` artifacts
 
 - **For every bug or issue:** immediately find the root cause and implement a fix, then **immediately commit and push that fix to the pull request** before moving on to the next issue.
+- **Real Hermes VM:** `sh scripts/hbc/hermes_vm.sh` fetches a checksum-pinned prebuilt HBC98 VM (250829098.0.16) to
+  `work/hermes/hermes-vm`. Use it as `HERMES_BIN` for `tests/runtime.test.cjs` and run benchmarks on bytecode from
+  `work/tools/hermesc -emit-binary -O`. Its `Date.now()` has 1 ms resolution, so time batches.
 - **For every optimization:** implement the optimization, benchmark it on a real Hermes VM, and **immediately commit and push that optimization to the pull request** before moving on to the next one.
 - Never batch unrelated fixes or optimizations into a single giant end-of-session commit; each fix or optimization should land in the pull request as soon as it is verified.
 - **GitHub Actions precompiled `.mpp` (`venus-patches-mpp` artifact):**
