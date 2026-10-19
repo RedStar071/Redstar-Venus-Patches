@@ -216,8 +216,7 @@
     const featureTable = Object.create(null);
     const enabled = key => {
         if (!settings[key]) return false;
-        let feature = featureTable[key];
-        if (feature === undefined) featureTable[key] = feature = featureFor(key);
+        const feature = featureTable[key] || featureFor(key);
         // An option only counts while its main switch is on too. Only FreeNitro checked that, so
         // "Removing link previews" kept skipping the question after QuickDelete itself was turned off.
         return feature === key ? !!features[key] : !!(features[feature] && settings[feature]);
@@ -701,7 +700,11 @@
 
     // Native setting nodes use Discord's own themed rows, navigation and back stack.
     let SettingsList;
-    const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : key;
+    const featureFor = key => {
+        const cached = featureTable[key];
+        if (cached !== undefined) return cached;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : key;
+    };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
         const entry = { settings: keys };
