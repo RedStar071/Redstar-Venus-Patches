@@ -1935,6 +1935,12 @@
         const entry = bucket && bucket.get(deletedKey(args[0],args[1]));
         return entry ? entry.message : orig.apply(self,args);
     }
+    // getMessage(channelId, messageId), the usual call: same logic without the arguments object.
+    retainedMessage.call2 = (orig, self, channelId, messageId) => {
+        const bucket = deleted.size && enabled("noDelete") && deletedByChannel.get(channelId);
+        const entry = bucket && bucket.get(deletedKey(channelId, messageId));
+        return entry ? entry.message : orig.call(self, channelId, messageId);
+    };
     function retainedMessages(orig, self, args) {
         const result = orig.apply(self,args), channelId = args[0];
         if (!enabled("noDelete") || !result) return result;
@@ -2146,6 +2152,13 @@
         return !!(channel && !channel.realCheck && viewPermission != null && bit == viewPermission &&
             channel.guild_id && channel.type !== 1 && channel.type !== 3) || real;
     }
+    // can(permission, channel), the usual call (once per channel per list render): no arguments object.
+    hiddenCan.call2 = (orig, self, bit, channel) => {
+        const real = orig.call(self, bit, channel);
+        if (real || !enabled("hiddenChannels")) return real;
+        return !!(channel && !channel.realCheck && viewPermission != null && bit == viewPermission &&
+            channel.guild_id && channel.type !== 1 && channel.type !== 3) || real;
+    };
     // The mobile list has a second VIEW_CHANNEL filter. Give ONLY that factory a
     // metadata-list facade; the real permission store and all other callers stay stock.
     function listImport(importer) {
@@ -5444,7 +5457,12 @@
     function hookExport(exports, key, operation) {
         const orig = exports && exports[key];
         if (typeof orig !== "function") return exports;
-        const patched = function () { return operation(orig, this, arguments); };
+        // Hot two-argument hooks (permission checks, message lookups) can declare operation.call2(orig, self, a, b):
+        // passing `arguments` on to apply is ~3x the cost of the call itself on Hermes (tests/bench/hook_call.js).
+        const call2 = operation.call2;
+        const patched = typeof call2 === "function" ?
+            function (a, b) { return arguments.length === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments); } :
+            function () { return operation(orig, this, arguments); };
         return replaceValue(exports, key, patched);
     }
     // Hook a component export (plain function, or memo/forwardRef object) without breaking React tags.
