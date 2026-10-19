@@ -7783,7 +7783,12 @@
             journal.raw.clear();
             kept.forEach(k => journal.raw.add(k));
             journal.sem.clear();
-            if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
+            if (journal.exp) {
+                for (let i = 0; i < journal.exp.length; i += 3) {
+                    const s = journal.exp[i]; s.raw = journal.exp[i + 1]; s.opacity = journal.exp[i + 2];
+                }
+                journal.exp.length = 0;
+            } else if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
             return;
         }
         if (customThemes.rawTable && customThemes.origRaw) {
@@ -7809,7 +7814,7 @@
             }
         }
         if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
-        if (customThemes.origRaw && customThemes.origSem) customThemes.journal = {raw:new Set(), sem:new Set()};
+        if (customThemes.origRaw && customThemes.origSem) customThemes.journal = {raw:new Set(), sem:new Set(), exp:[]};
     }
     function compileThemeIntoTables(theme) {
         const rawTable = customThemes.rawTable, sem = customThemes.semTable;
@@ -7950,9 +7955,23 @@
             }
         }
         // 6. An experiment override (590) would win over a themed token, so it follows every token the theme changed.
-        eachExperimentSlot((token, slot, theme) => {
-            const themed = sem[token] && sem[token][theme], was = customThemes.origSem && customThemes.origSem[token] && customThemes.origSem[token][theme];
-            if (themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) { slot.raw = themed.raw; slot.opacity = themed.opacity; }
+        // Only tokens in touchedSem can differ from origSem, so index expTable[token] directly instead of walking all ~400 tokens.
+        const expTable = customThemes.expTable, expJournal = journal && journal.exp;
+        if (expTable && typeof expTable === "object") touchedSem.forEach(token => {
+            const byExperiment = expTable[token], semEntry = sem[token], wasEntry = customThemes.origSem && customThemes.origSem[token];
+            if (!byExperiment || typeof byExperiment !== "object" || !semEntry || !wasEntry) return;
+            for (const experiment in byExperiment) {
+                if (!owns(byExperiment, experiment)) continue;
+                const byTheme = byExperiment[experiment];
+                if (!byTheme || typeof byTheme !== "object") continue;
+                for (const theme of THEME_SLOTS) {
+                    const slot = byTheme[theme], themed = semEntry[theme], was = wasEntry[theme];
+                    if (slot && typeof slot === "object" && themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) {
+                        if (expJournal) expJournal.push(slot, slot.raw, slot.opacity);
+                        slot.raw = themed.raw; slot.opacity = themed.opacity;
+                    }
+                }
+            }
         });
     }
     function customThemesActiveEntry() {
