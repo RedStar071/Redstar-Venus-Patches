@@ -459,7 +459,7 @@ The page title is short ("Deleted messages", "Tap gestures").
 
 Every optimization must be benchmarked on the real HBC98 Hermes VM **before** it is committed. Node/V8 numbers
 don't count: V8 has a JIT and Hermes on Android doesn't, so a change that is faster on Node can be slower on Hermes
-(1.16.x's manual `isDigits` scanner was slower than the `/^\d+$/` it replaced). A change that isn't measurably
+(in this repo, a hand-written `isDigits` loop measured slower on Hermes than the `/^\d+$/` regex it replaced). A change that isn't measurably
 faster on Hermes is not an optimization; revert it unless it's also simpler.
 
 1. **Get the VM once per sandbox:** `sh scripts/hbc/hermes_vm.sh`. It downloads a checksum-pinned prebuilt Hermes
