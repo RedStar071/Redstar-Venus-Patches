@@ -4,8 +4,12 @@
     if (global.__venusPatches) return;
     const features = /*__FEATURES__*/;
     // Inspected Metro IDs for the SHA-256-pinned 349.9 bundle; never scan or eagerly require modules.
-    const targetModules = new Set([17, 19, 1162, 11129, 14409, 14500]);
-    function selectModules(ids) { ids.forEach(id => targetModules.add(id)); }
+    // Metro IDs Venus wraps, as a dense table: decorateDefine checks it for all ~17.7k modules at startup, and an
+    // indexed read is ~3x cheaper than Set.has on Hermes (tests/bench/define_wrapper.js). 120 is RN's initializer.
+    // IDs past the end read as undefined, so a module added in a later bundle is simply left alone.
+    const targetModules = new Uint8Array(32768);
+    function selectModules(ids) { for (let i = 0; i < ids.length; i++) targetModules[ids[i]] = 1; }
+    selectModules([17, 19, 120, 1162, 11129, 14409, 14500]);
     if (features.picker) selectModules([414]);
     if (features.voice) selectModules([1282, 7268, 7243]);
     if (features.copyBios) selectModules([10987]);
@@ -8758,7 +8762,7 @@
         if (typeof define !== "function") return define;
         return function (factory, id, dependencies) {
             // Runs for all ~17.7k modules at startup: no arguments copy for the ones Venus leaves alone.
-            if ((id !== 120 && !targetModules.has(id)) || typeof factory !== "function")
+            if (targetModules[id] !== 1 || typeof factory !== "function")
                 return arguments.length === 3 ? define.call(this, factory, id, dependencies) : define.apply(this, arguments);
             const wrappedFactory = function () {
                 let result;
