@@ -2654,22 +2654,32 @@ test('Quest Completer reports video progress at 1x like VideoQuestPlayer, even f
     assert.ok((last.at - first.at) / 1000 + 8.5 >= last.body.timestamp - first.body.timestamp + 0, 'whole video takes at least its own length');
     assert.ok(b.map.get('q1').userStatus.completedAt);
 });
-test('Quest Completer pauses video Quests while Discord is in the background, like the player', async () => {
-    // Every phone request carries client_app_state (updateDynamicSuperProperties 17420). The video player only plays
-    // on screen, so a video report saying "background" is one no Discord client sends.
-    const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 60, enrolledAgo(3600))]});
+test('Quest Completer keeps working in the background: Activity Quests run, video Quests wait and resume where they stopped', async () => {
+    // Every phone request carries client_app_state (updateDynamicSuperProperties 17420), and the video player only
+    // plays on screen, so no video report may come from the background. Desktop heartbeats say "unfocused" anyway,
+    // so a Play or Activity Quest takes the slot while you're away instead of the whole queue sitting idle.
+    const video = questFixture('v1', 'WATCH_VIDEO_ON_MOBILE', 60, enrolledAgo(3600));
+    video.config.expiresAt = new Date(QUEST_T0 + 864e5).toISOString();
+    const b = questHarness({quests:[video, activityFixture('a1', 120, enrolledAgo(5))]});
     let state = 'active';
     const r = b.context.__r; b.context.__r = id => id === 1986 ? {default:{getState:() => state}} : r(id);
     b.connect(); await b.run(25 * 1000);
-    const before = b.requests.filter(x => x.url === '/quests/q1/video-progress');
-    assert.ok(before.length >= 1, 'plays while Discord is on screen');
+    const before = b.requests.filter(x => x.url === '/quests/v1/video-progress');
+    assert.ok(before.length >= 1, 'the video plays while Discord is on screen');
     state = 'background'; const left = b.clock;
     await b.run(10 * 60 * 1000);
-    assert.equal(b.requests.filter(x => x.url === '/quests/q1/video-progress' && x.at > left).length, 0, 'no video report from the background');
-    assert.equal(b.map.get('q1').userStatus && b.map.get('q1').userStatus.completedAt || null, null);
-    state = 'active'; const back = b.clock; await b.run();
-    const after = b.requests.filter(x => x.url === '/quests/q1/video-progress' && x.at > back);
-    assert.ok(after.length >= 1 && b.map.get('q1').userStatus.completedAt, 'resumes and finishes once Discord is back on screen');
+    assert.equal(b.requests.filter(x => x.url === '/quests/v1/video-progress' && x.at > left).length, 0, 'no video report from the background');
+    assert.ok(b.map.get('a1').userStatus.completedAt, 'the Activity Quest finished in the background');
+    assert.ok(b.requests.some(x => x.url === '/quests/a1/heartbeat' && x.at > left));
+    assert.equal(b.map.get('v1').userStatus && b.map.get('v1').userStatus.completedAt || null, null);
+    assert.equal(b.events.some(e => e.type === 'never'), false);
+    state = 'active'; const back = b.clock;
+    (b.subs.get('APP_STATE_UPDATE') || []).forEach(fn => fn({type:'APP_STATE_UPDATE', state:'active'}));
+    await b.run();
+    const after = b.requests.filter(x => x.url === '/quests/v1/video-progress' && x.at > back);
+    assert.ok(after.length >= 1 && b.map.get('v1').userStatus.completedAt, 'the video resumes and finishes once Discord is back');
+    assert.ok(after[0].body.timestamp > before.at(-1).body.timestamp, 'resumes after the last report, not from 0');
+    assert.ok(after[0].at - back < 60000, 'resumes within seconds, not after a 30-minute retry wait');
     const watched = after.at(-1).body.timestamp - before.at(-1).body.timestamp, wall = (after.at(-1).at - back) / 1000;
     assert.ok(wall + 1 >= watched, `the background time is not counted as watched (${watched.toFixed(1)} s in ${wall.toFixed(1)} s)`);
 });
