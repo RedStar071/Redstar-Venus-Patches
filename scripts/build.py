@@ -101,8 +101,196 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 const source = fs.readFileSync(process.argv[2], 'utf8').replace('/*__FEATURES__*/', '__VENUS_FEATURES__');
 context.Terser.minify(source, {compress:false, mangle:false,
     format:{comments:false, ascii_only:true}}).then(result => {
-    process.stdout.write(jsonLiterals(result.code).replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
+    process.stdout.write(lazySettingsUi(jsonLiterals(result.code)).replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
 });
+// Hermes's (0, eval) eagerly compiles every FunctionDeclaration and closure inside the runtime at startup,
+// even though load_calls.cjs shows only 5 functions run at startup. The Venus Settings pages, live previews,
+// and preview style/sample tables (~160 KB, 155 top-level statements) are only reachable after nativeRegistry
+// (Module 14409) runs. Wrap them in an ASCII string literal and evaluate once on first nativeRegistry call,
+// avoiding parsing, bytecode compilation, and closure allocation for all settings UI components during cold boot.
+function lazySettingsUi(code) {
+    const acorn = require(process.argv[3]);
+    const ast = acorn.parse(code, {ecmaVersion: 'latest'});
+    const iife = ast.body[0].expression.callee.body.body;
+
+    function stmtDecls(stmt) {
+        const out = [];
+        if (stmt.type === 'FunctionDeclaration' && stmt.id) out.push(stmt.id.name);
+        else if (stmt.type === 'VariableDeclaration') {
+            for (const d of stmt.declarations) if (d.id.type === 'Identifier') out.push(d.id.name);
+        }
+        return out;
+    }
+
+    function stmtRefs(node) {
+        const refs = new Set();
+        function walk(n, parent, prop) {
+            if (!n || typeof n !== 'object') return;
+            if (Array.isArray(n)) { for (const x of n) walk(x, parent, prop); return; }
+            if (n.type === 'Identifier') {
+                if (parent && parent.type === 'MemberExpression' && prop === 'property' && !parent.computed) return;
+                if (parent && parent.type === 'Property' && prop === 'key' && !parent.computed) return;
+                refs.add(n.name);
+                return;
+            }
+            for (const k of Object.keys(n)) {
+                if (k === 'type' || k === 'start' || k === 'end') continue;
+                walk(n[k], n, k);
+            }
+        }
+        walk(node, null, null);
+        return refs;
+    }
+
+    const items = iife.map((stmt, idx) => ({
+        idx,
+        stmt,
+        decls: stmtDecls(stmt),
+        refs: stmtRefs(stmt),
+        src: code.slice(stmt.start, stmt.end),
+    }));
+
+    const declToIdx = new Map();
+    for (const it of items) for (const d of it.decls) declToIdx.set(d, it.idx);
+
+    const nrIdx = declToIdx.get('nativeRegistry');
+    const nrStmt = items[nrIdx].stmt;
+    const keepMain = new Set(['section', 'PopIn', 'popIn', 'DISCORD_VERSION', 'DEFAULT_SETTINGS']);
+    const pageRoots = new Set();
+    for (const r of stmtRefs(nrStmt.body)) {
+        if (declToIdx.has(r)) {
+            const idx = declToIdx.get(r);
+            if (idx === nrIdx || items[idx].decls.some(d => keepMain.has(d))) continue;
+            let usedOutside = false;
+            for (let j = 0; j < items.length; j++) {
+                if (j === idx || j === nrIdx) continue;
+                for (const d of items[idx].decls) {
+                    if (items[j].refs.has(d)) usedOutside = true;
+                }
+            }
+            if (!usedOutside) pageRoots.add(idx);
+        }
+    }
+
+    const pageSet = new Set(pageRoots);
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (let i = 0; i < items.length; i++) {
+            if (pageSet.has(i) || i === nrIdx || items[i].decls.length === 0) continue;
+            if (items[i].decls.some(d => keepMain.has(d))) continue;
+            let usedOutside = false, usedInside = false;
+            for (let j = 0; j < items.length; j++) {
+                if (j === i) continue;
+                for (const d of items[i].decls) {
+                    if (items[j].refs.has(d)) {
+                        if (pageSet.has(j)) usedInside = true;
+                        else usedOutside = true;
+                    }
+                }
+            }
+            if (usedInside && !usedOutside) {
+                pageSet.add(i);
+                changed = true;
+            }
+        }
+    }
+
+    const pageDecls = new Set();
+    for (const idx of pageSet) for (const d of items[idx].decls) pageDecls.add(d);
+
+    const mainVars = new Map();
+    for (const it of items) {
+        if (pageSet.has(it.idx)) continue;
+        const s = it.stmt;
+        if (s.type === 'FunctionDeclaration' && s.id) mainVars.set(s.id.name, 'function');
+        else if (s.type === 'VariableDeclaration') {
+            for (const d of s.declarations) if (d.id.type === 'Identifier') mainVars.set(d.id.name, s.kind);
+        }
+    }
+    mainVars.set('global', 'param');
+
+    const neededMain = new Set();
+    for (const idx of pageSet) {
+        for (const r of items[idx].refs) {
+            if (!pageDecls.has(r) && mainVars.has(r)) neededMain.add(r);
+        }
+    }
+    for (const r of items[nrIdx].refs) {
+        if (!pageDecls.has(r) && mainVars.has(r) && r !== 'nativeRegistry') neededMain.add(r);
+    }
+
+    const letVars = [...neededMain].filter(v => mainVars.get(v) === 'let');
+    const constVars = [...neededMain].filter(v => mainVars.get(v) !== 'let');
+    const letSet = new Set(letVars);
+
+    function rewriteSubSource(subSrc) {
+        const subAst = acorn.parse(subSrc, {ecmaVersion: 'latest'});
+        const edits = [];
+        function walk(n, scope, parent, prop) {
+            if (!n || typeof n !== 'object') return;
+            if (Array.isArray(n)) { for (const x of n) walk(x, scope, parent, prop); return; }
+            let nextScope = scope;
+            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+                nextScope = new Set(scope);
+                if (n.id && n.id.type === 'Identifier') nextScope.add(n.id.name);
+                for (const p of n.params || []) {
+                    if (p.type === 'Identifier') nextScope.add(p.name);
+                    else for (const r of stmtRefs(p)) nextScope.add(r);
+                }
+                if (n.body && n.body.type === 'BlockStatement') {
+                    for (const st of n.body.body) for (const d of stmtDecls(st)) nextScope.add(d);
+                }
+            } else if (n.type === 'BlockStatement') {
+                nextScope = new Set(scope);
+                for (const st of n.body) for (const d of stmtDecls(st)) nextScope.add(d);
+            } else if (n.type === 'CatchClause' && n.param && n.param.type === 'Identifier') {
+                nextScope = new Set(scope);
+                nextScope.add(n.param.name);
+            }
+            if (n.type === 'Identifier') {
+                if (parent && parent.type === 'MemberExpression' && prop === 'property' && !parent.computed) return;
+                if (parent && parent.type === 'Property' && prop === 'key' && !parent.computed) {
+                    if (parent.shorthand && letSet.has(n.name) && !scope.has(n.name)) {
+                        edits.push([n.start, n.end, n.name + ':$live.' + n.name]);
+                    }
+                    return;
+                }
+                if (parent && (parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') && prop === 'id') return;
+                if (parent && parent.type === 'VariableDeclarator' && prop === 'id') return;
+                if (letSet.has(n.name) && !scope.has(n.name)) {
+                    edits.push([n.start, n.end, '$live.' + n.name]);
+                }
+                return;
+            }
+            for (const k of Object.keys(n)) {
+                if (k === 'type' || k === 'start' || k === 'end') continue;
+                walk(n[k], nextScope, n, k);
+            }
+        }
+        walk(subAst, new Set(), null, null);
+        edits.sort((a, b) => b[0] - a[0]);
+        let res = subSrc;
+        for (const [s, e, rep] of edits) res = res.slice(0, s) + rep + res.slice(e);
+        return res;
+    }
+
+    const rawPageCode = items.filter(it => pageSet.has(it.idx)).map(it => it.src).join('\n');
+    const nrBodySrc = code.slice(nrStmt.body.start + 1, nrStmt.body.end - 1);
+    const lazyFnExpr = rewriteSubSource('(function($live,' + constVars.join(',') + '){' + rawPageCode + '\nreturn function(registry){' + nrBodySrc + '};})');
+    const lazyFnString = JSON.stringify(lazyFnExpr).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+    const liveObjCode = '{' + letVars.map(v => 'get ' + v + '(){return ' + v + ';},set ' + v + '(_v){' + v + '=_v;}').join(',') + '}';
+    const newNrCode = 'let $nr;function nativeRegistry(registry){if(!$nr)$nr=(0,eval)(' + lazyFnString + ')(' + liveObjCode + ',' + constVars.join(',') + ');return $nr(registry);}';
+
+    const repList = [];
+    for (const idx of pageSet) repList.push([items[idx].stmt.start, items[idx].stmt.end, '']);
+    repList.push([nrStmt.start, nrStmt.end, 'let $nr;function nativeRegistry(registry){return $nr(registry);}']);
+    repList.push([items[items.length - 1].stmt.end, items[items.length - 1].stmt.end, ';$nr=function(registry){if($nr.$)return $nr.$(registry);return($nr.$=(0,eval)(' + lazyFnString + ')(' + liveObjCode + ',' + constVars.join(',') + '))(registry);};']);
+    repList.sort((a, b) => b[0] - a[0]);
+    let out = code;
+    for (const [s, e, r] of repList) out = out.slice(0, s) + r + out.slice(e);
+    return out;
+}
 // Hermes compiles an object/array literal into bytecode that builds it one property at a time, and
 // JSON.parse of a string builds the same value natively, much faster. Rewrite the runtime's large constant
 // tables (theme aliases, styles, icons, languages) to JSON.parse, only where the literal is pure JSON data,
