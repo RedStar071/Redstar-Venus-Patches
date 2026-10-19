@@ -1436,8 +1436,15 @@
     // GUILD_TEXT (0), GUILD_ANNOUNCEMENT (5), GUILD_STORE (6), GUILD_DIRECTORY (14), GUILD_FORUM (15), GUILD_MEDIA (16), GUILD_APP (21).
     const DASHLESS_TYPES = new Set([0, 5, 6, 14, 15, 16, 21]);
     const FALSE_FN = () => false;
+    const dashlessNames = new Map();
     function dashlessFormat(channel, name) {
-        return enabled("dashless") && channel && DASHLESS_TYPES.has(channel.type) && typeof name === "string" && name.includes("-") ? name.replace(/-/g, " ") : name;
+        if (!enabled("dashless") || !channel || !DASHLESS_TYPES.has(channel.type) || typeof name !== "string" || name.indexOf("-") < 0) return name;
+        const cached = dashlessNames.get(name);
+        if (cached !== undefined) return cached;
+        const formatted = name.replace(/-/g, " ");
+        if (dashlessNames.size >= 512) dashlessNames.delete(dashlessNames.keys().next().value);
+        dashlessNames.set(name, formatted);
+        return formatted;
     }
     function channelLabel(orig, self, args) {
         const channel=args[0];
@@ -1453,6 +1460,10 @@
         }
         return dashlessFormat(channel, orig.apply(self, next));
     }
+    channelLabel.call1 = (orig, self, channel) =>
+        hiddenMetadata(channel) ? channelLabel(orig, self, [channel]) : dashlessFormat(channel, orig.call(self, channel));
+    channelLabel.call2 = (orig, self, channel, b) =>
+        hiddenMetadata(channel) ? channelLabel(orig, self, [channel, b]) : dashlessFormat(channel, orig.call(self, channel, b));
     function useChannelLabel(orig, self, args) {
         if (React) {
             if (features.dashless) useSettings("dashless");
@@ -1460,6 +1471,20 @@
         }
         return channelLabel(orig, self, args);
     }
+    useChannelLabel.call1 = (orig, self, channel) => {
+        if (React) {
+            if (features.dashless) useSettings("dashless");
+            if (features.hiddenChannels) useSettings("hiddenChannels");
+        }
+        return channelLabel.call1(orig, self, channel);
+    };
+    useChannelLabel.call2 = (orig, self, channel, b) => {
+        if (React) {
+            if (features.dashless) useSettings("dashless");
+            if (features.hiddenChannels) useSettings("hiddenChannels");
+        }
+        return channelLabel.call2(orig, self, channel, b);
+    };
     const mentionChannelCache = new WeakMap();
     function mentionChannelFormat(result) {
         if (!result || typeof result.name !== "string") return result;
@@ -5537,7 +5562,12 @@
         // passing `arguments` on to apply is ~3x the cost of the call itself on Hermes (tests/bench/hook_call.js).
         // One-argument hooks (RowGenerator.generate) can declare operation.call1(orig, self, a) the same way.
         const call2 = operation.call2, call1 = operation.call1;
-        const patched = typeof call2 === "function" ?
+        const patched = typeof call2 === "function" && typeof call1 === "function" ?
+            function (a, b) {
+                const n = arguments.length;
+                return n === 1 ? call1(orig, this, a) : n === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments);
+            } :
+            typeof call2 === "function" ?
             function (a, b) { return arguments.length === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments); } :
             typeof call1 === "function" ?
             function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
