@@ -5661,11 +5661,15 @@
         if (!enabled("validUser") || !event || !userStore) return;
         const channelId = event.channelId;
         if (event.message) validMessage(event.message, event.message.channel_id || channelId);
-        if (Array.isArray(event.messages)) for (const message of event.messages) validMessage(message, message && message.channel_id || channelId);
+        const msgs = event.messages;
+        if (msgs && msgs.length && Array.isArray(msgs)) for (let i = 0; i < msgs.length; i++) {
+            const message = msgs[i];
+            if (message) validMessage(message, message.channel_id || channelId);
+        }
     }
     function validMessage(message, channelId) {
-        if (!message || !message.id || !channelId || valid.refreshing.has(message.id)) return;
-        validScratch.clear();
+        if (!message || !message.id || !channelId || valid.refreshing.size && valid.refreshing.has(message.id)) return;
+        if (validScratch.size) validScratch.clear();
         messageMentionIds(message, validScratch);
         if (!validScratch.size) return;
         const missing = [];
@@ -9007,6 +9011,11 @@
     }
     const existing = global.__d;
     if (typeof existing === "function") defineValue(decorateDefine(existing));
+    else holdDefine(existing);
+    // Local diagnostics/test API; not a network endpoint and no client-mod globals.
+    global.__venusPatches = Object.freeze({ revision, settings, features, status, setSetting, formatSize, getSize });
+})(globalThis);
+efineValue(decorateDefine(existing));
     else holdDefine(existing);
     // Local diagnostics/test API; not a network endpoint and no client-mod globals.
     global.__venusPatches = Object.freeze({ revision, settings, features, status, setSetting, formatSize, getSize });
