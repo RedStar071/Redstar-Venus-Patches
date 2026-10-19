@@ -5871,3 +5871,18 @@ test('Custom themes: false slots keep Discord\'s color, odd values parse, specif
     assert.equal(JSON.stringify(rawColors), pristineRaw, 'RawColors exactly as Discord shipped them, no synthetic keys left');
     assert.equal(JSON.stringify(sem), pristineSem, 'SemanticColors exactly as Discord shipped them');
 });
+
+test('every event type dispatchEvent acts on passes its early-return filter (DISPATCH_EVENTS)', () => {
+    const source = fs.readFileSync('patches/src/main/resources/venus/bootstrap.js', 'utf8');
+    const start = source.indexOf('    function dispatchEvent(orig, self, args) {');
+    const end = source.indexOf('\n    }\n', start);
+    assert.ok(start > 0 && end > start);
+    const types = new Set([...source.slice(start, end).matchAll(/event\.type === "([A-Z_]+)"/g)].map(m => m[1]));
+    const set = name => new Set([...new RegExp(name + ' = new Set\\(\\[([^\\]]*)\\]\\)').exec(source)[1].matchAll(/"([A-Z_]+)"/g)].map(m => m[1]));
+    const hidden = new Set(['LOGOUT', 'CHANNEL_DELETE', 'GUILD_DELETE', ...set('CHANNEL_EVENTS'), ...set('GUILD_EVENTS'),
+        ...set('READY_EVENTS'), ...set('BATCH_EVENTS'), ...set('MESSAGE_EVENTS')]);
+    const seen = new Set([...hidden, ...set('RESTORE_EVENTS'), 'MESSAGE_DELETE', 'MESSAGE_DELETE_BULK']);
+    assert.match(source, /const DISPATCH_EVENTS = new Set\(\[\.\.\.HIDDEN_EVENTS, \.\.\.RESTORE_EVENTS, "MESSAGE_DELETE", "MESSAGE_DELETE_BULK"\]\);/);
+    assert.ok(types.size >= 6);
+    for (const type of types) assert.ok(seen.has(type), type + ' is read by dispatchEvent but filtered out before it');
+});

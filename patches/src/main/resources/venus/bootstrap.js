@@ -1690,6 +1690,9 @@
     const MESSAGE_EVENTS = new Set(["MESSAGE_CREATE","MESSAGE_UPDATE"]), RESTORE_EVENTS = new Set(["CONNECTION_OPEN","CACHE_LOADED"]);
     // Every Flux event passes through here: leave typing, presence, voice and the rest alone.
     const HIDDEN_EVENTS = new Set(["LOGOUT","CHANNEL_DELETE","GUILD_DELETE",...CHANNEL_EVENTS,...GUILD_EVENTS,...READY_EVENTS,...BATCH_EVENTS,...MESSAGE_EVENTS]);
+    // Every type dispatchEvent or channelMetadataEvent acts on. Anything else (presence, typing, voice, acks: most of the
+    // traffic) goes straight to Discord. Add a type here when a new branch reads it.
+    const DISPATCH_EVENTS = new Set([...HIDDEN_EVENTS, ...RESTORE_EVENTS, "MESSAGE_DELETE", "MESSAGE_DELETE_BULK"]);
     function channelMetadataEvent(event) {
         if (!HIDDEN_EVENTS.has(event.type)) return;
         // Most messages mention no channels; skip the account lookup for them.
@@ -2018,7 +2021,7 @@
     }
     function dispatchEvent(orig, self, args) {
         const event = args[0];
-        if (!event) return orig.apply(self, args);
+        if (!event || !DISPATCH_EVENTS.has(event.type)) return orig.apply(self, args);
         if (features.hiddenChannels) channelMetadataEvent(event);
         if (event.type === "LOGOUT") { clearDeleted(false); edits.clear(); archiveRestored = false; clearReviewAuth(); }
         if (!features.noDelete) return orig.apply(self, args);
