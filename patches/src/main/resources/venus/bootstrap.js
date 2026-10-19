@@ -1949,7 +1949,7 @@
     };
     function retainedMessages(orig, self, args) {
         const result = orig.apply(self,args), channelId = args[0];
-        if (!enabled("noDelete") || !result) return result;
+        if (!deletedByChannel.size || !enabled("noDelete") || !result) return result;
         const bucket = deletedByChannel.get(channelId);
         if (!bucket || typeof result.merge !== "function") return result;
         const cached = deletedViews.get(channelId);
@@ -1994,6 +1994,11 @@
         deletedViews.set(channelId,{orig:result,revision:deletedRevision,value});
         return value;
     }
+    // getMessages(channelId), called on every chat render and store check: skip arguments allocation.
+    retainedMessages.call1 = (orig, self, channelId) => {
+        if (!deletedByChannel.size || !enabled("noDelete") || !deletedByChannel.has(channelId)) return orig.call(self, channelId);
+        return retainedMessages(orig, self, [channelId]);
+    };
     function rememberDeleted(event, orig, self) {
         const key = deletedKey(event.channelId, event.id);
         if (deleted.has(key)) return true;
@@ -5496,8 +5501,13 @@
         if (component && typeof component === "object" && component.$$typeof) {
             const inner = typeof component.type === "function" ? "type" : typeof component.render === "function" ? "render" : null;
             if (!inner) return exports;
-            const orig = component[inner];
-            return replaceValue(exports, key, cloneWith(component, inner, function () { return operation(orig, this, arguments); }));
+            const orig = component[inner], call2 = operation.call2, call1 = operation.call1;
+            const patched = typeof call2 === "function" ?
+                function (a, b) { return arguments.length === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments); } :
+                typeof call1 === "function" ?
+                function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
+                function () { return operation(orig, this, arguments); };
+            return replaceValue(exports, key, cloneWith(component, inner, patched));
         }
         return hookExport(exports, key, operation);
     }
@@ -8548,6 +8558,8 @@
                     if (!enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline) return orig.apply(self, args);
                     const next = Array.from(args); next[0] = Object.assign({}, props, {isMobileOnline:false}); return orig.apply(self, next);
                 };
+                plain.call1 = (orig, self, props) => !enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline ?
+                    orig.call(self, props) : orig.call(self, Object.assign({}, props, {isMobileOnline:false}));
                 return hookExport(hookExport(exports, "default", plain), "StatusWithTyping", plain);
             }
             case 16232: return features.readAll ? hookExport(exports, "default", readAllBarProps) : exports;

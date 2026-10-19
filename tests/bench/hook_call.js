@@ -19,3 +19,22 @@ function canFast(orig, self, a, b) { return orig.call(self, a, b); }
 canFast.args = pass;
 var viaFast = function (a, b) { return arguments.length === 2 ? canFast(orig, this, a, b) : canFast.args(orig, this, arguments); };
 bench("fast op (orig, self, a, b)", function () { for (var i = 0; i < 20000; i++) viaFast.call(store, "1", i); });
+
+// getMessages(channelId) and avatar Status(props): 1-arg call1 fast path vs arguments + apply
+var deletedByChannel = new Map();
+var msgObj = {_array: []};
+var msgStore2 = {getMessages: function (channelId) { return msgObj; }};
+var origGm = msgStore2.getMessages;
+function retainedMessagesBench(orig, self, args) {
+    var result = orig.apply(self, args), channelId = args[0];
+    if (!deletedByChannel.size || !result) return result;
+    return result;
+}
+retainedMessagesBench.call1 = function (orig, self, channelId) {
+    if (!deletedByChannel.size || !deletedByChannel.has(channelId)) return orig.call(self, channelId);
+    return retainedMessagesBench(orig, self, [channelId]);
+};
+var gmArgs = function () { return retainedMessagesBench(origGm, this, arguments); };
+var gmCall1 = function (a) { return arguments.length === 1 ? retainedMessagesBench.call1(origGm, this, a) : retainedMessagesBench(origGm, this, arguments); };
+bench("getMessages (arguments + apply)", function () { for (var i = 0; i < 20000; i++) gmArgs.call(msgStore2, "123"); });
+bench("getMessages (call1 fast path)", function () { for (var i = 0; i < 20000; i++) gmCall1.call(msgStore2, "123"); });
