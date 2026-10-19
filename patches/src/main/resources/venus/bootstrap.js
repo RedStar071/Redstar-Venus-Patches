@@ -5607,28 +5607,41 @@
         while ((match = MENTION_ID.exec(text))) out.add(match[1]);
     }
     function componentIds(components, out, depth) {
-        if (!Array.isArray(components) || depth > 6) return;
-        for (const component of components) if (component) {
-            mentionIds(component.content, out);
-            componentIds(component.components, out, depth + 1);
+        if (!components || !components.length || depth > 6 || !Array.isArray(components)) return;
+        for (let i = 0; i < components.length; i++) {
+            const component = components[i];
+            if (component) {
+                mentionIds(component.content, out);
+                if (component.components && component.components.length) componentIds(component.components, out, depth + 1);
+            }
         }
     }
     // Every place a raw (server-shaped) message can mention someone: text, embeds, components and forwards.
     function messageMentionIds(message, out) {
-        mentionIds(message.content, out);
-        if (Array.isArray(message.embeds)) for (const embed of message.embeds) if (embed) {
-            mentionIds(embed.title, out); mentionIds(embed.description, out);
-            mentionIds(embed.rawTitle, out); mentionIds(embed.rawDescription, out);
-            if (embed.footer) mentionIds(embed.footer.text, out);
-            if (Array.isArray(embed.fields)) for (const field of embed.fields) if (field) {
-                mentionIds(field.name, out); mentionIds(field.value, out); mentionIds(field.rawName, out); mentionIds(field.rawValue, out);
+        const content = message.content;
+        if (typeof content === "string" && content.indexOf("<@") >= 0) mentionIds(content, out);
+        const embeds = message.embeds;
+        if (embeds && embeds.length && Array.isArray(embeds)) for (let i = 0; i < embeds.length; i++) {
+            const embed = embeds[i];
+            if (embed) {
+                mentionIds(embed.title, out); mentionIds(embed.description, out);
+                mentionIds(embed.rawTitle, out); mentionIds(embed.rawDescription, out);
+                if (embed.footer) mentionIds(embed.footer.text, out);
+                const fields = embed.fields;
+                if (fields && fields.length && Array.isArray(fields)) for (let j = 0; j < fields.length; j++) {
+                    const field = fields[j];
+                    if (field) {
+                        mentionIds(field.name, out); mentionIds(field.value, out); mentionIds(field.rawName, out); mentionIds(field.rawValue, out);
+                    }
+                }
             }
         }
-        componentIds(message.components, out, 0);
+        const comps = message.components;
+        if (comps && comps.length) componentIds(comps, out, 0);
         const snapshots = message.message_snapshots || message.messageSnapshots;
-        if (Array.isArray(snapshots)) for (const snapshot of snapshots) {
-            const inner = snapshot && snapshot.message;
-            if (inner) { mentionIds(inner.content, out); componentIds(inner.components, out, 0); }
+        if (snapshots && snapshots.length && Array.isArray(snapshots)) for (let k = 0; k < snapshots.length; k++) {
+            const inner = snapshots[k] && snapshots[k].message;
+            if (inner) { mentionIds(inner.content, out); if (inner.components && inner.components.length) componentIds(inner.components, out, 0); }
         }
         return out;
     }
