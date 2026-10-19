@@ -6,7 +6,6 @@ var viaArguments = function () { return pass(orig, this, arguments); };
 var direct2 = function (a, b) { return arguments.length === 2 ? orig.call(this, a, b) : pass(orig, this, arguments); };
 bench("arguments + apply (ships)", function () { for (var i = 0; i < 20000; i++) viaArguments.call(store, "1", i); });
 bench("2-arg fast path + call", function () { for (var i = 0; i < 20000; i++) direct2.call(store, "1", i); });
-bench("unhooked", function () { for (var i = 0; i < 20000; i++) orig.call(store, "1", i); });
 // Where the cost is: reifying `arguments` to pass it on, or .apply?
 var viaArray = function (a, b) { return pass(orig, this, arguments.length === 2 ? [a, b] : arguments); };
 function passCall(orig, self, args) { return orig.call(self, args[0], args[1]); }
@@ -20,7 +19,7 @@ canFast.args = pass;
 var viaFast = function (a, b) { return arguments.length === 2 ? canFast(orig, this, a, b) : canFast.args(orig, this, arguments); };
 bench("fast op (orig, self, a, b)", function () { for (var i = 0; i < 20000; i++) viaFast.call(store, "1", i); });
 
-// getMessages(channelId) and avatar Status(props): 1-arg call1 fast path vs arguments + apply
+// getMessages(channelId) and avatar Status(props): 1-arg call1 fast path vs arguments + apply (relative to 2-arg baseline)
 var deletedByChannel = new Map();
 var msgObj = {_array: []};
 var msgStore2 = {getMessages: function (channelId) { return msgObj; }};
@@ -36,5 +35,5 @@ retainedMessagesBench.call1 = function (orig, self, channelId) {
 };
 var gmArgs = function () { return retainedMessagesBench(origGm, this, arguments); };
 var gmCall1 = function (a) { return arguments.length === 1 ? retainedMessagesBench.call1(origGm, this, a) : retainedMessagesBench(origGm, this, arguments); };
-bench("getMessages (arguments + apply)", function () { for (var i = 0; i < 20000; i++) gmArgs.call(msgStore2, "123"); });
-bench("getMessages (call1 fast path)", function () { for (var i = 0; i < 20000; i++) gmCall1.call(msgStore2, "123"); });
+bench("getMessages (old arguments + apply)", function () { for (var i = 0; i < 20000; i++) gmArgs.call(msgStore2, "123"); });
+bench("getMessages (new call1 fast path)", function () { for (var i = 0; i < 20000; i++) gmCall1.call(msgStore2, "123"); });

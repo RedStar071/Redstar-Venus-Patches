@@ -90,12 +90,12 @@ function report(title, results) {
 }
 
 function compact(file) {
-    // Same transform scripts/build.py applies before shipping (Terser parse/print, no mangle, no compress).
-    const vm = require("node:vm"), context = {};
-    vm.runInNewContext(fs.readFileSync(path.join(ROOT, "work/tools/terser.js"), "utf8"), context);
-    const source = fs.readFileSync(file, "utf8").replace("/*__FEATURES__*/", "__VENUS_FEATURES__");
-    return context.Terser.minify(source, {compress: false, mangle: false, format: {comments: false, ascii_only: true}})
-        .then(result => result.code.replace("__VENUS_FEATURES__", "/*__FEATURES__*/"));
+    // Same transform scripts/build.py applies before shipping (Terser + jsonLiterals + lazySettingsUi + lazyCoreRuntime).
+    const buildPy = fs.readFileSync(path.join(ROOT, "scripts/build.py"), "utf8");
+    const m = buildPy.match(/script = r"""([\s\S]*?)"""/);
+    if (!m) throw new Error("Could not extract compact_runtime script from scripts/build.py");
+    fs.mkdirSync(OUT, {recursive: true});
+    return Promise.resolve(execFileSync(process.execPath, ["-e", m[1], path.join(ROOT, "work/tools/terser.js"), file, path.join(ROOT, "work/tools/acorn.js")], {encoding: "utf8", maxBuffer: 32 << 20}));
 }
 
 async function startup() {

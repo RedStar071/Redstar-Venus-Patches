@@ -9018,9 +9018,10 @@
     function decorateDefine(define) {
         if (typeof define !== "function") return define;
         return function (factory, id, dependencies) {
-            // Runs for all ~17.7k modules at startup: no arguments copy for the ones Venus leaves alone.
+            // Runs for all ~17.7k modules at startup: call define(factory, id, dependencies) directly
+            // without checking arguments.length or going through Function.prototype.call (tests/bench/define_wrapper.js).
             if (targetModules[id] !== 1 || typeof factory !== "function")
-                return arguments.length === 3 ? define.call(this, factory, id, dependencies) : define.apply(this, arguments);
+                return define(factory, id, dependencies);
             const wrappedFactory = function () {
                 let result;
                 if (features.hiddenChannels && id === 7039) {
@@ -9057,7 +9058,7 @@
                 }
                 return result;
             };
-            if (arguments.length === 3) return define.call(this, wrappedFactory, id, dependencies);
+            if (arguments.length === 3) return define(wrappedFactory, id, dependencies);
             const args = Array.from(arguments);
             args[0] = wrappedFactory;
             return define.apply(this, args);
