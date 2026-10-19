@@ -2299,9 +2299,8 @@
             if (!source) source = basic ? Object.assign({},basic,full) : full;
             if (hiddenScans.size >= 64 && !last) hiddenScans.delete(hiddenScans.keys().next().value);
             hiddenScans.set(guild, {full, basic, owner, source});
-            const keep = channel => rememberChannelName(channel, owner);
-            if (basic) Object.values(basic).forEach(keep);
-            Object.values(full).forEach(keep);
+            if (basic) for (const k in basic) if (Object.prototype.hasOwnProperty.call(basic, k)) rememberChannelName(basic[k], owner, undefined, guild);
+            for (const k in full) if (Object.prototype.hasOwnProperty.call(full, k)) rememberChannelName(full[k], owner, undefined, guild);
         }
         function read() {
             full = channelStore.getMutableGuildChannelsForGuild(guild);
