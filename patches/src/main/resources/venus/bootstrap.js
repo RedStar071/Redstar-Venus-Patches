@@ -4604,12 +4604,11 @@
         return ((256 - m) << 24) | (colorInt & 0x00ffffff);
     }
     function highlightMentioned(source, message) {
-        if (source && source.mentioned || message && message.mentioned) return true;
-        if (!source || typeof source !== "object") return false;
-        if (source.mention_everyone || source.mentionEveryone) return true;
+        if (!source || typeof source !== "object") return !!(message && message.mentioned);
+        if (source.mentioned || message && message.mentioned || source.mention_everyone || source.mentionEveryone) return true;
         const mentions = source.mentions;
+        const hasMentions = mentions && mentions.length > 0 && Array.isArray(mentions);
         const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
-        const hasMentions = Array.isArray(mentions) && mentions.length > 0;
         const refAuthor = ref && ref.author && ref.author.id;
         if (!hasMentions && !refAuthor) return false;
         const me = currentUser();
@@ -7129,30 +7128,38 @@
     // Messages drawn lately, so switching on or changing an option can redraw them. Never while a redraw has
     // its zero-width space in, or that space would be put back for good.
     function translateSeen(source, channelId, id, key, quoteKey, quotedId) {
-        if (!source || !channelId || !id || translate.refreshing.has(id)) return;
+        if (!source || !channelId || !id || translate.refreshing.size && translate.refreshing.has(id)) return;
         const existing = translate.shown.get(id);
         const reference = source.messageReference || source.message_reference;
-        const nextQuotes = quotedId || reference && (reference.message_id || reference.messageId) || (existing && existing.quotes) || null;
+        const nextQuotes = quotedId || (reference ? reference.message_id || reference.messageId : existing && existing.quotes) || null;
         if (existing && existing.source === source && existing.channelId === channelId &&
             (!key || existing.key === key) && (!quoteKey || existing.quoteKey === quoteKey) && existing.quotes === nextQuotes) return;
-        const contentSource = translateContentSource(source);
-        const raw = typeof source.content === "string" && source.content ? source.content : "";
+        let raw = source.content;
+        const hasRaw = typeof raw === "string" && raw.length > 0;
         let snapshot = null;
-        if (!raw && contentSource && contentSource !== source && typeof contentSource.content === "string" && contentSource.content) {
-            const list = source.messageSnapshots || source.message_snapshots;
-            const first = Array.isArray(list) && list[0];
-            if (first && first.message) snapshot = {message:Object.assign({}, typeof first.message.toJS === "function" ? first.message.toJS() : first.message),
-                moderator_report:first.moderatorReport !== undefined ? first.moderatorReport : first.moderator_report || null,
-                rest:Array.isArray(list) && list.length > 1 ? list.slice(1).map(item => ({message:item && item.message && typeof item.message.toJS === "function" ? item.message.toJS() : item && item.message,
-                    moderator_report:item && (item.moderatorReport !== undefined ? item.moderatorReport : item.moderator_report || null)})) : []};
+        if (!hasRaw) {
+            raw = "";
+            const contentSource = translateContentSource(source);
+            if (contentSource && contentSource !== source && typeof contentSource.content === "string" && contentSource.content) {
+                const list = source.messageSnapshots || source.message_snapshots;
+                const first = Array.isArray(list) && list[0];
+                if (first && first.message) snapshot = {message:Object.assign({}, typeof first.message.toJS === "function" ? first.message.toJS() : first.message),
+                    moderator_report:first.moderatorReport !== undefined ? first.moderatorReport : first.moderator_report || null,
+                    rest:Array.isArray(list) && list.length > 1 ? list.slice(1).map(item => ({message:item && item.message && typeof item.message.toJS === "function" ? item.message.toJS() : item && item.message,
+                        moderator_report:item && (item.moderatorReport !== undefined ? item.moderatorReport : item.moderator_report || null)})) : []};
+            }
+            if (!snapshot) return;
         }
-        if (!raw && !snapshot) return;
         let entry = existing;
         if (entry) translate.shown.delete(id);
         else if (translate.shown.size >= 300) translate.shown.delete(translate.shown.keys().next().value);
-        if (!entry) entry = {channelId, id, source:null, raw:"", snapshot:null, key:null, quoteKey:null, quotes:null};
-        entry.source = source; entry.raw = raw; entry.snapshot = snapshot; entry.key = key || entry.key; entry.quoteKey = quoteKey || entry.quoteKey;
-        entry.quotes = nextQuotes;
+        if (!entry) entry = {channelId, id, source, raw, snapshot, key:key || null, quoteKey:quoteKey || null, quotes:nextQuotes};
+        else {
+            entry.source = source; entry.raw = raw; entry.snapshot = snapshot;
+            if (key) entry.key = key;
+            if (quoteKey) entry.quoteKey = quoteKey;
+            entry.quotes = nextQuotes;
+        }
         translate.shown.set(id, entry);
     }
     function translateView(entry, layout, original) {
