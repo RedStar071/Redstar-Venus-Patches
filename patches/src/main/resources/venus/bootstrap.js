@@ -211,13 +211,16 @@
     };
     const owns = (obj, key) => obj != null && Object.prototype.hasOwnProperty.call(obj, key);
     // enabled() runs inside nearly every hook: resolve setting -> feature once, not per call.
-    const featureTable = new Map();
+    // Off settings (most of them) return before any lookup, and a plain object beats Map.get on Hermes
+    // (tests/bench/enabled.js, 1.23x).
+    const featureTable = Object.create(null);
     const enabled = key => {
-        let feature = featureTable.get(key);
-        if (feature === undefined) featureTable.set(key, feature = featureFor(key));
+        if (!settings[key]) return false;
+        let feature = featureTable[key];
+        if (feature === undefined) featureTable[key] = feature = featureFor(key);
         // An option only counts while its main switch is on too. Only FreeNitro checked that, so
         // "Removing link previews" kept skipping the question after QuickDelete itself was turned off.
-        return !!(features[feature] && settings[key] && (feature === key || settings[feature]));
+        return feature === key ? !!features[key] : !!(features[feature] && settings[feature]);
     };
 
     // The font Discord started with; the native side reads the same saved setting at launch.
