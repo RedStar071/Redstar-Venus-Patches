@@ -511,9 +511,12 @@
         if (!component || wrapped.has(component)) return wrapped.get(component) || component;
         if (typeof component === "function" && (component.displayName || component.name) === "Pressable") {
             const orig = component;
-            const result = function () {
+            const result = function (props, second) {
+                const next = pickerProps(props), n = arguments.length;
+                if (n <= 1) return orig.call(this, next);
+                if (n === 2) return orig.call(this, next, second);
                 const args = Array.from(arguments);
-                args[0] = pickerProps(args[0]);
+                args[0] = next;
                 return orig.apply(this, args);
             };
             result.displayName = "Pressable";
@@ -5293,8 +5296,11 @@
     // The change runs inside the render, so it may use hooks, and it always runs, so the hook count never changes.
     function propsComponent(component, change) {
         if (typeof component === "function") {
-            const patched = function (props) {
-                const args = Array.from(arguments); args[0] = change(props);
+            const patched = function (props, second) {
+                const next = change(props), n = arguments.length;
+                if (n <= 1) return component.call(this, next);
+                if (n === 2) return component.call(this, next, second);
+                const args = Array.from(arguments); args[0] = next;
                 return component.apply(this, args);
             };
             if (component.displayName) patched.displayName = component.displayName;
