@@ -3221,26 +3221,45 @@
     // The game a Play or Activity task counts time for. Since mid-2026 it lives on the task
     // (taskConfigV2.tasks.<TYPE>.applications[0].id); older quests carry it on config.application.
     function questApplication(item, task) {
-        const apps = task && task.applications, first = Array.isArray(apps) ? apps.find(app => app && app.id) : null;
-        const id = first ? first.id : item && item.config && item.config.application && item.config.application.id;
-        return id != null && /^\d{5,25}$/.test(String(id)) ? String(id) : null;
+        const apps = task && task.applications;
+        let id = null;
+        if (Array.isArray(apps)) {
+            for (let i = 0; i < apps.length; i++) {
+                if (apps[i] && apps[i].id) { id = apps[i].id; break; }
+            }
+        }
+        if (!id) id = item && item.config && item.config.application && item.config.application.id;
+        if (id == null) return null;
+        const str = typeof id === "string" ? id : String(id);
+        return /^\d{5,25}$/.test(str) ? str : null;
     }
     // The first task this phone can do, in the order the settings allow.
     function questTask(item) {
         const config = item && item.config, tasks = config && (config.taskConfigV2 || config.taskConfig);
         const all = tasks && tasks.tasks;
         if (!all || typeof all !== "object") return null;
-        if (settings.questsVideo) for (const type of QUEST_VIDEO_TASKS) {
-            const target = Number(all[type] && all[type].target);
+        if (settings.questsVideo) for (let i = 0; i < QUEST_VIDEO_TASKS.length; i++) {
+            const type = QUEST_VIDEO_TASKS[i], entry = all[type], target = entry && Number(entry.target);
             if (target > 0) return {type, target, kind:"video"};
         }
         // "Play <game> for 15 minutes": the same heartbeat Discord's desktop app sends while the game runs.
-        const play = all[QUEST_PLAY_TASK], playTarget = Number(play && play.target), playApp = questApplication(item, play);
-        if (settings.questsPlay && playTarget > 0 && playApp) return {type:QUEST_PLAY_TASK, target:playTarget, kind:"play", applicationId:playApp};
-        const activity = all[QUEST_ACTIVITY_TASK], target = Number(activity && activity.target);
-        const activityApp = questApplication(item, activity), features = config.features;
-        const mobile = Array.isArray(features) && features.includes(QUEST_MOBILE_ACTIVITY);
-        if (settings.questsActivity && target > 0 && activityApp) return {type:QUEST_ACTIVITY_TASK, target, kind:"activity", applicationId:activityApp, mobile};
+        if (settings.questsPlay) {
+            const play = all[QUEST_PLAY_TASK], playTarget = play && Number(play.target);
+            if (playTarget > 0) {
+                const playApp = questApplication(item, play);
+                if (playApp) return {type:QUEST_PLAY_TASK, target:playTarget, kind:"play", applicationId:playApp};
+            }
+        }
+        if (settings.questsActivity) {
+            const activity = all[QUEST_ACTIVITY_TASK], target = activity && Number(activity.target);
+            if (target > 0) {
+                const activityApp = questApplication(item, activity);
+                if (activityApp) {
+                    const features = config.features, mobile = Array.isArray(features) && features.includes(QUEST_MOBILE_ACTIVITY);
+                    return {type:QUEST_ACTIVITY_TASK, target, kind:"activity", applicationId:activityApp, mobile};
+                }
+            }
+        }
         return null;
     }
     function questProgress(item, type) {
@@ -3262,18 +3281,24 @@
         let all;
         try { all = store.quests; } catch (_) { return; }
         if (!all || typeof all.values !== "function") return;
-        const now = Date.now(), ready = [], waiting = [], onScreen = isAppActive();
+        const now = Date.now(), ready = [], waiting = [], expMap = new Map(), onScreen = isAppActive();
         for (const item of all.values()) {
-            if (!questOpen(item, now) || !questTask(item)) continue;
+            if (!item || typeof item.id !== "string" || !item.config) continue;
+            if (item.userStatus && item.userStatus.completedAt) continue;
+            const expires = questTime(item.config.expiresAt);
+            if (expires <= now + 60000 || (quest.skip.get(item.id) || 0) > now) continue;
+            const task = questTask(item);
+            if (!task) continue;
+            expMap.set(item, Number.isFinite(expires) ? expires : Infinity);
             // A video Quest only plays on screen (questVideo), so in the background it must not hold the one running
             // slot: Play and Activity Quests, which desktop reports while unfocused, go ahead of it instead.
-            if (item.userStatus && item.userStatus.enrolledAt) { if (onScreen || questTask(item).kind !== "video") ready.push(item); }
+            if (item.userStatus && item.userStatus.enrolledAt) { if (onScreen || task.kind !== "video") ready.push(item); }
             else if (settings.questsEnroll) waiting.push(item);
         }
         // Soonest-expiring first, so nothing runs out while another quest is going.
-        const expiry = item => { const time = questTime(item.config.expiresAt); return Number.isFinite(time) ? time : Infinity; };
-        const soonest = (a, b) => expiry(a) - expiry(b);
-        ready.sort(soonest); waiting.sort(soonest);
+        const soonest = (a, b) => expMap.get(a) - expMap.get(b);
+        if (ready.length > 1) ready.sort(soonest);
+        if (waiting.length > 1) waiting.sort(soonest);
         const blocked = quest.enrollBlockedUntil > now || questTime(questFlag(store, "questEnrollmentBlockedUntil")) > now;
         // An accept says it came from the Quests screen (QUEST_HOME_MOBILE), which you can only tap with Discord open.
         // Sent from the background it carried client_app_state "background", which no real tap can. Wait for Discord.
