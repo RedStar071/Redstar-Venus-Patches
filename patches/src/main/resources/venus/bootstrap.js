@@ -2286,6 +2286,7 @@
         if (!hiddenMetadata(channel)) return channel;
         return renamedChannel(channel, hiddenName(channel));
     }
+    const HIDDEN_BUCKET_TYPES = [0, 2, 4, 5, 10, 11, 12, 13, 15, 16];
     function hiddenDirectory(orig, self, args) {
         const result = orig.apply(self, args), guild = args[0];
         // Always cache names from the current store even while the toggle is off,
@@ -2296,12 +2297,11 @@
         // records: the same final cache as walking the merged map, without visiting basic twice.
         function remember() {
             const current = userStore && userStore.getCurrentUser(), owner = current && current.id;
-            // While the switch is off this only backs up the names gateway events already record, and it ran over
-            // every channel on every channel-list render. Skip it while the server's records are the same objects.
+            // Skip rescanning channel names while the server's channel tables are the exact same objects.
             const last = hiddenScans.get(guild);
-            if (last && last.full === full && last.basic === basic && last.owner === owner) {
-                if (last.source) source = last.source;
-                if (!enabled("hiddenChannels")) return;
+            if (last && last.full === full && last.basic === basic && last.owner === owner && last.source) {
+                source = last.source;
+                return;
             }
             if (!source) source = basic ? Object.assign({},basic,full) : full;
             if (hiddenScans.size >= 64 && !last) hiddenScans.delete(hiddenScans.keys().next().value);
@@ -2329,19 +2329,23 @@
         // Recheck permissions and metadata on each directory lookup; retain stable
         // array identity for unchanged inputs and bound the cache to 16 guilds.
         const names = new Map();
-        const sigParts = new Array(extra.length);
+        let signature = "";
         const references = extra.slice();
         for (let i = 0; i < extra.length; i++) {
             const c = extra[i], name = hiddenName(c);
             names.set(c, name);
-            sigParts[i] = c.id + ":" + c.position + ":" + c.type + ":" + c.parent_id + ":" + name;
+            if (i) signature += "|";
+            signature += c.id + ":" + c.position + ":" + c.type + ":" + c.parent_id + ":" + name;
             const parent = source[c.parent_id];
             if (parent) references.push(parent);
         }
-        const signature = sigParts.join("|");
         const cached = hiddenViews.get(guild);
         if (cached && cached.orig === result && cached.source === full && cached.basic === basic && cached.signature === signature &&
-            references.length === cached.references.length && references.every((c,i) => c === cached.references[i])) return cached.value;
+            references.length === cached.references.length) {
+            let sameRefs = true;
+            for (let i = 0; i < references.length; i++) if (references[i] !== cached.references[i]) { sameRefs = false; break; }
+            if (sameRefs) return cached.value;
+        }
         let next = result;
         function append(key, channels) {
             if (!Array.isArray(next[key])) return;
@@ -2388,7 +2392,10 @@
             if (p && p.type === 4) parents.push(p);
         }
         const empty = [];
-        for (const type of [0,2,4,5,10,11,12,13,15,16]) append(type, byType.get(type) || empty);
+        for (let i = 0; i < HIDDEN_BUCKET_TYPES.length; i++) {
+            const type = HIDDEN_BUCKET_TYPES[i];
+            append(type, byType.get(type) || empty);
+        }
         append("SELECTABLE", selectable);
         append("VOCAL", vocal);
         append(4, parents);
