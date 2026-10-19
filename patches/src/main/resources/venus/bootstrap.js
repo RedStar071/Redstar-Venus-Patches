@@ -2572,9 +2572,10 @@
                 const color = pastelColor(node.userId,0.85,0.75);
                 if (color) result = Object.assign({},node,{roleColor:color.value,color:color.value,colorString:color.hex});
             }
-            if (Array.isArray(node.content) && node.content.length) {
-                const children = pastelMentions(node.content,guildId);
-                if (children !== node.content) result = Object.assign({},result,{content:children});
+            const sub = node.content;
+            if (typeof sub === "object" && Array.isArray(sub) && sub.length) {
+                const children = pastelMentions(sub,guildId);
+                if (children !== sub) result = Object.assign({},result,{content:children});
             }
             if (result !== node) { if (!next) next = content.slice(); next[i] = result; }
         }
@@ -2591,16 +2592,22 @@
         // If neither the author's name color nor any mention changed and shouldShowRoleOnName is already true,
         // return the original message without cloning it on every scroll frame.
         if (!color && content === message.content && message.shouldShowRoleOnName === true) return message;
-        // One copy of the row's message, with every change in it.
-        const changes = color ? {roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true} : {shouldShowRoleOnName:true};
-        if (content !== message.content) changes.content = content;
-        // Native MessageView applies Message.textColor via TextView.setTextColor (349.9 bridge field).
-        // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
-        if (color && settings.pastelContent) {
-            const text = pastelColor(seed,0.85,0.75);
-            if (text) changes.textColor = text.value;
+        // One copy of the row's message, with every change set directly on it instead of building an intermediate object.
+        const copy = Object.assign({},message);
+        copy.shouldShowRoleOnName = true;
+        if (color) {
+            copy.roleColor = color.value;
+            copy.usernameColor = color.value;
+            copy.colorString = color.value;
+            // Native MessageView applies Message.textColor via TextView.setTextColor (349.9 bridge field).
+            // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
+            if (settings.pastelContent) {
+                const text = pastelColor(seed,0.85,0.75);
+                if (text) copy.textColor = text.value;
+            }
         }
-        return Object.assign({},message,changes);
+        if (content !== message.content) copy.content = content;
+        return copy;
     }
     // The replied-to message above a reply. Discord's reply preview never read textColor, so "Color message text"
     // didn't reach replies (#45); the Pastelize patch now has it paint the reply text with it. Discord gives every
