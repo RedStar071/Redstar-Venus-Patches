@@ -5850,10 +5850,11 @@
         return false;
     }
     function userNotifWatched(id) {
-        if (typeof id !== "string" || !/^\d{17,20}$/.test(id)) return false;
+        if (typeof id !== "string") return false;
+        if (!userNotif.ids.has(id) && !(settings.userNotifFriends && userNotifIsFriend(id))) return false;
+        if (!/^\d{17,20}$/.test(id)) return false;
         const me = currentUser();
-        if (me && me.id === id) return false;
-        return userNotif.ids.has(id) || !!(settings.userNotifFriends && userNotifIsFriend(id));
+        return !(me && me.id === id);
     }
     function userNotifPersonName(id, fallbackUser) {
         const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"));
