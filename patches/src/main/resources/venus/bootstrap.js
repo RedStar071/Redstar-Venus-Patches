@@ -4,8 +4,12 @@
     if (global.__venusPatches) return;
     const features = /*__FEATURES__*/;
     // Inspected Metro IDs for the SHA-256-pinned 349.9 bundle; never scan or eagerly require modules.
-    const targetModules = new Set([17, 19, 1162, 11129, 14409, 14500]);
-    function selectModules(ids) { ids.forEach(id => targetModules.add(id)); }
+    // Metro IDs Venus wraps, as a dense table: decorateDefine checks it for all ~17.7k modules at startup, and an
+    // indexed read is ~3x cheaper than Set.has on Hermes (tests/bench/define_wrapper.js). 120 is RN's initializer.
+    // IDs past the end read as undefined, so a module added in a later bundle is simply left alone.
+    const targetModules = new Uint8Array(32768);
+    function selectModules(ids) { for (let i = 0; i < ids.length; i++) targetModules[ids[i]] = 1; }
+    selectModules([17, 19, 120, 1162, 11129, 14409, 14500]);
     if (features.picker) selectModules([414]);
     if (features.voice) selectModules([1282, 7268, 7243]);
     if (features.copyBios) selectModules([10987]);
@@ -207,13 +211,16 @@
     };
     const owns = (obj, key) => obj != null && Object.prototype.hasOwnProperty.call(obj, key);
     // enabled() runs inside nearly every hook: resolve setting -> feature once, not per call.
-    const featureTable = new Map();
+    // Off settings (most of them) return before any lookup, and a plain object beats Map.get on Hermes
+    // (tests/bench/enabled.js, 1.23x).
+    const featureTable = Object.create(null);
     const enabled = key => {
-        let feature = featureTable.get(key);
-        if (feature === undefined) featureTable.set(key, feature = featureFor(key));
+        if (!settings[key]) return false;
+        let feature = featureTable[key];
+        if (feature === undefined) featureTable[key] = feature = featureFor(key);
         // An option only counts while its main switch is on too. Only FreeNitro checked that, so
         // "Removing link previews" kept skipping the question after QuickDelete itself was turned off.
-        return !!(features[feature] && settings[key] && (feature === key || settings[feature]));
+        return feature === key ? !!features[key] : !!(features[feature] && settings[feature]);
     };
 
     // The font Discord started with; the native side reads the same saved setting at launch.
@@ -504,9 +511,12 @@
         if (!component || wrapped.has(component)) return wrapped.get(component) || component;
         if (typeof component === "function" && (component.displayName || component.name) === "Pressable") {
             const orig = component;
-            const result = function () {
+            const result = function (props, second) {
+                const next = pickerProps(props), n = arguments.length;
+                if (n <= 1) return orig.call(this, next);
+                if (n === 2) return orig.call(this, next, second);
                 const args = Array.from(arguments);
-                args[0] = pickerProps(args[0]);
+                args[0] = next;
                 return orig.apply(this, args);
             };
             result.displayName = "Pressable";
@@ -1426,8 +1436,15 @@
     // GUILD_TEXT (0), GUILD_ANNOUNCEMENT (5), GUILD_STORE (6), GUILD_DIRECTORY (14), GUILD_FORUM (15), GUILD_MEDIA (16), GUILD_APP (21).
     const DASHLESS_TYPES = new Set([0, 5, 6, 14, 15, 16, 21]);
     const FALSE_FN = () => false;
+    const dashlessNames = new Map();
     function dashlessFormat(channel, name) {
-        return enabled("dashless") && channel && DASHLESS_TYPES.has(channel.type) && typeof name === "string" && name.includes("-") ? name.replace(/-/g, " ") : name;
+        if (!enabled("dashless") || !channel || !DASHLESS_TYPES.has(channel.type) || typeof name !== "string" || name.indexOf("-") < 0) return name;
+        const cached = dashlessNames.get(name);
+        if (cached !== undefined) return cached;
+        const formatted = name.replace(/-/g, " ");
+        if (dashlessNames.size >= 512) dashlessNames.delete(dashlessNames.keys().next().value);
+        dashlessNames.set(name, formatted);
+        return formatted;
     }
     function channelLabel(orig, self, args) {
         const channel=args[0];
@@ -1443,6 +1460,10 @@
         }
         return dashlessFormat(channel, orig.apply(self, next));
     }
+    channelLabel.call1 = (orig, self, channel) =>
+        hiddenMetadata(channel) ? channelLabel(orig, self, [channel]) : dashlessFormat(channel, orig.call(self, channel));
+    channelLabel.call2 = (orig, self, channel, b) =>
+        hiddenMetadata(channel) ? channelLabel(orig, self, [channel, b]) : dashlessFormat(channel, orig.call(self, channel, b));
     function useChannelLabel(orig, self, args) {
         if (React) {
             if (features.dashless) useSettings("dashless");
@@ -1450,12 +1471,35 @@
         }
         return channelLabel(orig, self, args);
     }
-    function mentionChannelInfo(orig, self, args) {
-        const result = orig.apply(self, args);
+    useChannelLabel.call1 = (orig, self, channel) => {
+        if (React) {
+            if (features.dashless) useSettings("dashless");
+            if (features.hiddenChannels) useSettings("hiddenChannels");
+        }
+        return channelLabel.call1(orig, self, channel);
+    };
+    useChannelLabel.call2 = (orig, self, channel, b) => {
+        if (React) {
+            if (features.dashless) useSettings("dashless");
+            if (features.hiddenChannels) useSettings("hiddenChannels");
+        }
+        return channelLabel.call2(orig, self, channel, b);
+    };
+    const mentionChannelCache = new WeakMap();
+    function mentionChannelFormat(result) {
         if (!result || typeof result.name !== "string") return result;
         const formatted = dashlessFormat(result, result.name);
-        return formatted === result.name ? result : Object.assign({}, result, {name:formatted});
+        if (formatted === result.name) return result;
+        const cached = mentionChannelCache.get(result);
+        if (cached && cached.name === formatted) return cached.value;
+        const value = Object.assign({}, result, {name:formatted});
+        mentionChannelCache.set(result, {name:formatted, value});
+        return value;
     }
+    function mentionChannelInfo(orig, self, args) {
+        return mentionChannelFormat(orig.apply(self, args));
+    }
+    mentionChannelInfo.call1 = (orig, self, id) => mentionChannelFormat(orig.call(self, id));
     function parserStateChannels(orig, self, args) {
         const state = orig.apply(self, args);
         if (!enabled("dashless") || !state || !Array.isArray(state.channels) || !channelStore || typeof channelStore.getChannel !== "function") return state;
@@ -1683,6 +1727,9 @@
     const MESSAGE_EVENTS = new Set(["MESSAGE_CREATE","MESSAGE_UPDATE"]), RESTORE_EVENTS = new Set(["CONNECTION_OPEN","CACHE_LOADED"]);
     // Every Flux event passes through here: leave typing, presence, voice and the rest alone.
     const HIDDEN_EVENTS = new Set(["LOGOUT","CHANNEL_DELETE","GUILD_DELETE",...CHANNEL_EVENTS,...GUILD_EVENTS,...READY_EVENTS,...BATCH_EVENTS,...MESSAGE_EVENTS]);
+    // Every type dispatchEvent or channelMetadataEvent acts on. Anything else (presence, typing, voice, acks: most of the
+    // traffic) goes straight to Discord. Add a type here when a new branch reads it.
+    const DISPATCH_EVENTS = new Set([...HIDDEN_EVENTS, ...RESTORE_EVENTS, "MESSAGE_DELETE", "MESSAGE_DELETE_BULK"]);
     function channelMetadataEvent(event) {
         if (!HIDDEN_EVENTS.has(event.type)) return;
         // Most messages mention no channels; skip the account lookup for them.
@@ -1928,9 +1975,15 @@
         const entry = bucket && bucket.get(deletedKey(args[0],args[1]));
         return entry ? entry.message : orig.apply(self,args);
     }
+    // getMessage(channelId, messageId), the usual call: same logic without the arguments object.
+    retainedMessage.call2 = (orig, self, channelId, messageId) => {
+        const bucket = deleted.size && enabled("noDelete") && deletedByChannel.get(channelId);
+        const entry = bucket && bucket.get(deletedKey(channelId, messageId));
+        return entry ? entry.message : orig.call(self, channelId, messageId);
+    };
     function retainedMessages(orig, self, args) {
         const result = orig.apply(self,args), channelId = args[0];
-        if (!enabled("noDelete") || !result) return result;
+        if (!deletedByChannel.size || !enabled("noDelete") || !result) return result;
         const bucket = deletedByChannel.get(channelId);
         if (!bucket || typeof result.merge !== "function") return result;
         const cached = deletedViews.get(channelId);
@@ -1975,6 +2028,11 @@
         deletedViews.set(channelId,{orig:result,revision:deletedRevision,value});
         return value;
     }
+    // getMessages(channelId), called on every chat render and store check: skip arguments allocation.
+    retainedMessages.call1 = (orig, self, channelId) => {
+        if (!deletedByChannel.size || !enabled("noDelete") || !deletedByChannel.has(channelId)) return orig.call(self, channelId);
+        return retainedMessages(orig, self, [channelId]);
+    };
     function rememberDeleted(event, orig, self) {
         const key = deletedKey(event.channelId, event.id);
         if (deleted.has(key)) return true;
@@ -2003,9 +2061,12 @@
         for (const [key, entry] of edits) if (ids.has(entry.channelId)) { edits.delete(key); dropped = true; }
         if (dropped) persistDeleted();
     }
+    // dispatch(event) for an event no branch below reads (most of the traffic): straight through, no arguments object.
+    // Everything else takes the full path with the real arguments.
+    const dispatchEventFull = (orig, self, event) => dispatchEvent(orig, self, [event]);
     function dispatchEvent(orig, self, args) {
         const event = args[0];
-        if (!event) return orig.apply(self, args);
+        if (!event || !DISPATCH_EVENTS.has(event.type)) return orig.apply(self, args);
         if (features.hiddenChannels) channelMetadataEvent(event);
         if (event.type === "LOGOUT") { clearDeleted(false); edits.clear(); archiveRestored = false; clearReviewAuth(); }
         if (!features.noDelete) return orig.apply(self, args);
@@ -2038,6 +2099,8 @@
         }
         return orig.apply(self, args);
     }
+    dispatchEvent.call1 = (orig, self, event) => !event || !DISPATCH_EVENTS.has(event.type) ? orig.call(self, event) :
+        dispatchEventFull(orig, self, event);
     // Only a real edit counts: Discord's own update carries edited_timestamp and new text. Link previews,
     // reactions, pins and the update NoDelete sends for a kept message have no edit time or keep the text.
     function rememberEdit(update) {
@@ -2139,6 +2202,13 @@
         return !!(channel && !channel.realCheck && viewPermission != null && bit == viewPermission &&
             channel.guild_id && channel.type !== 1 && channel.type !== 3) || real;
     }
+    // can(permission, channel), the usual call (once per channel per list render): no arguments object.
+    hiddenCan.call2 = (orig, self, bit, channel) => {
+        const real = orig.call(self, bit, channel);
+        if (real || !enabled("hiddenChannels")) return real;
+        return !!(channel && !channel.realCheck && viewPermission != null && bit == viewPermission &&
+            channel.guild_id && channel.type !== 1 && channel.type !== 3) || real;
+    };
     // The mobile list has a second VIEW_CHANNEL filter. Give ONLY that factory a
     // metadata-list facade; the real permission store and all other callers stay stock.
     function listImport(importer) {
@@ -2222,9 +2292,13 @@
             // While the switch is off this only backs up the names gateway events already record, and it ran over
             // every channel on every channel-list render. Skip it while the server's records are the same objects.
             const last = hiddenScans.get(guild);
-            if (!enabled("hiddenChannels") && last && last.full === full && last.basic === basic && last.owner === owner) return;
+            if (last && last.full === full && last.basic === basic && last.owner === owner) {
+                if (last.source) source = last.source;
+                if (!enabled("hiddenChannels")) return;
+            }
+            if (!source) source = basic ? Object.assign({},basic,full) : full;
             if (hiddenScans.size >= 64 && !last) hiddenScans.delete(hiddenScans.keys().next().value);
-            hiddenScans.set(guild, {full, basic, owner});
+            hiddenScans.set(guild, {full, basic, owner, source});
             const keep = channel => rememberChannelName(channel, owner);
             if (basic) Object.values(basic).forEach(keep);
             Object.values(full).forEach(keep);
@@ -2235,7 +2309,6 @@
             basic = typeof channelStore.getMutableBasicGuildChannelsForGuild === "function" && channelStore.getMutableBasicGuildChannelsForGuild(guild);
             // Native lazy caching keeps basic metadata for channels with no full record.
             // Merge by ID, with full records retaining their richer native prototype.
-            source = basic ? Object.assign({},basic,full) : full;
             remember();
         }
         const readable = guild && channelStore && typeof channelStore.getMutableGuildChannelsForGuild === "function";
@@ -2243,12 +2316,23 @@
         if (!enabled("hiddenChannels") || !result || !readable || !permissions) return result;
         // The read above threw part-way: retry once, letting a real error surface as before.
         if (!source) { read(); if (!source) return result; }
-        const extra = Object.values(source).filter(channel => hiddenMetadata(channel));
+        const extra = [];
+        for (const k in source) {
+            if (Object.prototype.hasOwnProperty.call(source, k) && hiddenMetadata(source[k])) extra.push(source[k]);
+        }
         // Recheck permissions and metadata on each directory lookup; retain stable
         // array identity for unchanged inputs and bound the cache to 16 guilds.
-        const names = new Map(extra.map(c => [c, hiddenName(c)]));
-        const signature = extra.map(c => [c.id,c.position,c.type,c.parent_id,names.get(c)].join(":")).join("|");
-        const references = extra.concat(extra.map(c => source[c.parent_id]).filter(Boolean));
+        const names = new Map();
+        const sigParts = new Array(extra.length);
+        const references = extra.slice();
+        for (let i = 0; i < extra.length; i++) {
+            const c = extra[i], name = hiddenName(c);
+            names.set(c, name);
+            sigParts[i] = c.id + ":" + c.position + ":" + c.type + ":" + c.parent_id + ":" + name;
+            const parent = source[c.parent_id];
+            if (parent) references.push(parent);
+        }
+        const signature = sigParts.join("|");
         const cached = hiddenViews.get(guild);
         if (cached && cached.orig === result && cached.source === full && cached.basic === basic && cached.signature === signature &&
             references.length === cached.references.length && references.every((c,i) => c === cached.references[i])) return cached.value;
@@ -2256,30 +2340,52 @@
         function append(key, channels) {
             if (!Array.isArray(next[key])) return;
             const original = next[key];
-            const existing = original.map(entry => {
-                if (!entry.channel) return entry;
+            let existing = original, renamed = false;
+            for (let i = 0; i < original.length; i++) {
+                const entry = original[i];
+                if (!entry.channel) continue;
                 const channel = displayChannel(entry.channel);
-                return channel === entry.channel ? entry : Object.assign({},entry,{channel});
-            });
-            const renamed = existing.some((entry,index) => entry !== original[index]);
-            const ids = new Set(existing.map(entry => entry.channel && entry.channel.id));
+                if (channel !== entry.channel) {
+                    if (!renamed) { existing = original.slice(); renamed = true; }
+                    existing[i] = Object.assign({}, entry, {channel});
+                }
+            }
+            if (!channels.length && !renamed) return;
+            const ids = new Set();
+            for (let i = 0; i < existing.length; i++) {
+                const ch = existing[i] && existing[i].channel;
+                if (ch) ids.add(ch.id);
+            }
             const added = [];
-            channels.forEach(channel => {
-                if (ids.has(channel.id)) return;
+            for (let i = 0; i < channels.length; i++) {
+                const channel = channels[i];
+                if (ids.has(channel.id)) continue;
                 ids.add(channel.id);
                 const name = names.get(channel);
                 // Hidden names were resolved for the signature above; reuse them instead of asking again.
                 const shown = name === undefined ? displayChannel(channel) : renamedChannel(channel, name);
                 added.push({channel:shown,comparator:channel.position || 0});
-            });
+            }
             if (!added.length && !renamed) return;
             if (next === result) next = Object.assign({}, result);
             next[key] = existing.concat(added).sort((a,b) => a.comparator - b.comparator);
         }
-        for (const type of [0,2,4,5,10,11,12,13,15,16]) append(type, extra.filter(c => c.type === type));
-        append("SELECTABLE", extra.filter(c => ![2,4,13].includes(c.type)));
-        append("VOCAL", extra.filter(c => [2,13].includes(c.type)));
-        append(4, extra.map(c => source[c.parent_id]).filter(c => c && c.type === 4));
+        const byType = new Map(), selectable = [], vocal = [], parents = [];
+        for (let i = 0; i < extra.length; i++) {
+            const c = extra[i], t = c.type;
+            let bucket = byType.get(t);
+            if (!bucket) byType.set(t, bucket = []);
+            bucket.push(c);
+            if (t !== 2 && t !== 4 && t !== 13) selectable.push(c);
+            if (t === 2 || t === 13) vocal.push(c);
+            const p = source[c.parent_id];
+            if (p && p.type === 4) parents.push(p);
+        }
+        const empty = [];
+        for (const type of [0,2,4,5,10,11,12,13,15,16]) append(type, byType.get(type) || empty);
+        append("SELECTABLE", selectable);
+        append("VOCAL", vocal);
+        append(4, parents);
         if (hiddenViews.size >= 16 && !hiddenViews.has(guild)) hiddenViews.delete(hiddenViews.keys().next().value);
         hiddenViews.set(guild, {orig:result,source:full,basic,signature,references,value:next});
         return next;
@@ -2455,6 +2561,8 @@
     let reviewToken = "", reviewAccount = null, reviewAuthAttempt = 0, reviewAuthState = "idle", reviewAuthError = "";
     const reviewCache = new Map(), platformWrappers = new WeakMap();
     const REVIEW_API = "https://manti.vendicated.dev/api/reviewdb";
+    // One cache per tone (saturation, lightness), keyed by the seed: building "0.75:0.6:<id>" on every lookup cost
+    // 5.9x more than the lookup itself on Hermes (number-to-string). tests/bench/pastel_cache.js
     const pastelCache = new Map();
     let pastelCacheColor, pastelCacheHash;
     function pastelColor(seed, saturation, lightness) {
@@ -2463,26 +2571,31 @@
         if (pastelCacheColor !== RN.processColor || pastelCacheHash !== pastelHash) {
             pastelCache.clear(); pastelCacheColor = RN.processColor; pastelCacheHash = pastelHash;
         }
-        const cacheKey = saturation + ":" + lightness + ":" + seed;
-        const known = pastelCache.get(cacheKey);
+        const tone = saturation === 0.75 && lightness === 0.6 ? "name" : saturation === 0.85 && lightness === 0.75 ? "mention" :
+            saturation + ":" + lightness;
+        let table = pastelCache.get(tone);
+        if (!table) pastelCache.set(tone, table = new Map());
+        const known = table.get(seed);
         if (known) return known;
         const color = computePastel(seed, saturation, lightness);
-        if (pastelCache.size >= 1024) pastelCache.delete(pastelCache.keys().next().value);
-        pastelCache.set(cacheKey, color);
+        if (table.size >= 1024) table.delete(table.keys().next().value);
+        table.set(seed, color);
         return color;
     }
     function computePastel(seed, saturation, lightness) {
         const hue = ((pastelHash(String(seed)) >>> 0) % 360) / 360;
+        const a = saturation * Math.min(lightness, 1 - lightness), h12 = hue * 12;
         function component(offset) {
-            const k = (offset + hue * 12) % 12;
-            return Math.round(255 * (lightness - saturation * Math.min(lightness,1-lightness) * Math.max(-1,Math.min(k-3,9-k,1))));
+            const k = (offset + h12) % 12;
+            return Math.round(255 * (lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
         }
-        const hex = "#" + [component(0),component(8),component(4)].map(value => value.toString(16).padStart(2,"0")).join("");
+        const rgb = (component(0) << 16) | (component(8) << 8) | component(4);
+        const hex = "#" + (0x1000000 | rgb).toString(16).slice(1);
         return {hex, value:RN.processColor(hex)};
     }
     // Every chat row runs this: the content array is only copied once a node actually changes.
     function pastelMentions(content, guildId) {
-        if (!Array.isArray(content)) return content;
+        if (!Array.isArray(content) || !content.length) return content;
         let next = null;
         for (let i = 0; i < content.length; i++) {
             const node = content[i];
@@ -2493,9 +2606,10 @@
                 const color = pastelColor(node.userId,0.85,0.75);
                 if (color) result = Object.assign({},node,{roleColor:color.value,color:color.value,colorString:color.hex});
             }
-            if (Array.isArray(node.content)) {
-                const children = pastelMentions(node.content,guildId);
-                if (children !== node.content) result = Object.assign({},result,{content:children});
+            const sub = node.content;
+            if (typeof sub === "object" && Array.isArray(sub) && sub.length) {
+                const children = pastelMentions(sub,guildId);
+                if (children !== sub) result = Object.assign({},result,{content:children});
             }
             if (result !== node) { if (!next) next = content.slice(); next[i] = result; }
         }
@@ -2512,16 +2626,22 @@
         // If neither the author's name color nor any mention changed and shouldShowRoleOnName is already true,
         // return the original message without cloning it on every scroll frame.
         if (!color && content === message.content && message.shouldShowRoleOnName === true) return message;
-        // One copy of the row's message, with every change in it.
-        const changes = color ? {roleColor:color.value,usernameColor:color.value,colorString:color.value,shouldShowRoleOnName:true} : {shouldShowRoleOnName:true};
-        if (content !== message.content) changes.content = content;
-        // Native MessageView applies Message.textColor via TextView.setTextColor (349.9 bridge field).
-        // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
-        if (color && settings.pastelContent) {
-            const text = pastelColor(seed,0.85,0.75);
-            if (text) changes.textColor = text.value;
+        // One copy of the row's message, with every change set directly on it instead of building an intermediate object.
+        const copy = Object.assign({},message);
+        copy.shouldShowRoleOnName = true;
+        if (color) {
+            copy.roleColor = color.value;
+            copy.usernameColor = color.value;
+            copy.colorString = color.value;
+            // Native MessageView applies Message.textColor via TextView.setTextColor (349.9 bridge field).
+            // Never wrap content in a link node: that made the text blue, tappable and show "usernameOnClick".
+            if (settings.pastelContent) {
+                const text = pastelColor(seed,0.85,0.75);
+                if (text) copy.textColor = text.value;
+            }
         }
-        return Object.assign({},message,changes);
+        if (content !== message.content) copy.content = content;
+        return copy;
     }
     // The replied-to message above a reply. Discord's reply preview never read textColor, so "Color message text"
     // didn't reach replies (#45); the Pastelize patch now has it paint the reply text with it. Discord gives every
@@ -2959,7 +3079,7 @@
     // Video progress may run at most ~10 s ahead of the time since accepting; report about every 7 s like the player.
     // Play and Activity heartbeats follow Discord's desktop QuestProgressManager: one a minute, and when less
     // than a minute is left it waits exactly what's left plus one second.
-    const QUEST_VIDEO_LEEWAY = 10, QUEST_VIDEO_STEP = 7, QUEST_HEARTBEAT_MS = 60000, QUEST_HEARTBEAT_TAIL_MS = 1000;
+    const QUEST_VIDEO_LEEWAY = 10, QUEST_VIDEO_POLL_MS = 5000, QUEST_HEARTBEAT_MS = 60000, QUEST_HEARTBEAT_TAIL_MS = 1000;
     // QuestVariants.MOBILE_ACTIVITY_QUEST: an Activity Quest that Discord's phone app reports itself.
     const QUEST_MOBILE_ACTIVITY = 36;
     // Discord answers 401 when a phone reports play time, so Play and Activity heartbeats are sent as Discord
@@ -2975,7 +3095,8 @@
     // Heartbeats in a row that Discord answers without counting any more time before Quest Completer gives up for now.
     const QUEST_STALLED_BEATS = 5;
     const quest = {store:null, dispatcher:null, generation:0, running:null, enrolling:false, skip:new Map(), enrollBlockedUntil:0,
-        scanTimer:undefined, refetchTimer:undefined, user:null, completed:0, last:"", error:"", desktop:null, executables:new Map()};
+        scanTimer:undefined, refetchTimer:undefined, user:null, completed:0, last:"", error:"", desktop:null, executables:new Map(),
+        videoAt:new Map()};
     function questSleep(ms) { return new Promise(resolve => { later(resolve, ms); }); }
     function questStore() {
         if (quest.store) return quest.store;
@@ -3125,26 +3246,45 @@
     // The game a Play or Activity task counts time for. Since mid-2026 it lives on the task
     // (taskConfigV2.tasks.<TYPE>.applications[0].id); older quests carry it on config.application.
     function questApplication(item, task) {
-        const apps = task && task.applications, first = Array.isArray(apps) ? apps.find(app => app && app.id) : null;
-        const id = first ? first.id : item && item.config && item.config.application && item.config.application.id;
-        return id != null && /^\d{5,25}$/.test(String(id)) ? String(id) : null;
+        const apps = task && task.applications;
+        let id = null;
+        if (Array.isArray(apps)) {
+            for (let i = 0; i < apps.length; i++) {
+                if (apps[i] && apps[i].id) { id = apps[i].id; break; }
+            }
+        }
+        if (!id) id = item && item.config && item.config.application && item.config.application.id;
+        if (id == null) return null;
+        const str = typeof id === "string" ? id : String(id);
+        return /^\d{5,25}$/.test(str) ? str : null;
     }
     // The first task this phone can do, in the order the settings allow.
     function questTask(item) {
         const config = item && item.config, tasks = config && (config.taskConfigV2 || config.taskConfig);
         const all = tasks && tasks.tasks;
         if (!all || typeof all !== "object") return null;
-        if (settings.questsVideo) for (const type of QUEST_VIDEO_TASKS) {
-            const target = Number(all[type] && all[type].target);
+        if (settings.questsVideo) for (let i = 0; i < QUEST_VIDEO_TASKS.length; i++) {
+            const type = QUEST_VIDEO_TASKS[i], entry = all[type], target = entry && Number(entry.target);
             if (target > 0) return {type, target, kind:"video"};
         }
         // "Play <game> for 15 minutes": the same heartbeat Discord's desktop app sends while the game runs.
-        const play = all[QUEST_PLAY_TASK], playTarget = Number(play && play.target), playApp = questApplication(item, play);
-        if (settings.questsPlay && playTarget > 0 && playApp) return {type:QUEST_PLAY_TASK, target:playTarget, kind:"play", applicationId:playApp};
-        const activity = all[QUEST_ACTIVITY_TASK], target = Number(activity && activity.target);
-        const activityApp = questApplication(item, activity), features = config.features;
-        const mobile = Array.isArray(features) && features.includes(QUEST_MOBILE_ACTIVITY);
-        if (settings.questsActivity && target > 0 && activityApp) return {type:QUEST_ACTIVITY_TASK, target, kind:"activity", applicationId:activityApp, mobile};
+        if (settings.questsPlay) {
+            const play = all[QUEST_PLAY_TASK], playTarget = play && Number(play.target);
+            if (playTarget > 0) {
+                const playApp = questApplication(item, play);
+                if (playApp) return {type:QUEST_PLAY_TASK, target:playTarget, kind:"play", applicationId:playApp};
+            }
+        }
+        if (settings.questsActivity) {
+            const activity = all[QUEST_ACTIVITY_TASK], target = activity && Number(activity.target);
+            if (target > 0) {
+                const activityApp = questApplication(item, activity);
+                if (activityApp) {
+                    const features = config.features, mobile = Array.isArray(features) && features.includes(QUEST_MOBILE_ACTIVITY);
+                    return {type:QUEST_ACTIVITY_TASK, target, kind:"activity", applicationId:activityApp, mobile};
+                }
+            }
+        }
         return null;
     }
     function questProgress(item, type) {
@@ -3166,17 +3306,28 @@
         let all;
         try { all = store.quests; } catch (_) { return; }
         if (!all || typeof all.values !== "function") return;
-        const now = Date.now(), ready = [], waiting = [];
+        const now = Date.now(), ready = [], waiting = [], expMap = new Map(), onScreen = isAppActive();
         for (const item of all.values()) {
-            if (!questOpen(item, now) || !questTask(item)) continue;
-            if (item.userStatus && item.userStatus.enrolledAt) ready.push(item); else if (settings.questsEnroll) waiting.push(item);
+            if (!item || typeof item.id !== "string" || !item.config) continue;
+            if (item.userStatus && item.userStatus.completedAt) continue;
+            const expires = questTime(item.config.expiresAt);
+            if (expires <= now + 60000 || (quest.skip.get(item.id) || 0) > now) continue;
+            const task = questTask(item);
+            if (!task) continue;
+            expMap.set(item, Number.isFinite(expires) ? expires : Infinity);
+            // A video Quest only plays on screen (questVideo), so in the background it must not hold the one running
+            // slot: Play and Activity Quests, which desktop reports while unfocused, go ahead of it instead.
+            if (item.userStatus && item.userStatus.enrolledAt) { if (onScreen || task.kind !== "video") ready.push(item); }
+            else if (settings.questsEnroll) waiting.push(item);
         }
         // Soonest-expiring first, so nothing runs out while another quest is going.
-        const expiry = item => { const time = questTime(item.config.expiresAt); return Number.isFinite(time) ? time : Infinity; };
-        const soonest = (a, b) => expiry(a) - expiry(b);
-        ready.sort(soonest); waiting.sort(soonest);
+        const soonest = (a, b) => expMap.get(a) - expMap.get(b);
+        if (ready.length > 1) ready.sort(soonest);
+        if (waiting.length > 1) waiting.sort(soonest);
         const blocked = quest.enrollBlockedUntil > now || questTime(questFlag(store, "questEnrollmentBlockedUntil")) > now;
-        if (waiting.length && !quest.enrolling && !blocked) questEnroll(waiting[0]);
+        // An accept says it came from the Quests screen (QUEST_HOME_MOBILE), which you can only tap with Discord open.
+        // Sent from the background it carried client_app_state "background", which no real tap can. Wait for Discord.
+        if (waiting.length && !quest.enrolling && !blocked && onScreen) questEnroll(waiting[0]);
         if (!quest.running && ready.length) questRun(ready[0]);
     }
     // Accepting one at a time, a few seconds apart. Includes Discord's own QuestDataUtils (7183) ad decision and
@@ -3201,7 +3352,7 @@
         quest.enrolling = true;
         backgroundSync();
         questRequest("/quests/" + id + "/enroll", questEnrollBody(id), undefined, undefined,
-            () => generation === quest.generation && enabled("quests") && settings.questsEnroll && !!questTask(item) && questOpen(item, Date.now())).then(response => {
+            () => generation === quest.generation && enabled("quests") && settings.questsEnroll && isAppActive() && !!questTask(item) && questOpen(item, Date.now())).then(response => {
             if (!response || generation !== quest.generation) return;
             const status = questUserStatus(response && response.body);
             if (!status || !questDispatch({type:"QUESTS_ENROLL_SUCCESS", enrolledQuestUserStatus:status})) questsFetch(true);
@@ -3265,22 +3416,37 @@
         if (!Number.isFinite(enrolled)) throw new Error("no accepted time");
         let done = questProgress(item, entry.task.type), completed = false;
         questProgressed(entry, done);
+        // Like VideoQuestPlayer (14937): playback resumes where Discord last saved it and runs at 1x from now, and a
+        // report goes out once currentTime passes the last one by 6-8 s, carrying currentTime itself. Time since
+        // accepting alone let a Quest accepted long ago report 6-8 s of video every ~1.3 s, about five times 1x.
+        // The player only runs while Discord is on screen, and every phone request carries client_app_state, so
+        // the clock stops while Discord is in the background: a real video report never says "background".
+        // Leaving Discord pauses it and frees the slot for a Play or Activity Quest; it resumes from the last report.
+        done = Math.max(done, quest.videoAt.get(entry.id) || 0);
+        questProgressed(entry, done);
+        let played = 0, tick = Date.now();
+        const from = done;
         while (questActive(entry) && done < target) {
-            const step = 6 + Math.random() * 2;
-            const allowed = (Date.now() - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, next = Math.min(target, done + step);
-            if (allowed < next) { await questSleep(Math.max(1000, Math.ceil((next - allowed) * 1000))); continue; }
-            const timestamp = next < target ? Math.min(target, next + Math.random() * 0.5) : target;
+            const next = Math.min(target, done + 6 + Math.random() * 2), now = Date.now();
+            if (!isAppActive()) { entry.paused = true; return false; }
+            played += now - tick;
+            tick = now;
+            const playing = Math.min((now - enrolled) / 1000 + QUEST_VIDEO_LEEWAY, from + played / 1000);
+            if (playing < next) { await questSleep(Math.min(QUEST_VIDEO_POLL_MS, Math.max(250, Math.ceil((next - playing) * 1000)))); continue; }
+            const timestamp = Math.min(target, playing);
             questOptimisticProgress(entry.id, entry.task.type, timestamp);
             const response = await questRequest("/quests/" + entry.id + "/video-progress", {timestamp});
             if (!questActive(entry)) return false;
             completed = questVideoStatus(response);
-            done = next;
+            done = timestamp;
+            if (quest.videoAt.size >= 64) quest.videoAt.delete(quest.videoAt.keys().next().value);
+            quest.videoAt.set(entry.id, done);
             questProgressed(entry, done);
             if (completed) break;
-            await questSleep(1000 + Math.floor(Math.random() * 500));
         }
         if (!questActive(entry)) return false;
         if (!completed) {
+            if (!isAppActive()) { entry.paused = true; return false; }
             questOptimisticProgress(entry.id, entry.task.type, target);
             completed = questVideoStatus(await questRequest("/quests/" + entry.id + "/video-progress", {timestamp:target}));
         }
@@ -3364,9 +3530,11 @@
             // A Quest Discord stops counting used to get a heartbeat every minute for as long as Discord stayed open.
             if (beat.value > best) { best = beat.value; stalled = 0; }
             else if (++stalled >= QUEST_STALLED_BEATS) throw new Error("Discord stopped counting time");
+            // Exactly QuestProgressManager.calculateHeartbeatDurationMs (18086): max(0, left) plus a second when a
+            // minute or less is left, so a beat at the target that Discord hasn't confirmed yet is followed one
+            // second later, like Discord's own app. A 60 s wait there was a pattern no Discord client sends.
             const left = Math.max(0, (target - beat.value) * 1000);
-            // At the target, wait a normal interval for confirmation instead of hammering once a second.
-            await questSleep(left > 0 && left <= QUEST_HEARTBEAT_MS ? left + QUEST_HEARTBEAT_TAIL_MS : QUEST_HEARTBEAT_MS);
+            await questSleep(left <= QUEST_HEARTBEAT_MS ? left + QUEST_HEARTBEAT_TAIL_MS : QUEST_HEARTBEAT_MS);
         }
         return false;
     }
@@ -3413,7 +3581,7 @@
         quest.scanTimer = undefined; quest.refetchTimer = undefined;
         backgroundSync();
     }
-    function questsReset() { questsStop(); quest.completed = 0; quest.last = ""; quest.error = ""; notify("quests"); }
+    function questsReset() { questsStop(); quest.videoAt.clear(); quest.completed = 0; quest.last = ""; quest.error = ""; notify("quests"); }
     function questsConnected(event) {
         const id = event && event.user && event.user.id;
         if (id && quest.user && id !== quest.user) questsReset();
@@ -3426,6 +3594,10 @@
         quest.dispatcher = dispatcher;
         dispatcher.subscribe("CONNECTION_OPEN", questsConnected);
         dispatcher.subscribe("LOGOUT", () => { questsReset(); quest.user = null; });
+        // AppStateStore (1986): coming back to Discord lets a waiting accept or a paused video go on.
+        dispatcher.subscribe("APP_STATE_UPDATE", event => {
+            if (event && event.state === "active" && quest.user && enabled("quests")) questsSchedule(2000 + Math.floor(Math.random() * 3000));
+        });
     }
     // Discord can connect before the saved settings finish loading. Quest Completer was still off at that
     // moment, so it never started until the next reconnect. Start it now if Discord is already connected.
@@ -4396,6 +4568,23 @@
         const clean = normalizeHighlightColor(choice);
         return clean.startsWith("#") ? clean : HIGHLIGHT_COLOR_MAP[clean] || defaultHex;
     }
+    const highlightPairCache = new Map();
+    function highlightCustomPair(choice, defaultHex, mult) {
+        if (!RN || typeof RN.processColor !== "function") return null;
+        if (highlightPairCache.owner !== RN.processColor) {
+            highlightPairCache.clear();
+            highlightPairCache.owner = RN.processColor;
+        }
+        const key = choice + ":" + defaultHex + ":" + mult;
+        const cached = highlightPairCache.get(key);
+        if (cached !== undefined) return cached;
+        const hex = highlightColorHex(choice, defaultHex);
+        const gutter = highlightProcess(hex);
+        const background = highlightProcess(hex + "1a");
+        const pair = gutter == null || background == null ? null : {backgroundColor:background, gutterColor:highlightEncodeGutter(gutter, mult)};
+        highlightPairCache.set(key, pair);
+        return pair;
+    }
     function highlightProcess(colorStr) {
         if (!RN || typeof RN.processColor !== "function") return null;
         if (highlightProcessed.owner !== RN.processColor) {
@@ -4414,34 +4603,36 @@
         const m = Math.max(2, Math.min(8, Math.floor(mult)));
         return ((256 - m) << 24) | (colorInt & 0x00ffffff);
     }
-    function highlightCustomPair(hex, mult) {
-        const gutter = highlightProcess(hex);
-        const background = highlightProcess(hex + "1a");
-        if (gutter == null || background == null) return null;
-        return {backgroundColor:background, gutterColor:highlightEncodeGutter(gutter, mult)};
-    }
     function highlightMentioned(source, message) {
         if (source && source.mentioned || message && message.mentioned) return true;
         if (!source || typeof source !== "object") return false;
         if (source.mention_everyone || source.mentionEveryone) return true;
+        const mentions = source.mentions;
+        const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
+        const hasMentions = Array.isArray(mentions) && mentions.length > 0;
+        const refAuthor = ref && ref.author && ref.author.id;
+        if (!hasMentions && !refAuthor) return false;
         const me = currentUser();
         const myId = me && me.id;
         if (!myId) return false;
-        const mentions = source.mentions;
-        if (Array.isArray(mentions) && mentions.some(u => u && (u === myId || u.id === myId))) return true;
-        const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
-        const refAuthor = ref && ref.author && ref.author.id;
-        if (refAuthor && refAuthor === myId) return true;
+        if (refAuthor === myId) return true;
+        if (hasMentions) for (let i = 0; i < mentions.length; i++) {
+            const u = mentions[i];
+            if (u && (u === myId || u.id === myId)) return true;
+        }
         return false;
     }
     function highlightRemember(channelId, id, source) {
         if (!features.messageHighlight || typeof channelId !== "string" || !channelId || typeof id !== "string" || !id) return;
         const key = channelId + ":" + id;
-        if (highlightRecent.has(key)) highlightRecent.delete(key);
+        const existing = highlightRecent.get(key);
+        if (existing && existing.source === source) return;
+        if (existing) highlightRecent.delete(key);
         else if (highlightRecent.size >= 80) highlightRecent.delete(highlightRecent.keys().next().value);
         highlightRecent.set(key, {
             channelId,
             id,
+            source,
             content:source && typeof source.content === "string" ? source.content : "",
             embeds:source && Array.isArray(source.embeds) ? source.embeds : null,
             components:source && Array.isArray(source.components) ? source.components : null
@@ -4474,8 +4665,10 @@
             }
         });
     }
-    function messageRow(orig, self, args) {
-        const result = orig.apply(self,args), row = args[0];
+    function messageRow(orig, self, args) { return messageRowResult(orig.apply(self, args), args[0]); }
+    // generate(row) is called once per chat row as you scroll: skip the arguments object (2.3x, tests/bench/row_hook.js).
+    messageRow.call1 = (orig, self, row) => messageRowResult(orig.call(self, row), row);
+    function messageRowResult(result, row) {
         if (!result || !row || row.rowType !== 1 || !result.message) return result;
         const pastelOn = enabled("pastelize"), translateOn = enabled("translate"), noDeleteOn = enabled("noDelete"), highlightOn = enabled("messageHighlight");
         let message = result.message;
@@ -4501,15 +4694,15 @@
         }
         const bucket = deleted.size && noDeleteOn && deletedByChannel.get(channelId);
         const isDeletedRow = !!(bucket && bucket.has(deletedKey(channelId,id)));
-        const isMentionRow = !isDeletedRow && highlightMentioned(source, next.message);
+        const needHighlightCheck = highlightOn || features.messageHighlight;
+        const isMentionRow = !isDeletedRow && needHighlightCheck && highlightMentioned(source, next.message);
         if (features.messageHighlight && (isDeletedRow || isMentionRow || next.backgroundHighlight))
             highlightRemember(channelId, id, source);
         const mult = highlightOn ? settings.messageHighlightThickness : 1;
         if (isDeletedRow && RN && typeof RN.processColor === "function") {
             // Native row highlight schema from RowGeneratorConstants (7379). No injected notice, altered
             // message content, or AutoMod state. Only retained local rows are tinted.
-            const delHex = highlightOn ? highlightColorHex(settings.messageHighlightDeletedColor, "#f23f43") : "#f23f43";
-            const custom = highlightCustomPair(delHex, mult);
+            const custom = highlightCustomPair(highlightOn ? settings.messageHighlightDeletedColor : "default", "#f23f43", mult);
             if (custom) {
                 next = Object.assign({},next,{backgroundHighlight:custom});
             } else {
@@ -4523,8 +4716,7 @@
         } else if (highlightOn && RN && typeof RN.processColor === "function") {
             const existing = next.backgroundHighlight;
             if (isMentionRow && settings.messageHighlightPingColor !== "default") {
-                const pingHex = highlightColorHex(settings.messageHighlightPingColor, "#f0b232");
-                const custom = highlightCustomPair(pingHex, mult);
+                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult);
                 if (custom) next = Object.assign({},next,{backgroundHighlight:custom});
             } else if (existing && typeof existing.gutterColor === "number" && mult > 1) {
                 next = Object.assign({},next,{backgroundHighlight:Object.assign({},existing,{gutterColor:highlightEncodeGutter(existing.gutterColor, mult)})});
@@ -5184,8 +5376,11 @@
     // The change runs inside the render, so it may use hooks, and it always runs, so the hook count never changes.
     function propsComponent(component, change) {
         if (typeof component === "function") {
-            const patched = function (props) {
-                const args = Array.from(arguments); args[0] = change(props);
+            const patched = function (props, second) {
+                const next = change(props), n = arguments.length;
+                if (n <= 1) return component.call(this, next);
+                if (n === 2) return component.call(this, next, second);
+                const args = Array.from(arguments); args[0] = next;
                 return component.apply(this, args);
             };
             if (component.displayName) patched.displayName = component.displayName;
@@ -5363,7 +5558,20 @@
     function hookExport(exports, key, operation) {
         const orig = exports && exports[key];
         if (typeof orig !== "function") return exports;
-        const patched = function () { return operation(orig, this, arguments); };
+        // Hot two-argument hooks (permission checks, message lookups) can declare operation.call2(orig, self, a, b):
+        // passing `arguments` on to apply is ~3x the cost of the call itself on Hermes (tests/bench/hook_call.js).
+        // One-argument hooks (RowGenerator.generate) can declare operation.call1(orig, self, a) the same way.
+        const call2 = operation.call2, call1 = operation.call1;
+        const patched = typeof call2 === "function" && typeof call1 === "function" ?
+            function (a, b) {
+                const n = arguments.length;
+                return n === 1 ? call1(orig, this, a) : n === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments);
+            } :
+            typeof call2 === "function" ?
+            function (a, b) { return arguments.length === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments); } :
+            typeof call1 === "function" ?
+            function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
+            function () { return operation(orig, this, arguments); };
         return replaceValue(exports, key, patched);
     }
     // Hook a component export (plain function, or memo/forwardRef object) without breaking React tags.
@@ -5373,8 +5581,13 @@
         if (component && typeof component === "object" && component.$$typeof) {
             const inner = typeof component.type === "function" ? "type" : typeof component.render === "function" ? "render" : null;
             if (!inner) return exports;
-            const orig = component[inner];
-            return replaceValue(exports, key, cloneWith(component, inner, function () { return operation(orig, this, arguments); }));
+            const orig = component[inner], call2 = operation.call2, call1 = operation.call1;
+            const patched = typeof call2 === "function" ?
+                function (a, b) { return arguments.length === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments); } :
+                typeof call1 === "function" ?
+                function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
+                function () { return operation(orig, this, arguments); };
+            return replaceValue(exports, key, cloneWith(component, inner, patched));
         }
         return hookExport(exports, key, operation);
     }
@@ -5710,10 +5923,11 @@
         return false;
     }
     function userNotifWatched(id) {
-        if (typeof id !== "string" || !/^\d{17,20}$/.test(id)) return false;
+        if (typeof id !== "string") return false;
+        if (!userNotif.ids.has(id) && !(settings.userNotifFriends && userNotifIsFriend(id))) return false;
+        if (!/^\d{17,20}$/.test(id)) return false;
         const me = currentUser();
-        if (me && me.id === id) return false;
-        return userNotif.ids.has(id) || !!(settings.userNotifFriends && userNotifIsFriend(id));
+        return !(me && me.id === id);
     }
     function userNotifPersonName(id, fallbackUser) {
         const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4519, "default"));
@@ -5852,21 +6066,36 @@
     }
     function userNotifEvent(event) {
         if (!event || !enabled("userNotif")) return;
-        if (event.type === "PRESENCE_UPDATES" && Array.isArray(event.updates)) {
-            for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
-        } else if (event.type === "PRESENCE_UPDATE") userNotifPresence(event);
-        else if (event.type === "MESSAGE_CREATE") userNotifMessage(event);
-        else if (event.type === "TYPING_START") userNotifTyping(event);
-        else if (event.type === "CONNECTION_OPEN") { userNotif.statuses.clear(); userNotifSeedStatuses(false); userNotifSubscribeGuilds(); }
-        else if (event.type === "CONNECTION_OPEN_SUPPLEMENTAL" || event.type === "PRESENCES_REPLACE" || event.type === "OVERLAY_INITIALIZE") {
+        switch (event.type) {
+        case "PRESENCE_UPDATES":
+            if (Array.isArray(event.updates)) for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
+            return;
+        case "PRESENCE_UPDATE": userNotifPresence(event); return;
+        case "MESSAGE_CREATE": userNotifMessage(event); return;
+        case "TYPING_START": userNotifTyping(event); return;
+        case "CONNECTION_OPEN": userNotif.statuses.clear(); userNotifSeedStatuses(false); userNotifSubscribeGuilds(); return;
+        case "CONNECTION_OPEN_SUPPLEMENTAL":
+        case "PRESENCES_REPLACE":
+        case "OVERLAY_INITIALIZE":
             userNotifSeedStatuses(true);
             userNotifSubscribeGuilds();
-        } else if (event.type === "RELATIONSHIP_ADD" || event.type === "RELATIONSHIP_UPDATE") userNotifSeedStatuses(true);
-        else if (event.type === "CONNECTION_RESUMED" || event.type === "IDLE") userNotifSubscribeGuilds();
-        else if (event.type === "GUILD_CREATE") {
+            return;
+        case "RELATIONSHIP_ADD":
+        case "RELATIONSHIP_UPDATE":
+            userNotifSeedStatuses(true);
+            return;
+        case "CONNECTION_RESUMED":
+        case "IDLE":
+            userNotifSubscribeGuilds();
+            return;
+        case "GUILD_CREATE":
             userNotifSeedStatuses(true);
             if (event.guild && event.guild.id) userNotifSubscribeGuild(event.guild.id);
-        } else if (event.type === "LOGOUT") { userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif"); }
+            return;
+        case "LOGOUT":
+            userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif");
+            return;
+        }
     }
     function userNotifSync() {
         const d = userNotif.dispatcher;
@@ -6665,11 +6894,17 @@
         return value.replace("_", "-");
     }
     function translateTarget() {
-        const locale = localeCode(settings.translateTarget === "phone" ? "phone" : "discord");
+        const mode = settings.translateTarget === "phone" ? "phone" : "discord";
+        let raw = null;
+        try { raw = localeStore && (mode === "phone" ? localeStore.systemLocale || localeStore.locale : localeStore.locale); } catch (_) {}
+        if (mode === translate.targetMode && raw === translate.targetRaw && translate.targetCode) return translate.targetCode;
+        const locale = localeCode(mode);
         const parts = locale.split("-"), base = parts[0].toLowerCase();
-        if (base === "zh") return /^(TW|HK|MO|Hant)$/i.test(parts[1] || "") ? "zh-TW" : "zh-CN";
-        if (base === "nb" || base === "nn") return "no";
-        return base;
+        const out = base === "zh" ? (/^(TW|HK|MO|Hant)$/i.test(parts[1] || "") ? "zh-TW" : "zh-CN") : (base === "nb" || base === "nn") ? "no" : base;
+        translate.targetMode = mode;
+        translate.targetRaw = raw;
+        translate.targetCode = out;
+        return out;
     }
     // "iw" and "zh-CN" from Google, "he" and "zh-TW" from Discord: the same language either way.
     function languageBase(code) {
@@ -6895,6 +7130,11 @@
     // its zero-width space in, or that space would be put back for good.
     function translateSeen(source, channelId, id, key, quoteKey, quotedId) {
         if (!source || !channelId || !id || translate.refreshing.has(id)) return;
+        const existing = translate.shown.get(id);
+        const reference = source.messageReference || source.message_reference;
+        const nextQuotes = quotedId || reference && (reference.message_id || reference.messageId) || (existing && existing.quotes) || null;
+        if (existing && existing.source === source && existing.channelId === channelId &&
+            (!key || existing.key === key) && (!quoteKey || existing.quoteKey === quoteKey) && existing.quotes === nextQuotes) return;
         const contentSource = translateContentSource(source);
         const raw = typeof source.content === "string" && source.content ? source.content : "";
         let snapshot = null;
@@ -6907,13 +7147,12 @@
                     moderator_report:item && (item.moderatorReport !== undefined ? item.moderatorReport : item.moderator_report || null)})) : []};
         }
         if (!raw && !snapshot) return;
-        let entry = translate.shown.get(id);
+        let entry = existing;
         if (entry) translate.shown.delete(id);
         else if (translate.shown.size >= 300) translate.shown.delete(translate.shown.keys().next().value);
-        if (!entry) entry = {channelId, id, raw:"", snapshot:null, key:null, quoteKey:null, quotes:null};
-        entry.raw = raw; entry.snapshot = snapshot; entry.key = key || entry.key; entry.quoteKey = quoteKey || entry.quoteKey;
-        const reference = source.messageReference || source.message_reference;
-        if (quotedId || reference && (reference.message_id || reference.messageId)) entry.quotes = quotedId || reference.message_id || reference.messageId;
+        if (!entry) entry = {channelId, id, source:null, raw:"", snapshot:null, key:null, quoteKey:null, quotes:null};
+        entry.source = source; entry.raw = raw; entry.snapshot = snapshot; entry.key = key || entry.key; entry.quoteKey = quoteKey || entry.quoteKey;
+        entry.quotes = nextQuotes;
         translate.shown.set(id, entry);
     }
     function translateView(entry, layout, original) {
@@ -7624,7 +7863,12 @@
             journal.raw.clear();
             kept.forEach(k => journal.raw.add(k));
             journal.sem.clear();
-            if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
+            if (journal.exp) {
+                for (let i = 0; i < journal.exp.length; i += 3) {
+                    const s = journal.exp[i]; s.raw = journal.exp[i + 1]; s.opacity = journal.exp[i + 2];
+                }
+                journal.exp.length = 0;
+            } else if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
             return;
         }
         if (customThemes.rawTable && customThemes.origRaw) {
@@ -7650,7 +7894,7 @@
             }
         }
         if (customThemes.origExp) customThemes.origExp.forEach(([slot, raw, opacity]) => { slot.raw = raw; slot.opacity = opacity; });
-        if (customThemes.origRaw && customThemes.origSem) customThemes.journal = {raw:new Set(), sem:new Set()};
+        if (customThemes.origRaw && customThemes.origSem) customThemes.journal = {raw:new Set(), sem:new Set(), exp:[]};
     }
     function compileThemeIntoTables(theme) {
         const rawTable = customThemes.rawTable, sem = customThemes.semTable;
@@ -7791,9 +8035,23 @@
             }
         }
         // 6. An experiment override (590) would win over a themed token, so it follows every token the theme changed.
-        eachExperimentSlot((token, slot, theme) => {
-            const themed = sem[token] && sem[token][theme], was = customThemes.origSem && customThemes.origSem[token] && customThemes.origSem[token][theme];
-            if (themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) { slot.raw = themed.raw; slot.opacity = themed.opacity; }
+        // Only tokens in touchedSem can differ from origSem, so index expTable[token] directly instead of walking all ~400 tokens.
+        const expTable = customThemes.expTable, expJournal = journal && journal.exp;
+        if (expTable && typeof expTable === "object") touchedSem.forEach(token => {
+            const byExperiment = expTable[token], semEntry = sem[token], wasEntry = customThemes.origSem && customThemes.origSem[token];
+            if (!byExperiment || typeof byExperiment !== "object" || !semEntry || !wasEntry) return;
+            for (const experiment in byExperiment) {
+                if (!owns(byExperiment, experiment)) continue;
+                const byTheme = byExperiment[experiment];
+                if (!byTheme || typeof byTheme !== "object") continue;
+                for (const theme of THEME_SLOTS) {
+                    const slot = byTheme[theme], themed = semEntry[theme], was = wasEntry[theme];
+                    if (slot && typeof slot === "object" && themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) {
+                        if (expJournal) expJournal.push(slot, slot.raw, slot.opacity);
+                        slot.raw = themed.raw; slot.opacity = themed.opacity;
+                    }
+                }
+            }
         });
     }
     function customThemesActiveEntry() {
@@ -8333,230 +8591,249 @@
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
     function activatePlugins(id, exports) {
-        if ((features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight) && id === 1377 && exports && exports.default) userStore = exports.default;
-        if (id === 2116 && exports && exports.default && !localeStore) {
-            localeStore = exports.default;
-            // Following Discord's language: switching it there switches Venus too.
-            try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
-                if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); }
-                if (enabled("translate") && settings.translateTarget !== "phone") translateChanged();
-            }); } catch (_) {}
-        }
-        if (features.appIcons && id === 8828) return hookAppIconConstants(exports);
-        if (features.appIcons && id === 17455) return hookAppIconPremiumManager(exports);
-        if (features.appIcons && (id === 15351 || id === 15352 || id === 17106)) return hookComponent(exports, appIconsScreen);
-        if (features.customThemes && id === 589) return hookSemanticColorsModule(exports);
-        if (features.customThemes && id === 591) return hookRawColorsModule(exports);
-        if (features.customThemes && id === 590) return hookExperimentColorsModule(exports);
-        if (features.customThemes && id === 9758) return hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider");
-        if (features.customThemes && id === 1193 && exports && exports.default) customThemes.themeStore = exports.default;
-        if (features.customThemes && id === 4593) return hookCreateThemedContext(exports);
-        if (features.customThemes && id === 9769) return hookComponent(exports, chatViewWrapperThemeBackground);
-        if (features.accountSwitcher && id === 12056) return hookMultiAccountStore(exports);
-        if (features.accountSwitcher && id === 12058) return hookIsStaffForMultiAccount(exports);
-        if (features.userNotif && id === 584 && exports && exports.default) userNotifInit(exports.default);
-        if (features.userNotif && id === 4519 && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
-        if (features.userNotif && id === 2074 && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); }
-        if ((features.quests || features.userNotif) && id === 7252 && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); }
-        if ((features.quests || features.userNotif) && id === 13439) return hookGatewaySocket(exports);
-        if ((features.quests || features.userNotif) && id === 13477) return hookPauseGateway(exports);
-        if (features.translate && id === 584 && exports && exports.default) translateInit(exports.default);
-        if (features.translate && id === 11281) return hookComponent(exports, translateSheet);
-        if (features.splitMessages && id === 8809) return maxLengthModule(exports);
-        if ((features.youBarSettings || features.accountSwitcher) && id === 16335) return hookComponent(exports, youBarButtons);
-        if (features.validUser && id === 584 && exports && exports.default) validInit(exports.default);
-        // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
-        if (features.pastelize && id === 1251) pastelHash = typeof exports === "function" ? exports : exports.default;
-        if (features.pastelize && id === 2112) guildMembers = exports.default;
-        if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && id === 7591 && exports.default && exports.default.prototype) hookExport(exports.default.prototype,"generate",messageRow);
-        if ((features.platformIndicators || features.userNotif) && id === 4930) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); }
-        if (features.platformIndicators && id === 4908) sessionsStore = exports.default;
-        if (features.platformIndicators && id === 10843) {
-            displayNameType=exports.DisplayName;
-            exports=hookExport(exports,"DisplayName",platformName);
-            return hookComponent(exports,(orig,self,args)=>wrapProfileTree(orig.apply(self,args),displayNameType,platformName,platformWrappers));
-        }
-        if (features.platformIndicators && id === 13107) return hookComponent(exports,platformHeader);
-        if (features.platformIndicators && id === 15962) return hookComponent(exports,platformDmRow);
-        // User list rows (UserRow, default export) and voice panel rows (FormComponents' named MemberRowItem).
-        if (features.platformIndicators && id === 10602) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"));
-        if (features.platformIndicators && id === 9334) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"),"MemberRowItem");
-        // Profile "in voice" users (UserProfileActivityVoiceChannelUsers): private UserRow rows.
-        if (features.platformIndicators && id === 12849) return hookComponent(exports,(orig,self,args)=>{
-            const tree=orig.apply(self,args);
-            if (!enabled("platformIndicators") || !settings.piUserList || !React || !tree) return tree;
-            return cloneTree(tree,(node,p)=>{
-                if (typeof p.renderItem!=="function" || p.__venusPlatforms) return p;
-                const render=p.renderItem;
-                // Same wrapper for the same renderItem, so the list doesn't redraw every row.
-                let renderItem=platformRenderers.get(render);
-                if (!renderItem) platformRenderers.set(render,renderItem=function(){return platformRow(render.apply(this,arguments));});
-                return Object.assign({},p,{__venusPlatforms:true,renderItem});
-            },0);
-        });
-        // Plain status dot on avatars: avatar Status (design/void/Status,
-        // 13920) draws a phone badge when isMobileOnline; show the plain dot instead.
-        if (features.platformIndicators && id === 13920) {
-            const plain = (orig,self,args) => {
-                const props = args[0];
-                if (!enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline) return orig.apply(self,args);
-                const next = Array.from(args); next[0] = Object.assign({},props,{isMobileOnline:false}); return orig.apply(self,next);
-            };
-            return hookExport(hookExport(exports,"default",plain),"StatusWithTyping",plain);
-        }
-        if (features.readAll && id === 16232) return hookExport(exports,"default",readAllBarProps);
-        if (features.reviewDB && id === 8716) oauthModal=exports.default;
-        if (features.reviewDB && id === 6074) nativeRowGroup=exports.TableRowGroup;
-        if (features.reviewDB && id === 6698) nativeSwitchRow=exports.TableSwitchRow;
-        if (features.hiddenChannels && id === 16157) {
-            // ChannelInfo can be consumed as default export and as named export
-            // (GuildRolesAndChannelsRow reads it by name); hook both.
-            exports = hookComponent(exports,hiddenInfo);
-            return hookExport(exports, "ChannelInfo", hiddenInfo);
-        }
-        if (features.reviewDB && id === 12872) return hookComponent(exports,reviewNote);
-        if (features.reviewDB && id === 14259) return hookExport(exports,"ContextMenuPopout",reviewMenu);
-
-        if (features.reviewDB && id === 13790) return hookComponent(exports,reviewGuild);
-        if (features.hideGift && (id === 11864 || id === 12071) && exports && exports.default)
-            return replaceValue(exports, "default", propsComponent(exports.default, withoutGift));
-        if (features.hideCall && id === 12956) return hookComponent(exports, profileButtons);
-        if (features.hideQuestDock && id === 14892) return hideQuestHooks(exports);
-        if (features.hideQuestDock && id === 14985) return hideQuestDock(exports);
-        if (features.systemEmoji && id === 6625 && exports && exports.default)
-            return replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps));
-        if (id === 14409) exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG);
-        if (id === 11129) return hookExport(exports, "createList", settingsSections);
-        if (id === 14500) SettingsList = exports.SettingsList;
-        if (features.copyBios && id === 10987) return hookComponent(exports, copyBio);
-        if ((features.dashless || features.hiddenChannels) && id === 5043) {
-            exports = hookExport(exports,"computeChannelName",channelLabel);
-            return hookExport(exports, "default", useChannelLabel);
-        }
-        if (features.dashless && id === 5796) return hookExport(exports, "getChannel", mentionChannelInfo);
-        if (features.dashless && id === 7166) {
-            exports = hookExport(exports, "createParserState", parserStateChannels);
-            if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
-            return exports;
-        }
-        if (features.favouriteAnything && id === 12767) return hookComponent(exports, favouriteButton);
-        if (features.favouriteAnything && id === 10090) return hookExport(exports, "addFavoriteGIF", favouriteAdd);
-        if (features.favouriteAnything && id === 10093) return hookExport(exports, "useFavoriteGIFsMobile", favouriteList);
-        if (id === 2051) channelStore = exports.default;
-        if (features.noTyping && id === 11604) return replaceValue(exports, "default",
-            hookExport(hookExport(exports.default, "startTyping", typing), "stopTyping", typing));
-        if (features.quickDelete && id === 1126) locale = exports;
-        if (features.quickDelete && id === 5708) return replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm));
-        if (features.noDelete && id === 5112) {messageRecords = exports; restoreDeleted();}
-        if ((features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) && id === 1377) {userStore = exports.default; restoreDeleted();}
-        if ((features.jumpToTop || features.messageHighlight) && id === 5110) msgStore = exports.default;
-        if (features.noDelete && id === 5110) {
-            msgStore = exports.default;
-            exports = replaceValue(exports,"default",hookExport(hookExport(msgStore,"getMessage",retainedMessage),"getMessages",retainedMessages));
-            restoreDeleted(); return exports;
-        }
-        if (features.quests && id === 7187) questAttach(exports.default);
-        if (features.quests && id === 584) questsInit(exports.default);
-        if (features.messageHighlight && id === 584 && exports && exports.default && !dispatcher)
-            dispatcher = exports.default.dispatch.bind(exports.default);
-        if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
-            dispatcher = exports.default.dispatch.bind(exports.default);
-            return replaceValue(exports, "default", hookExport(exports.default, "dispatch", dispatchEvent));
-        }
-        if (features.hiddenChannels && [1085,1096].includes(id) && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
-        if (features.hiddenChannels && id === 1112) {
-            exports = hookExport(exports, "transitionTo", hiddenNavigation);
-            exports = hookExport(exports, "replaceWith", hiddenNavigation);
-            return hookExport(exports, "transitionToGuild", hiddenGuildNavigation);
-        }
-        if (features.hiddenChannels && id === 4509) {
-            // Lioncat6 finds permissions via findByProps("getChannelPermissions","can");
-            // In 349.9 PermissionStore (4509) is the only module exporting both.
-            // Candidate may be default export or the exports object itself.
-            const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
-                exports && typeof exports.can === "function" ? exports : null;
-            if (candidate) permissions = candidate;
-            // Globally reveal VIEW_CHANNEL so Discord builds
-            // real channel records (names) instead of obfuscated "hidden" stubs.
-            // Message/voice access stays blocked via hiddenFetch/hiddenNavigation guards.
-            // Use hookExport so frozen/sealed singletons are still patched via clone.
-            try {
-                if (candidate && !permissionsCanOrig) {
-                    permissionsCanOrig = candidate.can.bind(candidate);
-                    permissions = hookExport(hookExport(candidate, "can", hiddenCan), "canBasicChannel", hiddenCan);
-                    return candidate === exports ? permissions : replaceValue(exports, "default", permissions);
+        switch (id) {
+            case 2116:
+                if (exports && exports.default && !localeStore) {
+                    localeStore = exports.default;
+                    // Following Discord's language: switching it there switches Venus too.
+                    try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
+                        if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); }
+                        if (enabled("translate") && settings.translateTarget !== "phone") translateChanged();
+                    }); } catch (_) {}
                 }
-            } catch (_) {}
-        }
-        if (features.hiddenChannels && id === 4507) {
-            const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
-            guildChannels = store;
-            return replaceValue(exports, "default", store);
-        }
-        if (features.hiddenChannels && id === 2103 && exports && exports.default)
-            return replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel));
-        if (features.jumpToTop && id === 9064) chatHeight = exports;
-        if (features.jumpToTop && id === 11897) jumpPill = exports.default;
-        // 349.9's arrow is a registered image asset: Metro exports the asset id itself, not a default.
-        if (features.jumpToTop && id === 11898) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports;
-        if (features.jumpToTop && id === 11896) return hookComponent(exports, jumpButton);
-        if (features.gestures && id === 7627) return hookExport(exports, "handleAddDefaultDoubleTapReaction", doubleTapMessage);
-        // Discord's "double-tap to react" tips, reminders and banners would point at a gesture that now replies.
-        if (features.gestures && id === 11363) return hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures);
-        if (features.gestures && id === 9878) return hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args));
-        if (features.gestures && id === 11918) return hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures);
-        if (features.gestures && id === 1377) userStore = exports.default;
-        if (features.gestures && id === 11159) return hookTapHandlers(exports);
-        if (id === 6965) {
-            let actions = exports.default;
-            if (!actions) return exports;
-            if (features.noDelete) actions = hookExport(actions, "deleteMessage", deleteMessage);
-            // Split Large Messages wraps FreeNitro's hook (added below), so every part still gets its emoji links.
-            const splitLater = features.splitMessages;
-            if (features.hiddenChannels) actions = hookExport(actions, "fetchMessages", hiddenFetch);
-            if (features.freeNitro) {
-                actions = hookExport(actions, "sendMessage", sendMessage);
-                actions = hookExport(actions, "_sendMessage", sendMessage);
-                actions = hookExport(actions, "sendStickers", sendStickers);
+                return exports;
+            case 8828: return features.appIcons ? hookAppIconConstants(exports) : exports;
+            case 17455: return features.appIcons ? hookAppIconPremiumManager(exports) : exports;
+            case 15351: case 15352: case 17106: return features.appIcons ? hookComponent(exports, appIconsScreen) : exports;
+            case 589: return features.customThemes ? hookSemanticColorsModule(exports) : exports;
+            case 591: return features.customThemes ? hookRawColorsModule(exports) : exports;
+            case 590: return features.customThemes ? hookExperimentColorsModule(exports) : exports;
+            case 9758: return features.customThemes ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
+            case 1193: if (features.customThemes && exports && exports.default) customThemes.themeStore = exports.default; return exports;
+            case 4593: return features.customThemes ? hookCreateThemedContext(exports) : exports;
+            case 9769: return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
+            case 12056: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
+            case 12058: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
+            case 4519: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
+            case 2074: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
+            case 7252: if ((features.quests || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
+            case 13439: return (features.quests || features.userNotif) ? hookGatewaySocket(exports) : exports;
+            case 13477: return (features.quests || features.userNotif) ? hookPauseGateway(exports) : exports;
+            case 11281: return features.translate ? hookComponent(exports, translateSheet) : exports;
+            case 8809: return features.splitMessages ? maxLengthModule(exports) : exports;
+            case 16335: return (features.youBarSettings || features.accountSwitcher) ? hookComponent(exports, youBarButtons) : exports;
+            // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
+            case 1251: if (features.pastelize) pastelHash = typeof exports === "function" ? exports : exports.default; return exports;
+            case 2112: if (features.pastelize) guildMembers = exports.default; return exports;
+            case 7591:
+                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && exports.default && exports.default.prototype)
+                    hookExport(exports.default.prototype, "generate", messageRow);
+                return exports;
+            case 4930: if (features.platformIndicators || features.userNotif) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); } return exports;
+            case 4908: if (features.platformIndicators) sessionsStore = exports.default; return exports;
+            case 10843:
+                if (!features.platformIndicators) return exports;
+                displayNameType = exports.DisplayName;
+                exports = hookExport(exports, "DisplayName", platformName);
+                return hookComponent(exports, (orig, self, args) => wrapProfileTree(orig.apply(self, args), displayNameType, platformName, platformWrappers));
+            case 13107: return features.platformIndicators ? hookComponent(exports, platformHeader) : exports;
+            case 15962: return features.platformIndicators ? hookComponent(exports, platformDmRow) : exports;
+            // User list rows (UserRow, default export) and voice panel rows (FormComponents' named MemberRowItem).
+            case 10602: return features.platformIndicators ? hookComponent(exports, (orig, self, args) => platformPlacement(orig, self, args, "piUserList")) : exports;
+            case 9334: return features.platformIndicators ? hookComponent(exports, (orig, self, args) => platformPlacement(orig, self, args, "piUserList"), "MemberRowItem") : exports;
+            // Profile "in voice" users (UserProfileActivityVoiceChannelUsers): private UserRow rows.
+            case 12849:
+                return features.platformIndicators ? hookComponent(exports, (orig, self, args) => {
+                    const tree = orig.apply(self, args);
+                    if (!enabled("platformIndicators") || !settings.piUserList || !React || !tree) return tree;
+                    return cloneTree(tree, (node, p) => {
+                        if (typeof p.renderItem !== "function" || p.__venusPlatforms) return p;
+                        const render = p.renderItem;
+                        // Same wrapper for the same renderItem, so the list doesn't redraw every row.
+                        let renderItem = platformRenderers.get(render);
+                        if (!renderItem) platformRenderers.set(render, renderItem = function () { return platformRow(render.apply(this, arguments)); });
+                        return Object.assign({}, p, {__venusPlatforms:true, renderItem});
+                    }, 0);
+                }) : exports;
+            // Plain status dot on avatars: avatar Status (design/void/Status,
+            // 13920) draws a phone badge when isMobileOnline; show the plain dot instead.
+            case 13920: {
+                if (!features.platformIndicators) return exports;
+                const plain = (orig, self, args) => {
+                    const props = args[0];
+                    if (!enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline) return orig.apply(self, args);
+                    const next = Array.from(args); next[0] = Object.assign({}, props, {isMobileOnline:false}); return orig.apply(self, next);
+                };
+                plain.call1 = (orig, self, props) => !enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline ?
+                    orig.call(self, props) : orig.call(self, Object.assign({}, props, {isMobileOnline:false}));
+                return hookExport(hookExport(exports, "default", plain), "StatusWithTyping", plain);
             }
-            if (splitLater) actions = hookExport(actions, "sendMessage", splitSend);
-            msgActions = actions;
-            return replaceValue(exports, "default", actions);
-        }
-        if (!features.freeNitro && !features.appIcons) return exports;
-        if (id === 1377) userStore = exports.default;
-        if (id === 13797) { emojiCatalog = exports; return hookExport(exports, "canUserUse", catalogEligibility); }
-        if (features.freeNitro && id === 5638) emojiStore = exports.default;
-        if (features.freeNitro && id === 5687) stickerStore = exports.default;
-        if (id === 4528) {
-            // The pinned build exports the capabilities on a default singleton;
-            // named aliases are not used by its picker. Hook the inspected object.
-            let capabilities = exports.default || exports;
-            function patchCapability(key, setting) {
-                premiumOriginal[key] = typeof capabilities[key] === "function" ? capabilities[key].bind(capabilities) : undefined;
-                capabilities = hookExport(capabilities, key, premiumOverride(key, setting));
+            case 16232: return features.readAll ? hookExport(exports, "default", readAllBarProps) : exports;
+            case 8716: if (features.reviewDB) oauthModal = exports.default; return exports;
+            case 6074: if (features.reviewDB) nativeRowGroup = exports.TableRowGroup; return exports;
+            case 6698: if (features.reviewDB) nativeSwitchRow = exports.TableSwitchRow; return exports;
+            case 16157:
+                if (!features.hiddenChannels) return exports;
+                // ChannelInfo can be consumed as default export and as named export
+                // (GuildRolesAndChannelsRow reads it by name); hook both.
+                exports = hookComponent(exports, hiddenInfo);
+                return hookExport(exports, "ChannelInfo", hiddenInfo);
+            case 12872: return features.reviewDB ? hookComponent(exports, reviewNote) : exports;
+            case 14259: return features.reviewDB ? hookExport(exports, "ContextMenuPopout", reviewMenu) : exports;
+            case 13790: return features.reviewDB ? hookComponent(exports, reviewGuild) : exports;
+            case 11864: case 12071: return features.hideGift && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, withoutGift)) : exports;
+            case 12956: return features.hideCall ? hookComponent(exports, profileButtons) : exports;
+            case 14892: return features.hideQuestDock ? hideQuestHooks(exports) : exports;
+            case 14985: return features.hideQuestDock ? hideQuestDock(exports) : exports;
+            case 6625: return features.systemEmoji && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps)) : exports;
+            case 14409: exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG); return exports;
+            case 11129: return hookExport(exports, "createList", settingsSections);
+            case 14500: SettingsList = exports.SettingsList; return exports;
+            case 10987: return features.copyBios ? hookComponent(exports, copyBio) : exports;
+            case 5043:
+                if (!features.dashless && !features.hiddenChannels) return exports;
+                exports = hookExport(exports, "computeChannelName", channelLabel);
+                return hookExport(exports, "default", useChannelLabel);
+            case 5796: return features.dashless ? hookExport(exports, "getChannel", mentionChannelInfo) : exports;
+            case 7166:
+                if (!features.dashless) return exports;
+                exports = hookExport(exports, "createParserState", parserStateChannels);
+                if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
+                return exports;
+            case 12767: return features.favouriteAnything ? hookComponent(exports, favouriteButton) : exports;
+            case 10090: return features.favouriteAnything ? hookExport(exports, "addFavoriteGIF", favouriteAdd) : exports;
+            case 10093: return features.favouriteAnything ? hookExport(exports, "useFavoriteGIFsMobile", favouriteList) : exports;
+            case 2051: channelStore = exports.default; return exports;
+            case 11604: return features.noTyping ? replaceValue(exports, "default", hookExport(hookExport(exports.default, "startTyping", typing), "stopTyping", typing)) : exports;
+            case 1126: if (features.quickDelete) locale = exports; return exports;
+            case 5708: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
+            case 5112: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
+            case 1377:
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
+                    userStore = exports.default;
+                if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
+                return exports;
+            case 5110:
+                if (features.jumpToTop || features.messageHighlight || features.noDelete) msgStore = exports.default;
+                if (features.noDelete) {
+                    exports = replaceValue(exports, "default", hookExport(hookExport(msgStore, "getMessage", retainedMessage), "getMessages", retainedMessages));
+                    restoreDeleted();
+                }
+                return exports;
+            case 7187: if (features.quests) questAttach(exports.default); return exports;
+            case 584:
+                if (features.userNotif && exports && exports.default) userNotifInit(exports.default);
+                if (features.translate && exports && exports.default) translateInit(exports.default);
+                if (features.validUser && exports && exports.default) validInit(exports.default);
+                if (features.quests) questsInit(exports.default);
+                if (features.messageHighlight && exports && exports.default && !dispatcher)
+                    dispatcher = exports.default.dispatch.bind(exports.default);
+                if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
+                    dispatcher = exports.default.dispatch.bind(exports.default);
+                    return replaceValue(exports, "default", hookExport(exports.default, "dispatch", dispatchEvent));
+                }
+                return exports;
+            case 1085: case 1096:
+                if (features.hiddenChannels && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
+                return exports;
+            case 1112:
+                if (!features.hiddenChannels) return exports;
+                exports = hookExport(exports, "transitionTo", hiddenNavigation);
+                exports = hookExport(exports, "replaceWith", hiddenNavigation);
+                return hookExport(exports, "transitionToGuild", hiddenGuildNavigation);
+            case 4509: {
+                if (!features.hiddenChannels) return exports;
+                // Lioncat6 finds permissions via findByProps("getChannelPermissions","can");
+                // In 349.9 PermissionStore (4509) is the only module exporting both.
+                // Candidate may be default export or the exports object itself.
+                const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
+                    exports && typeof exports.can === "function" ? exports : null;
+                if (candidate) permissions = candidate;
+                // Globally reveal VIEW_CHANNEL so Discord builds
+                // real channel records (names) instead of obfuscated "hidden" stubs.
+                // Message/voice access stays blocked via hiddenFetch/hiddenNavigation guards.
+                // Use hookExport so frozen/sealed singletons are still patched via clone.
+                try {
+                    if (candidate && !permissionsCanOrig) {
+                        permissionsCanOrig = candidate.can.bind(candidate);
+                        permissions = hookExport(hookExport(candidate, "can", hiddenCan), "canBasicChannel", hiddenCan);
+                        return candidate === exports ? permissions : replaceValue(exports, "default", permissions);
+                    }
+                } catch (_) {}
+                return exports;
             }
-            if (features.freeNitro) {
-                patchCapability("canUseEmojisEverywhere", "emojis");
-                patchCapability("canUseAnimatedEmojis", "emojis");
-                // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
-                premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+            case 4507: {
+                if (!features.hiddenChannels) return exports;
+                const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
+                guildChannels = store;
+                return replaceValue(exports, "default", store);
             }
-            if (features.appIcons) {
-                patchCapability("canUsePremiumAppIcons", "appIcons");
-                if (typeof exports.canUsePremiumAppIcons === "function" && exports.default)
-                    exports = hookExport(exports, "canUsePremiumAppIcons", premiumOverride("canUsePremiumAppIcons", "appIcons"));
+            case 2103: return features.hiddenChannels && exports && exports.default ? replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel)) : exports;
+            case 9064: if (features.jumpToTop) chatHeight = exports; return exports;
+            case 11897: if (features.jumpToTop) jumpPill = exports.default; return exports;
+            // 349.9's arrow is a registered image asset: Metro exports the asset id itself, not a default.
+            case 11898: if (features.jumpToTop) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports; return exports;
+            case 11896: return features.jumpToTop ? hookComponent(exports, jumpButton) : exports;
+            case 7627: return features.gestures ? hookExport(exports, "handleAddDefaultDoubleTapReaction", doubleTapMessage) : exports;
+            // Discord's "double-tap to react" tips, reminders and banners would point at a gesture that now replies.
+            case 11363: return features.gestures ? hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures) : exports;
+            case 9878: return features.gestures ? hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args)) : exports;
+            case 11918: return features.gestures ? hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures) : exports;
+            case 11159: return features.gestures ? hookTapHandlers(exports) : exports;
+            case 6965: {
+                let actions = exports.default;
+                if (!actions) return exports;
+                if (features.noDelete) actions = hookExport(actions, "deleteMessage", deleteMessage);
+                // Split Large Messages wraps FreeNitro's hook (added below), so every part still gets its emoji links.
+                const splitLater = features.splitMessages;
+                if (features.hiddenChannels) actions = hookExport(actions, "fetchMessages", hiddenFetch);
+                if (features.freeNitro) {
+                    actions = hookExport(actions, "sendMessage", sendMessage);
+                    actions = hookExport(actions, "_sendMessage", sendMessage);
+                    actions = hookExport(actions, "sendStickers", sendStickers);
+                }
+                if (splitLater) actions = hookExport(actions, "sendMessage", splitSend);
+                msgActions = actions;
+                return replaceValue(exports, "default", actions);
             }
-            if (exports.default) exports = replaceValue(exports, "default", capabilities);
-            else exports = capabilities;
+            case 13797:
+                if (!features.freeNitro && !features.appIcons) return exports;
+                emojiCatalog = exports;
+                return hookExport(exports, "canUserUse", catalogEligibility);
+            case 5638: if (features.freeNitro) emojiStore = exports.default; return exports;
+            case 5687: if (features.freeNitro) stickerStore = exports.default; return exports;
+            case 4528: {
+                if (!features.freeNitro && !features.appIcons) return exports;
+                // The pinned build exports the capabilities on a default singleton;
+                // named aliases are not used by its picker. Hook the inspected object.
+                let capabilities = exports.default || exports;
+                function patchCapability(key, setting) {
+                    premiumOriginal[key] = typeof capabilities[key] === "function" ? capabilities[key].bind(capabilities) : undefined;
+                    capabilities = hookExport(capabilities, key, premiumOverride(key, setting));
+                }
+                if (features.freeNitro) {
+                    patchCapability("canUseEmojisEverywhere", "emojis");
+                    patchCapability("canUseAnimatedEmojis", "emojis");
+                    // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
+                    premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+                }
+                if (features.appIcons) {
+                    patchCapability("canUsePremiumAppIcons", "appIcons");
+                    if (typeof exports.canUsePremiumAppIcons === "function" && exports.default)
+                        exports = hookExport(exports, "canUsePremiumAppIcons", premiumOverride("canUsePremiumAppIcons", "appIcons"));
+                }
+                return exports.default ? replaceValue(exports, "default", capabilities) : capabilities;
+            }
+            case 6840:
+                if (!features.freeNitro) return exports;
+                stickerRules = exports;
+                exports = hookExport(exports, "getStickerSendability", sendability);
+                exports = hookExport(exports, "isSendableSticker", sendableSticker);
+                stickerRules = exports;
+                return exports;
+            default:
+                return exports;
         }
-        if (features.freeNitro && id === 6840) {
-            stickerRules = exports;
-            exports = hookExport(exports, "getStickerSendability", sendability);
-            exports = hookExport(exports, "isSendableSticker", sendableSticker);
-            stickerRules = exports;
-        }
-        return exports;
     }
 
     function instrument(exports, depth) {
@@ -8627,6 +8904,7 @@
         } });
         return changes.size ? proxy : exports;
     }
+    const INSTRUMENTED_MODULES = new Set([17, 19, 414, 1162, 1282, 7268, 7243]);
     function activateModule(id, module) {
         try {
             if (id === 1162) {
@@ -8636,7 +8914,7 @@
                     initFiles(nativeFiles);
             }
             module.exports = activatePlugins(id, module.exports);
-            if ([17, 19, 414, 1162, 1282, 7268, 7243].includes(id)) module.exports = instrument(module.exports, 0);
+            if (INSTRUMENTED_MODULES.has(id)) module.exports = instrument(module.exports, 0);
         } catch (error) {
             status.audioError = "Hook unavailable: " + String(error);
             if (global.console && typeof global.console.warn === "function")
@@ -8647,17 +8925,19 @@
         if (typeof define !== "function") return define;
         return function (factory, id, dependencies) {
             // Runs for all ~17.7k modules at startup: no arguments copy for the ones Venus leaves alone.
-            if ((id !== 120 && !targetModules.has(id)) || typeof factory !== "function")
+            if (targetModules[id] !== 1 || typeof factory !== "function")
                 return arguments.length === 3 ? define.call(this, factory, id, dependencies) : define.apply(this, arguments);
-            const args = Array.from(arguments);
-            args[0] = function () {
-                const factoryArgs = Array.from(arguments);
+            const wrappedFactory = function () {
+                let result;
                 if (features.hiddenChannels && id === 7039) {
+                    const factoryArgs = Array.from(arguments);
                     factoryArgs[1] = listImport(factoryArgs[1]);
                     factoryArgs[2] = listImport(factoryArgs[2]);
                     factoryArgs[3] = listImport(factoryArgs[3]);
+                    result = factory.apply(this, factoryArgs);
+                } else {
+                    result = factory.apply(this, arguments);
                 }
-                const result = factory.apply(this, factoryArgs);
                 const module = arguments[4]; // Verified Metro factory ABI in Discord 349.9.
                 if (module && module.exports) {
                     // Before anything reads them: DraftStore keeps its length cap from the moment it loads.
@@ -8683,6 +8963,9 @@
                 }
                 return result;
             };
+            if (arguments.length === 3) return define.call(this, wrappedFactory, id, dependencies);
+            const args = Array.from(arguments);
+            args[0] = wrappedFactory;
             return define.apply(this, args);
         };
     }

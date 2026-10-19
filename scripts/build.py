@@ -38,6 +38,9 @@ DEPENDENCIES = {
     "r8.jar": (
         "https://storage.googleapis.com/r8-releases/raw/8.12.22/r8.jar",
         "f18a6d1d7b37b7c9c8fbbcb5fd65b62f18bf7ce8f5be8e623b72648e282d964e"),
+    "acorn.tgz": (
+        "https://registry.npmjs.org/acorn/-/acorn-8.15.0.tgz",
+        "e46eae89bd9761f16d1d25563b837b55b4b78f3ece06ee0b9789cb2644f523b3"),
     "hermes-compiler.tgz": (
         "https://registry.npmjs.org/hermes-compiler/-/hermes-compiler-250829098.0.19.tgz",
         "839af099f0926b5ebbd738ba54764a3f40e35dfc3aac91babf56f8eb7c69280e"),
@@ -73,6 +76,8 @@ def tools():
     # Read one known tool file; never extract arbitrary npm archive paths.
     with tarfile.open(TOOLS / "terser.tgz") as archive:
         (TOOLS / "terser.js").write_bytes(archive.extractfile("package/dist/bundle.min.js").read())
+    with tarfile.open(TOOLS / "acorn.tgz") as archive:
+        (TOOLS / "acorn.js").write_bytes(archive.extractfile("package/dist/acorn.js").read())
     with tarfile.open(TOOLS / "hermes-compiler.tgz") as archive:
         (TOOLS / "hermesc").write_bytes(archive.extractfile("package/hermesc/linux64-bin/hermesc").read())
     (TOOLS / "hermesc").chmod(0o755)
@@ -96,11 +101,322 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 const source = fs.readFileSync(process.argv[2], 'utf8').replace('/*__FEATURES__*/', '__VENUS_FEATURES__');
 context.Terser.minify(source, {compress:false, mangle:false,
     format:{comments:false, ascii_only:true}}).then(result => {
-    process.stdout.write(result.code.replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
+    process.stdout.write(lazyCoreRuntime(lazySettingsUi(jsonLiterals(result.code))).replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
 });
+// At startup (load_calls.cjs), only 5 functions run: the outer IIFE, selectModules, decorateDefine,
+// defineValue, and the __d wrapper for each of the ~17.7k Metro modules. No target module factory executes
+// until React Native's initializer (Module 120) runs. Wrap all feature hooks, stores, and helpers into an
+// ASCII string literal ($core) evaluated once on the first target module activation (or __venusPatches call),
+// leaving only the ~6 KB module-selection and __d-decoration header to compile during startup eval.
+function lazyCoreRuntime(code) {
+    const acorn = require(process.argv[3]);
+    const ast = acorn.parse(code, {ecmaVersion: 'latest'});
+    const iife = ast.body[0].expression.callee.body.body;
+
+    function stmtDecls(stmt) {
+        const out = [];
+        if (stmt.type === 'FunctionDeclaration' && stmt.id) out.push(stmt.id.name);
+        else if (stmt.type === 'VariableDeclaration') {
+            for (const d of stmt.declarations) if (d.id.type === 'Identifier') out.push(d.id.name);
+        }
+        return out;
+    }
+
+    const items = iife.map((stmt, idx) => ({
+        idx,
+        stmt,
+        decls: stmtDecls(stmt),
+        src: code.slice(stmt.start, stmt.end),
+    }));
+    const declToIdx = new Map();
+    for (const it of items) for (const d of it.decls) declToIdx.set(d, it.idx);
+
+    const dsIdx = declToIdx.get('DEFAULT_SETTINGS');
+    const stIdx = declToIdx.get('status');
+    const ddIdx = declToIdx.get('decorateDefine');
+    const hdIdx = declToIdx.get('holdDefine');
+    const dvIdx = declToIdx.get('defineValue');
+    const exIdx = declToIdx.get('existing');
+
+    const eagerSet = new Set();
+    for (let i = 0; i <= dsIdx; i++) eagerSet.add(i);
+    eagerSet.add(stIdx);
+    for (let i = ddIdx; i <= exIdx + 2; i++) eagerSet.add(i);
+
+    const stage2Items = items.filter(it => !eagerSet.has(it.idx));
+    const stage2Code = stage2Items.map(it => it.src).join('\n') +
+        '\nreturn{listImport:listImport,lengthConstants:lengthConstants,multiAccountConstants:multiAccountConstants,activateModule:activateModule,setSetting:setSetting,formatSize:formatSize,getSize:getSize};';
+    const stage2Fn = '(function(global,features,revision,DISCORD_VERSION,settings,DEFAULT_SETTINGS,status){' + stage2Code + '})';
+    const stage2Str = JSON.stringify(stage2Fn).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+
+    let eagerHeader = '';
+    for (let i = 0; i <= dsIdx; i++) eagerHeader += items[i].src;
+    eagerHeader += items[stIdx].src;
+    eagerHeader += 'let pastelHash,$c;function $core(){return $c||($c=(0,eval)(' + stage2Str + ')(global,features,revision,DISCORD_VERSION,settings,DEFAULT_SETTINGS,status));}';
+
+    const ddSrc = items[ddIdx].src
+        .replace(/listImport\(/g, '$core().listImport(')
+        .replace(/lengthConstants\(/g, '$core().lengthConstants(')
+        .replace(/multiAccountConstants\(/g, '$core().multiAccountConstants(')
+        .replace(/activateModule\(/g, '$core().activateModule(');
+
+    let eagerFooter = ddSrc + items[hdIdx].src + items[dvIdx].src + items[exIdx].src + items[exIdx + 1].src;
+    eagerFooter += 'global.__venusPatches=Object.freeze({revision:revision,settings:settings,features:features,status:status,setSetting:function(k,v){return $core().setSetting(k,v)},formatSize:function(b){return $core().formatSize(b)},getSize:function(u){return $core().getSize(u)}});';
+
+    return '(function(global){' + eagerHeader + eagerFooter + '})(globalThis);';
+}
+// Hermes's (0, eval) eagerly compiles every FunctionDeclaration and closure inside the runtime at startup,
+// even though load_calls.cjs shows only 5 functions run at startup. The Venus Settings pages, live previews,
+// and preview style/sample tables (~160 KB, 155 top-level statements) are only reachable after nativeRegistry
+// (Module 14409) runs. Wrap them in an ASCII string literal and evaluate once on first nativeRegistry call,
+// avoiding parsing, bytecode compilation, and closure allocation for all settings UI components during cold boot.
+function lazySettingsUi(code) {
+    const acorn = require(process.argv[3]);
+    const ast = acorn.parse(code, {ecmaVersion: 'latest'});
+    const iife = ast.body[0].expression.callee.body.body;
+
+    function stmtDecls(stmt) {
+        const out = [];
+        if (stmt.type === 'FunctionDeclaration' && stmt.id) out.push(stmt.id.name);
+        else if (stmt.type === 'VariableDeclaration') {
+            for (const d of stmt.declarations) if (d.id.type === 'Identifier') out.push(d.id.name);
+        }
+        return out;
+    }
+
+    function stmtRefs(node) {
+        const refs = new Set();
+        function walk(n, parent, prop) {
+            if (!n || typeof n !== 'object') return;
+            if (Array.isArray(n)) { for (const x of n) walk(x, parent, prop); return; }
+            if (n.type === 'Identifier') {
+                if (parent && parent.type === 'MemberExpression' && prop === 'property' && !parent.computed) return;
+                if (parent && parent.type === 'Property' && prop === 'key' && !parent.computed) return;
+                refs.add(n.name);
+                return;
+            }
+            for (const k of Object.keys(n)) {
+                if (k === 'type' || k === 'start' || k === 'end') continue;
+                walk(n[k], n, k);
+            }
+        }
+        walk(node, null, null);
+        return refs;
+    }
+
+    const items = iife.map((stmt, idx) => ({
+        idx,
+        stmt,
+        decls: stmtDecls(stmt),
+        refs: stmtRefs(stmt),
+        src: code.slice(stmt.start, stmt.end),
+    }));
+
+    const declToIdx = new Map();
+    for (const it of items) for (const d of it.decls) declToIdx.set(d, it.idx);
+
+    const nrIdx = declToIdx.get('nativeRegistry');
+    const nrStmt = items[nrIdx].stmt;
+    const keepMain = new Set(['section', 'PopIn', 'popIn', 'DISCORD_VERSION', 'DEFAULT_SETTINGS']);
+    const pageRoots = new Set();
+    for (const r of stmtRefs(nrStmt.body)) {
+        if (declToIdx.has(r)) {
+            const idx = declToIdx.get(r);
+            if (idx === nrIdx || items[idx].decls.some(d => keepMain.has(d))) continue;
+            let usedOutside = false;
+            for (let j = 0; j < items.length; j++) {
+                if (j === idx || j === nrIdx) continue;
+                for (const d of items[idx].decls) {
+                    if (items[j].refs.has(d)) usedOutside = true;
+                }
+            }
+            if (!usedOutside) pageRoots.add(idx);
+        }
+    }
+
+    const pageSet = new Set(pageRoots);
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (let i = 0; i < items.length; i++) {
+            if (pageSet.has(i) || i === nrIdx || items[i].decls.length === 0) continue;
+            if (items[i].decls.some(d => keepMain.has(d))) continue;
+            let usedOutside = false, usedInside = false;
+            for (let j = 0; j < items.length; j++) {
+                if (j === i) continue;
+                for (const d of items[i].decls) {
+                    if (items[j].refs.has(d)) {
+                        if (pageSet.has(j)) usedInside = true;
+                        else usedOutside = true;
+                    }
+                }
+            }
+            if (usedInside && !usedOutside) {
+                pageSet.add(i);
+                changed = true;
+            }
+        }
+    }
+
+    const pageDecls = new Set();
+    for (const idx of pageSet) for (const d of items[idx].decls) pageDecls.add(d);
+
+    const mainVars = new Map();
+    for (const it of items) {
+        if (pageSet.has(it.idx)) continue;
+        const s = it.stmt;
+        if (s.type === 'FunctionDeclaration' && s.id) mainVars.set(s.id.name, 'function');
+        else if (s.type === 'VariableDeclaration') {
+            for (const d of s.declarations) if (d.id.type === 'Identifier') mainVars.set(d.id.name, s.kind);
+        }
+    }
+    mainVars.set('global', 'param');
+
+    const neededMain = new Set();
+    for (const idx of pageSet) {
+        for (const r of items[idx].refs) {
+            if (!pageDecls.has(r) && mainVars.has(r)) neededMain.add(r);
+        }
+    }
+    for (const r of items[nrIdx].refs) {
+        if (!pageDecls.has(r) && mainVars.has(r) && r !== 'nativeRegistry') neededMain.add(r);
+    }
+
+    const letVars = [...neededMain].filter(v => mainVars.get(v) === 'let');
+    const constVars = [...neededMain].filter(v => mainVars.get(v) !== 'let');
+    const letSet = new Set(letVars);
+
+    function rewriteSubSource(subSrc) {
+        const subAst = acorn.parse(subSrc, {ecmaVersion: 'latest'});
+        const edits = [];
+        function walk(n, scope, parent, prop) {
+            if (!n || typeof n !== 'object') return;
+            if (Array.isArray(n)) { for (const x of n) walk(x, scope, parent, prop); return; }
+            let nextScope = scope;
+            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+                nextScope = new Set(scope);
+                if (n.id && n.id.type === 'Identifier') nextScope.add(n.id.name);
+                for (const p of n.params || []) {
+                    if (p.type === 'Identifier') nextScope.add(p.name);
+                    else for (const r of stmtRefs(p)) nextScope.add(r);
+                }
+                if (n.body && n.body.type === 'BlockStatement') {
+                    for (const st of n.body.body) for (const d of stmtDecls(st)) nextScope.add(d);
+                }
+            } else if (n.type === 'BlockStatement') {
+                nextScope = new Set(scope);
+                for (const st of n.body) for (const d of stmtDecls(st)) nextScope.add(d);
+            } else if (n.type === 'CatchClause' && n.param && n.param.type === 'Identifier') {
+                nextScope = new Set(scope);
+                nextScope.add(n.param.name);
+            }
+            if (n.type === 'Identifier') {
+                if (parent && parent.type === 'MemberExpression' && prop === 'property' && !parent.computed) return;
+                if (parent && parent.type === 'Property' && prop === 'key' && !parent.computed) {
+                    if (parent.shorthand && letSet.has(n.name) && !scope.has(n.name)) {
+                        edits.push([n.start, n.end, n.name + ':$live.' + n.name]);
+                    }
+                    return;
+                }
+                if (parent && (parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') && prop === 'id') return;
+                if (parent && parent.type === 'VariableDeclarator' && prop === 'id') return;
+                if (letSet.has(n.name) && !scope.has(n.name)) {
+                    edits.push([n.start, n.end, '$live.' + n.name]);
+                }
+                return;
+            }
+            for (const k of Object.keys(n)) {
+                if (k === 'type' || k === 'start' || k === 'end') continue;
+                walk(n[k], nextScope, n, k);
+            }
+        }
+        walk(subAst, new Set(), null, null);
+        edits.sort((a, b) => b[0] - a[0]);
+        let res = subSrc;
+        for (const [s, e, rep] of edits) res = res.slice(0, s) + rep + res.slice(e);
+        return res;
+    }
+
+    const rawPageCode = items.filter(it => pageSet.has(it.idx)).map(it => it.src).join('\n');
+    const nrBodySrc = code.slice(nrStmt.body.start + 1, nrStmt.body.end - 1);
+    const lazyFnExpr = rewriteSubSource('(function($live,' + constVars.join(',') + '){' + rawPageCode + '\nreturn function(registry){' + nrBodySrc + '};})');
+    const lazyFnString = JSON.stringify(lazyFnExpr).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+    const liveObjCode = '{' + letVars.map(v => 'get ' + v + '(){return ' + v + ';},set ' + v + '(_v){' + v + '=_v;}').join(',') + '}';
+    const newNrCode = 'let $nr;function nativeRegistry(registry){if(!$nr)$nr=(0,eval)(' + lazyFnString + ')(' + liveObjCode + ',' + constVars.join(',') + ');return $nr(registry);}';
+
+    const repList = [];
+    for (const idx of pageSet) repList.push([items[idx].stmt.start, items[idx].stmt.end, '']);
+    repList.push([nrStmt.start, nrStmt.end, 'let $nr;function nativeRegistry(registry){return $nr(registry);}']);
+    repList.push([items[items.length - 1].stmt.end, items[items.length - 1].stmt.end, ';$nr=function(registry){if($nr.$)return $nr.$(registry);return($nr.$=(0,eval)(' + lazyFnString + ')(' + liveObjCode + ',' + constVars.join(',') + '))(registry);};']);
+    repList.sort((a, b) => b[0] - a[0]);
+    let out = code;
+    for (const [s, e, r] of repList) out = out.slice(0, s) + r + out.slice(e);
+    return out;
+}
+// Hermes compiles an object/array literal into bytecode that builds it one property at a time, and
+// JSON.parse of a string builds the same value natively, much faster. Rewrite the runtime's large constant
+// tables (theme aliases, styles, icons, languages) to JSON.parse, only where the literal is pure JSON data,
+// so the value is identical: same keys, order, types, a fresh mutable object. Measured on the HBC98 VM.
+function jsonLiterals(code) {
+    const acorn = require(process.argv[3]);
+    const ast = acorn.parse(code, {ecmaVersion: 'latest'});
+    const value = node => {
+        switch (node.type) {
+        case 'Literal':
+            return node.regex || typeof node.value === 'bigint' || (typeof node.value === 'number' && !isFinite(node.value)) ? undefined : node.value;
+        case 'UnaryExpression':
+            // -0 has no JSON form.
+            return node.operator === '-' && node.argument.type === 'Literal' && typeof node.argument.value === 'number' &&
+                node.argument.value !== 0 ? -node.argument.value : undefined;
+        case 'ArrayExpression': {
+            const out = [];
+            for (const element of node.elements) {
+                const v = element && element.type !== 'SpreadElement' ? value(element) : undefined;
+                if (v === undefined) return undefined;
+                out.push(v);
+            }
+            return out;
+        }
+        case 'ObjectExpression': {
+            const out = {}, seen = new Set();
+            for (const p of node.properties) {
+                if (p.type !== 'Property' || p.computed || p.kind !== 'init' || p.method || p.shorthand) return undefined;
+                const key = p.key.type === 'Identifier' ? p.key.name : p.key.value;
+                // Plain string keys only (integer-like keys reorder), no duplicates.
+                if (typeof key !== 'string' || key === '__proto__' || /^\d/.test(key) || seen.has(key)) return undefined;
+                seen.add(key);
+                const v = value(p.value);
+                if (v === undefined) return undefined;
+                out[key] = v;
+            }
+            return out;
+        }
+        }
+        return undefined;
+    };
+    // Only the runtime's top-level tables, which are built once at startup. A literal inside a function is built on
+    // every call, where re-parsing a string could cost more than it saves.
+    const edits = [];
+    const iife = ast.body[0].expression.callee.body.body;
+    for (const statement of iife) {
+        if (statement.type !== 'VariableDeclaration') continue;
+        for (const node of statement.declarations) {
+            if (!node.init || !/^(Object|Array)Expression$/.test(node.init.type) || node.init.end - node.init.start < 40) continue;
+            const v = value(node.init);
+            if (v !== undefined) edits.push([node.init.start, node.init.end, v]);
+        }
+    }
+    edits.sort((a, b) => b[0] - a[0]);
+    let out = code;
+    for (const [start, end, v] of edits) {
+        const text = JSON.stringify(JSON.stringify(v)).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+        out = out.slice(0, start) + 'JSON.parse(' + text + ')' + out.slice(end);
+    }
+    return out;
+}
 """
     source = ROOT / "patches/src/main/resources/venus/bootstrap.js"
-    result = subprocess.run(["node", "-e", script, str(TOOLS / "terser.js"), str(source)],
+    result = subprocess.run(["node", "-e", script, str(TOOLS / "terser.js"), str(source), str(TOOLS / "acorn.js")],
                             cwd=ROOT, check=True, capture_output=True, text=True)
     content = result.stdout
     # The About page reads this, so it must match the release. 1.5.1 still said 1.5.0.

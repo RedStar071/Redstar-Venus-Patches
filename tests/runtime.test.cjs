@@ -2639,6 +2639,64 @@ test('Quest Completer never reports video progress faster than real time allows'
     assert.equal(video.at(-1).body.timestamp, 60);
     assert.ok(b.map.get('q1').userStatus.completedAt);
 });
+test('Quest Completer reports video progress at 1x like VideoQuestPlayer, even for a Quest accepted long ago', async () => {
+    // VideoQuestPlayer (14937) sends progress when currentTime passes the last report + 6-8 s of playback.
+    // A Quest accepted an hour ago used to get a report every ~1.25 s, about five times real speed.
+    const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 120, enrolledAgo(3600))]});
+    b.connect(); await b.run();
+    const video = b.requests.filter(r => r.url === '/quests/q1/video-progress');
+    assert.ok(video.length >= 10);
+    for (let i = 1; i < video.length; i++) {
+        const watched = video[i].body.timestamp - video[i - 1].body.timestamp, wall = (video[i].at - video[i - 1].at) / 1000;
+        assert.ok(wall + 0.5 >= watched, `report ${i}: ${watched.toFixed(2)} s of video in ${wall.toFixed(2)} s`);
+    }
+    const first = video[0], last = video.at(-1);
+    assert.ok((last.at - first.at) / 1000 + 8.5 >= last.body.timestamp - first.body.timestamp + 0, 'whole video takes at least its own length');
+    assert.ok(b.map.get('q1').userStatus.completedAt);
+});
+test('Quest Completer keeps working in the background: Activity Quests run, video Quests wait and resume where they stopped', async () => {
+    // Every phone request carries client_app_state (updateDynamicSuperProperties 17420), and the video player only
+    // plays on screen, so no video report may come from the background. Desktop heartbeats say "unfocused" anyway,
+    // so a Play or Activity Quest takes the slot while you're away instead of the whole queue sitting idle.
+    const video = questFixture('v1', 'WATCH_VIDEO_ON_MOBILE', 60, enrolledAgo(3600));
+    video.config.expiresAt = new Date(QUEST_T0 + 864e5).toISOString();
+    const b = questHarness({quests:[video, activityFixture('a1', 120, enrolledAgo(5))]});
+    let state = 'active';
+    const r = b.context.__r; b.context.__r = id => id === 1986 ? {default:{getState:() => state}} : r(id);
+    b.connect(); await b.run(25 * 1000);
+    const before = b.requests.filter(x => x.url === '/quests/v1/video-progress');
+    assert.ok(before.length >= 1, 'the video plays while Discord is on screen');
+    state = 'background'; const left = b.clock;
+    await b.run(10 * 60 * 1000);
+    assert.equal(b.requests.filter(x => x.url === '/quests/v1/video-progress' && x.at > left).length, 0, 'no video report from the background');
+    assert.ok(b.map.get('a1').userStatus.completedAt, 'the Activity Quest finished in the background');
+    assert.ok(b.requests.some(x => x.url === '/quests/a1/heartbeat' && x.at > left));
+    assert.equal(b.map.get('v1').userStatus && b.map.get('v1').userStatus.completedAt || null, null);
+    assert.equal(b.events.some(e => e.type === 'never'), false);
+    state = 'active'; const back = b.clock;
+    (b.subs.get('APP_STATE_UPDATE') || []).forEach(fn => fn({type:'APP_STATE_UPDATE', state:'active'}));
+    await b.run();
+    const after = b.requests.filter(x => x.url === '/quests/v1/video-progress' && x.at > back);
+    assert.ok(after.length >= 1 && b.map.get('v1').userStatus.completedAt, 'the video resumes and finishes once Discord is back');
+    assert.ok(after[0].body.timestamp > before.at(-1).body.timestamp, 'resumes after the last report, not from 0');
+    assert.ok(after[0].at - back < 60000, 'resumes within seconds, not after a 30-minute retry wait');
+    const watched = after.at(-1).body.timestamp - before.at(-1).body.timestamp, wall = (after.at(-1).at - back) / 1000;
+    assert.ok(wall + 1 >= watched, `the background time is not counted as watched (${watched.toFixed(1)} s in ${wall.toFixed(1)} s)`);
+});
+test('Quest Completer only accepts Quests while Discord is on screen, and catches up when you come back', async () => {
+    // An accept says it came from the Quests screen (location 12), and every phone request carries client_app_state.
+    const b = questHarness({quests:[questFixture('q1', 'WATCH_VIDEO_ON_MOBILE', 30)]});
+    let state = 'background';
+    const r = b.context.__r; b.context.__r = id => id === 1986 ? {default:{getState:() => state}} : r(id);
+    b.connect(); await b.run(30 * 60 * 1000 - 1);
+    assert.equal(b.requests.some(x => x.url.endsWith('/enroll')), false, 'no accept from the background');
+    state = 'active';
+    (b.subs.get('APP_STATE_UPDATE') || []).forEach(fn => fn({type:'APP_STATE_UPDATE', state:'active'}));
+    const back = b.clock; await b.run(2 * 60 * 1000);
+    const enroll = b.requests.find(x => x.url === '/quests/q1/enroll');
+    assert.ok(enroll && enroll.at - back >= 2000 && enroll.at - back <= 60000, 'accepts a few seconds after Discord is back');
+    assert.ok(b.map.get('q1').userStatus.completedAt);
+});
 function activityFixture(id, target, extra = {}, app = '1124225423214485597', features = []) {
     const q = questFixture(id, 'PLAY_ACTIVITY', target, extra);
     q.config.taskConfigV2.tasks.PLAY_ACTIVITY.applications = [{id:app}]; q.config.features = features;
@@ -2692,7 +2750,7 @@ for (const mobile of [false, true]) test(`Quest Completer waits for server compl
     b.connect(); await b.run();
     const sent = b.requests.filter(r => r.url === '/quests/confirm/heartbeat');
     assert.equal(sent.length, 3, 'target progress alone is not a completed Quest; send the confirmation beat');
-    assert.equal(sent[2].at - sent[1].at, 60000, 'wait a normal heartbeat interval, not a one-second retry loop');
+    assert.equal(sent[2].at - sent[1].at, 1000, "at the target, beat again after one second like Discord's calculateHeartbeatDurationMs");
     assert.ok(b.map.get('confirm').userStatus.completedAt, 'Discord actually confirmed completion');
     assert.equal(b.events.filter(e => e.type === 'QUESTS_SEND_HEARTBEAT_SUCCESS' && e.userStatus.completedAt).length, 1);
     assert.deepEqual(b.ui, []);
@@ -2707,7 +2765,7 @@ test('Quest Completer bounds unconfirmed Activity heartbeats and moves to the ne
     b.connect(); await b.run(10 * 60 * 1000);
     const sent = b.requests.filter(r => r.url === '/quests/stalled/heartbeat');
     assert.equal(sent.length, 6, 'initial target report and at most five unchanged confirmation beats');
-    for (let i = 1; i < sent.length; i++) assert.equal(sent[i].at - sent[i - 1].at, 60000);
+    for (let i = 1; i < sent.length; i++) assert.equal(sent[i].at - sent[i - 1].at, 1000, "Discord's own pace at the target");
     assert.equal(b.map.get('stalled').userStatus.completedAt, null, 'never report an unconfirmed Quest as completed');
     assert.ok(b.map.get('next').userStatus.completedAt, 'one stalled Quest does not block the queue');
 });
@@ -2716,7 +2774,8 @@ test('Quest Completer can stop Activity Quests while waiting for completion conf
         const b = questHarness({quests:[activityFixture('stop', 60, enrolledAgo(5))]});
         const post = b.http.post;
         b.http.post = request => post(request).then(response => { response.body.completed_at = null; return response; });
-        b.connect(); await b.run(10 * 1000);
+        // The first beat (at 9 s) reaches the target unconfirmed; stop before the one-second confirmation beat.
+        b.connect(); await b.run(9500);
         assert.equal(b.requests.filter(r => r.url.endsWith('/heartbeat')).length, 1);
         if (stop === 'LOGOUT') b.subs.get('LOGOUT').forEach(fn => fn({type:'LOGOUT'}));
         else b.api.setSetting(stop, false);
@@ -4091,8 +4150,10 @@ test('every language file has every Venus text and keeps its {placeholders}',()=
     const folder='patches/src/main/resources/venus/i18n';
     const codes=fs.readFileSync(folder+'/index.txt','utf8').split('\n').filter(Boolean);
     assert.ok(codes.includes('ru'));assert.ok(codes.length>=29);
-    const start=raw.indexOf('UI_LANGUAGES');assert.ok(start>0);
-    const names=raw.slice(start,raw.indexOf('UI_CODES',start)).replace(/\s/g,'');
+    // The source table: the compacted runtime ships it as a JSON.parse string (scripts/build.py).
+    const source=fs.readFileSync('patches/src/main/resources/venus/bootstrap.js','utf8');
+    const start=source.indexOf('UI_LANGUAGES');assert.ok(start>0);
+    const names=source.slice(start,source.indexOf('UI_CODES',start)).replace(/\s/g,'');
     // Every text Venus passes through tr()/pl() (as scripts/i18n_strings.cjs finds it), so a new row can't ship in English.
     const {found}=require('../scripts/i18n_strings.cjs');assert.ok(found.size>=700);
     for (const label of ['Show edit history','Keep after restarting','Video Quests','Accept new Quests']) assert.ok(found.has(label),'option row '+label+' is listed');
@@ -4330,8 +4391,10 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     b.load({socket},null,13439);
     const questItem={
         id:'q1',
-        config:{expiresAt:'2099-01-01T00:00:00.000Z',messages:{questName:'Background Quest'},taskConfigV2:{tasks:{WATCH_VIDEO_ON_MOBILE:{target:5}}}},
-        userStatus:{enrolledAt:'2020-01-01T00:00:00.000Z',completedAt:null,progress:{WATCH_VIDEO_ON_MOBILE:{value:0}}}
+        // An Activity Quest: its desktop heartbeats keep going in the background. (Video Quests pause there, like the player.)
+        config:{expiresAt:'2099-01-01T00:00:00.000Z',messages:{questName:'Background Quest'},features:[],
+            taskConfigV2:{tasks:{PLAY_ACTIVITY:{target:60,applications:[{id:'1124225423214485597'}]}}}},
+        userStatus:{enrolledAt:'2020-01-01T00:00:00.000Z',completedAt:null,progress:{PLAY_ACTIVITY:{value:0}}}
     };
     const store={quests:new Map([['q1',questItem]]),getQuest:id=>id==='q1'?questItem:null,addChangeListener(){}};
     b.load({default:store},null,7187);
@@ -4350,13 +4413,13 @@ test('Quest Completer keeps Gateway open and holds foreground service while comp
     // Run the initial scan timer (at most 5 steps, since questsRefetchLoop re-schedules itself every 30 min).
     for (let i=0;i<5 && timers.length;i++) timers.shift().fn();
     await flush();
-    assert.equal(requests.length,1,'Quest progress request started');
+assert.equal(requests.length,1,'Quest progress request started');
     assert.ok(fgActive.has('venus-background'),'Foreground service active while Quest is running');
     // Leaving the app while Quest is running must not close the Gateway socket.
     socket.close(true);
     assert.equal(socketCloses,0,'Gateway close(true) blocked while Quest is running in background');
     // Finish the Quest -> foreground service is released and Gateway can close normally when idle.
-    resolveProgress({ok:true,status:200,body:{quest_id:'q1',completed_at:'2026-10-14T00:00:00.000Z'}});
+    resolveProgress({ok:true,status:200,body:{quest_id:'q1',completed_at:'2026-10-14T00:00:00.000Z',progress:{PLAY_ACTIVITY:{value:60}}}});
     await flush();await flush();await flush();
     assert.equal(fgActive.size,0,'Foreground service stopped once Quest finishes');
     socket.close(true);
@@ -5807,4 +5870,19 @@ test('Custom themes: false slots keep Discord\'s color, odd values parse, specif
     b.api.setSetting('customThemes', false);
     assert.equal(JSON.stringify(rawColors), pristineRaw, 'RawColors exactly as Discord shipped them, no synthetic keys left');
     assert.equal(JSON.stringify(sem), pristineSem, 'SemanticColors exactly as Discord shipped them');
+});
+
+test('every event type dispatchEvent acts on passes its early-return filter (DISPATCH_EVENTS)', () => {
+    const source = fs.readFileSync('patches/src/main/resources/venus/bootstrap.js', 'utf8');
+    const start = source.indexOf('    function dispatchEvent(orig, self, args) {');
+    const end = source.indexOf('\n    }\n', start);
+    assert.ok(start > 0 && end > start);
+    const types = new Set([...source.slice(start, end).matchAll(/event\.type === "([A-Z_]+)"/g)].map(m => m[1]));
+    const set = name => new Set([...new RegExp(name + ' = new Set\\(\\[([^\\]]*)\\]\\)').exec(source)[1].matchAll(/"([A-Z_]+)"/g)].map(m => m[1]));
+    const hidden = new Set(['LOGOUT', 'CHANNEL_DELETE', 'GUILD_DELETE', ...set('CHANNEL_EVENTS'), ...set('GUILD_EVENTS'),
+        ...set('READY_EVENTS'), ...set('BATCH_EVENTS'), ...set('MESSAGE_EVENTS')]);
+    const seen = new Set([...hidden, ...set('RESTORE_EVENTS'), 'MESSAGE_DELETE', 'MESSAGE_DELETE_BULK']);
+    assert.match(source, /const DISPATCH_EVENTS = new Set\(\[\.\.\.HIDDEN_EVENTS, \.\.\.RESTORE_EVENTS, "MESSAGE_DELETE", "MESSAGE_DELETE_BULK"\]\);/);
+    assert.ok(types.size >= 6);
+    for (const type of types) assert.ok(seen.has(type), type + ' is read by dispatchEvent but filtered out before it');
 });

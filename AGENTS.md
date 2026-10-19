@@ -455,10 +455,57 @@ The page title is short ("Deleted messages", "Tap gestures").
   is unique.
 - **Always keep both the module map file (`scripts/hbc/349.9-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
 
+## Benchmarking optimizations (required)
+
+Every optimization must be benchmarked on the real HBC98 Hermes VM **before** it is committed. Node/V8 numbers
+don't count: V8 has a JIT and Hermes on Android doesn't, so a change that is faster on Node can be slower on Hermes
+(in this repo, a hand-written `isDigits` loop measured slower on Hermes than the `/^\d+$/` regex it replaced). A change that isn't measurably
+faster on Hermes is not an optimization; revert it unless it's also simpler.
+
+1. **Get the VM once per sandbox:** `sh scripts/hbc/bench_setup.sh [Discord.apkm]` sets up everything below in one go
+   (tools, compacted runtime, VM, Discord bundle). On its own, `sh scripts/hbc/hermes_vm.sh` It downloads a checksum-pinned prebuilt Hermes
+   `250829098.0.16` (HBC98, the bytecode version Discord 349.9 runs) to `work/hermes/hermes-vm`, plus the ICU 70 it
+   links against. Bytecode always comes from the pinned compiler, `work/tools/hermesc -emit-binary -O` (written by
+   `python3 scripts/build.py`). Don't build Hermes yourself.
+2. **Measure with `tests/bench/hermes_bench.cjs`**, never with ad-hoc timing:
+   - **Startup** (any change to `bootstrap.js` top-level code, `decorateDefine`, `activatePlugins`, `instrument` or
+     anything else that runs at launch): `node tests/bench/hermes_bench.cjs --startup <old-bootstrap.js>`, with the
+     old copy from `git show origin/main:patches/src/main/resources/venus/bootstrap.js > work/bench/old.js`. It
+     evals the compacted runtime (the same Terser step as `scripts/build.py`) and pushes 17.7k Metro defines through
+     its `__d`, old and new interleaved.
+     For a change to the shipped form itself (`scripts/build.py`'s compaction), compare two compacted runtimes with
+     `node tests/bench/runtime_eval.cjs old.js patches/build/bootstrap.js` and then
+     `node tests/bench/hermes_bench.cjs work/bench/runtime_eval.js`.
+   - **Cold boot of the real Discord bundle** (required for every startup change, after the above):
+     `sh tests/bench/cold_boot.sh <old compacted bootstrap.js> [new]`. It injects each runtime into the user's 349.9
+     `index.android.bundle` with `HbcPrelude`, boots it through React Native's own initializer
+     (`tests/hermes-startup.js`, which must print `HBC98_REAL_RN_ENVIRONMENT_PASS`) and compares user CPU over
+     interleaved cold starts. It needs `sh scripts/hbc/setup.sh Discord.apkm` once. This is the closest number to a
+     phone launch; run it at least twice, because one run can land inside noise.
+   - **Finding startup work:** `node tests/bench/load_profile.cjs` splits the runtime's eval into compile time and the
+     cost of each top-level statement; `node tests/bench/load_calls.cjs` lists which functions actually run at startup
+     (as of 1.16.x: only the IIFE, `selectModules`, `decorateDefine`, `defineValue` and the `__d` wrapper; everything
+     else is compiled, never run, and costs ~18 us per function plus its size).
+   - **A hot function** (a hook, a store wrapper, a sort, a render helper): write `tests/bench/<name>.js` that copies
+     the old and new code verbatim and calls `bench("old …", fn)` then `bench("new …", fn)` with realistic inputs
+     (a 3000-message channel, 50 accounts, 200 guilds…), and run `node tests/bench/hermes_bench.cjs
+     tests/bench/<name>.js`. The first `bench` is the baseline. Commit the bench file with the optimization.
+3. **Read the result honestly.** The report gives the p10 (the headline: a busy shared host only ever slows
+   CPU-bound code down), the median and the range, then the speedup over the baseline. Anything within ±5% says
+   `(within noise)`: that's not a win, so don't ship it as one. If the median and p10 disagree, rerun with more
+   `--samples`/`--rounds`. `Date.now()` in this VM has 1 ms resolution, which is why the harness times batches.
+4. **Put the numbers in the commit message and the pull request:** the Hermes before/after for what changed, for
+   example `Hermes HBC98: 15.5 → 13.3 ms per 3000-message sort (1.17x)`. A ⚡ Performance changelog bullet needs
+   this measurement behind it.
+5. **Still run the tests on Hermes:** `HERMES_BIN=work/hermes/hermes-vm node --test tests/runtime.test.cjs`, so the
+   native-eval test runs instead of being skipped.
+
 ## Workflow for bug fixes, optimizations, and GitHub Actions `.mpp` artifacts
 
 - **For every bug or issue:** immediately find the root cause and implement a fix, then **immediately commit and push that fix to the pull request** before moving on to the next issue.
-- **For every optimization:** implement the optimization, benchmark it on a real Hermes VM, and **immediately commit and push that optimization to the pull request** before moving on to the next one.
+- **For every optimization:** implement the optimization, benchmark it on the real Hermes VM as described in
+  [Benchmarking optimizations](#benchmarking-optimizations-required), and **immediately commit and push that
+  optimization to the pull request** before moving on to the next one.
 - Never batch unrelated fixes or optimizations into a single giant end-of-session commit; each fix or optimization should land in the pull request as soon as it is verified.
 - **GitHub Actions precompiled `.mpp` (`venus-patches-mpp` artifact):**
   - `.github/workflows/main.yml` automatically builds, tests, and packages `patches/build/libs/patches-<version>.mpp` (along with `SHA256SUMS` and `bootstrap.hbc`) on every `push` to `main`, every `pull_request` targeting `main`, and on tag pushes (`v*`), uploading them as the `venus-patches-mpp` workflow artifact.

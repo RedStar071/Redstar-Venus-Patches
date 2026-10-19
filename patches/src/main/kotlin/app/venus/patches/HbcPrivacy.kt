@@ -11,9 +11,28 @@ internal object HbcPrivacy {
     const val ORIGINAL_SHA256 = "eae2c936fd3012ddf29bc3fd8369f9eb44e56e5421df899bf272b14fa3b8ded5"
     data class Target(val id: Int, val name: String, val offset: Int, val size: Int,
                       val header: String, val sha256: String, val promise: Boolean, val expandedHeaderHash: String)
+    private fun toHex(bytes: ByteArray): String {
+        val hex = "0123456789abcdef"
+        val out = CharArray(bytes.size * 2)
+        for (i in 0 until bytes.size) {
+            val v = bytes[i].toInt() and 255
+            out[i * 2] = hex[v ushr 4]
+            out[i * 2 + 1] = hex[v and 15]
+        }
+        return String(out)
+    }
     fun digest(bytes: ByteArray, algorithm: String = "SHA-256") =
-        MessageDigest.getInstance(algorithm).digest(bytes).joinToString("") { "%02x".format(it) }
-    fun hex(value: String) = value.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+        toHex(MessageDigest.getInstance(algorithm).digest(bytes))
+    fun hex(value: String): ByteArray {
+        val len = value.length / 2
+        val out = ByteArray(len)
+        for (i in 0 until len) {
+            val hi = Character.digit(value[i * 2], 16)
+            val lo = Character.digit(value[i * 2 + 1], 16)
+            out[i] = ((hi shl 4) or lo).toByte()
+        }
+        return out
+    }
     fun verifyOriginal(bytes: ByteArray) {
         require(digest(bytes) == ORIGINAL_SHA256) {
             "Unsupported Discord JavaScript bundle; use the original 349.9 - Stable APKM"
@@ -25,7 +44,9 @@ internal object HbcPrivacy {
             "Unsupported Discord JavaScript bundle; use the original 349.9 - Stable APKM"
         }
     }
-    private fun streamDigest(file: File, algorithm: String, length: Long): String {
+    private fun streamDigest(file: File, algorithm: String, length: Long): String =
+        toHex(streamDigestBytes(file, algorithm, length))
+    private fun streamDigestBytes(file: File, algorithm: String, length: Long): ByteArray {
         val digest = MessageDigest.getInstance(algorithm)
         file.inputStream().use { input ->
             val buffer = ByteArray(1 shl 20)
@@ -37,7 +58,7 @@ internal object HbcPrivacy {
                 left -= read
             }
         }
-        return digest.digest().joinToString("") { "%02x".format(it) }
+        return digest.digest()
     }
 
     // HBC98 opcodes (Hermes 250829098 BytecodeList.def) and the pinned bundle's string IDs.
@@ -237,7 +258,7 @@ internal object HbcPrivacy {
             fun read(offset: Long, size: Int) = ByteArray(size).also { raf.seek(offset); raf.readFully(it) }
             val header = ByteBuffer.wrap(read(0, 128)).order(ByteOrder.LITTLE_ENDIAN)
             require(header.getInt(8) == 98 && header.getInt(32).toLong() == length) { "Invalid HBC98 file header" }
-            require(streamDigest(file, "SHA-1", length - 20) == read(length - 20, 20).joinToString("") { "%02x".format(it) }) {
+            require(streamDigestBytes(file, "SHA-1", length - 20).contentEquals(read(length - 20, 20))) {
                 "Invalid HBC footer"
             }
             for (target in targets) {
@@ -261,7 +282,7 @@ internal object HbcPrivacy {
                 raf.write(body)
             }
             // Same-process writes are visible to the streamed read; no flush to disk needed.
-            val footer = hex(streamDigest(file, "SHA-1", length - 20))
+            val footer = streamDigestBytes(file, "SHA-1", length - 20)
             raf.seek(length - 20)
             raf.write(footer)
         }
