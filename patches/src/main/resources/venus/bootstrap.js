@@ -1937,20 +1937,15 @@
         if (cached && cached.orig === result && cached.revision === deletedRevision) return cached.value;
         const array = Array.isArray(result._array) ? result._array : null;
         const first = array && array.length ? String(array[0].id) : null, last = array && array.length ? String(array[array.length - 1].id) : null;
-        const isDigits = s => {
-            if (!s) return false;
-            for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); if (c < 48 || c > 57) return false; }
-            return true;
-        };
         const older = (a, b) => a.length - b.length || (a === b ? 0 : a < b ? -1 : 1);
         // Whether this window has numeric bounds is the same for every kept message: check it once.
-        const bounded = first !== null && isDigits(first);
+        const bounded = first !== null && /^\d+$/.test(first);
         // Never paste a retained message into a window that doesn't contain its position;
         // that produced out-of-place rows above unloaded history or below an older jump.
         const records = [];
         bucket.forEach(entry => {
             const id = String(entry.id);
-            if (bounded && isDigits(id)) {
+            if (bounded && /^\d+$/.test(id)) {
                 if (older(id, first) < 0 && result.hasMoreBefore === true) return;
                 if (older(id, last) > 0 && result.hasMoreAfter === true) return;
             }
@@ -1967,7 +1962,7 @@
             const ids = new Map();
             const idOf = message => {
                 let id = ids.get(message);
-                if (id === undefined) { const text = String(message.id); id = isDigits(text) ? text : null; ids.set(message, id); }
+                if (id === undefined) { const text = String(message.id); id = /^\d+$/.test(text) ? text : null; ids.set(message, id); }
                 return id;
             };
             copy._array.sort((a,b) => {
