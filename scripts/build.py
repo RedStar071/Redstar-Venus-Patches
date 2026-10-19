@@ -38,6 +38,9 @@ DEPENDENCIES = {
     "r8.jar": (
         "https://storage.googleapis.com/r8-releases/raw/8.12.22/r8.jar",
         "f18a6d1d7b37b7c9c8fbbcb5fd65b62f18bf7ce8f5be8e623b72648e282d964e"),
+    "acorn.tgz": (
+        "https://registry.npmjs.org/acorn/-/acorn-8.15.0.tgz",
+        "e46eae89bd9761f16d1d25563b837b55b4b78f3ece06ee0b9789cb2644f523b3"),
     "hermes-compiler.tgz": (
         "https://registry.npmjs.org/hermes-compiler/-/hermes-compiler-250829098.0.19.tgz",
         "839af099f0926b5ebbd738ba54764a3f40e35dfc3aac91babf56f8eb7c69280e"),
@@ -73,6 +76,8 @@ def tools():
     # Read one known tool file; never extract arbitrary npm archive paths.
     with tarfile.open(TOOLS / "terser.tgz") as archive:
         (TOOLS / "terser.js").write_bytes(archive.extractfile("package/dist/bundle.min.js").read())
+    with tarfile.open(TOOLS / "acorn.tgz") as archive:
+        (TOOLS / "acorn.js").write_bytes(archive.extractfile("package/dist/acorn.js").read())
     with tarfile.open(TOOLS / "hermes-compiler.tgz") as archive:
         (TOOLS / "hermesc").write_bytes(archive.extractfile("package/hermesc/linux64-bin/hermesc").read())
     (TOOLS / "hermesc").chmod(0o755)
@@ -96,11 +101,72 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 const source = fs.readFileSync(process.argv[2], 'utf8').replace('/*__FEATURES__*/', '__VENUS_FEATURES__');
 context.Terser.minify(source, {compress:false, mangle:false,
     format:{comments:false, ascii_only:true}}).then(result => {
-    process.stdout.write(result.code.replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
+    process.stdout.write(jsonLiterals(result.code).replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
 });
+// Hermes compiles an object/array literal into bytecode that builds it one property at a time, and
+// JSON.parse of a string builds the same value natively, much faster. Rewrite the runtime's large constant
+// tables (theme aliases, styles, icons, languages) to JSON.parse, only where the literal is pure JSON data,
+// so the value is identical: same keys, order, types, a fresh mutable object. Measured on the HBC98 VM.
+function jsonLiterals(code) {
+    const acorn = require(process.argv[3]);
+    const ast = acorn.parse(code, {ecmaVersion: 'latest'});
+    const value = node => {
+        switch (node.type) {
+        case 'Literal':
+            return node.regex || typeof node.value === 'bigint' || (typeof node.value === 'number' && !isFinite(node.value)) ? undefined : node.value;
+        case 'UnaryExpression':
+            // -0 has no JSON form.
+            return node.operator === '-' && node.argument.type === 'Literal' && typeof node.argument.value === 'number' &&
+                node.argument.value !== 0 ? -node.argument.value : undefined;
+        case 'ArrayExpression': {
+            const out = [];
+            for (const element of node.elements) {
+                const v = element && element.type !== 'SpreadElement' ? value(element) : undefined;
+                if (v === undefined) return undefined;
+                out.push(v);
+            }
+            return out;
+        }
+        case 'ObjectExpression': {
+            const out = {}, seen = new Set();
+            for (const p of node.properties) {
+                if (p.type !== 'Property' || p.computed || p.kind !== 'init' || p.method || p.shorthand) return undefined;
+                const key = p.key.type === 'Identifier' ? p.key.name : p.key.value;
+                // Plain string keys only (integer-like keys reorder), no duplicates.
+                if (typeof key !== 'string' || key === '__proto__' || /^\d/.test(key) || seen.has(key)) return undefined;
+                seen.add(key);
+                const v = value(p.value);
+                if (v === undefined) return undefined;
+                out[key] = v;
+            }
+            return out;
+        }
+        }
+        return undefined;
+    };
+    // Only the runtime's top-level tables, which are built once at startup. A literal inside a function is built on
+    // every call, where re-parsing a string could cost more than it saves.
+    const edits = [];
+    const iife = ast.body[0].expression.callee.body.body;
+    for (const statement of iife) {
+        if (statement.type !== 'VariableDeclaration') continue;
+        for (const node of statement.declarations) {
+            if (!node.init || !/^(Object|Array)Expression$/.test(node.init.type) || node.init.end - node.init.start < 40) continue;
+            const v = value(node.init);
+            if (v !== undefined) edits.push([node.init.start, node.init.end, v]);
+        }
+    }
+    edits.sort((a, b) => b[0] - a[0]);
+    let out = code;
+    for (const [start, end, v] of edits) {
+        const text = JSON.stringify(JSON.stringify(v)).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+        out = out.slice(0, start) + 'JSON.parse(' + text + ')' + out.slice(end);
+    }
+    return out;
+}
 """
     source = ROOT / "patches/src/main/resources/venus/bootstrap.js"
-    result = subprocess.run(["node", "-e", script, str(TOOLS / "terser.js"), str(source)],
+    result = subprocess.run(["node", "-e", script, str(TOOLS / "terser.js"), str(source), str(TOOLS / "acorn.js")],
                             cwd=ROOT, check=True, capture_output=True, text=True)
     content = result.stdout
     # The About page reads this, so it must match the release. 1.5.1 still said 1.5.0.

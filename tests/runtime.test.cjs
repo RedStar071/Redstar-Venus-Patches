@@ -4150,8 +4150,10 @@ test('every language file has every Venus text and keeps its {placeholders}',()=
     const folder='patches/src/main/resources/venus/i18n';
     const codes=fs.readFileSync(folder+'/index.txt','utf8').split('\n').filter(Boolean);
     assert.ok(codes.includes('ru'));assert.ok(codes.length>=29);
-    const start=raw.indexOf('UI_LANGUAGES');assert.ok(start>0);
-    const names=raw.slice(start,raw.indexOf('UI_CODES',start)).replace(/\s/g,'');
+    // The source table: the compacted runtime ships it as a JSON.parse string (scripts/build.py).
+    const source=fs.readFileSync('patches/src/main/resources/venus/bootstrap.js','utf8');
+    const start=source.indexOf('UI_LANGUAGES');assert.ok(start>0);
+    const names=source.slice(start,source.indexOf('UI_CODES',start)).replace(/\s/g,'');
     // Every text Venus passes through tr()/pl() (as scripts/i18n_strings.cjs finds it), so a new row can't ship in English.
     const {found}=require('../scripts/i18n_strings.cjs');assert.ok(found.size>=700);
     for (const label of ['Show edit history','Keep after restarting','Video Quests','Accept new Quests']) assert.ok(found.has(label),'option row '+label+' is listed');
