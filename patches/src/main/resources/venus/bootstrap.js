@@ -6927,7 +6927,8 @@
         try { const name = names && names.of(code); if (typeof name === "string" && name && name !== code) return name; } catch (_) {}
         return tr(LANGUAGE_NAMES[base] || "another language");
     }
-    function escapeTranslate(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    const ESCAPE_TRANSLATE_RE = /[&<>]/;
+    function escapeTranslate(text) { return ESCAPE_TRANSLATE_RE.test(text) ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : text; }
     // The row's content as text to translate: plain text stays text, formatting becomes <g i=N>...</g> around
     // the words it covers, and everything that must not change (mentions, emojis, code...) becomes <a i=N/>.
     // Worked out once per content array: rows are generated again for every change in the chat.
@@ -6939,18 +6940,21 @@
         function walk(list, depth) {
             let out = "";
             if (depth > 8) { failed = true; return out; }
-            for (const node of list) {
+            for (let i = 0; i < list.length; i++) {
+                const node = list[i];
                 if (!node || typeof node !== "object") continue;
-                if (node.type === "text" && typeof node.content === "string") {
+                const type = node.type;
+                if (type === "text" && typeof node.content === "string") {
                     // A zero-width space is how a message is redrawn: never let it make a new translation.
-                    const text = node.content.indexOf("\u200b") >= 0 ? node.content.replace(/\u200b/g, "") : node.content;
+                    const raw = node.content;
+                    const text = raw.indexOf("\u200b") >= 0 ? raw.replace(/\u200b/g, "") : raw;
                     if (letters < 3) {
                         TRANSLATE_LETTER.lastIndex = 0;
                         while (letters < 3 && TRANSLATE_LETTER.exec(text)) letters++;
                     }
                     out += escapeTranslate(text);
-                } else if (node.type === "br" || node.type === "newline") { lines = true; out += "\n"; }
-                else if (TRANSLATE_GROUPS.has(node.type) && Array.isArray(node.content)) {
+                } else if (type === "br" || type === "newline") { lines = true; out += "\n"; }
+                else if (TRANSLATE_GROUPS.has(type) && Array.isArray(node.content)) {
                     const index = nodes.push(node) - 1;
                     out += "<g i=" + index + ">" + walk(node.content, depth + 1) + "</g>";
                 } else { const index = nodes.push(node) - 1; out += "<a i=" + index + "/>"; }
@@ -6963,7 +6967,8 @@
         translate.layouts.set(content, layout);
         return layout;
     }
-    function unescapeTranslate(text) { return text.replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, "\""); }
+    const UNESCAPE_TRANSLATE_RE = /&#39;|&#x27;|&quot;/;
+    function unescapeTranslate(text) { return UNESCAPE_TRANSLATE_RE.test(text) ? text.replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, "\"") : text; }
     // The translation back as Discord's own nodes. Every tag must come back exactly once and nested the same way,
     // or the original is shown: a mention can never be lost, doubled or turned into text.
     const TRANSLATE_TAG = /<a\s+i\s*=\s*"?(\d+)"?\s*\/>|<g\s+i\s*=\s*"?(\d+)"?\s*>|<\/g\s*>/g;
