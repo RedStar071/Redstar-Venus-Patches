@@ -8360,230 +8360,247 @@
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
     function activatePlugins(id, exports) {
-        if ((features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight) && id === 1377 && exports && exports.default) userStore = exports.default;
-        if (id === 2116 && exports && exports.default && !localeStore) {
-            localeStore = exports.default;
-            // Following Discord's language: switching it there switches Venus too.
-            try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
-                if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); }
-                if (enabled("translate") && settings.translateTarget !== "phone") translateChanged();
-            }); } catch (_) {}
-        }
-        if (features.appIcons && id === 8828) return hookAppIconConstants(exports);
-        if (features.appIcons && id === 17455) return hookAppIconPremiumManager(exports);
-        if (features.appIcons && (id === 15351 || id === 15352 || id === 17106)) return hookComponent(exports, appIconsScreen);
-        if (features.customThemes && id === 589) return hookSemanticColorsModule(exports);
-        if (features.customThemes && id === 591) return hookRawColorsModule(exports);
-        if (features.customThemes && id === 590) return hookExperimentColorsModule(exports);
-        if (features.customThemes && id === 9758) return hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider");
-        if (features.customThemes && id === 1193 && exports && exports.default) customThemes.themeStore = exports.default;
-        if (features.customThemes && id === 4593) return hookCreateThemedContext(exports);
-        if (features.customThemes && id === 9769) return hookComponent(exports, chatViewWrapperThemeBackground);
-        if (features.accountSwitcher && id === 12056) return hookMultiAccountStore(exports);
-        if (features.accountSwitcher && id === 12058) return hookIsStaffForMultiAccount(exports);
-        if (features.userNotif && id === 584 && exports && exports.default) userNotifInit(exports.default);
-        if (features.userNotif && id === 4519 && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
-        if (features.userNotif && id === 2074 && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); }
-        if ((features.quests || features.userNotif) && id === 7252 && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); }
-        if ((features.quests || features.userNotif) && id === 13439) return hookGatewaySocket(exports);
-        if ((features.quests || features.userNotif) && id === 13477) return hookPauseGateway(exports);
-        if (features.translate && id === 584 && exports && exports.default) translateInit(exports.default);
-        if (features.translate && id === 11281) return hookComponent(exports, translateSheet);
-        if (features.splitMessages && id === 8809) return maxLengthModule(exports);
-        if ((features.youBarSettings || features.accountSwitcher) && id === 16335) return hookComponent(exports, youBarButtons);
-        if (features.validUser && id === 584 && exports && exports.default) validInit(exports.default);
-        // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
-        if (features.pastelize && id === 1251) pastelHash = typeof exports === "function" ? exports : exports.default;
-        if (features.pastelize && id === 2112) guildMembers = exports.default;
-        if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && id === 7591 && exports.default && exports.default.prototype) hookExport(exports.default.prototype,"generate",messageRow);
-        if ((features.platformIndicators || features.userNotif) && id === 4930) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); }
-        if (features.platformIndicators && id === 4908) sessionsStore = exports.default;
-        if (features.platformIndicators && id === 10843) {
-            displayNameType=exports.DisplayName;
-            exports=hookExport(exports,"DisplayName",platformName);
-            return hookComponent(exports,(orig,self,args)=>wrapProfileTree(orig.apply(self,args),displayNameType,platformName,platformWrappers));
-        }
-        if (features.platformIndicators && id === 13107) return hookComponent(exports,platformHeader);
-        if (features.platformIndicators && id === 15962) return hookComponent(exports,platformDmRow);
-        // User list rows (UserRow, default export) and voice panel rows (FormComponents' named MemberRowItem).
-        if (features.platformIndicators && id === 10602) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"));
-        if (features.platformIndicators && id === 9334) return hookComponent(exports,(orig,self,args)=>platformPlacement(orig,self,args,"piUserList"),"MemberRowItem");
-        // Profile "in voice" users (UserProfileActivityVoiceChannelUsers): private UserRow rows.
-        if (features.platformIndicators && id === 12849) return hookComponent(exports,(orig,self,args)=>{
-            const tree=orig.apply(self,args);
-            if (!enabled("platformIndicators") || !settings.piUserList || !React || !tree) return tree;
-            return cloneTree(tree,(node,p)=>{
-                if (typeof p.renderItem!=="function" || p.__venusPlatforms) return p;
-                const render=p.renderItem;
-                // Same wrapper for the same renderItem, so the list doesn't redraw every row.
-                let renderItem=platformRenderers.get(render);
-                if (!renderItem) platformRenderers.set(render,renderItem=function(){return platformRow(render.apply(this,arguments));});
-                return Object.assign({},p,{__venusPlatforms:true,renderItem});
-            },0);
-        });
-        // Plain status dot on avatars: avatar Status (design/void/Status,
-        // 13920) draws a phone badge when isMobileOnline; show the plain dot instead.
-        if (features.platformIndicators && id === 13920) {
-            const plain = (orig,self,args) => {
-                const props = args[0];
-                if (!enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline) return orig.apply(self,args);
-                const next = Array.from(args); next[0] = Object.assign({},props,{isMobileOnline:false}); return orig.apply(self,next);
-            };
-            return hookExport(hookExport(exports,"default",plain),"StatusWithTyping",plain);
-        }
-        if (features.readAll && id === 16232) return hookExport(exports,"default",readAllBarProps);
-        if (features.reviewDB && id === 8716) oauthModal=exports.default;
-        if (features.reviewDB && id === 6074) nativeRowGroup=exports.TableRowGroup;
-        if (features.reviewDB && id === 6698) nativeSwitchRow=exports.TableSwitchRow;
-        if (features.hiddenChannels && id === 16157) {
-            // ChannelInfo can be consumed as default export and as named export
-            // (GuildRolesAndChannelsRow reads it by name); hook both.
-            exports = hookComponent(exports,hiddenInfo);
-            return hookExport(exports, "ChannelInfo", hiddenInfo);
-        }
-        if (features.reviewDB && id === 12872) return hookComponent(exports,reviewNote);
-        if (features.reviewDB && id === 14259) return hookExport(exports,"ContextMenuPopout",reviewMenu);
-
-        if (features.reviewDB && id === 13790) return hookComponent(exports,reviewGuild);
-        if (features.hideGift && (id === 11864 || id === 12071) && exports && exports.default)
-            return replaceValue(exports, "default", propsComponent(exports.default, withoutGift));
-        if (features.hideCall && id === 12956) return hookComponent(exports, profileButtons);
-        if (features.hideQuestDock && id === 14892) return hideQuestHooks(exports);
-        if (features.hideQuestDock && id === 14985) return hideQuestDock(exports);
-        if (features.systemEmoji && id === 6625 && exports && exports.default)
-            return replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps));
-        if (id === 14409) exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG);
-        if (id === 11129) return hookExport(exports, "createList", settingsSections);
-        if (id === 14500) SettingsList = exports.SettingsList;
-        if (features.copyBios && id === 10987) return hookComponent(exports, copyBio);
-        if ((features.dashless || features.hiddenChannels) && id === 5043) {
-            exports = hookExport(exports,"computeChannelName",channelLabel);
-            return hookExport(exports, "default", useChannelLabel);
-        }
-        if (features.dashless && id === 5796) return hookExport(exports, "getChannel", mentionChannelInfo);
-        if (features.dashless && id === 7166) {
-            exports = hookExport(exports, "createParserState", parserStateChannels);
-            if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
-            return exports;
-        }
-        if (features.favouriteAnything && id === 12767) return hookComponent(exports, favouriteButton);
-        if (features.favouriteAnything && id === 10090) return hookExport(exports, "addFavoriteGIF", favouriteAdd);
-        if (features.favouriteAnything && id === 10093) return hookExport(exports, "useFavoriteGIFsMobile", favouriteList);
-        if (id === 2051) channelStore = exports.default;
-        if (features.noTyping && id === 11604) return replaceValue(exports, "default",
-            hookExport(hookExport(exports.default, "startTyping", typing), "stopTyping", typing));
-        if (features.quickDelete && id === 1126) locale = exports;
-        if (features.quickDelete && id === 5708) return replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm));
-        if (features.noDelete && id === 5112) {messageRecords = exports; restoreDeleted();}
-        if ((features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) && id === 1377) {userStore = exports.default; restoreDeleted();}
-        if ((features.jumpToTop || features.messageHighlight) && id === 5110) msgStore = exports.default;
-        if (features.noDelete && id === 5110) {
-            msgStore = exports.default;
-            exports = replaceValue(exports,"default",hookExport(hookExport(msgStore,"getMessage",retainedMessage),"getMessages",retainedMessages));
-            restoreDeleted(); return exports;
-        }
-        if (features.quests && id === 7187) questAttach(exports.default);
-        if (features.quests && id === 584) questsInit(exports.default);
-        if (features.messageHighlight && id === 584 && exports && exports.default && !dispatcher)
-            dispatcher = exports.default.dispatch.bind(exports.default);
-        if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
-            dispatcher = exports.default.dispatch.bind(exports.default);
-            return replaceValue(exports, "default", hookExport(exports.default, "dispatch", dispatchEvent));
-        }
-        if (features.hiddenChannels && [1085,1096].includes(id) && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
-        if (features.hiddenChannels && id === 1112) {
-            exports = hookExport(exports, "transitionTo", hiddenNavigation);
-            exports = hookExport(exports, "replaceWith", hiddenNavigation);
-            return hookExport(exports, "transitionToGuild", hiddenGuildNavigation);
-        }
-        if (features.hiddenChannels && id === 4509) {
-            // Lioncat6 finds permissions via findByProps("getChannelPermissions","can");
-            // In 349.9 PermissionStore (4509) is the only module exporting both.
-            // Candidate may be default export or the exports object itself.
-            const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
-                exports && typeof exports.can === "function" ? exports : null;
-            if (candidate) permissions = candidate;
-            // Globally reveal VIEW_CHANNEL so Discord builds
-            // real channel records (names) instead of obfuscated "hidden" stubs.
-            // Message/voice access stays blocked via hiddenFetch/hiddenNavigation guards.
-            // Use hookExport so frozen/sealed singletons are still patched via clone.
-            try {
-                if (candidate && !permissionsCanOrig) {
-                    permissionsCanOrig = candidate.can.bind(candidate);
-                    permissions = hookExport(hookExport(candidate, "can", hiddenCan), "canBasicChannel", hiddenCan);
-                    return candidate === exports ? permissions : replaceValue(exports, "default", permissions);
+        switch (id) {
+            case 2116:
+                if (exports && exports.default && !localeStore) {
+                    localeStore = exports.default;
+                    // Following Discord's language: switching it there switches Venus too.
+                    try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
+                        if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); }
+                        if (enabled("translate") && settings.translateTarget !== "phone") translateChanged();
+                    }); } catch (_) {}
                 }
-            } catch (_) {}
-        }
-        if (features.hiddenChannels && id === 4507) {
-            const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
-            guildChannels = store;
-            return replaceValue(exports, "default", store);
-        }
-        if (features.hiddenChannels && id === 2103 && exports && exports.default)
-            return replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel));
-        if (features.jumpToTop && id === 9064) chatHeight = exports;
-        if (features.jumpToTop && id === 11897) jumpPill = exports.default;
-        // 349.9's arrow is a registered image asset: Metro exports the asset id itself, not a default.
-        if (features.jumpToTop && id === 11898) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports;
-        if (features.jumpToTop && id === 11896) return hookComponent(exports, jumpButton);
-        if (features.gestures && id === 7627) return hookExport(exports, "handleAddDefaultDoubleTapReaction", doubleTapMessage);
-        // Discord's "double-tap to react" tips, reminders and banners would point at a gesture that now replies.
-        if (features.gestures && id === 11363) return hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures);
-        if (features.gestures && id === 9878) return hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args));
-        if (features.gestures && id === 11918) return hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures);
-        if (features.gestures && id === 1377) userStore = exports.default;
-        if (features.gestures && id === 11159) return hookTapHandlers(exports);
-        if (id === 6965) {
-            let actions = exports.default;
-            if (!actions) return exports;
-            if (features.noDelete) actions = hookExport(actions, "deleteMessage", deleteMessage);
-            // Split Large Messages wraps FreeNitro's hook (added below), so every part still gets its emoji links.
-            const splitLater = features.splitMessages;
-            if (features.hiddenChannels) actions = hookExport(actions, "fetchMessages", hiddenFetch);
-            if (features.freeNitro) {
-                actions = hookExport(actions, "sendMessage", sendMessage);
-                actions = hookExport(actions, "_sendMessage", sendMessage);
-                actions = hookExport(actions, "sendStickers", sendStickers);
+                return exports;
+            case 8828: return features.appIcons ? hookAppIconConstants(exports) : exports;
+            case 17455: return features.appIcons ? hookAppIconPremiumManager(exports) : exports;
+            case 15351: case 15352: case 17106: return features.appIcons ? hookComponent(exports, appIconsScreen) : exports;
+            case 589: return features.customThemes ? hookSemanticColorsModule(exports) : exports;
+            case 591: return features.customThemes ? hookRawColorsModule(exports) : exports;
+            case 590: return features.customThemes ? hookExperimentColorsModule(exports) : exports;
+            case 9758: return features.customThemes ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
+            case 1193: if (features.customThemes && exports && exports.default) customThemes.themeStore = exports.default; return exports;
+            case 4593: return features.customThemes ? hookCreateThemedContext(exports) : exports;
+            case 9769: return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
+            case 12056: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
+            case 12058: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
+            case 4519: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
+            case 2074: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
+            case 7252: if ((features.quests || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
+            case 13439: return (features.quests || features.userNotif) ? hookGatewaySocket(exports) : exports;
+            case 13477: return (features.quests || features.userNotif) ? hookPauseGateway(exports) : exports;
+            case 11281: return features.translate ? hookComponent(exports, translateSheet) : exports;
+            case 8809: return features.splitMessages ? maxLengthModule(exports) : exports;
+            case 16335: return (features.youBarSettings || features.accountSwitcher) ? hookComponent(exports, youBarButtons) : exports;
+            // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
+            case 1251: if (features.pastelize) pastelHash = typeof exports === "function" ? exports : exports.default; return exports;
+            case 2112: if (features.pastelize) guildMembers = exports.default; return exports;
+            case 7591:
+                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && exports.default && exports.default.prototype)
+                    hookExport(exports.default.prototype, "generate", messageRow);
+                return exports;
+            case 4930: if (features.platformIndicators || features.userNotif) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); } return exports;
+            case 4908: if (features.platformIndicators) sessionsStore = exports.default; return exports;
+            case 10843:
+                if (!features.platformIndicators) return exports;
+                displayNameType = exports.DisplayName;
+                exports = hookExport(exports, "DisplayName", platformName);
+                return hookComponent(exports, (orig, self, args) => wrapProfileTree(orig.apply(self, args), displayNameType, platformName, platformWrappers));
+            case 13107: return features.platformIndicators ? hookComponent(exports, platformHeader) : exports;
+            case 15962: return features.platformIndicators ? hookComponent(exports, platformDmRow) : exports;
+            // User list rows (UserRow, default export) and voice panel rows (FormComponents' named MemberRowItem).
+            case 10602: return features.platformIndicators ? hookComponent(exports, (orig, self, args) => platformPlacement(orig, self, args, "piUserList")) : exports;
+            case 9334: return features.platformIndicators ? hookComponent(exports, (orig, self, args) => platformPlacement(orig, self, args, "piUserList"), "MemberRowItem") : exports;
+            // Profile "in voice" users (UserProfileActivityVoiceChannelUsers): private UserRow rows.
+            case 12849:
+                return features.platformIndicators ? hookComponent(exports, (orig, self, args) => {
+                    const tree = orig.apply(self, args);
+                    if (!enabled("platformIndicators") || !settings.piUserList || !React || !tree) return tree;
+                    return cloneTree(tree, (node, p) => {
+                        if (typeof p.renderItem !== "function" || p.__venusPlatforms) return p;
+                        const render = p.renderItem;
+                        // Same wrapper for the same renderItem, so the list doesn't redraw every row.
+                        let renderItem = platformRenderers.get(render);
+                        if (!renderItem) platformRenderers.set(render, renderItem = function () { return platformRow(render.apply(this, arguments)); });
+                        return Object.assign({}, p, {__venusPlatforms:true, renderItem});
+                    }, 0);
+                }) : exports;
+            // Plain status dot on avatars: avatar Status (design/void/Status,
+            // 13920) draws a phone badge when isMobileOnline; show the plain dot instead.
+            case 13920: {
+                if (!features.platformIndicators) return exports;
+                const plain = (orig, self, args) => {
+                    const props = args[0];
+                    if (!enabled("platformIndicators") || !settings.piHideMobile || !props || !props.isMobileOnline) return orig.apply(self, args);
+                    const next = Array.from(args); next[0] = Object.assign({}, props, {isMobileOnline:false}); return orig.apply(self, next);
+                };
+                return hookExport(hookExport(exports, "default", plain), "StatusWithTyping", plain);
             }
-            if (splitLater) actions = hookExport(actions, "sendMessage", splitSend);
-            msgActions = actions;
-            return replaceValue(exports, "default", actions);
-        }
-        if (!features.freeNitro && !features.appIcons) return exports;
-        if (id === 1377) userStore = exports.default;
-        if (id === 13797) { emojiCatalog = exports; return hookExport(exports, "canUserUse", catalogEligibility); }
-        if (features.freeNitro && id === 5638) emojiStore = exports.default;
-        if (features.freeNitro && id === 5687) stickerStore = exports.default;
-        if (id === 4528) {
-            // The pinned build exports the capabilities on a default singleton;
-            // named aliases are not used by its picker. Hook the inspected object.
-            let capabilities = exports.default || exports;
-            function patchCapability(key, setting) {
-                premiumOriginal[key] = typeof capabilities[key] === "function" ? capabilities[key].bind(capabilities) : undefined;
-                capabilities = hookExport(capabilities, key, premiumOverride(key, setting));
+            case 16232: return features.readAll ? hookExport(exports, "default", readAllBarProps) : exports;
+            case 8716: if (features.reviewDB) oauthModal = exports.default; return exports;
+            case 6074: if (features.reviewDB) nativeRowGroup = exports.TableRowGroup; return exports;
+            case 6698: if (features.reviewDB) nativeSwitchRow = exports.TableSwitchRow; return exports;
+            case 16157:
+                if (!features.hiddenChannels) return exports;
+                // ChannelInfo can be consumed as default export and as named export
+                // (GuildRolesAndChannelsRow reads it by name); hook both.
+                exports = hookComponent(exports, hiddenInfo);
+                return hookExport(exports, "ChannelInfo", hiddenInfo);
+            case 12872: return features.reviewDB ? hookComponent(exports, reviewNote) : exports;
+            case 14259: return features.reviewDB ? hookExport(exports, "ContextMenuPopout", reviewMenu) : exports;
+            case 13790: return features.reviewDB ? hookComponent(exports, reviewGuild) : exports;
+            case 11864: case 12071: return features.hideGift && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, withoutGift)) : exports;
+            case 12956: return features.hideCall ? hookComponent(exports, profileButtons) : exports;
+            case 14892: return features.hideQuestDock ? hideQuestHooks(exports) : exports;
+            case 14985: return features.hideQuestDock ? hideQuestDock(exports) : exports;
+            case 6625: return features.systemEmoji && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps)) : exports;
+            case 14409: exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG); return exports;
+            case 11129: return hookExport(exports, "createList", settingsSections);
+            case 14500: SettingsList = exports.SettingsList; return exports;
+            case 10987: return features.copyBios ? hookComponent(exports, copyBio) : exports;
+            case 5043:
+                if (!features.dashless && !features.hiddenChannels) return exports;
+                exports = hookExport(exports, "computeChannelName", channelLabel);
+                return hookExport(exports, "default", useChannelLabel);
+            case 5796: return features.dashless ? hookExport(exports, "getChannel", mentionChannelInfo) : exports;
+            case 7166:
+                if (!features.dashless) return exports;
+                exports = hookExport(exports, "createParserState", parserStateChannels);
+                if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
+                return exports;
+            case 12767: return features.favouriteAnything ? hookComponent(exports, favouriteButton) : exports;
+            case 10090: return features.favouriteAnything ? hookExport(exports, "addFavoriteGIF", favouriteAdd) : exports;
+            case 10093: return features.favouriteAnything ? hookExport(exports, "useFavoriteGIFsMobile", favouriteList) : exports;
+            case 2051: channelStore = exports.default; return exports;
+            case 11604: return features.noTyping ? replaceValue(exports, "default", hookExport(hookExport(exports.default, "startTyping", typing), "stopTyping", typing)) : exports;
+            case 1126: if (features.quickDelete) locale = exports; return exports;
+            case 5708: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
+            case 5112: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
+            case 1377:
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
+                    userStore = exports.default;
+                if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
+                return exports;
+            case 5110:
+                if (features.jumpToTop || features.messageHighlight || features.noDelete) msgStore = exports.default;
+                if (features.noDelete) {
+                    exports = replaceValue(exports, "default", hookExport(hookExport(msgStore, "getMessage", retainedMessage), "getMessages", retainedMessages));
+                    restoreDeleted();
+                }
+                return exports;
+            case 7187: if (features.quests) questAttach(exports.default); return exports;
+            case 584:
+                if (features.userNotif && exports && exports.default) userNotifInit(exports.default);
+                if (features.translate && exports && exports.default) translateInit(exports.default);
+                if (features.validUser && exports && exports.default) validInit(exports.default);
+                if (features.quests) questsInit(exports.default);
+                if (features.messageHighlight && exports && exports.default && !dispatcher)
+                    dispatcher = exports.default.dispatch.bind(exports.default);
+                if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
+                    dispatcher = exports.default.dispatch.bind(exports.default);
+                    return replaceValue(exports, "default", hookExport(exports.default, "dispatch", dispatchEvent));
+                }
+                return exports;
+            case 1085: case 1096:
+                if (features.hiddenChannels && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
+                return exports;
+            case 1112:
+                if (!features.hiddenChannels) return exports;
+                exports = hookExport(exports, "transitionTo", hiddenNavigation);
+                exports = hookExport(exports, "replaceWith", hiddenNavigation);
+                return hookExport(exports, "transitionToGuild", hiddenGuildNavigation);
+            case 4509: {
+                if (!features.hiddenChannels) return exports;
+                // Lioncat6 finds permissions via findByProps("getChannelPermissions","can");
+                // In 349.9 PermissionStore (4509) is the only module exporting both.
+                // Candidate may be default export or the exports object itself.
+                const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
+                    exports && typeof exports.can === "function" ? exports : null;
+                if (candidate) permissions = candidate;
+                // Globally reveal VIEW_CHANNEL so Discord builds
+                // real channel records (names) instead of obfuscated "hidden" stubs.
+                // Message/voice access stays blocked via hiddenFetch/hiddenNavigation guards.
+                // Use hookExport so frozen/sealed singletons are still patched via clone.
+                try {
+                    if (candidate && !permissionsCanOrig) {
+                        permissionsCanOrig = candidate.can.bind(candidate);
+                        permissions = hookExport(hookExport(candidate, "can", hiddenCan), "canBasicChannel", hiddenCan);
+                        return candidate === exports ? permissions : replaceValue(exports, "default", permissions);
+                    }
+                } catch (_) {}
+                return exports;
             }
-            if (features.freeNitro) {
-                patchCapability("canUseEmojisEverywhere", "emojis");
-                patchCapability("canUseAnimatedEmojis", "emojis");
-                // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
-                premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+            case 4507: {
+                if (!features.hiddenChannels) return exports;
+                const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
+                guildChannels = store;
+                return replaceValue(exports, "default", store);
             }
-            if (features.appIcons) {
-                patchCapability("canUsePremiumAppIcons", "appIcons");
-                if (typeof exports.canUsePremiumAppIcons === "function" && exports.default)
-                    exports = hookExport(exports, "canUsePremiumAppIcons", premiumOverride("canUsePremiumAppIcons", "appIcons"));
+            case 2103: return features.hiddenChannels && exports && exports.default ? replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel)) : exports;
+            case 9064: if (features.jumpToTop) chatHeight = exports; return exports;
+            case 11897: if (features.jumpToTop) jumpPill = exports.default; return exports;
+            // 349.9's arrow is a registered image asset: Metro exports the asset id itself, not a default.
+            case 11898: if (features.jumpToTop) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports; return exports;
+            case 11896: return features.jumpToTop ? hookComponent(exports, jumpButton) : exports;
+            case 7627: return features.gestures ? hookExport(exports, "handleAddDefaultDoubleTapReaction", doubleTapMessage) : exports;
+            // Discord's "double-tap to react" tips, reminders and banners would point at a gesture that now replies.
+            case 11363: return features.gestures ? hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures) : exports;
+            case 9878: return features.gestures ? hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args)) : exports;
+            case 11918: return features.gestures ? hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures) : exports;
+            case 11159: return features.gestures ? hookTapHandlers(exports) : exports;
+            case 6965: {
+                let actions = exports.default;
+                if (!actions) return exports;
+                if (features.noDelete) actions = hookExport(actions, "deleteMessage", deleteMessage);
+                // Split Large Messages wraps FreeNitro's hook (added below), so every part still gets its emoji links.
+                const splitLater = features.splitMessages;
+                if (features.hiddenChannels) actions = hookExport(actions, "fetchMessages", hiddenFetch);
+                if (features.freeNitro) {
+                    actions = hookExport(actions, "sendMessage", sendMessage);
+                    actions = hookExport(actions, "_sendMessage", sendMessage);
+                    actions = hookExport(actions, "sendStickers", sendStickers);
+                }
+                if (splitLater) actions = hookExport(actions, "sendMessage", splitSend);
+                msgActions = actions;
+                return replaceValue(exports, "default", actions);
             }
-            if (exports.default) exports = replaceValue(exports, "default", capabilities);
-            else exports = capabilities;
+            case 13797:
+                if (!features.freeNitro && !features.appIcons) return exports;
+                emojiCatalog = exports;
+                return hookExport(exports, "canUserUse", catalogEligibility);
+            case 5638: if (features.freeNitro) emojiStore = exports.default; return exports;
+            case 5687: if (features.freeNitro) stickerStore = exports.default; return exports;
+            case 4528: {
+                if (!features.freeNitro && !features.appIcons) return exports;
+                // The pinned build exports the capabilities on a default singleton;
+                // named aliases are not used by its picker. Hook the inspected object.
+                let capabilities = exports.default || exports;
+                function patchCapability(key, setting) {
+                    premiumOriginal[key] = typeof capabilities[key] === "function" ? capabilities[key].bind(capabilities) : undefined;
+                    capabilities = hookExport(capabilities, key, premiumOverride(key, setting));
+                }
+                if (features.freeNitro) {
+                    patchCapability("canUseEmojisEverywhere", "emojis");
+                    patchCapability("canUseAnimatedEmojis", "emojis");
+                    // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
+                    premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+                }
+                if (features.appIcons) {
+                    patchCapability("canUsePremiumAppIcons", "appIcons");
+                    if (typeof exports.canUsePremiumAppIcons === "function" && exports.default)
+                        exports = hookExport(exports, "canUsePremiumAppIcons", premiumOverride("canUsePremiumAppIcons", "appIcons"));
+                }
+                return exports.default ? replaceValue(exports, "default", capabilities) : capabilities;
+            }
+            case 6840:
+                if (!features.freeNitro) return exports;
+                stickerRules = exports;
+                exports = hookExport(exports, "getStickerSendability", sendability);
+                exports = hookExport(exports, "isSendableSticker", sendableSticker);
+                stickerRules = exports;
+                return exports;
+            default:
+                return exports;
         }
-        if (features.freeNitro && id === 6840) {
-            stickerRules = exports;
-            exports = hookExport(exports, "getStickerSendability", sendability);
-            exports = hookExport(exports, "isSendableSticker", sendableSticker);
-            stickerRules = exports;
-        }
-        return exports;
     }
 
     function instrument(exports, depth) {
@@ -8654,6 +8671,7 @@
         } });
         return changes.size ? proxy : exports;
     }
+    const INSTRUMENTED_MODULES = new Set([17, 19, 414, 1162, 1282, 7268, 7243]);
     function activateModule(id, module) {
         try {
             if (id === 1162) {
@@ -8663,7 +8681,7 @@
                     initFiles(nativeFiles);
             }
             module.exports = activatePlugins(id, module.exports);
-            if ([17, 19, 414, 1162, 1282, 7268, 7243].includes(id)) module.exports = instrument(module.exports, 0);
+            if (INSTRUMENTED_MODULES.has(id)) module.exports = instrument(module.exports, 0);
         } catch (error) {
             status.audioError = "Hook unavailable: " + String(error);
             if (global.console && typeof global.console.warn === "function")
@@ -8676,15 +8694,17 @@
             // Runs for all ~17.7k modules at startup: no arguments copy for the ones Venus leaves alone.
             if ((id !== 120 && !targetModules.has(id)) || typeof factory !== "function")
                 return arguments.length === 3 ? define.call(this, factory, id, dependencies) : define.apply(this, arguments);
-            const args = Array.from(arguments);
-            args[0] = function () {
-                const factoryArgs = Array.from(arguments);
+            const wrappedFactory = function () {
+                let result;
                 if (features.hiddenChannels && id === 7039) {
+                    const factoryArgs = Array.from(arguments);
                     factoryArgs[1] = listImport(factoryArgs[1]);
                     factoryArgs[2] = listImport(factoryArgs[2]);
                     factoryArgs[3] = listImport(factoryArgs[3]);
+                    result = factory.apply(this, factoryArgs);
+                } else {
+                    result = factory.apply(this, arguments);
                 }
-                const result = factory.apply(this, factoryArgs);
                 const module = arguments[4]; // Verified Metro factory ABI in Discord 349.9.
                 if (module && module.exports) {
                     // Before anything reads them: DraftStore keeps its length cap from the moment it loads.
@@ -8710,6 +8730,9 @@
                 }
                 return result;
             };
+            if (arguments.length === 3) return define.call(this, wrappedFactory, id, dependencies);
+            const args = Array.from(arguments);
+            args[0] = wrappedFactory;
             return define.apply(this, args);
         };
     }
