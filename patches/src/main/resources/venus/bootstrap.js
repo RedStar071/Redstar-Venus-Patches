@@ -1937,15 +1937,20 @@
         if (cached && cached.orig === result && cached.revision === deletedRevision) return cached.value;
         const array = Array.isArray(result._array) ? result._array : null;
         const first = array && array.length ? String(array[0].id) : null, last = array && array.length ? String(array[array.length - 1].id) : null;
+        const isDigits = s => {
+            if (!s) return false;
+            for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); if (c < 48 || c > 57) return false; }
+            return true;
+        };
         const older = (a, b) => a.length - b.length || (a === b ? 0 : a < b ? -1 : 1);
         // Whether this window has numeric bounds is the same for every kept message: check it once.
-        const bounded = first !== null && /^\d+$/.test(first);
+        const bounded = first !== null && isDigits(first);
         // Never paste a retained message into a window that doesn't contain its position;
         // that produced out-of-place rows above unloaded history or below an older jump.
         const records = [];
         bucket.forEach(entry => {
             const id = String(entry.id);
-            if (bounded && /^\d+$/.test(id)) {
+            if (bounded && isDigits(id)) {
                 if (older(id, first) < 0 && result.hasMoreBefore === true) return;
                 if (older(id, last) > 0 && result.hasMoreAfter === true) return;
             }
@@ -1962,7 +1967,7 @@
             const ids = new Map();
             const idOf = message => {
                 let id = ids.get(message);
-                if (id === undefined) { const text = String(message.id); id = /^\d+$/.test(text) ? text : null; ids.set(message, id); }
+                if (id === undefined) { const text = String(message.id); id = isDigits(text) ? text : null; ids.set(message, id); }
                 return id;
             };
             copy._array.sort((a,b) => {
@@ -2222,9 +2227,13 @@
             // While the switch is off this only backs up the names gateway events already record, and it ran over
             // every channel on every channel-list render. Skip it while the server's records are the same objects.
             const last = hiddenScans.get(guild);
-            if (!enabled("hiddenChannels") && last && last.full === full && last.basic === basic && last.owner === owner) return;
+            if (last && last.full === full && last.basic === basic && last.owner === owner) {
+                if (last.source) source = last.source;
+                if (!enabled("hiddenChannels")) return;
+            }
+            if (!source) source = basic ? Object.assign({},basic,full) : full;
             if (hiddenScans.size >= 64 && !last) hiddenScans.delete(hiddenScans.keys().next().value);
-            hiddenScans.set(guild, {full, basic, owner});
+            hiddenScans.set(guild, {full, basic, owner, source});
             const keep = channel => rememberChannelName(channel, owner);
             if (basic) Object.values(basic).forEach(keep);
             Object.values(full).forEach(keep);
@@ -2235,7 +2244,6 @@
             basic = typeof channelStore.getMutableBasicGuildChannelsForGuild === "function" && channelStore.getMutableBasicGuildChannelsForGuild(guild);
             // Native lazy caching keeps basic metadata for channels with no full record.
             // Merge by ID, with full records retaining their richer native prototype.
-            source = basic ? Object.assign({},basic,full) : full;
             remember();
         }
         const readable = guild && channelStore && typeof channelStore.getMutableGuildChannelsForGuild === "function";
@@ -2243,12 +2251,23 @@
         if (!enabled("hiddenChannels") || !result || !readable || !permissions) return result;
         // The read above threw part-way: retry once, letting a real error surface as before.
         if (!source) { read(); if (!source) return result; }
-        const extra = Object.values(source).filter(channel => hiddenMetadata(channel));
+        const extra = [];
+        for (const k in source) {
+            if (Object.prototype.hasOwnProperty.call(source, k) && hiddenMetadata(source[k])) extra.push(source[k]);
+        }
         // Recheck permissions and metadata on each directory lookup; retain stable
         // array identity for unchanged inputs and bound the cache to 16 guilds.
-        const names = new Map(extra.map(c => [c, hiddenName(c)]));
-        const signature = extra.map(c => [c.id,c.position,c.type,c.parent_id,names.get(c)].join(":")).join("|");
-        const references = extra.concat(extra.map(c => source[c.parent_id]).filter(Boolean));
+        const names = new Map();
+        const sigParts = new Array(extra.length);
+        const references = extra.slice();
+        for (let i = 0; i < extra.length; i++) {
+            const c = extra[i], name = hiddenName(c);
+            names.set(c, name);
+            sigParts[i] = c.id + ":" + c.position + ":" + c.type + ":" + c.parent_id + ":" + name;
+            const parent = source[c.parent_id];
+            if (parent) references.push(parent);
+        }
+        const signature = sigParts.join("|");
         const cached = hiddenViews.get(guild);
         if (cached && cached.orig === result && cached.source === full && cached.basic === basic && cached.signature === signature &&
             references.length === cached.references.length && references.every((c,i) => c === cached.references[i])) return cached.value;
@@ -2256,30 +2275,52 @@
         function append(key, channels) {
             if (!Array.isArray(next[key])) return;
             const original = next[key];
-            const existing = original.map(entry => {
-                if (!entry.channel) return entry;
+            let existing = original, renamed = false;
+            for (let i = 0; i < original.length; i++) {
+                const entry = original[i];
+                if (!entry.channel) continue;
                 const channel = displayChannel(entry.channel);
-                return channel === entry.channel ? entry : Object.assign({},entry,{channel});
-            });
-            const renamed = existing.some((entry,index) => entry !== original[index]);
-            const ids = new Set(existing.map(entry => entry.channel && entry.channel.id));
+                if (channel !== entry.channel) {
+                    if (!renamed) { existing = original.slice(); renamed = true; }
+                    existing[i] = Object.assign({}, entry, {channel});
+                }
+            }
+            if (!channels.length && !renamed) return;
+            const ids = new Set();
+            for (let i = 0; i < existing.length; i++) {
+                const ch = existing[i] && existing[i].channel;
+                if (ch) ids.add(ch.id);
+            }
             const added = [];
-            channels.forEach(channel => {
-                if (ids.has(channel.id)) return;
+            for (let i = 0; i < channels.length; i++) {
+                const channel = channels[i];
+                if (ids.has(channel.id)) continue;
                 ids.add(channel.id);
                 const name = names.get(channel);
                 // Hidden names were resolved for the signature above; reuse them instead of asking again.
                 const shown = name === undefined ? displayChannel(channel) : renamedChannel(channel, name);
                 added.push({channel:shown,comparator:channel.position || 0});
-            });
+            }
             if (!added.length && !renamed) return;
             if (next === result) next = Object.assign({}, result);
             next[key] = existing.concat(added).sort((a,b) => a.comparator - b.comparator);
         }
-        for (const type of [0,2,4,5,10,11,12,13,15,16]) append(type, extra.filter(c => c.type === type));
-        append("SELECTABLE", extra.filter(c => ![2,4,13].includes(c.type)));
-        append("VOCAL", extra.filter(c => [2,13].includes(c.type)));
-        append(4, extra.map(c => source[c.parent_id]).filter(c => c && c.type === 4));
+        const byType = new Map(), selectable = [], vocal = [], parents = [];
+        for (let i = 0; i < extra.length; i++) {
+            const c = extra[i], t = c.type;
+            let bucket = byType.get(t);
+            if (!bucket) byType.set(t, bucket = []);
+            bucket.push(c);
+            if (t !== 2 && t !== 4 && t !== 13) selectable.push(c);
+            if (t === 2 || t === 13) vocal.push(c);
+            const p = source[c.parent_id];
+            if (p && p.type === 4) parents.push(p);
+        }
+        const empty = [];
+        for (const type of [0,2,4,5,10,11,12,13,15,16]) append(type, byType.get(type) || empty);
+        append("SELECTABLE", selectable);
+        append("VOCAL", vocal);
+        append(4, parents);
         if (hiddenViews.size >= 16 && !hiddenViews.has(guild)) hiddenViews.delete(hiddenViews.keys().next().value);
         hiddenViews.set(guild, {orig:result,source:full,basic,signature,references,value:next});
         return next;
@@ -5890,21 +5931,36 @@
     }
     function userNotifEvent(event) {
         if (!event || !enabled("userNotif")) return;
-        if (event.type === "PRESENCE_UPDATES" && Array.isArray(event.updates)) {
-            for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
-        } else if (event.type === "PRESENCE_UPDATE") userNotifPresence(event);
-        else if (event.type === "MESSAGE_CREATE") userNotifMessage(event);
-        else if (event.type === "TYPING_START") userNotifTyping(event);
-        else if (event.type === "CONNECTION_OPEN") { userNotif.statuses.clear(); userNotifSeedStatuses(false); userNotifSubscribeGuilds(); }
-        else if (event.type === "CONNECTION_OPEN_SUPPLEMENTAL" || event.type === "PRESENCES_REPLACE" || event.type === "OVERLAY_INITIALIZE") {
+        switch (event.type) {
+        case "PRESENCE_UPDATES":
+            if (Array.isArray(event.updates)) for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
+            return;
+        case "PRESENCE_UPDATE": userNotifPresence(event); return;
+        case "MESSAGE_CREATE": userNotifMessage(event); return;
+        case "TYPING_START": userNotifTyping(event); return;
+        case "CONNECTION_OPEN": userNotif.statuses.clear(); userNotifSeedStatuses(false); userNotifSubscribeGuilds(); return;
+        case "CONNECTION_OPEN_SUPPLEMENTAL":
+        case "PRESENCES_REPLACE":
+        case "OVERLAY_INITIALIZE":
             userNotifSeedStatuses(true);
             userNotifSubscribeGuilds();
-        } else if (event.type === "RELATIONSHIP_ADD" || event.type === "RELATIONSHIP_UPDATE") userNotifSeedStatuses(true);
-        else if (event.type === "CONNECTION_RESUMED" || event.type === "IDLE") userNotifSubscribeGuilds();
-        else if (event.type === "GUILD_CREATE") {
+            return;
+        case "RELATIONSHIP_ADD":
+        case "RELATIONSHIP_UPDATE":
+            userNotifSeedStatuses(true);
+            return;
+        case "CONNECTION_RESUMED":
+        case "IDLE":
+            userNotifSubscribeGuilds();
+            return;
+        case "GUILD_CREATE":
             userNotifSeedStatuses(true);
             if (event.guild && event.guild.id) userNotifSubscribeGuild(event.guild.id);
-        } else if (event.type === "LOGOUT") { userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif"); }
+            return;
+        case "LOGOUT":
+            userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif");
+            return;
+        }
     }
     function userNotifSync() {
         const d = userNotif.dispatcher;
