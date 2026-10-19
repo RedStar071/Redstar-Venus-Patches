@@ -8912,6 +8912,8 @@
         }
     }
 
+    const INSTRUMENT_HOOK_KEYS = ["getAttachmentPayload", "post"];
+    const INSTRUMENT_SUB_KEYS = ["default", "HTTP"];
     function instrument(exports, depth) {
         if (!exports || (typeof exports !== "object" && typeof exports !== "function")) return exports;
         if (owns(exports, "createElement") && owns(exports, "useState")) React = exports;
@@ -8919,11 +8921,25 @@
         if (typeof data(exports, "getSize") === "function" && typeof data(exports, "readFile") === "function" &&
             typeof data(exports, "writeFile") === "function") initFiles(exports);
         if (features.voice && owns(exports, "CloudUpload")) instrumentCloudUpload(exports.CloudUpload);
-        const changes = new Map();
-        let proxy = exports;
         if (features.picker) {
             const patched = pickerComponent(exports);
             if (patched !== exports) return patched;
+        }
+        let changes = null;
+        let proxy = exports;
+        // Preserve module identity and cached aliases wherever descriptors allow it,
+        // only allocating a Map for non-configurable/accessor exports that require a Proxy.
+        function applyOrDefer(key, patched) {
+            const descriptor = Object.getOwnPropertyDescriptor(exports, key);
+            if (descriptor && descriptor.configurable) {
+                Object.defineProperty(exports, key, { value: patched, writable: true,
+                    configurable: true, enumerable: descriptor.enumerable });
+            } else if (descriptor && "value" in descriptor && descriptor.writable) {
+                exports[key] = patched;
+            } else if (!descriptor || descriptor.configurable || !("value" in descriptor) || descriptor.writable) {
+                if (!changes) changes = new Map();
+                changes.set(key, patched);
+            }
         }
         // Invocation-scoped captures also work when Hermes eval disables block scoping.
         // The binding check fails fast at hook time (caught as "Hook unavailable",
@@ -8934,51 +8950,37 @@
             return function () { return operation(orig, this === proxy ? exports : this, arguments); };
         }
         // Only read explicitly identified export keys, never enumerate or invoke unrelated getters.
-        for (const key of ["getAttachmentPayload", "post"]) {
-            if (!owns(exports, key)) continue;
-            if (key === "getAttachmentPayload" && !features.voice) continue;
-            if (key === "post" && (!features.voice || !owns(exports, "get") || !owns(exports, "put"))) continue;
-            let orig;
-            try { orig = exports[key]; } catch (_) { continue; }
-            if (typeof orig !== "function") continue;
-            const operation = key === "post" ? postRequest : attachmentPayload;
-            const patched = replacementFor(operation, orig);
-            changes.set(key, patched);
-            if (key === "post") status.request = true;
-            if (key === "getAttachmentPayload") status.attachment = true;
-        }
-        if (depth < 2) for (const key of ["default", "HTTP"]) {
-            // Data exports only: default getters can be cyclic during module initialization.
-            const candidate = data(exports, key);
-            if (!candidate || candidate === exports) continue;
-            const patched = instrument(candidate, depth + 1);
-            if (patched !== candidate) changes.set(key, patched);
-        }
-        if (!changes.size) return exports;
-        // Preserve module identity and cached aliases wherever descriptors allow it.
-        for (const [key, patched] of Array.from(changes)) {
-            const descriptor = Object.getOwnPropertyDescriptor(exports, key);
-            if (descriptor && descriptor.configurable) {
-                Object.defineProperty(exports, key, { value: patched, writable: true,
-                    configurable: true, enumerable: descriptor.enumerable });
-                changes.delete(key);
-            } else if (descriptor && "value" in descriptor && descriptor.writable) {
-                exports[key] = patched;
-                changes.delete(key);
+        if (features.voice) {
+            for (let i = 0; i < INSTRUMENT_HOOK_KEYS.length; i++) {
+                const key = INSTRUMENT_HOOK_KEYS[i];
+                if (!owns(exports, key)) continue;
+                if (key === "post" && (!owns(exports, "get") || !owns(exports, "put"))) continue;
+                let orig;
+                try { orig = exports[key]; } catch (_) { continue; }
+                if (typeof orig !== "function") continue;
+                const operation = key === "post" ? postRequest : attachmentPayload;
+                const patched = replacementFor(operation, orig);
+                applyOrDefer(key, patched);
+                if (key === "post") status.request = true;
+                else status.attachment = true;
             }
         }
-        if (!changes.size) return exports;
-        // Only immutable accessor exports need a proxy; never inspect them during RN initialization.
-        // Do not violate Proxy invariants on non-writable, non-configurable data properties.
-        for (const key of Array.from(changes.keys())) {
-            const descriptor = Object.getOwnPropertyDescriptor(exports, key);
-            if (descriptor && !descriptor.configurable && "value" in descriptor && !descriptor.writable)
-                changes.delete(key);
+        if (depth < 2) {
+            for (let i = 0; i < INSTRUMENT_SUB_KEYS.length; i++) {
+                // Data exports only: default getters can be cyclic during module initialization.
+                const key = INSTRUMENT_SUB_KEYS[i];
+                const candidate = data(exports, key);
+                if (!candidate || candidate === exports) continue;
+                const patched = instrument(candidate, depth + 1);
+                if (patched !== candidate) applyOrDefer(key, patched);
+            }
         }
+        if (!changes || !changes.size) return exports;
+        // Only immutable accessor exports need a proxy; never inspect them during RN initialization.
         proxy = new Proxy(exports, { get(target, key, self) {
             return changes.has(key) ? changes.get(key) : Reflect.get(target, key, self);
         } });
-        return changes.size ? proxy : exports;
+        return proxy;
     }
     const INSTRUMENTED_MODULES = new Set([17, 19, 414, 1162, 1282, 7268, 7243]);
     function activateModule(id, module) {
