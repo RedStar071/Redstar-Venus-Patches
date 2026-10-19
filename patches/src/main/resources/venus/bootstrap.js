@@ -2019,6 +2019,9 @@
         for (const [key, entry] of edits) if (ids.has(entry.channelId)) { edits.delete(key); dropped = true; }
         if (dropped) persistDeleted();
     }
+    // dispatch(event) for an event no branch below reads (most of the traffic): straight through, no arguments object.
+    // Everything else takes the full path with the real arguments.
+    const dispatchEventFull = (orig, self, event) => dispatchEvent(orig, self, [event]);
     function dispatchEvent(orig, self, args) {
         const event = args[0];
         if (!event || !DISPATCH_EVENTS.has(event.type)) return orig.apply(self, args);
@@ -2054,6 +2057,8 @@
         }
         return orig.apply(self, args);
     }
+    dispatchEvent.call1 = (orig, self, event) => !event || !DISPATCH_EVENTS.has(event.type) ? orig.call(self, event) :
+        dispatchEventFull(orig, self, event);
     // Only a real edit counts: Discord's own update carries edited_timestamp and new text. Link previews,
     // reactions, pins and the update NoDelete sends for a kept message have no edit time or keep the text.
     function rememberEdit(update) {

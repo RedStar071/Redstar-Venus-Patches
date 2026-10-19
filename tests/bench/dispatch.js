@@ -57,3 +57,9 @@ for (var i = 0; i < 1000; i++) events.push({type: types[i % types.length], messa
 var store = {dispatch: function (e) { return e; }}; var orig = store.dispatch;
 bench("dispatchEvent (before)", function () { for (var i = 0; i < events.length; i++) dispatchBefore(orig, store, [events[i]]); });
 bench("early return for ignored types", function () { for (var i = 0; i < events.length; i++) dispatchAfter(orig, store, [events[i]]); });
+// call1 path for ignored events: no arguments object, one Set check, then Discord's dispatch.
+function call1(orig, self, event) { return !event || !DISPATCH_SEEN.has(event.type) ? orig.call(self, event) : dispatchBefore(orig, self, [event]); }
+var hookedArgs = function () { return dispatchAfter(orig, this, arguments); };
+var hooked1 = function (e) { return arguments.length === 1 ? call1(orig, this, e) : dispatchAfter(orig, this, arguments); };
+bench("hooked dispatch, arguments path", function () { for (var i = 0; i < events.length; i++) hookedArgs.call(store, events[i]); });
+bench("hooked dispatch, call1 path", function () { for (var i = 0; i < events.length; i++) hooked1.call(store, events[i]); });
