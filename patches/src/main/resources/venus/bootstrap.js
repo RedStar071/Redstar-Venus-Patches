@@ -4575,8 +4575,10 @@
             }
         });
     }
-    function messageRow(orig, self, args) {
-        const result = orig.apply(self,args), row = args[0];
+    function messageRow(orig, self, args) { return messageRowResult(orig.apply(self, args), args[0]); }
+    // generate(row) is called once per chat row as you scroll: skip the arguments object (2.3x, tests/bench/row_hook.js).
+    messageRow.call1 = (orig, self, row) => messageRowResult(orig.call(self, row), row);
+    function messageRowResult(result, row) {
         if (!result || !row || row.rowType !== 1 || !result.message) return result;
         const pastelOn = enabled("pastelize"), translateOn = enabled("translate"), noDeleteOn = enabled("noDelete"), highlightOn = enabled("messageHighlight");
         let message = result.message;
@@ -5467,9 +5469,12 @@
         if (typeof orig !== "function") return exports;
         // Hot two-argument hooks (permission checks, message lookups) can declare operation.call2(orig, self, a, b):
         // passing `arguments` on to apply is ~3x the cost of the call itself on Hermes (tests/bench/hook_call.js).
-        const call2 = operation.call2;
+        // One-argument hooks (RowGenerator.generate) can declare operation.call1(orig, self, a) the same way.
+        const call2 = operation.call2, call1 = operation.call1;
         const patched = typeof call2 === "function" ?
             function (a, b) { return arguments.length === 2 ? call2(orig, this, a, b) : operation(orig, this, arguments); } :
+            typeof call1 === "function" ?
+            function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
             function () { return operation(orig, this, arguments); };
         return replaceValue(exports, key, patched);
     }
