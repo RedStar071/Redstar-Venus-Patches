@@ -60,7 +60,21 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
-    const DEFAULT_SETTINGS = Object.freeze(Object.assign({}, settings));
+    let DEFAULT_SETTINGS = null;
+    function defaultSettings() {
+        return DEFAULT_SETTINGS || (DEFAULT_SETTINGS = Object.freeze({
+            picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
+            noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true,
+            jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
+            quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true, systemFont: false,
+            hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
+            validUser: false, youBarSettings: false, splitMessages: false,
+            translate: false, translateTarget: "discord", translateMode: "auto", translateNote: true, translateOriginal: false,
+            userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
+            accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", language: "auto"
+        }));
+    }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
     const backup = {last:0, busy:"", restoring:false};
     // First-run setup on the Features list: done once any feature has been on, or after Not now. justOn is this session's
@@ -1204,14 +1218,16 @@
     }
     // What a backup holds right now, for the page's summary: features on, options changed, people watched, themes.
     function backupContents() {
+        const defaults = defaultSettings();
         const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
-        const changed = Object.keys(DEFAULT_SETTINGS).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
-            settings[key] !== DEFAULT_SETTINGS[key]).length;
+        const changed = Object.keys(defaults).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
+            settings[key] !== defaults[key]).length;
         return {on:keys.filter(key => settings[key]).length, total:keys.length, changed, people:features.userNotif ? userNotif.ids.size : 0,
             themes:features.customThemes ? customThemes.list.length : 0, language:settings.language !== "auto"};
     }
     function backupIsDefault() {
-        return Object.keys(DEFAULT_SETTINGS).every(key => !features[featureFor(key)] && key !== "language" || settings[key] === DEFAULT_SETTINGS[key]);
+        const defaults = defaultSettings();
+        return Object.keys(defaults).every(key => !features[featureFor(key)] && key !== "language" || settings[key] === defaults[key]);
     }
     function backupText() {
         const out = {app:BACKUP_APP, format:BACKUP_FORMAT, version:revision, created:new Date().toISOString(), settings:Object.assign({}, settings)};
@@ -1228,8 +1244,8 @@
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error(tr("That isn't a Venus backup."));
         const wrapped = data.app === BACKUP_APP && data.settings && typeof data.settings === "object" && !Array.isArray(data.settings);
         if (wrapped && typeof data.format === "number" && data.format > BACKUP_FORMAT) throw new Error(tr("This backup is from a newer Venus. Update Venus to restore it."));
-        const raw = wrapped ? data.settings : data, values = {};
-        Object.keys(DEFAULT_SETTINGS).forEach(key => { const value = acceptedSetting(key, raw[key]); if (value !== undefined) values[key] = value; });
+        const raw = wrapped ? data.settings : data, values = {}, defaults = defaultSettings();
+        Object.keys(defaults).forEach(key => { const value = acceptedSetting(key, raw[key]); if (value !== undefined) values[key] = value; });
         if (!Object.keys(values).length) throw new Error(tr("That isn't a Venus backup."));
         const people = Array.isArray(wrapped ? data.people : data.userNotifIds) ? (wrapped ? data.people : data.userNotifIds)
             .filter(id => typeof id === "string" && /^\d{17,20}$/.test(id)).slice(0, USER_NOTIF_MAX_IDS) : null;
@@ -1251,13 +1267,13 @@
     // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
     // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
     function backupApply(parsed, reset) {
-        const fontWas = fontInUse, emojiWas = emojiInUse;
+        const fontWas = fontInUse, emojiWas = emojiInUse, defaults = defaultSettings();
         backup.restoring = true;
         try {
             animateLayout();
-            Object.keys(DEFAULT_SETTINGS).forEach(key => {
+            Object.keys(defaults).forEach(key => {
                 if (key !== "language" && !features[featureFor(key)]) return;
-                setSetting(key, owns(parsed.values, key) ? parsed.values[key] : DEFAULT_SETTINGS[key]);
+                setSetting(key, owns(parsed.values, key) ? parsed.values[key] : defaults[key]);
             });
             if (features.userNotif && parsed.people) {
                 userNotif.ids.clear(); parsed.people.forEach(id => userNotif.ids.add(id));
@@ -1359,7 +1375,7 @@
     }
     function backupReset() {
         confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes and people stay.", "Reset",
-            () => backupApply({values:Object.assign({}, DEFAULT_SETTINGS, {language:settings.language}), people:null, themes:null}, true));
+            () => backupApply({values:Object.assign({}, defaultSettings(), {language:settings.language}), people:null, themes:null}, true));
     }
     const BACKUP_DARK = {chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"}};
     // Backup and restore: what a backup holds right now, two ways to save it, two ways to bring one back.
