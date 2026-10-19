@@ -1407,24 +1407,30 @@
         return orig.apply(self, next);
     }
 
-    function cloneTree(node, change, depth) {
-        if (!node || typeof node !== "object" || depth > 24) return node;
+    function cloneTree(node, change, depth, isDone) {
+        if (!node || typeof node !== "object" || depth > 24 || isDone && isDone()) return node;
         if (Array.isArray(node)) {
             let children = node;
             for (let i = 0; i < node.length; i++) {
-                const child = cloneTree(node[i], change, depth + 1);
-                if (child !== node[i]) {
+                if (isDone && isDone()) break;
+                const item = node[i];
+                if (!item || typeof item !== "object") continue;
+                const child = cloneTree(item, change, depth + 1, isDone);
+                if (child !== item) {
                     if (children === node) children = node.slice();
                     children[i] = child;
                 }
             }
             return children;
         }
-        if (!node.props) return node;
-        const children = cloneTree(node.props.children, change, depth + 1);
-        let props = children !== node.props.children ? Object.assign({}, node.props, { children }) : node.props;
+        const nodeProps = node.props;
+        if (!nodeProps) return node;
+        const rawChildren = nodeProps.children;
+        const children = rawChildren && typeof rawChildren === "object" ? cloneTree(rawChildren, change, depth + 1, isDone) : rawChildren;
+        let props = children !== rawChildren ? Object.assign({}, nodeProps, { children }) : nodeProps;
+        if (isDone && isDone()) return props === nodeProps ? node : React.cloneElement(node, props);
         props = change(node, props);
-        return props === node.props ? node : React.cloneElement(node, props);
+        return props === nodeProps ? node : React.cloneElement(node, props);
     }
     function copyBio(orig, self, args) {
         const result = orig.apply(self, args);
@@ -4737,15 +4743,22 @@
     const PLATFORM_LABELS = {desktop:"Desktop",mobile:"Mobile",web:"Web",embedded:"Console",vr:"VR"};
     const PLATFORM_STATUS = {online:"Online",idle:"Idle",dnd:"Do Not Disturb"};
     // This user's clients as a stable key, so a badge only re-renders when its own presence changes.
-    function platformClients(userId) {
+    function platformClients(userId, myId) {
         let clients = presenceStore.getClientStatus(userId);
-        const current = userStore && userStore.getCurrentUser();
-        if (current && current.id === userId && sessionsStore && typeof sessionsStore.getSessions === "function") {
+        if (myId === undefined) {
+            const current = userStore && userStore.getCurrentUser();
+            myId = current && current.id;
+        }
+        if (myId && myId === userId && sessionsStore && typeof sessionsStore.getSessions === "function") {
             clients = {};
-            Object.values(sessionsStore.getSessions() || {}).forEach(session => {
-                const client = session.clientInfo && session.clientInfo.client;
-                if (client && client !== "unknown") clients[client] = session.status;
-            });
+            const sessions = sessionsStore.getSessions();
+            if (sessions) for (const k in sessions) {
+                if (Object.prototype.hasOwnProperty.call(sessions, k)) {
+                    const session = sessions[k];
+                    const client = session && session.clientInfo && session.clientInfo.client;
+                    if (client && client !== "unknown") clients[client] = session.status;
+                }
+            }
         }
         return clients || null;
     }
@@ -4755,14 +4768,17 @@
         for (const name in clients) key += name + ":" + clients[name] + ",";
         return key;
     }
-    function platformKey(userId) { return clientsKey(presenceStore && platformClients(userId)); }
+    function platformKey(userId, myId) { return clientsKey(presenceStore && platformClients(userId, myId)); }
     // One listener per store for every badge on screen, not two per badge. Each change works
     // out a person's clients once, however many badges show them, and wakes only those badges.
     const platformSubs = new Map(), platformStores = new Set();
     // PresenceStore changes for every presence update of anyone: the key is built without temporary arrays.
     function platformChanged() {
+        if (!platformSubs.size) return;
+        const current = userStore && userStore.getCurrentUser();
+        const myId = current && current.id || null;
         platformSubs.forEach((entry, userId) => {
-            const key = platformKey(userId);
+            const key = platformKey(userId, myId);
             if (key !== entry.key) { entry.key = key; entry.fns.forEach(fn => fn()); }
         });
     }
@@ -4856,7 +4872,7 @@
             if (!children.some(isIcon)) return p;
             added = true;
             return Object.assign({},p,{children:children.concat(el(RN.View,{key:"venus-platform-dm",style:{marginRight:4}},el(PlatformBadges,{userId})))});
-        },0);
+        },0,() => added);
         return added ? next : placePlatformTree(tree,args[0] || {},"piUserList");
     }
     function platformPlacement(orig,self,args,option) {
@@ -4887,7 +4903,7 @@
             if (!title || node.type === RN.Text) return p;
             added = true;
             return Object.assign({},p,{children:children.map(child => child !== title ? child : el(RN.View,{key:"venus-platform-title",style:{flexDirection:"row",alignItems:"center",gap:6,flexShrink:1}},child,el(PlatformBadges,{userId})))});
-        },0);
+        },0,() => added);
     }
     const platformRenderers = new WeakMap();
     function platformRow(row) {
@@ -7147,7 +7163,7 @@
                 }});
             const index = nodeProps.children.indexOf(template) + 1;
             return Object.assign({}, nodeProps, {children:nodeProps.children.slice(0, index).concat([row], nodeProps.children.slice(index))});
-        }, 0);
+        }, 0, () => added);
     }
     // Messages drawn lately, so switching on or changing an option can redraw them. Never while a redraw has
     // its zero-width space in, or that space would be put back for good.
