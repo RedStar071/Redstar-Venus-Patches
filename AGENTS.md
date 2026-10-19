@@ -482,6 +482,10 @@ faster on Hermes is not an optimization; revert it unless it's also simpler.
      (`tests/hermes-startup.js`, which must print `HBC98_REAL_RN_ENVIRONMENT_PASS`) and compares user CPU over
      interleaved cold starts. It needs `sh scripts/hbc/setup.sh Discord.apkm` once. This is the closest number to a
      phone launch; run it at least twice, because one run can land inside noise.
+   - **Finding startup work:** `node tests/bench/load_profile.cjs` splits the runtime's eval into compile time and the
+     cost of each top-level statement; `node tests/bench/load_calls.cjs` lists which functions actually run at startup
+     (as of 1.16.x: only the IIFE, `selectModules`, `decorateDefine`, `defineValue` and the `__d` wrapper; everything
+     else is compiled, never run, and costs ~18 us per function plus its size).
    - **A hot function** (a hook, a store wrapper, a sort, a render helper): write `tests/bench/<name>.js` that copies
      the old and new code verbatim and calls `bench("old …", fn)` then `bench("new …", fn)` with realistic inputs
      (a 3000-message channel, 50 accounts, 200 guilds…), and run `node tests/bench/hermes_bench.cjs
