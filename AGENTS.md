@@ -472,6 +472,15 @@ faster on Hermes is not an optimization; revert it unless it's also simpler.
      old copy from `git show origin/main:patches/src/main/resources/venus/bootstrap.js > work/bench/old.js`. It
      evals the compacted runtime (the same Terser step as `scripts/build.py`) and pushes 17.7k Metro defines through
      its `__d`, old and new interleaved.
+     For a change to the shipped form itself (`scripts/build.py`'s compaction), compare two compacted runtimes with
+     `node tests/bench/runtime_eval.cjs old.js patches/build/bootstrap.js` and then
+     `node tests/bench/hermes_bench.cjs work/bench/runtime_eval.js`.
+   - **Cold boot of the real Discord bundle** (required for every startup change, after the above):
+     `sh tests/bench/cold_boot.sh <old compacted bootstrap.js> [new]`. It injects each runtime into the user's 349.9
+     `index.android.bundle` with `HbcPrelude`, boots it through React Native's own initializer
+     (`tests/hermes-startup.js`, which must print `HBC98_REAL_RN_ENVIRONMENT_PASS`) and compares user CPU over
+     interleaved cold starts. It needs `sh scripts/hbc/setup.sh Discord.apkm` once. This is the closest number to a
+     phone launch; run it at least twice, because one run can land inside noise.
    - **A hot function** (a hook, a store wrapper, a sort, a render helper): write `tests/bench/<name>.js` that copies
      the old and new code verbatim and calls `bench("old …", fn)` then `bench("new …", fn)` with realistic inputs
      (a 3000-message channel, 50 accounts, 200 guilds…), and run `node tests/bench/hermes_bench.cjs
