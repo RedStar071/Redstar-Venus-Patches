@@ -1460,12 +1460,21 @@
         }
         return channelLabel(orig, self, args);
     }
-    function mentionChannelInfo(orig, self, args) {
-        const result = orig.apply(self, args);
+    const mentionChannelCache = new WeakMap();
+    function mentionChannelFormat(result) {
         if (!result || typeof result.name !== "string") return result;
         const formatted = dashlessFormat(result, result.name);
-        return formatted === result.name ? result : Object.assign({}, result, {name:formatted});
+        if (formatted === result.name) return result;
+        const cached = mentionChannelCache.get(result);
+        if (cached && cached.name === formatted) return cached.value;
+        const value = Object.assign({}, result, {name:formatted});
+        mentionChannelCache.set(result, {name:formatted, value});
+        return value;
     }
+    function mentionChannelInfo(orig, self, args) {
+        return mentionChannelFormat(orig.apply(self, args));
+    }
+    mentionChannelInfo.call1 = (orig, self, id) => mentionChannelFormat(orig.call(self, id));
     function parserStateChannels(orig, self, args) {
         const state = orig.apply(self, args);
         if (!enabled("dashless") || !state || !Array.isArray(state.channels) || !channelStore || typeof channelStore.getChannel !== "function") return state;
