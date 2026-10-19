@@ -6855,11 +6855,17 @@
         return value.replace("_", "-");
     }
     function translateTarget() {
-        const locale = localeCode(settings.translateTarget === "phone" ? "phone" : "discord");
+        const mode = settings.translateTarget === "phone" ? "phone" : "discord";
+        let raw = null;
+        try { raw = localeStore && (mode === "phone" ? localeStore.systemLocale || localeStore.locale : localeStore.locale); } catch (_) {}
+        if (mode === translate.targetMode && raw === translate.targetRaw && translate.targetCode) return translate.targetCode;
+        const locale = localeCode(mode);
         const parts = locale.split("-"), base = parts[0].toLowerCase();
-        if (base === "zh") return /^(TW|HK|MO|Hant)$/i.test(parts[1] || "") ? "zh-TW" : "zh-CN";
-        if (base === "nb" || base === "nn") return "no";
-        return base;
+        const out = base === "zh" ? (/^(TW|HK|MO|Hant)$/i.test(parts[1] || "") ? "zh-TW" : "zh-CN") : (base === "nb" || base === "nn") ? "no" : base;
+        translate.targetMode = mode;
+        translate.targetRaw = raw;
+        translate.targetCode = out;
+        return out;
     }
     // "iw" and "zh-CN" from Google, "he" and "zh-TW" from Discord: the same language either way.
     function languageBase(code) {
