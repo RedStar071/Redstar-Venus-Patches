@@ -7848,19 +7848,19 @@
     }
     function snapshotColorTables() {
         if (customThemes.rawTable && !customThemes.origRaw) {
-            const copy = {};
-            for (const k of Object.keys(customThemes.rawTable)) copy[k] = customThemes.rawTable[k];
-            customThemes.origRaw = copy;
+            customThemes.origRaw = Object.assign({}, customThemes.rawTable);
         }
         if (customThemes.semTable && !customThemes.origSem) {
-            const copy = {};
-            for (const k of Object.keys(customThemes.semTable)) {
-                const entry = customThemes.semTable[k];
+            const copy = {}, sem = customThemes.semTable;
+            for (const k in sem) {
+                if (!owns(sem, k)) continue;
+                const entry = sem[k];
                 if (!entry || typeof entry !== "object") continue;
                 const snap = {};
-                for (const slot of THEME_SLOTS) {
-                    if (entry[slot] && typeof entry[slot] === "object")
-                        snap[slot] = {raw:entry[slot].raw, opacity:entry[slot].opacity};
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const slot = THEME_SLOTS[i], sObj = entry[slot];
+                    if (sObj && typeof sObj === "object")
+                        snap[slot] = {raw:sObj.raw, opacity:sObj.opacity};
                 }
                 if ("gradient" in entry) snap.gradient = entry.gradient;
                 if ("userProfileThemes" in entry) snap.userProfileThemes = entry.userProfileThemes;
@@ -7879,14 +7879,16 @@
     function eachExperimentSlot(fn) {
         const table = customThemes.expTable;
         if (!table || typeof table !== "object") return;
-        for (const token of Object.keys(table)) {
+        for (const token in table) {
+            if (!owns(table, token)) continue;
             const byExperiment = table[token];
             if (!byExperiment || typeof byExperiment !== "object") continue;
-            for (const experiment of Object.keys(byExperiment)) {
+            for (const experiment in byExperiment) {
+                if (!owns(byExperiment, experiment)) continue;
                 const byTheme = byExperiment[experiment];
                 if (!byTheme || typeof byTheme !== "object") continue;
-                for (const theme of THEME_SLOTS) {
-                    const slot = byTheme[theme];
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const theme = THEME_SLOTS[i], slot = byTheme[theme];
                     if (slot && typeof slot === "object") fn(token, slot, theme);
                 }
             }
@@ -7902,20 +7904,21 @@
             // (nothing reads them once their tokens point back at Discord's keys). Turning themes off removes them.
             const kept = [];
             journal.raw.forEach(k => {
-                if (Object.prototype.hasOwnProperty.call(origRaw, k)) raw[k] = origRaw[k];
+                if (owns(origRaw, k)) raw[k] = origRaw[k];
                 else if (keepSynthetic && k.startsWith("__VENUS_")) kept.push(k);
                 else delete raw[k];
             });
             journal.sem.forEach(k => {
                 const entry = sem[k], snap = origSem[k];
                 if (!entry || !snap) return;
-                for (const slot of THEME_SLOTS) {
-                    if (snap[slot] && entry[slot] && typeof entry[slot] === "object") { entry[slot].raw = snap[slot].raw; entry[slot].opacity = snap[slot].opacity; }
-                    else if (snap[slot]) entry[slot] = {raw:snap[slot].raw, opacity:snap[slot].opacity};
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const slot = THEME_SLOTS[i], sn = snap[slot], en = entry[slot];
+                    if (sn && en && typeof en === "object") { en.raw = sn.raw; en.opacity = sn.opacity; }
+                    else if (sn) entry[slot] = {raw:sn.raw, opacity:sn.opacity};
                 }
             });
             journal.raw.clear();
-            kept.forEach(k => journal.raw.add(k));
+            for (let i = 0; i < kept.length; i++) journal.raw.add(kept[i]);
             journal.sem.clear();
             if (journal.exp) {
                 for (let i = 0; i < journal.exp.length; i += 3) {
@@ -7929,18 +7932,21 @@
             for (const k of Object.keys(customThemes.rawTable)) {
                 if (k.startsWith("__VENUS_")) delete customThemes.rawTable[k];
             }
-            for (const k of Object.keys(customThemes.origRaw)) customThemes.rawTable[k] = customThemes.origRaw[k];
+            Object.assign(customThemes.rawTable, customThemes.origRaw);
         }
         if (customThemes.semTable && customThemes.origSem) {
-            for (const k of Object.keys(customThemes.origSem)) {
-                const entry = customThemes.semTable[k], snap = customThemes.origSem[k];
+            const origSem = customThemes.origSem;
+            for (const k in origSem) {
+                if (!owns(origSem, k)) continue;
+                const entry = customThemes.semTable[k], snap = origSem[k];
                 if (!entry || !snap) continue;
-                for (const slot of THEME_SLOTS) {
-                    if (snap[slot]) {
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const slot = THEME_SLOTS[i], sn = snap[slot];
+                    if (sn) {
                         if (entry[slot] && typeof entry[slot] === "object") {
-                            entry[slot].raw = snap[slot].raw;
-                            entry[slot].opacity = snap[slot].opacity;
-                        } else entry[slot] = {raw:snap[slot].raw, opacity:snap[slot].opacity};
+                            entry[slot].raw = sn.raw;
+                            entry[slot].opacity = sn.opacity;
+                        } else entry[slot] = {raw:sn.raw, opacity:sn.opacity};
                     }
                 }
                 if ("gradient" in snap) entry.gradient = snap.gradient;
@@ -7960,13 +7966,13 @@
         const journal = customThemes.journal;
         if (journal) { journal.rawTable = rawTable; journal.semTable = sem; }
         const touchedRaw = journal ? journal.raw : new Set(), touchedSem = journal ? journal.sem : new Set();
-        // Every raw write goes through raw.set so the key lands in the journal.
-        const raw = {set(k, v) { touchedRaw.add(k); rawTable[k] = v; }};
+        const setRaw = (k, v) => { touchedRaw.add(k); rawTable[k] = v; };
         const rawIn = theme.rawColors || {}, semIn = theme.semanticColors || {}, plus = theme.plus, bg = theme.background;
         // 1. Apply rawColors directly onto Discord's RawColors table (hex only; alpha is carried on semantic slots).
-        for (const key of Object.keys(rawIn)) {
+        for (const key in rawIn) {
+            if (!owns(rawIn, key)) continue;
             const parsed = parseThemeColor(rawIn[key]);
-            if (parsed) raw.set(key, parsed.hex);
+            if (parsed) setRaw(key, parsed.hex);
         }
         // 2. Bridge legacy PRIMARY / PLUM / BRAND raw colors to Discord 349.9's NEUTRAL / BLURPLE raw tokens
         // whenever the theme didn't already set the NEUTRAL / BLURPLE key directly.
@@ -7977,7 +7983,7 @@
                 const src = sources[j];
                 if (rawIn[src]) {
                     const parsed = parseThemeColor(rawIn[src]);
-                    if (parsed) { raw.set(target, parsed.hex); break; }
+                    if (parsed) { setRaw(target, parsed.hex); break; }
                 }
             }
         }
@@ -7997,11 +8003,16 @@
             // A slot the array doesn't reach (single-palette themes) borrows index 0. A slot the theme wrote as
             // false (stored as null) means "keep Discord's color here", as in Revenge: [false, false, "#fff"]
             // only recolors Onyx.
-            const slotColor = i => parseThemeColor(i < arr.length ? arr[i] : arr[0]);
-            const slotColors = {dark:slotColor(0), light:slotColor(1), midnight:slotColor(2), darker:slotColor(3)};
+            const len = arr.length;
+            const c0 = parseThemeColor(arr[0]);
+            const c1 = len > 1 ? parseThemeColor(arr[1]) : c0;
+            const c2 = len > 2 ? parseThemeColor(arr[2]) : c0;
+            const c3 = len > 3 ? parseThemeColor(arr[3]) : c0;
             const orig = isDirect && customThemes.origSem && customThemes.origSem[targetKey];
-            for (const slot of THEME_SLOTS) {
-                const picked = slotColors[slot];
+            const prefix = "__VENUS_" + targetKey + "_";
+            for (let i = 0; i < 4; i++) {
+                const slot = THEME_SLOTS[i];
+                const picked = i === 0 ? c0 : i === 1 ? c1 : i === 2 ? c3 : c2;
                 if (!picked) {
                     // The theme's own key said false here: undo any legacy alias that reached this slot first.
                     if (orig && orig[slot] && entry[slot] && typeof entry[slot] === "object") {
@@ -8010,8 +8021,8 @@
                     }
                     continue;
                 }
-                const syntheticKey = "__VENUS_" + targetKey + "_" + slot;
-                raw.set(syntheticKey, picked.hex);
+                const syntheticKey = prefix + slot;
+                setRaw(syntheticKey, picked.hex);
                 if (entry[slot] && typeof entry[slot] === "object") {
                     entry[slot].raw = syntheticKey;
                     entry[slot].opacity = picked.opacity;
@@ -8023,7 +8034,8 @@
         // earlier), not whichever key the theme happened to write last: CHAT_BACKGROUND over BACKGROUND_PRIMARY
         // for the chat surface, KEYBOARD over BACKGROUND_PRIMARY for the keyboard gap.
         const aliasRank = new Map();
-        for (const key of Object.keys(semIn)) {
+        for (const key in semIn) {
+            if (!owns(semIn, key)) continue;
             const arr = semIn[key];
             if (!Array.isArray(arr) || !arr.length || sem[key]) continue;
             const targets = LEGACY_SEMANTIC_ALIASES[key];
@@ -8035,7 +8047,8 @@
         }
         aliasRank.forEach((pick, target) => writeSemanticTarget(target, pick.arr, false));
         // Second pass: direct Mana semantic keys.
-        for (const key of Object.keys(semIn)) {
+        for (const key in semIn) {
+            if (!owns(semIn, key)) continue;
             const arr = semIn[key];
             if (!Array.isArray(arr) || !arr.length) continue;
             if (sem[key]) writeSemanticTarget(key, arr, true);
@@ -8046,7 +8059,7 @@
                 const mc = parseThemeColor(plus.mentionLineColor);
                 if (mc && sem.BACKGROUND_MENTIONED_FEEDBACK) writeSemanticTarget("BACKGROUND_MENTIONED_FEEDBACK", [formatThemeColor(mc)], false);
                 if (mc && !semIn.BACKGROUND_MENTIONED && !semIn.MESSAGE_MENTIONED_BACKGROUND_DEFAULT) {
-                    const tint = {hex:mc.hex, opacity:Number(Math.min(0.25, mc.opacity * 0.16).toFixed(4))};
+                    const tint = {hex:mc.hex, opacity:Math.round(Math.min(0.25, mc.opacity * 0.16) * 10000) / 10000};
                     writeSemanticTarget("MESSAGE_MENTIONED_BACKGROUND_DEFAULT", [formatThemeColor(tint)], false);
                 }
             }
@@ -8056,12 +8069,13 @@
                 writeSemanticTarget("MOBILE_CHAT_NEW_MESSAGE_TEXT", [plus.unreadBadgeColor], false);
             }
             if (plus.icons && typeof plus.icons === "object") {
-                for (const iconKey of Object.keys(PLUS_STATUS_ICON_MAP)) {
+                for (const iconKey in PLUS_STATUS_ICON_MAP) {
+                    if (!owns(PLUS_STATUS_ICON_MAP, iconKey)) continue;
                     const arr = plus.icons[iconKey];
                     if (!Array.isArray(arr) || !arr.length) continue;
                     const mapping = PLUS_STATUS_ICON_MAP[iconKey];
                     const first = parseThemeColor(arr[0]);
-                    if (first) for (let i = 0; i < mapping.raw.length; i++) raw.set(mapping.raw[i], first.hex);
+                    if (first) for (let i = 0; i < mapping.raw.length; i++) setRaw(mapping.raw[i], first.hex);
                     for (let i = 0; i < mapping.sem.length; i++) writeSemanticTarget(mapping.sem[i], arr, false);
                 }
             }
@@ -8078,11 +8092,11 @@
                     const entry = sem[CHAT_SURFACE_TOKENS[i]];
                     if (!entry || typeof entry !== "object") continue;
                     touchedSem.add(CHAT_SURFACE_TOKENS[i]);
-                    for (const slot of THEME_SLOTS) {
-                        const s = entry[slot];
+                    for (let j = 0; j < THEME_SLOTS.length; j++) {
+                        const s = entry[THEME_SLOTS[j]];
                         if (s && typeof s === "object") {
                             const cur = Number.isFinite(s.opacity) ? s.opacity : 1;
-                            s.opacity = Number((cur * alpha).toFixed(4));
+                            s.opacity = Math.round(cur * alpha * 10000) / 10000;
                         }
                     }
                 }
@@ -8098,7 +8112,8 @@
                 if (!owns(byExperiment, experiment)) continue;
                 const byTheme = byExperiment[experiment];
                 if (!byTheme || typeof byTheme !== "object") continue;
-                for (const theme of THEME_SLOTS) {
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const theme = THEME_SLOTS[i];
                     const slot = byTheme[theme], themed = semEntry[theme], was = wasEntry[theme];
                     if (slot && typeof slot === "object" && themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) {
                         if (expJournal) expJournal.push(slot, slot.raw, slot.opacity);
