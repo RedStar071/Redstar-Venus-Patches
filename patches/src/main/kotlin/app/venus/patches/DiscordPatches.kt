@@ -19,8 +19,7 @@ internal val discord = Compatibility(
     targets = listOf(AppTarget(
         version = "349.9 - Stable",
         versionCode = 349009,
-        minSdk = 26,
-        description = "Pinned Discord 349.9 bundle; Android device validation still required."
+        minSdk = 26
     ))
 )
 
