@@ -2473,16 +2473,18 @@
     }
     function computePastel(seed, saturation, lightness) {
         const hue = ((pastelHash(String(seed)) >>> 0) % 360) / 360;
+        const a = saturation * Math.min(lightness, 1 - lightness), h12 = hue * 12;
         function component(offset) {
-            const k = (offset + hue * 12) % 12;
-            return Math.round(255 * (lightness - saturation * Math.min(lightness,1-lightness) * Math.max(-1,Math.min(k-3,9-k,1))));
+            const k = (offset + h12) % 12;
+            return Math.round(255 * (lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
         }
-        const hex = "#" + [component(0),component(8),component(4)].map(value => value.toString(16).padStart(2,"0")).join("");
+        const rgb = (component(0) << 16) | (component(8) << 8) | component(4);
+        const hex = "#" + (0x1000000 | rgb).toString(16).slice(1);
         return {hex, value:RN.processColor(hex)};
     }
     // Every chat row runs this: the content array is only copied once a node actually changes.
     function pastelMentions(content, guildId) {
-        if (!Array.isArray(content)) return content;
+        if (!Array.isArray(content) || !content.length) return content;
         let next = null;
         for (let i = 0; i < content.length; i++) {
             const node = content[i];
@@ -2493,7 +2495,7 @@
                 const color = pastelColor(node.userId,0.85,0.75);
                 if (color) result = Object.assign({},node,{roleColor:color.value,color:color.value,colorString:color.hex});
             }
-            if (Array.isArray(node.content)) {
+            if (Array.isArray(node.content) && node.content.length) {
                 const children = pastelMentions(node.content,guildId);
                 if (children !== node.content) result = Object.assign({},result,{content:children});
             }
@@ -4451,24 +4453,32 @@
         if (source && source.mentioned || message && message.mentioned) return true;
         if (!source || typeof source !== "object") return false;
         if (source.mention_everyone || source.mentionEveryone) return true;
+        const mentions = source.mentions;
+        const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
+        const hasMentions = Array.isArray(mentions) && mentions.length > 0;
+        const refAuthor = ref && ref.author && ref.author.id;
+        if (!hasMentions && !refAuthor) return false;
         const me = currentUser();
         const myId = me && me.id;
         if (!myId) return false;
-        const mentions = source.mentions;
-        if (Array.isArray(mentions) && mentions.some(u => u && (u === myId || u.id === myId))) return true;
-        const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
-        const refAuthor = ref && ref.author && ref.author.id;
-        if (refAuthor && refAuthor === myId) return true;
+        if (refAuthor === myId) return true;
+        if (hasMentions) for (let i = 0; i < mentions.length; i++) {
+            const u = mentions[i];
+            if (u && (u === myId || u.id === myId)) return true;
+        }
         return false;
     }
     function highlightRemember(channelId, id, source) {
         if (!features.messageHighlight || typeof channelId !== "string" || !channelId || typeof id !== "string" || !id) return;
         const key = channelId + ":" + id;
-        if (highlightRecent.has(key)) highlightRecent.delete(key);
+        const existing = highlightRecent.get(key);
+        if (existing && existing.source === source) return;
+        if (existing) highlightRecent.delete(key);
         else if (highlightRecent.size >= 80) highlightRecent.delete(highlightRecent.keys().next().value);
         highlightRecent.set(key, {
             channelId,
             id,
+            source,
             content:source && typeof source.content === "string" ? source.content : "",
             embeds:source && Array.isArray(source.embeds) ? source.embeds : null,
             components:source && Array.isArray(source.components) ? source.components : null
@@ -4528,7 +4538,8 @@
         }
         const bucket = deleted.size && noDeleteOn && deletedByChannel.get(channelId);
         const isDeletedRow = !!(bucket && bucket.has(deletedKey(channelId,id)));
-        const isMentionRow = !isDeletedRow && highlightMentioned(source, next.message);
+        const needHighlightCheck = highlightOn || features.messageHighlight;
+        const isMentionRow = !isDeletedRow && needHighlightCheck && highlightMentioned(source, next.message);
         if (features.messageHighlight && (isDeletedRow || isMentionRow || next.backgroundHighlight))
             highlightRemember(channelId, id, source);
         const mult = highlightOn ? settings.messageHighlightThickness : 1;
@@ -6922,6 +6933,11 @@
     // its zero-width space in, or that space would be put back for good.
     function translateSeen(source, channelId, id, key, quoteKey, quotedId) {
         if (!source || !channelId || !id || translate.refreshing.has(id)) return;
+        const existing = translate.shown.get(id);
+        const reference = source.messageReference || source.message_reference;
+        const nextQuotes = quotedId || reference && (reference.message_id || reference.messageId) || (existing && existing.quotes) || null;
+        if (existing && existing.source === source && existing.channelId === channelId &&
+            (!key || existing.key === key) && (!quoteKey || existing.quoteKey === quoteKey) && existing.quotes === nextQuotes) return;
         const contentSource = translateContentSource(source);
         const raw = typeof source.content === "string" && source.content ? source.content : "";
         let snapshot = null;
@@ -6934,13 +6950,12 @@
                     moderator_report:item && (item.moderatorReport !== undefined ? item.moderatorReport : item.moderator_report || null)})) : []};
         }
         if (!raw && !snapshot) return;
-        let entry = translate.shown.get(id);
+        let entry = existing;
         if (entry) translate.shown.delete(id);
         else if (translate.shown.size >= 300) translate.shown.delete(translate.shown.keys().next().value);
-        if (!entry) entry = {channelId, id, raw:"", snapshot:null, key:null, quoteKey:null, quotes:null};
-        entry.raw = raw; entry.snapshot = snapshot; entry.key = key || entry.key; entry.quoteKey = quoteKey || entry.quoteKey;
-        const reference = source.messageReference || source.message_reference;
-        if (quotedId || reference && (reference.message_id || reference.messageId)) entry.quotes = quotedId || reference.message_id || reference.messageId;
+        if (!entry) entry = {channelId, id, source:null, raw:"", snapshot:null, key:null, quoteKey:null, quotes:null};
+        entry.source = source; entry.raw = raw; entry.snapshot = snapshot; entry.key = key || entry.key; entry.quoteKey = quoteKey || entry.quoteKey;
+        entry.quotes = nextQuotes;
         translate.shown.set(id, entry);
     }
     function translateView(entry, layout, original) {
