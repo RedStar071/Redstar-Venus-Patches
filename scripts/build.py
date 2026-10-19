@@ -101,8 +101,70 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 const source = fs.readFileSync(process.argv[2], 'utf8').replace('/*__FEATURES__*/', '__VENUS_FEATURES__');
 context.Terser.minify(source, {compress:false, mangle:false,
     format:{comments:false, ascii_only:true}}).then(result => {
-    process.stdout.write(lazySettingsUi(jsonLiterals(result.code)).replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
+    process.stdout.write(lazyCoreRuntime(lazySettingsUi(jsonLiterals(result.code))).replace('__VENUS_FEATURES__', '/*__FEATURES__*/'));
 });
+// At startup (load_calls.cjs), only 5 functions run: the outer IIFE, selectModules, decorateDefine,
+// defineValue, and the __d wrapper for each of the ~17.7k Metro modules. No target module factory executes
+// until React Native's initializer (Module 120) runs. Wrap all feature hooks, stores, and helpers into an
+// ASCII string literal ($core) evaluated once on the first target module activation (or __venusPatches call),
+// leaving only the ~6 KB module-selection and __d-decoration header to compile during startup eval.
+function lazyCoreRuntime(code) {
+    const acorn = require(process.argv[3]);
+    const ast = acorn.parse(code, {ecmaVersion: 'latest'});
+    const iife = ast.body[0].expression.callee.body.body;
+
+    function stmtDecls(stmt) {
+        const out = [];
+        if (stmt.type === 'FunctionDeclaration' && stmt.id) out.push(stmt.id.name);
+        else if (stmt.type === 'VariableDeclaration') {
+            for (const d of stmt.declarations) if (d.id.type === 'Identifier') out.push(d.id.name);
+        }
+        return out;
+    }
+
+    const items = iife.map((stmt, idx) => ({
+        idx,
+        stmt,
+        decls: stmtDecls(stmt),
+        src: code.slice(stmt.start, stmt.end),
+    }));
+    const declToIdx = new Map();
+    for (const it of items) for (const d of it.decls) declToIdx.set(d, it.idx);
+
+    const dsIdx = declToIdx.get('DEFAULT_SETTINGS');
+    const stIdx = declToIdx.get('status');
+    const ddIdx = declToIdx.get('decorateDefine');
+    const hdIdx = declToIdx.get('holdDefine');
+    const dvIdx = declToIdx.get('defineValue');
+    const exIdx = declToIdx.get('existing');
+
+    const eagerSet = new Set();
+    for (let i = 0; i <= dsIdx; i++) eagerSet.add(i);
+    eagerSet.add(stIdx);
+    for (let i = ddIdx; i <= exIdx + 2; i++) eagerSet.add(i);
+
+    const stage2Items = items.filter(it => !eagerSet.has(it.idx));
+    const stage2Code = stage2Items.map(it => it.src).join('\n') +
+        '\nreturn{listImport:listImport,lengthConstants:lengthConstants,multiAccountConstants:multiAccountConstants,activateModule:activateModule,setSetting:setSetting,formatSize:formatSize,getSize:getSize};';
+    const stage2Fn = '(function(global,features,revision,DISCORD_VERSION,settings,DEFAULT_SETTINGS,status){' + stage2Code + '})';
+    const stage2Str = JSON.stringify(stage2Fn).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+
+    let eagerHeader = '';
+    for (let i = 0; i <= dsIdx; i++) eagerHeader += items[i].src;
+    eagerHeader += items[stIdx].src;
+    eagerHeader += 'let pastelHash,$c;function $core(){return $c||($c=(0,eval)(' + stage2Str + ')(global,features,revision,DISCORD_VERSION,settings,DEFAULT_SETTINGS,status));}';
+
+    const ddSrc = items[ddIdx].src
+        .replace(/listImport\(/g, '$core().listImport(')
+        .replace(/lengthConstants\(/g, '$core().lengthConstants(')
+        .replace(/multiAccountConstants\(/g, '$core().multiAccountConstants(')
+        .replace(/activateModule\(/g, '$core().activateModule(');
+
+    let eagerFooter = ddSrc + items[hdIdx].src + items[dvIdx].src + items[exIdx].src + items[exIdx + 1].src;
+    eagerFooter += 'global.__venusPatches=Object.freeze({revision:revision,settings:settings,features:features,status:status,setSetting:function(k,v){return $core().setSetting(k,v)},formatSize:function(b){return $core().formatSize(b)},getSize:function(u){return $core().getSize(u)}});';
+
+    return '(function(global){' + eagerHeader + eagerFooter + '})(globalThis);';
+}
 // Hermes's (0, eval) eagerly compiles every FunctionDeclaration and closure inside the runtime at startup,
 // even though load_calls.cjs shows only 5 functions run at startup. The Venus Settings pages, live previews,
 // and preview style/sample tables (~160 KB, 155 top-level statements) are only reachable after nativeRegistry
