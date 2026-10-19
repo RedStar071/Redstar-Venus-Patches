@@ -39,7 +39,8 @@ function __run(rounds, minMs) {
     for (var b = 0; b < __benches.length; b++) {
         var v = __benches[b], n = 1;
         v.fn(); v.fn();
-        while (__batch(v.fn, n) < minMs) n *= 2;
+        // Capped so a near-free variant (sub-microsecond) can't double forever under the 1 ms clock.
+        while (n < 1048576 && __batch(v.fn, n) < minMs) n *= 2;
         v.n = n; v.samples = [];
     }
     for (var r = 0; r < rounds; r++)
