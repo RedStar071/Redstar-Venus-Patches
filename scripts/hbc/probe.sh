@@ -33,6 +33,7 @@ if '__ASSET_IDS__' in probe:
     probe = probe.replace('__ASSET_IDS__', ','.join(str(m) for m in sorted(m for m, d in B.deps.items() if d and d[0] == 1132)))
 src = open('tests/hermes-startup.js').read(); mark = 'print("HBC98_REAL_RN_ENVIRONMENT_PASS");'
 assert src.count(mark) == 1
+probe = probe.encode('ascii', 'backslashreplace').decode()   # the prelude injector only takes ASCII
 open(sys.argv[3], 'w').write(src.replace(mark, mark + '\n' + probe))
 PY
 { cat "$OUT/startup.js"; echo; sed "s#/\*__FEATURES__\*/#$FEATURES#" "$RUNTIME"; } > "$OUT/combined.js"

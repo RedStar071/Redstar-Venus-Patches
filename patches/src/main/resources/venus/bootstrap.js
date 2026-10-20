@@ -5546,7 +5546,8 @@
     function serverVerification(level) { return [tr("None"), tr("Low"), tr("Medium"), tr("High"), tr("Highest")][Math.max(0, Math.min(4, level))]; }
     const SERVER_BADGES = [["VERIFIED", () => tr("Verified")], ["PARTNERED", () => tr("Partner")], ["COMMUNITY", () => tr("Community")], ["DISCOVERABLE", () => tr("Discoverable")]];
     const SERVER_STATUS_RANK = {online:0, streaming:0, dnd:1, idle:2};
-    const serverInfo = {asked:new Map(), fetched:new Set()};
+    // members counts changes to any store but presence (4930), so a status-only tick skips the friend membership walk.
+    const serverInfo = {asked:new Map(), fetched:new Set(), members:0, friendsKey:"", friends:[]};
     function serverStore(id) { const store = inspectedExport(id, "default"); return store && typeof store === "object" ? store : null; }
     function serverCall(store, name, a, b) {
         if (!store || typeof store[name] !== "function") return undefined;
@@ -5631,19 +5632,32 @@
             badges:SERVER_BADGES.filter(entry => serverFeature(guild, entry[0])).map(entry => entry[1]())};
     }
     function serverRank(status) { const rank = SERVER_STATUS_RANK[status]; return rank == null ? 3 : rank; }
-    // Your friends who are members, online ones first, each with their status and server nickname.
+    // Your friends who are members, online ones first, each with their status and server nickname. Who's here (one
+    // getMember per friend) only changes with the member, user or friend stores, so it's kept, sorted by name, until
+    // one of them changes; a presence tick (up to ~3/s) just re-reads their statuses and stable-sorts by rank
+    // (tests/bench/server_info.js: 1.63 ms -> 70 us for 300 friends, 60 here).
     function serverFriends(guildId) {
         const ids = serverCall(serverStore(4519), "getFriendIDs") || [], members = serverStore(2112), presence = serverStore(4930);
         if (!members || !ids.length) return [];
-        const out = [];
-        for (let i = 0; i < ids.length; i++) {
-            const id = ids[i], member = serverCall(members, "getMember", guildId, id);
-            if (!member) continue;
-            const user = userStore && serverCall(userStore, "getUser", id) || {id};
-            out.push({id, user, status:serverCall(presence, "getStatus", id) || "offline",
-                name:member.nick || user.globalName || user.global_name || user.username || id});
+        const key = guildId + ":" + ids.length + ":" + serverInfo.members;
+        let list = serverInfo.friends;
+        if (serverInfo.friendsKey !== key) {
+            list = [];
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i], member = serverCall(members, "getMember", guildId, id);
+                if (!member) continue;
+                const user = userStore && serverCall(userStore, "getUser", id) || {id};
+                list.push({id, user, name:String(member.nick || user.globalName || user.global_name || user.username || id)});
+            }
+            list.sort((a, b) => a.name.localeCompare(b.name));
+            serverInfo.friendsKey = key; serverInfo.friends = list;
         }
-        return out.sort((a, b) => serverRank(a.status) - serverRank(b.status) || String(a.name).localeCompare(String(b.name)));
+        const out = new Array(list.length);
+        for (let i = 0; i < list.length; i++) {
+            const f = list[i], status = serverCall(presence, "getStatus", f.id) || "offline";
+            out[i] = {id:f.id, user:f.user, name:f.name, status, rank:serverRank(status), at:i};
+        }
+        return out.sort((a, b) => a.rank - b.rank || a.at - b.at);
     }
     // Asks Discord once every few minutes which of your friends are members (the request its own member list makes).
     function serverAskFriends(guildId) {
@@ -5686,9 +5700,12 @@
         React.useEffect(() => {
             let pending, live = true;
             const bump = () => { if (pending !== undefined || !live) return; pending = later(() => { pending = undefined; if (live) tick(n => n + 1); }, 300, false); };
+            const changed = () => { serverInfo.members++; bump(); }, presence = serverStore(4930);
             const stores = SERVER_INFO_STORES.map(serverStore).filter(store => store && typeof store.addChangeListener === "function");
-            stores.forEach(store => { try { store.addChangeListener(bump); } catch (_) {} });
-            return () => { live = false; stores.forEach(store => { try { store.removeChangeListener(bump); } catch (_) {} });
+            const listen = store => store === presence ? bump : changed;
+            stores.forEach(store => { try { store.addChangeListener(listen(store)); } catch (_) {} });
+            serverInfo.members++;
+            return () => { live = false; stores.forEach(store => { try { store.removeChangeListener(listen(store)); } catch (_) {} });
                 if (pending !== undefined && global.clearTimeout) global.clearTimeout(pending); };
         }, [guildId]);
     }
