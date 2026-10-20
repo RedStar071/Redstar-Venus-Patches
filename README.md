@@ -79,7 +79,7 @@ Want Venus next to the normal Discord app? Select **Custom branding** under **Fe
 | **App icon** | A square PNG, JPG or WebP picture (512 × 512 is ideal). It fills the icon's shape, so keep the important part away from the corners |
 | **Icon background** | Recolors the icon in Discord's blurple, green, yellow, fuchsia, red or black, or any color you choose. It's the quickest way to tell the two apps apart |
 
-Leave **App icon** and **Icon background** empty to keep Discord's icon. With a new package name, the copy is a separate app: it starts signed out, has its own settings, and may not get push notifications, since Discord only sends them to `com.discord`. Keep the same package name every time you patch so updates install over the top.
+Leave **App icon** and **Icon background** empty to keep Discord's icon. With a new package name, the copy is a separate app: it starts signed out and has its own settings. Notifications work in both apps: each one registers for push notifications under its own name, so signing in to the same account in both gets them in both, and the copy's notification sounds, pictures and **Notification settings** button all use its new name. Keep the same package name every time you patch so updates install over the top.
 
 ### Privacy options
 
