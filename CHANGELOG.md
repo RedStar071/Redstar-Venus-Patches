@@ -1,3 +1,21 @@
+## [1.17.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.16.1...v1.17.0) (2026-10-20)
+
+### ✨ New Features
+
+* **Discord:** Add `Server info` patch: hold a server's icon to see who's online, channels, roles, emojis, boosts, the owner and your friends there ([#77](https://github.com/VenusIsJaded/Venus-Patches/issues/77))
+* **Discord:** Add `Icon packs` patch: replace Discord's icons with 10 built-in community icon packs or a custom pack link, with a live preview ([#61](https://github.com/VenusIsJaded/Venus-Patches/issues/61))
+* **Discord:** Add `Custom branding` patch: install Venus next to normal Discord with your own app name, package name, icon color and icon picture ([#78](https://github.com/VenusIsJaded/Venus-Patches/issues/78))
+
+### ⚡ Performance Improvements
+
+* **Discord:** Shrink the startup runtime and register Discord's modules with less work, making the startup header 1.59x faster
+* **Discord - Venus settings:** Look up which feature each setting belongs to from a cache, 7.8x faster across settings, backups and switches
+* **Discord - Show hidden channels:** Skip rescanning unchanged server channel lists and check channel names with less work, up to 2.6x faster
+* **Discord - Custom themes:** Parse theme colors 2x faster and compile themes into Discord's color tables 1.3x faster
+* **Discord - Translate messages:** Skip escaping text that needs none when laying out translations, 1.7x faster
+* **Discord - Fix unknown mentions:** Check loaded messages for mentions with less work, 1.3x faster
+* **Discord - Show device indicators:** Read the current user once per presence update instead of once per indicator
+
 ## [1.16.1](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.16.0...v1.16.1) (2026-10-19)
 
 ### 🐛 Bug Fixes

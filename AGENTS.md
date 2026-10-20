@@ -80,6 +80,13 @@ Rules:
   Discord 349.9, and Keep deleted messages (and every feature listening to Discord's events) hooking the wrong module,
   and theme colors 349.9 renamed, were only broken inside that pull request, so neither is in the 1.16.0 notes. The
   same goes for ReviewDB cards failing to render on 348.10 in 1.3.7.
+- **Write the notes from the exact difference between the last release and this one, never from the pull request.**
+  Before writing an entry (and before a pull request description that lists fixes), run
+  `git log --oneline vX.Y.Z..HEAD` and `git diff --stat vX.Y.Z HEAD` against the previous release tag, and for every
+  candidate bullet confirm with `git show vX.Y.Z:<file>` that the previous release really had the behavior. Only what
+  changed for someone updating from that release goes in. A fix for something a commit in the same range broke (for
+  example 1.17.0's Backup defaults fix, which repaired a regression from that release's own startup speedup) and every
+  fix to a feature that is new in this release are left out; the new feature gets one ✨ bullet instead.
 
 ## The GitHub release
 

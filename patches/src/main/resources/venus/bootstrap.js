@@ -42,7 +42,7 @@
     if (features.iconPacks) selectModules([81, 84, 328, 1193, 4579, 4593, 9758]);
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
     if (features.serverInfo) selectModules([1377, 16226]);
-    const revision = "1.16.1";
+    const revision = "1.17.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "349.9";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
