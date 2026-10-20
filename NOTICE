@@ -52,3 +52,8 @@ request. No Google code is included; translations are Google's.
 
 Server info is based on the idea of fshin's ServerInfo Revenge plugin (fshinz/Revenge-Plugins). Its code
 is written for this project against Discord 349.9's own stores and server menu.
+
+Icon packs is based on the idea and community icon pack catalog of nexpid's Themes+ plugin
+(nexpid/ThemesPlus), with icon packs created by Rosie, Rairof, Lemon, Jay, Google, Hurricane,
+480 Design, WalkQuackBack, doraa and Iconsax. Its code is written for this project against
+Discord 349.9's own AssetRegistry and BaseIconImage modules.

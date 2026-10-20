@@ -54,6 +54,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
 | | Custom themes | Install Revenge and Vendetta color themes from a link, then pick one from a gallery that previews each in its own colors |
+| | Icon packs | Replace Discord's icons across the app with built-in community icon packs (Rosiecord Plumpy, Rosiecord Iconsax, MD3, Solar, Deco, Material Two Tone, Iconsax Bulk) or a custom icon pack link |
 | **Quests** | Complete Quests automatically | Finishes video, Play and timed Activity Quests in the background |
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 

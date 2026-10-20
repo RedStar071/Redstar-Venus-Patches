@@ -71,7 +71,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "messageHighlight", "serverInfo")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -694,6 +694,10 @@ val unlockAppIcons = bundledPlugin("appIcons", "Unlock app icons",
 @Suppress("unused")
 val customThemes = bundledPlugin("customThemes", "Custom themes",
     "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.")
+
+@Suppress("unused")
+val iconPacks = bundledPlugin("iconPacks", "Icon packs",
+    "Replace Discord's icons with community icon packs or a custom icon pack link. Works with Themes+ icon packs.")
 
 internal const val HIGHLIGHT_DRAWER = "Lcom/discord/chat/presentation/message/decorations/HighlightedMessageDrawer;"
 internal const val CHAT_R_DIMEN = "Lcom/discord/chat/R\$dimen;"

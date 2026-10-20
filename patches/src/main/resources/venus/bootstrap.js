@@ -39,6 +39,7 @@
     if (features.accountSwitcher) selectModules([1377, 12056, 12057, 12058, 16335]);
     if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
     if (features.customThemes) selectModules([589, 590, 591, 1193, 4593, 9758, 9769]);
+    if (features.iconPacks) selectModules([81, 84, 328, 1193, 4579, 4593, 9758]);
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
     if (features.serverInfo) selectModules([1377, 16226]);
     const revision = "1.16.1";
@@ -59,6 +60,7 @@
         translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
+        iconPacks:false, iconPacksTint:true, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
@@ -73,6 +75,7 @@
             translate: false, translateTarget: "discord", translateMode: "auto", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
+            iconPacks: false, iconPacksTint: true, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
         }));
     }
@@ -355,8 +358,10 @@
         if (features.userNotif && key === "userNotifPush" && value && status.storage !== "loading" && status.storage !== "waiting") later(() => userNotifRequestPermissions(false), 0);
         if (features.userNotif && featureFor(key) === "userNotif") userNotifSync();
         if (features.accountSwitcher && featureFor(key) === "accountSwitcher") accountSwitcherSync();
-        if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); }
+        if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.customThemes && key === "customThemesBackground") customThemesApply();
+        if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
+        if (features.iconPacks && (key === "iconPacksTint" || key === "iconPacksTheme")) iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
         if (features.quests || features.userNotif) backgroundSync();
         return true;
@@ -409,6 +414,7 @@
             }
             if (features.accountSwitcher) accountSwitcherSync();
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
+            if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
             if (features.quests || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
@@ -716,7 +722,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -751,7 +757,7 @@
         hiddenChannels:[5879, "LockIcon"], dashless:[15411, "HashmarkIcon"], systemFont:[15493, "LettersIcon"], systemEmoji:[8944, "ChatSmileIcon"],
         hideGift:[10766, "GiftIcon"], hideCall:[7523, "PhoneCallIcon"], youBarSettings:[6883, "SettingsIcon"], quests:[14803, "QuestsIcon"],
         hideQuestDock:[6456, "EyeSlashIcon"], userNotif:[9266, "BellIcon"], accountSwitcher:[5873, "GroupIcon"], appIcons:[5890, "AppsIcon"],
-        customThemes:[15172, "EyeDropperIcon"], messageHighlight:[16425, "PaintbrushThinIcon"], serverInfo:[4812, "CircleInformationIcon"]};
+        customThemes:[15172, "EyeDropperIcon"], iconPacks:[9640, "ImageSparkleIcon"], messageHighlight:[16425, "PaintbrushThinIcon"], serverInfo:[4812, "CircleInformationIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -787,7 +793,8 @@
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
-        hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"]};
+        hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
+        iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Tint icons with theme colors", "Follow theme's icon pack"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1103,6 +1110,7 @@
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus next to the notifications bell.");
         toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon without Nitro.");
         withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install Revenge and Vendetta color themes from a link.", "Custom themes", CustomThemesSettings);
+        withOptions("appearance", "iconPacks", "VENUS_ICONPACKS", "Icon packs", "Replace Discord's icons with community icon packs or a custom pack.", "Icon packs", IconPacksSettings);
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
@@ -1218,14 +1226,16 @@
             diff < day ? pl(Math.floor(diff / hour), "{n} hour", "{n} hours") : pl(Math.floor(diff / day), "{n} day", "{n} days")});
         return tr("Last backup {time}", {time});
     }
-    // What a backup holds right now, for the page's summary: features on, options changed, people watched, themes.
+    // What a backup holds right now, for the page's summary: features on, options changed, people watched, themes, icon packs.
     function backupContents() {
         const defaults = defaultSettings();
         const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
         const changed = Object.keys(defaults).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
             settings[key] !== defaults[key]).length;
         return {on:keys.filter(key => settings[key]).length, total:keys.length, changed, people:features.userNotif ? userNotif.ids.size : 0,
-            themes:features.customThemes ? customThemes.list.length : 0, language:settings.language !== "auto"};
+            themes:features.customThemes ? customThemes.list.length : 0,
+            iconPacks:features.iconPacks ? (iconPacks.active ? 1 : 0) + iconPacks.custom.length : 0,
+            language:settings.language !== "auto"};
     }
     function backupIsDefault() {
         const defaults = defaultSettings();
@@ -1235,6 +1245,8 @@
         const out = {app:BACKUP_APP, format:BACKUP_FORMAT, version:revision, created:new Date().toISOString(), settings:Object.assign({}, settings)};
         if (features.userNotif && userNotif.ids.size) out.people = Array.from(userNotif.ids);
         if (features.customThemes && customThemes.list.length) out.themes = {active:customThemes.active || "", list:customThemes.list.slice(0, THEMES_MAX)};
+        if (features.iconPacks && (iconPacks.active || iconPacks.custom.length))
+            out.iconPacks = {active:iconPacks.active || "", custom:iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM)};
         return JSON.stringify(out, null, 1);
     }
     // A backup, or a plain venus-patches.json settings file, read back. Throws a message you can show when it isn't one.
@@ -1263,8 +1275,20 @@
             });
             themes = {list, active:typeof data.themes.active === "string" && list.some(t => t.id === data.themes.active) ? data.themes.active : ""};
         }
+        let packs = null;
+        if (wrapped && data.iconPacks && typeof data.iconPacks === "object" && !Array.isArray(data.iconPacks)) {
+            const custom = [];
+            if (Array.isArray(data.iconPacks.custom)) {
+                data.iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM).forEach(item => {
+                    const clean = sanitizeCustomIconPack(item);
+                    if (clean && !custom.some(x => x.id === clean.id)) custom.push(clean);
+                });
+            }
+            const act = typeof data.iconPacks.active === "string" ? normalizeIconPackId(data.iconPacks.active) : "";
+            packs = {custom, active:act};
+        }
         const created = wrapped && typeof data.created === "string" ? Date.parse(data.created) : NaN;
-        return {values, people, themes, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
+        return {values, people, themes, iconPacks:packs, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
     }
     // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
     // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
@@ -1284,6 +1308,10 @@
             if (features.customThemes && parsed.themes) {
                 customThemes.loaded = true; customThemes.list = parsed.themes.list; customThemes.active = parsed.themes.active; customThemes.error = "";
                 customThemesPersist(); customThemesApply(); notify("customThemes");
+            }
+            if (features.iconPacks && parsed.iconPacks) {
+                iconPacks.loaded = true; iconPacks.custom = parsed.iconPacks.custom; iconPacks.active = parsed.iconPacks.active; iconPacks.error = "";
+                iconPacksPersist(); iconPacksApply(); notify("iconPacks");
             }
         } finally { backup.restoring = false; }
         notify("*");
@@ -1394,6 +1422,7 @@
             what.changed ? chip("options", 6883, "SettingsIcon", pl(what.changed, "{n} option changed", "{n} options changed")) : null,
             what.people ? chip("people", 4831, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
             what.themes ? chip("themes", 15172, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
+            what.iconPacks ? chip("iconPacks", 9640, "ImageSparkleIcon", pl(what.iconPacks, "{n} icon pack", "{n} icon packs")) : null,
             what.language ? chip("language", 15243, "LanguageIcon", languageLabel(settings.language)) : null];
         const backupRow = (key, label, sub, id, name, onPress, disabled) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true,
             onPress, disabled:!!busy || !!disabled}) : null;
@@ -8185,8 +8214,10 @@
         const iconsIn = plusIn.icons;
         if (iconsIn && typeof iconsIn === "object" && !Array.isArray(iconsIn)) {
             const icons = {};
-            for (const key of Object.keys(PLUS_STATUS_ICON_MAP)) {
-                const v = iconsIn[key];
+            for (const rawKey of Object.keys(iconsIn)) {
+                const key = rawKey.trim();
+                if (!/^[A-Za-z0-9_-]{1,80}$/.test(key)) continue;
+                const v = iconsIn[rawKey];
                 const arr = Array.isArray(v) ? v : typeof v === "string" ? [v] : null;
                 if (!arr || !arr.length) continue;
                 const cleaned = arr.slice(0, 4).map(item => {
@@ -8197,6 +8228,11 @@
             }
             if (Object.keys(icons).length) out.icons = icons;
         }
+        if (typeof plusIn.iconpack === "string" && plusIn.iconpack.trim()) {
+            out.iconpack = normalizeIconPackId(plusIn.iconpack.trim().slice(0, 120));
+            hasAny = true;
+        }
+        if (plusIn.customOverlays === true) { out.customOverlays = true; hasAny = true; }
         return hasAny ? out : null;
     }
     function sanitizeThemeSpec(data, sourceUrl) {
@@ -8566,6 +8602,7 @@
         // revision key, invalidating createStyles (4890) and useToken (4580) caches once and keeping O(1) lookups.
         const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1193, "default"));
         try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
+        if (features.iconPacks && enabled("iconPacks")) iconPacksApply();
         notify("customThemes");
     }
     function hookRawColorsModule(exports) {
@@ -8600,7 +8637,8 @@
     // Discord's root providers (9758) build the theme context once and keep it in a memo keyed on theme, flags and
     // so on, never on our revision. Re-keying the value they hand down makes createStyles and useToken read fresh.
     function rootThemeContextProvider(orig, self, args) {
-        useSettings("customThemes");
+        if (features.customThemes) useSettings("customThemes");
+        if (features.iconPacks) useSettings("iconPacks");
         const tree = orig.apply(self, args);
         if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
         const value = tree.props.value, key = value.key.split("#v")[0] + "#v" + customThemes.revision;
@@ -8897,6 +8935,797 @@
             customThemes.list.length ? footnote("note", "Hold a theme to remove it.") : null];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
+    // Icon packs (#61): replaces Discord's icons across the app with community icon packs (Themes+ / Rosiecord / MD3 /
+    // Solar / Deco / Material Two Tone / Iconsax) or any custom icon pack URL, and applies per-icon tint overrides from
+    // the active theme's plus.icons table. Instead of building path strings and scanning manifest arrays on every
+    // <Image> render, Venus compiles a dense O(1) lookup table indexed by numeric assetId once when the active pack or
+    // theme changes, so BaseIconImage (4579), RN.Image (328) and resolveAssetSource (81) do a single array read.
+    const ICONPACKS_FILE = "venus-iconpacks.json", ICONPACKS_MAX_CUSTOM = 20, ICONPACKS_MAX_BYTES = 1024 * 1024, ICONPACKS_TIMEOUT_MS = 10000;
+    const ICONPACKS_LIST_URL = "https://raw.githubusercontent.com/nexpid/ThemesPlus/main/iconpacks/list.json";
+    const ICONPACKS_TREE_BASE = "https://raw.githubusercontent.com/nexpid/ThemesPlus/iconpack-trees/";
+    const ICONPACK_REDESIGN_DIR = "design/components/Icon/native/redesign/generated/images";
+    const ICONPACK_LEGACY_DIR = "images/native/icons";
+    const ICONPACK_TRANSPARENT_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIAAAUAAeImBZsAAAAASUVORK5CYII=";
+    // Built-in community icon packs from Themes+, embedded so the gallery works straight away offline.
+    const BUILTIN_ICONPACKS = [
+        {id:"rosiecord-plumpy", name:"Rosiecord Plumpy", description:"Icons8 Plumpy icons", authors:"Rosie & Rairof", load:"https://raw.githubusercontent.com/Rairof/discord-iconpacks/main/Packs/Plumpy/", suffix:"", tint:true},
+        {id:"rosiecord-iconsax", name:"Rosiecord Iconsax", description:"Iconsax linear icons", authors:"Rosie, Lemon & Jay", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/iconsax/", suffix:"@2x", tint:true},
+        {id:"md3", name:"MD3 (Rounded)", description:"Material Design 3 rounded icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3/", suffix:"", tint:true},
+        {id:"md3legacy", name:"MD3 (Legacy)", description:"Classic Material Design 3 icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3Legacy/", suffix:"", tint:true},
+        {id:"solar", name:"Solar", description:"Solar bold icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar/", suffix:"", tint:true},
+        {id:"solarduotone", name:"Solar (Duotone)", description:"Solar two-tone shaded icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-duotone/", suffix:"", tint:false},
+        {id:"solarbroken", name:"Solar (Dashed)", description:"Solar broken-line icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-broken/", suffix:"", tint:true},
+        {id:"deco", name:"Deco", description:"Clean geometric line icons", authors:"doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/Deco/", suffix:"", tint:true},
+        {id:"materialtwotone", name:"Material Two Tone", description:"Two-tone Material icons", authors:"Google & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/MaterialTwoTone/", suffix:"", tint:false},
+        {id:"iconsaxbulk", name:"Iconsax Bulk", description:"Iconsax filled bulk icons", authors:"Iconsax & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/IconsaxBulk/", suffix:"", tint:false}
+    ];
+    // Common theme plus.iconpack spellings/typos mapped to canonical pack IDs.
+    const ICONPACK_ID_ALIASES = {
+        "plumpy":"rosiecord-plumpy", "rosiecord_plumpy":"rosiecord-plumpy",
+        "iconsax":"rosiecord-iconsax", "rosiecord_iconsax":"rosiecord-iconsax",
+        "md3-rounded":"md3", "md3_rounded":"md3", "materialdesign3":"md3",
+        "md3-legacy":"md3legacy", "md3_legacy":"md3legacy", "materialdesign3legacy":"md3legacy",
+        "solar-duotone":"solarduotone", "solar_duotone":"solarduotone", "solar-duotune":"solarduotone", "solarduotune":"solarduotone",
+        "solar-broken":"solarbroken", "solar_broken":"solarbroken", "solar-dashed":"solarbroken", "solardashed":"solarbroken",
+        "material-two-tone":"materialtwotone", "material_two_tone":"materialtwotone",
+        "iconsax-bulk":"iconsaxbulk", "iconsax_bulk":"iconsaxbulk"
+    };
+    // Maps Discord 349.9 redesign icon names to older redesign and legacy icon paths shipped by community icon packs,
+    // so icons Discord renamed or split since older builds still match across every pack.
+    const ICONPACK_NAME_ALIASES = {
+        ArrowAngleRightUpIcon:["LinkExternalSmallIcon", "@ic_open_in_browser"],
+        ArrowLargeRightIcon:["ArrowSmallRightIcon", "@ic_arrow_forward_24px"],
+        ArrowLargeUpIcon:["ArrowSmallUpIcon", "@ic_chevron_up_24px"],
+        ArrowSmallLeftIcon:["ChevronSmallLeftIcon", "@ic_arrow_back_24px"],
+        ArrowSmallRightIcon:["ChevronSmallRightIcon", "@ic_arrow_forward_24px"],
+        ArrowsLeftRightIcon:["ArrowsUpDownIcon", "@ic_sync_24px"],
+        BellZIcon:["BellSlashIcon", "@ic_mute_channel_24px"],
+        BillIcon:["ReceiptIcon", "@ic_file_text"],
+        BookmarkIcon:["@ic_stamp"],
+        BookmarkOutlineIcon:["BookmarkIcon", "@ic_stamp"],
+        BoostGemIcon:["@ic_settings_boost_24px", "@ic_nitro_wheel"],
+        BoostGemOutlineIcon:["BoostGemIcon", "@ic_settings_boost_24px"],
+        BoostGemSlashIcon:["BoostGemSlashIcon-primary", "BoostGemIcon"],
+        BugIcon:["@ic_feedback", "WarningIcon"],
+        BurgerIcon:["MenuIcon", "@ic_menu_24px"],
+        CarIcon:["TravelIcon"],
+        ChannelListPlusIcon:["PlusLargeIcon", "@ic_add_24px"],
+        ChannelsFollowedIcon:["AnnouncementsIcon", "@ic_megaphone_16px"],
+        ChatArrowRightIcon:["ChatIcon", "@ic_chat_bubble_16px"],
+        ChatDotsIcon:["ChatIcon", "@ic_chat_bubble_16px"],
+        ChatMarkUnreadIcon:["MarkUnreadIcon"],
+        ChatSmileIcon:["ChatIcon", "SmileIcon"],
+        ChatWarningIcon:["ChatAlertIcon", "WarningIcon"],
+        ChatXIcon:["ChatIcon", "@ic_close_24px"],
+        CheckmarkLargeBoldIcon:["CheckmarkBoldIcon", "CheckmarkLargeIcon", "@ic_check_24px"],
+        ChevronLargeUpIcon:["ChevronSmallUpIcon", "@ic_chevron_up_24px"],
+        CircleCheckIcon:["CircleCheckIcon-primary", "@ic_radio_circle_checked"],
+        CircleErrorIcon:["CircleWarningIcon", "CircleExclamationPointIcon", "CircleWarningIcon-primary", "CircleExclamationPointIcon-primary", "@ic_warning_24px"],
+        "CircleErrorIcon-primary":["CircleWarningIcon-primary", "CircleExclamationPointIcon-primary", "CircleWarningIcon", "CircleExclamationPointIcon"],
+        "CircleErrorIcon-secondary":["CircleWarningIcon-secondary", "CircleExclamationPointIcon-secondary"],
+        "CirclePlayIcon-primary":["PlayIcon", "@ic_play"],
+        ClipboardCheckIcon:["ClipboardListIcon", "CopyIcon"],
+        CompassIcon:["@discovery_20px", "GlobeEarthIcon"],
+        CreditCardIcon:["TicketDollarIcon", "BillIcon"],
+        CrownIcon:["@ic_crown_16px"],
+        DenyIcon:["CircleXIcon", "@ic_ban_24px"],
+        DiceIcon:["#modules/hang_status/native/images/DiceIcon.png"],
+        DoubleCheckmarkIcon:["CheckmarkLargeIcon", "@ic_check_24px"],
+        EducationIcon:["BookCheckIcon", "@ic_rulebook"],
+        EmbedIcon:["FileIcon", "@ic_file_text"],
+        EyeSlashIcon:["@ic_hide_24px", "@ic_hide_password"],
+        FileWarningIcon:["FileIcon", "WarningIcon"],
+        FlashIcon:["SparklesIcon", "@ic_wand"],
+        FolderPlusIcon:["FolderIcon", "@ic_folder_add_24px"],
+        FullscreenEnterIcon:["MaximizeIcon", "@ic_pip"],
+        GamesIcon:["ActivitiesIcon", "GameControllerIcon", "@ic_controller_24px"],
+        GridSquareIcon:["AppsIcon", "@ic_grid_24px"],
+        GroupPlusIcon:["GroupIcon", "@ic_new_group"],
+        HashmarkIcon:["TextIcon", "ChannelsTextIcon", "@ic_text_channel_16px"],
+        HeartOutlineIcon:["HeartIcon"],
+        HourglassIcon:["TimerIcon", "@ic_timer_24px"],
+        ImageBrokenIcon:["ExperimentalImageBrokenIcon", "ImageWarningIcon"],
+        ImagePlusIcon:["ImageIcon", "@ic_image_upload"],
+        ImageSparkleIcon:["ImagePlusIcon", "ImageIcon"],
+        ImagesIcon:["ImageIcon", "@ic_image"],
+        InboxIcon:["@ic_mail", "BellIcon"],
+        LettersIcon:["@settings/ic_locale_24px", "LanguageIcon"],
+        LinkExternalMediumIcon:["LinkExternalSmallIcon", "@ic_open_in_browser"],
+        LinkPlusIcon:["LinkIcon", "@ic_link_24px"],
+        ListViewIcon:["MenuIcon", "@ic_forum_channel_list_view_24px"],
+        MagicDoorIcon:["DoorEnterIcon", "DoorExitIcon", "@ic_leave_24px"],
+        MedalIcon:["TrophyIcon", "@ic_trophy_filled"],
+        MenuIcon:["@ic_menu_24px", "MoreHorizontalIcon"],
+        MobilePhoneDenyIcon:["MobilePhoneIcon", "@ic_mobile_device"],
+        MobilePhoneSettingsIcon:["MobilePhoneIcon", "@settings/ic_phonelink_24px"],
+        MobilePhoneShareIcon:["ScreenIcon", "@ic_screen_share_24px"],
+        MoreVerticalIcon:["MoreHorizontalIcon", "@ic_more_android", "@ic_overflow_android"],
+        NewUserIcon:["NewUserLargeIcon", "UserCircleNewIcon", "UserPlusIcon"],
+        OrbsIcon:["SparklesIcon", "@ic_nitro_wheel"],
+        PaintbrushThinIcon:["PaintPaletteIcon", "@ic_paint_brush"],
+        PaperIcon:["FileIcon", "@ic_file_text"],
+        PaperPlusIcon:["FileUpIcon", "FileIcon"],
+        PhoneIcon:["PhoneCallIcon", "@voice_calls/voice_bar_phone"],
+        PiggyBankIcon:["TicketDollarIcon", "ShopIcon"],
+        PollsIcon:["AnalyticsIcon", "@ic_analytics_bubble_24px"],
+        QrCodeIcon:["QrCodeCameraIcon", "@settings/ic_qr_code_24px"],
+        QuestsIcon:["CompassIcon", "TrophyIcon", "@discovery_20px"],
+        QuoteIcon:["ChatIcon", "@ic_reply_24px"],
+        ReactionIcon:["SmileIcon", "@ic_emoji_24px"],
+        RedoIcon:["RetryIcon", "@ic_sync_24px"],
+        RefreshIcon:["RetryIcon", "@ic_sync_24px"],
+        ScienceIcon:["ScienceDefaultIcon", "@settings/ic_progress_wrench_24px"],
+        ShieldLockIcon:["ShieldIcon", "@ic_shield_24px"],
+        ShopIcon:["ShopSparkleIcon", "@ic_gift"],
+        SignPostIcon:["@ic_sign_post", "@ic_channel_browse"],
+        SlashIcon:["SlashBoxIcon", "@ic_application_command_24px"],
+        SpeedometerIcon:["TimerIcon", "@ic_timer_24px"],
+        StampXIcon:["StampIcon", "@ic_stamp"],
+        StickerIcon:["StickerWinkIcon", "StickerWink2Icon", "@ic_sticker_24px"],
+        StickerPlusIcon:["StickerIcon", "StickerWinkIcon", "@ic_sticker_24px"],
+        StopIcon:["PauseIcon", "@ic_stop_stream_24px"],
+        SuperReactionIcon:["AddSuperReactionIcon", "ReactionIcon", "SmilePlusIcon"],
+        TagIcon:["BadgeIcon"],
+        TagsIcon:["TagIcon", "BadgeIcon"],
+        TextControllerIcon:["GameControllerIcon", "@ic_controller_24px"],
+        ThreadLockIcon:["ThreadIcon", "@ic_thread_private_24px"],
+        ThreadMinusIcon:["ThreadIcon", "@ic_thread_normal_24px"],
+        ThumbsDownIcon:["HandRequestDenyIcon", "ReactionIcon"],
+        ThumbsUpIcon:["HandRequestSpeakIcon", "ReactionIcon"],
+        TimerIcon:["@ic_timer_24px", "ClockIcon"],
+        TvIcon:["ScreenIcon", "@ic_monitor"],
+        UndoIcon:["@ic_undo", "RetryIcon"],
+        UnknownGameIcon:["GameControllerIcon", "@ic_controller_24px"],
+        UnsendIcon:["@ic_undo", "ArrowAngleLeftUpIcon"],
+        UserCheckIcon:["UserIcon", "@ic_friend_request_accepted"],
+        UserClockIcon:["UserIcon", "@ic_clock_timeout_16px"],
+        UserPlatformIcon:["LaptopPhoneIcon", "@settings/ic_phonelink_24px"],
+        VideoDenyIcon:["VideoSlashIcon", "VideoIcon", "@user_profile/ic_video_disabled"],
+        VideoSelfieIcon:["VideoIcon", "@ic_video"],
+        WarningIcon:["TriangleExclamationPointIcon", "@ic_warning_24px"],
+        WaveformIcon:["SoundboardIcon", "@ic_soundboard"],
+        WebhookPlusIcon:["WebhookIcon", "@ic_webhook_24px"],
+        WindowLaunchIcon:["LinkExternalSmallIcon", "@ic_open_in_browser"],
+        XLargeBoldIcon:["CloseLargeBoldIcon", "CloseLargeIcon", "@ic_close_24px"],
+        XLargeIcon:["CloseLargeIcon", "@ic_close_24px", "@ic_close"],
+        XNeutralIcon:["TwitterIcon", "TwitterNeutralIcon"],
+        XSmallBoldIcon:["CloseSmallBoldIcon", "CloseSmallIcon", "@ic_close_16px"],
+        XSmallIcon:["CloseSmallIcon", "@ic_close_16px", "@ic_close"]
+    };
+    const iconPacks = {
+        registry:null, assets:null, table:null, hasActive:false, appliedKey:"",
+        active:"", custom:[], trees:new Map(), loadingTrees:new Set(),
+        loaded:false, loading:false, installing:false, error:""
+    };
+    function normalizeIconPackId(raw) {
+        if (typeof raw !== "string") return "";
+        const id = raw.trim();
+        if (!id) return "";
+        const lower = id.toLowerCase();
+        return ICONPACK_ID_ALIASES[lower] || lower;
+    }
+    function sanitizeCustomIconPack(item) {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+        let load = typeof item.load === "string" ? item.load.trim() : typeof item.url === "string" ? item.url.trim() : "";
+        if (!/^https?:\/\/\S+/i.test(load)) return null;
+        load = normalizeThemeUrl(load).replace(/\/?$/, "/");
+        const suffix = typeof item.suffix === "string" ? item.suffix.trim().slice(0, 16) : "";
+        let name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
+        if (!name) {
+            const parts = load.replace(/\/+$/, "").split("/").filter(Boolean);
+            name = decodeURIComponent(parts[parts.length - 1] || "Custom pack").slice(0, 80);
+        }
+        const id = typeof item.id === "string" && item.id.trim() ? normalizeIconPackId(item.id) : "custom:" + load.toLowerCase();
+        const description = typeof item.description === "string" ? item.description.trim().slice(0, 160) : "";
+        const authors = Array.isArray(item.authors) ? item.authors.map(a => a && typeof a.name === "string" ? a.name.trim() : typeof a === "string" ? a.trim() : "").filter(Boolean).slice(0, 4).join(", ").slice(0, 80) :
+            typeof item.authors === "string" ? item.authors.trim().slice(0, 80) : "";
+        const out = {id, name, description, authors, load, suffix, custom:true, tint:item.tint !== false};
+        if (Array.isArray(item.tree) && item.tree.length) {
+            const tree = item.tree.filter(p => typeof p === "string" && p.length <= 240).slice(0, 4000);
+            if (tree.length) iconPacks.trees.set(id, new Set(tree));
+        }
+        return out;
+    }
+    function iconPackCatalog() {
+        return BUILTIN_ICONPACKS.concat(iconPacks.custom);
+    }
+    function iconPackById(id) {
+        if (!id) return null;
+        const norm = normalizeIconPackId(id);
+        return BUILTIN_ICONPACKS.find(p => p.id === norm) || iconPacks.custom.find(p => p.id === norm || p.id === id) || null;
+    }
+    // Which icon pack is active right now: the one you picked, or the active theme's plus.iconpack when "Follow theme's icon pack" is on.
+    function iconPacksActiveEntry() {
+        if (!enabled("iconPacks")) return null;
+        if (settings.iconPacksTheme && features.customThemes && enabled("customThemes")) {
+            const theme = customThemesActiveEntry();
+            const themePackId = theme && theme.plus && theme.plus.iconpack;
+            if (themePackId) {
+                const fromTheme = iconPackById(themePackId);
+                if (fromTheme) return fromTheme;
+            }
+        }
+        return iconPackById(iconPacks.active);
+    }
+    function expandIconAlias(entry) {
+        if (entry.charCodeAt(0) === 64) return ICONPACK_LEGACY_DIR + "/" + entry.slice(1) + ".png";
+        if (entry.charCodeAt(0) === 35) return entry.slice(1);
+        return ICONPACK_REDESIGN_DIR + "/" + entry + ".png";
+    }
+    function iconPackCandidates(name, relDir, type) {
+        const base = relDir ? relDir + "/" + name + "." + type : name + "." + type;
+        const list = [base];
+        if (type !== "png") return list;
+        if (relDir === ICONPACK_REDESIGN_DIR) {
+            if (name.endsWith("-primary")) list.push(ICONPACK_REDESIGN_DIR + "/" + name.slice(0, -8) + ".png");
+            if (name.endsWith("NeutralIcon")) list.push(ICONPACK_REDESIGN_DIR + "/" + name.slice(0, -11) + "Icon.png");
+            if (name === "TiktokNeutralIcon") list.push(ICONPACK_REDESIGN_DIR + "/TikTokIcon.png");
+            else if (name === "YoutubeNeutralIcon") list.push(ICONPACK_REDESIGN_DIR + "/YouTubeIcon.png");
+            const aliases = ICONPACK_NAME_ALIASES[name];
+            if (aliases) for (let i = 0; i < aliases.length; i++) list.push(expandIconAlias(aliases[i]));
+        } else if (relDir.startsWith(ICONPACK_LEGACY_DIR)) {
+            if (name === "ic_close_24px" || name === "ic_close") list.push(ICONPACK_REDESIGN_DIR + "/XLargeIcon.png", ICONPACK_REDESIGN_DIR + "/CloseLargeIcon.png");
+            else if (name === "ic_close_16px") list.push(ICONPACK_REDESIGN_DIR + "/XSmallIcon.png", ICONPACK_REDESIGN_DIR + "/CloseSmallIcon.png");
+            else if (name === "ic_check_24px" || name === "ic_checkmark") list.push(ICONPACK_REDESIGN_DIR + "/CheckmarkLargeIcon.png");
+            else if (name === "ic_search" || name === "ic_search_24px") list.push(ICONPACK_REDESIGN_DIR + "/MagnifyingGlassIcon.png");
+            else if (name === "ic_trash_24px" || name === "ic_trash_filled") list.push(ICONPACK_REDESIGN_DIR + "/TrashIcon.png");
+            else if (name === "ic_cog_24px" || name === "ic_gear") list.push(ICONPACK_REDESIGN_DIR + "/SettingsIcon.png");
+            else if (name === "ic_add_24px") list.push(ICONPACK_REDESIGN_DIR + "/PlusLargeIcon.png");
+        }
+        return list;
+    }
+    function withPackSuffix(path, suffix) {
+        if (!suffix) return path;
+        const dot = path.lastIndexOf(".");
+        return dot > 0 ? path.slice(0, dot) + suffix + path.slice(dot) : path + suffix;
+    }
+    // Scan AssetRegistry (84) once and index all non-jsona image assets by their numeric assetId.
+    function iconPacksScanAssets() {
+        if (iconPacks.assets) return iconPacks.assets;
+        const reg = iconPacks.registry || (iconPacks.registry = global.__r && global.__r(84));
+        if (!reg || typeof reg.getAssetByID !== "function") return null;
+        const list = [];
+        let misses = 0;
+        for (let id = 1; id < 8192; id++) {
+            const a = reg.getAssetByID(id);
+            if (!a) { if (++misses > 32) break; continue; }
+            misses = 0;
+            if (a.type !== "png" && a.type !== "jpg" && a.type !== "webp" && a.type !== "gif") continue;
+            const loc = typeof a.httpServerLocation === "string" ? a.httpServerLocation : "";
+            const rel = loc.split("/").slice(2).join("/").replace(/^\.\.\//, "_/");
+            const name = typeof a.name === "string" ? a.name : "";
+            if (!name) continue;
+            list.push({
+                id,
+                name,
+                rel,
+                type:a.type,
+                width:a.width || 24,
+                height:a.height || 24,
+                candidates:iconPackCandidates(name, rel, a.type),
+                secondaryOf:rel === ICONPACK_REDESIGN_DIR && name.endsWith("-secondary") ? name.slice(0, -10) : ""
+            });
+        }
+        if (list.length) iconPacks.assets = list;
+        return list.length ? list : null;
+    }
+    function iconPacksFetchTree(pack) {
+        if (!pack || pack.custom || iconPacks.trees.has(pack.id) || iconPacks.loadingTrees.has(pack.id) || typeof global.fetch !== "function") return;
+        const id = pack.id;
+        iconPacks.loadingTrees.add(id);
+        Promise.resolve().then(() => global.fetch(ICONPACKS_TREE_BASE + encodeURIComponent(id) + ".txt", {method:"GET"}))
+            .then(res => res && res.ok ? res.text() : "")
+            .then(text => {
+                if (typeof text === "string" && text.trim()) {
+                    const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                    if (lines.length) {
+                        iconPacks.trees.set(id, new Set(lines));
+                        iconPacksPersist();
+                        if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+                    }
+                }
+            }).catch(() => {}).then(() => {
+                iconPacks.loadingTrees.delete(id);
+                notify("iconPacks");
+            });
+    }
+    function iconPacksResolveAssetUri(asset, pack, tree) {
+        const load = pack.load, suffix = pack.suffix || "";
+        const cands = asset.candidates;
+        if (tree && tree.size) {
+            for (let i = 0; i < cands.length; i++) {
+                const rel = withPackSuffix(cands[i], suffix);
+                if (tree.has(rel)) return load + rel;
+                if (suffix && tree.has(cands[i])) return load + cands[i];
+            }
+            // Multi-layer icon (CircleCheckIcon, CircleXIcon, CircleInformationIcon, CircleQuestionIcon, CircleErrorIcon,
+            // CirclePlusIcon, CircleMinusIcon, CirclePlayIcon): when a pack provides the primary/base icon without a
+            // separate -secondary background layer, replace -secondary with a 1x1 transparent pixel so Discord's stock
+            // circle doesn't clash behind the custom icon.
+            if (asset.secondaryOf) {
+                const primCands = iconPackCandidates(asset.secondaryOf + "-primary", asset.rel, asset.type)
+                    .concat(iconPackCandidates(asset.secondaryOf, asset.rel, asset.type));
+                for (let i = 0; i < primCands.length; i++) {
+                    const rel = withPackSuffix(primCands[i], suffix);
+                    if (tree.has(rel) || suffix && tree.has(primCands[i])) return ICONPACK_TRANSPARENT_URI;
+                }
+            }
+            return "";
+        }
+        // Before the tree manifest has arrived (or for a custom URL pack without a manifest), use the direct path for
+        // redesign and legacy icons so icons appear immediately on first selection.
+        if (asset.rel === ICONPACK_REDESIGN_DIR || asset.rel.startsWith(ICONPACK_LEGACY_DIR)) {
+            if (asset.secondaryOf) return "";
+            return load + withPackSuffix(cands[0], suffix);
+        }
+        return "";
+    }
+    function iconPacksResolvePlusTint(name, plusIcons) {
+        if (!plusIcons) return "";
+        const direct = plusIcons[name] || (name.endsWith("-primary") ? plusIcons[name.slice(0, -8)] : null);
+        const arr = Array.isArray(direct) ? direct : typeof direct === "string" ? [direct] : null;
+        if (!arr || !arr.length) return "";
+        const p = parseThemeColor(arr[0]);
+        return p ? formatThemeColor(p) : "";
+    }
+    // Compiles the O(1) assetId -> {source, tint, noTint} table whenever the active icon pack, tint toggle or theme changes.
+    function iconPacksCompileTable(pack, plusIcons, allowTint) {
+        const assets = iconPacksScanAssets();
+        if (!assets) return null;
+        const tree = pack ? iconPacks.trees.get(pack.id) : null;
+        if (pack && !tree && !pack.custom) iconPacksFetchTree(pack);
+        const table = [];
+        let count = 0;
+        for (let i = 0; i < assets.length; i++) {
+            const a = assets[i];
+            const uri = pack ? iconPacksResolveAssetUri(a, pack, tree) : "";
+            const tint = iconPacksResolvePlusTint(a.name, plusIcons);
+            if (!uri && !tint && allowTint) continue;
+            const src = uri ? Object.freeze({__venusIcon:true, uri, width:a.width, height:a.height}) : null;
+            table[a.id] = Object.freeze({source:src, tint, noTint:!allowTint && !!uri});
+            count++;
+        }
+        iconPacks.hasActive = count > 0;
+        return count > 0 ? table : null;
+    }
+    function iconPacksBumpThemeRevision() {
+        customThemes.revision++;
+        customThemesBumpFallbackContextKey();
+        const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1193, "default"));
+        try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
+    }
+    function iconPacksApply() {
+        const on = enabled("iconPacks");
+        const pack = on ? iconPacksActiveEntry() : null;
+        const theme = features.customThemes && enabled("customThemes") ? customThemesActiveEntry() : null;
+        const plusIcons = on && theme && theme.plus && theme.plus.icons || null;
+        const allowTint = !on || !!settings.iconPacksTint;
+        const treeSize = pack && iconPacks.trees.has(pack.id) ? iconPacks.trees.get(pack.id).size : 0;
+        const nextKey = on ? (pack ? pack.id + ":" + pack.load + ":" + pack.suffix + ":" + treeSize : "none") +
+            "|t:" + (allowTint ? "1" : "0") + "|p:" + (theme && plusIcons ? theme.id + ":" + customThemes.editCounter : "") : "";
+        if (nextKey === iconPacks.appliedKey) return;
+        iconPacks.appliedKey = nextKey;
+        if (!on || (!pack && !plusIcons)) {
+            iconPacks.table = null;
+            iconPacks.hasActive = false;
+        } else {
+            iconPacks.table = iconPacksCompileTable(pack, plusIcons, allowTint);
+        }
+        iconPacksBumpThemeRevision();
+        notify("iconPacks");
+    }
+    // BaseIconImage (4579) is used by all 375 generated design-system icons. Replacing props.source with our frozen
+    // {uri, width, height} object invalidates React Compiler's memo slot (c[11] !== source) whenever the pack changes.
+    function baseIconImageHook(orig, self, args) {
+        if (!iconPacks.hasActive) return orig.apply(self, args);
+        const props = args[0];
+        if (!props) return orig.apply(self, args);
+        const srcId = props.source;
+        const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
+        if (!entry) return orig.apply(self, args);
+        const next = Object.assign({}, props);
+        if (entry.source) next.source = entry.source;
+        if (entry.noTint) next.color = null;
+        else if (entry.tint) next.color = entry.tint;
+        return orig.call(self, next);
+    }
+    baseIconImageHook.call1 = (orig, self, props) => {
+        if (!iconPacks.hasActive || !props) return orig.call(self, props);
+        const srcId = props.source;
+        const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
+        if (!entry) return orig.call(self, props);
+        const next = Object.assign({}, props);
+        if (entry.source) next.source = entry.source;
+        if (entry.noTint) next.color = null;
+        else if (entry.tint) next.color = entry.tint;
+        return orig.call(self, next);
+    };
+    // Direct <RN.Image source={assetId} /> and resolveAssetSource(assetId) callers (legacy ic_* icons, illustrations, status icons).
+    function resolveAssetSourceHook(orig, self, args) {
+        if (iconPacks.hasActive) {
+            const srcId = args[0];
+            const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
+            if (entry && entry.source) return entry.source;
+        }
+        return orig.apply(self, args);
+    }
+    resolveAssetSourceHook.call1 = (orig, self, srcId) => {
+        if (iconPacks.hasActive && typeof srcId === "number") {
+            const entry = iconPacks.table[srcId];
+            if (entry && entry.source) return entry.source;
+        }
+        return orig.call(self, srcId);
+    };
+    function hookImageModule(exports) {
+        if (!exports || !exports.default) return exports;
+        return hookComponent(exports, function (orig, self, args) {
+            if (!iconPacks.hasActive) return orig.apply(self, args);
+            const props = args[0];
+            if (!props) return orig.apply(self, args);
+            const srcId = props.source;
+            const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
+            if (!entry || !entry.source) return orig.apply(self, args);
+            const next = Object.assign({}, props, {source:entry.source});
+            if (entry.noTint && next.style) next.style = [next.style, {tintColor:undefined}];
+            else if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
+            const nextArgs = Array.from(args);
+            nextArgs[0] = next;
+            return orig.apply(self, nextArgs);
+        });
+    }
+    function hookAssetRegistryModule(exports) {
+        if (exports && typeof exports.getAssetByID === "function") {
+            iconPacks.registry = exports;
+            if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+        }
+        return exports;
+    }
+    function iconPacksPersist() {
+        if (!files || !iconPacks.loaded) return;
+        const treesObj = {};
+        iconPacks.trees.forEach((set, id) => {
+            if (set && set.size && set.size <= 3000) treesObj[id] = Array.from(set);
+        });
+        const payload = JSON.stringify({
+            version:1,
+            active:iconPacks.active || "",
+            custom:iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM),
+            trees:treesObj
+        });
+        if (payload.length > ICONPACKS_MAX_BYTES) return;
+        Promise.resolve().then(() => files.writeFile("documents", ICONPACKS_FILE, payload, "utf8")).catch(() => {});
+    }
+    function iconPacksRestore() {
+        if (iconPacks.loaded || iconPacks.loading || !files) return;
+        let constants;
+        try { constants = typeof files.getConstants === "function" ? files.getConstants() : files; } catch (_) { constants = {}; }
+        const dir = constants && constants.DocumentsDirPath;
+        if (typeof dir !== "string") { iconPacks.loaded = true; return; }
+        const path = dir.replace(/\/$/, "") + "/" + ICONPACKS_FILE;
+        iconPacks.loading = true;
+        Promise.resolve().then(() => files.fileExists(path)).then(exists => exists ? files.readFile(path, "utf8") : null).then(text => {
+            if (text && text.length <= ICONPACKS_MAX_BYTES) {
+                const parsed = JSON.parse(text);
+                if (parsed && typeof parsed === "object") {
+                    if (parsed.trees && typeof parsed.trees === "object" && !Array.isArray(parsed.trees)) {
+                        for (const id of Object.keys(parsed.trees)) {
+                            const arr = parsed.trees[id];
+                            if (Array.isArray(arr) && arr.length) iconPacks.trees.set(id, new Set(arr.filter(x => typeof x === "string")));
+                        }
+                    }
+                    if (Array.isArray(parsed.custom) && !iconPacks.custom.length) {
+                        const list = [];
+                        parsed.custom.slice(0, ICONPACKS_MAX_CUSTOM).forEach(item => {
+                            const clean = sanitizeCustomIconPack(item);
+                            if (clean && !list.some(x => x.id === clean.id)) list.push(clean);
+                        });
+                        iconPacks.custom = list;
+                    }
+                    if (!iconPacks.active && typeof parsed.active === "string" && parsed.active) {
+                        iconPacks.active = normalizeIconPackId(parsed.active);
+                    }
+                }
+            }
+        }).catch(() => {}).then(() => {
+            iconPacks.loading = false;
+            iconPacks.loaded = true;
+            if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+            notify("iconPacks");
+        });
+    }
+    function iconPacksInstallFromUrl(rawUrl, onDone) {
+        const input = typeof rawUrl === "string" ? rawUrl.trim() : "";
+        if (!/^https?:\/\/\S+/i.test(input)) {
+            iconPacks.error = tr("Enter a valid https:// or http:// link to an icon pack.");
+            notify("iconPacks");
+            return Promise.resolve(false);
+        }
+        const url = normalizeThemeUrl(input);
+        // If the link is a folder base URL (doesn't end in .json), add it directly as a custom icon pack base URL.
+        if (!/\.json(?:[?#]|$)/i.test(url)) {
+            const spec = sanitizeCustomIconPack({load:url});
+            if (!spec) {
+                iconPacks.error = tr("Enter a valid https:// or http:// link to an icon pack.");
+                notify("iconPacks");
+                return Promise.resolve(false);
+            }
+            iconPacks.loaded = true;
+            const idx = iconPacks.custom.findIndex(p => p.id === spec.id || p.load === spec.load);
+            if (idx >= 0) iconPacks.custom[idx] = spec;
+            else {
+                if (iconPacks.custom.length >= ICONPACKS_MAX_CUSTOM) iconPacks.custom.pop();
+                iconPacks.custom.unshift(spec);
+            }
+            iconPacks.active = spec.id;
+            iconPacks.error = "";
+            iconPacksPersist();
+            iconPacks.appliedKey = "";
+            iconPacksApply();
+            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4792, "CircleCheckIcon"));
+            if (typeof onDone === "function") onDone();
+            return Promise.resolve(true);
+        }
+        if (typeof global.fetch !== "function") {
+            iconPacks.error = tr("Can't reach the internet right now. Try again in a moment.");
+            notify("iconPacks");
+            return Promise.resolve(false);
+        }
+        iconPacks.installing = true;
+        iconPacks.error = "";
+        notify("iconPacks");
+        let timer;
+        const timeout = new Promise((_, reject) => {
+            timer = later(() => reject(new Error(tr("Icon pack download timed out."))), ICONPACKS_TIMEOUT_MS, false);
+        });
+        return Promise.race([
+            Promise.resolve().then(() => global.fetch(url, {method:"GET", headers:{Accept:"application/json, text/plain, */*"}})).then(res => {
+                if (!res || !res.ok) throw new Error(tr("Couldn't download icon pack (HTTP {status}).", {status:res && res.status || "error"}));
+                return res.text();
+            }),
+            timeout
+        ]).then(text => {
+            if (timer !== undefined && typeof global.clearTimeout === "function") global.clearTimeout(timer);
+            if (typeof text !== "string" || !text.trim()) throw new Error(tr("The link returned an empty file."));
+            if (text.length > ICONPACKS_MAX_BYTES) throw new Error(tr("That icon pack file is too large."));
+            let json;
+            try { json = JSON.parse(text); } catch (_) { throw new Error(tr("That link didn't return valid JSON.")); }
+            const spec = sanitizeCustomIconPack(Object.assign({url}, json));
+            if (!spec) throw new Error(tr("That JSON file has no icon pack load URL."));
+            iconPacks.loaded = true;
+            const idx = iconPacks.custom.findIndex(p => p.id === spec.id || p.load === spec.load);
+            if (idx >= 0) iconPacks.custom[idx] = spec;
+            else {
+                if (iconPacks.custom.length >= ICONPACKS_MAX_CUSTOM) iconPacks.custom.pop();
+                iconPacks.custom.unshift(spec);
+            }
+            iconPacks.active = spec.id;
+            iconPacks.installing = false;
+            iconPacks.error = "";
+            iconPacksPersist();
+            iconPacks.appliedKey = "";
+            iconPacksApply();
+            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4792, "CircleCheckIcon"));
+            if (typeof onDone === "function") onDone();
+            return true;
+        }).catch(err => {
+            if (timer !== undefined && typeof global.clearTimeout === "function") global.clearTimeout(timer);
+            iconPacks.installing = false;
+            iconPacks.error = String(err && err.message || err);
+            notify("iconPacks");
+            return false;
+        });
+    }
+    function iconPacksUse(id) {
+        if (!enabled("iconPacks") || iconPacks.installing) return;
+        const norm = id ? normalizeIconPackId(id) : "";
+        if (iconPacks.active === norm) return;
+        haptic("SELECTION"); animateLayout();
+        iconPacks.loaded = true;
+        iconPacks.active = norm;
+        iconPacks.error = "";
+        const pack = iconPackById(norm);
+        if (pack && !pack.custom && !iconPacks.trees.has(pack.id)) iconPacksFetchTree(pack);
+        iconPacksPersist();
+        iconPacks.appliedKey = "";
+        iconPacksApply();
+    }
+    function iconPacksRemoveCustom(id) {
+        iconPacks.loaded = true;
+        const idx = iconPacks.custom.findIndex(p => p.id === id);
+        if (idx < 0) return;
+        const removed = iconPacks.custom[idx];
+        iconPacks.custom.splice(idx, 1);
+        iconPacks.trees.delete(id);
+        if (iconPacks.active === id) iconPacks.active = "";
+        iconPacksPersist();
+        iconPacks.appliedKey = "";
+        iconPacksApply();
+        reviewToast(reviewUI(), tr("Removed {name}", {name:removed.name}), venusIcon(4847, "TrashIcon"));
+    }
+    function iconPacksClearCustom() {
+        iconPacks.loaded = true;
+        iconPacks.custom.forEach(p => iconPacks.trees.delete(p.id));
+        iconPacks.custom = [];
+        if (iconPacks.active && !BUILTIN_ICONPACKS.some(p => p.id === iconPacks.active)) iconPacks.active = "";
+        iconPacks.error = "";
+        iconPacksPersist();
+        iconPacks.appliedKey = "";
+        iconPacksApply();
+        reviewToast(reviewUI(), "Custom icon packs cleared", venusIcon(4847, "TrashIcon"));
+    }
+    // Six icons that exist in every built-in pack and represent Discord's core surfaces: Chat, Notifications, Friends,
+    // Reactions, Settings and Voice. Each tile in the gallery renders these 6 icons directly from that pack's URLs.
+    const ICONPACK_SHOWCASE = [
+        [5855, "ChatIcon"],
+        [9266, "BellIcon"],
+        [4831, "FriendsIcon"],
+        [8411, "ReactionIcon"],
+        [6883, "SettingsIcon"],
+        [9689, "MicrophoneIcon"]
+    ];
+    function iconPackSampleUri(pack, iconName) {
+        if (!pack) return "";
+        const suf = pack.suffix || "";
+        return pack.load + ICONPACK_REDESIGN_DIR + "/" + iconName + suf + ".png";
+    }
+    // A mini icon showcase inside each gallery tile: 6 icons in a 3x2 grid on a soft themed surface.
+    function iconPackMiniGrid(pack, k, tintColor) {
+        return el(RN.View, {style:{height:84, borderRadius:12, backgroundColor:k.segTrack.backgroundColor, paddingHorizontal:12, paddingVertical:10,
+            flexDirection:"row", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", rowGap:10}},
+            ICONPACK_SHOWCASE.map(([modId, iconName]) => {
+                const uri = pack ? iconPackSampleUri(pack, iconName) : "";
+                const tint = tintColor && (!pack || settings.iconPacksTint && pack.tint !== false) ? tintColor : undefined;
+                return el(RN.View, {key:iconName, style:{width:"30%", alignItems:"center", justifyContent:"center"}},
+                    uri && RN.Image ? el(RN.Image, {source:{uri, width:22, height:22}, fadeDuration:0,
+                        style:{width:22, height:22, tintColor:tint}, resizeMode:"contain"}) :
+                        el(venusIcon(modId, iconName), {size:"sm", color:tintColor}));
+            }));
+    }
+    // Live preview at the top of the Icon packs page: shows a channel header, a message with quick actions, a message bar
+    // and Discord's bottom tab bar, all using the active icon pack and updating immediately when you tap any pack below.
+    function IconPacksPreview(props) {
+        useSettings("iconPacks");
+        if (features.customThemes) useSettings("customThemes");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on, active = props.active;
+        const packLabel = active ? active.name : tr("Discord's icons");
+        const TabIcon = (modId, name, selected) => el(RN.View, {key:name, style:{flex:1, alignItems:"center", justifyContent:"center", paddingVertical:8, gap:3}},
+            el(venusIcon(modId, name), {size:"sm", color:selected ? s.name.color : k.iconMuted.color}),
+            el(RN.View, {style:{width:selected ? 16 : 0, height:3, borderRadius:1.5, backgroundColor:k.brandFg.color}}));
+        const body = el(RN.View, {key:"body", style:{paddingVertical:2}},
+            previewMessage(s, "msg", "Sam", "#5865f2", tr("Today at 4:01 PM"),
+                el(RN.View, {style:{gap:6}},
+                    el(RN.Text, {style:s.text}, tr("Switched to {pack} — every icon updates at once!", {pack:packLabel})),
+                    el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, marginTop:2}},
+                        [[8411, "ReactionIcon", "3"], [11366, "ArrowAngleLeftUpIcon", tr("Reply")], [4843, "CopyIcon", tr("Copy Text")], [9943, "StarIcon", ""]].map(([id, name, label]) =>
+                            el(RN.View, {key:name, style:[k.headerPill, {flexDirection:"row", width:undefined, height:28, paddingHorizontal:9, gap:5}]},
+                                el(venusIcon(id, name), {size:"xs", color:k.icon.color}),
+                                label ? el(RN.Text, {style:[s.muted, {fontSize:12, fontWeight:"600"}]}, label) : null))))));
+        const tabs = el(RN.View, {key:"tabs", style:[k.strip, {flexDirection:"row", alignItems:"center", paddingHorizontal:8}]},
+            TabIcon(5855, "ChatIcon", true),
+            TabIcon(4831, "FriendsIcon", false),
+            TabIcon(9266, "BellIcon", false),
+            TabIcon(6883, "SettingsIcon", false));
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Icon packs preview", [body], {
+                header:previewHeader(k, {title:"design", icons:[[10692, "PinIcon"], [9266, "BellIcon"], [6548, "MagnifyingGlassIcon"]]}),
+                footer:el(RN.View, {key:"foot"},
+                    previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#design"})}),
+                    tabs,
+                    !on ? null : previewCaption(s, active ? tr("{name} is active across Discord.", {name:active.name}) : tr("Tap any icon pack below to try it live.")))
+            }));
+    }
+    function IconPacksSettings() {
+        useSettings("iconPacks");
+        if (features.customThemes) useSettings("customThemes");
+        const [urlDraft, setUrlDraft] = React.useState("");
+        const ui = reviewUI();
+        React.useEffect(() => {
+            if (enabled("iconPacks")) iconPacksRestore();
+        }, []);
+        if (!React || !RN) return null;
+        const s = useThemeTileStyles(), k = usePreviewChrome();
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Text = inspectedExport(4886, "Text"), Press = RN.Pressable || RN.View, Check = venusIcon(6628, "CheckmarkSmallIcon");
+        const on = enabled("iconPacks"), busy = iconPacks.installing;
+        const canInstall = on && !busy && /^https?:\/\/\S+/i.test(urlDraft.trim());
+        const onInstall = () => {
+            if (!canInstall) return;
+            iconPacksInstallFromUrl(urlDraft, () => setUrlDraft(""));
+        };
+        const onPaste = () => {
+            if (!on || busy) return;
+            const clip = ui.clipboard || RN.Clipboard;
+            if (!clip || typeof clip.getString !== "function") return;
+            Promise.resolve().then(() => clip.getString()).then(str => {
+                if (typeof str === "string" && str.trim()) setUrlDraft(str.trim());
+            }).catch(() => {});
+        };
+        const empty = !urlDraft.trim();
+        const urlInput = inputWithButton(ui, "input", {
+            label:tr("Icon pack link"),
+            value:urlDraft,
+            autoCapitalize:"none",
+            autoCorrect:false,
+            keyboardType:"url",
+            placeholder:tr("https://.../pack/ or config.json"),
+            onSubmitEditing:onInstall,
+            returnKeyType:"go",
+            editable:on && !busy,
+            isDisabled:!on || busy
+        }, text => setUrlDraft(String(text || "")), busy ? "Installing…" : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || busy : !canInstall);
+        const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1, numberOfLines:1}, value) :
+            el(RN.Text, {style:fallback, numberOfLines:1}, value);
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
+        const active = iconPacksActiveEntry();
+        const activeTheme = features.customThemes && enabled("customThemes") ? customThemesActiveEntry() : null;
+        const themePack = activeTheme && activeTheme.plus && activeTheme.plus.iconpack ? iconPackById(activeTheme.plus.iconpack) : null;
+        const followingTheme = !!(on && settings.iconPacksTheme && themePack);
+        const makeTile = opts => el(Press, {
+            key:opts.key,
+            style:[s.tile, opts.selected ? s.on : null, {opacity:opts.disabled ? 0.5 : 1}],
+            accessibilityRole:"radio",
+            accessibilityLabel:opts.name,
+            accessibilityHint:opts.sub || undefined,
+            accessibilityState:{selected:!!opts.selected, disabled:!!opts.disabled},
+            disabled:!!opts.disabled,
+            onPress:opts.onPress,
+            onLongPress:opts.onLongPress,
+            delayLongPress:400
+        },
+        iconPackMiniGrid(opts.pack, k, k.icon.color),
+        opts.selected ? el(RN.View, {style:s.check, pointerEvents:"none"}, popIn("check:" + opts.key, el(Check, {size:"xs", color:"#ffffff"}))) : null,
+        el(RN.View, {style:{paddingHorizontal:8, paddingTop:8, paddingBottom:6, gap:1}},
+            line(opts.name, "text-sm/semibold", "text-strong", {color:"#f2f3f5", fontSize:14, fontWeight:"600"}),
+            opts.sub ? line(opts.sub, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}) : null));
+        const tiles = [makeTile({
+            key:"discord",
+            pack:null,
+            name:tr("Discord's icons"),
+            sub:on && !active ? tr("In use") : tr("Default"),
+            selected:on && !active,
+            disabled:!on || busy,
+            onPress:() => { if (followingTheme) setSetting("iconPacksTheme", false); iconPacksUse(""); }
+        })];
+        iconPackCatalog().forEach(pack => {
+            if (!pack) return;
+            const selected = !!(on && active && active.id === pack.id);
+            const isLoading = iconPacks.loadingTrees.has(pack.id);
+            const sub = selected ? (isLoading ? tr("Loading icons…") : followingTheme && themePack && themePack.id === pack.id ? tr("From theme") : tr("In use")) :
+                pack.authors ? tr("by {author}", {author:pack.authors}) : pack.description || "";
+            tiles.push(makeTile({
+                key:"pack:" + pack.id,
+                pack,
+                name:pack.name,
+                sub,
+                selected,
+                disabled:!on || busy,
+                onPress:() => { if (followingTheme && themePack && themePack.id !== pack.id) setSetting("iconPacksTheme", false); iconPacksUse(pack.id); },
+                onLongPress:pack.custom ? () => confirmAction("Remove icon pack?", tr("Remove {name} from this phone?", {name:pack.name}), "Remove", () => iconPacksRemoveCustom(pack.id)) : undefined
+            }));
+        });
+        const gallery = el(RN.View, {key:"packs", style:{gap:8}},
+            groupTitle("title", "Icon packs"),
+            el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", justifyContent:"space-between", rowGap:12}, accessibilityRole:"radiogroup"}, tiles));
+        const problem = on && iconPacks.error ? el(RN.View, {key:"error", style:{paddingHorizontal:12, paddingBottom:12, gap:2}, accessibilityLiveRegion:"polite"},
+            text(tr("Couldn't install the icon pack"), "text-sm/semibold", "text-feedback-critical", {color:"#f23f43", fontSize:14, fontWeight:"600"}),
+            text(iconPacks.error, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12})) : null;
+        const groups = [
+            on ? null : offCard("status", venusIcon(9640, "ImageSparkleIcon"), "iconPacks"),
+            el(IconPacksPreview, {key:"preview", on, active}),
+            gallery,
+            el(Group, {key:"display", title:tr("Display")},
+                switchRow(Switch, "iconPacksTint", "Tint icons with theme colors", "Turn off for duotone or full-color packs so they keep their own shading.", rowIcon(15080, "PaintPaletteIcon")),
+                features.customThemes ? switchRow(Switch, "iconPacksTheme", "Follow theme's icon pack", "Uses the icon pack recommended by your active custom theme, when it sets one.", rowIcon(15172, "EyeDropperIcon")) : null),
+            el(Group, {key:"install", title:tr("Add from link"), description:tr("Paste a custom icon pack folder URL or config.json link.")},
+                el(RN.View, {key:"input", style:{padding:12}}, urlInput), problem),
+            iconPacks.custom.length ? el(Group, {key:"manage", title:tr("Manage")},
+                actionRow(ui, "clear", "Clear custom icon packs",
+                    pl(iconPacks.custom.length, "Removes {n} custom icon pack from this phone.", "Removes {n} custom icon packs from this phone."),
+                    () => confirmAction("Clear custom icon packs?", "Every custom icon pack you added will be removed from this phone.", "Clear", iconPacksClearCustom),
+                    !on, true)) : null,
+            footnote("note", iconPacks.custom.length ? "Hold a custom icon pack to remove it. Icons change right away, with no restart." : "Icons change across Discord right away, with no restart.")
+        ];
+        return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
+    }
     // Message highlights settings: a live chat preview, the bar width as a segmented choice, and a row of color
     // swatches per highlight, with Discord's own color picker (showCustomColorPickerActionSheet 14421) for any color.
     const HIGHLIGHT_PING_CHOICES = [["default", "Yellow", "#f0b232"], ["blurple", "Blurple", "#5865f2"], ["cyan", "Cyan", "#00a8fc"],
@@ -9081,15 +9910,19 @@
                     }); } catch (_) {}
                 }
                 return exports;
+            case 81: return features.iconPacks ? hookExport(exports, "default", resolveAssetSourceHook) : exports;
+            case 84: return features.iconPacks ? hookAssetRegistryModule(exports) : exports;
+            case 328: return features.iconPacks ? hookImageModule(exports) : exports;
+            case 4579: return features.iconPacks ? hookExport(exports, "BaseIconImage", baseIconImageHook) : exports;
             case 8828: return features.appIcons ? hookAppIconConstants(exports) : exports;
             case 17455: return features.appIcons ? hookAppIconPremiumManager(exports) : exports;
             case 15351: case 15352: case 17106: return features.appIcons ? hookComponent(exports, appIconsScreen) : exports;
             case 589: return features.customThemes ? hookSemanticColorsModule(exports) : exports;
             case 591: return features.customThemes ? hookRawColorsModule(exports) : exports;
             case 590: return features.customThemes ? hookExperimentColorsModule(exports) : exports;
-            case 9758: return features.customThemes ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
-            case 1193: if (features.customThemes && exports && exports.default) customThemes.themeStore = exports.default; return exports;
-            case 4593: return features.customThemes ? hookCreateThemedContext(exports) : exports;
+            case 9758: return (features.customThemes || features.iconPacks) ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
+            case 1193: if ((features.customThemes || features.iconPacks) && exports && exports.default) customThemes.themeStore = exports.default; return exports;
+            case 4593: return (features.customThemes || features.iconPacks) ? hookCreateThemedContext(exports) : exports;
             case 9769: return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
             case 12056: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
             case 12058: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
