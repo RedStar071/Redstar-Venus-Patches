@@ -6026,7 +6026,21 @@
             typeof call1 === "function" ?
             function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
             function () { return operation(orig, this, arguments); };
+        copyStatics(patched, orig);
         return replaceValue(exports, key, patched);
+    }
+    // A wrapper must keep the static members of the function it replaces: resolveAssetSource (81) carries
+    // addCustomSourceTransformer and pickScale, which BundleUpdater calls at launch, and Image (328) carries getSize,
+    // prefetch and resolveAssetSource. Losing them crashed Discord on start with "undefined is not a function".
+    function copyStatics(target, source) {
+        const names = Object.getOwnPropertyNames(source);
+        for (let i = 0; i < names.length; i++) {
+            const name = names[i];
+            if (name === "length" || name === "name" || name === "prototype" || name === "arguments" || name === "caller") continue;
+            const descriptor = Object.getOwnPropertyDescriptor(source, name);
+            if (descriptor) try { Object.defineProperty(target, name, descriptor); } catch (_) {}
+        }
+        return target;
     }
     // Hook a component export (plain function, or memo/forwardRef object) without breaking React tags.
     function hookComponent(exports, operation, key) {
@@ -6041,6 +6055,7 @@
                 typeof call1 === "function" ?
                 function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
                 function () { return operation(orig, this, arguments); };
+            copyStatics(patched, orig);
             return replaceValue(exports, key, cloneWith(component, inner, patched));
         }
         return hookExport(exports, key, operation);
