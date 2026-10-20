@@ -9109,7 +9109,7 @@
     };
     const iconPacks = {
         registry:null, table:null, ctx:null, hasActive:false, appliedKey:"",
-        active:"", custom:[], trees:new Map(), loadingTrees:new Set(),
+        active:"", custom:[], trees:new Map(), loadingTrees:new Set(), treeTries:new Map(),
         loaded:false, loading:false, installing:false, error:""
     };
     function normalizeIconPackId(raw) {
@@ -9231,15 +9231,19 @@
         Promise.resolve().then(() => global.fetch(ICONPACKS_TREE_BASE + encodeURIComponent(id) + ".txt", {method:"GET"}))
             .then(res => res && res.ok ? res.text() : "")
             .then(text => {
-                if (typeof text === "string" && text.trim()) {
-                    const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-                    if (lines.length) {
-                        iconPacks.trees.set(id, new Set(lines));
-                        iconPacksPersist();
-                        if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
-                    }
-                }
-            }).catch(() => {}).then(() => {
+                const lines = typeof text === "string" ? text.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+                if (!lines.length) throw new Error("empty");
+                iconPacks.trees.set(id, new Set(lines));
+                iconPacks.treeTries.delete(id);
+                iconPacksPersist();
+                if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+            }).catch(() => {
+                // Offline or a GitHub hiccup: try again a little later (3 times) instead of keeping Discord's icons until
+                // the pack is picked again.
+                const tries = (iconPacks.treeTries.get(id) || 0) + 1;
+                iconPacks.treeTries.set(id, tries);
+                if (tries <= 3) later(() => { if (enabled("iconPacks") && iconPacksActiveEntry() === pack) iconPacksFetchTree(pack); }, 15000 * tries, false);
+            }).then(() => {
                 iconPacks.loadingTrees.delete(id);
                 notify("iconPacks");
             });
@@ -9267,8 +9271,10 @@
             }
             return "";
         }
-        // Before the tree manifest has arrived (or for a custom URL pack without a manifest), use the direct path for
-        // redesign and legacy icons so icons appear immediately on first selection.
+        // A built-in pack waits for its file list: a guessed path is missing for 31-52% of 349.9's icons in every one of
+        // them, and those drew as blank squares. Discord's own icon stays until the list says the pack has one.
+        if (!pack.custom) return "";
+        // A custom pack without a file list can only be guessed.
         if (asset.rel === ICONPACK_REDESIGN_DIR || asset.rel.startsWith(ICONPACK_LEGACY_DIR)) {
             if (asset.secondaryOf) return "";
             return load + withPackSuffix(cands[0], suffix);
@@ -9376,10 +9382,10 @@
     }
     function iconPacksPersist() {
         if (!files || !iconPacks.loaded) return;
-        const treesObj = {};
-        iconPacks.trees.forEach((set, id) => {
-            if (set && set.size && set.size <= 3000) treesObj[id] = Array.from(set);
-        });
+        // Only the pack in use keeps its file list on the phone (~40-90 KB); others download again when picked. Keeping
+        // every list (558 KB for the 10 built-in packs) neared the 1 MB cap, past which nothing was saved, not even your pick.
+        const treesObj = {}, inUse = iconPacksActiveEntry(), keepId = inUse && !inUse.custom ? inUse.id : "", keep = keepId && iconPacks.trees.get(keepId);
+        if (keep && keep.size && keep.size <= 4000) treesObj[keepId] = Array.from(keep);
         const payload = JSON.stringify({
             version:1,
             active:iconPacks.active || "",
