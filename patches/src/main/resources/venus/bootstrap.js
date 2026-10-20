@@ -9596,23 +9596,26 @@
         [6883, "SettingsIcon"],
         [9689, "MicrophoneIcon"]
     ];
+    // The pack's own image for a design-system icon, or "" when its file list says it has none (then Discord's stays).
     function iconPackSampleUri(pack, iconName) {
         if (!pack) return "";
-        const suf = pack.suffix || "";
-        return pack.load + ICONPACK_REDESIGN_DIR + "/" + iconName + suf + ".png";
+        const rel = withPackSuffix(ICONPACK_REDESIGN_DIR + "/" + iconName + ".png", pack.suffix || ""), tree = iconPacks.trees.get(pack.id);
+        return tree && tree.size && !tree.has(rel) ? "" : pack.load + rel;
+    }
+    // One icon as it looks with this pack: the pack's image in the given color, or Discord's own icon when the pack
+    // doesn't have it or the image fails to load, so a preview never shows an empty box.
+    function PackIcon(props) {
+        const [failed, setFailed] = React.useState(""), uri = props.pack ? iconPackSampleUri(props.pack, props.name) : "", px = props.px || 22;
+        if (uri && uri !== failed && RN.Image) return el(RN.Image, {source:{uri, width:px, height:px}, fadeDuration:0, resizeMode:"contain",
+            style:{width:px, height:px, tintColor:props.color || undefined}, onError:() => setFailed(uri)});
+        return el(venusIcon(props.id, props.name), {size:px >= 22 ? "sm" : "xs", color:props.color});
     }
     // A mini icon showcase inside each gallery tile: 6 icons in a 3x2 grid on a soft themed surface.
     function iconPackMiniGrid(pack, k, tintColor) {
         return el(RN.View, {style:{height:84, borderRadius:12, backgroundColor:k.segTrack.backgroundColor, paddingHorizontal:12, paddingVertical:10,
             flexDirection:"row", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", rowGap:10}},
-            ICONPACK_SHOWCASE.map(([modId, iconName]) => {
-                const uri = pack ? iconPackSampleUri(pack, iconName) : "";
-                const tint = tintColor || undefined;
-                return el(RN.View, {key:iconName, style:{width:"30%", alignItems:"center", justifyContent:"center"}},
-                    uri && RN.Image ? el(RN.Image, {source:{uri, width:22, height:22}, fadeDuration:0,
-                        style:{width:22, height:22, tintColor:tint}, resizeMode:"contain"}) :
-                        el(venusIcon(modId, iconName), {size:"sm", color:tintColor}));
-            }));
+            ICONPACK_SHOWCASE.map(([modId, iconName]) => el(RN.View, {key:iconName, style:{width:"30%", alignItems:"center", justifyContent:"center"}},
+                el(PackIcon, {pack, id:modId, name:iconName, color:tintColor}))));
     }
     // Live preview at the top of the Icon packs page: shows a channel header, a message with quick actions, a message bar
     // and Discord's bottom tab bar, all using the active icon pack and updating immediately when you tap any pack below.
@@ -9621,8 +9624,11 @@
         if (features.customThemes) useSettings("customThemes");
         const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on, active = props.active;
         const packLabel = active ? active.name : tr("Discord's icons");
+        // Drawn from the active pack directly, so the preview changes the moment you tap a pack (Discord's own icons only
+        // switch once the pack's file list has loaded) and falls back to Discord's icon for one the pack lacks.
+        const pack = on ? active : null;
         const TabIcon = (modId, name, selected) => el(RN.View, {key:name, style:{flex:1, alignItems:"center", justifyContent:"center", paddingVertical:8, gap:3}},
-            el(venusIcon(modId, name), {size:"sm", color:selected ? s.name.color : k.iconMuted.color}),
+            el(PackIcon, {pack, id:modId, name, color:selected ? s.name.color : k.iconMuted.color}),
             el(RN.View, {style:{width:selected ? 16 : 0, height:3, borderRadius:1.5, backgroundColor:k.brandFg.color}}));
         const body = el(RN.View, {key:"body", style:{paddingVertical:2}},
             previewMessage(s, "msg", "Sam", "#5865f2", tr("Today at 4:01 PM"),
@@ -9631,7 +9637,7 @@
                     el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, marginTop:2}},
                         [[8411, "ReactionIcon", "3"], [11366, "ArrowAngleLeftUpIcon", tr("Reply")], [4843, "CopyIcon", tr("Copy Text")], [9943, "StarIcon", ""]].map(([id, name, label]) =>
                             el(RN.View, {key:name, style:[k.headerPill, {flexDirection:"row", width:undefined, height:28, paddingHorizontal:9, gap:5}]},
-                                el(venusIcon(id, name), {size:"xs", color:k.icon.color}),
+                                el(PackIcon, {pack, id, name, px:16, color:k.icon.color}),
                                 label ? el(RN.Text, {style:[s.muted, {fontSize:12, fontWeight:"600"}]}, label) : null))))));
         const tabs = el(RN.View, {key:"tabs", style:[k.strip, {flexDirection:"row", alignItems:"center", paddingHorizontal:8}]},
             TabIcon(5855, "ChatIcon", true),
