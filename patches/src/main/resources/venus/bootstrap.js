@@ -9380,20 +9380,31 @@
         }
         return orig.call(self, srcId);
     };
+    // Every <Image> in Discord (avatars, attachments, emojis, icons) renders through this while a pack is on, and most
+    // aren't replaced, so the miss path matters. React calls a function component as (props, secondArg): call2 skips
+    // passing arguments on, and a hit no longer copies args (tests/bench/icon_image_hook.js, 2.16x).
+    function imageHook(orig, self, args) {
+        const props = args[0];
+        if (!iconPacks.hasActive || !props) return orig.apply(self, args);
+        const entry = iconPacksEntry(props.source);
+        if (!entry.source) return orig.apply(self, args);
+        const nextArgs = Array.from(args);
+        nextArgs[0] = iconPacksImageProps(props, entry);
+        return orig.apply(self, nextArgs);
+    }
+    imageHook.call2 = (orig, self, props, second) => {
+        if (!iconPacks.hasActive || !props) return orig.call(self, props, second);
+        const entry = iconPacksEntry(props.source);
+        return entry.source ? orig.call(self, iconPacksImageProps(props, entry), second) : orig.call(self, props, second);
+    };
+    imageHook.call1 = (orig, self, props) => imageHook.call2(orig, self, props, undefined);
+    function iconPacksImageProps(props, entry) {
+        const next = Object.assign({}, props, {source:entry.source});
+        if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
+        return next;
+    }
     function hookImageModule(exports) {
-        if (!exports || !exports.default) return exports;
-        return hookComponent(exports, function (orig, self, args) {
-            if (!iconPacks.hasActive) return orig.apply(self, args);
-            const props = args[0];
-            if (!props) return orig.apply(self, args);
-            const entry = iconPacksEntry(props.source);
-            if (!entry.source) return orig.apply(self, args);
-            const next = Object.assign({}, props, {source:entry.source});
-            if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
-            const nextArgs = Array.from(args);
-            nextArgs[0] = next;
-            return orig.apply(self, nextArgs);
-        });
+        return exports && exports.default ? hookComponent(exports, imageHook) : exports;
     }
     function hookAssetRegistryModule(exports) {
         if (exports && typeof exports.getAssetByID === "function") {
