@@ -9345,10 +9345,32 @@
     }
     // BaseIconImage (4579) is used by all 375 generated design-system icons. Replacing props.source with our frozen
     // {uri, width, height} object invalidates React Compiler's memo slot (c[11] !== source) whenever the pack changes.
+    // Previews draw each pack's own icons, so a sample that falls back to Discord's (the "Discord's icons" tile, or an
+    // icon a pack lacks) renders inside iconPacksOriginal, which BaseIconImage reads to keep Discord's real icon there.
+    let ICONPACK_ORIGINAL_CTX = null;
+    function iconPacksOriginalContext() {
+        return ICONPACK_ORIGINAL_CTX || (React && React.createContext ? ICONPACK_ORIGINAL_CTX = React.createContext(false) : null);
+    }
+    function iconPacksKeepOriginal() {
+        // useContext only reads a value (it keeps no hook state), so calling it only while a pack is on is safe.
+        const ctx = iconPacksOriginalContext();
+        if (!ctx || !React.useContext) return false;
+        try { return React.useContext(ctx) === true; } catch (_) { return false; }
+    }
+    // Discord's own image for an icon, already resolved: the Image and resolveAssetSource hooks only swap numeric
+    // asset IDs, so this one stays Discord's even while a pack is on.
+    function iconPacksOriginalProps(props) {
+        const id = props.source, resolve = iconPacks.resolveOriginal;
+        if (typeof id !== "number" || typeof resolve !== "function") return props;
+        let src = null;
+        try { src = resolve(id); } catch (_) {}
+        return src && typeof src === "object" ? Object.assign({}, props, {source:src}) : props;
+    }
     function baseIconImageHook(orig, self, args) {
         if (!iconPacks.hasActive) return orig.apply(self, args);
         const props = args[0];
         if (!props) return orig.apply(self, args);
+        if (iconPacksKeepOriginal()) return orig.call(self, iconPacksOriginalProps(props));
         const entry = iconPacksEntry(props.source);
         if (entry === ICONPACK_MISS) return orig.apply(self, args);
         const next = Object.assign({}, props);
@@ -9358,6 +9380,7 @@
     }
     baseIconImageHook.call1 = (orig, self, props) => {
         if (!iconPacks.hasActive || !props) return orig.call(self, props);
+        if (iconPacksKeepOriginal()) return orig.call(self, iconPacksOriginalProps(props));
         const entry = iconPacksEntry(props.source);
         if (entry === ICONPACK_MISS) return orig.call(self, props);
         const next = Object.assign({}, props);
@@ -9608,7 +9631,9 @@
         const [failed, setFailed] = React.useState(""), uri = props.pack ? iconPackSampleUri(props.pack, props.name) : "", px = props.px || 22;
         if (uri && uri !== failed && RN.Image) return el(RN.Image, {source:{uri, width:px, height:px}, fadeDuration:0, resizeMode:"contain",
             style:{width:px, height:px, tintColor:props.color || undefined}, onError:() => setFailed(uri)});
-        return el(venusIcon(props.id, props.name), {size:px >= 22 ? "sm" : "xs", color:props.color});
+        const icon = el(venusIcon(props.id, props.name), {size:px >= 22 ? "sm" : "xs", color:props.color});
+        const ctx = iconPacksOriginalContext();
+        return ctx ? el(ctx.Provider, {value:true}, icon) : icon;
     }
     // A mini icon showcase inside each gallery tile: 6 icons in a 3x2 grid on a soft themed surface.
     function iconPackMiniGrid(pack, k, tintColor) {
@@ -9957,7 +9982,10 @@
                     }); } catch (_) {}
                 }
                 return exports;
-            case 81: return features.iconPacks ? hookExport(exports, "default", resolveAssetSourceHook) : exports;
+            case 81:
+                if (!features.iconPacks) return exports;
+                if (exports && typeof exports.default === "function") iconPacks.resolveOriginal = exports.default;
+                return hookExport(exports, "default", resolveAssetSourceHook);
             case 84: return features.iconPacks ? hookAssetRegistryModule(exports) : exports;
             case 328: return features.iconPacks ? hookImageModule(exports) : exports;
             case 4579: return features.iconPacks ? hookExport(exports, "BaseIconImage", baseIconImageHook) : exports;
