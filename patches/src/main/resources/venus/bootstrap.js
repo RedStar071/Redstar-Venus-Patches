@@ -40,6 +40,7 @@
     if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
     if (features.customThemes) selectModules([589, 590, 591, 1193, 4593, 9758, 9769]);
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
+    if (features.serverInfo) selectModules([1377, 16226]);
     const revision = "1.16.1";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "349.9";
@@ -58,7 +59,7 @@
         translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
-        messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", language:"auto" };
+        messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -72,7 +73,7 @@
             translate: false, translateTarget: "discord", translateMode: "auto", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
-            messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", language: "auto"
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -715,7 +716,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -750,7 +751,7 @@
         hiddenChannels:[5879, "LockIcon"], dashless:[15411, "HashmarkIcon"], systemFont:[15493, "LettersIcon"], systemEmoji:[8944, "ChatSmileIcon"],
         hideGift:[10766, "GiftIcon"], hideCall:[7523, "PhoneCallIcon"], youBarSettings:[6883, "SettingsIcon"], quests:[14803, "QuestsIcon"],
         hideQuestDock:[6456, "EyeSlashIcon"], userNotif:[9266, "BellIcon"], accountSwitcher:[5873, "GroupIcon"], appIcons:[5890, "AppsIcon"],
-        customThemes:[15172, "EyeDropperIcon"], messageHighlight:[16425, "PaintbrushThinIcon"]};
+        customThemes:[15172, "EyeDropperIcon"], messageHighlight:[16425, "PaintbrushThinIcon"], serverInfo:[4812, "CircleInformationIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -786,7 +787,7 @@
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
-        hiddenChannels:["Show its details"], customThemes:["Show theme background image", "Browse Revenge themes"]};
+        hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1092,6 +1093,7 @@
         // Servers
         withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button that marks servers and DMs as read.", "Read all", ReadAllSettings);
         withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open show with a lock. Messages stay hidden.", "Hidden channels", HiddenChannelsSettings);
+        withOptions("servers", "serverInfo", "VENUS_SERVERINFO", "Server info", "Hold a server's icon to see its details, boosts and friends there.", "Server info", ServerInfoSettings);
         toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\".");
         // Appearance
         toggle("appearance", "systemFont", "Use your phone's font", "Replaces Discord's font everywhere. Android 9 or newer.");
@@ -4295,6 +4297,101 @@
             footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];
         return settingsBody(ui,groups);
     }
+    // Server info's preview is the server list as Discord draws it: hold a server's icon, its menu opens with Server info
+    // as the last row, and a tap shows the sheet with the sample server's details. Watch plays that; Try it lets you do it.
+    const SERVER_SAMPLES = [["GN", "#5865f2", "Game Night"], ["AR", "#3ba55c", "Art Club"], ["WD", "#eb459e", "Wumpus Den"]];
+    const SERVER_SAMPLE_FRIENDS = [{id:"a", username:"Alex"}, {id:"b", username:"Sam"}, {id:"c", username:"Jordan"}];
+    function ServerInfoPreview(props) {
+        useSettings("serverInfo");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), si = useServerInfoStyles(), [mode, setMode] = usePreviewMode(), on = props.on;
+        const blank = {held:false, menu:false, sheet:false, pulse:null, picked:false, tried:0};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const friends = settings.serverInfoFriends;
+        const story = useStory(watching, () => [[0, () => setState(blank), tr("Hold a server's icon in the server list")],
+            [900, () => update(st => ({held:true, pulse:{who:"icon", id:"hold" + (st.tried + 1)}}))],
+            [500, () => { animateLayout(); update({menu:true}); }, tr("Its menu opens, with Server info at the bottom")],
+            [1600, () => update({picked:true, pulse:{who:"row", id:"row"}}), tr("Tap Server info")],
+            [400, () => { animateLayout(); update({menu:false, held:false, sheet:true, picked:false}); },
+                tr(friends ? "Live details, boosts, the owner and which friends are there" : "Live details, boosts and the owner, with friends Discord has loaded")],
+            [3600, () => { animateLayout(); update({sheet:false}); }], [600, () => {}]], [friends]);
+        const Press = RN.Pressable || RN.View;
+        const hold = () => { if (!on || watching) return; haptic("IMPACT_MEDIUM"); animateLayout();
+            update(st => ({held:true, menu:true, sheet:false, tried:Math.max(st.tried, 1), pulse:{who:"icon", id:"try" + st.tried}})); };
+        const pick = () => { if (!on || watching) return; haptic("SELECTION"); animateLayout(); update({menu:false, held:false, sheet:true, tried:2}); };
+        const closeAll = () => { if (watching) return; animateLayout(); update({menu:false, held:false, sheet:false}); };
+        const icon = ([letters, color, name], i) => {
+            const first = i === 0, held = first && state.held;
+            return el(Press, {key:letters, onLongPress:first ? hold : undefined, delayLongPress:300, accessibilityRole:"button", accessibilityLabel:name,
+                style:{alignItems:"center", justifyContent:"center", width:64, height:56}},
+                held ? el(RN.View, {style:{position:"absolute", left:0, width:4, height:36, borderTopRightRadius:4, borderBottomRightRadius:4, backgroundColor:s.name.color}}) : null,
+                el(RN.View, {style:{width:44, height:44, borderRadius:held ? 14 : 22, backgroundColor:color, alignItems:"center", justifyContent:"center",
+                    transform:held ? [{scale:0.92}] : []}},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:15, fontWeight:"700"}}, letters)),
+                first ? tapRipple(state.pulse, "icon", {left:15, top:11}) : null);
+        };
+        const rail = el(RN.View, {key:"rail", style:{width:64, paddingVertical:6, alignItems:"center"}}, SERVER_SAMPLES.map(icon));
+        const channels = el(RN.View, {key:"channels", style:{flex:1, paddingVertical:8, gap:2}},
+            el(RN.Text, {style:[k.title, {fontSize:16, paddingHorizontal:12, paddingBottom:6}], numberOfLines:1}, tr("Game Night")),
+            ["general", "clips", "memes"].map((name, i) => el(RN.View, {key:name, style:[{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10,
+                paddingVertical:6, marginHorizontal:6, borderRadius:8}, i === 0 ? k.selected : null]},
+                el(venusIcon(15411, "HashmarkIcon"), {size:"xs", color:k.channel.color}),
+                el(RN.Text, {style:[s.text, {fontSize:14, color:i === 0 ? s.name.color : k.channel.color}]}, name))));
+        const menuRow = (key, label, Icon, highlight) => el(highlight ? Press : RN.View, Object.assign({key, style:[{flexDirection:"row", alignItems:"center", gap:12,
+            paddingHorizontal:14, paddingVertical:10}, highlight && state.picked ? k.selected : null]},
+            highlight ? {onPress:pick, accessibilityRole:"button", accessibilityLabel:label} : null),
+            el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {flex:1, fontSize:15}]}, label),
+            highlight ? tapRipple(state.pulse, "row", {right:24, top:4}) : null);
+        const overlay = (key, child) => el(RN.View, {key, style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"flex-end"}]},
+            el(Press, {style:{flex:1}, onPress:closeAll, accessibilityLabel:tr("Cancel")}), child);
+        // Discord's own rows in that menu, then ours, the way they really show.
+        const menu = state.menu ? overlay("menu", popIn("menu", el(RN.View, {style:[k.sheet, {paddingHorizontal:8, paddingBottom:8}]},
+            el(RN.View, {style:[k.sheetRow, {borderRadius:16, borderWidth:1, overflow:"hidden"}]},
+                menuRow("invite", tr("Invite people"), venusIcon(4833, "UserPlusIcon")),
+                menuRow("bell", tr("Notifications"), venusIcon(9266, "BellIcon")),
+                menuRow("settings", tr("Settings"), venusIcon(6883, "SettingsIcon")),
+                menuRow("info", tr("Server info"), venusIcon(4812, "CircleInformationIcon"), true))))) : null;
+        const tile = (key, Icon, value, label) => el(RN.View, {key, style:[si.tile, {minWidth:0, flexBasis:"22%", paddingHorizontal:8, paddingVertical:8, gap:2, borderRadius:12}]},
+            el(Icon, {size:"xs"}), el(RN.Text, {style:[s.name, {fontSize:16, fontWeight:"700"}]}, value),
+            el(RN.Text, {style:[s.muted, {fontSize:11}], numberOfLines:1}, label));
+        const sheet = state.sheet ? overlay("sheet", popIn("sheet", el(RN.View, {style:[k.sheet, {paddingHorizontal:10, paddingBottom:10, gap:8}]},
+            el(RN.View, {style:{height:44, borderRadius:12, backgroundColor:"#5865f2", opacity:0.55}}),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"flex-end", gap:10, marginTop:-26, paddingHorizontal:8}},
+                el(RN.View, {style:[si.ring, {width:52, height:52, borderRadius:18, borderWidth:3, backgroundColor:"#5865f2", alignItems:"center", justifyContent:"center"}]},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, "GN")),
+                el(RN.View, {style:{flex:1, paddingBottom:2}},
+                    el(RN.Text, {style:[s.name, {fontSize:16, fontWeight:"700"}], numberOfLines:1}, tr("Game Night")),
+                    el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:5}},
+                        el(RN.View, {style:{width:8, height:8, borderRadius:4, backgroundColor:STATUS_HEX.online}}),
+                        el(RN.Text, {style:[s.muted, {fontSize:12}], numberOfLines:1},
+                            tr("{count} online", {count:serverNumber(318)}) + " \u00b7 " + serverCount(1284, "{n} member", "{n} members"))))),
+            el(RN.View, {style:{flexDirection:"row", gap:6}},
+                tile("c", venusIcon(15411, "HashmarkIcon"), serverNumber(24), tr("Channels")), tile("r", venusIcon(9232, "ShieldUserIcon"), serverNumber(12), tr("Roles")),
+                tile("e", venusIcon(8411, "ReactionIcon"), serverNumber(48), tr("Emojis")), tile("b", venusIcon(16149, "BoostTier2Icon"), serverNumber(9), tr("Boosts"))),
+            el(RN.View, {style:[si.card, {flexDirection:"row", alignItems:"center", gap:10, paddingVertical:10, borderRadius:12}]},
+                friends ? avatarPile(SERVER_SAMPLE_FRIENDS, si.ring.borderColor) : el(venusIcon(4831, "FriendsIcon"), {size:"sm"}),
+                el(RN.Text, {style:[s.text, {flex:1, fontSize:14}]}, serverCount(friends ? 3 : 1, "{n} friend here", "{n} friends here")),
+                el(venusIcon(10631, "CrownIcon"), {size:"xs", color:"#f0b232"}))))) : null;
+        const tip = on && !watching ? previewTip(k, state.tried === 0 ? tr("Hold the Game Night icon") : state.menu ? tr("Tap Server info") :
+            state.sheet ? tr("That's the sheet you'll see in Discord. Tap outside it to close") : tr("Hold the icon again to reopen it")) : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Server info preview",
+                [el(RN.View, {key:"body", style:{minHeight:236, flexDirection:"row", overflow:"hidden"}}, rail, channels, menu, sheet), tip],
+                {footer:watching ? storyStrip(k, s, story) : null}));
+    }
+    function ServerInfoSettings() {
+        useSettings("serverInfo");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("serverInfo"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const groups = [
+            on ? null : offCard("status", venusIcon(4812, "CircleInformationIcon"), "serverInfo"),
+            el(ServerInfoPreview, {key:"preview", on}),
+            el(Group, {key:"friends", title:tr("Friends")},
+                switchRow(Switch, "serverInfoFriends", "Look up friends in the server", "Asks Discord which of your friends are members when you open it.", rowIcon(4831, "FriendsIcon"))),
+            footnote("note", "Everything else comes from what Discord has already loaded, and updates while the sheet is open.")];
+        return settingsBody(ui, groups);
+    }
     function ReadAllSettings() {
         useSettings("readAll");
         const ui=reviewUI();
@@ -5409,6 +5506,295 @@
         const next=Array.from(args);
         next[0]=Object.assign({},props,{menu:Object.assign({},menu,{items:menu.items.concat([{label:tr("Reviews"),action:() => openReviewSheet(id)}])})});
         return orig.apply(self,next);
+    }
+    // Server info (#77, based on ServerInfo by fshin): hold a server icon in the server list and its menu
+    // (getGuildsBarGuildMenuItems 16226) gets a Server info row. It opens a sheet that reads everything from Discord's own
+    // stores and redraws live: who's online, channels, roles, emojis, stickers, events, boost level with how far the next
+    // one is, which friends are there (with their status), the owner, when you joined and copyable details.
+    const SERVER_INFO_STORES = [2074, 4780, 2112, 2106, 4507, 4519, 4930, 1377];
+    const SERVER_BOOST_LEVELS = [0, 2, 7, 14];
+    const SERVER_VERIFICATION = ["None", "Low", "Medium", "High", "Highest"];
+    const SERVER_BADGES = [["VERIFIED", "Verified"], ["PARTNERED", "Partner"], ["COMMUNITY", "Community"], ["DISCOVERABLE", "Discoverable"]];
+    const SERVER_STATUS_RANK = {online:0, streaming:0, dnd:1, idle:2};
+    const serverInfo = {asked:new Map(), fetched:new Set()};
+    function serverStore(id) { const store = inspectedExport(id, "default"); return store && typeof store === "object" ? store : null; }
+    function serverCall(store, name, a, b) {
+        if (!store || typeof store[name] !== "function") return undefined;
+        try { return store[name](a, b); } catch (_) { return undefined; }
+    }
+    function serverSize(value) {
+        if (!value) return 0;
+        if (typeof value.length === "number") return value.length;
+        if (typeof value.size === "number") return value.size;
+        return typeof value === "object" ? Object.keys(value).length : 0;
+    }
+    // 1284 -> "1,284" in the language Venus is shown in, when Hermes has Intl; plain digits otherwise.
+    function serverNumber(n) {
+        if (typeof n !== "number" || !isFinite(n)) return "\u2014";
+        try { const text = n.toLocaleString(uiLanguage()); if (typeof text === "string" && /\d/.test(text)) return text; } catch (_) {}
+        return String(Math.round(n));
+    }
+    // "{n} members" with the number grouped, still using the language's plural form for it.
+    function serverCount(n, one, other, vars) { return pl(n, one, other, vars).replace(String(n), serverNumber(n)); }
+    function serverDate(ms) {
+        if (!isFinite(ms)) return tr("Unavailable");
+        try { const text = new Date(ms).toLocaleDateString(uiLanguage(), {year:"numeric", month:"long", day:"numeric"}); if (text) return text; } catch (_) {}
+        return backupDate(ms);
+    }
+    // The largest whole unit since then: "3 years ago", "5 months ago", "12 days ago".
+    function serverAge(ms) {
+        if (!isFinite(ms)) return "";
+        const diff = Math.max(0, Date.now() - ms), day = 86400000;
+        if (diff < day) return tr("just now");
+        const time = diff >= 365 * day ? pl(Math.floor(diff / (365 * day)), "{n} year", "{n} years") :
+            diff >= 30 * day ? pl(Math.floor(diff / (30 * day)), "{n} month", "{n} months") : pl(Math.floor(diff / day), "{n} day", "{n} days");
+        return tr("{time} ago", {time});
+    }
+    function serverIconUri(guild, size) {
+        return guild && typeof guild.icon === "string" && guild.icon ? "https://cdn.discordapp.com/icons/" + guild.id + "/" + guild.icon + ".png?size=" + (size || 128) : null;
+    }
+    function serverBannerUri(guild) {
+        const hash = guild && (guild.banner || guild.splash);
+        return typeof hash === "string" && hash ? "https://cdn.discordapp.com/" + (guild.banner ? "banners/" : "splashes/") + guild.id + "/" + hash + ".png?size=600" : null;
+    }
+    function serverAcronym(name) {
+        const words = String(name || "?").trim().split(/\s+/).filter(Boolean);
+        return (words.length > 1 ? words.slice(0, 3).map(w => w[0]).join("") : String(name || "?").slice(0, 2)).toUpperCase();
+    }
+    // Boost level and how far the next one is: {level, boosts, next, need, share}.
+    function serverBoost(guild) {
+        const boosts = Math.max(0, Number(guild && guild.premiumSubscriberCount) || 0);
+        let level = Math.max(0, Math.min(3, Number(guild && guild.premiumTier) || 0));
+        if (!level) for (let i = 3; i > 0; i--) if (boosts >= SERVER_BOOST_LEVELS[i]) { level = i; break; }
+        if (level >= 3) return {level, boosts, next:0, need:0, share:1};
+        const from = SERVER_BOOST_LEVELS[level], to = SERVER_BOOST_LEVELS[level + 1];
+        return {level, boosts, next:level + 1, need:Math.max(1, to - boosts), share:Math.max(0, Math.min(1, (boosts - from) / (to - from)))};
+    }
+    function serverFeature(guild, name) {
+        const list = guild && guild.features;
+        try { return !!list && (typeof list.has === "function" ? list.has(name) : Array.isArray(list) && list.indexOf(name) >= 0); } catch (_) { return false; }
+    }
+    // Everything the sheet shows, read once per render from Discord's stores. A store that isn't there leaves its part out.
+    function serverSnapshot(guildId) {
+        const guild = serverCall(serverStore(2074), "getGuild", guildId);
+        if (!guild) return null;
+        const counts = serverStore(4780), members = serverStore(2112), channels = serverCall(serverStore(4507), "getChannels", guildId) || {};
+        const textCount = serverSize(channels.SELECTABLE), voiceCount = serverSize(channels.VOCAL);
+        const roles = serverCall(serverStore(2106), "getNumRoles", guildId);
+        const events = serverCall(serverStore(7037), "getGuildScheduledEventsForGuild", guildId);
+        const me = currentUser(), joined = serverCall(members, "getSelfMemberJoinedAt", guildId);
+        const memberCount = serverCall(counts, "getMemberCount", guildId), online = serverCall(counts, "getOnlineCount", guildId);
+        return {guild, id:guildId, name:guild.name || "", description:typeof guild.description === "string" ? guild.description.trim() : "",
+            members:typeof memberCount === "number" ? memberCount : typeof guild.memberCount === "number" ? guild.memberCount : null,
+            online:typeof online === "number" ? online : null,
+            text:textCount, voice:voiceCount, channels:textCount + voiceCount,
+            // Discord counts @everyone as a role; nobody thinks of it as one.
+            roles:typeof roles === "number" ? Math.max(0, roles - 1) : null,
+            emojis:serverSize(serverCall(serverStore(5640), "getGuildEmojis", guildId)),
+            stickers:serverSize(serverCall(serverStore(5688), "getStickersByGuildId", guildId)),
+            events:Array.isArray(events) ? events.length : 0,
+            boost:serverBoost(guild), created:snowflakeMs(guildId),
+            joined:joined && typeof joined.getTime === "function" ? joined.getTime() : typeof joined === "number" ? joined : NaN,
+            ownerId:typeof guild.ownerId === "string" ? guild.ownerId : null, mine:!!(me && guild.ownerId === me.id),
+            vanity:typeof guild.vanityURLCode === "string" && guild.vanityURLCode ? guild.vanityURLCode : "",
+            verification:Number(guild.verificationLevel) || 0, locale:typeof guild.preferredLocale === "string" ? guild.preferredLocale : "",
+            badges:SERVER_BADGES.filter(entry => serverFeature(guild, entry[0])).map(entry => entry[1])};
+    }
+    function serverRank(status) { const rank = SERVER_STATUS_RANK[status]; return rank == null ? 3 : rank; }
+    // Your friends who are members, online ones first, each with their status and server nickname.
+    function serverFriends(guildId) {
+        const ids = serverCall(serverStore(4519), "getFriendIDs") || [], members = serverStore(2112), presence = serverStore(4930);
+        if (!members || !ids.length) return [];
+        const out = [];
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i], member = serverCall(members, "getMember", guildId, id);
+            if (!member) continue;
+            const user = userStore && serverCall(userStore, "getUser", id) || {id};
+            out.push({id, user, status:serverCall(presence, "getStatus", id) || "offline",
+                name:member.nick || user.globalName || user.global_name || user.username || id});
+        }
+        return out.sort((a, b) => serverRank(a.status) - serverRank(b.status) || String(a.name).localeCompare(String(b.name)));
+    }
+    // Asks Discord once every few minutes which of your friends are members (the request its own member list makes).
+    function serverAskFriends(guildId) {
+        if (!settings.serverInfoFriends) return false;
+        const last = serverInfo.asked.get(guildId) || 0, ids = serverCall(serverStore(4519), "getFriendIDs") || [];
+        if (!ids.length || Date.now() - last < 5 * 60000) return false;
+        const actions = serverStore(5705);
+        if (!actions || typeof actions.requestMembersById !== "function") return false;
+        serverInfo.asked.set(guildId, Date.now());
+        try { for (let i = 0; i < ids.length; i += 100) actions.requestMembersById(guildId, ids.slice(i, i + 100)); return true; } catch (_) { return false; }
+    }
+    // The owner isn't always loaded; Discord's own getUser (7852) fetches them once and adds them to UserStore.
+    function serverOwner(snap) {
+        if (!snap.ownerId) return null;
+        const user = userStore && serverCall(userStore, "getUser", snap.ownerId);
+        if (!user && !serverInfo.fetched.has(snap.ownerId)) {
+            serverInfo.fetched.add(snap.ownerId);
+            const getUser = inspectedExport(7852, "getUser");
+            if (typeof getUser === "function") Promise.resolve().then(() => getUser(snap.ownerId)).catch(() => {});
+        }
+        const member = serverCall(serverStore(2112), "getMember", snap.id, snap.ownerId);
+        return {id:snap.ownerId, user, name:member && member.nick || user && (user.globalName || user.global_name || user.username) || null,
+            handle:user && user.username ? "@" + user.username : "", status:serverCall(serverStore(4930), "getStatus", snap.ownerId) || null};
+    }
+    function serverOpenProfile(userId, guildId) {
+        const show = inspectedExport(7850, "default");
+        if (typeof show !== "function" || !userId) return;
+        haptic("SELECTION");
+        try { show({userId, guildId}); } catch (_) {}
+    }
+    function serverCopy(text, toast) {
+        const ui = reviewUI();
+        try { (ui.clipboard || RN.Clipboard).setString(text); } catch (_) { return; }
+        haptic("SELECTION");
+        reviewToast(ui, toast, venusIcon(4843, "CopyIcon"));
+    }
+    // Redraws when any store it reads changes, at most about three times a second (presence changes all the time).
+    function useServerStores(guildId) {
+        const [, tick] = React.useState(0);
+        React.useEffect(() => {
+            let pending, live = true;
+            const bump = () => { if (pending !== undefined || !live) return; pending = later(() => { pending = undefined; if (live) tick(n => n + 1); }, 300, false); };
+            const stores = SERVER_INFO_STORES.map(serverStore).filter(store => store && typeof store.addChangeListener === "function");
+            stores.forEach(store => { try { store.addChangeListener(bump); } catch (_) {} });
+            return () => { live = false; stores.forEach(store => { try { store.removeChangeListener(bump); } catch (_) {} });
+                if (pending !== undefined && global.clearTimeout) global.clearTimeout(pending); };
+        }, [guildId]);
+    }
+    const SERVER_INFO_DARK = {banner:{height:112, backgroundColor:"#4e50584d"}, ring:{borderColor:"#232428", backgroundColor:"#2b2d31"},
+        card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:10},
+        tile:{flexGrow:1, flexBasis:"30%", minWidth:96, backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:12, paddingVertical:12, gap:4},
+        chip:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:8, paddingVertical:3, borderRadius:10, backgroundColor:"#4e50584d"},
+        acronym:{backgroundColor:"#5865f2"}};
+    function useServerInfoStyles() {
+        return useThemed("serverInfo", c => ({banner:Object.assign({}, SERVER_INFO_DARK.banner, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            ring:{borderColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW, backgroundColor:c.CARD_BACKGROUND_DEFAULT},
+            card:Object.assign({}, SERVER_INFO_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            tile:Object.assign({}, SERVER_INFO_DARK.tile, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            chip:Object.assign({}, SERVER_INFO_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            acronym:{backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}}), SERVER_INFO_DARK);
+    }
+    function serverText(value, variant, color, fallback, extra) {
+        const Text = inspectedExport(4886, "Text");
+        return Text ? el(Text, Object.assign({variant, color}, extra), value) : el(RN.Text, Object.assign({style:fallback}, extra), value);
+    }
+    function serverBoostIcon(level) {
+        return level >= 3 ? venusIcon(13330, "BoostTier3Icon") : level === 2 ? venusIcon(16149, "BoostTier2Icon") : venusIcon(12241, "BoostTier1Icon");
+    }
+    // The top of the sheet: banner, the server's icon over it, name, badges, description and who's online.
+    function serverHero(s, snap) {
+        const icon = serverIconUri(snap.guild, 160), banner = serverBannerUri(snap.guild);
+        const dot = (color, label) => el(RN.View, {key:label, style:{flexDirection:"row", alignItems:"center", gap:6}},
+            el(RN.View, {style:{width:10, height:10, borderRadius:5, backgroundColor:color}}),
+            serverText(label, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}));
+        return el(RN.View, {key:"hero"},
+            el(RN.View, {style:[s.banner, {borderRadius:16, overflow:"hidden"}]},
+                banner && RN.Image ? el(RN.Image, {source:{uri:banner}, style:{width:"100%", height:"100%"}, resizeMode:"cover"}) : null),
+            el(RN.View, {style:{paddingHorizontal:16, marginTop:-40, gap:8}},
+                popIn("icon:" + snap.id, el(RN.View, {style:[s.ring, {width:84, height:84, borderRadius:28, borderWidth:4, overflow:"hidden", alignItems:"center", justifyContent:"center"}]},
+                    icon && RN.Image ? el(RN.Image, {source:{uri:icon}, style:{width:76, height:76}}) :
+                        el(RN.View, {style:[s.acronym, {width:76, height:76, alignItems:"center", justifyContent:"center"}]},
+                            el(RN.Text, {style:{color:"#ffffff", fontSize:24, fontWeight:"700"}}, serverAcronym(snap.name))))),
+                serverText(snap.name, "heading-xl/bold", "text-strong", {color:"#f2f3f5", fontSize:22, fontWeight:"700"}, {numberOfLines:2, selectable:true}),
+                snap.badges.length ? el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:6}}, snap.badges.map(label =>
+                    el(RN.View, {key:label, style:s.chip}, el(venusIcon(4792, "CircleCheckIcon"), {size:"xxs"}),
+                        serverText(tr(label), "text-xs/semibold", "text-strong", {color:"#f2f3f5", fontSize:12, fontWeight:"600"})))) : null,
+                snap.description ? serverText(snap.description, "text-sm/medium", "text-default", {color:"#dbdee1", fontSize:14}, {selectable:true}) : null,
+                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:16}},
+                    snap.online != null ? dot(STATUS_HEX.online, tr("{count} online", {count:serverNumber(snap.online)})) : null,
+                    snap.members != null ? dot(STATUS_HEX.offline, serverCount(snap.members, "{n} member", "{n} members")) : null)));
+    }
+    // A grid of what's in the server; parts Discord hasn't loaded are left out rather than shown as zero.
+    function serverTiles(s, snap) {
+        const tile = (key, Icon, value, label, sub) => el(RN.View, {key, style:s.tile, accessible:true, accessibilityLabel:label + ": " + serverNumber(value)},
+            el(Icon, {size:"sm"}),
+            serverText(serverNumber(value), "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
+            serverText(label, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}, {numberOfLines:1}),
+            sub ? serverText(sub, "text-xxs/medium", "text-muted", {color:"#949ba4", fontSize:11}, {numberOfLines:1}) : null);
+        const tiles = [
+            snap.channels ? tile("channels", venusIcon(15411, "HashmarkIcon"), snap.channels, tr("Channels"), tr("{text} text, {voice} voice", {text:snap.text, voice:snap.voice})) : null,
+            snap.roles != null ? tile("roles", venusIcon(9232, "ShieldUserIcon"), snap.roles, tr("Roles")) : null,
+            tile("emojis", venusIcon(8411, "ReactionIcon"), snap.emojis, tr("Emojis")),
+            tile("stickers", venusIcon(12190, "StickerIcon"), snap.stickers, tr("Stickers")),
+            tile("boosts", serverBoostIcon(snap.boost.level), snap.boost.boosts, tr("Boosts")),
+            snap.events ? tile("events", venusIcon(9275, "CalendarIcon"), snap.events, tr("Events")) : null];
+        return el(RN.View, {key:"tiles", style:{flexDirection:"row", flexWrap:"wrap", gap:8}}, tiles.filter(Boolean));
+    }
+    // Boost level, with a bar to the next one.
+    function serverBoostCard(s, snap) {
+        const b = snap.boost, Icon = serverBoostIcon(b.level);
+        return el(RN.View, {key:"boost", style:s.card, accessible:true},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:12}},
+                el(Icon, {size:"md"}),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    serverText(b.level ? tr("Level {level}", {level:b.level}) : tr("No boost level yet"), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    serverText(serverCount(b.boosts, "{n} boost", "{n} boosts"), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
+            el(VenusProgress, {key:"bar", value:b.share}),
+            serverText(b.next ? pl(b.need, "{n} more boost for Level {level}", "{n} more boosts for Level {level}", {level:b.next}) : tr("Highest level reached"),
+                "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}));
+    }
+    function ServerInfoSheet(props) {
+        useSettings("serverInfo"); useServerStores(props.guildId);
+        const ui = reviewUI(), s = useServerInfoStyles(), guildId = props.guildId;
+        const [looking, setLooking] = React.useState(false), [all, setAll] = React.useState(false);
+        React.useEffect(() => {
+            if (!serverAskFriends(guildId)) return undefined;
+            setLooking(true);
+            const timer = later(() => setLooking(false), 2500, false);
+            return () => { if (timer !== undefined && global.clearTimeout) global.clearTimeout(timer); };
+        }, [guildId]);
+        const snap = serverSnapshot(guildId);
+        const header = ui.Header ? el(ui.Header, {title:tr("Server info"), trailing:ui.Close ? el(ui.Close, {onPress:() => hideReviewSheet(ui, props.sheetKey)}) : undefined}) : undefined;
+        if (!snap) return el(ui.ActionSheet || RN.View, {header}, el(RN.View, {style:{padding:24}},
+            serverText(tr("This server isn't available right now."), "text-md/medium", "text-muted", {color:"#949ba4", fontSize:16})));
+        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, friends = serverFriends(guildId), owner = serverOwner(snap);
+        const shown = all ? friends : friends.slice(0, 5), ring = s.ring.borderColor;
+        const friendRow = friend => Row ? el(Row, {key:friend.id, label:friend.name,
+            subLabel:friend.user.username && friend.user.username !== friend.name ? "@" + friend.user.username : undefined,
+            icon:avatarBubble(friend.user, 32, friend.status, ring), arrow:true, onPress:() => serverOpenProfile(friend.id, guildId)}) : null;
+        const friendsTitle = friends.length ? serverCount(friends.length, "{n} friend here", "{n} friends here") :
+            tr(looking ? "Looking for friends\u2026" : "None of your friends are here");
+        const detail = (key, label, value, id, name, onPress) => Row ? el(Row, {key, label:tr(label), subLabel:value, icon:rowIcon(id, name), onPress}) : null;
+        const body = [
+            serverHero(s, snap),
+            serverTiles(s, snap),
+            serverBoostCard(s, snap),
+            el(Group, {key:"friends", title:tr("Friends")},
+                Row ? el(Row, {key:"summary", label:friendsTitle,
+                    icon:friends.length ? avatarPile(friends.slice(0, 4).map(f => f.user), ring) : rowIcon(4831, "FriendsIcon"),
+                    subLabel:!settings.serverInfoFriends && !friends.length ? tr("Only friends Discord has already loaded show here.") : undefined}) : null,
+                shown.map(friendRow),
+                friends.length > 5 && Row ? el(Row, {key:"more", label:all ? tr("Show fewer") : tr("Show all {n}", {n:friends.length}), arrow:!all,
+                    onPress:() => { animateLayout(); haptic("SELECTION"); setAll(v => !v); }}) : null),
+            owner && Row ? el(Group, {key:"owner", title:tr("Owner")},
+                el(Row, {key:"owner", label:snap.mine ? tr("You own this server") : owner.name || tr("Loading\u2026"), subLabel:snap.mine ? undefined : owner.handle || undefined,
+                    icon:owner.user ? avatarBubble(owner.user, 32, owner.status, ring) : rowIcon(10631, "CrownIcon"), arrow:!snap.mine,
+                    trailing:el(venusIcon(10631, "CrownIcon"), {size:"sm", color:"#f0b232"}),
+                    onPress:snap.mine ? undefined : () => serverOpenProfile(owner.id, guildId)})) : null,
+            el(Group, {key:"details", title:tr("Details")},
+                detail("created", "Created", serverDate(snap.created) + " \u00b7 " + serverAge(snap.created), 9275, "CalendarIcon"),
+                isFinite(snap.joined) ? detail("joined", "You joined", serverDate(snap.joined) + " \u00b7 " + serverAge(snap.joined), 4833, "UserPlusIcon") : null,
+                snap.vanity ? detail("vanity", "Invite link", "discord.gg/" + snap.vanity, 4839, "LinkIcon", () => serverCopy("https://discord.gg/" + snap.vanity, "Link copied")) : null,
+                detail("verification", "Verification", tr(SERVER_VERIFICATION[Math.max(0, Math.min(4, snap.verification))]), 8923, "ShieldIcon"),
+                snap.locale ? detail("locale", "Language", languageName(snap.locale), 8551, "GlobeEarthIcon") : null,
+                detail("id", "Server ID", snap.id, 10358, "IdIcon", () => serverCopy(snap.id, "Server ID copied"))),
+            footnote("note", "Tap the invite link or the server ID to copy it.")];
+        const content = el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:20}}, body.filter(Boolean));
+        return el(ui.ActionSheet || RN.View, {header}, RN.ScrollView ? el(RN.ScrollView, null, content) : content);
+    }
+    function openServerInfo(guildId) {
+        if (!enabled("serverInfo") || !React || !RN || typeof guildId !== "string") return;
+        const ui = reviewUI();
+        if (!ui.ActionSheet || typeof ui.showSheet !== "function") { reviewToast(ui, "Server info is unavailable right now.", venusIcon(4797, "CircleXIcon")); return; }
+        const key = "VenusServerInfo:" + guildId;
+        try { ui.showSheet({key, content:el(ServerInfoSheet, {guildId, sheetKey:key}), stackingBehavior:"stack"}); } catch (_) {}
+    }
+    // The server icon's hold menu: Server info goes last, after Discord's own rows, in the same shape.
+    function serverInfoMenu(orig, self, args) {
+        const items = orig.apply(self, args), guildId = args[0] == null ? null : String(args[0]);
+        if (!enabled("serverInfo") || !Array.isArray(items) || !guildId || !/^\d{17,20}$/.test(guildId)) return items;
+        return items.concat([{IconComponent:venusIcon(4812, "CircleInformationIcon"), label:tr("Server info"), action:() => openServerInfo(guildId)}]);
     }
     // Rewrites a component's props before Discord's own render, through memo and forwardRef wrappers.
     // The change runs inside the render, so it may use hooks, and it always runs, so the hook count never changes.
@@ -8761,6 +9147,7 @@
                 return hookExport(hookExport(exports, "default", plain), "StatusWithTyping", plain);
             }
             case 16232: return features.readAll ? hookExport(exports, "default", readAllBarProps) : exports;
+            case 16226: return features.serverInfo ? hookExport(exports, "default", serverInfoMenu) : exports;
             case 8716: if (features.reviewDB) oauthModal = exports.default; return exports;
             case 6074: if (features.reviewDB) nativeRowGroup = exports.TableRowGroup; return exports;
             case 6698: if (features.reviewDB) nativeSwitchRow = exports.TableSwitchRow; return exports;
@@ -8801,7 +9188,7 @@
             case 5708: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5112: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1377:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;

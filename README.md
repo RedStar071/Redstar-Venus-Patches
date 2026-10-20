@@ -45,6 +45,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Account switcher | Switch between up to 50 Discord accounts from the profile bar or Venus settings |
 | **Servers** | Read all button | Marks servers, DMs or both as read in one tap |
 | | Show hidden channels | Channels you can't open appear with a lock. Only a tap opens their details menu, which you can turn off |
+| | Server info | Hold a server's icon to see live details: who's online, channels, roles, emojis, boost progress, the owner, your friends there, when it was made and when you joined |
 | | Spaces in channel names | "general chat" instead of "general-chat" |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
 | | Use your phone's emojis | Your phone's emojis instead of Discord's |
