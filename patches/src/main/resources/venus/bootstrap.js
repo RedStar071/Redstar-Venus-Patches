@@ -5513,8 +5513,9 @@
     // one is, which friends are there (with their status), the owner, when you joined and copyable details.
     const SERVER_INFO_STORES = [2074, 4780, 2112, 2106, 4507, 4519, 4930, 1377];
     const SERVER_BOOST_LEVELS = [0, 2, 7, 14];
-    const SERVER_VERIFICATION = ["None", "Low", "Medium", "High", "Highest"];
-    const SERVER_BADGES = [["VERIFIED", "Verified"], ["PARTNERED", "Partner"], ["COMMUNITY", "Community"], ["DISCOVERABLE", "Discoverable"]];
+    // Discord's verification levels 0-4, as words.
+    function serverVerification(level) { return [tr("None"), tr("Low"), tr("Medium"), tr("High"), tr("Highest")][Math.max(0, Math.min(4, level))]; }
+    const SERVER_BADGES = [["VERIFIED", () => tr("Verified")], ["PARTNERED", () => tr("Partner")], ["COMMUNITY", () => tr("Community")], ["DISCOVERABLE", () => tr("Discoverable")]];
     const SERVER_STATUS_RANK = {online:0, streaming:0, dnd:1, idle:2};
     const serverInfo = {asked:new Map(), fetched:new Set()};
     function serverStore(id) { const store = inspectedExport(id, "default"); return store && typeof store === "object" ? store : null; }
@@ -5598,7 +5599,7 @@
             ownerId:typeof guild.ownerId === "string" ? guild.ownerId : null, mine:!!(me && guild.ownerId === me.id),
             vanity:typeof guild.vanityURLCode === "string" && guild.vanityURLCode ? guild.vanityURLCode : "",
             verification:Number(guild.verificationLevel) || 0, locale:typeof guild.preferredLocale === "string" ? guild.preferredLocale : "",
-            badges:SERVER_BADGES.filter(entry => serverFeature(guild, entry[0])).map(entry => entry[1])};
+            badges:SERVER_BADGES.filter(entry => serverFeature(guild, entry[0])).map(entry => entry[1]())};
     }
     function serverRank(status) { const rank = SERVER_STATUS_RANK[status]; return rank == null ? 3 : rank; }
     // Your friends who are members, online ones first, each with their status and server nickname.
@@ -5699,7 +5700,7 @@
                 serverText(snap.name, "heading-xl/bold", "text-strong", {color:"#f2f3f5", fontSize:22, fontWeight:"700"}, {numberOfLines:2, selectable:true}),
                 snap.badges.length ? el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:6}}, snap.badges.map(label =>
                     el(RN.View, {key:label, style:s.chip}, el(venusIcon(4792, "CircleCheckIcon"), {size:"xxs"}),
-                        serverText(tr(label), "text-xs/semibold", "text-strong", {color:"#f2f3f5", fontSize:12, fontWeight:"600"})))) : null,
+                        serverText(label, "text-xs/semibold", "text-strong", {color:"#f2f3f5", fontSize:12, fontWeight:"600"})))) : null,
                 snap.description ? serverText(snap.description, "text-sm/medium", "text-default", {color:"#dbdee1", fontSize:14}, {selectable:true}) : null,
                 el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:16}},
                     snap.online != null ? dot(STATUS_HEX.online, tr("{count} online", {count:serverNumber(snap.online)})) : null,
@@ -5776,7 +5777,7 @@
                 detail("created", "Created", serverDate(snap.created) + " \u00b7 " + serverAge(snap.created), 9275, "CalendarIcon"),
                 isFinite(snap.joined) ? detail("joined", "You joined", serverDate(snap.joined) + " \u00b7 " + serverAge(snap.joined), 4833, "UserPlusIcon") : null,
                 snap.vanity ? detail("vanity", "Invite link", "discord.gg/" + snap.vanity, 4839, "LinkIcon", () => serverCopy("https://discord.gg/" + snap.vanity, "Link copied")) : null,
-                detail("verification", "Verification", tr(SERVER_VERIFICATION[Math.max(0, Math.min(4, snap.verification))]), 8923, "ShieldIcon"),
+                detail("verification", "Verification", serverVerification(snap.verification), 8923, "ShieldIcon"),
                 snap.locale ? detail("locale", "Language", languageName(snap.locale), 8551, "GlobeEarthIcon") : null,
                 detail("id", "Server ID", snap.id, 10358, "IdIcon", () => serverCopy(snap.id, "Server ID copied"))),
             footnote("note", "Tap the invite link or the server ID to copy it.")];
