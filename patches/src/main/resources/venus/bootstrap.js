@@ -9747,12 +9747,21 @@
         const problem = on && iconPacks.error ? el(RN.View, {key:"error", style:{paddingHorizontal:12, paddingBottom:12, gap:2}, accessibilityLiveRegion:"polite"},
             text(tr("Couldn't install the icon pack"), "text-sm/semibold", "text-feedback-critical", {color:"#f23f43", fontSize:14, fontWeight:"600"}),
             text(iconPacks.error, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12})) : null;
+        // A built-in pack whose file list couldn't be downloaded keeps Discord's icons; say why and offer to try again,
+        // instead of the pack looking picked but doing nothing.
+        const stuck = on && active && !active.custom && !iconPacks.trees.has(active.id) && !iconPacks.loadingTrees.has(active.id) &&
+            (iconPacks.treeTries.get(active.id) || 0) > 0;
+        const RetryButton = stuck ? inspectedExport(5594, "Button") : null;
+        const retry = () => { haptic("SELECTION"); iconPacks.treeTries.delete(active.id); iconPacksFetchTree(active); notify("iconPacks"); };
         const groups = [
             on ? null : offCard("status", venusIcon(9640, "ImageSparkleIcon"), "iconPacks"),
+            stuck ? statusCard("status", "Can't reach the internet right now. Try again in a moment.", {title:active.name, IconComponent:venusIcon(9640, "ImageSparkleIcon"),
+                trailing:RetryButton ? el(RetryButton, {text:tr("Retry"), size:"sm", variant:"secondary", onPress:retry}) : null}) : null,
             el(IconPacksPreview, {key:"preview", on, active}),
             gallery,
-            el(Group, {key:"display", title:tr("Display")},
-                features.customThemes ? switchRow(Switch, "iconPacksTheme", "Follow theme's icon pack", "Uses the icon pack recommended by your active custom theme, when it sets one.", rowIcon(15172, "EyeDropperIcon")) : null),
+            // Its only row needs Custom themes; without it the group was an empty "Display" title.
+            features.customThemes ? el(Group, {key:"display", title:tr("Display")},
+                switchRow(Switch, "iconPacksTheme", "Follow theme's icon pack", "Uses the icon pack recommended by your active custom theme, when it sets one.", rowIcon(15172, "EyeDropperIcon"))) : null,
             el(Group, {key:"install", title:tr("Add from link"), description:tr("Paste a custom icon pack folder URL or config.json link.")},
                 el(RN.View, {key:"input", style:{padding:12}}, urlInput), problem),
             iconPacks.custom.length ? el(Group, {key:"manage", title:tr("Manage")},
