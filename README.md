@@ -74,12 +74,14 @@ Want Venus next to the normal Discord app? Select **Custom branding** under **Fe
 
 | Option | What it does |
 | --- | --- |
-| **Package name** | `com.discord.venus` by default, so both apps install side by side. Pick **Keep Discord's** to replace Discord instead |
-| **App name** | The name on your home screen: **Venus**, **Discord Venus**, Discord's own, or anything you type |
-| **App icon** | A square PNG, JPG or WebP picture (512 × 512 is ideal). It fills the icon's shape, so keep the important part away from the corners |
-| **Icon background** | Recolors the icon in Discord's blurple, green, yellow, fuchsia, red or black, or any color you choose. It's the quickest way to tell the two apps apart |
+| **App name** | The name on your home screen. Type anything; **Venus** by default |
+| **Package name** | Type any name of lowercase words joined by dots; `com.discord.venus` by default, so both apps install side by side. Type `com.discord` to replace Discord instead |
+| **Icon color** | The color behind the logo: Discord's blurple, green, yellow, fuchsia, red or black, or any color you choose |
+| **Icon picture** | Your own square PNG, JPG or WebP picture (512 × 512 is ideal) in place of Discord's logo. It fills the icon's shape, so keep the important part away from the corners |
 
-Leave **App icon** and **Icon background** empty to keep Discord's icon. With a new package name, the copy is a separate app: it starts signed out and has its own settings. Notifications work in both apps: each one registers for push notifications under its own name, so signing in to the same account in both gets them in both, and the copy's notification sounds, pictures and **Notification settings** button all use its new name. Keep the same package name every time you patch so updates install over the top.
+**Icon color and Icon picture work together:** the color fills the icon's background and the picture sits on top, so the color only shows through transparent parts of the picture. With neither, the icon stays Discord's. With only a color, it's Discord's logo on your color.
+
+A copy with a new package name is a separate app: it starts signed out and has its own settings. Notifications work in both apps: each one registers for push notifications under its own name, so signing in to the same account in both gets them in both, and the copy's notification sounds, pictures and **Notification settings** button all use its new name. Keep the same package name every time you patch so updates install over the top.
 
 ### Privacy options
 

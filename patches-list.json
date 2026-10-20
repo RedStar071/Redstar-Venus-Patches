@@ -106,7 +106,7 @@
     },
     {
       "name": "Custom branding",
-      "description": "Changes Discord's package name, name and icon, so Venus can be installed next to the normal Discord app. A copy with a new package name starts signed out and keeps its own settings. Notifications work in both apps.",
+      "description": "Installs Venus as its own app next to the normal Discord app, with the name, color and icon you pick. It starts signed out and keeps its own settings. Notifications work in both.",
       "default": false,
       "category": "Features",
       "dependencies": [],
@@ -136,43 +136,27 @@
       ],
       "options": [
         {
-          "key": "packageName",
-          "title": "Package name",
-          "description": "A different package name lets this copy be installed next to the normal Discord app. Use lowercase letters, digits and dots, like com.discord.venus. Keep com.discord to replace Discord instead.",
-          "required": true,
-          "type": "kotlin.String",
-          "default": "com.discord.venus",
-          "values": {
-            "Venus (com.discord.venus)": "com.discord.venus",
-            "Keep Discord's (com.discord)": "com.discord"
-          }
-        },
-        {
           "key": "appName",
           "title": "App name",
-          "description": "The name under the icon on your home screen and in your app list.",
+          "description": "Type the name shown under the icon on your home screen and in your app list.",
           "required": true,
           "type": "kotlin.String",
           "default": "Venus",
-          "values": {
-            "Venus": "Venus",
-            "Discord Venus": "Discord Venus",
-            "Keep Discord's (Discord)": "Discord"
-          }
+          "values": null
         },
         {
-          "key": "appIcon",
-          "title": "App icon",
-          "description": "A square PNG, JPG or WebP image for the home screen icon. It fills the icon's shape, so keep anything important away from the corners. Leave empty to keep Discord's icon.",
-          "required": false,
+          "key": "packageName",
+          "title": "Package name",
+          "description": "Type any name made of lowercase words joined by dots, like com.discord.venus. A name other than com.discord installs Venus next to the normal Discord app. Type com.discord to replace Discord instead.",
+          "required": true,
           "type": "kotlin.String",
-          "default": null,
+          "default": "com.discord.venus",
           "values": null
         },
         {
           "key": "iconBackground",
-          "title": "Icon background",
-          "description": "Recolors the icon's background, which is the quickest way to tell the two apps apart. Shows behind a transparent App icon. Leave empty to keep Discord's blurple.",
+          "title": "Icon color",
+          "description": "The color behind the logo, to tell the two apps apart at a glance. Leave empty for Discord's blurple.",
           "required": false,
           "type": "kotlin.String",
           "default": null,
@@ -184,6 +168,15 @@
             "Red": "#ED4245",
             "Black": "#23272A"
           }
+        },
+        {
+          "key": "appIcon",
+          "title": "Icon picture",
+          "description": "Replaces Discord's logo with your own square picture (PNG, JPG or WebP). Icon color still shows through any transparent parts. Leave empty to keep Discord's logo.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": null,
+          "values": null
         }
       ]
     },

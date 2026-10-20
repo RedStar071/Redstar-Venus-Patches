@@ -93,54 +93,46 @@ private fun ResourcePatchContext.addBackgroundColor(color: String) {
 @Suppress("unused")
 val customBranding = resourcePatch(
     name = "Custom branding",
-    description = "Changes Discord's package name, name and icon, so Venus can be installed next to the normal Discord app. " +
-        "A copy with a new package name starts signed out and keeps its own settings. Notifications work in both apps.",
+    description = "Installs Venus as its own app next to the normal Discord app, with the name, color and icon you pick. " +
+        "It starts signed out and keeps its own settings. Notifications work in both.",
     default = false,
 ) {
     compatibleWith(discord)
     section(PLUGINS)
 
-    val packageName = stringOption(
-        key = "packageName",
-        default = "com.discord.venus",
-        values = mapOf(
-            "Venus (com.discord.venus)" to "com.discord.venus",
-            "Keep Discord's (com.discord)" to DISCORD_PACKAGE,
-        ),
-        title = "Package name",
-        description = "A different package name lets this copy be installed next to the normal Discord app. " +
-            "Use lowercase letters, digits and dots, like com.discord.venus. Keep com.discord to replace Discord instead.",
-        required = true,
-    ) { it != null && it.matches(PACKAGE_NAME) }
-
+    // Shown in this order in Morphe. Name and package are plain text fields with no presets: with presets Morphe draws
+    // a dropdown, which hid that you can type anything.
     val appName = stringOption(
         key = "appName",
         default = "Venus",
-        values = mapOf(
-            "Venus" to "Venus",
-            "Discord Venus" to "Discord Venus",
-            "Keep Discord's (Discord)" to "Discord",
-        ),
         title = "App name",
-        description = "The name under the icon on your home screen and in your app list.",
+        description = "Type the name shown under the icon on your home screen and in your app list.",
         required = true,
     ) { it != null && it.isNotBlank() && it.trim().length <= 50 }
 
-    val appIcon = imageOption(
-        key = "appIcon",
-        title = "App icon",
-        description = "A square PNG, JPG or WebP image for the home screen icon. It fills the icon's shape, so keep " +
-            "anything important away from the corners. Leave empty to keep Discord's icon.",
-        recommendedSize = ImageSize(512, 512),
-    ) { it.isNullOrBlank() || File(it).isFile }
+    val packageName = stringOption(
+        key = "packageName",
+        default = "com.discord.venus",
+        title = "Package name",
+        description = "Type any name made of lowercase words joined by dots, like com.discord.venus. A name other than " +
+            "com.discord installs Venus next to the normal Discord app. Type com.discord to replace Discord instead.",
+        required = true,
+    ) { it != null && it.trim().matches(PACKAGE_NAME) }
 
     val iconBackground = colorOption(
         key = "iconBackground",
         values = ICON_COLORS,
-        title = "Icon background",
-        description = "Recolors the icon's background, which is the quickest way to tell the two apps apart. " +
-            "Shows behind a transparent App icon. Leave empty to keep Discord's blurple.",
+        title = "Icon color",
+        description = "The color behind the logo, to tell the two apps apart at a glance. Leave empty for Discord's blurple.",
     ) { it.isNullOrBlank() || it.matches(HEX_COLOR) }
+
+    val appIcon = imageOption(
+        key = "appIcon",
+        title = "Icon picture",
+        description = "Replaces Discord's logo with your own square picture (PNG, JPG or WebP). Icon color still shows " +
+            "through any transparent parts. Leave empty to keep Discord's logo.",
+        recommendedSize = ImageSize(512, 512),
+    ) { it.isNullOrBlank() || File(it).isFile }
 
     finalize {
         val newPackage = packageName.value?.trim().orEmpty()
