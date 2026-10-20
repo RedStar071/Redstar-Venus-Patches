@@ -57,3 +57,6 @@ Icon packs is based on the idea and community icon pack catalog of nexpid's Them
 (nexpid/ThemesPlus), with icon packs created by Rosie, Rairof, Lemon, Jay, Google, Hurricane,
 480 Design, WalkQuackBack, doraa and Iconsax. Its code is written for this project against
 Discord 349.9's own AssetRegistry and BaseIconImage modules.
+
+Custom branding renames the package, its permission and its providers the same way Morphe's
+"Clone app" patch does. Its code is written for this project against Discord 349.9's manifest.

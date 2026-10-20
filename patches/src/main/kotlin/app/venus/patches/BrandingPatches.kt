@@ -143,8 +143,10 @@ val customBranding = resourcePatch(
     ) { it.isNullOrBlank() || it.matches(HEX_COLOR) }
 
     finalize {
-        val newPackage = packageName.value!!.trim()
-        val name = appName.value!!.trim()
+        val newPackage = packageName.value?.trim().orEmpty()
+        if (!newPackage.matches(PACKAGE_NAME))
+            throw PatchException("\"$newPackage\" isn't a valid package name. Use lowercase letters, digits and dots, like com.discord.venus")
+        val name = appName.value?.trim().orEmpty().ifEmpty { "Discord" }
         val image = appIcon.file
         val color = iconBackground.value?.trim()?.takeIf { it.isNotEmpty() }
             ?.let { if (it.length == 7) "#FF${it.substring(1)}" else it }?.uppercase()
