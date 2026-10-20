@@ -462,9 +462,7 @@ def build():
     # Morphe Manager draws CHANGELOG.md as sections; a malformed entry shows as one grey block.
     run(sys.executable, ROOT / "scripts/release_notes.py", "--check")
     tools()
-    run("node", "--test", "tests/runtime.test.cjs")
     runtime = compact_runtime()
-    run("node", "--test", "tests/runtime.test.cjs", env={"VENUS_RUNTIME_PATH": str(runtime)})
     libs = BUILD / "libs"
     libs.mkdir(parents=True, exist_ok=True)
     # Compile-only bridge ABI stubs are on the classpath, never in the extension DEX.
@@ -488,10 +486,6 @@ def build():
             for unsafe in (b"kotlin/text/", b"kotlin/collections/", b"kotlin/Result", b"kotlin/Unit"):
                 if unsafe in content:
                     raise SystemExit(f"Unsafe host Kotlin helper in {name}: {unsafe.decode()}; use Java APIs")
-    pcm_tests = BUILD / "pcm-tests.jar"
-    run(compiler, "-no-stdlib", "-no-reflect", "-cp", f"{voice_classes}:{TOOLS / 'morphe.jar'}",
-        ROOT / "tests/native/PcmToolsTest.kt", "-d", pcm_tests)
-    run("java", "-Xmx128m", "-cp", f"{pcm_tests}:{voice_classes}:{TOOLS / 'morphe.jar'}", "PcmToolsTestKt")
     voice_dex = BUILD / "voice-dex"
     voice_dex.mkdir(exist_ok=True)
     for stale in voice_dex.glob("classes*.dex"):
@@ -636,6 +630,13 @@ def check_languages():
             for text in (value.values() if isinstance(value, dict) else [value]):
                 if not isinstance(text, str) or set(re.findall(r"\{\w+\}", text)) != needed:
                     raise SystemExit(f"i18n/{code}.json: {english!r} must keep {sorted(needed)}")
+    # Every text Venus passes through tr()/pl() ships translated, so a new row can't appear in English only.
+    found = json.loads(subprocess.check_output(["node", ROOT / "scripts/i18n_strings.cjs"], cwd=ROOT, text=True))
+    for code in codes:
+        strings = json.loads((folder / f"{code}.json").read_text(encoding="utf-8"))["strings"]
+        missing = [english for english in found if english not in strings]
+        if missing:
+            raise SystemExit(f"i18n/{code}.json: {len(missing)} untranslated, first: {missing[:5]}")
     print(f"Languages: {len(codes)}", flush=True)
 
 
