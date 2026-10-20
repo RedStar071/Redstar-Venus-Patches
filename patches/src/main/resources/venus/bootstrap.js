@@ -60,7 +60,7 @@
         translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
-        iconPacks:false, iconPacksTint:true, iconPacksTheme:true,
+        iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
@@ -75,7 +75,7 @@
             translate: false, translateTarget: "discord", translateMode: "auto", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
-            iconPacks: false, iconPacksTint: true, iconPacksTheme: true,
+            iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
         }));
     }
@@ -361,7 +361,7 @@
         if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.customThemes && key === "customThemesBackground") customThemesApply();
         if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
-        if (features.iconPacks && (key === "iconPacksTint" || key === "iconPacksTheme")) iconPacksApply();
+        if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
         if (features.quests || features.userNotif) backgroundSync();
         return true;
@@ -794,7 +794,7 @@
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
-        iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Tint icons with theme colors", "Follow theme's icon pack"]};
+        iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -8963,16 +8963,16 @@
     const ICONPACK_TRANSPARENT_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIAAAUAAeImBZsAAAAASUVORK5CYII=";
     // Built-in community icon packs from Themes+, embedded so the gallery works straight away offline.
     const BUILTIN_ICONPACKS = [
-        {id:"rosiecord-plumpy", name:"Rosiecord Plumpy", description:"Icons8 Plumpy icons", authors:"Rosie & Rairof", load:"https://raw.githubusercontent.com/Rairof/discord-iconpacks/main/Packs/Plumpy/", suffix:"", tint:true},
-        {id:"rosiecord-iconsax", name:"Rosiecord Iconsax", description:"Iconsax linear icons", authors:"Rosie, Lemon & Jay", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/iconsax/", suffix:"@2x", tint:true},
-        {id:"md3", name:"MD3 (Rounded)", description:"Material Design 3 rounded icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3/", suffix:"", tint:true},
-        {id:"md3legacy", name:"MD3 (Legacy)", description:"Classic Material Design 3 icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3Legacy/", suffix:"", tint:true},
-        {id:"solar", name:"Solar", description:"Solar bold icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar/", suffix:"", tint:true},
-        {id:"solarduotone", name:"Solar (Duotone)", description:"Solar two-tone shaded icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-duotone/", suffix:"", tint:false},
-        {id:"solarbroken", name:"Solar (Dashed)", description:"Solar broken-line icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-broken/", suffix:"", tint:true},
-        {id:"deco", name:"Deco", description:"Clean geometric line icons", authors:"doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/Deco/", suffix:"", tint:true},
-        {id:"materialtwotone", name:"Material Two Tone", description:"Two-tone Material icons", authors:"Google & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/MaterialTwoTone/", suffix:"", tint:false},
-        {id:"iconsaxbulk", name:"Iconsax Bulk", description:"Iconsax filled bulk icons", authors:"Iconsax & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/IconsaxBulk/", suffix:"", tint:false}
+        {id:"rosiecord-plumpy", name:"Rosiecord Plumpy", description:"Icons8 Plumpy icons", authors:"Rosie & Rairof", load:"https://raw.githubusercontent.com/Rairof/discord-iconpacks/main/Packs/Plumpy/", suffix:""},
+        {id:"rosiecord-iconsax", name:"Rosiecord Iconsax", description:"Iconsax linear icons", authors:"Rosie, Lemon & Jay", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/iconsax/", suffix:"@2x"},
+        {id:"md3", name:"MD3 (Rounded)", description:"Material Design 3 rounded icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3/", suffix:""},
+        {id:"md3legacy", name:"MD3 (Legacy)", description:"Classic Material Design 3 icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3Legacy/", suffix:""},
+        {id:"solar", name:"Solar", description:"Solar bold icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar/", suffix:""},
+        {id:"solarduotone", name:"Solar (Duotone)", description:"Solar two-tone shaded icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-duotone/", suffix:""},
+        {id:"solarbroken", name:"Solar (Dashed)", description:"Solar broken-line icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-broken/", suffix:""},
+        {id:"deco", name:"Deco", description:"Clean geometric line icons", authors:"doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/Deco/", suffix:""},
+        {id:"materialtwotone", name:"Material Two Tone", description:"Two-tone Material icons", authors:"Google & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/MaterialTwoTone/", suffix:""},
+        {id:"iconsaxbulk", name:"Iconsax Bulk", description:"Iconsax filled bulk icons", authors:"Iconsax & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/IconsaxBulk/", suffix:""}
     ];
     // Common theme plus.iconpack spellings/typos mapped to canonical pack IDs.
     const ICONPACK_ID_ALIASES = {
@@ -9134,7 +9134,7 @@
         const description = typeof item.description === "string" ? item.description.trim().slice(0, 160) : "";
         const authors = Array.isArray(item.authors) ? item.authors.map(a => a && typeof a.name === "string" ? a.name.trim() : typeof a === "string" ? a.trim() : "").filter(Boolean).slice(0, 4).join(", ").slice(0, 80) :
             typeof item.authors === "string" ? item.authors.trim().slice(0, 80) : "";
-        const out = {id, name, description, authors, load, suffix, custom:true, tint:item.tint !== false};
+        const out = {id, name, description, authors, load, suffix, custom:true};
         if (Array.isArray(item.tree) && item.tree.length) {
             const tree = item.tree.filter(p => typeof p === "string" && p.length <= 240).slice(0, 4000);
             if (tree.length) iconPacks.trees.set(id, new Set(tree));
@@ -9197,7 +9197,7 @@
     // Discord registers an asset only when its module first loads (none at launch, ~1.4k images once every screen has
     // been opened), so a one-time scan of AssetRegistry (84) caught a partial list or nothing and most icons never
     // changed. Each asset ID is resolved the first time it's drawn instead, then cached in iconPacks.table.
-    const ICONPACK_MISS = Object.freeze({source:null, tint:"", noTint:false});
+    const ICONPACK_MISS = Object.freeze({source:null, tint:""});
     function iconPacksAsset(id) {
         const reg = iconPacks.registry || (iconPacks.registry = global.__r && global.__r(84));
         let a = null;
@@ -9216,7 +9216,7 @@
         const uri = ctx.pack ? iconPacksResolveAssetUri(a, ctx.pack, ctx.tree) : "";
         const tint = iconPacksResolvePlusTint(a.name, ctx.plusIcons);
         if (!uri && !tint) return ICONPACK_MISS;
-        return Object.freeze({source:uri ? Object.freeze({__venusIcon:true, uri, width:a.width, height:a.height}) : null, tint, noTint:!ctx.allowTint && !!uri});
+        return Object.freeze({source:uri ? Object.freeze({__venusIcon:true, uri, width:a.width, height:a.height}) : null, tint});
     }
     // O(1) after the first draw of each icon: one array read per render.
     function iconPacksEntry(id) {
@@ -9284,10 +9284,10 @@
         return p ? formatThemeColor(p) : "";
     }
     // What every icon is resolved against; a new pack, tint choice or theme starts a fresh cache.
-    function iconPacksSetContext(pack, plusIcons, allowTint) {
+    function iconPacksSetContext(pack, plusIcons) {
         const tree = pack ? iconPacks.trees.get(pack.id) || null : null;
         if (pack && !tree && !pack.custom) iconPacksFetchTree(pack);
-        iconPacks.ctx = {pack, tree, plusIcons, allowTint};
+        iconPacks.ctx = {pack, tree, plusIcons};
         iconPacks.table = [];
         iconPacks.hasActive = true;
     }
@@ -9302,17 +9302,16 @@
         const pack = on ? iconPacksActiveEntry() : null;
         const theme = features.customThemes && enabled("customThemes") ? customThemesActiveEntry() : null;
         const plusIcons = on && theme && theme.plus && theme.plus.icons || null;
-        const allowTint = !on || !!settings.iconPacksTint;
         const treeSize = pack && iconPacks.trees.has(pack.id) ? iconPacks.trees.get(pack.id).size : 0;
         const nextKey = on ? (pack ? pack.id + ":" + pack.load + ":" + pack.suffix + ":" + treeSize : "none") +
-            "|t:" + (allowTint ? "1" : "0") + "|p:" + (theme && plusIcons ? theme.id + ":" + customThemes.editCounter : "") : "";
+            "|p:" + (theme && plusIcons ? theme.id + ":" + customThemes.editCounter : "") : "";
         if (nextKey === iconPacks.appliedKey) return;
         iconPacks.appliedKey = nextKey;
         if (!on || (!pack && !plusIcons)) {
             iconPacks.ctx = null;
             iconPacks.table = null;
             iconPacks.hasActive = false;
-        } else iconPacksSetContext(pack, plusIcons, allowTint);
+        } else iconPacksSetContext(pack, plusIcons);
         iconPacksBumpThemeRevision();
         notify("iconPacks");
     }
@@ -9326,8 +9325,7 @@
         if (entry === ICONPACK_MISS) return orig.apply(self, args);
         const next = Object.assign({}, props);
         if (entry.source) next.source = entry.source;
-        if (entry.noTint) next.color = null;
-        else if (entry.tint) next.color = entry.tint;
+        if (entry.tint) next.color = entry.tint;
         return orig.call(self, next);
     }
     baseIconImageHook.call1 = (orig, self, props) => {
@@ -9336,8 +9334,7 @@
         if (entry === ICONPACK_MISS) return orig.call(self, props);
         const next = Object.assign({}, props);
         if (entry.source) next.source = entry.source;
-        if (entry.noTint) next.color = null;
-        else if (entry.tint) next.color = entry.tint;
+        if (entry.tint) next.color = entry.tint;
         return orig.call(self, next);
     };
     // Direct <RN.Image source={assetId} /> and resolveAssetSource(assetId) callers (legacy ic_* icons, illustrations, status icons).
@@ -9364,8 +9361,7 @@
             const entry = iconPacksEntry(props.source);
             if (!entry.source) return orig.apply(self, args);
             const next = Object.assign({}, props, {source:entry.source});
-            if (entry.noTint && next.style) next.style = [next.style, {tintColor:undefined}];
-            else if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
+            if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
             const nextArgs = Array.from(args);
             nextArgs[0] = next;
             return orig.apply(self, nextArgs);
@@ -9572,7 +9568,7 @@
             flexDirection:"row", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", rowGap:10}},
             ICONPACK_SHOWCASE.map(([modId, iconName]) => {
                 const uri = pack ? iconPackSampleUri(pack, iconName) : "";
-                const tint = tintColor && (!pack || settings.iconPacksTint && pack.tint !== false) ? tintColor : undefined;
+                const tint = tintColor || undefined;
                 return el(RN.View, {key:iconName, style:{width:"30%", alignItems:"center", justifyContent:"center"}},
                     uri && RN.Image ? el(RN.Image, {source:{uri, width:22, height:22}, fadeDuration:0,
                         style:{width:22, height:22, tintColor:tint}, resizeMode:"contain"}) :
@@ -9711,7 +9707,6 @@
             el(IconPacksPreview, {key:"preview", on, active}),
             gallery,
             el(Group, {key:"display", title:tr("Display")},
-                switchRow(Switch, "iconPacksTint", "Tint icons with theme colors", "Turn off for duotone or full-color packs so they keep their own shading.", rowIcon(15080, "PaintPaletteIcon")),
                 features.customThemes ? switchRow(Switch, "iconPacksTheme", "Follow theme's icon pack", "Uses the icon pack recommended by your active custom theme, when it sets one.", rowIcon(15172, "EyeDropperIcon")) : null),
             el(Group, {key:"install", title:tr("Add from link"), description:tr("Paste a custom icon pack folder URL or config.json link.")},
                 el(RN.View, {key:"input", style:{padding:12}}, urlInput), problem),
