@@ -11,12 +11,12 @@ Extra features and privacy options for Discord on Android, built into the app wi
 1. Install [Morphe Manager](https://github.com/MorpheApp/morphe-manager/releases).
 2. Tap **[Add to Morphe](https://morphe.software/add-source?github=VenusIsJaded/Venus-Patches&name=Venus%20Patches)**. You can also add `https://github.com/VenusIsJaded/Venus-Patches` as a source.
 3. Choose the **original** Discord 349.9 APKM. Don't pick an APK you've already patched.
-4. Every patch is selected for you, under **Features** and **Privacy**. Leave **Venus settings** on, then patch and install.
+4. Every patch except **Custom branding** is selected for you, under **Features** and **Privacy**. Leave **Venus settings** on, then patch and install.
 5. Open **Discord Settings → Venus → Features** and turn on the ones you want. They all start off.
 
 You can also download `patches-<version>.mpp` from [Releases](https://github.com/VenusIsJaded/Venus-Patches/releases) and import it under **Sources → + → Local**.
 
-> **Heads up:** the patched app is signed with your key, not Discord's, so you may need to uninstall official Discord first. Uninstalling deletes Discord's local data. Keep the same Morphe signing key so later updates install over the top.
+> **Heads up:** the patched app is signed with your key, not Discord's, so you may need to uninstall official Discord first, unless you use [Custom branding](#custom-branding) to install it next to Discord. Uninstalling deletes Discord's local data. Keep the same Morphe signing key so later updates install over the top.
 
 ## Features
 
@@ -67,6 +67,19 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 **Backup and restore** keeps your Venus setup safe when you patch again, reinstall or move to a new phone. **Save to a file** opens Android's Save to screen so you can keep the backup in Downloads, Drive or anywhere else, and **Copy to clipboard** lets you paste it into a note. **Restore from a file** or **Paste from clipboard** brings every feature, option, watched person and installed theme back after asking first. Backups are small JSON files and never include your ReviewDB sign-in, saved accounts or kept deleted messages. **Reset to defaults** turns every feature off again.
 
 **About** shows your version, how many features are on (in total and per group), whether everything is working, and links to what's new and to report a problem. Venus settings animate gently as you use them, and follow Android's **Remove animations** setting.
+
+### Custom branding
+
+Want Venus next to the normal Discord app? Select **Custom branding** under **Features** in Morphe (it's the only patch that starts off) and tap its gear to choose:
+
+| Option | What it does |
+| --- | --- |
+| **Package name** | `com.discord.venus` by default, so both apps install side by side. Pick **Keep Discord's** to replace Discord instead |
+| **App name** | The name on your home screen: **Venus**, **Discord Venus**, Discord's own, or anything you type |
+| **App icon** | A square PNG, JPG or WebP picture (512 × 512 is ideal). It fills the icon's shape, so keep the important part away from the corners |
+| **Icon background** | Recolors the icon in Discord's blurple, green, yellow, fuchsia, red or black, or any color you choose. It's the quickest way to tell the two apps apart |
+
+Leave **App icon** and **Icon background** empty to keep Discord's icon. With a new package name, the copy is a separate app: it starts signed out, has its own settings, and may not get push notifications, since Discord only sends them to `com.discord`. Keep the same package name every time you patch so updates install over the top.
 
 ### Privacy options
 

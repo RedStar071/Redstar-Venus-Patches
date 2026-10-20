@@ -94,7 +94,7 @@ private fun ResourcePatchContext.addBackgroundColor(color: String) {
 val customBranding = resourcePatch(
     name = "Custom branding",
     description = "Changes Discord's package name, name and icon, so Venus can be installed next to the normal Discord app. " +
-        "The copy starts signed out and keeps its own settings.",
+        "A copy with a new package name starts signed out, keeps its own settings, and may not get push notifications.",
     default = false,
 ) {
     compatibleWith(discord)

@@ -105,6 +105,89 @@
       "options": []
     },
     {
+      "name": "Custom branding",
+      "description": "Changes Discord's package name, name and icon, so Venus can be installed next to the normal Discord app. A copy with a new package name starts signed out, keeps its own settings, and may not get push notifications.",
+      "default": false,
+      "category": "Features",
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "349.9 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": [
+        {
+          "key": "packageName",
+          "title": "Package name",
+          "description": "A different package name lets this copy be installed next to the normal Discord app. Use lowercase letters, digits and dots, like com.discord.venus. Keep com.discord to replace Discord instead.",
+          "required": true,
+          "type": "kotlin.String",
+          "default": "com.discord.venus",
+          "values": {
+            "Venus (com.discord.venus)": "com.discord.venus",
+            "Keep Discord's (com.discord)": "com.discord"
+          }
+        },
+        {
+          "key": "appName",
+          "title": "App name",
+          "description": "The name under the icon on your home screen and in your app list.",
+          "required": true,
+          "type": "kotlin.String",
+          "default": "Venus",
+          "values": {
+            "Venus": "Venus",
+            "Discord Venus": "Discord Venus",
+            "Keep Discord's (Discord)": "Discord"
+          }
+        },
+        {
+          "key": "appIcon",
+          "title": "App icon",
+          "description": "A square PNG, JPG or WebP image for the home screen icon. It fills the icon's shape, so keep anything important away from the corners. Leave empty to keep Discord's icon.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": null,
+          "values": null
+        },
+        {
+          "key": "iconBackground",
+          "title": "Icon background",
+          "description": "Recolors the icon's background, which is the quickest way to tell the two apps apart. Shows behind a transparent App icon. Leave empty to keep Discord's blurple.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": null,
+          "values": {
+            "Blurple": "#5865F2",
+            "Green": "#57F287",
+            "Yellow": "#FEE75C",
+            "Fuchsia": "#EB459E",
+            "Red": "#ED4245",
+            "Black": "#23272A"
+          }
+        }
+      ]
+    },
+    {
       "name": "Custom themes",
       "description": "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.",
       "default": true,
