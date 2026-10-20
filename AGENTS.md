@@ -80,6 +80,13 @@ Rules:
   Discord 349.9, and Keep deleted messages (and every feature listening to Discord's events) hooking the wrong module,
   and theme colors 349.9 renamed, were only broken inside that pull request, so neither is in the 1.16.0 notes. The
   same goes for ReviewDB cards failing to render on 348.10 in 1.3.7.
+- **Write the notes from the exact difference between the last release and this one, never from the pull request.**
+  Before writing an entry (and before a pull request description that lists fixes), run
+  `git log --oneline vX.Y.Z..HEAD` and `git diff --stat vX.Y.Z HEAD` against the previous release tag, and for every
+  candidate bullet confirm with `git show vX.Y.Z:<file>` that the previous release really had the behavior. Only what
+  changed for someone updating from that release goes in. A fix for something a commit in the same range broke (for
+  example 1.17.0's Backup defaults fix, which repaired a regression from that release's own startup speedup) and every
+  fix to a feature that is new in this release are left out; the new feature gets one ✨ bullet instead.
 
 ## The GitHub release
 
@@ -103,7 +110,7 @@ gh release create v1.6.1 patches/build/libs/patches-1.6.1.mpp --title "1.6.1" --
 2. Nothing to write for `patches-bundle.json`: its `description` is this version's `CHANGELOG.md` sections,
    which Morphe shows when its cached `CHANGELOG.md` doesn't list the new release yet. Never replace it with a sentence.
 3. Add the `CHANGELOG.md` entry at the top, as above.
-4. `python3 scripts/build.py` (which compacts `bootstrap.js`, verifies HBC98 syntax/bytecode compilation when `hermesc` is present, compiles all extensions and patches, and runs `runtime.test.cjs`, `PcmToolsTestKt` and `PrivacyTestKt`), then `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`.
+4. `python3 scripts/build.py` (which compacts `bootstrap.js`, verifies HBC98 syntax/bytecode compilation when `hermesc` is present, compiles all extensions and patches, checks every language file, and runs `PrivacyTestKt`), then `python3 scripts/build.py --metadata-only` to write `patches-bundle.json`.
 5. Update `README.md` if a feature or setting changed.
 
 ## How the Venus runtime is compiled & injected (HBC98 architecture)
@@ -123,9 +130,9 @@ Instead, Venus uses **single-bundle HBC98 bytecode injection** (`HbcPrelude.kt`)
 ## Upgrading to a new Discord Android version
 
 Every Discord version upgrade touches four layers that are pinned to the exact APK and `assets/index.android.bundle`:
-1. **Supported version string** (`349.9 - Stable`) in `DiscordPatches.kt`, `DISCORD_VERSION` in `bootstrap.js` (shown on the About page) and `README.md`. A test fails if they differ.
+1. **Supported version string** (`349.9 - Stable`) in `DiscordPatches.kt`, `DISCORD_VERSION` in `bootstrap.js` (shown on the About page) and `README.md`. Keep all three the same.
 2. **HBC98 bundle & global `#0` constants** in `HbcPrelude.kt` and `HbcPrivacy.kt`.
-3. **Metro module IDs** in `patches/src/main/resources/venus/bootstrap.js` (and `tests/runtime.test.cjs`).
+3. **Metro module IDs** in `patches/src/main/resources/venus/bootstrap.js`.
 4. **Pinned HBC98 privacy targets (104 functions)** in `HbcPrivacy.kt` and **pinned native DEX methods (137 methods)** in `PrivacyPatches.kt`.
 
 Follow this step-by-step checklist whenever upgrading the supported Discord version:
@@ -163,7 +170,7 @@ python3 scripts/hbc/port_check.py work/new/assets/index.android.bundle
    - Discord embeds source file paths (`fileFinishedImporting(moduleId, "path/to/File.tsx")`) in almost every module. If any module ID shifted in the new version, `port_check.py` prints `[MOVED/CHECK]` along with `candidate_in_new_bundle=<new_id>`.
    - For any shifted or newly added module ID:
      - Inspect the candidate with `B.show(new_id)` and `B.exports(new_id)` using `scripts/hbc/hbc.py`.
-     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/349.9-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js` and `tests/runtime.test.cjs`.
+     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/349.9-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js`.
      - Also check the icon module IDs in `FEATURE_ICONS` inside `bootstrap.js`:
        ```bash
        python3 -c "
@@ -285,8 +292,7 @@ Venus and Morphe, translations, tests, the module map), keep following it.
 
 Every option page shares one look, set by the User activity notifications and Message highlights pages in 1.12.0:
 calm, roomy and visual, built from Discord's own components so it feels like part of the app. Follow it for every
-new page and every change to an existing one. `tests/runtime.test.cjs` ("every option page renders in the shared
-design") renders each page on and off and fails when a page breaks the rules below.
+new page and every change to an existing one. Check each page yourself, on and off, against the rules below.
 
 **Page order, top to bottom**
 
@@ -356,7 +362,7 @@ design") renders each page on and off and fails when a page breaks the rules bel
 - **Start with the essentials** (`STARTER_FEATURES`, `starterCard`) sits above the Features search on a fresh install, until any
   feature has been on, Not now is tapped (`setupDone` in the settings file), or you search. Only add a feature there if it works
   on its own: no sign-in, no outside service (ReviewDB, Google Translate), no restart, nothing that acts for you (Quests,
-  Skip delete confirmation) or changes what others see (Hide typing indicator). The runtime test lists the ones that must stay out.
+  Skip delete confirmation) or changes what others see (Hide typing indicator).
 - **Backup and restore** saves `settings` (plus watched people and installed themes). A new setting needs nothing extra as long
   as `acceptedSetting` can validate it: add a check there for any setting with a fixed list of values, so a hand-edited backup
   can't put a page in a state it can't show. Never add sign-ins, tokens, saved accounts or kept messages to `backupText`.
@@ -450,9 +456,8 @@ The page title is short ("Deleted messages", "Tap gestures").
 - The feature's name is **the same in Venus and in Morphe**: the Venus row title, the Morphe patch `name` in
   `DiscordPatches.kt` and the README features table. Morphe patches sit in the **Features** category. The
   Morphe description is the Venus description, plus any credit.
-- Update `README.md` (features table) and the tests in `tests/runtime.test.cjs` whenever a
-  title, group or option changes. The Features list test checks title and description length and that each icon
-  is unique.
+- Update `README.md` (features table) whenever a title, group or option changes. Keep titles at most 40 characters,
+  descriptions at most 130, and every feature icon unique.
 - **Always keep both the module map file (`scripts/hbc/349.9-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
 
 ## Benchmarking optimizations (required)
@@ -497,8 +502,31 @@ faster on Hermes is not an optimization; revert it unless it's also simpler.
 4. **Put the numbers in the commit message and the pull request:** the Hermes before/after for what changed, for
    example `Hermes HBC98: 15.5 → 13.3 ms per 3000-message sort (1.17x)`. A ⚡ Performance changelog bullet needs
    this measurement behind it.
-5. **Still run the tests on Hermes:** `HERMES_BIN=work/hermes/hermes-vm node --test tests/runtime.test.cjs`, so the
-   native-eval test runs instead of being skipped.
+5. **Check the change still works:** boot the real bundle with `sh tests/bench/cold_boot.sh` (it must print
+   `HBC98_REAL_RN_ENVIRONMENT_PASS`) and try the feature in the patched app. Throwaway verification scripts stay local
+   (see [Tests](#tests-what-may-be-committed)).
+
+## Tests: what may be committed
+
+Only commit tests that have a lasting, practical use. **Never commit tests whose only job is to verify that a feature,
+page, hook or fix works** (per-feature unit tests, render snapshots, "does this row exist" checks, harnesses that mock
+Discord's modules to exercise one feature). Write them locally if they help you, run them, and leave them out of the
+commit: they go stale with every Discord port and redesign and slow every change down without catching real problems.
+
+What belongs in the repository:
+
+- **Performance measurement:** the Hermes HBC98 benchmarks in `tests/bench/` (`hermes_bench.cjs`, `cold_boot.sh`,
+  `load_profile.cjs`, `load_calls.cjs`, `runtime_eval.cjs` and each optimization's `<name>.js`), and
+  `tests/hermes-startup.js`, which cold-boots the real Discord bundle.
+- **Checks against the real APK that protect every patch:** `tests/native/VerifyApk.kt` (the patched APK applies and
+  every branch is aligned), `tests/native/PrivacyTest.kt` (every pinned HBC98 and DEX target is still safe to stub) and
+  `tests/native/HbcPreludeTest.kt` (the prelude injects cleanly). These are reused on every Discord port.
+- **Developer tools with a future use:** `tests/theme_compat.cjs` and `tests/themes_fetch.py` (published-theme
+  compatibility), and the porting tools in `scripts/hbc/`.
+- **Build gates** in `scripts/build.py`: changelog format, HBC98 compilation of the runtime, and language files (valid,
+  every `{placeholder}` kept, every text translated).
+
+If you're unsure whether a new test has a future use, it doesn't: keep it local.
 
 ## Workflow for bug fixes, optimizations, and GitHub Actions `.mpp` artifacts
 

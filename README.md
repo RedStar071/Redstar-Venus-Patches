@@ -11,12 +11,12 @@ Extra features and privacy options for Discord on Android, built into the app wi
 1. Install [Morphe Manager](https://github.com/MorpheApp/morphe-manager/releases).
 2. Tap **[Add to Morphe](https://morphe.software/add-source?github=VenusIsJaded/Venus-Patches&name=Venus%20Patches)**. You can also add `https://github.com/VenusIsJaded/Venus-Patches` as a source.
 3. Choose the **original** Discord 349.9 APKM. Don't pick an APK you've already patched.
-4. Every patch is selected for you, under **Features** and **Privacy**. Leave **Venus settings** on, then patch and install.
+4. Every patch except **Custom branding** is selected for you, under **Features** and **Privacy**. Leave **Venus settings** on, then patch and install.
 5. Open **Discord Settings → Venus → Features** and turn on the ones you want. They all start off.
 
 You can also download `patches-<version>.mpp` from [Releases](https://github.com/VenusIsJaded/Venus-Patches/releases) and import it under **Sources → + → Local**.
 
-> **Heads up:** the patched app is signed with your key, not Discord's, so you may need to uninstall official Discord first. Uninstalling deletes Discord's local data. Keep the same Morphe signing key so later updates install over the top.
+> **Heads up:** the patched app is signed with your key, not Discord's, so you may need to uninstall official Discord first, unless you use [Custom branding](#custom-branding) to install it next to Discord. Uninstalling deletes Discord's local data. Keep the same Morphe signing key so later updates install over the top.
 
 ## Features
 
@@ -45,6 +45,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Account switcher | Switch between up to 50 Discord accounts from the profile bar or Venus settings |
 | **Servers** | Read all button | Marks servers, DMs or both as read in one tap |
 | | Show hidden channels | Channels you can't open appear with a lock. Only a tap opens their details menu, which you can turn off |
+| | Server info | Hold a server's icon to see live details: who's online, channels, roles, emojis, boost progress, the owner, your friends there, when it was made and when you joined |
 | | Spaces in channel names | "general chat" instead of "general-chat" |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
 | | Use your phone's emojis | Your phone's emojis instead of Discord's |
@@ -53,6 +54,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
 | | Custom themes | Install Revenge and Vendetta color themes from a link, then pick one from a gallery that previews each in its own colors |
+| | Icon packs | Replace Discord's icons across the app with built-in community icon packs (Rosiecord Plumpy, Rosiecord Iconsax, MD3, Solar, Deco, Material Two Tone, Iconsax Bulk) or a custom icon pack link |
 | **Quests** | Complete Quests automatically | Finishes video, Play and timed Activity Quests in the background |
 | | Hide the Quests banner | Removes the Quest promotion above your profile bar |
 
@@ -65,6 +67,21 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 **Backup and restore** keeps your Venus setup safe when you patch again, reinstall or move to a new phone. **Save to a file** opens Android's Save to screen so you can keep the backup in Downloads, Drive or anywhere else, and **Copy to clipboard** lets you paste it into a note. **Restore from a file** or **Paste from clipboard** brings every feature, option, watched person and installed theme back after asking first. Backups are small JSON files and never include your ReviewDB sign-in, saved accounts or kept deleted messages. **Reset to defaults** turns every feature off again.
 
 **About** shows your version, how many features are on (in total and per group), whether everything is working, and links to what's new and to report a problem. Venus settings animate gently as you use them, and follow Android's **Remove animations** setting.
+
+### Custom branding
+
+Want Venus next to the normal Discord app? Select **Custom branding** under **Features** in Morphe (it's the only patch that starts off) and tap its gear to choose:
+
+| Option | What it does |
+| --- | --- |
+| **App name** | The name on your home screen. Type anything; **Venus** by default |
+| **Package name** | Type any name of lowercase words joined by dots; `com.discord.venus` by default, so both apps install side by side. Type `com.discord` to replace Discord instead |
+| **Icon color** | The color behind the logo: Discord's blurple, green, yellow, fuchsia, red or black, or any color you choose |
+| **Icon picture** | Your own square PNG, JPG or WebP picture (512 × 512 is ideal) in place of Discord's logo. It fills the icon's shape, so keep the important part away from the corners |
+
+**Icon color and Icon picture work together:** the color fills the icon's background and the picture sits on top, so the color only shows through transparent parts of the picture. With neither, the icon stays Discord's. With only a color, it's Discord's logo on your color.
+
+A copy with a new package name is a separate app: it starts signed out and has its own settings. Notifications work in both apps: each one registers for push notifications under its own name, so signing in to the same account in both gets them in both, and the copy's notification sounds, pictures and **Notification settings** button all use its new name. Keep the same package name every time you patch so updates install over the top.
 
 ### Privacy options
 

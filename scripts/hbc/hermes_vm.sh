@@ -1,7 +1,7 @@
 #!/bin/sh
 # Fetch a prebuilt standalone Hermes HBC98 VM (250829098.0.16, linux-x64) for benchmarks and HERMES_BIN tests.
 # Developer-only, never committed: everything lands in work/hermes. Prints the wrapper path to use as HERMES_BIN.
-#   sh scripts/hbc/hermes_vm.sh && HERMES_BIN=work/hermes/hermes-vm node --test tests/runtime.test.cjs
+#   sh scripts/hbc/hermes_vm.sh && node tests/bench/hermes_bench.cjs tests/bench/<name>.js
 # Source: github.com/malopezr7/argus release hermes-bin-v250829098.0.16 (CI-gated to emit byte-identical .hbc
 # to React Native's hermes-compiler). The binary links ICU 70, taken from Ubuntu 22.04's libicu70 package.
 set -e

@@ -1,4 +1,4 @@
-"""One-pass 348.10 -> 349.9 Metro id rewrite for bootstrap.js and runtime tests (numbers only, never strings/base64)."""
+"""One-pass 348.10 -> 349.9 Metro id rewrite for bootstrap.js (numbers only, never strings/base64)."""
 import re, sys
 MAP = {585:584, 588:587, 590:589, 592:591, 1086:1085, 1097:1096, 1112:1111, 1113:1112, 1127:1126, 1163:1162,
  1194:1193, 1252:1251, 1283:1282, 1348:1347, 1378:1377, 1403:1402, 1491:1490, 2073:2074, 2102:2103, 2111:2112,

@@ -9,14 +9,14 @@
     // IDs past the end read as undefined, so a module added in a later bundle is simply left alone.
     const targetModules = new Uint8Array(32768);
     function selectModules(ids) { for (let i = 0; i < ids.length; i++) targetModules[ids[i]] = 1; }
-    selectModules([17, 19, 120, 1162, 11129, 14409, 14500]);
-    if (features.picker) selectModules([414]);
+    selectModules([17, 19, 120, 1162, 2116, 11129, 14409, 14500]);
+    if (features.picker) targetModules[414] = 1;
     if (features.voice) selectModules([1282, 7268, 7243]);
-    if (features.copyBios) selectModules([10987]);
+    if (features.copyBios) targetModules[10987] = 1;
     if (features.dashless) selectModules([2051, 5043, 5796, 7166]);
     if (features.favouriteAnything) selectModules([12767, 10090, 10093]);
     if (features.freeNitro) selectModules([1377, 2051, 5638, 5687, 4528, 13797, 6840, 6965]);
-    if (features.noTyping) selectModules([11604]);
+    if (features.noTyping) targetModules[11604] = 1;
     if (features.quickDelete) selectModules([5708, 1126]);
     if (features.noDelete) selectModules([584, 5110, 5112, 1377, 2051, 6965, 7591]);
     if (features.jumpToTop) selectModules([11896, 11897, 11898, 9064, 6965, 5110]);
@@ -24,25 +24,25 @@
     if (features.pastelize) selectModules([7591, 1251, 2112]);
     if (features.platformIndicators) selectModules([4930, 4908, 1377, 2051, 10843, 10602, 13107, 15962, 9334, 13920, 12849]);
     if (features.reviewDB) selectModules([12872, 13790, 14259, 8716, 6074, 6698, 1377, 584]);
-    if (features.readAll) selectModules([16232]);
+    if (features.readAll) targetModules[16232] = 1;
     if (features.quests) selectModules([584, 7187, 7252, 13439, 13477]);
     if (features.hideGift) selectModules([11864, 12071]);
     if (features.hideQuestDock) selectModules([14892, 14985]);
-    if (features.systemEmoji) selectModules([6625]);
+    if (features.systemEmoji) targetModules[6625] = 1;
     if (features.gestures) selectModules([7627, 9878, 11363, 11918, 1377, 11159]);
-    if (features.hideCall) selectModules([12956]);
+    if (features.hideCall) targetModules[12956] = 1;
     if (features.validUser) selectModules([584, 1377]);
-    if (features.youBarSettings) selectModules([16335]);
+    if (features.youBarSettings) targetModules[16335] = 1;
     if (features.splitMessages) selectModules([1085, 1377, 2051, 6965, 8809]);
     if (features.translate) selectModules([584, 1377, 7591, 11281]);
     if (features.userNotif) selectModules([584, 1377, 2051, 2074, 4519, 4930, 7252, 13439, 13477]);
     if (features.accountSwitcher) selectModules([1377, 12056, 12057, 12058, 16335]);
     if (features.appIcons) selectModules([1377, 4528, 8828, 13797, 15351, 15352, 17106, 17455]);
     if (features.customThemes) selectModules([589, 590, 591, 1193, 4593, 9758, 9769]);
+    if (features.iconPacks) selectModules([81, 84, 328, 1193, 4579, 4593, 9758]);
     if (features.messageHighlight) selectModules([584, 1377, 5110, 7591]);
-    // LocaleStore: Venus settings follow Discord's language unless you pick another one.
-    selectModules([2116]);
-    const revision = "1.16.1";
+    if (features.serverInfo) selectModules([1377, 16226]);
+    const revision = "1.17.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "349.9";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
@@ -60,9 +60,25 @@
         translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
-        messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", language:"auto" };
+        iconPacks:false, iconPacksTheme:true,
+        messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
-    const DEFAULT_SETTINGS = Object.freeze(Object.assign({}, settings));
+    let DEFAULT_SETTINGS = null;
+    function defaultSettings() {
+        return DEFAULT_SETTINGS || (DEFAULT_SETTINGS = Object.freeze({
+            picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
+            noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true,
+            jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
+            quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true, systemFont: false,
+            hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
+            validUser: false, youBarSettings: false, splitMessages: false,
+            translate: false, translateTarget: "discord", translateMode: "auto", translateNote: true, translateOriginal: false,
+            userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
+            accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
+            iconPacks: false, iconPacksTheme: true,
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
+        }));
+    }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
     const backup = {last:0, busy:"", restoring:false};
     // First-run setup on the Features list: done once any feature has been on, or after Not now. justOn is this session's
@@ -216,8 +232,7 @@
     const featureTable = Object.create(null);
     const enabled = key => {
         if (!settings[key]) return false;
-        let feature = featureTable[key];
-        if (feature === undefined) featureTable[key] = feature = featureFor(key);
+        const feature = featureTable[key] || featureFor(key);
         // An option only counts while its main switch is on too. Only FreeNitro checked that, so
         // "Removing link previews" kept skipping the question after QuickDelete itself was turned off.
         return feature === key ? !!features[key] : !!(features[feature] && settings[feature]);
@@ -343,8 +358,10 @@
         if (features.userNotif && key === "userNotifPush" && value && status.storage !== "loading" && status.storage !== "waiting") later(() => userNotifRequestPermissions(false), 0);
         if (features.userNotif && featureFor(key) === "userNotif") userNotifSync();
         if (features.accountSwitcher && featureFor(key) === "accountSwitcher") accountSwitcherSync();
-        if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); }
+        if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.customThemes && key === "customThemesBackground") customThemesApply();
+        if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
+        if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
         if (features.quests || features.userNotif) backgroundSync();
         return true;
@@ -397,6 +414,7 @@
             }
             if (features.accountSwitcher) accountSwitcherSync();
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
+            if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
             if (features.quests || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
@@ -701,7 +719,11 @@
 
     // Native setting nodes use Discord's own themed rows, navigation and back stack.
     let SettingsList;
-    const featureFor = key => key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : key;
+    const featureFor = key => {
+        const cached = featureTable[key];
+        if (cached !== undefined) return cached;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : key;
+    };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
         const entry = { settings: keys };
@@ -735,7 +757,7 @@
         hiddenChannels:[5879, "LockIcon"], dashless:[15411, "HashmarkIcon"], systemFont:[15493, "LettersIcon"], systemEmoji:[8944, "ChatSmileIcon"],
         hideGift:[10766, "GiftIcon"], hideCall:[7523, "PhoneCallIcon"], youBarSettings:[6883, "SettingsIcon"], quests:[14803, "QuestsIcon"],
         hideQuestDock:[6456, "EyeSlashIcon"], userNotif:[9266, "BellIcon"], accountSwitcher:[5873, "GroupIcon"], appIcons:[5890, "AppsIcon"],
-        customThemes:[15172, "EyeDropperIcon"], messageHighlight:[16425, "PaintbrushThinIcon"]};
+        customThemes:[15172, "EyeDropperIcon"], iconPacks:[9640, "ImageSparkleIcon"], messageHighlight:[16425, "PaintbrushThinIcon"], serverInfo:[4812, "CircleInformationIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -771,7 +793,8 @@
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
-        hiddenChannels:["Show its details"], customThemes:["Show theme background image", "Browse Revenge themes"]};
+        hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
+        iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1077,6 +1100,7 @@
         // Servers
         withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button that marks servers and DMs as read.", "Read all", ReadAllSettings);
         withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open show with a lock. Messages stay hidden.", "Hidden channels", HiddenChannelsSettings);
+        withOptions("servers", "serverInfo", "VENUS_SERVERINFO", "Server info", "Hold a server's icon to see its details, boosts and friends there.", "Server info", ServerInfoSettings);
         toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\".");
         // Appearance
         toggle("appearance", "systemFont", "Use your phone's font", "Replaces Discord's font everywhere. Android 9 or newer.");
@@ -1086,6 +1110,7 @@
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus next to the notifications bell.");
         toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon without Nitro.");
         withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install Revenge and Vendetta color themes from a link.", "Custom themes", CustomThemesSettings);
+        withOptions("appearance", "iconPacks", "VENUS_ICONPACKS", "Icon packs", "Replace Discord's icons with community icon packs or a custom pack.", "Icon packs", IconPacksSettings);
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
@@ -1201,21 +1226,27 @@
             diff < day ? pl(Math.floor(diff / hour), "{n} hour", "{n} hours") : pl(Math.floor(diff / day), "{n} day", "{n} days")});
         return tr("Last backup {time}", {time});
     }
-    // What a backup holds right now, for the page's summary: features on, options changed, people watched, themes.
+    // What a backup holds right now, for the page's summary: features on, options changed, people watched, themes, icon packs.
     function backupContents() {
+        const defaults = defaultSettings();
         const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]);
-        const changed = Object.keys(DEFAULT_SETTINGS).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
-            settings[key] !== DEFAULT_SETTINGS[key]).length;
+        const changed = Object.keys(defaults).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
+            settings[key] !== defaults[key]).length;
         return {on:keys.filter(key => settings[key]).length, total:keys.length, changed, people:features.userNotif ? userNotif.ids.size : 0,
-            themes:features.customThemes ? customThemes.list.length : 0, language:settings.language !== "auto"};
+            themes:features.customThemes ? customThemes.list.length : 0,
+            iconPacks:features.iconPacks ? (iconPacks.active ? 1 : 0) + iconPacks.custom.length : 0,
+            language:settings.language !== "auto"};
     }
     function backupIsDefault() {
-        return Object.keys(DEFAULT_SETTINGS).every(key => !features[featureFor(key)] && key !== "language" || settings[key] === DEFAULT_SETTINGS[key]);
+        const defaults = defaultSettings();
+        return Object.keys(defaults).every(key => !features[featureFor(key)] && key !== "language" || settings[key] === defaults[key]);
     }
     function backupText() {
         const out = {app:BACKUP_APP, format:BACKUP_FORMAT, version:revision, created:new Date().toISOString(), settings:Object.assign({}, settings)};
         if (features.userNotif && userNotif.ids.size) out.people = Array.from(userNotif.ids);
         if (features.customThemes && customThemes.list.length) out.themes = {active:customThemes.active || "", list:customThemes.list.slice(0, THEMES_MAX)};
+        if (features.iconPacks && (iconPacks.active || iconPacks.custom.length))
+            out.iconPacks = {active:iconPacks.active || "", custom:iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM)};
         return JSON.stringify(out, null, 1);
     }
     // A backup, or a plain venus-patches.json settings file, read back. Throws a message you can show when it isn't one.
@@ -1227,8 +1258,8 @@
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error(tr("That isn't a Venus backup."));
         const wrapped = data.app === BACKUP_APP && data.settings && typeof data.settings === "object" && !Array.isArray(data.settings);
         if (wrapped && typeof data.format === "number" && data.format > BACKUP_FORMAT) throw new Error(tr("This backup is from a newer Venus. Update Venus to restore it."));
-        const raw = wrapped ? data.settings : data, values = {};
-        Object.keys(DEFAULT_SETTINGS).forEach(key => { const value = acceptedSetting(key, raw[key]); if (value !== undefined) values[key] = value; });
+        const raw = wrapped ? data.settings : data, values = {}, defaults = defaultSettings();
+        Object.keys(defaults).forEach(key => { const value = acceptedSetting(key, raw[key]); if (value !== undefined) values[key] = value; });
         if (!Object.keys(values).length) throw new Error(tr("That isn't a Venus backup."));
         const people = Array.isArray(wrapped ? data.people : data.userNotifIds) ? (wrapped ? data.people : data.userNotifIds)
             .filter(id => typeof id === "string" && /^\d{17,20}$/.test(id)).slice(0, USER_NOTIF_MAX_IDS) : null;
@@ -1244,19 +1275,31 @@
             });
             themes = {list, active:typeof data.themes.active === "string" && list.some(t => t.id === data.themes.active) ? data.themes.active : ""};
         }
+        let packs = null;
+        if (wrapped && data.iconPacks && typeof data.iconPacks === "object" && !Array.isArray(data.iconPacks)) {
+            const custom = [];
+            if (Array.isArray(data.iconPacks.custom)) {
+                data.iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM).forEach(item => {
+                    const clean = sanitizeCustomIconPack(item);
+                    if (clean && !custom.some(x => x.id === clean.id)) custom.push(clean);
+                });
+            }
+            const act = typeof data.iconPacks.active === "string" ? normalizeIconPackId(data.iconPacks.active) : "";
+            packs = {custom, active:act};
+        }
         const created = wrapped && typeof data.created === "string" ? Date.parse(data.created) : NaN;
-        return {values, people, themes, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
+        return {values, people, themes, iconPacks:packs, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
     }
     // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
     // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
     function backupApply(parsed, reset) {
-        const fontWas = fontInUse, emojiWas = emojiInUse;
+        const fontWas = fontInUse, emojiWas = emojiInUse, defaults = defaultSettings();
         backup.restoring = true;
         try {
             animateLayout();
-            Object.keys(DEFAULT_SETTINGS).forEach(key => {
+            Object.keys(defaults).forEach(key => {
                 if (key !== "language" && !features[featureFor(key)]) return;
-                setSetting(key, owns(parsed.values, key) ? parsed.values[key] : DEFAULT_SETTINGS[key]);
+                setSetting(key, owns(parsed.values, key) ? parsed.values[key] : defaults[key]);
             });
             if (features.userNotif && parsed.people) {
                 userNotif.ids.clear(); parsed.people.forEach(id => userNotif.ids.add(id));
@@ -1265,6 +1308,10 @@
             if (features.customThemes && parsed.themes) {
                 customThemes.loaded = true; customThemes.list = parsed.themes.list; customThemes.active = parsed.themes.active; customThemes.error = "";
                 customThemesPersist(); customThemesApply(); notify("customThemes");
+            }
+            if (features.iconPacks && parsed.iconPacks) {
+                iconPacks.loaded = true; iconPacks.custom = parsed.iconPacks.custom; iconPacks.active = parsed.iconPacks.active; iconPacks.error = "";
+                iconPacksPersist(); iconPacksApply(); notify("iconPacks");
             }
         } finally { backup.restoring = false; }
         notify("*");
@@ -1358,7 +1405,7 @@
     }
     function backupReset() {
         confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes and people stay.", "Reset",
-            () => backupApply({values:Object.assign({}, DEFAULT_SETTINGS, {language:settings.language}), people:null, themes:null}, true));
+            () => backupApply({values:Object.assign({}, defaultSettings(), {language:settings.language}), people:null, themes:null}, true));
     }
     const BACKUP_DARK = {chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"}};
     // Backup and restore: what a backup holds right now, two ways to save it, two ways to bring one back.
@@ -1375,6 +1422,7 @@
             what.changed ? chip("options", 6883, "SettingsIcon", pl(what.changed, "{n} option changed", "{n} options changed")) : null,
             what.people ? chip("people", 4831, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
             what.themes ? chip("themes", 15172, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
+            what.iconPacks ? chip("iconPacks", 9640, "ImageSparkleIcon", pl(what.iconPacks, "{n} icon pack", "{n} icon packs")) : null,
             what.language ? chip("language", 15243, "LanguageIcon", languageLabel(settings.language)) : null];
         const backupRow = (key, label, sub, id, name, onPress, disabled) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true,
             onPress, disabled:!!busy || !!disabled}) : null;
@@ -1404,24 +1452,30 @@
         return orig.apply(self, next);
     }
 
-    function cloneTree(node, change, depth) {
-        if (!node || typeof node !== "object" || depth > 24) return node;
+    function cloneTree(node, change, depth, isDone) {
+        if (!node || typeof node !== "object" || depth > 24 || isDone && isDone()) return node;
         if (Array.isArray(node)) {
             let children = node;
             for (let i = 0; i < node.length; i++) {
-                const child = cloneTree(node[i], change, depth + 1);
-                if (child !== node[i]) {
+                if (isDone && isDone()) break;
+                const item = node[i];
+                if (!item || typeof item !== "object") continue;
+                const child = cloneTree(item, change, depth + 1, isDone);
+                if (child !== item) {
                     if (children === node) children = node.slice();
                     children[i] = child;
                 }
             }
             return children;
         }
-        if (!node.props) return node;
-        const children = cloneTree(node.props.children, change, depth + 1);
-        let props = children !== node.props.children ? Object.assign({}, node.props, { children }) : node.props;
+        const nodeProps = node.props;
+        if (!nodeProps) return node;
+        const rawChildren = nodeProps.children;
+        const children = rawChildren && typeof rawChildren === "object" ? cloneTree(rawChildren, change, depth + 1, isDone) : rawChildren;
+        let props = children !== rawChildren ? Object.assign({}, nodeProps, { children }) : nodeProps;
+        if (isDone && isDone()) return props === nodeProps ? node : React.cloneElement(node, props);
         props = change(node, props);
-        return props === node.props ? node : React.cloneElement(node, props);
+        return props === nodeProps ? node : React.cloneElement(node, props);
     }
     function copyBio(orig, self, args) {
         const result = orig.apply(self, args);
@@ -2279,6 +2333,7 @@
         if (!hiddenMetadata(channel)) return channel;
         return renamedChannel(channel, hiddenName(channel));
     }
+    const HIDDEN_BUCKET_TYPES = [0, 2, 4, 5, 10, 11, 12, 13, 15, 16];
     function hiddenDirectory(orig, self, args) {
         const result = orig.apply(self, args), guild = args[0];
         // Always cache names from the current store even while the toggle is off,
@@ -2289,19 +2344,17 @@
         // records: the same final cache as walking the merged map, without visiting basic twice.
         function remember() {
             const current = userStore && userStore.getCurrentUser(), owner = current && current.id;
-            // While the switch is off this only backs up the names gateway events already record, and it ran over
-            // every channel on every channel-list render. Skip it while the server's records are the same objects.
+            // Skip rescanning channel names while the server's channel tables are the exact same objects.
             const last = hiddenScans.get(guild);
-            if (last && last.full === full && last.basic === basic && last.owner === owner) {
-                if (last.source) source = last.source;
-                if (!enabled("hiddenChannels")) return;
+            if (last && last.full === full && last.basic === basic && last.owner === owner && last.source) {
+                source = last.source;
+                return;
             }
             if (!source) source = basic ? Object.assign({},basic,full) : full;
             if (hiddenScans.size >= 64 && !last) hiddenScans.delete(hiddenScans.keys().next().value);
             hiddenScans.set(guild, {full, basic, owner, source});
-            const keep = channel => rememberChannelName(channel, owner);
-            if (basic) Object.values(basic).forEach(keep);
-            Object.values(full).forEach(keep);
+            if (basic) for (const k in basic) if (Object.prototype.hasOwnProperty.call(basic, k)) rememberChannelName(basic[k], owner, undefined, guild);
+            for (const k in full) if (Object.prototype.hasOwnProperty.call(full, k)) rememberChannelName(full[k], owner, undefined, guild);
         }
         function read() {
             full = channelStore.getMutableGuildChannelsForGuild(guild);
@@ -2323,19 +2376,23 @@
         // Recheck permissions and metadata on each directory lookup; retain stable
         // array identity for unchanged inputs and bound the cache to 16 guilds.
         const names = new Map();
-        const sigParts = new Array(extra.length);
+        let signature = "";
         const references = extra.slice();
         for (let i = 0; i < extra.length; i++) {
             const c = extra[i], name = hiddenName(c);
             names.set(c, name);
-            sigParts[i] = c.id + ":" + c.position + ":" + c.type + ":" + c.parent_id + ":" + name;
+            if (i) signature += "|";
+            signature += c.id + ":" + c.position + ":" + c.type + ":" + c.parent_id + ":" + name;
             const parent = source[c.parent_id];
             if (parent) references.push(parent);
         }
-        const signature = sigParts.join("|");
         const cached = hiddenViews.get(guild);
         if (cached && cached.orig === result && cached.source === full && cached.basic === basic && cached.signature === signature &&
-            references.length === cached.references.length && references.every((c,i) => c === cached.references[i])) return cached.value;
+            references.length === cached.references.length) {
+            let sameRefs = true;
+            for (let i = 0; i < references.length; i++) if (references[i] !== cached.references[i]) { sameRefs = false; break; }
+            if (sameRefs) return cached.value;
+        }
         let next = result;
         function append(key, channels) {
             if (!Array.isArray(next[key])) return;
@@ -2382,7 +2439,10 @@
             if (p && p.type === 4) parents.push(p);
         }
         const empty = [];
-        for (const type of [0,2,4,5,10,11,12,13,15,16]) append(type, byType.get(type) || empty);
+        for (let i = 0; i < HIDDEN_BUCKET_TYPES.length; i++) {
+            const type = HIDDEN_BUCKET_TYPES[i];
+            append(type, byType.get(type) || empty);
+        }
         append("SELECTABLE", selectable);
         append("VOCAL", vocal);
         append(4, parents);
@@ -4266,6 +4326,101 @@
             footnote("note","Only a tap opens it: scrolling past a locked channel, opening a server or opening Discord never does.")];
         return settingsBody(ui,groups);
     }
+    // Server info's preview is the server list as Discord draws it: hold a server's icon, its menu opens with Server info
+    // as the last row, and a tap shows the sheet with the sample server's details. Watch plays that; Try it lets you do it.
+    const SERVER_SAMPLES = [["GN", "#5865f2", "Game Night"], ["AR", "#3ba55c", "Art Club"], ["WD", "#eb459e", "Wumpus Den"]];
+    const SERVER_SAMPLE_FRIENDS = [{id:"a", username:"Alex"}, {id:"b", username:"Sam"}, {id:"c", username:"Jordan"}];
+    function ServerInfoPreview(props) {
+        useSettings("serverInfo");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), si = useServerInfoStyles(), [mode, setMode] = usePreviewMode(), on = props.on;
+        const blank = {held:false, menu:false, sheet:false, pulse:null, picked:false, tried:0};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const friends = settings.serverInfoFriends;
+        const story = useStory(watching, () => [[0, () => setState(blank), tr("Hold a server's icon in the server list")],
+            [900, () => update(st => ({held:true, pulse:{who:"icon", id:"hold" + (st.tried + 1)}}))],
+            [500, () => { animateLayout(); update({menu:true}); }, tr("Its menu opens, with Server info at the bottom")],
+            [1600, () => update({picked:true, pulse:{who:"row", id:"row"}}), tr("Tap Server info")],
+            [400, () => { animateLayout(); update({menu:false, held:false, sheet:true, picked:false}); },
+                tr(friends ? "Live details, boosts, the owner and which friends are there" : "Live details, boosts and the owner, with friends Discord has loaded")],
+            [3600, () => { animateLayout(); update({sheet:false}); }], [600, () => {}]], [friends]);
+        const Press = RN.Pressable || RN.View;
+        const hold = () => { if (!on || watching) return; haptic("IMPACT_MEDIUM"); animateLayout();
+            update(st => ({held:true, menu:true, sheet:false, tried:Math.max(st.tried, 1), pulse:{who:"icon", id:"try" + st.tried}})); };
+        const pick = () => { if (!on || watching) return; haptic("SELECTION"); animateLayout(); update({menu:false, held:false, sheet:true, tried:2}); };
+        const closeAll = () => { if (watching) return; animateLayout(); update({menu:false, held:false, sheet:false}); };
+        const icon = ([letters, color, name], i) => {
+            const first = i === 0, held = first && state.held;
+            return el(Press, {key:letters, onLongPress:first ? hold : undefined, delayLongPress:300, accessibilityRole:"button", accessibilityLabel:name,
+                style:{alignItems:"center", justifyContent:"center", width:64, height:56}},
+                held ? el(RN.View, {style:{position:"absolute", left:0, width:4, height:36, borderTopRightRadius:4, borderBottomRightRadius:4, backgroundColor:s.name.color}}) : null,
+                el(RN.View, {style:{width:44, height:44, borderRadius:held ? 14 : 22, backgroundColor:color, alignItems:"center", justifyContent:"center",
+                    transform:held ? [{scale:0.92}] : []}},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:15, fontWeight:"700"}}, letters)),
+                first ? tapRipple(state.pulse, "icon", {left:15, top:11}) : null);
+        };
+        const rail = el(RN.View, {key:"rail", style:{width:64, paddingVertical:6, alignItems:"center"}}, SERVER_SAMPLES.map(icon));
+        const channels = el(RN.View, {key:"channels", style:{flex:1, paddingVertical:8, gap:2}},
+            el(RN.Text, {style:[k.title, {fontSize:16, paddingHorizontal:12, paddingBottom:6}], numberOfLines:1}, tr("Game Night")),
+            ["general", "clips", "memes"].map((name, i) => el(RN.View, {key:name, style:[{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10,
+                paddingVertical:6, marginHorizontal:6, borderRadius:8}, i === 0 ? k.selected : null]},
+                el(venusIcon(15411, "HashmarkIcon"), {size:"xs", color:k.channel.color}),
+                el(RN.Text, {style:[s.text, {fontSize:14, color:i === 0 ? s.name.color : k.channel.color}]}, name))));
+        const menuRow = (key, label, Icon, highlight) => el(highlight ? Press : RN.View, Object.assign({key, style:[{flexDirection:"row", alignItems:"center", gap:12,
+            paddingHorizontal:14, paddingVertical:10}, highlight && state.picked ? k.selected : null]},
+            highlight ? {onPress:pick, accessibilityRole:"button", accessibilityLabel:label} : null),
+            el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {flex:1, fontSize:15}]}, label),
+            highlight ? tapRipple(state.pulse, "row", {right:24, top:4}) : null);
+        const overlay = (key, child) => el(RN.View, {key, style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"flex-end"}]},
+            el(Press, {style:{flex:1}, onPress:closeAll, accessibilityLabel:tr("Cancel")}), child);
+        // Discord's own rows in that menu, then ours, the way they really show.
+        const menu = state.menu ? overlay("menu", popIn("menu", el(RN.View, {style:[k.sheet, {paddingHorizontal:8, paddingBottom:8}]},
+            el(RN.View, {style:[k.sheetRow, {borderRadius:16, borderWidth:1, overflow:"hidden"}]},
+                menuRow("invite", tr("Invite people"), venusIcon(4833, "UserPlusIcon")),
+                menuRow("bell", tr("Notifications"), venusIcon(9266, "BellIcon")),
+                menuRow("settings", tr("Settings"), venusIcon(6883, "SettingsIcon")),
+                menuRow("info", tr("Server info"), venusIcon(4812, "CircleInformationIcon"), true))))) : null;
+        const tile = (key, Icon, value, label) => el(RN.View, {key, style:[si.tile, {minWidth:0, flexBasis:"22%", paddingHorizontal:8, paddingVertical:8, gap:2, borderRadius:12}]},
+            el(Icon, {size:"xs"}), el(RN.Text, {style:[s.name, {fontSize:16, fontWeight:"700"}]}, value),
+            el(RN.Text, {style:[s.muted, {fontSize:11}], numberOfLines:1}, label));
+        const sheet = state.sheet ? overlay("sheet", popIn("sheet", el(RN.View, {style:[k.sheet, {paddingHorizontal:10, paddingBottom:10, gap:8}]},
+            el(RN.View, {style:{height:44, borderRadius:12, backgroundColor:"#5865f2", opacity:0.55}}),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"flex-end", gap:10, marginTop:-26, paddingHorizontal:8}},
+                el(RN.View, {style:[si.ring, {width:52, height:52, borderRadius:18, borderWidth:3, backgroundColor:"#5865f2", alignItems:"center", justifyContent:"center"}]},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, "GN")),
+                el(RN.View, {style:{flex:1, paddingBottom:2}},
+                    el(RN.Text, {style:[s.name, {fontSize:16, fontWeight:"700"}], numberOfLines:1}, tr("Game Night")),
+                    el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:5}},
+                        el(RN.View, {style:{width:8, height:8, borderRadius:4, backgroundColor:STATUS_HEX.online}}),
+                        el(RN.Text, {style:[s.muted, {fontSize:12}], numberOfLines:1},
+                            tr("{count} online", {count:serverNumber(318)}) + " \u00b7 " + serverCount(1284, "{n} member", "{n} members"))))),
+            el(RN.View, {style:{flexDirection:"row", gap:6}},
+                tile("c", venusIcon(15411, "HashmarkIcon"), serverNumber(24), tr("Channels")), tile("r", venusIcon(9232, "ShieldUserIcon"), serverNumber(12), tr("Roles")),
+                tile("e", venusIcon(8411, "ReactionIcon"), serverNumber(48), tr("Emojis")), tile("b", venusIcon(16149, "BoostTier2Icon"), serverNumber(9), tr("Boosts"))),
+            el(RN.View, {style:[si.card, {flexDirection:"row", alignItems:"center", gap:10, paddingVertical:10, borderRadius:12}]},
+                friends ? avatarPile(SERVER_SAMPLE_FRIENDS, si.ring.borderColor) : el(venusIcon(4831, "FriendsIcon"), {size:"sm"}),
+                el(RN.Text, {style:[s.text, {flex:1, fontSize:14}]}, serverCount(friends ? 3 : 1, "{n} friend here", "{n} friends here")),
+                el(venusIcon(10631, "CrownIcon"), {size:"xs", color:"#f0b232"}))))) : null;
+        const tip = on && !watching ? previewTip(k, state.tried === 0 ? tr("Hold the Game Night icon") : state.menu ? tr("Tap Server info") :
+            state.sheet ? tr("That's the sheet you'll see in Discord. Tap outside it to close") : tr("Hold the icon again to reopen it")) : null;
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+            previewScreen(s, "preview", "Server info preview",
+                [el(RN.View, {key:"body", style:{minHeight:236, flexDirection:"row", overflow:"hidden"}}, rail, channels, menu, sheet), tip],
+                {footer:watching ? storyStrip(k, s, story) : null}));
+    }
+    function ServerInfoSettings() {
+        useSettings("serverInfo");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("serverInfo"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const groups = [
+            on ? null : offCard("status", venusIcon(4812, "CircleInformationIcon"), "serverInfo"),
+            el(ServerInfoPreview, {key:"preview", on}),
+            el(Group, {key:"friends", title:tr("Friends")},
+                switchRow(Switch, "serverInfoFriends", "Look up friends in the server", "Asks Discord which of your friends are members when you open it.", rowIcon(4831, "FriendsIcon"))),
+            footnote("note", "Everything else comes from what Discord has already loaded, and updates while the sheet is open.")];
+        return settingsBody(ui, groups);
+    }
     function ReadAllSettings() {
         useSettings("readAll");
         const ui=reviewUI();
@@ -4604,12 +4759,11 @@
         return ((256 - m) << 24) | (colorInt & 0x00ffffff);
     }
     function highlightMentioned(source, message) {
-        if (source && source.mentioned || message && message.mentioned) return true;
-        if (!source || typeof source !== "object") return false;
-        if (source.mention_everyone || source.mentionEveryone) return true;
+        if (!source || typeof source !== "object") return !!(message && message.mentioned);
+        if (source.mentioned || message && message.mentioned || source.mention_everyone || source.mentionEveryone) return true;
         const mentions = source.mentions;
+        const hasMentions = mentions && mentions.length > 0 && Array.isArray(mentions);
         const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
-        const hasMentions = Array.isArray(mentions) && mentions.length > 0;
         const refAuthor = ref && ref.author && ref.author.id;
         if (!hasMentions && !refAuthor) return false;
         const me = currentUser();
@@ -4736,15 +4890,22 @@
     const PLATFORM_LABELS = {desktop:"Desktop",mobile:"Mobile",web:"Web",embedded:"Console",vr:"VR"};
     const PLATFORM_STATUS = {online:"Online",idle:"Idle",dnd:"Do Not Disturb"};
     // This user's clients as a stable key, so a badge only re-renders when its own presence changes.
-    function platformClients(userId) {
+    function platformClients(userId, myId) {
         let clients = presenceStore.getClientStatus(userId);
-        const current = userStore && userStore.getCurrentUser();
-        if (current && current.id === userId && sessionsStore && typeof sessionsStore.getSessions === "function") {
+        if (myId === undefined) {
+            const current = userStore && userStore.getCurrentUser();
+            myId = current && current.id;
+        }
+        if (myId && myId === userId && sessionsStore && typeof sessionsStore.getSessions === "function") {
             clients = {};
-            Object.values(sessionsStore.getSessions() || {}).forEach(session => {
-                const client = session.clientInfo && session.clientInfo.client;
-                if (client && client !== "unknown") clients[client] = session.status;
-            });
+            const sessions = sessionsStore.getSessions();
+            if (sessions) for (const k in sessions) {
+                if (Object.prototype.hasOwnProperty.call(sessions, k)) {
+                    const session = sessions[k];
+                    const client = session && session.clientInfo && session.clientInfo.client;
+                    if (client && client !== "unknown") clients[client] = session.status;
+                }
+            }
         }
         return clients || null;
     }
@@ -4754,14 +4915,17 @@
         for (const name in clients) key += name + ":" + clients[name] + ",";
         return key;
     }
-    function platformKey(userId) { return clientsKey(presenceStore && platformClients(userId)); }
+    function platformKey(userId, myId) { return clientsKey(presenceStore && platformClients(userId, myId)); }
     // One listener per store for every badge on screen, not two per badge. Each change works
     // out a person's clients once, however many badges show them, and wakes only those badges.
     const platformSubs = new Map(), platformStores = new Set();
     // PresenceStore changes for every presence update of anyone: the key is built without temporary arrays.
     function platformChanged() {
+        if (!platformSubs.size) return;
+        const current = userStore && userStore.getCurrentUser();
+        const myId = current && current.id || null;
         platformSubs.forEach((entry, userId) => {
-            const key = platformKey(userId);
+            const key = platformKey(userId, myId);
             if (key !== entry.key) { entry.key = key; entry.fns.forEach(fn => fn()); }
         });
     }
@@ -4855,7 +5019,7 @@
             if (!children.some(isIcon)) return p;
             added = true;
             return Object.assign({},p,{children:children.concat(el(RN.View,{key:"venus-platform-dm",style:{marginRight:4}},el(PlatformBadges,{userId})))});
-        },0);
+        },0,() => added);
         return added ? next : placePlatformTree(tree,args[0] || {},"piUserList");
     }
     function platformPlacement(orig,self,args,option) {
@@ -4886,7 +5050,7 @@
             if (!title || node.type === RN.Text) return p;
             added = true;
             return Object.assign({},p,{children:children.map(child => child !== title ? child : el(RN.View,{key:"venus-platform-title",style:{flexDirection:"row",alignItems:"center",gap:6,flexShrink:1}},child,el(PlatformBadges,{userId})))});
-        },0);
+        },0,() => added);
     }
     const platformRenderers = new WeakMap();
     function platformRow(row) {
@@ -5372,6 +5536,318 @@
         next[0]=Object.assign({},props,{menu:Object.assign({},menu,{items:menu.items.concat([{label:tr("Reviews"),action:() => openReviewSheet(id)}])})});
         return orig.apply(self,next);
     }
+    // Server info (#77, based on ServerInfo by fshin): hold a server icon in the server list and its menu
+    // (getGuildsBarGuildMenuItems 16226) gets a Server info row. It opens a sheet that reads everything from Discord's own
+    // stores and redraws live: who's online, channels, roles, emojis, stickers, events, boost level with how far the next
+    // one is, which friends are there (with their status), the owner, when you joined and copyable details.
+    const SERVER_INFO_STORES = [2074, 4780, 2112, 2106, 4507, 4519, 4930, 1377];
+    const SERVER_BOOST_LEVELS = [0, 2, 7, 14];
+    // Discord's verification levels 0-4, as words.
+    function serverVerification(level) { return [tr("None"), tr("Low"), tr("Medium"), tr("High"), tr("Highest")][Math.max(0, Math.min(4, level))]; }
+    const SERVER_BADGES = [["VERIFIED", () => tr("Verified")], ["PARTNERED", () => tr("Partner")], ["COMMUNITY", () => tr("Community")], ["DISCOVERABLE", () => tr("Discoverable")]];
+    const SERVER_STATUS_RANK = {online:0, streaming:0, dnd:1, idle:2};
+    // members counts changes to any store but presence (4930), so a status-only tick skips the friend membership walk.
+    const serverInfo = {asked:new Map(), fetched:new Set(), members:0, friendsKey:"", friends:[]};
+    function serverStore(id) { const store = inspectedExport(id, "default"); return store && typeof store === "object" ? store : null; }
+    function serverCall(store, name, a, b) {
+        if (!store || typeof store[name] !== "function") return undefined;
+        try { return store[name](a, b); } catch (_) { return undefined; }
+    }
+    function serverSize(value) {
+        if (!value) return 0;
+        if (typeof value.length === "number") return value.length;
+        if (typeof value.size === "number") return value.size;
+        return typeof value === "object" ? Object.keys(value).length : 0;
+    }
+    // 1284 -> "1,284" in the language Venus is shown in, when Hermes has Intl; plain digits otherwise.
+    function serverNumber(n) {
+        if (typeof n !== "number" || !isFinite(n)) return "\u2014";
+        try { const text = n.toLocaleString(uiLanguage()); if (typeof text === "string" && /\d/.test(text)) return text; } catch (_) {}
+        return String(Math.round(n));
+    }
+    // "{n} members" with the number grouped, still using the language's plural form for it.
+    function serverCount(n, one, other, vars) { return pl(n, one, other, vars).replace(String(n), serverNumber(n)); }
+    function serverDate(ms) {
+        if (!isFinite(ms)) return tr("Unavailable");
+        try { const text = new Date(ms).toLocaleDateString(uiLanguage(), {year:"numeric", month:"long", day:"numeric"}); if (text) return text; } catch (_) {}
+        return backupDate(ms);
+    }
+    // The largest whole unit since then: "3 years ago", "5 months ago", "12 days ago".
+    function serverAge(ms) {
+        if (!isFinite(ms)) return "";
+        const diff = Math.max(0, Date.now() - ms), day = 86400000;
+        if (diff < day) return tr("just now");
+        const time = diff >= 365 * day ? pl(Math.floor(diff / (365 * day)), "{n} year", "{n} years") :
+            diff >= 30 * day ? pl(Math.floor(diff / (30 * day)), "{n} month", "{n} months") : pl(Math.floor(diff / day), "{n} day", "{n} days");
+        return tr("{time} ago", {time});
+    }
+    function serverIconUri(guild, size) {
+        return guild && typeof guild.icon === "string" && guild.icon ? "https://cdn.discordapp.com/icons/" + guild.id + "/" + guild.icon + ".png?size=" + (size || 128) : null;
+    }
+    function serverBannerUri(guild) {
+        const hash = guild && (guild.banner || guild.splash);
+        return typeof hash === "string" && hash ? "https://cdn.discordapp.com/" + (guild.banner ? "banners/" : "splashes/") + guild.id + "/" + hash + ".png?size=600" : null;
+    }
+    function serverAcronym(name) {
+        const words = String(name || "?").trim().split(/\s+/).filter(Boolean);
+        return (words.length > 1 ? words.slice(0, 3).map(w => w[0]).join("") : String(name || "?").slice(0, 2)).toUpperCase();
+    }
+    // Boost level and how far the next one is: {level, boosts, next, need, share}.
+    function serverBoost(guild) {
+        const boosts = Math.max(0, Number(guild && guild.premiumSubscriberCount) || 0);
+        let level = Math.max(0, Math.min(3, Number(guild && guild.premiumTier) || 0));
+        if (!level) for (let i = 3; i > 0; i--) if (boosts >= SERVER_BOOST_LEVELS[i]) { level = i; break; }
+        if (level >= 3) return {level, boosts, next:0, need:0, share:1};
+        const from = SERVER_BOOST_LEVELS[level], to = SERVER_BOOST_LEVELS[level + 1];
+        return {level, boosts, next:level + 1, need:Math.max(1, to - boosts), share:Math.max(0, Math.min(1, (boosts - from) / (to - from)))};
+    }
+    function serverFeature(guild, name) {
+        const list = guild && guild.features;
+        try { return !!list && (typeof list.has === "function" ? list.has(name) : Array.isArray(list) && list.indexOf(name) >= 0); } catch (_) { return false; }
+    }
+    // Everything the sheet shows, read once per render from Discord's stores. A store that isn't there leaves its part out.
+    function serverSnapshot(guildId) {
+        const guild = serverCall(serverStore(2074), "getGuild", guildId);
+        if (!guild) return null;
+        const counts = serverStore(4780), members = serverStore(2112), channels = serverCall(serverStore(4507), "getChannels", guildId) || {};
+        const textCount = serverSize(channels.SELECTABLE), voiceCount = serverSize(channels.VOCAL);
+        const roles = serverCall(serverStore(2106), "getNumRoles", guildId);
+        const events = serverCall(serverStore(7037), "getGuildScheduledEventsForGuild", guildId);
+        const me = currentUser(), joined = serverCall(members, "getSelfMemberJoinedAt", guildId);
+        const memberCount = serverCall(counts, "getMemberCount", guildId), online = serverCall(counts, "getOnlineCount", guildId);
+        return {guild, id:guildId, name:guild.name || "", description:typeof guild.description === "string" ? guild.description.trim() : "",
+            members:typeof memberCount === "number" ? memberCount : typeof guild.memberCount === "number" ? guild.memberCount : null,
+            online:typeof online === "number" ? online : null,
+            text:textCount, voice:voiceCount, channels:textCount + voiceCount,
+            // Discord counts @everyone as a role; nobody thinks of it as one.
+            roles:typeof roles === "number" ? Math.max(0, roles - 1) : null,
+            emojis:serverSize(serverCall(serverStore(5640), "getGuildEmojis", guildId)),
+            stickers:serverSize(serverCall(serverStore(5688), "getStickersByGuildId", guildId)),
+            events:Array.isArray(events) ? events.length : 0,
+            boost:serverBoost(guild), created:snowflakeMs(guildId),
+            joined:joined && typeof joined.getTime === "function" ? joined.getTime() : typeof joined === "number" ? joined : NaN,
+            ownerId:typeof guild.ownerId === "string" ? guild.ownerId : null, mine:!!(me && guild.ownerId === me.id),
+            vanity:typeof guild.vanityURLCode === "string" && guild.vanityURLCode ? guild.vanityURLCode : "",
+            verification:Number(guild.verificationLevel) || 0, locale:typeof guild.preferredLocale === "string" ? guild.preferredLocale : "",
+            badges:SERVER_BADGES.filter(entry => serverFeature(guild, entry[0])).map(entry => entry[1]())};
+    }
+    function serverRank(status) { const rank = SERVER_STATUS_RANK[status]; return rank == null ? 3 : rank; }
+    // Your friends who are members, online ones first, each with their status and server nickname. Who's here (one
+    // getMember per friend) only changes with the member, user or friend stores, so it's kept, sorted by name, until
+    // one of them changes; a presence tick (up to ~3/s) just re-reads their statuses and stable-sorts by rank
+    // (tests/bench/server_info.js: 1.63 ms -> 70 us for 300 friends, 60 here).
+    function serverFriends(guildId) {
+        const ids = serverCall(serverStore(4519), "getFriendIDs") || [], members = serverStore(2112), presence = serverStore(4930);
+        if (!members || !ids.length) return [];
+        const key = guildId + ":" + ids.length + ":" + serverInfo.members;
+        let list = serverInfo.friends;
+        if (serverInfo.friendsKey !== key) {
+            list = [];
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i], member = serverCall(members, "getMember", guildId, id);
+                if (!member) continue;
+                const user = userStore && serverCall(userStore, "getUser", id) || {id};
+                list.push({id, user, name:String(member.nick || user.globalName || user.global_name || user.username || id)});
+            }
+            list.sort((a, b) => a.name.localeCompare(b.name));
+            serverInfo.friendsKey = key; serverInfo.friends = list;
+        }
+        const out = new Array(list.length);
+        for (let i = 0; i < list.length; i++) {
+            const f = list[i], status = serverCall(presence, "getStatus", f.id) || "offline";
+            out[i] = {id:f.id, user:f.user, name:f.name, status, rank:serverRank(status), at:i};
+        }
+        return out.sort((a, b) => a.rank - b.rank || a.at - b.at);
+    }
+    // Asks Discord once every few minutes which of your friends are members (the request its own member list makes).
+    function serverAskFriends(guildId) {
+        if (!settings.serverInfoFriends) return false;
+        const last = serverInfo.asked.get(guildId) || 0, ids = serverCall(serverStore(4519), "getFriendIDs") || [];
+        if (!ids.length || Date.now() - last < 5 * 60000) return false;
+        const actions = serverStore(5705);
+        if (!actions || typeof actions.requestMembersById !== "function") return false;
+        serverInfo.asked.set(guildId, Date.now());
+        try { for (let i = 0; i < ids.length; i += 100) actions.requestMembersById(guildId, ids.slice(i, i + 100)); return true; } catch (_) { return false; }
+    }
+    // The owner isn't always loaded; Discord's own getUser (7852) fetches them once and adds them to UserStore.
+    function serverOwner(snap) {
+        if (!snap.ownerId) return null;
+        const user = userStore && serverCall(userStore, "getUser", snap.ownerId);
+        if (!user && !serverInfo.fetched.has(snap.ownerId)) {
+            serverInfo.fetched.add(snap.ownerId);
+            const getUser = inspectedExport(7852, "getUser");
+            if (typeof getUser === "function") Promise.resolve().then(() => getUser(snap.ownerId)).catch(() => {});
+        }
+        const member = serverCall(serverStore(2112), "getMember", snap.id, snap.ownerId);
+        return {id:snap.ownerId, user, name:member && member.nick || user && (user.globalName || user.global_name || user.username) || null,
+            handle:user && user.username ? "@" + user.username : "", status:serverCall(serverStore(4930), "getStatus", snap.ownerId) || null};
+    }
+    function serverOpenProfile(userId, guildId) {
+        const show = inspectedExport(7850, "default");
+        if (typeof show !== "function" || !userId) return;
+        haptic("SELECTION");
+        try { show({userId, guildId}); } catch (_) {}
+    }
+    function serverCopy(text, toast) {
+        const ui = reviewUI();
+        try { (ui.clipboard || RN.Clipboard).setString(text); } catch (_) { return; }
+        haptic("SELECTION");
+        reviewToast(ui, toast, venusIcon(4843, "CopyIcon"));
+    }
+    // Redraws when any store it reads changes, at most about three times a second (presence changes all the time).
+    function useServerStores(guildId) {
+        const [, tick] = React.useState(0);
+        React.useEffect(() => {
+            let pending, live = true;
+            const bump = () => { if (pending !== undefined || !live) return; pending = later(() => { pending = undefined; if (live) tick(n => n + 1); }, 300, false); };
+            const changed = () => { serverInfo.members++; bump(); }, presence = serverStore(4930);
+            const stores = SERVER_INFO_STORES.map(serverStore).filter(store => store && typeof store.addChangeListener === "function");
+            const listen = store => store === presence ? bump : changed;
+            stores.forEach(store => { try { store.addChangeListener(listen(store)); } catch (_) {} });
+            serverInfo.members++;
+            return () => { live = false; stores.forEach(store => { try { store.removeChangeListener(listen(store)); } catch (_) {} });
+                if (pending !== undefined && global.clearTimeout) global.clearTimeout(pending); };
+        }, [guildId]);
+    }
+    const SERVER_INFO_DARK = {banner:{height:112, backgroundColor:"#4e50584d"}, ring:{borderColor:"#232428", backgroundColor:"#2b2d31"},
+        card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:10},
+        tile:{flexGrow:1, flexBasis:"30%", minWidth:96, backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:12, paddingVertical:12, gap:4},
+        chip:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:8, paddingVertical:3, borderRadius:10, backgroundColor:"#4e50584d"},
+        acronym:{backgroundColor:"#5865f2"}};
+    function useServerInfoStyles() {
+        return useThemed("serverInfo", c => ({banner:Object.assign({}, SERVER_INFO_DARK.banner, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            ring:{borderColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW, backgroundColor:c.CARD_BACKGROUND_DEFAULT},
+            card:Object.assign({}, SERVER_INFO_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            tile:Object.assign({}, SERVER_INFO_DARK.tile, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            chip:Object.assign({}, SERVER_INFO_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            acronym:{backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}}), SERVER_INFO_DARK);
+    }
+    function serverText(value, variant, color, fallback, extra) {
+        const Text = inspectedExport(4886, "Text");
+        return Text ? el(Text, Object.assign({variant, color}, extra), value) : el(RN.Text, Object.assign({style:fallback}, extra), value);
+    }
+    function serverBoostIcon(level) {
+        return level >= 3 ? venusIcon(13330, "BoostTier3Icon") : level === 2 ? venusIcon(16149, "BoostTier2Icon") : venusIcon(12241, "BoostTier1Icon");
+    }
+    // The top of the sheet: banner, the server's icon over it, name, badges, description and who's online.
+    function serverHero(s, snap) {
+        const icon = serverIconUri(snap.guild, 160), banner = serverBannerUri(snap.guild);
+        const dot = (color, label) => el(RN.View, {key:label, style:{flexDirection:"row", alignItems:"center", gap:6}},
+            el(RN.View, {style:{width:10, height:10, borderRadius:5, backgroundColor:color}}),
+            serverText(label, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}));
+        return el(RN.View, {key:"hero"},
+            el(RN.View, {style:[s.banner, {borderRadius:16, overflow:"hidden"}]},
+                banner && RN.Image ? el(RN.Image, {source:{uri:banner}, style:{width:"100%", height:"100%"}, resizeMode:"cover"}) : null),
+            el(RN.View, {style:{paddingHorizontal:16, marginTop:-40, gap:8}},
+                popIn("icon:" + snap.id, el(RN.View, {style:[s.ring, {width:84, height:84, borderRadius:28, borderWidth:4, overflow:"hidden", alignItems:"center", justifyContent:"center"}]},
+                    icon && RN.Image ? el(RN.Image, {source:{uri:icon}, style:{width:76, height:76}}) :
+                        el(RN.View, {style:[s.acronym, {width:76, height:76, alignItems:"center", justifyContent:"center"}]},
+                            el(RN.Text, {style:{color:"#ffffff", fontSize:24, fontWeight:"700"}}, serverAcronym(snap.name))))),
+                serverText(snap.name, "heading-xl/bold", "text-strong", {color:"#f2f3f5", fontSize:22, fontWeight:"700"}, {numberOfLines:2, selectable:true}),
+                snap.badges.length ? el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:6}}, snap.badges.map(label =>
+                    el(RN.View, {key:label, style:s.chip}, el(venusIcon(4792, "CircleCheckIcon"), {size:"xxs"}),
+                        serverText(label, "text-xs/semibold", "text-strong", {color:"#f2f3f5", fontSize:12, fontWeight:"600"})))) : null,
+                snap.description ? serverText(snap.description, "text-sm/medium", "text-default", {color:"#dbdee1", fontSize:14}, {selectable:true}) : null,
+                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:16}},
+                    snap.online != null ? dot(STATUS_HEX.online, tr("{count} online", {count:serverNumber(snap.online)})) : null,
+                    snap.members != null ? dot(STATUS_HEX.offline, serverCount(snap.members, "{n} member", "{n} members")) : null)));
+    }
+    // A grid of what's in the server; parts Discord hasn't loaded are left out rather than shown as zero.
+    function serverTiles(s, snap) {
+        const tile = (key, Icon, value, label, sub) => el(RN.View, {key, style:s.tile, accessible:true, accessibilityLabel:label + ": " + serverNumber(value)},
+            el(Icon, {size:"sm"}),
+            serverText(serverNumber(value), "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
+            serverText(label, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}, {numberOfLines:1}),
+            sub ? serverText(sub, "text-xxs/medium", "text-muted", {color:"#949ba4", fontSize:11}, {numberOfLines:1}) : null);
+        const tiles = [
+            snap.channels ? tile("channels", venusIcon(15411, "HashmarkIcon"), snap.channels, tr("Channels"), tr("{text} text, {voice} voice", {text:snap.text, voice:snap.voice})) : null,
+            snap.roles != null ? tile("roles", venusIcon(9232, "ShieldUserIcon"), snap.roles, tr("Roles")) : null,
+            tile("emojis", venusIcon(8411, "ReactionIcon"), snap.emojis, tr("Emojis")),
+            tile("stickers", venusIcon(12190, "StickerIcon"), snap.stickers, tr("Stickers")),
+            tile("boosts", serverBoostIcon(snap.boost.level), snap.boost.boosts, tr("Boosts")),
+            snap.events ? tile("events", venusIcon(9275, "CalendarIcon"), snap.events, tr("Events")) : null];
+        return el(RN.View, {key:"tiles", style:{flexDirection:"row", flexWrap:"wrap", gap:8}}, tiles.filter(Boolean));
+    }
+    // Boost level, with a bar to the next one.
+    function serverBoostCard(s, snap) {
+        const b = snap.boost, Icon = serverBoostIcon(b.level);
+        return el(RN.View, {key:"boost", style:s.card, accessible:true},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:12}},
+                el(Icon, {size:"md"}),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    serverText(b.level ? tr("Level {level}", {level:b.level}) : tr("No boost level yet"), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    serverText(serverCount(b.boosts, "{n} boost", "{n} boosts"), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
+            el(VenusProgress, {key:"bar", value:b.share}),
+            serverText(b.next ? pl(b.need, "{n} more boost for Level {level}", "{n} more boosts for Level {level}", {level:b.next}) : tr("Highest level reached"),
+                "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}));
+    }
+    function ServerInfoSheet(props) {
+        useSettings("serverInfo"); useServerStores(props.guildId);
+        const ui = reviewUI(), s = useServerInfoStyles(), guildId = props.guildId;
+        const [looking, setLooking] = React.useState(false), [all, setAll] = React.useState(false);
+        React.useEffect(() => {
+            if (!serverAskFriends(guildId)) return undefined;
+            setLooking(true);
+            const timer = later(() => setLooking(false), 2500, false);
+            return () => { if (timer !== undefined && global.clearTimeout) global.clearTimeout(timer); };
+        }, [guildId]);
+        const snap = serverSnapshot(guildId);
+        const header = ui.Header ? el(ui.Header, {title:tr("Server info"), trailing:ui.Close ? el(ui.Close, {onPress:() => hideReviewSheet(ui, props.sheetKey)}) : undefined}) : undefined;
+        if (!snap) return el(ui.ActionSheet || RN.View, {header}, el(RN.View, {style:{padding:24}},
+            serverText(tr("This server isn't available right now."), "text-md/medium", "text-muted", {color:"#949ba4", fontSize:16})));
+        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, friends = serverFriends(guildId), owner = serverOwner(snap);
+        const shown = all ? friends : friends.slice(0, 5), ring = s.ring.borderColor;
+        const friendRow = friend => Row ? el(Row, {key:friend.id, label:friend.name,
+            subLabel:friend.user.username && friend.user.username !== friend.name ? "@" + friend.user.username : undefined,
+            icon:avatarBubble(friend.user, 32, friend.status, ring), arrow:true, onPress:() => serverOpenProfile(friend.id, guildId)}) : null;
+        const friendsTitle = friends.length ? serverCount(friends.length, "{n} friend here", "{n} friends here") :
+            tr(looking ? "Looking for friends\u2026" : "None of your friends are here");
+        const detail = (key, label, value, id, name, onPress) => Row ? el(Row, {key, label:tr(label), subLabel:value, icon:rowIcon(id, name), onPress}) : null;
+        const body = [
+            serverHero(s, snap),
+            serverTiles(s, snap),
+            serverBoostCard(s, snap),
+            el(Group, {key:"friends", title:tr("Friends")},
+                Row ? el(Row, {key:"summary", label:friendsTitle,
+                    icon:friends.length ? avatarPile(friends.slice(0, 4).map(f => f.user), ring) : rowIcon(4831, "FriendsIcon"),
+                    subLabel:!settings.serverInfoFriends && !friends.length ? tr("Only friends Discord has already loaded show here.") : undefined}) : null,
+                shown.map(friendRow),
+                friends.length > 5 && Row ? el(Row, {key:"more", label:all ? tr("Show fewer") : tr("Show all {n}", {n:friends.length}), arrow:!all,
+                    onPress:() => { animateLayout(); haptic("SELECTION"); setAll(v => !v); }}) : null),
+            owner && Row ? el(Group, {key:"owner", title:tr("Owner")},
+                el(Row, {key:"owner", label:snap.mine ? tr("You own this server") : owner.name || tr("Loading\u2026"), subLabel:snap.mine ? undefined : owner.handle || undefined,
+                    icon:owner.user ? avatarBubble(owner.user, 32, owner.status, ring) : rowIcon(10631, "CrownIcon"), arrow:!snap.mine,
+                    trailing:el(venusIcon(10631, "CrownIcon"), {size:"sm", color:"#f0b232"}),
+                    onPress:snap.mine ? undefined : () => serverOpenProfile(owner.id, guildId)})) : null,
+            el(Group, {key:"details", title:tr("Details")},
+                detail("created", "Created", serverDate(snap.created) + " \u00b7 " + serverAge(snap.created), 9275, "CalendarIcon"),
+                isFinite(snap.joined) ? detail("joined", "You joined", serverDate(snap.joined) + " \u00b7 " + serverAge(snap.joined), 4833, "UserPlusIcon") : null,
+                snap.vanity ? detail("vanity", "Invite link", "discord.gg/" + snap.vanity, 4839, "LinkIcon", () => serverCopy("https://discord.gg/" + snap.vanity, "Link copied")) : null,
+                detail("verification", "Verification", serverVerification(snap.verification), 8923, "ShieldIcon"),
+                snap.locale ? detail("locale", "Language", languageName(snap.locale), 8551, "GlobeEarthIcon") : null,
+                detail("id", "Server ID", snap.id, 10358, "IdIcon", () => serverCopy(snap.id, "Server ID copied"))),
+            footnote("note", "Tap the invite link or the server ID to copy it.")];
+        const content = el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:20}}, body.filter(Boolean));
+        // Discord's own long sheets (channel picker, forum tags) pass scrollable and scroll with the sheet's
+        // BottomSheetScrollView (6112). A plain RN ScrollView fought the sheet's drag: swiping up either scrolled the
+        // page or dragged the sheet, and the sheet couldn't be pulled down from the middle of the page.
+        const Scroll = inspectedExport(6112, "BottomSheetScrollView");
+        return Scroll ? el(ui.ActionSheet || RN.View, {header, scrollable:true}, el(Scroll, null, content)) :
+            el(ui.ActionSheet || RN.View, {header}, RN.ScrollView ? el(RN.ScrollView, null, content) : content);
+    }
+    function openServerInfo(guildId) {
+        if (!enabled("serverInfo") || !React || !RN || typeof guildId !== "string") return;
+        const ui = reviewUI();
+        if (!ui.ActionSheet || typeof ui.showSheet !== "function") { reviewToast(ui, "Server info is unavailable right now.", venusIcon(4797, "CircleXIcon")); return; }
+        const key = "VenusServerInfo:" + guildId;
+        try { ui.showSheet({key, content:el(ServerInfoSheet, {guildId, sheetKey:key}), stackingBehavior:"stack"}); } catch (_) {}
+    }
+    // The server icon's hold menu: Server info goes last, after Discord's own rows, in the same shape.
+    function serverInfoMenu(orig, self, args) {
+        const items = orig.apply(self, args), guildId = args[0] == null ? null : String(args[0]);
+        if (!enabled("serverInfo") || !Array.isArray(items) || !guildId || !/^\d{17,20}$/.test(guildId)) return items;
+        return items.concat([{IconComponent:venusIcon(4812, "CircleInformationIcon"), label:tr("Server info"), action:() => openServerInfo(guildId)}]);
+    }
     // Rewrites a component's props before Discord's own render, through memo and forwardRef wrappers.
     // The change runs inside the render, so it may use hooks, and it always runs, so the hook count never changes.
     function propsComponent(component, change) {
@@ -5572,7 +6048,21 @@
             typeof call1 === "function" ?
             function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
             function () { return operation(orig, this, arguments); };
+        copyStatics(patched, orig);
         return replaceValue(exports, key, patched);
+    }
+    // A wrapper must keep the static members of the function it replaces: resolveAssetSource (81) carries
+    // addCustomSourceTransformer and pickScale, which BundleUpdater calls at launch, and Image (328) carries getSize,
+    // prefetch and resolveAssetSource. Losing them crashed Discord on start with "undefined is not a function".
+    function copyStatics(target, source) {
+        const names = Object.getOwnPropertyNames(source);
+        for (let i = 0; i < names.length; i++) {
+            const name = names[i];
+            if (name === "length" || name === "name" || name === "prototype" || name === "arguments" || name === "caller") continue;
+            const descriptor = Object.getOwnPropertyDescriptor(source, name);
+            if (descriptor) try { Object.defineProperty(target, name, descriptor); } catch (_) {}
+        }
+        return target;
     }
     // Hook a component export (plain function, or memo/forwardRef object) without breaking React tags.
     function hookComponent(exports, operation, key) {
@@ -5587,6 +6077,7 @@
                 typeof call1 === "function" ?
                 function (a) { return arguments.length === 1 ? call1(orig, this, a) : operation(orig, this, arguments); } :
                 function () { return operation(orig, this, arguments); };
+            copyStatics(patched, orig);
             return replaceValue(exports, key, cloneWith(component, inner, patched));
         }
         return hookExport(exports, key, operation);
@@ -5606,28 +6097,41 @@
         while ((match = MENTION_ID.exec(text))) out.add(match[1]);
     }
     function componentIds(components, out, depth) {
-        if (!Array.isArray(components) || depth > 6) return;
-        for (const component of components) if (component) {
-            mentionIds(component.content, out);
-            componentIds(component.components, out, depth + 1);
+        if (!components || !components.length || depth > 6 || !Array.isArray(components)) return;
+        for (let i = 0; i < components.length; i++) {
+            const component = components[i];
+            if (component) {
+                mentionIds(component.content, out);
+                if (component.components && component.components.length) componentIds(component.components, out, depth + 1);
+            }
         }
     }
     // Every place a raw (server-shaped) message can mention someone: text, embeds, components and forwards.
     function messageMentionIds(message, out) {
-        mentionIds(message.content, out);
-        if (Array.isArray(message.embeds)) for (const embed of message.embeds) if (embed) {
-            mentionIds(embed.title, out); mentionIds(embed.description, out);
-            mentionIds(embed.rawTitle, out); mentionIds(embed.rawDescription, out);
-            if (embed.footer) mentionIds(embed.footer.text, out);
-            if (Array.isArray(embed.fields)) for (const field of embed.fields) if (field) {
-                mentionIds(field.name, out); mentionIds(field.value, out); mentionIds(field.rawName, out); mentionIds(field.rawValue, out);
+        const content = message.content;
+        if (typeof content === "string" && content.indexOf("<@") >= 0) mentionIds(content, out);
+        const embeds = message.embeds;
+        if (embeds && embeds.length && Array.isArray(embeds)) for (let i = 0; i < embeds.length; i++) {
+            const embed = embeds[i];
+            if (embed) {
+                mentionIds(embed.title, out); mentionIds(embed.description, out);
+                mentionIds(embed.rawTitle, out); mentionIds(embed.rawDescription, out);
+                if (embed.footer) mentionIds(embed.footer.text, out);
+                const fields = embed.fields;
+                if (fields && fields.length && Array.isArray(fields)) for (let j = 0; j < fields.length; j++) {
+                    const field = fields[j];
+                    if (field) {
+                        mentionIds(field.name, out); mentionIds(field.value, out); mentionIds(field.rawName, out); mentionIds(field.rawValue, out);
+                    }
+                }
             }
         }
-        componentIds(message.components, out, 0);
+        const comps = message.components;
+        if (comps && comps.length) componentIds(comps, out, 0);
         const snapshots = message.message_snapshots || message.messageSnapshots;
-        if (Array.isArray(snapshots)) for (const snapshot of snapshots) {
-            const inner = snapshot && snapshot.message;
-            if (inner) { mentionIds(inner.content, out); componentIds(inner.components, out, 0); }
+        if (snapshots && snapshots.length && Array.isArray(snapshots)) for (let k = 0; k < snapshots.length; k++) {
+            const inner = snapshots[k] && snapshots[k].message;
+            if (inner) { mentionIds(inner.content, out); if (inner.components && inner.components.length) componentIds(inner.components, out, 0); }
         }
         return out;
     }
@@ -5647,11 +6151,15 @@
         if (!enabled("validUser") || !event || !userStore) return;
         const channelId = event.channelId;
         if (event.message) validMessage(event.message, event.message.channel_id || channelId);
-        if (Array.isArray(event.messages)) for (const message of event.messages) validMessage(message, message && message.channel_id || channelId);
+        const msgs = event.messages;
+        if (msgs && msgs.length && Array.isArray(msgs)) for (let i = 0; i < msgs.length; i++) {
+            const message = msgs[i];
+            if (message) validMessage(message, message.channel_id || channelId);
+        }
     }
     function validMessage(message, channelId) {
-        if (!message || !message.id || !channelId || valid.refreshing.has(message.id)) return;
-        validScratch.clear();
+        if (!message || !message.id || !channelId || valid.refreshing.size && valid.refreshing.has(message.id)) return;
+        if (validScratch.size) validScratch.clear();
         messageMentionIds(message, validScratch);
         if (!validScratch.size) return;
         const missing = [];
@@ -6926,7 +7434,8 @@
         try { const name = names && names.of(code); if (typeof name === "string" && name && name !== code) return name; } catch (_) {}
         return tr(LANGUAGE_NAMES[base] || "another language");
     }
-    function escapeTranslate(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    const ESCAPE_TRANSLATE_RE = /[&<>]/;
+    function escapeTranslate(text) { return ESCAPE_TRANSLATE_RE.test(text) ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : text; }
     // The row's content as text to translate: plain text stays text, formatting becomes <g i=N>...</g> around
     // the words it covers, and everything that must not change (mentions, emojis, code...) becomes <a i=N/>.
     // Worked out once per content array: rows are generated again for every change in the chat.
@@ -6938,18 +7447,21 @@
         function walk(list, depth) {
             let out = "";
             if (depth > 8) { failed = true; return out; }
-            for (const node of list) {
+            for (let i = 0; i < list.length; i++) {
+                const node = list[i];
                 if (!node || typeof node !== "object") continue;
-                if (node.type === "text" && typeof node.content === "string") {
+                const type = node.type;
+                if (type === "text" && typeof node.content === "string") {
                     // A zero-width space is how a message is redrawn: never let it make a new translation.
-                    const text = node.content.indexOf("\u200b") >= 0 ? node.content.replace(/\u200b/g, "") : node.content;
+                    const raw = node.content;
+                    const text = raw.indexOf("\u200b") >= 0 ? raw.replace(/\u200b/g, "") : raw;
                     if (letters < 3) {
                         TRANSLATE_LETTER.lastIndex = 0;
                         while (letters < 3 && TRANSLATE_LETTER.exec(text)) letters++;
                     }
                     out += escapeTranslate(text);
-                } else if (node.type === "br" || node.type === "newline") { lines = true; out += "\n"; }
-                else if (TRANSLATE_GROUPS.has(node.type) && Array.isArray(node.content)) {
+                } else if (type === "br" || type === "newline") { lines = true; out += "\n"; }
+                else if (TRANSLATE_GROUPS.has(type) && Array.isArray(node.content)) {
                     const index = nodes.push(node) - 1;
                     out += "<g i=" + index + ">" + walk(node.content, depth + 1) + "</g>";
                 } else { const index = nodes.push(node) - 1; out += "<a i=" + index + "/>"; }
@@ -6962,7 +7474,8 @@
         translate.layouts.set(content, layout);
         return layout;
     }
-    function unescapeTranslate(text) { return text.replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, "\""); }
+    const UNESCAPE_TRANSLATE_RE = /&#39;|&#x27;|&quot;/;
+    function unescapeTranslate(text) { return UNESCAPE_TRANSLATE_RE.test(text) ? text.replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, "\"") : text; }
     // The translation back as Discord's own nodes. Every tag must come back exactly once and nested the same way,
     // or the original is shown: a mention can never be lost, doubled or turned into text.
     const TRANSLATE_TAG = /<a\s+i\s*=\s*"?(\d+)"?\s*\/>|<g\s+i\s*=\s*"?(\d+)"?\s*>|<\/g\s*>/g;
@@ -7124,35 +7637,43 @@
                 }});
             const index = nodeProps.children.indexOf(template) + 1;
             return Object.assign({}, nodeProps, {children:nodeProps.children.slice(0, index).concat([row], nodeProps.children.slice(index))});
-        }, 0);
+        }, 0, () => added);
     }
     // Messages drawn lately, so switching on or changing an option can redraw them. Never while a redraw has
     // its zero-width space in, or that space would be put back for good.
     function translateSeen(source, channelId, id, key, quoteKey, quotedId) {
-        if (!source || !channelId || !id || translate.refreshing.has(id)) return;
+        if (!source || !channelId || !id || translate.refreshing.size && translate.refreshing.has(id)) return;
         const existing = translate.shown.get(id);
         const reference = source.messageReference || source.message_reference;
-        const nextQuotes = quotedId || reference && (reference.message_id || reference.messageId) || (existing && existing.quotes) || null;
+        const nextQuotes = quotedId || (reference ? reference.message_id || reference.messageId : existing && existing.quotes) || null;
         if (existing && existing.source === source && existing.channelId === channelId &&
             (!key || existing.key === key) && (!quoteKey || existing.quoteKey === quoteKey) && existing.quotes === nextQuotes) return;
-        const contentSource = translateContentSource(source);
-        const raw = typeof source.content === "string" && source.content ? source.content : "";
+        let raw = source.content;
+        const hasRaw = typeof raw === "string" && raw.length > 0;
         let snapshot = null;
-        if (!raw && contentSource && contentSource !== source && typeof contentSource.content === "string" && contentSource.content) {
-            const list = source.messageSnapshots || source.message_snapshots;
-            const first = Array.isArray(list) && list[0];
-            if (first && first.message) snapshot = {message:Object.assign({}, typeof first.message.toJS === "function" ? first.message.toJS() : first.message),
-                moderator_report:first.moderatorReport !== undefined ? first.moderatorReport : first.moderator_report || null,
-                rest:Array.isArray(list) && list.length > 1 ? list.slice(1).map(item => ({message:item && item.message && typeof item.message.toJS === "function" ? item.message.toJS() : item && item.message,
-                    moderator_report:item && (item.moderatorReport !== undefined ? item.moderatorReport : item.moderator_report || null)})) : []};
+        if (!hasRaw) {
+            raw = "";
+            const contentSource = translateContentSource(source);
+            if (contentSource && contentSource !== source && typeof contentSource.content === "string" && contentSource.content) {
+                const list = source.messageSnapshots || source.message_snapshots;
+                const first = Array.isArray(list) && list[0];
+                if (first && first.message) snapshot = {message:Object.assign({}, typeof first.message.toJS === "function" ? first.message.toJS() : first.message),
+                    moderator_report:first.moderatorReport !== undefined ? first.moderatorReport : first.moderator_report || null,
+                    rest:Array.isArray(list) && list.length > 1 ? list.slice(1).map(item => ({message:item && item.message && typeof item.message.toJS === "function" ? item.message.toJS() : item && item.message,
+                        moderator_report:item && (item.moderatorReport !== undefined ? item.moderatorReport : item.moderator_report || null)})) : []};
+            }
+            if (!snapshot) return;
         }
-        if (!raw && !snapshot) return;
         let entry = existing;
         if (entry) translate.shown.delete(id);
         else if (translate.shown.size >= 300) translate.shown.delete(translate.shown.keys().next().value);
-        if (!entry) entry = {channelId, id, source:null, raw:"", snapshot:null, key:null, quoteKey:null, quotes:null};
-        entry.source = source; entry.raw = raw; entry.snapshot = snapshot; entry.key = key || entry.key; entry.quoteKey = quoteKey || entry.quoteKey;
-        entry.quotes = nextQuotes;
+        if (!entry) entry = {channelId, id, source, raw, snapshot, key:key || null, quoteKey:quoteKey || null, quotes:nextQuotes};
+        else {
+            entry.source = source; entry.raw = raw; entry.snapshot = snapshot;
+            if (key) entry.key = key;
+            if (quoteKey) entry.quoteKey = quoteKey;
+            entry.quotes = nextQuotes;
+        }
         translate.shown.set(id, entry);
     }
     function translateView(entry, layout, original) {
@@ -7625,12 +8146,21 @@
         parsedColorCache.set(value, hit);
         return hit;
     }
+    const HEX6_CLEAN_RE = /^#[0-9a-f]{6}$/;
+    const HEX8_CLEAN_RE = /^#[0-9a-f]{8}$/;
+    const WHITESPACE_RE = /\s/;
     function parseThemeColorUncached(value) {
+        const len = value.length;
+        if (len === 7 && value.charCodeAt(0) === 35 && HEX6_CLEAN_RE.test(value)) return {hex:value, opacity:1};
+        if (len === 9 && value.charCodeAt(0) === 35 && HEX8_CLEAN_RE.test(value)) {
+            const aFast = parseInt(value.slice(7, 9), 16) / 255;
+            return {hex:value.slice(0, 7), opacity:Math.round(aFast * 10000) / 10000};
+        }
         const s = value.trim();
         if (!s) return null;
         // Hex and keywords never contain spaces, so a value that a theme author wrapped across lines
         // ("#66006\n\n64d") or wrote as "#transparent" still reads as the color they meant.
-        const compact = s.replace(/\s+/g, "");
+        const compact = WHITESPACE_RE.test(s) ? s.replace(/\s+/g, "") : s;
         if (/^#?transparent$/i.test(compact)) return {hex:"#000000", opacity:0};
         let m = /^#([0-9a-f]{3,8})$/i.exec(compact) || /^([0-9a-f]{6}|[0-9a-f]{8})$/i.exec(compact);
         if (m) {
@@ -7638,12 +8168,12 @@
             if (hex.length === 3) return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:1};
             if (hex.length === 4) {
                 const a = parseInt(hex[3] + hex[3], 16) / 255;
-                return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:Number(a.toFixed(4))};
+                return {hex:"#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2], opacity:Math.round(a * 10000) / 10000};
             }
             if (hex.length === 6) return {hex:"#" + hex, opacity:1};
             if (hex.length === 8) {
                 const a = parseInt(hex.slice(6, 8), 16) / 255;
-                return {hex:"#" + hex.slice(0, 6), opacity:Number(a.toFixed(4))};
+                return {hex:"#" + hex.slice(0, 6), opacity:Math.round(a * 10000) / 10000};
             }
             return null;
         }
@@ -7655,7 +8185,7 @@
             };
             const a = parseAlphaValue(m[4]);
             if (a === null) return null;
-            return {hex:"#" + chan(m[1]) + chan(m[2]) + chan(m[3]), opacity:Number(a.toFixed(4))};
+            return {hex:"#" + chan(m[1]) + chan(m[2]) + chan(m[3]), opacity:Math.round(a * 10000) / 10000};
         }
         m = /^hsla?\(\s*(-?[0-9.]+)(?:deg)?\s*(?:,\s*|\s+)([0-9.]+)%\s*(?:,\s*|\s+)([0-9.]+)%(?:\s*[,/]\s*([0-9.]+%?))?\s*\)$/i.exec(s);
         if (m) {
@@ -7678,7 +8208,7 @@
             const r = sat === 0 ? lig : hue2rgb(h + 1 / 3);
             const g = sat === 0 ? lig : hue2rgb(h);
             const b = sat === 0 ? lig : hue2rgb(h - 1 / 3);
-            return {hex:"#" + toHex(r) + toHex(g) + toHex(b), opacity:Number(a.toFixed(4))};
+            return {hex:"#" + toHex(r) + toHex(g) + toHex(b), opacity:Math.round(a * 10000) / 10000};
         }
         return null;
     }
@@ -7721,8 +8251,10 @@
         const iconsIn = plusIn.icons;
         if (iconsIn && typeof iconsIn === "object" && !Array.isArray(iconsIn)) {
             const icons = {};
-            for (const key of Object.keys(PLUS_STATUS_ICON_MAP)) {
-                const v = iconsIn[key];
+            for (const rawKey of Object.keys(iconsIn)) {
+                const key = rawKey.trim();
+                if (!/^[A-Za-z0-9_-]{1,80}$/.test(key)) continue;
+                const v = iconsIn[rawKey];
                 const arr = Array.isArray(v) ? v : typeof v === "string" ? [v] : null;
                 if (!arr || !arr.length) continue;
                 const cleaned = arr.slice(0, 4).map(item => {
@@ -7733,6 +8265,11 @@
             }
             if (Object.keys(icons).length) out.icons = icons;
         }
+        if (typeof plusIn.iconpack === "string" && plusIn.iconpack.trim()) {
+            out.iconpack = normalizeIconPackId(plusIn.iconpack.trim().slice(0, 120));
+            hasAny = true;
+        }
+        if (plusIn.customOverlays === true) { out.customOverlays = true; hasAny = true; }
         return hasAny ? out : null;
     }
     function sanitizeThemeSpec(data, sourceUrl) {
@@ -7794,19 +8331,19 @@
     }
     function snapshotColorTables() {
         if (customThemes.rawTable && !customThemes.origRaw) {
-            const copy = {};
-            for (const k of Object.keys(customThemes.rawTable)) copy[k] = customThemes.rawTable[k];
-            customThemes.origRaw = copy;
+            customThemes.origRaw = Object.assign({}, customThemes.rawTable);
         }
         if (customThemes.semTable && !customThemes.origSem) {
-            const copy = {};
-            for (const k of Object.keys(customThemes.semTable)) {
-                const entry = customThemes.semTable[k];
+            const copy = {}, sem = customThemes.semTable;
+            for (const k in sem) {
+                if (!owns(sem, k)) continue;
+                const entry = sem[k];
                 if (!entry || typeof entry !== "object") continue;
                 const snap = {};
-                for (const slot of THEME_SLOTS) {
-                    if (entry[slot] && typeof entry[slot] === "object")
-                        snap[slot] = {raw:entry[slot].raw, opacity:entry[slot].opacity};
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const slot = THEME_SLOTS[i], sObj = entry[slot];
+                    if (sObj && typeof sObj === "object")
+                        snap[slot] = {raw:sObj.raw, opacity:sObj.opacity};
                 }
                 if ("gradient" in entry) snap.gradient = entry.gradient;
                 if ("userProfileThemes" in entry) snap.userProfileThemes = entry.userProfileThemes;
@@ -7825,14 +8362,16 @@
     function eachExperimentSlot(fn) {
         const table = customThemes.expTable;
         if (!table || typeof table !== "object") return;
-        for (const token of Object.keys(table)) {
+        for (const token in table) {
+            if (!owns(table, token)) continue;
             const byExperiment = table[token];
             if (!byExperiment || typeof byExperiment !== "object") continue;
-            for (const experiment of Object.keys(byExperiment)) {
+            for (const experiment in byExperiment) {
+                if (!owns(byExperiment, experiment)) continue;
                 const byTheme = byExperiment[experiment];
                 if (!byTheme || typeof byTheme !== "object") continue;
-                for (const theme of THEME_SLOTS) {
-                    const slot = byTheme[theme];
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const theme = THEME_SLOTS[i], slot = byTheme[theme];
                     if (slot && typeof slot === "object") fn(token, slot, theme);
                 }
             }
@@ -7848,20 +8387,21 @@
             // (nothing reads them once their tokens point back at Discord's keys). Turning themes off removes them.
             const kept = [];
             journal.raw.forEach(k => {
-                if (Object.prototype.hasOwnProperty.call(origRaw, k)) raw[k] = origRaw[k];
+                if (owns(origRaw, k)) raw[k] = origRaw[k];
                 else if (keepSynthetic && k.startsWith("__VENUS_")) kept.push(k);
                 else delete raw[k];
             });
             journal.sem.forEach(k => {
                 const entry = sem[k], snap = origSem[k];
                 if (!entry || !snap) return;
-                for (const slot of THEME_SLOTS) {
-                    if (snap[slot] && entry[slot] && typeof entry[slot] === "object") { entry[slot].raw = snap[slot].raw; entry[slot].opacity = snap[slot].opacity; }
-                    else if (snap[slot]) entry[slot] = {raw:snap[slot].raw, opacity:snap[slot].opacity};
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const slot = THEME_SLOTS[i], sn = snap[slot], en = entry[slot];
+                    if (sn && en && typeof en === "object") { en.raw = sn.raw; en.opacity = sn.opacity; }
+                    else if (sn) entry[slot] = {raw:sn.raw, opacity:sn.opacity};
                 }
             });
             journal.raw.clear();
-            kept.forEach(k => journal.raw.add(k));
+            for (let i = 0; i < kept.length; i++) journal.raw.add(kept[i]);
             journal.sem.clear();
             if (journal.exp) {
                 for (let i = 0; i < journal.exp.length; i += 3) {
@@ -7875,18 +8415,21 @@
             for (const k of Object.keys(customThemes.rawTable)) {
                 if (k.startsWith("__VENUS_")) delete customThemes.rawTable[k];
             }
-            for (const k of Object.keys(customThemes.origRaw)) customThemes.rawTable[k] = customThemes.origRaw[k];
+            Object.assign(customThemes.rawTable, customThemes.origRaw);
         }
         if (customThemes.semTable && customThemes.origSem) {
-            for (const k of Object.keys(customThemes.origSem)) {
-                const entry = customThemes.semTable[k], snap = customThemes.origSem[k];
+            const origSem = customThemes.origSem;
+            for (const k in origSem) {
+                if (!owns(origSem, k)) continue;
+                const entry = customThemes.semTable[k], snap = origSem[k];
                 if (!entry || !snap) continue;
-                for (const slot of THEME_SLOTS) {
-                    if (snap[slot]) {
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const slot = THEME_SLOTS[i], sn = snap[slot];
+                    if (sn) {
                         if (entry[slot] && typeof entry[slot] === "object") {
-                            entry[slot].raw = snap[slot].raw;
-                            entry[slot].opacity = snap[slot].opacity;
-                        } else entry[slot] = {raw:snap[slot].raw, opacity:snap[slot].opacity};
+                            entry[slot].raw = sn.raw;
+                            entry[slot].opacity = sn.opacity;
+                        } else entry[slot] = {raw:sn.raw, opacity:sn.opacity};
                     }
                 }
                 if ("gradient" in snap) entry.gradient = snap.gradient;
@@ -7906,13 +8449,13 @@
         const journal = customThemes.journal;
         if (journal) { journal.rawTable = rawTable; journal.semTable = sem; }
         const touchedRaw = journal ? journal.raw : new Set(), touchedSem = journal ? journal.sem : new Set();
-        // Every raw write goes through raw.set so the key lands in the journal.
-        const raw = {set(k, v) { touchedRaw.add(k); rawTable[k] = v; }};
+        const setRaw = (k, v) => { touchedRaw.add(k); rawTable[k] = v; };
         const rawIn = theme.rawColors || {}, semIn = theme.semanticColors || {}, plus = theme.plus, bg = theme.background;
         // 1. Apply rawColors directly onto Discord's RawColors table (hex only; alpha is carried on semantic slots).
-        for (const key of Object.keys(rawIn)) {
+        for (const key in rawIn) {
+            if (!owns(rawIn, key)) continue;
             const parsed = parseThemeColor(rawIn[key]);
-            if (parsed) raw.set(key, parsed.hex);
+            if (parsed) setRaw(key, parsed.hex);
         }
         // 2. Bridge legacy PRIMARY / PLUM / BRAND raw colors to Discord 349.9's NEUTRAL / BLURPLE raw tokens
         // whenever the theme didn't already set the NEUTRAL / BLURPLE key directly.
@@ -7923,7 +8466,7 @@
                 const src = sources[j];
                 if (rawIn[src]) {
                     const parsed = parseThemeColor(rawIn[src]);
-                    if (parsed) { raw.set(target, parsed.hex); break; }
+                    if (parsed) { setRaw(target, parsed.hex); break; }
                 }
             }
         }
@@ -7943,11 +8486,16 @@
             // A slot the array doesn't reach (single-palette themes) borrows index 0. A slot the theme wrote as
             // false (stored as null) means "keep Discord's color here", as in Revenge: [false, false, "#fff"]
             // only recolors Onyx.
-            const slotColor = i => parseThemeColor(i < arr.length ? arr[i] : arr[0]);
-            const slotColors = {dark:slotColor(0), light:slotColor(1), midnight:slotColor(2), darker:slotColor(3)};
+            const len = arr.length;
+            const c0 = parseThemeColor(arr[0]);
+            const c1 = len > 1 ? parseThemeColor(arr[1]) : c0;
+            const c2 = len > 2 ? parseThemeColor(arr[2]) : c0;
+            const c3 = len > 3 ? parseThemeColor(arr[3]) : c0;
             const orig = isDirect && customThemes.origSem && customThemes.origSem[targetKey];
-            for (const slot of THEME_SLOTS) {
-                const picked = slotColors[slot];
+            const prefix = "__VENUS_" + targetKey + "_";
+            for (let i = 0; i < 4; i++) {
+                const slot = THEME_SLOTS[i];
+                const picked = i === 0 ? c0 : i === 1 ? c1 : i === 2 ? c3 : c2;
                 if (!picked) {
                     // The theme's own key said false here: undo any legacy alias that reached this slot first.
                     if (orig && orig[slot] && entry[slot] && typeof entry[slot] === "object") {
@@ -7956,8 +8504,8 @@
                     }
                     continue;
                 }
-                const syntheticKey = "__VENUS_" + targetKey + "_" + slot;
-                raw.set(syntheticKey, picked.hex);
+                const syntheticKey = prefix + slot;
+                setRaw(syntheticKey, picked.hex);
                 if (entry[slot] && typeof entry[slot] === "object") {
                     entry[slot].raw = syntheticKey;
                     entry[slot].opacity = picked.opacity;
@@ -7969,7 +8517,8 @@
         // earlier), not whichever key the theme happened to write last: CHAT_BACKGROUND over BACKGROUND_PRIMARY
         // for the chat surface, KEYBOARD over BACKGROUND_PRIMARY for the keyboard gap.
         const aliasRank = new Map();
-        for (const key of Object.keys(semIn)) {
+        for (const key in semIn) {
+            if (!owns(semIn, key)) continue;
             const arr = semIn[key];
             if (!Array.isArray(arr) || !arr.length || sem[key]) continue;
             const targets = LEGACY_SEMANTIC_ALIASES[key];
@@ -7981,7 +8530,8 @@
         }
         aliasRank.forEach((pick, target) => writeSemanticTarget(target, pick.arr, false));
         // Second pass: direct Mana semantic keys.
-        for (const key of Object.keys(semIn)) {
+        for (const key in semIn) {
+            if (!owns(semIn, key)) continue;
             const arr = semIn[key];
             if (!Array.isArray(arr) || !arr.length) continue;
             if (sem[key]) writeSemanticTarget(key, arr, true);
@@ -7992,7 +8542,7 @@
                 const mc = parseThemeColor(plus.mentionLineColor);
                 if (mc && sem.BACKGROUND_MENTIONED_FEEDBACK) writeSemanticTarget("BACKGROUND_MENTIONED_FEEDBACK", [formatThemeColor(mc)], false);
                 if (mc && !semIn.BACKGROUND_MENTIONED && !semIn.MESSAGE_MENTIONED_BACKGROUND_DEFAULT) {
-                    const tint = {hex:mc.hex, opacity:Number(Math.min(0.25, mc.opacity * 0.16).toFixed(4))};
+                    const tint = {hex:mc.hex, opacity:Math.round(Math.min(0.25, mc.opacity * 0.16) * 10000) / 10000};
                     writeSemanticTarget("MESSAGE_MENTIONED_BACKGROUND_DEFAULT", [formatThemeColor(tint)], false);
                 }
             }
@@ -8002,12 +8552,13 @@
                 writeSemanticTarget("MOBILE_CHAT_NEW_MESSAGE_TEXT", [plus.unreadBadgeColor], false);
             }
             if (plus.icons && typeof plus.icons === "object") {
-                for (const iconKey of Object.keys(PLUS_STATUS_ICON_MAP)) {
+                for (const iconKey in PLUS_STATUS_ICON_MAP) {
+                    if (!owns(PLUS_STATUS_ICON_MAP, iconKey)) continue;
                     const arr = plus.icons[iconKey];
                     if (!Array.isArray(arr) || !arr.length) continue;
                     const mapping = PLUS_STATUS_ICON_MAP[iconKey];
                     const first = parseThemeColor(arr[0]);
-                    if (first) for (let i = 0; i < mapping.raw.length; i++) raw.set(mapping.raw[i], first.hex);
+                    if (first) for (let i = 0; i < mapping.raw.length; i++) setRaw(mapping.raw[i], first.hex);
                     for (let i = 0; i < mapping.sem.length; i++) writeSemanticTarget(mapping.sem[i], arr, false);
                 }
             }
@@ -8024,11 +8575,11 @@
                     const entry = sem[CHAT_SURFACE_TOKENS[i]];
                     if (!entry || typeof entry !== "object") continue;
                     touchedSem.add(CHAT_SURFACE_TOKENS[i]);
-                    for (const slot of THEME_SLOTS) {
-                        const s = entry[slot];
+                    for (let j = 0; j < THEME_SLOTS.length; j++) {
+                        const s = entry[THEME_SLOTS[j]];
                         if (s && typeof s === "object") {
                             const cur = Number.isFinite(s.opacity) ? s.opacity : 1;
-                            s.opacity = Number((cur * alpha).toFixed(4));
+                            s.opacity = Math.round(cur * alpha * 10000) / 10000;
                         }
                     }
                 }
@@ -8044,7 +8595,8 @@
                 if (!owns(byExperiment, experiment)) continue;
                 const byTheme = byExperiment[experiment];
                 if (!byTheme || typeof byTheme !== "object") continue;
-                for (const theme of THEME_SLOTS) {
+                for (let i = 0; i < THEME_SLOTS.length; i++) {
+                    const theme = THEME_SLOTS[i];
                     const slot = byTheme[theme], themed = semEntry[theme], was = wasEntry[theme];
                     if (slot && typeof slot === "object" && themed && was && (themed.raw !== was.raw || themed.opacity !== was.opacity)) {
                         if (expJournal) expJournal.push(slot, slot.raw, slot.opacity);
@@ -8087,6 +8639,7 @@
         // revision key, invalidating createStyles (4890) and useToken (4580) caches once and keeping O(1) lookups.
         const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1193, "default"));
         try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
+        if (features.iconPacks && enabled("iconPacks")) iconPacksApply();
         notify("customThemes");
     }
     function hookRawColorsModule(exports) {
@@ -8121,7 +8674,8 @@
     // Discord's root providers (9758) build the theme context once and keep it in a memo keyed on theme, flags and
     // so on, never on our revision. Re-keying the value they hand down makes createStyles and useToken read fresh.
     function rootThemeContextProvider(orig, self, args) {
-        useSettings("customThemes");
+        if (features.customThemes) useSettings("customThemes");
+        if (features.iconPacks) useSettings("iconPacks");
         const tree = orig.apply(self, args);
         if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
         const value = tree.props.value, key = value.key.split("#v")[0] + "#v" + customThemes.revision;
@@ -8418,6 +8972,832 @@
             customThemes.list.length ? footnote("note", "Hold a theme to remove it.") : null];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
+    // Icon packs (#61): replaces Discord's icons across the app with community icon packs (Themes+ / Rosiecord / MD3 /
+    // Solar / Deco / Material Two Tone / Iconsax) or any custom icon pack URL, and applies per-icon tint overrides from
+    // the active theme's plus.icons table. Instead of building path strings and scanning manifest arrays on every
+    // <Image> render, Venus compiles a dense O(1) lookup table indexed by numeric assetId once when the active pack or
+    // theme changes, so BaseIconImage (4579), RN.Image (328) and resolveAssetSource (81) do a single array read.
+    const ICONPACKS_FILE = "venus-iconpacks.json", ICONPACKS_MAX_CUSTOM = 20, ICONPACKS_MAX_BYTES = 1024 * 1024, ICONPACKS_TIMEOUT_MS = 10000;
+    const ICONPACKS_LIST_URL = "https://raw.githubusercontent.com/nexpid/ThemesPlus/main/iconpacks/list.json";
+    const ICONPACKS_TREE_BASE = "https://raw.githubusercontent.com/nexpid/ThemesPlus/iconpack-trees/";
+    const ICONPACK_REDESIGN_DIR = "design/components/Icon/native/redesign/generated/images";
+    const ICONPACK_LEGACY_DIR = "images/native/icons";
+    const ICONPACK_TRANSPARENT_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIAAAUAAeImBZsAAAAASUVORK5CYII=";
+    // Built-in community icon packs from Themes+, embedded so the gallery works straight away offline.
+    const BUILTIN_ICONPACKS = [
+        {id:"rosiecord-plumpy", name:"Rosiecord Plumpy", description:"Icons8 Plumpy icons", authors:"Rosie & Rairof", load:"https://raw.githubusercontent.com/Rairof/discord-iconpacks/main/Packs/Plumpy/", suffix:""},
+        {id:"rosiecord-iconsax", name:"Rosiecord Iconsax", description:"Iconsax linear icons", authors:"Rosie, Lemon & Jay", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/iconsax/", suffix:"@2x"},
+        {id:"md3", name:"MD3 (Rounded)", description:"Material Design 3 rounded icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3/", suffix:""},
+        {id:"md3legacy", name:"MD3 (Legacy)", description:"Classic Material Design 3 icons", authors:"Google & Hurricane", load:"https://codeberg.org/panbread/iconpackrepo/raw/branch/main/packs/MaterialDesign3Legacy/", suffix:""},
+        {id:"solar", name:"Solar", description:"Solar bold icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar/", suffix:""},
+        {id:"solarduotone", name:"Solar (Duotone)", description:"Solar two-tone shaded icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-duotone/", suffix:""},
+        {id:"solarbroken", name:"Solar (Dashed)", description:"Solar broken-line icons", authors:"480 Design & WalkQuackBack", load:"https://raw.githubusercontent.com/mudrhiod/discord-iconpacks/master/plus/solar-broken/", suffix:""},
+        {id:"deco", name:"Deco", description:"Clean geometric line icons", authors:"doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/Deco/", suffix:""},
+        {id:"materialtwotone", name:"Material Two Tone", description:"Two-tone Material icons", authors:"Google & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/MaterialTwoTone/", suffix:""},
+        {id:"iconsaxbulk", name:"Iconsax Bulk", description:"Iconsax filled bulk icons", authors:"Iconsax & doraa", load:"https://raw.githubusercontent.com/dora727/doraa-pyoncordstuff/master/Packs/IconsaxBulk/", suffix:""}
+    ];
+    // Common theme plus.iconpack spellings/typos mapped to canonical pack IDs.
+    const ICONPACK_ID_ALIASES = {
+        "plumpy":"rosiecord-plumpy", "rosiecord_plumpy":"rosiecord-plumpy",
+        "iconsax":"rosiecord-iconsax", "rosiecord_iconsax":"rosiecord-iconsax",
+        "md3-rounded":"md3", "md3_rounded":"md3", "materialdesign3":"md3",
+        "md3-legacy":"md3legacy", "md3_legacy":"md3legacy", "materialdesign3legacy":"md3legacy",
+        "solar-duotone":"solarduotone", "solar_duotone":"solarduotone", "solar-duotune":"solarduotone", "solarduotune":"solarduotone",
+        "solar-broken":"solarbroken", "solar_broken":"solarbroken", "solar-dashed":"solarbroken", "solardashed":"solarbroken",
+        "material-two-tone":"materialtwotone", "material_two_tone":"materialtwotone",
+        "iconsax-bulk":"iconsaxbulk", "iconsax_bulk":"iconsaxbulk"
+    };
+    // Maps Discord 349.9 redesign icon names to older redesign and legacy icon paths shipped by community icon packs,
+    // so icons Discord renamed or split since older builds still match across every pack.
+    const ICONPACK_NAME_ALIASES = {
+        ArrowAngleRightUpIcon:["LinkExternalSmallIcon", "@ic_open_in_browser"],
+        ArrowLargeRightIcon:["ArrowSmallRightIcon", "@ic_arrow_forward_24px"],
+        ArrowLargeUpIcon:["ArrowSmallUpIcon", "@ic_chevron_up_24px"],
+        ArrowSmallLeftIcon:["ChevronSmallLeftIcon", "@ic_arrow_back_24px"],
+        ArrowSmallRightIcon:["ChevronSmallRightIcon", "@ic_arrow_forward_24px"],
+        ArrowsLeftRightIcon:["ArrowsUpDownIcon", "@ic_sync_24px"],
+        BellZIcon:["BellSlashIcon", "@ic_mute_channel_24px"],
+        BillIcon:["ReceiptIcon", "@ic_file_text"],
+        BookmarkIcon:["@ic_stamp"],
+        BookmarkOutlineIcon:["BookmarkIcon", "@ic_stamp"],
+        BoostGemIcon:["@ic_settings_boost_24px", "@ic_nitro_wheel"],
+        BoostGemOutlineIcon:["BoostGemIcon", "@ic_settings_boost_24px"],
+        BoostGemSlashIcon:["BoostGemSlashIcon-primary", "BoostGemIcon"],
+        BugIcon:["@ic_feedback", "WarningIcon"],
+        BurgerIcon:["MenuIcon", "@ic_menu_24px"],
+        CarIcon:["TravelIcon"],
+        ChannelListPlusIcon:["PlusLargeIcon", "@ic_add_24px"],
+        ChannelsFollowedIcon:["AnnouncementsIcon", "@ic_megaphone_16px"],
+        ChatArrowRightIcon:["ChatIcon", "@ic_chat_bubble_16px"],
+        ChatDotsIcon:["ChatIcon", "@ic_chat_bubble_16px"],
+        ChatMarkUnreadIcon:["MarkUnreadIcon"],
+        ChatSmileIcon:["ChatIcon", "SmileIcon"],
+        ChatWarningIcon:["ChatAlertIcon", "WarningIcon"],
+        ChatXIcon:["ChatIcon", "@ic_close_24px"],
+        CheckmarkLargeBoldIcon:["CheckmarkBoldIcon", "CheckmarkLargeIcon", "@ic_check_24px"],
+        ChevronLargeUpIcon:["ChevronSmallUpIcon", "@ic_chevron_up_24px"],
+        CircleCheckIcon:["CircleCheckIcon-primary", "@ic_radio_circle_checked"],
+        CircleErrorIcon:["CircleWarningIcon", "CircleExclamationPointIcon", "CircleWarningIcon-primary", "CircleExclamationPointIcon-primary", "@ic_warning_24px"],
+        "CircleErrorIcon-primary":["CircleWarningIcon-primary", "CircleExclamationPointIcon-primary", "CircleWarningIcon", "CircleExclamationPointIcon"],
+        "CircleErrorIcon-secondary":["CircleWarningIcon-secondary", "CircleExclamationPointIcon-secondary"],
+        "CirclePlayIcon-primary":["PlayIcon", "@ic_play"],
+        ClipboardCheckIcon:["ClipboardListIcon", "CopyIcon"],
+        CompassIcon:["@discovery_20px", "GlobeEarthIcon"],
+        CreditCardIcon:["TicketDollarIcon", "BillIcon"],
+        CrownIcon:["@ic_crown_16px"],
+        DenyIcon:["CircleXIcon", "@ic_ban_24px"],
+        DiceIcon:["#modules/hang_status/native/images/DiceIcon.png"],
+        DoubleCheckmarkIcon:["CheckmarkLargeIcon", "@ic_check_24px"],
+        EducationIcon:["BookCheckIcon", "@ic_rulebook"],
+        EmbedIcon:["FileIcon", "@ic_file_text"],
+        EyeSlashIcon:["@ic_hide_24px", "@ic_hide_password"],
+        FileWarningIcon:["FileIcon", "WarningIcon"],
+        FlashIcon:["SparklesIcon", "@ic_wand"],
+        FolderPlusIcon:["FolderIcon", "@ic_folder_add_24px"],
+        FullscreenEnterIcon:["MaximizeIcon", "@ic_pip"],
+        GamesIcon:["ActivitiesIcon", "GameControllerIcon", "@ic_controller_24px"],
+        GridSquareIcon:["AppsIcon", "@ic_grid_24px"],
+        GroupPlusIcon:["GroupIcon", "@ic_new_group"],
+        HashmarkIcon:["TextIcon", "ChannelsTextIcon", "@ic_text_channel_16px"],
+        HeartOutlineIcon:["HeartIcon"],
+        HourglassIcon:["TimerIcon", "@ic_timer_24px"],
+        ImageBrokenIcon:["ExperimentalImageBrokenIcon", "ImageWarningIcon"],
+        ImagePlusIcon:["ImageIcon", "@ic_image_upload"],
+        ImageSparkleIcon:["ImagePlusIcon", "ImageIcon"],
+        ImagesIcon:["ImageIcon", "@ic_image"],
+        InboxIcon:["@ic_mail", "BellIcon"],
+        LettersIcon:["@settings/ic_locale_24px", "LanguageIcon"],
+        LinkExternalMediumIcon:["LinkExternalSmallIcon", "@ic_open_in_browser"],
+        LinkPlusIcon:["LinkIcon", "@ic_link_24px"],
+        ListViewIcon:["MenuIcon", "@ic_forum_channel_list_view_24px"],
+        MagicDoorIcon:["DoorEnterIcon", "DoorExitIcon", "@ic_leave_24px"],
+        MedalIcon:["TrophyIcon", "@ic_trophy_filled"],
+        MenuIcon:["@ic_menu_24px", "MoreHorizontalIcon"],
+        MobilePhoneDenyIcon:["MobilePhoneIcon", "@ic_mobile_device"],
+        MobilePhoneSettingsIcon:["MobilePhoneIcon", "@settings/ic_phonelink_24px"],
+        MobilePhoneShareIcon:["ScreenIcon", "@ic_screen_share_24px"],
+        MoreVerticalIcon:["MoreHorizontalIcon", "@ic_more_android", "@ic_overflow_android"],
+        NewUserIcon:["NewUserLargeIcon", "UserCircleNewIcon", "UserPlusIcon"],
+        OrbsIcon:["SparklesIcon", "@ic_nitro_wheel"],
+        PaintbrushThinIcon:["PaintPaletteIcon", "@ic_paint_brush"],
+        PaperIcon:["FileIcon", "@ic_file_text"],
+        PaperPlusIcon:["FileUpIcon", "FileIcon"],
+        PhoneIcon:["PhoneCallIcon", "@voice_calls/voice_bar_phone"],
+        PiggyBankIcon:["TicketDollarIcon", "ShopIcon"],
+        PollsIcon:["AnalyticsIcon", "@ic_analytics_bubble_24px"],
+        QrCodeIcon:["QrCodeCameraIcon", "@settings/ic_qr_code_24px"],
+        QuestsIcon:["CompassIcon", "TrophyIcon", "@discovery_20px"],
+        QuoteIcon:["ChatIcon", "@ic_reply_24px"],
+        ReactionIcon:["SmileIcon", "@ic_emoji_24px"],
+        RedoIcon:["RetryIcon", "@ic_sync_24px"],
+        RefreshIcon:["RetryIcon", "@ic_sync_24px"],
+        ScienceIcon:["ScienceDefaultIcon", "@settings/ic_progress_wrench_24px"],
+        ShieldLockIcon:["ShieldIcon", "@ic_shield_24px"],
+        ShopIcon:["ShopSparkleIcon", "@ic_gift"],
+        SignPostIcon:["@ic_sign_post", "@ic_channel_browse"],
+        SlashIcon:["SlashBoxIcon", "@ic_application_command_24px"],
+        SpeedometerIcon:["TimerIcon", "@ic_timer_24px"],
+        StampXIcon:["StampIcon", "@ic_stamp"],
+        StickerIcon:["StickerWinkIcon", "StickerWink2Icon", "@ic_sticker_24px"],
+        StickerPlusIcon:["StickerIcon", "StickerWinkIcon", "@ic_sticker_24px"],
+        StopIcon:["PauseIcon", "@ic_stop_stream_24px"],
+        SuperReactionIcon:["AddSuperReactionIcon", "ReactionIcon", "SmilePlusIcon"],
+        TagIcon:["BadgeIcon"],
+        TagsIcon:["TagIcon", "BadgeIcon"],
+        TextControllerIcon:["GameControllerIcon", "@ic_controller_24px"],
+        ThreadLockIcon:["ThreadIcon", "@ic_thread_private_24px"],
+        ThreadMinusIcon:["ThreadIcon", "@ic_thread_normal_24px"],
+        ThumbsDownIcon:["HandRequestDenyIcon", "ReactionIcon"],
+        ThumbsUpIcon:["HandRequestSpeakIcon", "ReactionIcon"],
+        TimerIcon:["@ic_timer_24px", "ClockIcon"],
+        TvIcon:["ScreenIcon", "@ic_monitor"],
+        UndoIcon:["@ic_undo", "RetryIcon"],
+        UnknownGameIcon:["GameControllerIcon", "@ic_controller_24px"],
+        UnsendIcon:["@ic_undo", "ArrowAngleLeftUpIcon"],
+        UserCheckIcon:["UserIcon", "@ic_friend_request_accepted"],
+        UserClockIcon:["UserIcon", "@ic_clock_timeout_16px"],
+        UserPlatformIcon:["LaptopPhoneIcon", "@settings/ic_phonelink_24px"],
+        VideoDenyIcon:["VideoSlashIcon", "VideoIcon", "@user_profile/ic_video_disabled"],
+        VideoSelfieIcon:["VideoIcon", "@ic_video"],
+        WarningIcon:["TriangleExclamationPointIcon", "@ic_warning_24px"],
+        WaveformIcon:["SoundboardIcon", "@ic_soundboard"],
+        WebhookPlusIcon:["WebhookIcon", "@ic_webhook_24px"],
+        WindowLaunchIcon:["LinkExternalSmallIcon", "@ic_open_in_browser"],
+        XLargeBoldIcon:["CloseLargeBoldIcon", "CloseLargeIcon", "@ic_close_24px"],
+        XLargeIcon:["CloseLargeIcon", "@ic_close_24px", "@ic_close"],
+        XNeutralIcon:["TwitterIcon", "TwitterNeutralIcon"],
+        XSmallBoldIcon:["CloseSmallBoldIcon", "CloseSmallIcon", "@ic_close_16px"],
+        XSmallIcon:["CloseSmallIcon", "@ic_close_16px", "@ic_close"]
+    };
+    const iconPacks = {
+        registry:null, table:null, ctx:null, hasActive:false, appliedKey:"",
+        active:"", custom:[], trees:new Map(), loadingTrees:new Set(), treeTries:new Map(),
+        loaded:false, loading:false, installing:false, error:""
+    };
+    function normalizeIconPackId(raw) {
+        if (typeof raw !== "string") return "";
+        const id = raw.trim();
+        if (!id) return "";
+        const lower = id.toLowerCase();
+        return ICONPACK_ID_ALIASES[lower] || lower;
+    }
+    function sanitizeCustomIconPack(item) {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+        let load = typeof item.load === "string" ? item.load.trim() : typeof item.url === "string" ? item.url.trim() : "";
+        if (!/^https?:\/\/\S+/i.test(load)) return null;
+        load = normalizeThemeUrl(load).replace(/\/?$/, "/");
+        const suffix = typeof item.suffix === "string" ? item.suffix.trim().slice(0, 16) : "";
+        let name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
+        if (!name) {
+            const parts = load.replace(/\/+$/, "").split("/").filter(Boolean);
+            name = decodeURIComponent(parts[parts.length - 1] || "Custom pack").slice(0, 80);
+        }
+        const id = typeof item.id === "string" && item.id.trim() ? normalizeIconPackId(item.id) : "custom:" + load.toLowerCase();
+        const description = typeof item.description === "string" ? item.description.trim().slice(0, 160) : "";
+        const authors = Array.isArray(item.authors) ? item.authors.map(a => a && typeof a.name === "string" ? a.name.trim() : typeof a === "string" ? a.trim() : "").filter(Boolean).slice(0, 4).join(", ").slice(0, 80) :
+            typeof item.authors === "string" ? item.authors.trim().slice(0, 80) : "";
+        const out = {id, name, description, authors, load, suffix, custom:true};
+        if (Array.isArray(item.tree) && item.tree.length) {
+            const tree = item.tree.filter(p => typeof p === "string" && p.length <= 240).slice(0, 4000);
+            if (tree.length) iconPacks.trees.set(id, new Set(tree));
+        }
+        return out;
+    }
+    function iconPackCatalog() {
+        return BUILTIN_ICONPACKS.concat(iconPacks.custom);
+    }
+    function iconPackById(id) {
+        if (!id) return null;
+        const norm = normalizeIconPackId(id);
+        return BUILTIN_ICONPACKS.find(p => p.id === norm) || iconPacks.custom.find(p => p.id === norm || p.id === id) || null;
+    }
+    // Which icon pack is active right now: the one you picked, or the active theme's plus.iconpack when "Follow theme's icon pack" is on.
+    function iconPacksActiveEntry() {
+        if (!enabled("iconPacks")) return null;
+        if (settings.iconPacksTheme && features.customThemes && enabled("customThemes")) {
+            const theme = customThemesActiveEntry();
+            const themePackId = theme && theme.plus && theme.plus.iconpack;
+            if (themePackId) {
+                const fromTheme = iconPackById(themePackId);
+                if (fromTheme) return fromTheme;
+            }
+        }
+        return iconPackById(iconPacks.active);
+    }
+    function expandIconAlias(entry) {
+        if (entry.charCodeAt(0) === 64) return ICONPACK_LEGACY_DIR + "/" + entry.slice(1) + ".png";
+        if (entry.charCodeAt(0) === 35) return entry.slice(1);
+        return ICONPACK_REDESIGN_DIR + "/" + entry + ".png";
+    }
+    function iconPackCandidates(name, relDir, type) {
+        const base = relDir ? relDir + "/" + name + "." + type : name + "." + type;
+        const list = [base];
+        if (type !== "png") return list;
+        if (relDir === ICONPACK_REDESIGN_DIR) {
+            if (name.endsWith("-primary")) list.push(ICONPACK_REDESIGN_DIR + "/" + name.slice(0, -8) + ".png");
+            if (name.endsWith("NeutralIcon")) list.push(ICONPACK_REDESIGN_DIR + "/" + name.slice(0, -11) + "Icon.png");
+            if (name === "TiktokNeutralIcon") list.push(ICONPACK_REDESIGN_DIR + "/TikTokIcon.png");
+            else if (name === "YoutubeNeutralIcon") list.push(ICONPACK_REDESIGN_DIR + "/YouTubeIcon.png");
+            const aliases = ICONPACK_NAME_ALIASES[name];
+            if (aliases) for (let i = 0; i < aliases.length; i++) list.push(expandIconAlias(aliases[i]));
+        } else if (relDir.startsWith(ICONPACK_LEGACY_DIR)) {
+            if (name === "ic_close_24px" || name === "ic_close") list.push(ICONPACK_REDESIGN_DIR + "/XLargeIcon.png", ICONPACK_REDESIGN_DIR + "/CloseLargeIcon.png");
+            else if (name === "ic_close_16px") list.push(ICONPACK_REDESIGN_DIR + "/XSmallIcon.png", ICONPACK_REDESIGN_DIR + "/CloseSmallIcon.png");
+            else if (name === "ic_check_24px" || name === "ic_checkmark") list.push(ICONPACK_REDESIGN_DIR + "/CheckmarkLargeIcon.png");
+            else if (name === "ic_search" || name === "ic_search_24px") list.push(ICONPACK_REDESIGN_DIR + "/MagnifyingGlassIcon.png");
+            else if (name === "ic_trash_24px" || name === "ic_trash_filled") list.push(ICONPACK_REDESIGN_DIR + "/TrashIcon.png");
+            else if (name === "ic_cog_24px" || name === "ic_gear") list.push(ICONPACK_REDESIGN_DIR + "/SettingsIcon.png");
+            else if (name === "ic_add_24px") list.push(ICONPACK_REDESIGN_DIR + "/PlusLargeIcon.png");
+        }
+        return list;
+    }
+    function withPackSuffix(path, suffix) {
+        if (!suffix) return path;
+        const dot = path.lastIndexOf(".");
+        return dot > 0 ? path.slice(0, dot) + suffix + path.slice(dot) : path + suffix;
+    }
+    // Discord registers an asset only when its module first loads (none at launch, ~1.4k images once every screen has
+    // been opened), so a one-time scan of AssetRegistry (84) caught a partial list or nothing and most icons never
+    // changed. Each asset ID is resolved the first time it's drawn instead, then cached in iconPacks.table.
+    const ICONPACK_MISS = Object.freeze({source:null, tint:""});
+    function iconPacksAsset(id) {
+        const reg = iconPacks.registry || (iconPacks.registry = global.__r && global.__r(84));
+        let a = null;
+        try { a = reg && typeof reg.getAssetByID === "function" ? reg.getAssetByID(id) : null; } catch (_) {}
+        if (!a || a.type !== "png" && a.type !== "jpg" && a.type !== "webp" && a.type !== "gif") return null;
+        const name = typeof a.name === "string" ? a.name : "";
+        if (!name) return null;
+        const loc = typeof a.httpServerLocation === "string" ? a.httpServerLocation : "";
+        const rel = loc.split("/").slice(2).join("/").replace(/^\.\.\//, "_/");
+        return {id, name, rel, type:a.type, width:a.width || 24, height:a.height || 24, candidates:iconPackCandidates(name, rel, a.type),
+            secondaryOf:rel === ICONPACK_REDESIGN_DIR && name.endsWith("-secondary") ? name.slice(0, -10) : ""};
+    }
+    function iconPacksResolveEntry(id) {
+        const ctx = iconPacks.ctx, a = ctx ? iconPacksAsset(id) : null;
+        if (!a) return ICONPACK_MISS;
+        const uri = ctx.pack ? iconPacksResolveAssetUri(a, ctx.pack, ctx.tree) : "";
+        const tint = iconPacksResolvePlusTint(a.name, ctx.plusIcons);
+        if (!uri && !tint) return ICONPACK_MISS;
+        return Object.freeze({source:uri ? Object.freeze({__venusIcon:true, uri, width:a.width, height:a.height}) : null, tint});
+    }
+    // O(1) after the first draw of each icon: one array read per render.
+    function iconPacksEntry(id) {
+        if (typeof id !== "number") return ICONPACK_MISS;
+        const table = iconPacks.table, hit = table[id];
+        return hit !== undefined ? hit : table[id] = iconPacksResolveEntry(id);
+    }
+    function iconPacksFetchTree(pack) {
+        if (!pack || pack.custom || iconPacks.trees.has(pack.id) || iconPacks.loadingTrees.has(pack.id) || typeof global.fetch !== "function") return;
+        const id = pack.id;
+        iconPacks.loadingTrees.add(id);
+        Promise.resolve().then(() => global.fetch(ICONPACKS_TREE_BASE + encodeURIComponent(id) + ".txt", {method:"GET"}))
+            .then(res => res && res.ok ? res.text() : "")
+            .then(text => {
+                const lines = typeof text === "string" ? text.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+                if (!lines.length) throw new Error("empty");
+                iconPacks.trees.set(id, new Set(lines));
+                iconPacks.treeTries.delete(id);
+                iconPacksPersist();
+                if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+            }).catch(() => {
+                // Offline or a GitHub hiccup: try again a little later (3 times) instead of keeping Discord's icons until
+                // the pack is picked again.
+                const tries = (iconPacks.treeTries.get(id) || 0) + 1;
+                iconPacks.treeTries.set(id, tries);
+                if (tries <= 3) later(() => { if (enabled("iconPacks") && iconPacksActiveEntry() === pack) iconPacksFetchTree(pack); }, 15000 * tries, false);
+            }).then(() => {
+                iconPacks.loadingTrees.delete(id);
+                notify("iconPacks");
+            });
+    }
+    function iconPacksResolveAssetUri(asset, pack, tree) {
+        const load = pack.load, suffix = pack.suffix || "";
+        const cands = asset.candidates;
+        if (tree && tree.size) {
+            for (let i = 0; i < cands.length; i++) {
+                const rel = withPackSuffix(cands[i], suffix);
+                if (tree.has(rel)) return load + rel;
+                if (suffix && tree.has(cands[i])) return load + cands[i];
+            }
+            // Multi-layer icon (CircleCheckIcon, CircleXIcon, CircleInformationIcon, CircleQuestionIcon, CircleErrorIcon,
+            // CirclePlusIcon, CircleMinusIcon, CirclePlayIcon): when a pack provides the primary/base icon without a
+            // separate -secondary background layer, replace -secondary with a 1x1 transparent pixel so Discord's stock
+            // circle doesn't clash behind the custom icon.
+            if (asset.secondaryOf) {
+                const primCands = iconPackCandidates(asset.secondaryOf + "-primary", asset.rel, asset.type)
+                    .concat(iconPackCandidates(asset.secondaryOf, asset.rel, asset.type));
+                for (let i = 0; i < primCands.length; i++) {
+                    const rel = withPackSuffix(primCands[i], suffix);
+                    if (tree.has(rel) || suffix && tree.has(primCands[i])) return ICONPACK_TRANSPARENT_URI;
+                }
+            }
+            return "";
+        }
+        // A built-in pack waits for its file list: a guessed path is missing for 31-52% of 349.9's icons in every one of
+        // them, and those drew as blank squares. Discord's own icon stays until the list says the pack has one.
+        if (!pack.custom) return "";
+        // A custom pack without a file list can only be guessed.
+        if (asset.rel === ICONPACK_REDESIGN_DIR || asset.rel.startsWith(ICONPACK_LEGACY_DIR)) {
+            if (asset.secondaryOf) return "";
+            return load + withPackSuffix(cands[0], suffix);
+        }
+        return "";
+    }
+    function iconPacksResolvePlusTint(name, plusIcons) {
+        if (!plusIcons) return "";
+        const direct = plusIcons[name] || (name.endsWith("-primary") ? plusIcons[name.slice(0, -8)] : null);
+        const arr = Array.isArray(direct) ? direct : typeof direct === "string" ? [direct] : null;
+        if (!arr || !arr.length) return "";
+        const p = parseThemeColor(arr[0]);
+        return p ? formatThemeColor(p) : "";
+    }
+    // What every icon is resolved against; a new pack, tint choice or theme starts a fresh cache.
+    function iconPacksSetContext(pack, plusIcons) {
+        const tree = pack ? iconPacks.trees.get(pack.id) || null : null;
+        if (pack && !tree && !pack.custom) iconPacksFetchTree(pack);
+        iconPacks.ctx = {pack, tree, plusIcons};
+        iconPacks.table = [];
+        iconPacks.hasActive = true;
+    }
+    function iconPacksBumpThemeRevision() {
+        customThemes.revision++;
+        customThemesBumpFallbackContextKey();
+        const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1193, "default"));
+        try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
+    }
+    function iconPacksApply() {
+        const on = enabled("iconPacks");
+        const pack = on ? iconPacksActiveEntry() : null;
+        const theme = features.customThemes && enabled("customThemes") ? customThemesActiveEntry() : null;
+        const plusIcons = on && theme && theme.plus && theme.plus.icons || null;
+        const treeSize = pack && iconPacks.trees.has(pack.id) ? iconPacks.trees.get(pack.id).size : 0;
+        const nextKey = on ? (pack ? pack.id + ":" + pack.load + ":" + pack.suffix + ":" + treeSize : "none") +
+            "|p:" + (theme && plusIcons ? theme.id + ":" + customThemes.editCounter : "") : "";
+        if (nextKey === iconPacks.appliedKey) return;
+        iconPacks.appliedKey = nextKey;
+        if (!on || (!pack && !plusIcons)) {
+            iconPacks.ctx = null;
+            iconPacks.table = null;
+            iconPacks.hasActive = false;
+        } else iconPacksSetContext(pack, plusIcons);
+        iconPacksBumpThemeRevision();
+        notify("iconPacks");
+    }
+    // BaseIconImage (4579) is used by all 375 generated design-system icons. Replacing props.source with our frozen
+    // {uri, width, height} object invalidates React Compiler's memo slot (c[11] !== source) whenever the pack changes.
+    // Previews draw each pack's own icons, so a sample that falls back to Discord's (the "Discord's icons" tile, or an
+    // icon a pack lacks) renders inside iconPacksOriginal, which BaseIconImage reads to keep Discord's real icon there.
+    let ICONPACK_ORIGINAL_CTX = null;
+    function iconPacksOriginalContext() {
+        return ICONPACK_ORIGINAL_CTX || (React && React.createContext ? ICONPACK_ORIGINAL_CTX = React.createContext(false) : null);
+    }
+    function iconPacksKeepOriginal() {
+        // useContext only reads a value (it keeps no hook state), so calling it only while a pack is on is safe.
+        const ctx = iconPacksOriginalContext();
+        if (!ctx || !React.useContext) return false;
+        try { return React.useContext(ctx) === true; } catch (_) { return false; }
+    }
+    // Discord's own image for an icon, already resolved: the Image and resolveAssetSource hooks only swap numeric
+    // asset IDs, so this one stays Discord's even while a pack is on.
+    function iconPacksOriginalProps(props) {
+        const id = props.source, resolve = iconPacks.resolveOriginal;
+        if (typeof id !== "number" || typeof resolve !== "function") return props;
+        let src = null;
+        try { src = resolve(id); } catch (_) {}
+        return src && typeof src === "object" ? Object.assign({}, props, {source:src}) : props;
+    }
+    function baseIconImageHook(orig, self, args) {
+        if (!iconPacks.hasActive) return orig.apply(self, args);
+        const props = args[0];
+        if (!props) return orig.apply(self, args);
+        if (iconPacksKeepOriginal()) return orig.call(self, iconPacksOriginalProps(props));
+        const entry = iconPacksEntry(props.source);
+        if (entry === ICONPACK_MISS) return orig.apply(self, args);
+        const next = Object.assign({}, props);
+        if (entry.source) next.source = entry.source;
+        if (entry.tint) next.color = entry.tint;
+        return orig.call(self, next);
+    }
+    baseIconImageHook.call1 = (orig, self, props) => {
+        if (!iconPacks.hasActive || !props) return orig.call(self, props);
+        if (iconPacksKeepOriginal()) return orig.call(self, iconPacksOriginalProps(props));
+        const entry = iconPacksEntry(props.source);
+        if (entry === ICONPACK_MISS) return orig.call(self, props);
+        const next = Object.assign({}, props);
+        if (entry.source) next.source = entry.source;
+        if (entry.tint) next.color = entry.tint;
+        return orig.call(self, next);
+    };
+    // Direct <RN.Image source={assetId} /> and resolveAssetSource(assetId) callers (legacy ic_* icons, illustrations, status icons).
+    function resolveAssetSourceHook(orig, self, args) {
+        if (iconPacks.hasActive) {
+            const entry = iconPacksEntry(args[0]);
+            if (entry.source) return entry.source;
+        }
+        return orig.apply(self, args);
+    }
+    resolveAssetSourceHook.call1 = (orig, self, srcId) => {
+        if (iconPacks.hasActive) {
+            const entry = iconPacksEntry(srcId);
+            if (entry.source) return entry.source;
+        }
+        return orig.call(self, srcId);
+    };
+    // Every <Image> in Discord (avatars, attachments, emojis, icons) renders through this while a pack is on, and most
+    // aren't replaced, so the miss path matters. React calls a function component as (props, secondArg): call2 skips
+    // passing arguments on, and a hit no longer copies args (tests/bench/icon_image_hook.js, 2.16x).
+    function imageHook(orig, self, args) {
+        const props = args[0];
+        if (!iconPacks.hasActive || !props) return orig.apply(self, args);
+        const entry = iconPacksEntry(props.source);
+        if (!entry.source) return orig.apply(self, args);
+        const nextArgs = Array.from(args);
+        nextArgs[0] = iconPacksImageProps(props, entry);
+        return orig.apply(self, nextArgs);
+    }
+    imageHook.call2 = (orig, self, props, second) => {
+        if (!iconPacks.hasActive || !props) return orig.call(self, props, second);
+        const entry = iconPacksEntry(props.source);
+        return entry.source ? orig.call(self, iconPacksImageProps(props, entry), second) : orig.call(self, props, second);
+    };
+    imageHook.call1 = (orig, self, props) => imageHook.call2(orig, self, props, undefined);
+    function iconPacksImageProps(props, entry) {
+        const next = Object.assign({}, props, {source:entry.source});
+        if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
+        return next;
+    }
+    function hookImageModule(exports) {
+        return exports && exports.default ? hookComponent(exports, imageHook) : exports;
+    }
+    function hookAssetRegistryModule(exports) {
+        if (exports && typeof exports.getAssetByID === "function") {
+            iconPacks.registry = exports;
+            if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+        }
+        return exports;
+    }
+    function iconPacksPersist() {
+        if (!files || !iconPacks.loaded) return;
+        // Only the pack in use keeps its file list on the phone (~40-90 KB); others download again when picked. Keeping
+        // every list (558 KB for the 10 built-in packs) neared the 1 MB cap, past which nothing was saved, not even your pick.
+        const treesObj = {}, inUse = iconPacksActiveEntry(), keepId = inUse && !inUse.custom ? inUse.id : "", keep = keepId && iconPacks.trees.get(keepId);
+        if (keep && keep.size && keep.size <= 4000) treesObj[keepId] = Array.from(keep);
+        const payload = JSON.stringify({
+            version:1,
+            active:iconPacks.active || "",
+            custom:iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM),
+            trees:treesObj
+        });
+        if (payload.length > ICONPACKS_MAX_BYTES) return;
+        Promise.resolve().then(() => files.writeFile("documents", ICONPACKS_FILE, payload, "utf8")).catch(() => {});
+    }
+    function iconPacksRestore() {
+        if (iconPacks.loaded || iconPacks.loading || !files) return;
+        let constants;
+        try { constants = typeof files.getConstants === "function" ? files.getConstants() : files; } catch (_) { constants = {}; }
+        const dir = constants && constants.DocumentsDirPath;
+        if (typeof dir !== "string") { iconPacks.loaded = true; return; }
+        const path = dir.replace(/\/$/, "") + "/" + ICONPACKS_FILE;
+        iconPacks.loading = true;
+        Promise.resolve().then(() => files.fileExists(path)).then(exists => exists ? files.readFile(path, "utf8") : null).then(text => {
+            if (text && text.length <= ICONPACKS_MAX_BYTES) {
+                const parsed = JSON.parse(text);
+                if (parsed && typeof parsed === "object") {
+                    if (parsed.trees && typeof parsed.trees === "object" && !Array.isArray(parsed.trees)) {
+                        for (const id of Object.keys(parsed.trees)) {
+                            const arr = parsed.trees[id];
+                            if (Array.isArray(arr) && arr.length) iconPacks.trees.set(id, new Set(arr.filter(x => typeof x === "string")));
+                        }
+                    }
+                    if (Array.isArray(parsed.custom) && !iconPacks.custom.length) {
+                        const list = [];
+                        parsed.custom.slice(0, ICONPACKS_MAX_CUSTOM).forEach(item => {
+                            const clean = sanitizeCustomIconPack(item);
+                            if (clean && !list.some(x => x.id === clean.id)) list.push(clean);
+                        });
+                        iconPacks.custom = list;
+                    }
+                    if (!iconPacks.active && typeof parsed.active === "string" && parsed.active) {
+                        iconPacks.active = normalizeIconPackId(parsed.active);
+                    }
+                }
+            }
+        }).catch(() => {}).then(() => {
+            iconPacks.loading = false;
+            iconPacks.loaded = true;
+            if (enabled("iconPacks")) { iconPacks.appliedKey = ""; iconPacksApply(); }
+            notify("iconPacks");
+        });
+    }
+    function iconPacksInstallFromUrl(rawUrl, onDone) {
+        const input = typeof rawUrl === "string" ? rawUrl.trim() : "";
+        if (!/^https?:\/\/\S+/i.test(input)) {
+            iconPacks.error = tr("Enter a valid https:// or http:// link to an icon pack.");
+            notify("iconPacks");
+            return Promise.resolve(false);
+        }
+        const url = normalizeThemeUrl(input);
+        // If the link is a folder base URL (doesn't end in .json), add it directly as a custom icon pack base URL.
+        if (!/\.json(?:[?#]|$)/i.test(url)) {
+            const spec = sanitizeCustomIconPack({load:url});
+            if (!spec) {
+                iconPacks.error = tr("Enter a valid https:// or http:// link to an icon pack.");
+                notify("iconPacks");
+                return Promise.resolve(false);
+            }
+            iconPacks.loaded = true;
+            const idx = iconPacks.custom.findIndex(p => p.id === spec.id || p.load === spec.load);
+            if (idx >= 0) iconPacks.custom[idx] = spec;
+            else {
+                if (iconPacks.custom.length >= ICONPACKS_MAX_CUSTOM) iconPacks.custom.pop();
+                iconPacks.custom.unshift(spec);
+            }
+            iconPacks.active = spec.id;
+            iconPacks.error = "";
+            iconPacksPersist();
+            iconPacks.appliedKey = "";
+            iconPacksApply();
+            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4792, "CircleCheckIcon"));
+            if (typeof onDone === "function") onDone();
+            return Promise.resolve(true);
+        }
+        if (typeof global.fetch !== "function") {
+            iconPacks.error = tr("Can't reach the internet right now. Try again in a moment.");
+            notify("iconPacks");
+            return Promise.resolve(false);
+        }
+        iconPacks.installing = true;
+        iconPacks.error = "";
+        notify("iconPacks");
+        let timer;
+        const timeout = new Promise((_, reject) => {
+            timer = later(() => reject(new Error(tr("Icon pack download timed out."))), ICONPACKS_TIMEOUT_MS, false);
+        });
+        return Promise.race([
+            Promise.resolve().then(() => global.fetch(url, {method:"GET", headers:{Accept:"application/json, text/plain, */*"}})).then(res => {
+                if (!res || !res.ok) throw new Error(tr("Couldn't download icon pack (HTTP {status}).", {status:res && res.status || "error"}));
+                return res.text();
+            }),
+            timeout
+        ]).then(text => {
+            if (timer !== undefined && typeof global.clearTimeout === "function") global.clearTimeout(timer);
+            if (typeof text !== "string" || !text.trim()) throw new Error(tr("The link returned an empty file."));
+            if (text.length > ICONPACKS_MAX_BYTES) throw new Error(tr("That icon pack file is too large."));
+            let json;
+            try { json = JSON.parse(text); } catch (_) { throw new Error(tr("That link didn't return valid JSON.")); }
+            const spec = sanitizeCustomIconPack(Object.assign({url}, json));
+            if (!spec) throw new Error(tr("That JSON file has no icon pack load URL."));
+            iconPacks.loaded = true;
+            const idx = iconPacks.custom.findIndex(p => p.id === spec.id || p.load === spec.load);
+            if (idx >= 0) iconPacks.custom[idx] = spec;
+            else {
+                if (iconPacks.custom.length >= ICONPACKS_MAX_CUSTOM) iconPacks.custom.pop();
+                iconPacks.custom.unshift(spec);
+            }
+            iconPacks.active = spec.id;
+            iconPacks.installing = false;
+            iconPacks.error = "";
+            iconPacksPersist();
+            iconPacks.appliedKey = "";
+            iconPacksApply();
+            reviewToast(reviewUI(), tr("Applied {name}", {name:spec.name}), venusIcon(4792, "CircleCheckIcon"));
+            if (typeof onDone === "function") onDone();
+            return true;
+        }).catch(err => {
+            if (timer !== undefined && typeof global.clearTimeout === "function") global.clearTimeout(timer);
+            iconPacks.installing = false;
+            iconPacks.error = String(err && err.message || err);
+            notify("iconPacks");
+            return false;
+        });
+    }
+    function iconPacksUse(id) {
+        if (!enabled("iconPacks") || iconPacks.installing) return;
+        const norm = id ? normalizeIconPackId(id) : "";
+        if (iconPacks.active === norm) return;
+        haptic("SELECTION"); animateLayout();
+        iconPacks.loaded = true;
+        iconPacks.active = norm;
+        iconPacks.error = "";
+        const pack = iconPackById(norm);
+        if (pack && !pack.custom && !iconPacks.trees.has(pack.id)) iconPacksFetchTree(pack);
+        iconPacksPersist();
+        iconPacks.appliedKey = "";
+        iconPacksApply();
+    }
+    function iconPacksRemoveCustom(id) {
+        iconPacks.loaded = true;
+        const idx = iconPacks.custom.findIndex(p => p.id === id);
+        if (idx < 0) return;
+        const removed = iconPacks.custom[idx];
+        iconPacks.custom.splice(idx, 1);
+        iconPacks.trees.delete(id);
+        if (iconPacks.active === id) iconPacks.active = "";
+        iconPacksPersist();
+        iconPacks.appliedKey = "";
+        iconPacksApply();
+        reviewToast(reviewUI(), tr("Removed {name}", {name:removed.name}), venusIcon(4847, "TrashIcon"));
+    }
+    function iconPacksClearCustom() {
+        iconPacks.loaded = true;
+        iconPacks.custom.forEach(p => iconPacks.trees.delete(p.id));
+        iconPacks.custom = [];
+        if (iconPacks.active && !BUILTIN_ICONPACKS.some(p => p.id === iconPacks.active)) iconPacks.active = "";
+        iconPacks.error = "";
+        iconPacksPersist();
+        iconPacks.appliedKey = "";
+        iconPacksApply();
+        reviewToast(reviewUI(), "Custom icon packs cleared", venusIcon(4847, "TrashIcon"));
+    }
+    // Six icons that exist in every built-in pack and represent Discord's core surfaces: Chat, Notifications, Friends,
+    // Reactions, Settings and Voice. Each tile in the gallery renders these 6 icons directly from that pack's URLs.
+    const ICONPACK_SHOWCASE = [
+        [5855, "ChatIcon"],
+        [9266, "BellIcon"],
+        [4831, "FriendsIcon"],
+        [8411, "ReactionIcon"],
+        [6883, "SettingsIcon"],
+        [9689, "MicrophoneIcon"]
+    ];
+    // The pack's own image for a design-system icon, or "" when its file list says it has none (then Discord's stays).
+    function iconPackSampleUri(pack, iconName) {
+        if (!pack) return "";
+        const rel = withPackSuffix(ICONPACK_REDESIGN_DIR + "/" + iconName + ".png", pack.suffix || ""), tree = iconPacks.trees.get(pack.id);
+        return tree && tree.size && !tree.has(rel) ? "" : pack.load + rel;
+    }
+    // One icon as it looks with this pack: the pack's image in the given color, or Discord's own icon when the pack
+    // doesn't have it or the image fails to load, so a preview never shows an empty box.
+    function PackIcon(props) {
+        const [failed, setFailed] = React.useState(""), uri = props.pack ? iconPackSampleUri(props.pack, props.name) : "", px = props.px || 22;
+        if (uri && uri !== failed && RN.Image) return el(RN.Image, {source:{uri, width:px, height:px}, fadeDuration:0, resizeMode:"contain",
+            style:{width:px, height:px, tintColor:props.color || undefined}, onError:() => setFailed(uri)});
+        const icon = el(venusIcon(props.id, props.name), {size:px >= 22 ? "sm" : "xs", color:props.color});
+        const ctx = iconPacksOriginalContext();
+        return ctx ? el(ctx.Provider, {value:true}, icon) : icon;
+    }
+    // A mini icon showcase inside each gallery tile: 6 icons in a 3x2 grid on a soft themed surface.
+    function iconPackMiniGrid(pack, k, tintColor) {
+        return el(RN.View, {style:{height:84, borderRadius:12, backgroundColor:k.segTrack.backgroundColor, paddingHorizontal:12, paddingVertical:10,
+            flexDirection:"row", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", rowGap:10}},
+            ICONPACK_SHOWCASE.map(([modId, iconName]) => el(RN.View, {key:iconName, style:{width:"30%", alignItems:"center", justifyContent:"center"}},
+                el(PackIcon, {pack, id:modId, name:iconName, color:tintColor}))));
+    }
+    // Live preview at the top of the Icon packs page: shows a channel header, a message with quick actions, a message bar
+    // and Discord's bottom tab bar, all using the active icon pack and updating immediately when you tap any pack below.
+    function IconPacksPreview(props) {
+        useSettings("iconPacks");
+        if (features.customThemes) useSettings("customThemes");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on, active = props.active;
+        const packLabel = active ? active.name : tr("Discord's icons");
+        // Drawn from the active pack directly, so the preview changes the moment you tap a pack (Discord's own icons only
+        // switch once the pack's file list has loaded) and falls back to Discord's icon for one the pack lacks.
+        const pack = on ? active : null;
+        const TabIcon = (modId, name, selected) => el(RN.View, {key:name, style:{flex:1, alignItems:"center", justifyContent:"center", paddingVertical:8, gap:3}},
+            el(PackIcon, {pack, id:modId, name, color:selected ? s.name.color : k.iconMuted.color}),
+            el(RN.View, {style:{width:selected ? 16 : 0, height:3, borderRadius:1.5, backgroundColor:k.brandFg.color}}));
+        const body = el(RN.View, {key:"body", style:{paddingVertical:2}},
+            previewMessage(s, "msg", "Sam", "#5865f2", tr("Today at 4:01 PM"),
+                el(RN.View, {style:{gap:6}},
+                    el(RN.Text, {style:s.text}, tr("Switched to {pack} — every icon updates at once!", {pack:packLabel})),
+                    el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, marginTop:2}},
+                        [[8411, "ReactionIcon", "3"], [11366, "ArrowAngleLeftUpIcon", tr("Reply")], [4843, "CopyIcon", tr("Copy Text")], [9943, "StarIcon", ""]].map(([id, name, label]) =>
+                            el(RN.View, {key:name, style:[k.headerPill, {flexDirection:"row", width:undefined, height:28, paddingHorizontal:9, gap:5}]},
+                                el(PackIcon, {pack, id, name, px:16, color:k.icon.color}),
+                                label ? el(RN.Text, {style:[s.muted, {fontSize:12, fontWeight:"600"}]}, label) : null))))));
+        const tabs = el(RN.View, {key:"tabs", style:[k.strip, {flexDirection:"row", alignItems:"center", paddingHorizontal:8}]},
+            TabIcon(5855, "ChatIcon", true),
+            TabIcon(4831, "FriendsIcon", false),
+            TabIcon(9266, "BellIcon", false),
+            TabIcon(6883, "SettingsIcon", false));
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Icon packs preview", [body], {
+                header:previewHeader(k, {title:"design", icons:[[10692, "PinIcon"], [9266, "BellIcon"], [6548, "MagnifyingGlassIcon"]]}),
+                footer:el(RN.View, {key:"foot"},
+                    previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#design"})}),
+                    tabs,
+                    !on ? null : previewCaption(s, active ? tr("{name} is active across Discord.", {name:active.name}) : tr("Tap any icon pack below to try it live.")))
+            }));
+    }
+    function IconPacksSettings() {
+        useSettings("iconPacks");
+        if (features.customThemes) useSettings("customThemes");
+        const [urlDraft, setUrlDraft] = React.useState("");
+        const ui = reviewUI();
+        React.useEffect(() => {
+            if (enabled("iconPacks")) iconPacksRestore();
+        }, []);
+        if (!React || !RN) return null;
+        const s = useThemeTileStyles(), k = usePreviewChrome();
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Text = inspectedExport(4886, "Text"), Press = RN.Pressable || RN.View, Check = venusIcon(6628, "CheckmarkSmallIcon");
+        const on = enabled("iconPacks"), busy = iconPacks.installing;
+        const canInstall = on && !busy && /^https?:\/\/\S+/i.test(urlDraft.trim());
+        const onInstall = () => {
+            if (!canInstall) return;
+            iconPacksInstallFromUrl(urlDraft, () => setUrlDraft(""));
+        };
+        const onPaste = () => {
+            if (!on || busy) return;
+            const clip = ui.clipboard || RN.Clipboard;
+            if (!clip || typeof clip.getString !== "function") return;
+            Promise.resolve().then(() => clip.getString()).then(str => {
+                if (typeof str === "string" && str.trim()) setUrlDraft(str.trim());
+            }).catch(() => {});
+        };
+        const empty = !urlDraft.trim();
+        const urlInput = inputWithButton(ui, "input", {
+            label:tr("Icon pack link"),
+            value:urlDraft,
+            autoCapitalize:"none",
+            autoCorrect:false,
+            keyboardType:"url",
+            placeholder:tr("https://.../pack/ or config.json"),
+            onSubmitEditing:onInstall,
+            returnKeyType:"go",
+            editable:on && !busy,
+            isDisabled:!on || busy
+        }, text => setUrlDraft(String(text || "")), busy ? "Installing…" : empty ? "Paste" : "Install", empty ? onPaste : onInstall, empty ? !on || busy : !canInstall);
+        const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1, numberOfLines:1}, value) :
+            el(RN.Text, {style:fallback, numberOfLines:1}, value);
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
+        const active = iconPacksActiveEntry();
+        const activeTheme = features.customThemes && enabled("customThemes") ? customThemesActiveEntry() : null;
+        const themePack = activeTheme && activeTheme.plus && activeTheme.plus.iconpack ? iconPackById(activeTheme.plus.iconpack) : null;
+        const followingTheme = !!(on && settings.iconPacksTheme && themePack);
+        const makeTile = opts => el(Press, {
+            key:opts.key,
+            style:[s.tile, opts.selected ? s.on : null, {opacity:opts.disabled ? 0.5 : 1}],
+            accessibilityRole:"radio",
+            accessibilityLabel:opts.name,
+            accessibilityHint:opts.sub || undefined,
+            accessibilityState:{selected:!!opts.selected, disabled:!!opts.disabled},
+            disabled:!!opts.disabled,
+            onPress:opts.onPress,
+            onLongPress:opts.onLongPress,
+            delayLongPress:400
+        },
+        iconPackMiniGrid(opts.pack, k, k.icon.color),
+        opts.selected ? el(RN.View, {style:s.check, pointerEvents:"none"}, popIn("check:" + opts.key, el(Check, {size:"xs", color:"#ffffff"}))) : null,
+        el(RN.View, {style:{paddingHorizontal:8, paddingTop:8, paddingBottom:6, gap:1}},
+            line(opts.name, "text-sm/semibold", "text-strong", {color:"#f2f3f5", fontSize:14, fontWeight:"600"}),
+            opts.sub ? line(opts.sub, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}) : null));
+        const tiles = [makeTile({
+            key:"discord",
+            pack:null,
+            name:tr("Discord's icons"),
+            sub:on && !active ? tr("In use") : tr("Default"),
+            selected:on && !active,
+            disabled:!on || busy,
+            onPress:() => { if (followingTheme) setSetting("iconPacksTheme", false); iconPacksUse(""); }
+        })];
+        iconPackCatalog().forEach(pack => {
+            if (!pack) return;
+            const selected = !!(on && active && active.id === pack.id);
+            const isLoading = iconPacks.loadingTrees.has(pack.id);
+            const sub = selected ? (isLoading ? tr("Loading icons…") : followingTheme && themePack && themePack.id === pack.id ? tr("From theme") : tr("In use")) :
+                pack.authors ? tr("by {author}", {author:pack.authors}) : pack.description || "";
+            tiles.push(makeTile({
+                key:"pack:" + pack.id,
+                pack,
+                name:pack.name,
+                sub,
+                selected,
+                disabled:!on || busy,
+                onPress:() => { if (followingTheme && themePack && themePack.id !== pack.id) setSetting("iconPacksTheme", false); iconPacksUse(pack.id); },
+                onLongPress:pack.custom ? () => confirmAction("Remove icon pack?", tr("Remove {name} from this phone?", {name:pack.name}), "Remove", () => iconPacksRemoveCustom(pack.id)) : undefined
+            }));
+        });
+        const gallery = el(RN.View, {key:"packs", style:{gap:8}},
+            groupTitle("title", "Icon packs"),
+            el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", justifyContent:"space-between", rowGap:12}, accessibilityRole:"radiogroup"}, tiles));
+        const problem = on && iconPacks.error ? el(RN.View, {key:"error", style:{paddingHorizontal:12, paddingBottom:12, gap:2}, accessibilityLiveRegion:"polite"},
+            text(tr("Couldn't install the icon pack"), "text-sm/semibold", "text-feedback-critical", {color:"#f23f43", fontSize:14, fontWeight:"600"}),
+            text(iconPacks.error, "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12})) : null;
+        // A built-in pack whose file list couldn't be downloaded keeps Discord's icons; say why and offer to try again,
+        // instead of the pack looking picked but doing nothing.
+        const stuck = on && active && !active.custom && !iconPacks.trees.has(active.id) && !iconPacks.loadingTrees.has(active.id) &&
+            (iconPacks.treeTries.get(active.id) || 0) > 0;
+        const RetryButton = stuck ? inspectedExport(5594, "Button") : null;
+        const retry = () => { haptic("SELECTION"); iconPacks.treeTries.delete(active.id); iconPacksFetchTree(active); notify("iconPacks"); };
+        const groups = [
+            on ? null : offCard("status", venusIcon(9640, "ImageSparkleIcon"), "iconPacks"),
+            stuck ? statusCard("status", "Can't reach the internet right now. Try again in a moment.", {title:active.name, IconComponent:venusIcon(9640, "ImageSparkleIcon"),
+                trailing:RetryButton ? el(RetryButton, {text:tr("Retry"), size:"sm", variant:"secondary", onPress:retry}) : null}) : null,
+            el(IconPacksPreview, {key:"preview", on, active}),
+            gallery,
+            // Its only row needs Custom themes; without it the group was an empty "Display" title.
+            features.customThemes ? el(Group, {key:"display", title:tr("Display")},
+                switchRow(Switch, "iconPacksTheme", "Follow theme's icon pack", "Uses the icon pack recommended by your active custom theme, when it sets one.", rowIcon(15172, "EyeDropperIcon"))) : null,
+            el(Group, {key:"install", title:tr("Add from link"), description:tr("Paste a custom icon pack folder URL or config.json link.")},
+                el(RN.View, {key:"input", style:{padding:12}}, urlInput), problem),
+            iconPacks.custom.length ? el(Group, {key:"manage", title:tr("Manage")},
+                actionRow(ui, "clear", "Clear custom icon packs",
+                    pl(iconPacks.custom.length, "Removes {n} custom icon pack from this phone.", "Removes {n} custom icon packs from this phone."),
+                    () => confirmAction("Clear custom icon packs?", "Every custom icon pack you added will be removed from this phone.", "Clear", iconPacksClearCustom),
+                    !on, true)) : null,
+            footnote("note", iconPacks.custom.length ? "Hold a custom icon pack to remove it. Icons change right away, with no restart." : "Icons change across Discord right away, with no restart.")
+        ];
+        return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
+    }
     // Message highlights settings: a live chat preview, the bar width as a segmented choice, and a row of color
     // swatches per highlight, with Discord's own color picker (showCustomColorPickerActionSheet 14421) for any color.
     const HIGHLIGHT_PING_CHOICES = [["default", "Yellow", "#f0b232"], ["blurple", "Blurple", "#5865f2"], ["cyan", "Cyan", "#00a8fc"],
@@ -8602,15 +9982,22 @@
                     }); } catch (_) {}
                 }
                 return exports;
+            case 81:
+                if (!features.iconPacks) return exports;
+                if (exports && typeof exports.default === "function") iconPacks.resolveOriginal = exports.default;
+                return hookExport(exports, "default", resolveAssetSourceHook);
+            case 84: return features.iconPacks ? hookAssetRegistryModule(exports) : exports;
+            case 328: return features.iconPacks ? hookImageModule(exports) : exports;
+            case 4579: return features.iconPacks ? hookExport(exports, "BaseIconImage", baseIconImageHook) : exports;
             case 8828: return features.appIcons ? hookAppIconConstants(exports) : exports;
             case 17455: return features.appIcons ? hookAppIconPremiumManager(exports) : exports;
             case 15351: case 15352: case 17106: return features.appIcons ? hookComponent(exports, appIconsScreen) : exports;
             case 589: return features.customThemes ? hookSemanticColorsModule(exports) : exports;
             case 591: return features.customThemes ? hookRawColorsModule(exports) : exports;
             case 590: return features.customThemes ? hookExperimentColorsModule(exports) : exports;
-            case 9758: return features.customThemes ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
-            case 1193: if (features.customThemes && exports && exports.default) customThemes.themeStore = exports.default; return exports;
-            case 4593: return features.customThemes ? hookCreateThemedContext(exports) : exports;
+            case 9758: return (features.customThemes || features.iconPacks) ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
+            case 1193: if ((features.customThemes || features.iconPacks) && exports && exports.default) customThemes.themeStore = exports.default; return exports;
+            case 4593: return (features.customThemes || features.iconPacks) ? hookCreateThemedContext(exports) : exports;
             case 9769: return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
             case 12056: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
             case 12058: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
@@ -8669,6 +10056,7 @@
                 return hookExport(hookExport(exports, "default", plain), "StatusWithTyping", plain);
             }
             case 16232: return features.readAll ? hookExport(exports, "default", readAllBarProps) : exports;
+            case 16226: return features.serverInfo ? hookExport(exports, "default", serverInfoMenu) : exports;
             case 8716: if (features.reviewDB) oauthModal = exports.default; return exports;
             case 6074: if (features.reviewDB) nativeRowGroup = exports.TableRowGroup; return exports;
             case 6698: if (features.reviewDB) nativeSwitchRow = exports.TableSwitchRow; return exports;
@@ -8709,7 +10097,7 @@
             case 5708: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5112: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1377:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
@@ -8836,6 +10224,8 @@
         }
     }
 
+    const INSTRUMENT_HOOK_KEYS = ["getAttachmentPayload", "post"];
+    const INSTRUMENT_SUB_KEYS = ["default", "HTTP"];
     function instrument(exports, depth) {
         if (!exports || (typeof exports !== "object" && typeof exports !== "function")) return exports;
         if (owns(exports, "createElement") && owns(exports, "useState")) React = exports;
@@ -8843,11 +10233,25 @@
         if (typeof data(exports, "getSize") === "function" && typeof data(exports, "readFile") === "function" &&
             typeof data(exports, "writeFile") === "function") initFiles(exports);
         if (features.voice && owns(exports, "CloudUpload")) instrumentCloudUpload(exports.CloudUpload);
-        const changes = new Map();
-        let proxy = exports;
         if (features.picker) {
             const patched = pickerComponent(exports);
             if (patched !== exports) return patched;
+        }
+        let changes = null;
+        let proxy = exports;
+        // Preserve module identity and cached aliases wherever descriptors allow it,
+        // only allocating a Map for non-configurable/accessor exports that require a Proxy.
+        function applyOrDefer(key, patched) {
+            const descriptor = Object.getOwnPropertyDescriptor(exports, key);
+            if (descriptor && descriptor.configurable) {
+                Object.defineProperty(exports, key, { value: patched, writable: true,
+                    configurable: true, enumerable: descriptor.enumerable });
+            } else if (descriptor && "value" in descriptor && descriptor.writable) {
+                exports[key] = patched;
+            } else if (!descriptor || descriptor.configurable || !("value" in descriptor) || descriptor.writable) {
+                if (!changes) changes = new Map();
+                changes.set(key, patched);
+            }
         }
         // Invocation-scoped captures also work when Hermes eval disables block scoping.
         // The binding check fails fast at hook time (caught as "Hook unavailable",
@@ -8858,51 +10262,37 @@
             return function () { return operation(orig, this === proxy ? exports : this, arguments); };
         }
         // Only read explicitly identified export keys, never enumerate or invoke unrelated getters.
-        for (const key of ["getAttachmentPayload", "post"]) {
-            if (!owns(exports, key)) continue;
-            if (key === "getAttachmentPayload" && !features.voice) continue;
-            if (key === "post" && (!features.voice || !owns(exports, "get") || !owns(exports, "put"))) continue;
-            let orig;
-            try { orig = exports[key]; } catch (_) { continue; }
-            if (typeof orig !== "function") continue;
-            const operation = key === "post" ? postRequest : attachmentPayload;
-            const patched = replacementFor(operation, orig);
-            changes.set(key, patched);
-            if (key === "post") status.request = true;
-            if (key === "getAttachmentPayload") status.attachment = true;
-        }
-        if (depth < 2) for (const key of ["default", "HTTP"]) {
-            // Data exports only: default getters can be cyclic during module initialization.
-            const candidate = data(exports, key);
-            if (!candidate || candidate === exports) continue;
-            const patched = instrument(candidate, depth + 1);
-            if (patched !== candidate) changes.set(key, patched);
-        }
-        if (!changes.size) return exports;
-        // Preserve module identity and cached aliases wherever descriptors allow it.
-        for (const [key, patched] of Array.from(changes)) {
-            const descriptor = Object.getOwnPropertyDescriptor(exports, key);
-            if (descriptor && descriptor.configurable) {
-                Object.defineProperty(exports, key, { value: patched, writable: true,
-                    configurable: true, enumerable: descriptor.enumerable });
-                changes.delete(key);
-            } else if (descriptor && "value" in descriptor && descriptor.writable) {
-                exports[key] = patched;
-                changes.delete(key);
+        if (features.voice) {
+            for (let i = 0; i < INSTRUMENT_HOOK_KEYS.length; i++) {
+                const key = INSTRUMENT_HOOK_KEYS[i];
+                if (!owns(exports, key)) continue;
+                if (key === "post" && (!owns(exports, "get") || !owns(exports, "put"))) continue;
+                let orig;
+                try { orig = exports[key]; } catch (_) { continue; }
+                if (typeof orig !== "function") continue;
+                const operation = key === "post" ? postRequest : attachmentPayload;
+                const patched = replacementFor(operation, orig);
+                applyOrDefer(key, patched);
+                if (key === "post") status.request = true;
+                else status.attachment = true;
             }
         }
-        if (!changes.size) return exports;
-        // Only immutable accessor exports need a proxy; never inspect them during RN initialization.
-        // Do not violate Proxy invariants on non-writable, non-configurable data properties.
-        for (const key of Array.from(changes.keys())) {
-            const descriptor = Object.getOwnPropertyDescriptor(exports, key);
-            if (descriptor && !descriptor.configurable && "value" in descriptor && !descriptor.writable)
-                changes.delete(key);
+        if (depth < 2) {
+            for (let i = 0; i < INSTRUMENT_SUB_KEYS.length; i++) {
+                // Data exports only: default getters can be cyclic during module initialization.
+                const key = INSTRUMENT_SUB_KEYS[i];
+                const candidate = data(exports, key);
+                if (!candidate || candidate === exports) continue;
+                const patched = instrument(candidate, depth + 1);
+                if (patched !== candidate) applyOrDefer(key, patched);
+            }
         }
+        if (!changes || !changes.size) return exports;
+        // Only immutable accessor exports need a proxy; never inspect them during RN initialization.
         proxy = new Proxy(exports, { get(target, key, self) {
             return changes.has(key) ? changes.get(key) : Reflect.get(target, key, self);
         } });
-        return changes.size ? proxy : exports;
+        return proxy;
     }
     const INSTRUMENTED_MODULES = new Set([17, 19, 414, 1162, 1282, 7268, 7243]);
     function activateModule(id, module) {
@@ -8924,9 +10314,10 @@
     function decorateDefine(define) {
         if (typeof define !== "function") return define;
         return function (factory, id, dependencies) {
-            // Runs for all ~17.7k modules at startup: no arguments copy for the ones Venus leaves alone.
+            // Runs for all ~17.7k modules at startup: call define(factory, id, dependencies) directly
+            // without checking arguments.length or going through Function.prototype.call (tests/bench/define_wrapper.js).
             if (targetModules[id] !== 1 || typeof factory !== "function")
-                return arguments.length === 3 ? define.call(this, factory, id, dependencies) : define.apply(this, arguments);
+                return define(factory, id, dependencies);
             const wrappedFactory = function () {
                 let result;
                 if (features.hiddenChannels && id === 7039) {
@@ -8963,7 +10354,7 @@
                 }
                 return result;
             };
-            if (arguments.length === 3) return define.call(this, wrappedFactory, id, dependencies);
+            if (arguments.length === 3) return define(wrappedFactory, id, dependencies);
             const args = Array.from(arguments);
             args[0] = wrappedFactory;
             return define.apply(this, args);

@@ -13,9 +13,9 @@ for (let i = 0; i < tokens.length - 1; i++) {
     if (prev && prev.type === 'punct' && (prev.value === '.' || prev.value === '?.')) continue;
     if (prev && prev.type === 'ident' && prev.value === 'function') continue;
     const name = t.value;
-    if (name !== 'pl' && name !== 'take' && name !== 'count') continue;
+    if (name !== 'pl' && name !== 'take' && name !== 'count' && name !== 'serverCount') continue;
     const {args} = splitArgs(tokens, i + 1);
-    if ((name === 'pl' || name === 'take') && args[1]?.length === 1 && args[1][0].type === 'str' && args[2]?.length === 1 && args[2][0].type === 'str') {
+    if ((name === 'pl' || name === 'take' || name === 'serverCount') && args[1]?.length === 1 && args[1][0].type === 'str' && args[2]?.length === 1 && args[2][0].type === 'str') {
         pairs[args[2][0].value] = args[1][0].value;
     }
     if (name === 'count' && args[1]?.length === 1 && args[1][0].type === 'str') {
