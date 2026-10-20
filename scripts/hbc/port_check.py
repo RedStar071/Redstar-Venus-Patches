@@ -116,6 +116,7 @@ BOOTSTRAP_MODULES = [
     (6071, 'design/components/TableRow/native/TableRadioRow.native.tsx', ['TableRadioRow'], 'TableRadioRow'),
     (6072, 'design/components/TableRow/native/TableRadioGroup.native.tsx', ['TableRadioGroupContext', 'TableRadioGroup'], 'TableRadioGroup'),
     (6074, 'design/components/TableRow/native/TableRowGroup.native.tsx', ['TableRowGroupTitle', 'TableRowGroup'], 'TableRowGroup'),
+    (6112, None, ['BottomSheetScrollView', 'BottomSheetFlatList', 'BottomSheetModal'], '@gorhom/bottom-sheet (Server info sheet scrolling)'),
     (6098, 'design/components/TextInput/native/TextInput.native.tsx', ['TextInput'], 'TextInput'),
     (6446, 'design/components/Icon/native/redesign/generated/KeyIcon.tsx', ['KeyIcon'], 'KeyIcon'),
     (6448, 'design/components/Icon/native/redesign/generated/MobilePhoneIcon.tsx', ['MobilePhoneIcon'], 'MobilePhoneIcon'),

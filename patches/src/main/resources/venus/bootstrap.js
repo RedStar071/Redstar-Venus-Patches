@@ -5811,7 +5811,12 @@
                 detail("id", "Server ID", snap.id, 10358, "IdIcon", () => serverCopy(snap.id, "Server ID copied"))),
             footnote("note", "Tap the invite link or the server ID to copy it.")];
         const content = el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:20}}, body.filter(Boolean));
-        return el(ui.ActionSheet || RN.View, {header}, RN.ScrollView ? el(RN.ScrollView, null, content) : content);
+        // Discord's own long sheets (channel picker, forum tags) pass scrollable and scroll with the sheet's
+        // BottomSheetScrollView (6112). A plain RN ScrollView fought the sheet's drag: swiping up either scrolled the
+        // page or dragged the sheet, and the sheet couldn't be pulled down from the middle of the page.
+        const Scroll = inspectedExport(6112, "BottomSheetScrollView");
+        return Scroll ? el(ui.ActionSheet || RN.View, {header, scrollable:true}, el(Scroll, null, content)) :
+            el(ui.ActionSheet || RN.View, {header}, RN.ScrollView ? el(RN.ScrollView, null, content) : content);
     }
     function openServerInfo(guildId) {
         if (!enabled("serverInfo") || !React || !RN || typeof guildId !== "string") return;
