@@ -9108,7 +9108,7 @@
         XSmallIcon:["CloseSmallIcon", "@ic_close_16px", "@ic_close"]
     };
     const iconPacks = {
-        registry:null, assets:null, table:null, hasActive:false, appliedKey:"",
+        registry:null, table:null, ctx:null, hasActive:false, appliedKey:"",
         active:"", custom:[], trees:new Map(), loadingTrees:new Set(),
         loaded:false, loading:false, installing:false, error:""
     };
@@ -9194,35 +9194,35 @@
         const dot = path.lastIndexOf(".");
         return dot > 0 ? path.slice(0, dot) + suffix + path.slice(dot) : path + suffix;
     }
-    // Scan AssetRegistry (84) once and index all non-jsona image assets by their numeric assetId.
-    function iconPacksScanAssets() {
-        if (iconPacks.assets) return iconPacks.assets;
+    // Discord registers an asset only when its module first loads (none at launch, ~1.4k images once every screen has
+    // been opened), so a one-time scan of AssetRegistry (84) caught a partial list or nothing and most icons never
+    // changed. Each asset ID is resolved the first time it's drawn instead, then cached in iconPacks.table.
+    const ICONPACK_MISS = Object.freeze({source:null, tint:"", noTint:false});
+    function iconPacksAsset(id) {
         const reg = iconPacks.registry || (iconPacks.registry = global.__r && global.__r(84));
-        if (!reg || typeof reg.getAssetByID !== "function") return null;
-        const list = [];
-        let misses = 0;
-        for (let id = 1; id < 8192; id++) {
-            const a = reg.getAssetByID(id);
-            if (!a) { if (++misses > 32) break; continue; }
-            misses = 0;
-            if (a.type !== "png" && a.type !== "jpg" && a.type !== "webp" && a.type !== "gif") continue;
-            const loc = typeof a.httpServerLocation === "string" ? a.httpServerLocation : "";
-            const rel = loc.split("/").slice(2).join("/").replace(/^\.\.\//, "_/");
-            const name = typeof a.name === "string" ? a.name : "";
-            if (!name) continue;
-            list.push({
-                id,
-                name,
-                rel,
-                type:a.type,
-                width:a.width || 24,
-                height:a.height || 24,
-                candidates:iconPackCandidates(name, rel, a.type),
-                secondaryOf:rel === ICONPACK_REDESIGN_DIR && name.endsWith("-secondary") ? name.slice(0, -10) : ""
-            });
-        }
-        if (list.length) iconPacks.assets = list;
-        return list.length ? list : null;
+        let a = null;
+        try { a = reg && typeof reg.getAssetByID === "function" ? reg.getAssetByID(id) : null; } catch (_) {}
+        if (!a || a.type !== "png" && a.type !== "jpg" && a.type !== "webp" && a.type !== "gif") return null;
+        const name = typeof a.name === "string" ? a.name : "";
+        if (!name) return null;
+        const loc = typeof a.httpServerLocation === "string" ? a.httpServerLocation : "";
+        const rel = loc.split("/").slice(2).join("/").replace(/^\.\.\//, "_/");
+        return {id, name, rel, type:a.type, width:a.width || 24, height:a.height || 24, candidates:iconPackCandidates(name, rel, a.type),
+            secondaryOf:rel === ICONPACK_REDESIGN_DIR && name.endsWith("-secondary") ? name.slice(0, -10) : ""};
+    }
+    function iconPacksResolveEntry(id) {
+        const ctx = iconPacks.ctx, a = ctx ? iconPacksAsset(id) : null;
+        if (!a) return ICONPACK_MISS;
+        const uri = ctx.pack ? iconPacksResolveAssetUri(a, ctx.pack, ctx.tree) : "";
+        const tint = iconPacksResolvePlusTint(a.name, ctx.plusIcons);
+        if (!uri && !tint) return ICONPACK_MISS;
+        return Object.freeze({source:uri ? Object.freeze({__venusIcon:true, uri, width:a.width, height:a.height}) : null, tint, noTint:!ctx.allowTint && !!uri});
+    }
+    // O(1) after the first draw of each icon: one array read per render.
+    function iconPacksEntry(id) {
+        if (typeof id !== "number") return ICONPACK_MISS;
+        const table = iconPacks.table, hit = table[id];
+        return hit !== undefined ? hit : table[id] = iconPacksResolveEntry(id);
     }
     function iconPacksFetchTree(pack) {
         if (!pack || pack.custom || iconPacks.trees.has(pack.id) || iconPacks.loadingTrees.has(pack.id) || typeof global.fetch !== "function") return;
@@ -9283,25 +9283,13 @@
         const p = parseThemeColor(arr[0]);
         return p ? formatThemeColor(p) : "";
     }
-    // Compiles the O(1) assetId -> {source, tint, noTint} table whenever the active icon pack, tint toggle or theme changes.
-    function iconPacksCompileTable(pack, plusIcons, allowTint) {
-        const assets = iconPacksScanAssets();
-        if (!assets) return null;
-        const tree = pack ? iconPacks.trees.get(pack.id) : null;
+    // What every icon is resolved against; a new pack, tint choice or theme starts a fresh cache.
+    function iconPacksSetContext(pack, plusIcons, allowTint) {
+        const tree = pack ? iconPacks.trees.get(pack.id) || null : null;
         if (pack && !tree && !pack.custom) iconPacksFetchTree(pack);
-        const table = [];
-        let count = 0;
-        for (let i = 0; i < assets.length; i++) {
-            const a = assets[i];
-            const uri = pack ? iconPacksResolveAssetUri(a, pack, tree) : "";
-            const tint = iconPacksResolvePlusTint(a.name, plusIcons);
-            if (!uri && !tint && allowTint) continue;
-            const src = uri ? Object.freeze({__venusIcon:true, uri, width:a.width, height:a.height}) : null;
-            table[a.id] = Object.freeze({source:src, tint, noTint:!allowTint && !!uri});
-            count++;
-        }
-        iconPacks.hasActive = count > 0;
-        return count > 0 ? table : null;
+        iconPacks.ctx = {pack, tree, plusIcons, allowTint};
+        iconPacks.table = [];
+        iconPacks.hasActive = true;
     }
     function iconPacksBumpThemeRevision() {
         customThemes.revision++;
@@ -9321,11 +9309,10 @@
         if (nextKey === iconPacks.appliedKey) return;
         iconPacks.appliedKey = nextKey;
         if (!on || (!pack && !plusIcons)) {
+            iconPacks.ctx = null;
             iconPacks.table = null;
             iconPacks.hasActive = false;
-        } else {
-            iconPacks.table = iconPacksCompileTable(pack, plusIcons, allowTint);
-        }
+        } else iconPacksSetContext(pack, plusIcons, allowTint);
         iconPacksBumpThemeRevision();
         notify("iconPacks");
     }
@@ -9335,9 +9322,8 @@
         if (!iconPacks.hasActive) return orig.apply(self, args);
         const props = args[0];
         if (!props) return orig.apply(self, args);
-        const srcId = props.source;
-        const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
-        if (!entry) return orig.apply(self, args);
+        const entry = iconPacksEntry(props.source);
+        if (entry === ICONPACK_MISS) return orig.apply(self, args);
         const next = Object.assign({}, props);
         if (entry.source) next.source = entry.source;
         if (entry.noTint) next.color = null;
@@ -9346,9 +9332,8 @@
     }
     baseIconImageHook.call1 = (orig, self, props) => {
         if (!iconPacks.hasActive || !props) return orig.call(self, props);
-        const srcId = props.source;
-        const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
-        if (!entry) return orig.call(self, props);
+        const entry = iconPacksEntry(props.source);
+        if (entry === ICONPACK_MISS) return orig.call(self, props);
         const next = Object.assign({}, props);
         if (entry.source) next.source = entry.source;
         if (entry.noTint) next.color = null;
@@ -9358,16 +9343,15 @@
     // Direct <RN.Image source={assetId} /> and resolveAssetSource(assetId) callers (legacy ic_* icons, illustrations, status icons).
     function resolveAssetSourceHook(orig, self, args) {
         if (iconPacks.hasActive) {
-            const srcId = args[0];
-            const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
-            if (entry && entry.source) return entry.source;
+            const entry = iconPacksEntry(args[0]);
+            if (entry.source) return entry.source;
         }
         return orig.apply(self, args);
     }
     resolveAssetSourceHook.call1 = (orig, self, srcId) => {
-        if (iconPacks.hasActive && typeof srcId === "number") {
-            const entry = iconPacks.table[srcId];
-            if (entry && entry.source) return entry.source;
+        if (iconPacks.hasActive) {
+            const entry = iconPacksEntry(srcId);
+            if (entry.source) return entry.source;
         }
         return orig.call(self, srcId);
     };
@@ -9377,9 +9361,8 @@
             if (!iconPacks.hasActive) return orig.apply(self, args);
             const props = args[0];
             if (!props) return orig.apply(self, args);
-            const srcId = props.source;
-            const entry = typeof srcId === "number" ? iconPacks.table[srcId] : null;
-            if (!entry || !entry.source) return orig.apply(self, args);
+            const entry = iconPacksEntry(props.source);
+            if (!entry.source) return orig.apply(self, args);
             const next = Object.assign({}, props, {source:entry.source});
             if (entry.noTint && next.style) next.style = [next.style, {tintColor:undefined}];
             else if (entry.tint) next.style = next.style ? [next.style, {tintColor:entry.tint}] : {tintColor:entry.tint};
