@@ -722,6 +722,40 @@
       "options": []
     },
     {
+      "name": "Server info",
+      "description": "Hold a server's icon to see its details, boosts and friends there. Based on ServerInfo by fshin.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "349.9 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 349009,
+                "ARMEABI_V7A": 349009,
+                "X86_64": 349009,
+                "X86": 349009
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Send Nitro stickers and emojis as links",
       "description": "Sends Nitro emojis and stickers as links that show as the image.",
       "default": true,
