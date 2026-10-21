@@ -57,7 +57,7 @@
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
-        translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateNote:true, translateOriginal:false,
+        translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
@@ -72,7 +72,7 @@
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true, systemFont: false,
             hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
             validUser: false, youBarSettings: false, splitMessages: false,
-            translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateNote: true, translateOriginal: false,
+            translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
@@ -115,6 +115,9 @@
         "uz", "vi", "zh-CN", "zh-TW"];
     // When Translate messages translates: everything on screen, or only messages you pick from the hold menu.
     const TRANSLATE_MODES = ["auto", "manual"];
+    // How you ask in "Only when you ask" (#82): the bar at the top of a chat, Translate in a message's menu, or both.
+    // One choice instead of two switches, so there's always a way to translate.
+    const TRANSLATE_ASKS = ["both", "bar", "menu"];
     // Left bar thickness multiplier (1x = 2dp default, 2x = 4dp, 3x = 6dp, 4x = 8dp) and highlight color presets (#60).
     const HIGHLIGHT_THICKNESSES = [1, 2, 3, 4];
     // How strongly a highlighted row is tinted behind its text, 0 to 100 %. 50 is Discord's own tint (alpha 1a, about
@@ -297,7 +300,7 @@
     function acceptedSetting(key, value) {
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
-            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) ||
+            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) ||
             key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
@@ -322,8 +325,8 @@
             if (settings.gestureOwn === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.gestureOwn = value; dirty.add(key); save(); notify(key); return true;
         }
-        if (key === "translateTarget" || key === "translateMode" || key === "translateLanguage") {
-            if (!(key === "translateMode" ? TRANSLATE_MODES : key === "translateLanguage" ? TRANSLATE_LANGUAGES : TRANSLATE_TARGETS).includes(value)) return false;
+        if (key === "translateTarget" || key === "translateMode" || key === "translateLanguage" || key === "translateAsk") {
+            if (!(key === "translateMode" ? TRANSLATE_MODES : key === "translateLanguage" ? TRANSLATE_LANGUAGES : key === "translateAsk" ? TRANSLATE_ASKS : TRANSLATE_TARGETS).includes(value)) return false;
             if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings[key] = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
         }
@@ -7428,17 +7431,34 @@
         restored:false, restoring:false, saveTimer:undefined, saving:false,
         // Your choice for single messages from the hold menu: true translates it, false keeps the original.
         // With "Only when you ask", only messages set to true are translated.
-        choice:new Map(), asked:new Set()};
-    const TRANSLATE_CHOICES = 1000;
-    function translateWanted(id) {
+        choice:new Map(), asked:new Set(),
+        // Chats translated as a whole from the translate bar (#82), in "Only when you ask". A message's own choice still wins.
+        channels:new Set()};
+    const TRANSLATE_CHOICES = 1000, TRANSLATE_CHANNELS = 200;
+    // What a message does when you haven't chosen for it: translated, unless you only translate when you ask and its chat isn't on.
+    function translateDefault(channelId) { return settings.translateMode !== "manual" || translate.channels.has(channelId); }
+    function translateWanted(id, channelId) {
         const choice = translate.choice.get(id);
-        return settings.translateMode === "manual" ? choice === true : choice !== false;
+        return choice === undefined ? translateDefault(channelId) : choice;
+    }
+    // The translate bar: translate a whole chat, or show it as written again. Every row on screen from it is redrawn.
+    function translateChannel(channelId, on) {
+        if (!channelId || translate.channels.has(channelId) === !!on) return;
+        if (on) {
+            if (translate.channels.size >= TRANSLATE_CHANNELS) translate.channels.delete(translate.channels.values().next().value);
+            translate.channels.add(channelId);
+        } else translate.channels.delete(channelId);
+        translatePersist();
+        notify("translate");
+        const ids = new Set();
+        translate.shown.forEach((entry, id) => { if (entry.channelId === channelId) ids.add(id); });
+        translateRedraw(ids);
     }
     function translateInit(dispatcher) {
         if (translate.dispatcher || !dispatcher || typeof dispatcher.dispatch !== "function") return;
         translate.dispatcher = dispatcher;
         if (typeof dispatcher.subscribe === "function") dispatcher.subscribe("LOGOUT", () => {
-            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear();
+            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear(); translate.channels.clear();
             // Another account's messages must never be shown from this one's translations.
             if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         });
@@ -7462,6 +7482,10 @@
                 if (Array.isArray(item) && item.length === 2 && typeof item[0] === "string" && /^\d{1,20}$/.test(item[0]) && typeof item[1] === "boolean" &&
                     !translate.choice.has(item[0])) { translate.choice.set(item[0], item[1]); restored++; }
             });
+            // Chats translated from the translate bar (#82).
+            if (Array.isArray(saved.channels)) saved.channels.slice(-TRANSLATE_CHANNELS).forEach(id => {
+                if (typeof id === "string" && /^\d{1,20}$/.test(id) && !translate.channels.has(id)) { translate.channels.add(id); restored++; }
+            });
             saved.entries.slice(-TRANSLATE_SAVED).forEach(item => {
                 if (!Array.isArray(item) || item.length !== 4 || !item.every(part => typeof part === "string")) return;
                 const [target, text, translated, language] = item, key = translateKey(target, text), known = translate.cache.get(key);
@@ -7480,10 +7504,11 @@
             if (translate.saving) { translatePersist(); return; }
             const entries = [];
             translate.cache.forEach(entry => { if (entry.state === "done" && typeof entry.translated === "string") entries.push([entry.target, entry.text, entry.translated, entry.language || ""]); });
-            const choices = Array.from(translate.choice.entries());
-            let text = JSON.stringify(choices.length ? {version:1, entries:entries.slice(-TRANSLATE_SAVED), choices} : {version:1, entries:entries.slice(-TRANSLATE_SAVED)});
+            const choices = Array.from(translate.choice.entries()), channels = Array.from(translate.channels);
+            const extra = entries => Object.assign({version:1, entries}, choices.length ? {choices} : null, channels.length ? {channels} : null);
+            let text = JSON.stringify(extra(entries.slice(-TRANSLATE_SAVED)));
             // Too big to read back: keep the newest half instead.
-            if (text.length > TRANSLATE_SAVED_BYTES) text = JSON.stringify({version:1, entries:entries.slice(-Math.floor(TRANSLATE_SAVED / 2)), choices});
+            if (text.length > TRANSLATE_SAVED_BYTES) text = JSON.stringify(extra(entries.slice(-Math.floor(TRANSLATE_SAVED / 2))));
             translate.saving = true;
             Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, text, "utf8")).catch(() => {}).then(() => { translate.saving = false; });
         }, 3000, false);
@@ -7634,7 +7659,7 @@
         if (!message || !Array.isArray(message.content) || !contentSource || typeof contentSource.content !== "string" || !channelId || !id) return message;
         // Not wanted (most rows in "Only when you ask") needs no user lookup (1.44x, tests/bench/translate_row.js).
         const choice = translate.choice.get(id);
-        if (settings.translateMode === "manual" ? choice !== true : choice === false) { translateSeen(source, channelId, id, null); return message; }
+        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translate.channels.has(channelId)) { translateSeen(source, channelId, id, null); return message; }
         // Your own messages are already in a language you read, unless you ask for one from the hold menu.
         if (choice !== true) {
             const author = source && source.author && source.author.id || message.authorId, me = currentUser();
@@ -7680,7 +7705,7 @@
         // The same order as translateRow: the choice first, the current user only when it can matter.
         if (!quotedId) return message;
         const choice = translate.choice.get(quotedId);
-        if (settings.translateMode === "manual" ? choice !== true : choice === false) return message;
+        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translate.channels.has(channelId)) return message;
         if (choice !== true) { const me = currentUser(); if (me && quoted.authorId === me.id) return message; }
         const layout = translateLayout(quoted.content);
         if (!layout) return message;
@@ -7704,17 +7729,16 @@
     function translateToggle(message) {
         const id = message && message.id;
         if (!id || !enabled("translate")) return;
-        const wanted = !translateShownFor(message);
+        const wanted = !translateShownFor(message), channelId = message.channel_id || message.channelId;
         translate.choice.delete(id);
-        // Back to what the mode does anyway (and not your own message): nothing to remember.
+        // Back to what the mode (or the chat's translate bar) does anyway, and not your own message: nothing to remember.
         const mine = currentUser() && message.author && message.author.id === currentUser().id;
-        if (wanted !== (settings.translateMode !== "manual") || mine) {
+        if (wanted !== translateDefault(channelId) || mine) {
             if (translate.choice.size >= TRANSLATE_CHOICES) translate.choice.delete(translate.choice.keys().next().value);
             translate.choice.set(id, wanted);
         }
         if (wanted) translate.asked.add(id); else translate.asked.delete(id);
         translatePersist();
-        const channelId = message.channel_id || message.channelId;
         if (channelId) translateSeen(message, channelId, id, null);
         // Every row showing this message or quoting it.
         const ids = new Set([id]);
@@ -7724,14 +7748,17 @@
     // Whether this message is (or will be) shown translated: your own only when you asked.
     function translateShownFor(message) {
         const mine = currentUser() && message.author && message.author.id === currentUser().id;
-        return mine ? translate.choice.get(message.id) === true : translateWanted(message.id);
+        return mine ? translate.choice.get(message.id) === true : translateWanted(message.id, message.channel_id || message.channelId);
     }
     // LongPressMessageActionSheet (9675): one more row, after Discord's own, styled like them.
     function translateSheet(orig, self, args) {
         const tree = orig.apply(self, args), props = args[0], message = props && props.message;
         const contentSource = translateContentSource(message);
         if (!enabled("translate") || !React || !tree || !message || !message.id || !contentSource || typeof contentSource.content !== "string" || !contentSource.content.trim()) return tree;
-        const label = translateShownFor(message) ? tr("Show original") : tr("Translate");
+        const shownNow = translateShownFor(message);
+        // "Top bar" only: the menu is for showing one message's original in a chat you translated, not for asking.
+        if (settings.translateMode === "manual" && settings.translateAsk === "bar" && !shownNow && !translate.channels.has(message.channel_id || message.channelId)) return tree;
+        const label = shownNow ? tr("Show original") : tr("Translate");
         let added = false;
         const Icon = venusIcon(15723, "LanguageIcon");
         return cloneTree(tree, function (node, nodeProps) {
@@ -8084,7 +8111,7 @@
     }
     // Clear saved translations: forgets every translation, on the phone too, and translates what's on screen again.
     function translateForget() {
-        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear();
+        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear(); translate.channels.clear();
         if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         translateChanged(); notify("translate");
         reviewToast(reviewUI(), "Saved translations cleared", venusIcon(5049, "TrashIcon"));
