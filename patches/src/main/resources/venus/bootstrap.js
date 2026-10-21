@@ -7588,8 +7588,11 @@
         const quotedId = quoted.id || reference && (reference.message_id || reference.messageId);
         // Known as the reply's row, so the reply is redrawn once its quote is translated or toggled.
         if (source) translateSeen(source, channelId, id, null, null, quotedId);
-        const me = currentUser();
-        if (!quotedId || me && quoted.authorId === me.id && translate.choice.get(quotedId) !== true || !translateWanted(quotedId)) return message;
+        // The same order as translateRow: the choice first, the current user only when it can matter.
+        if (!quotedId) return message;
+        const choice = translate.choice.get(quotedId);
+        if (settings.translateMode === "manual" ? choice !== true : choice === false) return message;
+        if (choice !== true) { const me = currentUser(); if (me && quoted.authorId === me.id) return message; }
         const layout = translateLayout(quoted.content);
         if (!layout) return message;
         const target = translateTarget(), key = translateKey(target, layout.text);
