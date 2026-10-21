@@ -8221,7 +8221,7 @@
             el(Group, {key:"clear", title:tr("Manage")}, actionRow(ui, "clear", "Clear saved translations",
                 saved ? tr("{count} kept on this phone, so chats you reopen show them at once.", {count:count(saved, "translation")}) : "Nothing saved yet.",
                 () => confirmAction("Clear saved translations?", "Messages on screen will be translated again.", "Clear", translateForget), !saved, true)),
-            footnote("note", settings.translateMode === "manual" ? "Only messages you choose are sent to Google Translate, once each, without your Discord account." :
+            footnote("note", settings.translateMode === "manual" ? "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account." :
                 "Only messages on screen are sent to Google Translate, once each, without your Discord account. Hold a message to show its original, or translate your own.")];
         return settingsBody(ui, groups);
     }
