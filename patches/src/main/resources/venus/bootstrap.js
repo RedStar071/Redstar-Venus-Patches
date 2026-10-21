@@ -7453,13 +7453,77 @@
         // With "Only when you ask", only messages set to true are translated.
         choice:new Map(), asked:new Set(),
         // Chats translated as a whole from the translate bar (#82), in "Only when you ask". A message's own choice still wins.
-        channels:new Set()};
-    const TRANSLATE_CHOICES = 1000, TRANSLATE_CHANNELS = 200;
+        // Only while you're in the chat: leaving it (the chat closes) shows it as written again, with the bar back.
+        channels:new Set(),
+        // Chats with a message you could translate: one Google already said isn't in your language. Only those show the bar.
+        foreign:new Map()};
+    const TRANSLATE_CHOICES = 1000, TRANSLATE_FOREIGN = 200;
     // What a message does when you haven't chosen for it: translated, unless you only translate when you ask and its chat isn't on.
     function translateDefault(channelId) { return settings.translateMode !== "manual" || translateChatOn(channelId); }
     // A chat you translated from the bar. Only while the bar is one of the ways you ask, so choosing "Message menu" never
     // leaves chats translated with no bar to turn them back.
     function translateChatOn(channelId) { return settings.translateAsk !== "menu" && translate.channels.has(channelId); }
+    // Whether a message is likely not in the language you translate into, decided on the phone without sending it
+    // anywhere (#82): it only decides whether the translate bar shows. The writing system tells most languages apart
+    // (Cyrillic, Arabic, Hangul...). For Latin text against a Latin language, it takes letters that language doesn't
+    // use, or at least two everyday words of another one, so a stray accent or a word like "die" never shows the bar.
+    const TRANSLATE_SCRIPTS = [["cyrl", /[\u0400-\u04ff]/], ["arab", /[\u0600-\u06ff]/], ["hebr", /[\u0590-\u05ff]/], ["deva", /[\u0900-\u097f]/],
+        ["thai", /[\u0e00-\u0e7f]/], ["hang", /[\uac00-\ud7af]/], ["kana", /[\u3040-\u30ff]/], ["hani", /[\u4e00-\u9fff]/], ["grek", /[\u0370-\u03ff]/]];
+    const TRANSLATE_SCRIPT_OF = {ru:"cyrl", uk:"cyrl", bg:"cyrl", sr:"cyrl", mk:"cyrl", kk:"cyrl", mn:"cyrl", ar:"arab", fa:"arab", ur:"arab", he:"hebr",
+        hi:"deva", mr:"deva", ne:"deva", th:"thai", ko:"hang", ja:"kana", zh:"hani", el:"grek"};
+    // Letters each Latin language writes with, beyond a-z. Anything else in a message is another language's.
+    const LATIN_LETTERS = {en:"", de:"\u00e4\u00f6\u00fc\u00df", fr:"\u00e0\u00e2\u00e6\u00e7\u00e9\u00e8\u00ea\u00eb\u00ee\u00ef\u00f4\u0153\u00f9\u00fb\u00fc\u00ff",
+        es:"\u00e1\u00e9\u00ed\u00f1\u00f3\u00fa\u00fc", it:"\u00e0\u00e8\u00e9\u00ec\u00ed\u00f2\u00f3\u00f9\u00fa", pt:"\u00e0\u00e1\u00e2\u00e3\u00e7\u00e9\u00ea\u00ed\u00f3\u00f4\u00f5\u00fa",
+        nl:"\u00e9\u00eb\u00ef\u00f6", sv:"\u00e5\u00e4\u00f6", no:"\u00e5\u00e6\u00f8", da:"\u00e5\u00e6\u00f8", fi:"\u00e4\u00f6\u00e5",
+        pl:"\u0105\u0107\u0119\u0142\u0144\u00f3\u015b\u017a\u017c", cs:"\u00e1\u010d\u010f\u00e9\u011b\u00ed\u0148\u00f3\u0159\u0161\u0165\u00fa\u016f\u00fd\u017e",
+        sk:"\u00e1\u00e4\u010d\u010f\u00e9\u00ed\u013a\u013e\u0148\u00f3\u00f4\u0155\u0161\u0165\u00fa\u00fd\u017e", hu:"\u00e1\u00e9\u00ed\u00f3\u00f6\u0151\u00fa\u00fc\u0171",
+        ro:"\u0103\u00e2\u00ee\u0219\u021b\u015f\u0163", tr:"\u00e7\u011f\u0131\u00f6\u015f\u00fc", hr:"\u010d\u0107\u0111\u0161\u017e", sl:"\u010d\u0161\u017e",
+        lt:"\u0105\u010d\u0119\u0117\u012f\u0161\u0173\u016b\u017e", lv:"\u0101\u010d\u0113\u0123\u012b\u0137\u013c\u0146\u0161\u016b\u017e", et:"\u00e4\u00f5\u00f6\u00fc\u0161\u017e",
+        vi:"\u00e0\u00e1\u00e2\u00e3\u00e8\u00e9\u00ea\u00ec\u00ed\u00f2\u00f3\u00f4\u00f5\u00f9\u00fa\u00fd\u0103\u0111\u0129\u0169\u01a1\u01b0\u1ea1-\u1ef9",
+        ca:"\u00e0\u00e7\u00e8\u00e9\u00ed\u00ef\u00f2\u00f3\u00fa\u00fc", is:"\u00e1\u00e6\u00e9\u00ed\u00f0\u00f3\u00f6\u00fa\u00fd\u00fe", ga:"\u00e1\u00e9\u00ed\u00f3\u00fa",
+        sq:"\u00e7\u00eb", eo:"\u0109\u011d\u0125\u0135\u015d\u016d", gl:"\u00e1\u00e9\u00ed\u00f1\u00f3\u00fa"};
+    // Everyday words that are only one language's (none of them an English word), to tell Latin languages apart.
+    const LATIN_WORDS = {en:["the", "and", "you", "what", "with", "this", "that", "have", "just", "about"],
+        es:["que", "los", "las", "pero", "est\u00e1", "porque", "tambi\u00e9n", "hola", "gracias", "usted", "muy"],
+        de:["und", "nicht", "ich", "ist", "auch", "aber", "wir", "das", "noch", "schon", "danke"],
+        fr:["les", "est", "pas", "avec", "pour", "mais", "je", "c'est", "tr\u00e8s", "bonjour", "merci", "vous"],
+        it:["che", "non", "sono", "per", "anche", "ciao", "grazie", "perch\u00e9", "molto"],
+        pt:["n\u00e3o", "voc\u00ea", "com", "para", "obrigado", "est\u00e1", "tamb\u00e9m", "muito"],
+        nl:["een", "het", "niet", "ik", "ook", "maar", "wat", "dank"], sv:["och", "jag", "det", "inte", "\u00e4r", "hej", "tack"],
+        pl:["jest", "nie", "tak", "czy", "si\u0119", "dzi\u0119ki"], tr:["bir", "ve", "bu", "ne", "\u00e7ok", "te\u015fekk\u00fcrler"],
+        id:["yang", "dan", "tidak", "ini", "itu", "aku", "kamu", "terima"]};
+    function translateLooksForeign(text) {
+        if (typeof text !== "string" || text.length < 2) return false;
+        const target = translateTarget(), base = languageBase(target), want = TRANSLATE_SCRIPT_OF[base] || null;
+        let found = null;
+        for (let i = 0; i < TRANSLATE_SCRIPTS.length && !found; i++) if (TRANSLATE_SCRIPTS[i][1].test(text)) found = TRANSLATE_SCRIPTS[i][0];
+        // Japanese is written with kanji too, so kanji alone never shows the bar to a Japanese reader.
+        if (found === "hani" && base === "ja") return false;
+        if (found) return found !== want;
+        const words = text.toLowerCase().replace(/https?:\/\/\S+|<[^>]*>|:[\w~]+:/g, " ").match(/[a-z\u00c0-\u024f\u1e00-\u1eff']+/g);
+        if (!words || !words.some(word => word.length > 2)) return false;
+        // Latin text for someone reading a non-Latin language.
+        if (want) return true;
+        const own = LATIN_LETTERS[base];
+        if (own === undefined) return false;
+        const allowed = new RegExp("[^a-z'" + own + "]");
+        if (words.some(word => allowed.test(word))) return true;
+        let other = 0;
+        const ownWords = new Set(LATIN_WORDS[base] || []), seen = new Set();
+        for (const code in LATIN_WORDS) {
+            if (code === base) continue;
+            for (const word of LATIN_WORDS[code]) if (!ownWords.has(word) && !seen.has(word) && words.includes(word)) { seen.add(word); other++; }
+        }
+        return other >= 2;
+    }
+    // A row in "Only when you ask" that the bar could translate: remembered per chat, and the bar shows from then on.
+    function translateNoticeForeign(channelId, text) {
+        if (!channelId || translate.foreign.get(channelId) === true || settings.translateAsk === "menu" || !translateLooksForeign(text)) return;
+        if (translate.foreign.size >= TRANSLATE_FOREIGN) translate.foreign.delete(translate.foreign.keys().next().value);
+        translate.foreign.set(channelId, true);
+        // Rows are generated while Discord renders the list; the bar updates right after, never during it.
+        later(() => notify("translate"), 0);
+    }
     function translateWanted(id, channelId) {
         const choice = translate.choice.get(id);
         return choice === undefined ? translateDefault(channelId) : choice;
@@ -7467,11 +7531,7 @@
     // The translate bar: translate a whole chat, or show it as written again. Every row on screen from it is redrawn.
     function translateChannel(channelId, on) {
         if (!channelId || translate.channels.has(channelId) === !!on) return;
-        if (on) {
-            if (translate.channels.size >= TRANSLATE_CHANNELS) translate.channels.delete(translate.channels.values().next().value);
-            translate.channels.add(channelId);
-        } else translate.channels.delete(channelId);
-        translatePersist();
+        if (on) translate.channels.add(channelId); else translate.channels.delete(channelId);
         notify("translate");
         const ids = new Set();
         translate.shown.forEach((entry, id) => { if (entry.channelId === channelId) ids.add(id); });
@@ -7481,7 +7541,7 @@
         if (translate.dispatcher || !dispatcher || typeof dispatcher.dispatch !== "function") return;
         translate.dispatcher = dispatcher;
         if (typeof dispatcher.subscribe === "function") dispatcher.subscribe("LOGOUT", () => {
-            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear(); translate.channels.clear();
+            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear(); translate.channels.clear(); translate.foreign.clear();
             // Another account's messages must never be shown from this one's translations.
             if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         });
@@ -7505,10 +7565,6 @@
                 if (Array.isArray(item) && item.length === 2 && typeof item[0] === "string" && /^\d{1,20}$/.test(item[0]) && typeof item[1] === "boolean" &&
                     !translate.choice.has(item[0])) { translate.choice.set(item[0], item[1]); restored++; }
             });
-            // Chats translated from the translate bar (#82).
-            if (Array.isArray(saved.channels)) saved.channels.slice(-TRANSLATE_CHANNELS).forEach(id => {
-                if (typeof id === "string" && /^\d{1,20}$/.test(id) && !translate.channels.has(id)) { translate.channels.add(id); restored++; }
-            });
             saved.entries.slice(-TRANSLATE_SAVED).forEach(item => {
                 if (!Array.isArray(item) || item.length !== 4 || !item.every(part => typeof part === "string")) return;
                 const [target, text, translated, language] = item, key = translateKey(target, text), known = translate.cache.get(key);
@@ -7527,8 +7583,8 @@
             if (translate.saving) { translatePersist(); return; }
             const entries = [];
             translate.cache.forEach(entry => { if (entry.state === "done" && typeof entry.translated === "string") entries.push([entry.target, entry.text, entry.translated, entry.language || ""]); });
-            const choices = Array.from(translate.choice.entries()), channels = Array.from(translate.channels);
-            const extra = entries => Object.assign({version:1, entries}, choices.length ? {choices} : null, channels.length ? {channels} : null);
+            const choices = Array.from(translate.choice.entries());
+            const extra = entries => Object.assign({version:1, entries}, choices.length ? {choices} : null);
             let text = JSON.stringify(extra(entries.slice(-TRANSLATE_SAVED)));
             // Too big to read back: keep the newest half instead.
             if (text.length > TRANSLATE_SAVED_BYTES) text = JSON.stringify(extra(entries.slice(-Math.floor(TRANSLATE_SAVED / 2))));
@@ -7682,7 +7738,15 @@
         if (!message || !Array.isArray(message.content) || !contentSource || typeof contentSource.content !== "string" || !channelId || !id) return message;
         // Not wanted (most rows in "Only when you ask") needs no user lookup (1.44x, tests/bench/translate_row.js).
         const choice = translate.choice.get(id);
-        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translateChatOn(channelId)) { translateSeen(source, channelId, id, null); return message; }
+        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translateChatOn(channelId)) {
+            translateSeen(source, channelId, id, null);
+            // Your own messages never count: you wrote them in a language you read.
+            if (choice === undefined && translate.foreign.get(channelId) !== true) {
+                const author = source && source.author && source.author.id || message.authorId, me = currentUser();
+                if (!me || author !== me.id) translateNoticeForeign(channelId, contentSource.content);
+            }
+            return message;
+        }
         // Your own messages are already in a language you read, unless you ask for one from the hold menu.
         if (choice !== true) {
             const author = source && source.author && source.author.id || message.authorId, me = currentUser();
@@ -7977,6 +8041,7 @@
     // Only messages that are (or were) shown translated are redrawn.
     function translateChanged() {
         translate.version++;
+        translate.foreign.clear();
         if (enabled("translate")) translateSchedule(0);
         // Messages known to be in your language, or that failed, look the same either way unless they quote a message that doesn't.
         const ids = new Set();
@@ -8105,9 +8170,10 @@
                  footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     watching ? storyStrip(k, s, story) : null)}));
     }
-    // The translate bar (#82), like Telegram's: one slim bar at the top of a chat in "Only when you ask". Tap it to
-    // translate the whole chat into your language; tap again to show it as written. Single messages still have
-    // Translate and Show original in their menu. The cog opens these settings.
+    // The translate bar (#82), like Telegram's: in "Only when you ask", a slim bar appears at the top of a chat once a
+    // message in it is in another language. Tap it to translate every message on screen and every one you see while
+    // you're in the chat; tap again to show it as written. Leave the chat and it's as written again, with the bar back.
+    // Single messages still have Translate and Show original in their menu. The cog opens these settings.
     function translateBarHeader(orig, self, args) {
         const props = args[0];
         // The bar is always in the tree and draws nothing unless it's wanted, so switching options never remounts the chat.
@@ -8121,7 +8187,8 @@
         paddingLeft:14, paddingRight:4, borderRadius:19, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#3f414766"},
         text:{color:"#949cf7"}, muted:{color:"#949ba4"}, cog:{width:32, height:32, borderRadius:16, alignItems:"center", justifyContent:"center"}};
     function translateBarShown(channelId) {
-        return enabled("translate") && settings.translateMode === "manual" && settings.translateAsk !== "menu" && !!channelId && !hiddenChannel(channelId);
+        return enabled("translate") && settings.translateMode === "manual" && settings.translateAsk !== "menu" && !!channelId && !hiddenChannel(channelId) &&
+            (translate.channels.has(channelId) || translate.foreign.get(channelId) === true);
     }
     function TranslateBar(props) {
         useSettings("translate");
@@ -8129,19 +8196,21 @@
             bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
             text:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND}, muted:{color:c.TEXT_MUTED}, cog:TRANSLATE_BAR_DARK.cog}), TRANSLATE_BAR_DARK);
         const channelId = props.channelId;
+        // Leaving the chat (it closes) shows it as written again, so coming back offers the bar again.
+        React.useEffect(() => () => { if (translate.channels.has(channelId)) translateChannel(channelId, false); }, [channelId]);
         if (!translateBarShown(channelId)) return null;
         const on = translate.channels.has(channelId), Press = RN.Pressable || RN.View, Text = inspectedExport(5088, "Text");
         const Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
         const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
         const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
-        return el(RN.View, {style:s.bar},
+        return popIn("bar", el(RN.View, {style:s.bar},
             el(Press, {style:{flex:1, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8, minHeight:36},
                 accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap},
                 el(Lang, {size:"sm", color:on ? s.muted.color : s.text.color}),
                 popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
                     el(RN.Text, {numberOfLines:1, style:[{fontSize:14, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
             el(Press, {style:s.cog, accessibilityRole:"button", accessibilityLabel:tr("Translate messages"), onPress:openTranslateSettings,
-                hitSlop:{top:6, bottom:6, left:6, right:6}}, el(Cog, {size:"sm", color:s.muted.color})));
+                hitSlop:{top:6, bottom:6, left:6, right:6}}, el(Cog, {size:"sm", color:s.muted.color}))));
     }
     function openTranslateSettings() {
         haptic("SELECTION");
@@ -8227,7 +8296,7 @@
     }
     // Clear saved translations: forgets every translation, on the phone too, and translates what's on screen again.
     function translateForget() {
-        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear(); translate.channels.clear();
+        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear(); translate.channels.clear(); translate.foreign.clear();
         if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         translateChanged(); notify("translate");
         reviewToast(reviewUI(), "Saved translations cleared", venusIcon(5049, "TrashIcon"));
