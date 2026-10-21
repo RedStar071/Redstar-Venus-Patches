@@ -34,7 +34,7 @@
     if (features.validUser) selectModules([584, 1390]);
     if (features.youBarSettings) targetModules[16858] = 1;
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
-    if (features.translate) selectModules([584, 1390, 7742, 9675]);
+    if (features.translate) selectModules([584, 1390, 7742, 9675, 10368]);
     if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
     if (features.accountSwitcher) selectModules([1390, 12129, 12130, 12131, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
@@ -113,6 +113,26 @@
         "ga", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "jv", "ka", "kk", "km", "ko", "la", "lt", "lv", "mk", "ml", "mn",
         "mr", "ms", "my", "ne", "nl", "no", "pa", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tr", "uk", "ur",
         "uz", "vi", "zh-CN", "zh-TW"];
+    // Each language in its own words, like the Language page lists Venus's languages (#82): you find yours whatever
+    // language Venus is shown in. The name in Venus's language goes under it.
+    const TRANSLATE_NATIVE = {
+        af:"Afrikaans", ar:"\u0627\u0644\u0639\u0631\u0628\u064a\u0629", bg:"\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438",
+        bn:"\u09ac\u09be\u0982\u09b2\u09be", ca:"Catal\u00e0", cs:"\u010ce\u0161tina", cy:"Cymraeg", da:"Dansk", de:"Deutsch",
+        el:"\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac", en:"English", eo:"Esperanto", es:"Espa\u00f1ol", et:"Eesti",
+        fa:"\u0641\u0627\u0631\u0633\u06cc", fi:"Suomi", fil:"Filipino", fr:"Fran\u00e7ais", ga:"Gaeilge", gl:"Galego",
+        gu:"\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4\u0ac0", he:"\u05e2\u05d1\u05e8\u05d9\u05ea", hi:"\u0939\u093f\u0928\u094d\u0926\u0940",
+        hr:"Hrvatski", hu:"Magyar", hy:"\u0540\u0561\u0575\u0565\u0580\u0565\u0576", id:"Bahasa Indonesia", is:"\u00cdslenska",
+        it:"Italiano", ja:"\u65e5\u672c\u8a9e", jv:"Basa Jawa", ka:"\u10e5\u10d0\u10e0\u10d7\u10e3\u10da\u10d8",
+        kk:"\u049a\u0430\u0437\u0430\u049b \u0442\u0456\u043b\u0456", km:"\u1781\u17d2\u1798\u17c2\u179a", ko:"\ud55c\uad6d\uc5b4",
+        la:"Latina", lt:"Lietuvi\u0173", lv:"Latvie\u0161u", mk:"\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438",
+        ml:"\u0d2e\u0d32\u0d2f\u0d3e\u0d33\u0d02", mn:"\u041c\u043e\u043d\u0433\u043e\u043b", mr:"\u092e\u0930\u093e\u0920\u0940",
+        ms:"Bahasa Melayu", my:"\u1019\u103c\u1014\u103a\u1019\u102c", ne:"\u0928\u0947\u092a\u093e\u0932\u0940", nl:"Nederlands",
+        no:"Norsk", pa:"\u0a2a\u0a70\u0a1c\u0a3e\u0a2c\u0a40", pl:"Polski", pt:"Portugu\u00eas", ro:"Rom\u00e2n\u0103",
+        ru:"\u0420\u0443\u0441\u0441\u043a\u0438\u0439", sk:"Sloven\u010dina", sl:"Sloven\u0161\u010dina", sq:"Shqip",
+        sr:"\u0421\u0440\u043f\u0441\u043a\u0438", sv:"Svenska", sw:"Kiswahili", ta:"\u0ba4\u0bae\u0bbf\u0bb4\u0bcd",
+        te:"\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41", th:"\u0e44\u0e17\u0e22", tr:"T\u00fcrk\u00e7e",
+        uk:"\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430", ur:"\u0627\u0631\u062f\u0648", uz:"O\u02bbzbekcha",
+        vi:"Ti\u1ebfng Vi\u1ec7t", "zh-CN":"\u7b80\u4f53\u4e2d\u6587", "zh-TW":"\u7e41\u9ad4\u4e2d\u6587"};
     // When Translate messages translates: everything on screen, or only messages you pick from the hold menu.
     const TRANSLATE_MODES = ["auto", "manual"];
     // How you ask in "Only when you ask" (#82): the bar at the top of a chat, Translate in a message's menu, or both.
@@ -8058,29 +8078,89 @@
                  footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     watching ? storyStrip(k, s, story) : null)}));
     }
-    // Another language (#79): every language Translate messages can write in, by name in the language Venus is shown in,
-    // with Discord's search field once the list is long. Like the Language list, the rows have no icons of their own.
+    // The translate bar (#82), like Telegram's: one slim bar at the top of a chat in "Only when you ask". Tap it to
+    // translate the whole chat into your language; tap again to show it as written. Single messages still have
+    // Translate and Show original in their menu. The cog opens these settings.
+    function translateBarHeader(orig, self, args) {
+        const props = args[0];
+        if (!props || !props.channelId || !React || !RN || props.stickyHeader === undefined) return orig.apply(self, args);
+        const bar = el(TranslateBar, {key:"venus-translate-bar", channelId:props.channelId});
+        const header = props.stickyHeader ? el(RN.View, {pointerEvents:"box-none"}, props.stickyHeader, bar) : bar;
+        const next = Object.assign({}, props, {stickyHeader:header});
+        return args.length === 1 ? orig.call(self, next) : orig.apply(self, [next].concat(Array.prototype.slice.call(args, 1)));
+    }
+    const TRANSLATE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", marginHorizontal:8, marginTop:6, marginBottom:2, minHeight:38,
+        paddingLeft:14, paddingRight:4, borderRadius:19, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#3f414766"},
+        text:{color:"#949cf7"}, muted:{color:"#949ba4"}, cog:{width:32, height:32, borderRadius:16, alignItems:"center", justifyContent:"center"}};
+    function translateBarShown(channelId) {
+        return enabled("translate") && settings.translateMode === "manual" && settings.translateAsk !== "menu" && !!channelId && !hiddenChannel(channelId);
+    }
+    function TranslateBar(props) {
+        useSettings("translate");
+        const s = useThemed("translateBar", c => ({
+            bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
+            text:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND}, muted:{color:c.TEXT_MUTED}, cog:TRANSLATE_BAR_DARK.cog}), TRANSLATE_BAR_DARK);
+        const channelId = props.channelId;
+        if (!translateBarShown(channelId)) return null;
+        const on = translate.channels.has(channelId), Press = RN.Pressable || RN.View, Text = inspectedExport(5088, "Text");
+        const Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
+        const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
+        const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
+        return el(RN.View, {style:s.bar},
+            el(Press, {style:{flex:1, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8, minHeight:36},
+                accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap},
+                el(Lang, {size:"sm", color:on ? s.muted.color : s.text.color}),
+                popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
+                    el(RN.Text, {numberOfLines:1, style:[{fontSize:14, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
+            el(Press, {style:s.cog, accessibilityRole:"button", accessibilityLabel:tr("Translate messages"), onPress:openTranslateSettings,
+                hitSlop:{top:6, bottom:6, left:6, right:6}}, el(Cog, {size:"sm", color:s.muted.color})));
+    }
+    function openTranslateSettings() {
+        haptic("SELECTION");
+        if (!status.menu) inspectedExport(14839, "SETTING_RENDERER_CONFIG");
+        if (!SettingsList) SettingsList = inspectedExport(14971, "SettingsList");
+        const open = inspectedExport(7094, "openUserSettings");
+        try { if (typeof open === "function") { open({screen:status.menu ? "VENUS_TRANSLATE" : undefined}); return; } } catch (_) {}
+        openSettings();
+    }
+    // A language in its own words, and in the language Venus is shown in when that's different, like "Deutsch · German".
+    function translateNativeName(code) { return TRANSLATE_NATIVE[code] || translateLanguageName(code); }
+    // Another language (#79): one row that says which language, and opens the list only when you want to change it.
+    // Each language is listed in its own words with Venus's name for it under it (#82), with Discord's search field.
+    // Picking one closes the list again, so the rest of the page is never pushed far down.
     function TranslateLanguagePicker(props) {
         useSettings("translate");
-        const [query, setQuery] = React.useState(""), ui = reviewUI(), on = !!props.on;
+        const [query, setQuery] = React.useState(""), [open, setOpen] = React.useState(false), ui = reviewUI(), on = !!props.on;
         const RadioGroup = inspectedExport(6263, "TableRadioGroup"), RadioRow = inspectedExport(6262, "TableRadioRow");
         const SearchField = inspectedExport(6739, "SearchField"), Group = ui.TableRowGroup || RN.View;
         const shownIn = i18n.shownIn;
         const all = React.useMemo(() => TRANSLATE_LANGUAGES.map(code => {
-            const label = translateLanguageName(code), english = code === "zh-CN" ? "Chinese Simplified" : code === "zh-TW" ? "Chinese Traditional" : LANGUAGE_NAMES[languageBase(code)] || "";
-            return {code, label, search:searchFold(label + " " + english + " " + code)};
+            const local = translateLanguageName(code), own = translateNativeName(code);
+            const english = code === "zh-CN" ? "Chinese Simplified" : code === "zh-TW" ? "Chinese Traditional" : LANGUAGE_NAMES[languageBase(code)] || "";
+            return {code, label:own, sub:local !== own ? local : undefined, search:searchFold(own + " " + local + " " + english + " " + code)};
         }).sort((a, b) => a.label.localeCompare(b.label)), [shownIn, i18n.version]);
         const needle = searchFold(query.trim());
         const shown = needle ? all.filter(entry => entry.search.includes(needle)) : all;
-        const pick = value => { if (value !== settings.translateLanguage) { haptic("SELECTION"); setSetting("translateLanguage", value); } };
+        const toggle = () => { if (!on) return; haptic("SELECTION"); animateLayout(); setOpen(!open); setQuery(""); };
+        const pick = value => {
+            if (value !== settings.translateLanguage) { haptic("SELECTION"); setSetting("translateLanguage", value); }
+            animateLayout(); setOpen(false); setQuery("");
+        };
+        const current = all.find(entry => entry.code === settings.translateLanguage);
+        const Chevron = venusIcon(open ? 10534 : 6906, open ? "ChevronSmallDownIcon" : "ChevronSmallRightIcon");
+        const head = ui.TableRow ? el(ui.TableRow, {key:"current", label:current ? current.label : settings.translateLanguage, subLabel:current && current.sub,
+            icon:rowIcon(15723, "LanguageIcon"), trailing:el(Chevron, {size:"sm"}), onPress:toggle, disabled:!on,
+            accessibilityHint:tr(open ? "Close the list" : "Choose a language")}) : null;
+        if (!open) return el(Group, {key:"language", title:tr("Language")}, head);
         const search = SearchField ? el(SearchField, {key:"search", placeholder:tr("Search languages"), value:query, onChange:text => setQuery(String(text || "")), isDisabled:!on}) :
             ui.TextInput ? el(ui.TextInput, {key:"search", placeholder:tr("Search languages"), value:query, onChange:text => setQuery(String(text || "")), editable:on}) : null;
         const rows = !shown.length ? (ui.TableRow ? el(ui.TableRow, {key:"none", label:tr("No matching languages"), disabled:true}) : null) :
-            RadioGroup && RadioRow ? el(RadioGroup, {key:"list", title:tr("Language"), value:settings.translateLanguage, onChange:pick},
-                shown.map(entry => el(RadioRow, {key:entry.code, value:entry.code, label:entry.label, disabled:!on}))) :
-            el(Group, {key:"list", title:tr("Language")}, shown.map(entry => ui.TableRow && el(ui.TableRow, {key:entry.code, label:entry.label,
+            RadioGroup && RadioRow ? el(RadioGroup, {key:"list", value:settings.translateLanguage, onChange:pick},
+                shown.map(entry => el(RadioRow, {key:entry.code, value:entry.code, label:entry.label, subLabel:entry.sub, disabled:!on}))) :
+            el(Group, {key:"list"}, shown.map(entry => ui.TableRow && el(ui.TableRow, {key:entry.code, label:entry.label, subLabel:entry.sub,
                 trailing:entry.code === settings.translateLanguage ? el(venusIcon(6823, "CheckmarkSmallIcon"), {size:"sm"}) : undefined, disabled:!on, onPress:() => pick(entry.code)})));
-        return el(RN.View, {style:{gap:12}}, el(RN.View, {style:{paddingHorizontal:16}}, search), rows);
+        return el(RN.View, {key:"language", style:{gap:12}}, el(Group, {key:"head", title:tr("Language")}, head),
+            el(RN.View, {style:{paddingHorizontal:16}}, search), rows);
     }
     function TranslateSettings() {
         useSettings("translate");
@@ -8094,7 +8174,15 @@
                 offCard("status", venusIcon(15723, "LanguageIcon"), "translate"),
             el(TranslatePreview, {key:"preview", on}),
             radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(17143, "SparklesIcon")],
-                ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8956, "ReactionIcon")]]),
+                ["manual", "Only when you ask", "From the bar at the top of a chat, or a message's menu. Nothing else is sent.", rowIcon(8956, "ReactionIcon")]]),
+            // How you ask (#82): one choice, so there's always a way to translate. Only shown when it matters.
+            settings.translateMode === "manual" ? el(RN.View, {key:"ask", style:{gap:8}},
+                groupTitle("title", "How you ask"),
+                venusSegmented({key:"ask:choice", value:settings.translateAsk, disabled:!on, onChange:value => setSetting("translateAsk", value),
+                    items:[{value:"both", label:tr("Both")}, {value:"bar", label:tr("Top bar")}, {value:"menu", label:tr("Message menu")}]}),
+                footnote("hint", settings.translateAsk === "bar" ? "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original." :
+                    settings.translateAsk === "menu" ? "Hold a message and tap Translate. No bar at the top of chats." :
+                    "Tap the bar to translate the whole chat, or hold one message and tap Translate.")) : null,
             radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(12901, "ChatSmileIcon")],
                 ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6642, "MobilePhoneIcon")],
                 ["custom", tr("Another language"), translateLanguageName(settings.translateLanguage) + ".", rowIcon(15723, "LanguageIcon")]], true),
@@ -10172,7 +10260,11 @@
             case 11191: return (features.customThemes || features.iconPacks) ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
             case 1205: if ((features.customThemes || features.iconPacks) && exports && exports.default) customThemes.themeStore = exports.default; return exports;
             case 4831: return (features.customThemes || features.iconPacks) ? hookCreateThemedContext(exports) : exports;
-            case 10368: return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
+            case 10368:
+                // ChatViewWrapper {channelId, stickyHeader, children}: the theme background behind chat, and the translate bar (#82)
+                // in the sticky header slot above the messages, where Discord shows its own New messages bar.
+                if (features.translate) exports = hookComponent(exports, translateBarHeader);
+                return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
             case 12129: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
             case 12131: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
             case 4760: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
