@@ -1001,6 +1001,11 @@
   "Chinese (Simplified)": "Čínština (zjednodušená)",
   "Chinese (Traditional)": "Čínština (tradiční)",
   "No matching languages": "Žádné odpovídající jazyky",
-  "Search languages": "Hledat jazyky"
+  "Search languages": "Hledat jazyky",
+  "Reply and mention brightness": "Jas odpovědí a zmínek",
+  "Faint": "Slabý",
+  "Normal": "Normální",
+  "Bright": "Jasný",
+  "Vivid": "Sytý"
  }
 }

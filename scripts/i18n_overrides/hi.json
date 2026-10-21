@@ -864,5 +864,10 @@
  "Chinese (Simplified)": "चीनी (सरलीकृत)",
  "Chinese (Traditional)": "चीनी (पारंपरिक)",
  "No matching languages": "कोई मेल खाने वाली भाषा नहीं मिली",
- "Search languages": "भाषाएँ खोजें"
+ "Search languages": "भाषाएँ खोजें",
+ "Reply and mention brightness": "जवाबों और उल्लेखों की चमक",
+ "Faint": "हल्की",
+ "Normal": "सामान्य",
+ "Bright": "तेज़",
+ "Vivid": "गहरी"
 }

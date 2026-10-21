@@ -864,5 +864,10 @@
  "Chinese (Simplified)": "Chinees (vereenvoudigd)",
  "Chinese (Traditional)": "Chinees (traditioneel)",
  "No matching languages": "Geen overeenkomende talen",
- "Search languages": "Talen zoeken"
+ "Search languages": "Talen zoeken",
+ "Reply and mention brightness": "Helderheid van antwoorden en vermeldingen",
+ "Faint": "Zwak",
+ "Normal": "Normaal",
+ "Bright": "Helder",
+ "Vivid": "Fel"
 }

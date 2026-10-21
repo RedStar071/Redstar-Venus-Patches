@@ -896,5 +896,10 @@
  "Chinese (Simplified)": "Chineză (simplificată)",
  "Chinese (Traditional)": "Chineză (tradițională)",
  "No matching languages": "Nicio limbă găsită",
- "Search languages": "Caută limbi"
+ "Search languages": "Caută limbi",
+ "Reply and mention brightness": "Luminozitatea răspunsurilor și mențiunilor",
+ "Faint": "Slabă",
+ "Normal": "Normală",
+ "Bright": "Luminoasă",
+ "Vivid": "Intensă"
 }

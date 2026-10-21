@@ -963,6 +963,11 @@
   "Chinese (Simplified)": "Chinois (simplifié)",
   "Chinese (Traditional)": "Chinois (traditionnel)",
   "No matching languages": "Aucune langue correspondante",
-  "Search languages": "Rechercher une langue"
+  "Search languages": "Rechercher une langue",
+  "Reply and mention brightness": "Luminosité des réponses et mentions",
+  "Faint": "Faible",
+  "Normal": "Normale",
+  "Bright": "Vive",
+  "Vivid": "Intense"
  }
 }

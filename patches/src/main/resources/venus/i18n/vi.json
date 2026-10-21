@@ -849,6 +849,11 @@
   "Chinese (Simplified)": "Tiếng Trung (Giản thể)",
   "Chinese (Traditional)": "Tiếng Trung (Phồn thể)",
   "No matching languages": "Không tìm thấy ngôn ngữ nào khớp",
-  "Search languages": "Tìm kiếm ngôn ngữ"
+  "Search languages": "Tìm kiếm ngôn ngữ",
+  "Reply and mention brightness": "Độ sáng của trả lời và lượt nhắc",
+  "Faint": "Nhạt",
+  "Normal": "Bình thường",
+  "Bright": "Sáng",
+  "Vivid": "Rực rỡ"
  }
 }

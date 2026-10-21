@@ -768,5 +768,10 @@
  "Chinese (Simplified)": "中文（简体）",
  "Chinese (Traditional)": "中文（繁体）",
  "No matching languages": "没有匹配的语言",
- "Search languages": "搜索语言"
+ "Search languages": "搜索语言",
+ "Reply and mention brightness": "回复和提及的亮度",
+ "Faint": "淡",
+ "Normal": "正常",
+ "Bright": "亮",
+ "Vivid": "鲜艳"
 }

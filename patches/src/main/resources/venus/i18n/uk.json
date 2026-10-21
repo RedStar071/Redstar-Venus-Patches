@@ -1001,6 +1001,11 @@
   "Chinese (Simplified)": "Китайська (спрощена)",
   "Chinese (Traditional)": "Китайська (традиційна)",
   "No matching languages": "Відповідних мов не знайдено",
-  "Search languages": "Пошук мов"
+  "Search languages": "Пошук мов",
+  "Reply and mention brightness": "Яскравість відповідей і згадок",
+  "Faint": "Слабка",
+  "Normal": "Звичайна",
+  "Bright": "Яскрава",
+  "Vivid": "Насичена"
  }
 }

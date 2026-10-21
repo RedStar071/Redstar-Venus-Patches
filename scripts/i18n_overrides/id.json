@@ -768,5 +768,10 @@
  "Chinese (Simplified)": "Tionghoa (Sederhana)",
  "Chinese (Traditional)": "Tionghoa (Tradisional)",
  "No matching languages": "Tidak ada bahasa yang cocok",
- "Search languages": "Cari bahasa"
+ "Search languages": "Cari bahasa",
+ "Reply and mention brightness": "Kecerahan balasan dan sebutan",
+ "Faint": "Samar",
+ "Normal": "Normal",
+ "Bright": "Terang",
+ "Vivid": "Mencolok"
 }

@@ -849,6 +849,11 @@
   "Chinese (Simplified)": "จีน (ตัวย่อ)",
   "Chinese (Traditional)": "จีน (ตัวเต็ม)",
   "No matching languages": "ไม่พบภาษาที่ตรงกับการค้นหา",
-  "Search languages": "ค้นหาภาษา"
+  "Search languages": "ค้นหาภาษา",
+  "Reply and mention brightness": "ความสว่างของการตอบกลับและการกล่าวถึง",
+  "Faint": "จาง",
+  "Normal": "ปกติ",
+  "Bright": "สว่าง",
+  "Vivid": "สด"
  }
 }

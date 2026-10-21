@@ -864,5 +864,10 @@
  "Chinese (Simplified)": "Китайски (опростен)",
  "Chinese (Traditional)": "Китайски (традиционен)",
  "No matching languages": "Няма съвпадащи езици",
- "Search languages": "Търсене на езици"
+ "Search languages": "Търсене на езици",
+ "Reply and mention brightness": "Яркост на отговорите и споменаванията",
+ "Faint": "Слаба",
+ "Normal": "Нормална",
+ "Bright": "Ярка",
+ "Vivid": "Наситена"
 }

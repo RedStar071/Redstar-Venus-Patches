@@ -1001,6 +1001,11 @@
   "Chinese (Simplified)": "Kineski (pojednostavljeni)",
   "Chinese (Traditional)": "Kineski (tradicionalni)",
   "No matching languages": "Nema odgovarajućih jezika",
-  "Search languages": "Pretraži jezike"
+  "Search languages": "Pretraži jezike",
+  "Reply and mention brightness": "Svjetlina odgovora i spominjanja",
+  "Faint": "Blaga",
+  "Normal": "Normalna",
+  "Bright": "Svijetla",
+  "Vivid": "Jaka"
  }
 }

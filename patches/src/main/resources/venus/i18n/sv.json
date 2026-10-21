@@ -945,6 +945,11 @@
   "Chinese (Simplified)": "Kinesiska (förenklad)",
   "Chinese (Traditional)": "Kinesiska (traditionell)",
   "No matching languages": "Inga matchande språk",
-  "Search languages": "Sök bland språk"
+  "Search languages": "Sök bland språk",
+  "Reply and mention brightness": "Ljusstyrka för svar och omnämnanden",
+  "Faint": "Svag",
+  "Normal": "Normal",
+  "Bright": "Ljus",
+  "Vivid": "Kraftig"
  }
 }

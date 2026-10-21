@@ -864,5 +864,10 @@
  "Chinese (Simplified)": "Çince (Basitleştirilmiş)",
  "Chinese (Traditional)": "Çince (Geleneksel)",
  "No matching languages": "Eşleşen dil bulunamadı",
- "Search languages": "Dil ara"
+ "Search languages": "Dil ara",
+ "Reply and mention brightness": "Yanıt ve bahsetme parlaklığı",
+ "Faint": "Soluk",
+ "Normal": "Normal",
+ "Bright": "Parlak",
+ "Vivid": "Canlı"
 }

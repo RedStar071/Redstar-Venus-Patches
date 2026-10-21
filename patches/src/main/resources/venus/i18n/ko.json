@@ -849,6 +849,11 @@
   "Chinese (Simplified)": "중국어(간체)",
   "Chinese (Traditional)": "중국어(번체)",
   "No matching languages": "일치하는 언어 없음",
-  "Search languages": "언어 검색"
+  "Search languages": "언어 검색",
+  "Reply and mention brightness": "답장 및 멘션 밝기",
+  "Faint": "희미하게",
+  "Normal": "보통",
+  "Bright": "밝게",
+  "Vivid": "선명하게"
  }
 }

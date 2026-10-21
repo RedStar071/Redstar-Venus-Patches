@@ -896,5 +896,10 @@
  "Chinese (Simplified)": "Kinų (supaprastinta)",
  "Chinese (Traditional)": "Kinų (tradicinė)",
  "No matching languages": "Atitinkančių kalbų nerasta",
- "Search languages": "Ieškoti kalbų"
+ "Search languages": "Ieškoti kalbų",
+ "Reply and mention brightness": "Atsakymų ir paminėjimų ryškumas",
+ "Faint": "Blankus",
+ "Normal": "Įprastas",
+ "Bright": "Ryškus",
+ "Vivid": "Sodrus"
 }

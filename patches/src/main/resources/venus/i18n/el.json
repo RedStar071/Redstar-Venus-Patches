@@ -945,6 +945,11 @@
   "Chinese (Simplified)": "Κινεζικά (Απλοποιημένα)",
   "Chinese (Traditional)": "Κινεζικά (Παραδοσιακά)",
   "No matching languages": "Δεν βρέθηκαν αντίστοιχες γλώσσες",
-  "Search languages": "Αναζήτηση γλωσσών"
+  "Search languages": "Αναζήτηση γλωσσών",
+  "Reply and mention brightness": "Φωτεινότητα απαντήσεων και αναφορών",
+  "Faint": "Αχνή",
+  "Normal": "Κανονική",
+  "Bright": "Φωτεινή",
+  "Vivid": "Έντονη"
  }
 }

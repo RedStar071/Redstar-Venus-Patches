@@ -61,7 +61,7 @@
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
-        messageHighlight:false, messageHighlightThickness:2, messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
+        messageHighlight:false, messageHighlightThickness:2, messageHighlightStrength:"normal", messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -76,7 +76,7 @@
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
-            messageHighlight: false, messageHighlightThickness: 2, messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightStrength: "normal", messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -117,6 +117,11 @@
     const TRANSLATE_MODES = ["auto", "manual"];
     // Left bar thickness multiplier (1x = 2dp default, 2x = 4dp, 3x = 6dp, 4x = 8dp) and highlight color presets (#60).
     const HIGHLIGHT_THICKNESSES = [1, 2, 3, 4];
+    // How strongly replies and mentions are tinted behind the text: alpha of the highlight color. Normal (1a, ~10%) is
+    // what Discord draws by itself; the others are about 5%, 20% and 30%.
+    const HIGHLIGHT_STRENGTHS = {faint:"0d", normal:"1a", bright:"33", vivid:"4d"};
+    const HIGHLIGHT_STRENGTH_KEYS = ["faint", "normal", "bright", "vivid"];
+    function highlightAlpha() { return HIGHLIGHT_STRENGTHS[settings.messageHighlightStrength] || "1a"; }
     const HIGHLIGHT_COLOR_MAP = {default:"", yellow:"#f0b232", blurple:"#5865f2", green:"#23a55a", cyan:"#00a8fc", pink:"#eb459e", purple:"#9b59b6", orange:"#e67e22", red:"#f23f43"};
     function isHighlightColor(value) {
         return typeof value === "string" && (owns(HIGHLIGHT_COLOR_MAP, value) || /^#[0-9a-fA-F]{6}$/.test(value.trim()));
@@ -283,7 +288,7 @@
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
             key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) ||
-            key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
+            key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "messageHighlightStrength" && !HIGHLIGHT_STRENGTH_KEYS.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "noDeleteLimit") return deleteLimit(value);
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
@@ -322,6 +327,11 @@
             if (!HIGHLIGHT_THICKNESSES.includes(mult)) return false;
             if (settings.messageHighlightThickness === mult && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.messageHighlightThickness = mult; dirty.add(key); save(); notify(key); later(messageHighlightRedraw, 0); return true;
+        }
+        if (key === "messageHighlightStrength") {
+            if (!HIGHLIGHT_STRENGTH_KEYS.includes(value)) return false;
+            if (settings.messageHighlightStrength === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.messageHighlightStrength = value; dirty.add(key); save(); notify(key); later(messageHighlightRedraw, 0); return true;
         }
         if (key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor") {
             if (!isHighlightColor(value)) return false;
@@ -799,7 +809,7 @@
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
-        iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
+        messageHighlight:["Reply and mention brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -4729,18 +4739,19 @@
         return clean.startsWith("#") ? clean : HIGHLIGHT_COLOR_MAP[clean] || defaultHex;
     }
     const highlightPairCache = new Map();
-    function highlightCustomPair(choice, defaultHex, mult) {
+    function highlightCustomPair(choice, defaultHex, mult, alpha) {
+        alpha = alpha || "1a";
         if (!RN || typeof RN.processColor !== "function") return null;
         if (highlightPairCache.owner !== RN.processColor) {
             highlightPairCache.clear();
             highlightPairCache.owner = RN.processColor;
         }
-        const key = choice + ":" + defaultHex + ":" + mult;
+        const key = choice + ":" + defaultHex + ":" + mult + ":" + alpha;
         const cached = highlightPairCache.get(key);
         if (cached !== undefined) return cached;
         const hex = highlightColorHex(choice, defaultHex);
         const gutter = highlightProcess(hex);
-        const background = highlightProcess(hex + "1a");
+        const background = highlightProcess(hex + alpha);
         const pair = gutter == null || background == null ? null : {backgroundColor:background, gutterColor:highlightEncodeGutter(gutter, mult)};
         highlightPairCache.set(key, pair);
         return pair;
@@ -4887,8 +4898,9 @@
             }
         } else if (highlightOn && RN && typeof RN.processColor === "function") {
             const existing = next.backgroundHighlight;
-            if (isMentionRow && settings.messageHighlightPingColor !== "default") {
-                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult);
+            // A custom color or brightness repaints the row; Discord's own yellow at Normal keeps its own highlight.
+            if (isMentionRow && (settings.messageHighlightPingColor !== "default" || settings.messageHighlightStrength !== "normal")) {
+                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult, highlightAlpha());
                 if (custom) next = Object.assign({},next,{backgroundHighlight:custom});
             } else if (existing && typeof existing.gutterColor === "number" && mult > 1) {
                 next = Object.assign({},next,{backgroundHighlight:Object.assign({},existing,{gutterColor:highlightEncodeGutter(existing.gutterColor, mult)})});
@@ -9919,7 +9931,8 @@
         const Press = RN.Pressable || RN.View, count = props.count == null ? 3 : props.count;
         const message = (key, hex, children) => {
             const beat = props.beats && props.beats[key] || 0;
-            const body = el(RN.View, {key, style:{paddingHorizontal:12, paddingVertical:6, backgroundColor:hex ? hex + "1a" : undefined}},
+            const alpha = key === "reply" && props.pingAlpha || "1a";
+            const body = el(RN.View, {key, style:{paddingHorizontal:12, paddingVertical:6, backgroundColor:hex ? hex + alpha : undefined}},
                 hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar + ":" + beat, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
                 hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children,
                 props.ripple ? props.ripple(key) : null);
@@ -9953,7 +9966,7 @@
         useSettings("messageHighlight");
         const s = useChatPreviewStyles(), k = usePreviewChrome(), given = props.fresh || {};
         return el(RN.View, {key:"preview"},
-            highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, deleted:props.deleted,
+            highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, pingAlpha:props.pingAlpha, deleted:props.deleted,
                 fresh:{reply:!!given.reply, deleted:!!given.deleted},
                 header:previewHeader(k, {title:"general"}),
                 footer:previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})})}));
@@ -9997,11 +10010,14 @@
         const pingHex = on ? highlightColorHex(settings.messageHighlightPingColor, "#f0b232") : "#f0b232";
         const delHex = on ? highlightColorHex(settings.messageHighlightDeletedColor, "#f23f43") : "#f23f43";
         const barWidth = (on ? settings.messageHighlightThickness : 1) * 2, last = shown.current;
-        const fresh = last ? {reply:last.ping !== pingHex || last.bar !== barWidth, deleted:last.deleted !== delHex || last.bar !== barWidth} : null;
-        shown.current = {ping:pingHex, deleted:delHex, bar:barWidth};
-        const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightDeletedColor !== "default";
+        const pingAlpha = on ? highlightAlpha() : "1a";
+        const fresh = last ? {reply:last.ping !== pingHex || last.bar !== barWidth || last.alpha !== pingAlpha, deleted:last.deleted !== delHex || last.bar !== barWidth} : null;
+        shown.current = {ping:pingHex, deleted:delHex, bar:barWidth, alpha:pingAlpha};
+        const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightDeletedColor !== "default" ||
+            settings.messageHighlightStrength !== "normal";
         const resetAll = () => {
             setSetting("messageHighlightThickness", 2); setSetting("messageHighlightPingColor", "default"); setSetting("messageHighlightDeletedColor", "default");
+            setSetting("messageHighlightStrength", "normal");
             setHexTarget(""); reviewToast(ui, "Highlights reset", venusIcon(6868,"CircleCheckIcon"));
         };
         // When Discord's color picker can't open, a hex box opens under the colors instead.
@@ -10015,11 +10031,15 @@
             onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
             on ? null : offCard("status", venusIcon(16947, "PaintbrushThinIcon"), "messageHighlight"),
-            el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, deleted:showDeleted ? delHex : null, fresh}),
+            el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, pingAlpha, deleted:showDeleted ? delHex : null, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
                 venusSegmented({key:"choice", value:settings.messageHighlightThickness, disabled:!on, onChange:value => setSetting("messageHighlightThickness", value),
                     items:HIGHLIGHT_THICKNESSES.map(n => ({value:n, label:tr("{n} dp", {n:n * 2})}))})),
+            el(RN.View, {key:"strength", style:{gap:8}},
+                groupTitle("title", "Reply and mention brightness"),
+                venusSegmented({key:"choice", value:settings.messageHighlightStrength, disabled:!on, onChange:value => setSetting("messageHighlightStrength", value),
+                    items:[{value:"faint", label:tr("Faint")}, {value:"normal", label:tr("Normal")}, {value:"bright", label:tr("Bright")}, {value:"vivid", label:tr("Vivid")}]})),
             el(RN.View, {key:"colors", style:{gap:8}},
                 groupTitle("title", "Colors"),
                 el(RN.View, {style:s.card},

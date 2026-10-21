@@ -768,5 +768,10 @@
  "Chinese (Simplified)": "中国語（簡体字）",
  "Chinese (Traditional)": "中国語（繁体字）",
  "No matching languages": "一致する言語がありません",
- "Search languages": "言語を検索"
+ "Search languages": "言語を検索",
+ "Reply and mention brightness": "返信とメンションの明るさ",
+ "Faint": "控えめ",
+ "Normal": "標準",
+ "Bright": "明るい",
+ "Vivid": "鮮やか"
 }

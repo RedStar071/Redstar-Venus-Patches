@@ -945,6 +945,11 @@
   "Chinese (Simplified)": "Chino (simplificado)",
   "Chinese (Traditional)": "Chino (tradicional)",
   "No matching languages": "No hay idiomas que coincidan",
-  "Search languages": "Buscar idiomas"
+  "Search languages": "Buscar idiomas",
+  "Reply and mention brightness": "Brillo de respuestas y menciones",
+  "Faint": "Tenue",
+  "Normal": "Normal",
+  "Bright": "Brillante",
+  "Vivid": "Intenso"
  }
 }

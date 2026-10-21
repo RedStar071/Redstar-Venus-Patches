@@ -963,6 +963,11 @@
   "Chinese (Simplified)": "Kiina (yksinkertaistettu)",
   "Chinese (Traditional)": "Kiina (perinteinen)",
   "No matching languages": "Kieliä ei löytynyt haulla",
-  "Search languages": "Etsi kieliä"
+  "Search languages": "Etsi kieliä",
+  "Reply and mention brightness": "Vastausten ja mainintojen kirkkaus",
+  "Faint": "Himmeä",
+  "Normal": "Normaali",
+  "Bright": "Kirkas",
+  "Vivid": "Voimakas"
  }
 }
