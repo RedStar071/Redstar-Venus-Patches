@@ -85,6 +85,7 @@ BOOTSTRAP_MODULES = [
     (5421, 'modules/channel/useChannelName.tsx', ['default', 'computeDefaultGroupDmNameFromUserIds', 'computeDefaultGroupDmName'], 'ChannelNameUtils'),
     (5967, 'modules/read_states/ReadStateConstants.tsx', ['CHANNEL', 'GUILD_EVENT', 'NOTIFICATION_CENTER'], 'ReadStateTypes'),
     (5432, 'stores/MessageStore.tsx', ['default'], 'MessageStore'),
+    (5632, 'modules/messages/isMessageMentioned.tsx', ['isRawMessageMentioned', 'isMentioned', 'mention_roles'], 'isMessageMentioned (Message highlights: role mentions)'),
     (5434, 'modules/messages/MessageRecordUtils.tsx', ['createMessageRecord', 'updateServerMessage', 'updateMessageRecord'], 'MessageRecordUtils'),
     (5377, 'design/components/Stack/native/Stack.native.tsx', ['Stack'], 'Stack'),
     (5379, 'design/components/Button/native/Button.native.tsx', ['Button'], 'Button'),

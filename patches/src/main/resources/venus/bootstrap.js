@@ -4770,6 +4770,10 @@
         const hasMentions = mentions && mentions.length > 0 && Array.isArray(mentions);
         const ref = source.referenced_message || source.referencedMessage && source.referencedMessage.message;
         const refAuthor = ref && ref.author && ref.author.id;
+        // A role you have (@Moderators) is a mention too, the same as Discord's own highlight: ask its isRawMessageMentioned
+        // (5632), which also knows which roles are yours in that server. It used to be skipped, so those rows lost the ping color.
+        const roles = source.mention_roles || source.mentionRoles;
+        if (roles && roles.length > 0 && highlightRoleMentioned(source)) return true;
         if (!hasMentions && !refAuthor) return false;
         const me = currentUser();
         const myId = me && me.id;
@@ -4780,6 +4784,15 @@
             if (u && (u === myId || u.id === myId)) return true;
         }
         return false;
+    }
+    function highlightRoleMentioned(source) {
+        const me = currentUser(), check = inspectedExport(5632, "isRawMessageMentioned");
+        if (!me || !me.id || typeof check !== "function") return false;
+        // isRawMessageMentioned reads channel_id/mention_roles; a MessageRecord has the camelCase names instead. Only roles
+        // are asked about here: everyone and user mentions are already checked above.
+        const raw = {channel_id:source.channel_id || source.channelId, mention_roles:source.mention_roles || source.mentionRoles,
+            mention_everyone:false, mentions:[]};
+        try { return !!check({rawMessage:raw, userId:me.id, suppressEveryone:true, suppressRoles:false}); } catch (_) { return false; }
     }
     function highlightRemember(channelId, id, source) {
         if (!features.messageHighlight || typeof channelId !== "string" || !channelId || typeof id !== "string" || !id) return;
