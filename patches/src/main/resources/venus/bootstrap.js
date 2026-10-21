@@ -846,7 +846,7 @@
     }
     // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
     // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
-    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language"],
+    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
@@ -7456,7 +7456,10 @@
         channels:new Set()};
     const TRANSLATE_CHOICES = 1000, TRANSLATE_CHANNELS = 200;
     // What a message does when you haven't chosen for it: translated, unless you only translate when you ask and its chat isn't on.
-    function translateDefault(channelId) { return settings.translateMode !== "manual" || translate.channels.has(channelId); }
+    function translateDefault(channelId) { return settings.translateMode !== "manual" || translateChatOn(channelId); }
+    // A chat you translated from the bar. Only while the bar is one of the ways you ask, so choosing "Message menu" never
+    // leaves chats translated with no bar to turn them back.
+    function translateChatOn(channelId) { return settings.translateAsk !== "menu" && translate.channels.has(channelId); }
     function translateWanted(id, channelId) {
         const choice = translate.choice.get(id);
         return choice === undefined ? translateDefault(channelId) : choice;
@@ -7679,7 +7682,7 @@
         if (!message || !Array.isArray(message.content) || !contentSource || typeof contentSource.content !== "string" || !channelId || !id) return message;
         // Not wanted (most rows in "Only when you ask") needs no user lookup (1.44x, tests/bench/translate_row.js).
         const choice = translate.choice.get(id);
-        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translate.channels.has(channelId)) { translateSeen(source, channelId, id, null); return message; }
+        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translateChatOn(channelId)) { translateSeen(source, channelId, id, null); return message; }
         // Your own messages are already in a language you read, unless you ask for one from the hold menu.
         if (choice !== true) {
             const author = source && source.author && source.author.id || message.authorId, me = currentUser();
@@ -7725,7 +7728,7 @@
         // The same order as translateRow: the choice first, the current user only when it can matter.
         if (!quotedId) return message;
         const choice = translate.choice.get(quotedId);
-        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translate.channels.has(channelId)) return message;
+        if (choice === false || choice === undefined && settings.translateMode === "manual" && !translateChatOn(channelId)) return message;
         if (choice !== true) { const me = currentUser(); if (me && quoted.authorId === me.id) return message; }
         const layout = translateLayout(quoted.content);
         if (!layout) return message;
@@ -7777,7 +7780,7 @@
         if (!enabled("translate") || !React || !tree || !message || !message.id || !contentSource || typeof contentSource.content !== "string" || !contentSource.content.trim()) return tree;
         const shownNow = translateShownFor(message);
         // "Top bar" only: the menu is for showing one message's original in a chat you translated, not for asking.
-        if (settings.translateMode === "manual" && settings.translateAsk === "bar" && !shownNow && !translate.channels.has(message.channel_id || message.channelId)) return tree;
+        if (settings.translateMode === "manual" && settings.translateAsk === "bar" && !shownNow && !translateChatOn(message.channel_id || message.channelId)) return tree;
         const label = shownNow ? tr("Show original") : tr("Translate");
         let added = false;
         const Icon = venusIcon(15723, "LanguageIcon");
