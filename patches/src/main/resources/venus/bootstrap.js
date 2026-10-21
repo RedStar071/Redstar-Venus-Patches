@@ -52,7 +52,7 @@
     // Every feature starts off: nothing changes in Discord until you turn it on. Options inside a feature keep
     // their own defaults, so turning a feature on does what it says straight away.
     const settings = { picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
-        noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true,
+        noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
@@ -61,13 +61,13 @@
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
-        messageHighlight:false, messageHighlightThickness:2, messageHighlightStrength:"normal", messageHighlightPingColor:"default", messageHighlightDeletedColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
+        messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
         return DEFAULT_SETTINGS || (DEFAULT_SETTINGS = Object.freeze({
             picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
-            noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true,
+            noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true, systemFont: false,
             hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
@@ -76,7 +76,7 @@
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
-            messageHighlight: false, messageHighlightThickness: 2, messageHighlightStrength: "normal", messageHighlightPingColor: "default", messageHighlightDeletedColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -117,11 +117,14 @@
     const TRANSLATE_MODES = ["auto", "manual"];
     // Left bar thickness multiplier (1x = 2dp default, 2x = 4dp, 3x = 6dp, 4x = 8dp) and highlight color presets (#60).
     const HIGHLIGHT_THICKNESSES = [1, 2, 3, 4];
-    // How strongly replies and mentions are tinted behind the text: alpha of the highlight color. Normal (1a, ~10%) is
-    // what Discord draws by itself; the others are about 5%, 20% and 30%.
-    const HIGHLIGHT_STRENGTHS = {faint:"0d", normal:"1a", bright:"33", vivid:"4d"};
-    const HIGHLIGHT_STRENGTH_KEYS = ["faint", "normal", "bright", "vivid"];
-    function highlightAlpha() { return HIGHLIGHT_STRENGTHS[settings.messageHighlightStrength] || "1a"; }
+    // How strongly a highlighted row is tinted behind its text, 0 to 100 %. 50 is Discord's own tint (alpha 1a, about
+    // 10%); 0 leaves only the bar and 100 is about 40%, still light enough to read on. The pills are these steps.
+    const BRIGHTNESS_STEPS = [0, 25, 50, 75, 100];
+    function brightness(value) { const n = Math.round(Number(value)); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 50; }
+    function highlightAlpha(level) {
+        const n = brightness(level), a = n <= 50 ? Math.round(n * 26 / 50) : Math.round(26 + (n - 50) * 76 / 50);
+        return (a < 16 ? "0" : "") + a.toString(16);
+    }
     const HIGHLIGHT_COLOR_MAP = {default:"", yellow:"#f0b232", blurple:"#5865f2", green:"#23a55a", cyan:"#00a8fc", pink:"#eb459e", purple:"#9b59b6", orange:"#e67e22", red:"#f23f43"};
     function isHighlightColor(value) {
         return typeof value === "string" && (owns(HIGHLIGHT_COLOR_MAP, value) || /^#[0-9a-fA-F]{6}$/.test(value.trim()));
@@ -282,14 +285,22 @@
     }
     // Typing 0 in the maximum box used to jump it to 512; anything below 1 now means the lowest, 1.
     function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(MAX_DELETED, n)) : 512; }
+    // 1.18.0 moved the deleted messages color from Message highlights to Keep deleted messages: a settings file or
+    // backup from before keeps the color you picked.
+    function migrateSettings(raw) {
+        if (raw && typeof raw === "object" && raw.noDeleteColor === undefined && typeof raw.messageHighlightDeletedColor === "string")
+            raw.noDeleteColor = raw.messageHighlightDeletedColor;
+        return raw;
+    }
     // A saved or imported value for one setting, cleaned up, or undefined when it can't be used. Shared by the settings
     // file and by restoring a backup, so a hand-edited backup can never put a setting in a state the pages can't show.
     function acceptedSetting(key, value) {
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
             key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) ||
-            key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "messageHighlightStrength" && !HIGHLIGHT_STRENGTH_KEYS.includes(value) || key === "language" && !isLanguage(value)) return undefined;
-        if (key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
+            key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
+        if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
+        if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
         if (key === "noDeleteLimit") return deleteLimit(value);
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
     }
@@ -328,12 +339,19 @@
             if (settings.messageHighlightThickness === mult && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.messageHighlightThickness = mult; dirty.add(key); save(); notify(key); later(messageHighlightRedraw, 0); return true;
         }
-        if (key === "messageHighlightStrength") {
-            if (!HIGHLIGHT_STRENGTH_KEYS.includes(value)) return false;
-            if (settings.messageHighlightStrength === value && status.storage !== "loading" && status.storage !== "waiting") return true;
-            settings.messageHighlightStrength = value; dirty.add(key); save(); notify(key); later(messageHighlightRedraw, 0); return true;
+        if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") {
+            if (typeof value !== "number" || !Number.isFinite(value)) return false;
+            const level = brightness(value);
+            if (settings[key] === level && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings[key] = level; dirty.add(key); save(); notify(key); later(key === "noDeleteBrightness" ? deletedRedraw : messageHighlightRedraw, 0); return true;
         }
-        if (key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor") {
+        if (key === "noDeleteColor") {
+            if (!isHighlightColor(value)) return false;
+            const clean = normalizeHighlightColor(value);
+            if (settings.noDeleteColor === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.noDeleteColor = clean; dirty.add(key); save(); notify(key); later(deletedRedraw, 0); return true;
+        }
+        if (key === "messageHighlightPingColor") {
             if (!isHighlightColor(value)) return false;
             const clean = normalizeHighlightColor(value);
             if (settings[key] === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
@@ -399,6 +417,7 @@
             if (text) {
                 const loaded = JSON.parse(text);
                 if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) throw new Error("Invalid preferences");
+                migrateSettings(loaded);
                 for (const key of Object.keys(settings)) {
                     const value = dirty.has(key) ? undefined : acceptedSetting(key, loaded[key]);
                     if (value !== undefined) settings[key] = value;
@@ -804,12 +823,12 @@
     }
     // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
     // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
-    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting"], translate:["Show the original language", "Show the original text", "Another language"],
+    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
-        messageHighlight:["Reply and mention brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
+        messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1273,7 +1292,7 @@
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error(tr("That isn't a Venus backup."));
         const wrapped = data.app === BACKUP_APP && data.settings && typeof data.settings === "object" && !Array.isArray(data.settings);
         if (wrapped && typeof data.format === "number" && data.format > BACKUP_FORMAT) throw new Error(tr("This backup is from a newer Venus. Update Venus to restore it."));
-        const raw = wrapped ? data.settings : data, values = {}, defaults = defaultSettings();
+        const raw = migrateSettings(Object.assign({}, wrapped ? data.settings : data)), values = {}, defaults = defaultSettings();
         Object.keys(defaults).forEach(key => { const value = acceptedSetting(key, raw[key]); if (value !== undefined) values[key] = value; });
         if (!Object.keys(values).length) throw new Error(tr("That isn't a Venus backup."));
         const people = Array.isArray(wrapped ? data.people : data.userNotifIds) ? (wrapped ? data.people : data.userNotifIds)
@@ -2013,6 +2032,15 @@
             type:message.type || 0,flags:message.flags || 0,attachments:message.attachments || [],embeds:message.embeds || [],
             mentions:message.mentions || [],mention_roles:message.mentionRoles || [],referenced_message:null};
         return JSON.parse(JSON.stringify(raw));
+    }
+    // A new color or brightness for kept messages reaches chat at once: Discord redraws a row when its message
+    // updates, so the newest 200 kept messages get the same no-op MESSAGE_UPDATE NoDelete sends when it keeps one.
+    function deletedRedraw() {
+        if (!dispatcher || !deleted.size || !enabled("noDelete")) return;
+        Array.from(deleted.values()).slice(-200).forEach(entry => {
+            const message = entry.message;
+            try { dispatcher({type:"MESSAGE_UPDATE", message:{id:entry.id, channel_id:entry.channelId, content:message && message.content || ""}}); } catch (_) {}
+        });
     }
     // One Flux removal per channel instead of one dispatch (and store emit) per message.
     function dispatchRemovals(entries) {
@@ -4209,7 +4237,8 @@
     }
     // A choice of two to four, drawn like Discord's segmented control (its MOBILE_SEGMENTED_CONTROL tokens).
     function venusSegmented(props) {
-        const index=Math.max(0,props.items.findIndex(item => item.value===props.value));
+        // -1 when the value isn't one of the pills (a custom number): no pill is shown as chosen.
+        const index=props.items.findIndex(item => item.value===props.value);
         const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { haptic("IMPACT_MEDIUM"); animateLayout(); props.onChange(item.value); } };
         const pill={flex:1,paddingVertical:9,borderRadius:20,alignItems:"center"};
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
@@ -4220,11 +4249,41 @@
         const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
         const indicator=s.on && s.on.backgroundColor;
         return el(RN.View,{key:props.key,style:[s.wrap,{opacity:props.disabled ? 0.5 : 1}],accessibilityRole:"tablist"},
-            motion() ? el(SegmentedSlider,{key:"slider",slot,index,count:props.items.length,color:indicator}) : null,
+            motion() && index>=0 ? el(SegmentedSlider,{key:"slider",slot,index,count:props.items.length,color:indicator}) : null,
             props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index && !sliding ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
                 accessibilityState:{selected:i===index,disabled:!!props.disabled},disabled:!!props.disabled,onPress:() => pick(i)},
                 Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted"},item.label) :
                     el(RN.Text,{style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600"}},item.label))));
+    }
+    // Presets as Discord's segmented pills, and under them one Custom row that says what's in use: tap it for an inline
+    // number box with Use. A custom value leaves every pill unselected, so they never claim a choice you didn't make.
+    function PresetOrCustom(props) {
+        const [editing, setEditing] = React.useState(false), [draft, setDraft] = React.useState("");
+        const s = useThemed("presetCustom", c => ({row:{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:12,
+            borderRadius:16, backgroundColor:c.CARD_BACKGROUND_DEFAULT}, chip:{paddingHorizontal:12, paddingVertical:5, borderRadius:12,
+            backgroundColor:c.BACKGROUND_MOD_SUBTLE}, active:{backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}}),
+            {row:{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:12, borderRadius:16, backgroundColor:"#2b2d31"},
+             chip:{paddingHorizontal:12, paddingVertical:5, borderRadius:12, backgroundColor:"#4e50584d"}, active:{backgroundColor:"#5865f2"}});
+        const ui = reviewUI(), Text = inspectedExport(5088, "Text"), Press = RN.Pressable || RN.View, Pencil = venusIcon(9720, "PencilIcon");
+        const value = props.value, preset = props.presets.some(item => item.value === value), on = !props.disabled;
+        const label = (text, variant, color) => Text ? el(Text, {variant, color}, text) :
+            el(RN.Text, {style:{color:color === "text-strong" ? "#f2f3f5" : color === "always-white" ? "#ffffff" : "#949ba4", fontSize:variant.indexOf("text-md") === 0 ? 16 : 13, fontWeight:"600"}}, text);
+        const number = Number(draft), valid = draft !== "" && Number.isFinite(number) && number >= props.min && number <= props.max;
+        const apply = () => { if (!on || !valid) return; haptic("SELECTION"); animateLayout(); props.onChange(number); setEditing(false); setDraft(""); };
+        const open = () => { if (!on) return; animateLayout(); setDraft(String(value)); setEditing(true); };
+        return el(RN.View, {key:props.key, style:{gap:10}},
+            groupTitle("title", props.title),
+            venusSegmented({key:props.key + ":pills", value:preset ? value : undefined, disabled:!on, onChange:next => { setEditing(false); props.onChange(next); }, items:props.presets}),
+            el(Press, {accessibilityRole:"button", accessibilityLabel:tr("Custom"), disabled:!on || editing, onPress:open, style:[s.row, {opacity:on ? 1 : 0.5}]},
+                el(Pencil, {size:"sm"}),
+                el(RN.View, {style:{flex:1}}, label(tr("Custom"), "text-md/semibold", "text-strong"),
+                    label(tr("{min} to {max}", {min:props.format(props.min), max:props.format(props.max)}), "text-sm/medium", "text-muted")),
+                popIn("custom:" + (preset ? "off" : value), el(RN.View, {style:[s.chip, preset ? null : s.active]},
+                    label(preset ? tr("Edit") : props.format(value), "text-sm/semibold", preset ? "text-muted" : "always-white")))),
+            editing ? inputWithButton(ui, "input", {value:draft, label:props.inputLabel, keyboardType:"number-pad", maxLength:String(props.max).length,
+                autoFocus:true, returnKeyType:"done", onSubmitEditing:apply, placeholder:String(props.placeholder), editable:on, isDisabled:!on},
+                text => setDraft(String(text || "").replace(/[^0-9]/g, "")), "Use", apply, !valid) : null,
+            props.hint ? footnote("hint", props.hint) : null);
     }
     // A text box with Discord's button (Button 5379) beside it, like its own "add" fields.
     function inputWithButton(ui,key,inputProps,onChange,buttonText,onPress,disabled) {
@@ -4730,7 +4789,6 @@
             footnote("note","Icons are colored by status on each device: desktop, mobile, web, console or VR.")];
         return settingsBody(ui,groups);
     }
-    const deletedHighlight = {};
     const highlightProcessed = new Map();
     const highlightRecent = new Map();
     function highlightColorHex(choice, defaultHex) {
@@ -4885,22 +4943,14 @@
         if (isDeletedRow && RN && typeof RN.processColor === "function") {
             // Native row highlight schema from RowGeneratorConstants (7743). No injected notice, altered
             // message content, or AutoMod state. Only retained local rows are tinted.
-            const custom = highlightCustomPair(highlightOn ? settings.messageHighlightDeletedColor : "default", "#f23f43", mult);
-            if (custom) {
-                next = Object.assign({},next,{backgroundHighlight:custom});
-            } else {
-                if (deletedHighlight.owner !== RN.processColor) {
-                    deletedHighlight.owner = RN.processColor;
-                    deletedHighlight.gutter = RN.processColor("#f23f43");
-                    deletedHighlight.background = RN.processColor("#f23f431a");
-                }
-                next = Object.assign({},next,{backgroundHighlight:{backgroundColor:deletedHighlight.background,gutterColor:highlightEncodeGutter(deletedHighlight.gutter, mult)}});
-            }
+            // Its color and brightness are NoDelete's own (Keep deleted messages page); only the bar width is Message highlights'.
+            const custom = highlightCustomPair(settings.noDeleteColor, "#f23f43", mult, highlightAlpha(settings.noDeleteBrightness));
+            if (custom) next = Object.assign({},next,{backgroundHighlight:custom});
         } else if (highlightOn && RN && typeof RN.processColor === "function") {
             const existing = next.backgroundHighlight;
             // A custom color or brightness repaints the row; Discord's own yellow at Normal keeps its own highlight.
-            if (isMentionRow && (settings.messageHighlightPingColor !== "default" || settings.messageHighlightStrength !== "normal")) {
-                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult, highlightAlpha());
+            if (isMentionRow && (settings.messageHighlightPingColor !== "default" || settings.messageHighlightBrightness !== 50)) {
+                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult, highlightAlpha(settings.messageHighlightBrightness));
                 if (custom) next = Object.assign({},next,{backgroundHighlight:custom});
             } else if (existing && typeof existing.gutterColor === "number" && mult > 1) {
                 next = Object.assign({},next,{backgroundHighlight:Object.assign({},existing,{gutterColor:highlightEncodeGutter(existing.gutterColor, mult)})});
@@ -5273,7 +5323,7 @@
     // deleted message outlined in your deleted highlight color. Toggling Show edit history updates it live.
     function NoDeletePreview(props) {
         const s=useChatPreviewStyles(), k=usePreviewChrome();
-        const red=highlightColorHex(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightDeletedColor : "default","#f23f43");
+        const red=highlightColorHex(settings.noDeleteColor,"#f23f43"), alpha=highlightAlpha(settings.noDeleteBrightness);
         const bar=(features.messageHighlight && enabled("messageHighlight") ? settings.messageHighlightThickness : 1)*2;
         const versions=[tr("See you at 6"),tr("See you at 7"),tr("See you at 8")];
         const history=props.edits ? versions.slice(0,2) : [];
@@ -5283,7 +5333,7 @@
                 previewMessage(s,"edited","Alex","#3ba55c",tr("Today at 4:01 PM"),el(RN.View,null,
                     history.map((text,i) => popIn("old:"+i,el(RN.Text,{style:s.faded},text))),
                     el(RN.Text,{style:s.text},versions[2],el(RN.Text,{style:s.muted}," "+tr("(edited)")))))),
-            el(RN.View,{key:"deleted",style:{backgroundColor:red+"1a"}},
+            el(RN.View,{key:"deleted",style:{backgroundColor:red+alpha}},
                 el(RN.View,{style:{position:"absolute",left:0,top:0,bottom:0,width:bar,backgroundColor:red}}),
                 previewMessage(s,"msg","Sam","#eb459e",tr("Today at 4:03 PM"),el(RN.Text,{style:s.text},tr("Oops, wrong chat. Deleting this."))))],
             {header:previewHeader(k,{title:"general"}),footer:previewInput(k,s,{placeholder:tr("Message {channel}",{channel:"#general"})})}));
@@ -5291,12 +5341,13 @@
     const NODELETE_LIMITS = [100, 512, 1000, MAX_DELETED];
     function NoDeleteSettings() {
         useSettings();
+        const [hexOpen, setHexOpen]=React.useState(false), [hexDraft, setHexDraft]=React.useState(""), card=highlightCardStyle();
         const ui=reviewUI();
         if (!React || !RN) return null;
-        const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow;
-        // How many to keep is a choice of four, not a number to type. A number saved by an older version shows
-        // as the closest choice and stays as it is until you pick another.
-        const limit=settings.noDeleteLimit, nearest=NODELETE_LIMITS.reduce((best,n) => Math.abs(n-limit)<Math.abs(best-limit) ? n : best,NODELETE_LIMITS[0]);
+        const Group=ui.TableRowGroup || RN.View, Switch=ui.TableSwitchRow, on=!!settings.noDelete;
+        const cleanHex=String(hexDraft || "").trim(), validHex=/^#?[0-9a-fA-F]{6}$/.test(cleanHex);
+        const applyHex=() => { if (!on || !validHex) return; setSetting("noDeleteColor",(cleanHex.startsWith("#") ? cleanHex : "#"+cleanHex).toLowerCase()); setHexOpen(false); setHexDraft(""); };
+        const look=settings.noDeleteColor!=="default" || settings.noDeleteBrightness!==50;
         const kept=deleted.size, changed=edits.size, hasKept=kept>0 || changed>0;
         const summary=hasKept ? tr(settings.noDeleteSave ? "{deleted} and {edited} kept, saved on this phone." : "{deleted} and {edited} kept until Discord restarts.",
             {deleted:count(kept,"deleted message"),edited:count(changed,"edited message")}) : "";
@@ -5306,13 +5357,23 @@
             el(NoDeletePreview,{key:"preview",edits:!!settings.noDeleteEdits,on:!!settings.noDelete}),
             el(Group,{key:"edits",title:tr("Edited messages")},toggle("noDeleteEdits","Show edit history","What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.",rowIcon(9720,"PencilIcon"))),
             el(Group,{key:"save",title:tr("Storage")},toggle("noDeleteSave","Keep after restarting","Deleted and edited messages survive closing Discord. Saved only on this phone, for this account.",rowIcon(5044,"DownloadIcon"))),
-            el(RN.View,{key:"limit",style:{gap:8}},
-                groupTitle("title","Keep up to"),
-                venusSegmented({key:"choice",value:nearest,disabled:!settings.noDelete,onChange:value => setSetting("noDeleteLimit",value),
-                    items:NODELETE_LIMITS.map(n => ({value:n,label:String(n)}))}),
-                footnote("hint","When it's full, the oldest is removed first.")),
-            hasKept ? el(Group,{key:"clear",title:tr("Manage")},actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
-                () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),false,true)) : null,
+            el(RN.View,{key:"look",style:{gap:8}},
+                groupTitle("title","Look"),
+                el(RN.View,{style:card},
+                    highlightColorPicker({setting:"noDeleteColor",title:"Color",choices:HIGHLIGHT_DELETED_CHOICES,defaultHex:"#f23f43",on,value:settings.noDeleteColor,
+                        onNoPicker:() => { setHexOpen(true); setHexDraft(settings.noDeleteColor.startsWith("#") ? settings.noDeleteColor : ""); }}),
+                    hexOpen ? inputWithButton(ui,"hex",{value:hexDraft,label:tr("Hex color"),autoCapitalize:"none",autoCorrect:false,maxLength:7,placeholder:"#f23f43",
+                        onSubmitEditing:applyHex,returnKeyType:"done",editable:on,isDisabled:!on},text => setHexDraft(String(text || "")),"Use",applyHex,!on || !validHex) : null)),
+            el(PresetOrCustom,{key:"brightness",title:"Brightness",value:settings.noDeleteBrightness,disabled:!on,min:0,max:100,placeholder:50,
+                inputLabel:tr("Brightness, 0 to 100"),format:n => tr("{n}%",{n}),onChange:value => setSetting("noDeleteBrightness",value),
+                presets:BRIGHTNESS_STEPS.map(n => ({value:n,label:tr("{n}%",{n})})),hint:"How strongly a kept message is tinted behind its text. 0% leaves only the bar."}),
+            el(PresetOrCustom,{key:"limit",title:"Keep up to",value:settings.noDeleteLimit,disabled:!on,min:1,max:MAX_DELETED,placeholder:512,
+                inputLabel:tr("Messages, 1 to {max}",{max:MAX_DELETED}),format:n => String(n),onChange:value => setSetting("noDeleteLimit",value),
+                presets:NODELETE_LIMITS.map(n => ({value:n,label:String(n)})),hint:"When it's full, the oldest is removed first."}),
+            hasKept || look ? el(Group,{key:"clear",title:tr("Manage")},
+                look ? actionRow(ui,"look","Reset the look","Red at 50% brightness, as Discord draws a highlight.",() => { setSetting("noDeleteColor","default"); setSetting("noDeleteBrightness",50); setHexOpen(false); },!on) : null,
+                hasKept ? actionRow(ui,"clear","Clear kept messages","Removes every deleted message and edit history Venus kept, from chat and from this phone.",
+                    () => confirmAction("Clear kept messages?","Every deleted message and edit history Venus kept is removed. This can't be undone.","Clear",forgetKept),false,true) : null) : null,
             footnote("note","Delete a kept message again to hide just that one.")];
         return settingsBody(ui,groups);
         function toggle(key,label,subLabel,icon) { return switchRow(Switch,key,label,subLabel,icon); }
@@ -9885,6 +9946,11 @@
         spine:{borderColor:"#4e5058"}, mention:{backgroundColor:"#5865f24d", color:"#c9cdfb", fontWeight:"600"},
         card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:16, gap:16}, divider:{height:1, backgroundColor:"#ffffff14"},
         ring:{borderColor:"#f2f3f5"}, dashed:{borderColor:"#949ba4"}};
+    // The rounded card the color pickers sit on, in the theme's card color.
+    function highlightCardStyle() {
+        return useThemed("highlightCard", c => ({card:Object.assign({}, HIGHLIGHT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            divider:{height:1, backgroundColor:c.BORDER_SUBTLE}}), HIGHLIGHT_DARK).card;
+    }
     // Discord's own color picker sheet, the one its role and profile colors use. Returns false when it can't open.
     function highlightPickColor(current, presets, onPick) {
         const show = inspectedExport(14850, "default");
@@ -9931,7 +9997,7 @@
         const Press = RN.Pressable || RN.View, count = props.count == null ? 3 : props.count;
         const message = (key, hex, children) => {
             const beat = props.beats && props.beats[key] || 0;
-            const alpha = key === "reply" && props.pingAlpha || "1a";
+            const alpha = key === "reply" ? props.pingAlpha || "1a" : key === "deleted" ? props.deletedAlpha || "1a" : "1a";
             const body = el(RN.View, {key, style:{paddingHorizontal:12, paddingVertical:6, backgroundColor:hex ? hex + alpha : undefined}},
                 hex ? el(HighlightGlow, {key:"glow:" + hex + ":" + bar + ":" + beat, hex, fresh:!!(props.fresh && props.fresh[key])}) : null,
                 hex ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:bar, backgroundColor:hex}}) : null, children,
@@ -9966,7 +10032,7 @@
         useSettings("messageHighlight");
         const s = useChatPreviewStyles(), k = usePreviewChrome(), given = props.fresh || {};
         return el(RN.View, {key:"preview"},
-            highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, pingAlpha:props.pingAlpha, deleted:props.deleted,
+            highlightPreview({key:"chat", me:props.me, bar:props.bar, ping:props.ping, pingAlpha:props.pingAlpha, deleted:props.deleted, deletedAlpha:props.deletedAlpha,
                 fresh:{reply:!!given.reply, deleted:!!given.deleted},
                 header:previewHeader(k, {title:"general"}),
                 footer:previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})})}));
@@ -10000,57 +10066,51 @@
     function MessageHighlightSettings() {
         useSettings("messageHighlight");
         const ui = reviewUI();
-        const [hexDraft, setHexDraft] = React.useState(""), [hexTarget, setHexTarget] = React.useState("");
+        const [hexDraft, setHexDraft] = React.useState(""), [hexOpen, setHexOpen] = React.useState(false);
         // What the preview last showed, so only the highlight you just changed glows.
-        const shown = React.useRef(null);
+        const shown = React.useRef(null), card = highlightCardStyle();
         if (!React || !RN) return null;
-        const s = useThemed("highlightCard", c => ({card:Object.assign({}, HIGHLIGHT_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
-            divider:{height:1, backgroundColor:c.BORDER_SUBTLE}}), HIGHLIGHT_DARK);
         const on = enabled("messageHighlight"), showDeleted = !!features.noDelete;
         const pingHex = on ? highlightColorHex(settings.messageHighlightPingColor, "#f0b232") : "#f0b232";
-        const delHex = on ? highlightColorHex(settings.messageHighlightDeletedColor, "#f23f43") : "#f23f43";
+        // Kept deleted messages show here as Keep deleted messages draws them, so the bar width can be judged on both.
+        const delHex = highlightColorHex(settings.noDeleteColor, "#f23f43"), delAlpha = highlightAlpha(settings.noDeleteBrightness);
         const barWidth = (on ? settings.messageHighlightThickness : 1) * 2, last = shown.current;
-        const pingAlpha = on ? highlightAlpha() : "1a";
-        const fresh = last ? {reply:last.ping !== pingHex || last.bar !== barWidth || last.alpha !== pingAlpha, deleted:last.deleted !== delHex || last.bar !== barWidth} : null;
-        shown.current = {ping:pingHex, deleted:delHex, bar:barWidth, alpha:pingAlpha};
-        const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightDeletedColor !== "default" ||
-            settings.messageHighlightStrength !== "normal";
+        const pingAlpha = on ? highlightAlpha(settings.messageHighlightBrightness) : "1a";
+        const fresh = last ? {reply:last.ping !== pingHex || last.bar !== barWidth || last.alpha !== pingAlpha, deleted:last.bar !== barWidth} : null;
+        shown.current = {ping:pingHex, bar:barWidth, alpha:pingAlpha};
+        const changed = settings.messageHighlightThickness !== 2 || settings.messageHighlightPingColor !== "default" || settings.messageHighlightBrightness !== 50;
         const resetAll = () => {
-            setSetting("messageHighlightThickness", 2); setSetting("messageHighlightPingColor", "default"); setSetting("messageHighlightDeletedColor", "default");
-            setSetting("messageHighlightStrength", "normal");
-            setHexTarget(""); reviewToast(ui, "Highlights reset", venusIcon(6868,"CircleCheckIcon"));
+            setSetting("messageHighlightThickness", 2); setSetting("messageHighlightPingColor", "default"); setSetting("messageHighlightBrightness", 50);
+            setHexOpen(false); reviewToast(ui, "Highlights reset", venusIcon(6868,"CircleCheckIcon"));
         };
         // When Discord's color picker can't open, a hex box opens under the colors instead.
         const cleanHex = String(hexDraft || "").trim(), validHex = /^#?[0-9a-fA-F]{6}$/.test(cleanHex);
         const applyHex = () => {
-            if (!on || !validHex || !hexTarget) return;
-            setSetting(hexTarget, (cleanHex.startsWith("#") ? cleanHex : "#" + cleanHex).toLowerCase());
-            setHexTarget(""); setHexDraft("");
+            if (!on || !validHex) return;
+            setSetting("messageHighlightPingColor", (cleanHex.startsWith("#") ? cleanHex : "#" + cleanHex).toLowerCase());
+            setHexOpen(false); setHexDraft("");
         };
-        const picker = (setting, title, choices, defaultHex) => highlightColorPicker({ setting, title, choices, defaultHex, on, value:settings[setting],
-            onNoPicker:() => { setHexTarget(setting); setHexDraft(settings[setting].startsWith("#") ? settings[setting] : ""); }});
         const groups = [
             on ? null : offCard("status", venusIcon(16947, "PaintbrushThinIcon"), "messageHighlight"),
-            el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, pingAlpha, deleted:showDeleted ? delHex : null, fresh}),
+            el(HighlightPreview, {key:"preview", on, me:currentUser(), bar:barWidth, ping:pingHex, pingAlpha, deleted:showDeleted ? delHex : null, deletedAlpha:delAlpha, fresh}),
             el(RN.View, {key:"thickness", style:{gap:8}},
                 groupTitle("title", "Left bar width"),
                 venusSegmented({key:"choice", value:settings.messageHighlightThickness, disabled:!on, onChange:value => setSetting("messageHighlightThickness", value),
                     items:HIGHLIGHT_THICKNESSES.map(n => ({value:n, label:tr("{n} dp", {n:n * 2})}))})),
-            el(RN.View, {key:"strength", style:{gap:8}},
-                groupTitle("title", "Reply and mention brightness"),
-                venusSegmented({key:"choice", value:settings.messageHighlightStrength, disabled:!on, onChange:value => setSetting("messageHighlightStrength", value),
-                    items:[{value:"faint", label:tr("Faint")}, {value:"normal", label:tr("Normal")}, {value:"bright", label:tr("Bright")}, {value:"vivid", label:tr("Vivid")}]})),
             el(RN.View, {key:"colors", style:{gap:8}},
-                groupTitle("title", "Colors"),
-                el(RN.View, {style:s.card},
-                    picker("messageHighlightPingColor", "Replies and mentions", HIGHLIGHT_PING_CHOICES, "#f0b232"),
-                    showDeleted ? el(RN.View, {style:s.divider}) : null,
-                    showDeleted ? picker("messageHighlightDeletedColor", "Deleted messages", HIGHLIGHT_DELETED_CHOICES, "#f23f43") : null,
-                    hexTarget ? inputWithButton(ui, "hex", {value:hexDraft, label:tr("Hex color"), autoCapitalize:"none", autoCorrect:false, maxLength:7, placeholder:"#5865f2",
+                groupTitle("title", "Look"),
+                el(RN.View, {style:card},
+                    highlightColorPicker({setting:"messageHighlightPingColor", title:"Replies and mentions", choices:HIGHLIGHT_PING_CHOICES, defaultHex:"#f0b232", on,
+                        value:settings.messageHighlightPingColor, onNoPicker:() => { setHexOpen(true); setHexDraft(settings.messageHighlightPingColor.startsWith("#") ? settings.messageHighlightPingColor : ""); }}),
+                    hexOpen ? inputWithButton(ui, "hex", {value:hexDraft, label:tr("Hex color"), autoCapitalize:"none", autoCorrect:false, maxLength:7, placeholder:"#5865f2",
                         onSubmitEditing:applyHex, returnKeyType:"done", editable:on, isDisabled:!on}, text => setHexDraft(String(text || "")), "Use", applyHex, !on || !validHex) : null)),
+            el(PresetOrCustom, {key:"brightness", title:"Brightness", value:settings.messageHighlightBrightness, disabled:!on, min:0, max:100, placeholder:50,
+                inputLabel:tr("Brightness, 0 to 100"), format:n => tr("{n}%", {n}), onChange:value => setSetting("messageHighlightBrightness", value),
+                presets:BRIGHTNESS_STEPS.map(n => ({value:n, label:tr("{n}%", {n})})), hint:"How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it."}),
             el(ui.TableRowGroup || RN.View, {key:"manage", title:tr("Manage")},
-                actionRow(ui, "reset", "Reset to defaults", "A 4 dp bar, yellow for replies and mentions, red for deleted messages.", resetAll, !on || !changed)),
-            footnote("note", "Changes show in chat right away, with no restart.")
+                actionRow(ui, "reset", "Reset to defaults", "A 4 dp bar, yellow at 50% brightness.", resetAll, !on || !changed)),
+            footnote("note", showDeleted ? "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages." :
+                "Changes show in chat right away, with no restart.")
         ];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
