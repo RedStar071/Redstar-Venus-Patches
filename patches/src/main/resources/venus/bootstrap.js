@@ -7543,9 +7543,14 @@
     function translateRow(message, source, channelId, id) {
         const contentSource = translateContentSource(source);
         if (!message || !Array.isArray(message.content) || !contentSource || typeof contentSource.content !== "string" || !channelId || !id) return message;
-        const author = source && source.author && source.author.id || message.authorId, me = currentUser();
+        // Not wanted (most rows in "Only when you ask") needs no user lookup (1.44x, tests/bench/translate_row.js).
+        const choice = translate.choice.get(id);
+        if (settings.translateMode === "manual" ? choice !== true : choice === false) { translateSeen(source, channelId, id, null); return message; }
         // Your own messages are already in a language you read, unless you ask for one from the hold menu.
-        if (me && author === me.id && translate.choice.get(id) !== true || !translateWanted(id)) { translateSeen(source, channelId, id, null); return message; }
+        if (choice !== true) {
+            const author = source && source.author && source.author.id || message.authorId, me = currentUser();
+            if (me && author === me.id) { translateSeen(source, channelId, id, null); return message; }
+        }
         const layout = translateLayout(message.content);
         if (!layout) { translateSeen(source, channelId, id, null); translateNothing(id); return message; }
         const target = translateTarget(), key = translateKey(target, layout.text);
