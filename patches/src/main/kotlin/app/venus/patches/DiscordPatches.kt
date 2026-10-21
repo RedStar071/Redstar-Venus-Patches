@@ -17,8 +17,8 @@ internal val discord = Compatibility(
     apkFileType = ApkFileType.APKM,
     appIconColor = 0x5865F2,
     targets = listOf(AppTarget(
-        version = "349.9 - Stable",
-        versionCode = 349009,
+        version = "350.8 - Stable",
+        versionCode = 350008,
         minSdk = 26
     ))
 )
@@ -148,7 +148,7 @@ internal fun skipLaunchOtaChecks(method: app.morphe.patcher.util.proxy.mutableTy
 
 internal fun pinPackagedDiscordBundle(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
     // Pin JS execution to the inspected packaged bundle, avoiding incompatible OTA cache bundles.
-    // 349.9 has two scratch locals; p1 is deliberately replaced with an asset loader.
+    // 350.8 has two scratch locals; p1 is deliberately replaced with an asset loader.
     if ((method.implementation?.registerCount ?: 0) - 2 < 2)
         throw PatchException("Bundle loader no longer has two safe scratch registers")
     method.addInstructions(0, """
@@ -778,7 +778,7 @@ internal const val QUEST_DESKTOP_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x
 internal const val QUEST_AGENT_GUARD_SIZE = 14
 
 /**
- * Discord's OkHttp interceptor replaces every request's User-Agent with Discord-Android/349009;RNA.
+ * Discord's OkHttp interceptor replaces every request's User-Agent with Discord-Android/350008;RNA.
  * A request that already says it's the Windows desktop app passes through untouched; everything else is unchanged.
  * Locals v0-v2 are free: the interceptor has 5 registers and 2 of them are parameters.
  */

@@ -170,7 +170,7 @@ python3 scripts/hbc/port_check.py work/new/assets/index.android.bundle
    - Discord embeds source file paths (`fileFinishedImporting(moduleId, "path/to/File.tsx")`) in almost every module. If any module ID shifted in the new version, `port_check.py` prints `[MOVED/CHECK]` along with `candidate_in_new_bundle=<new_id>`.
    - For any shifted or newly added module ID:
      - Inspect the candidate with `B.show(new_id)` and `B.exports(new_id)` using `scripts/hbc/hbc.py`.
-     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/349.9-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js`.
+     - **Always update both** `BOOTSTRAP_MODULES` in `scripts/hbc/port_check.py` **and** the module map file (`scripts/hbc/350.8-module-map.md`, or the new version's `<version>-module-map.md`), along with `patches/src/main/resources/venus/bootstrap.js`.
      - Also check the icon module IDs in `FEATURE_ICONS` inside `bootstrap.js`:
        ```bash
        python3 -c "
@@ -458,7 +458,7 @@ The page title is short ("Deleted messages", "Tap gestures").
   Morphe description is the Venus description, plus any credit.
 - Update `README.md` (features table) whenever a title, group or option changes. Keep titles at most 40 characters,
   descriptions at most 130, and every feature icon unique.
-- **Always keep both the module map file (`scripts/hbc/349.9-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
+- **Always keep both the module map file (`scripts/hbc/350.8-module-map.md`) and `scripts/hbc/port_check.py` (`BOOTSTRAP_MODULES`) updated** whenever any Metro module ID, export, or native hook is added, changed, or removed in `bootstrap.js`, and run `python3 scripts/hbc/port_check.py` to verify all entries pass.
 
 ## Benchmarking optimizations (required)
 
