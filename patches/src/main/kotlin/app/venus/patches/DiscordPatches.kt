@@ -434,8 +434,8 @@ val pastelize = bytecodePatch(
     execute {
         additionalSelections += "pastelize"
         pastelReplyText(Fingerprint(
+            // The lambda's number changes between builds ($9 in 349.9, $2 in 350.8); its signature is unique.
             definingClass = REPLY_PREVIEW,
-            name = "configureReply\$lambda\$9",
             returnType = "Lkotlin/Unit;",
             parameters = listOf("Lcom/discord/chat/bridge/structurabletext/StructurableText;", REPLY_PREVIEW, BRIDGE_MESSAGE, "I")
         ).method)
@@ -788,7 +788,7 @@ internal fun keepDesktopQuestAgent(method: app.morphe.patcher.util.proxy.mutable
         method.returnType != "Lokhttp3/Response;" || implementation.registerCount - 2 < 3)
         throw PatchException("Discord's User-Agent interceptor ABI changed")
     method.addInstructions(0, """
-        invoke-interface {p1}, Lokhttp3/Interceptor${'$'}Chain;->i()Lokhttp3/Request;
+        invoke-interface {p1}, Lokhttp3/Interceptor${'$'}Chain;->h()Lokhttp3/Request;
         move-result-object v0
         const-string v1, "User-Agent"
         invoke-virtual {v0, v1}, Lokhttp3/Request;->a(Ljava/lang/String;)Ljava/lang/String;

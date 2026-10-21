@@ -152,7 +152,7 @@ fun main(args: Array<String>) {
         check(regs.all { it in 0..2 || it == parameter }) { "Guard touches register outside v0-v2/p1: $regs" }
     }
     val calls = guard.mapNotNull { ((it as? ReferenceInstruction)?.reference as? MethodReference) }
-    check(calls.map { it.definingClass + "->" + it.name } == listOf("Lokhttp3/Interceptor\$Chain;->i", "Lokhttp3/Request;->a",
+    check(calls.map { it.definingClass + "->" + it.name } == listOf("Lokhttp3/Interceptor\$Chain;->h", "Lokhttp3/Request;->a",
         "Ljava/lang/String;->startsWith", "Lokhttp3/Interceptor\$Chain;->a"))
     for (call in calls.filter { it.definingClass != "Ljava/lang/String;" })
         check(methods.any { it.definingClass == call.definingClass && it.name == call.name && it.returnType == call.returnType &&
@@ -208,7 +208,8 @@ fun main(args: Array<String>) {
     }
     checkBranches(font, "Font guard"); checkBranches(interceptor, "User-Agent guard")
     // Pastelize reply text (#45): assembled on Discord's real reply preview text lambda (a detached fixture).
-    val replyMethod = methods.single { it.definingClass == REPLY_PREVIEW && it.name == "configureReply\$lambda\$9" }
+    val replyMethod = methods.single { it.definingClass == REPLY_PREVIEW && it.name.startsWith("configureReply\$lambda\$") &&
+        it.returnType == "Lkotlin/Unit;" && it.parameterTypes.map { p -> p.toString() } == listOf("Lcom/discord/chat/bridge/structurabletext/StructurableText;", REPLY_PREVIEW, BRIDGE_MESSAGE, "I") }
     val replyOriginal = replyMethod.implementation!!.instructions.map { it.opcode }
     val reply = MutableMethod(replyMethod)
     pastelReplyText(reply)
