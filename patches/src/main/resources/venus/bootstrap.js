@@ -7559,7 +7559,8 @@
             translateSchedule(60);
         }
         if (entry.state === "queued" || entry.state === "sending") { entry.ids.add(id); return message; }
-        if (entry.state !== "done") { translateNothing(id); return message; }
+        // Only "same" means it's already in your language; a translation that broke a mention or emoji just isn't shown.
+        if (entry.state !== "done") { if (entry.state === "same") translateNothing(id); else translate.asked.delete(id); return message; }
         translate.asked.delete(id);
         if (layout.view === undefined || layout.viewOf !== entry || layout.viewVersion !== translate.version) {
             layout.viewOf = entry; layout.viewVersion = translate.version;
@@ -7775,9 +7776,10 @@
                 // Missing from the answer: asked for again, not given up on.
                 if (!result) { entry.state = "queued"; translate.queue.push(key); return; }
                 // Already in your language, or given back unchanged: nothing to show, and it's never asked for again.
-                if (result.text === entry.text || result.language && languageBase(result.language) === languageBase(target)) { entry.state = "same"; entry.layout = null; return; }
+                // The row isn't redrawn, so a message you asked for from the hold menu says so now instead of never.
+                if (result.text === entry.text || result.language && languageBase(result.language) === languageBase(target)) { entry.state = "same"; entry.layout = null; ids.forEach(translateNothing); return; }
                 // A translation that lost, doubled or moved a mention or emoji out of its formatting is never shown.
-                if (!translateNodes(result.text, entry.layout)) { entry.state = "failed"; entry.layout = null; return; }
+                if (!translateNodes(result.text, entry.layout)) { entry.state = "failed"; entry.layout = null; ids.forEach(id => translate.asked.delete(id)); return; }
                 entry.translated = result.text; entry.language = result.language; entry.state = "done"; entry.layout = null; translate.translated++;
                 // Only rows that change are redrawn: one in your language looks the same as before.
                 ids.forEach(id => redraw.add(id));
