@@ -8015,17 +8015,33 @@
                     style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:k.sheetRow.borderColor} : null]},
                     el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {fontSize:15, fontWeight:"500"}]}, label), tapRipple(pulse, key, {left:8, top:7})))));
     }
+    // The translate bar as it looks in chat (TranslateBar), drawn with the preview's own colors.
+    function previewTranslateBar(k, done, target, onPress, pulse) {
+        const Press = RN.Pressable || RN.View, Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
+        const label = done ? tr("Show original") : tr("Translate to {language}", {language:target}), color = done ? k.iconMuted.color : k.brandFg.color;
+        return el(RN.View, {key:"bar", style:{flexDirection:"row", alignItems:"center", marginHorizontal:8, marginTop:4, marginBottom:6, minHeight:36,
+            paddingLeft:14, paddingRight:4, borderRadius:18, borderWidth:1, borderColor:k.bar.borderTopColor, backgroundColor:k.bar.backgroundColor}},
+            el(Press, {onPress, accessibilityRole:onPress ? "button" : undefined, accessibilityLabel:label,
+                style:{flex:1, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8, minHeight:34}},
+                el(Lang, {size:"sm", color}), popIn("bar:" + done, el(RN.Text, {numberOfLines:1, style:{fontSize:14, fontWeight:"600", color}}, label)),
+                tapRipple(pulse, "bar", {left:"45%", top:2})),
+            el(RN.View, {style:{width:30, height:30, alignItems:"center", justifyContent:"center"}}, el(Cog, {size:"sm", color:k.iconMuted.color})));
+    }
     function TranslatePreview(props) {
         useSettings("translate");
         const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = !!props.on;
         const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null, tried:{}};
         const [state, setState] = React.useState(blank), watching = on && mode === "watch", manual = settings.translateMode === "manual";
+        // The translate bar (#82) is shown, and is how Watch asks, whenever "How you ask" includes it.
+        const barAsk = manual && settings.translateAsk !== "menu";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const target = translateTargetName();
         const story = useStory(watching, () => {
             const steps = [[0, () => setState(Object.assign({}, blank, {shown:false}))],
                 [700, () => { animateLayout(); update({shown:true}); }, tr("Luc\u00eda writes in Spanish")]];
-            if (manual) steps.push([1400, () => update({pulse:{who:"msg", id:"hold"}, held:true}), tr("You hold the message to open its menu")],
+            if (barAsk) steps.push([1400, () => update({pulse:{who:"bar", id:"tap"}}), tr("You tap the bar at the top of the chat")],
+                [600, () => { animateLayout(); update({busy:true}); }]);
+            else if (manual) steps.push([1400, () => update({pulse:{who:"msg", id:"hold"}, held:true}), tr("You hold the message to open its menu")],
                 [700, () => { animateLayout(); update({menu:true}); }],
                 [1800, () => update({pulse:{who:"translate", id:"tap"}}), tr("And tap Translate")],
                 [600, () => { animateLayout(); update({menu:false, held:false, busy:true}); }]);
@@ -8035,7 +8051,7 @@
                 tr(settings.translateOriginal ? "The note under it says what it was in, with the original quoted below" : "The small note under it says what language it was in")]);
             steps.push([800, () => {}]);
             return steps;
-        }, [manual, settings.translateNote, settings.translateOriginal, target]);
+        }, [manual, barAsk, settings.translateNote, settings.translateOriginal, target]);
         const startTry = () => Object.assign({}, blank, {done:!manual});
         const translated = on ? state.done : true;
         const Lang = venusIcon(15723, "LanguageIcon");
@@ -8058,6 +8074,12 @@
                 tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
         };
         const closeMenu = () => { if (!on || watching) return; animateLayout(); update({menu:false, held:false}); };
+        const tapBar = () => {
+            if (!on || watching) return;
+            haptic("SELECTION"); animateLayout();
+            update(st => ({menu:false, held:false, done:!st.done, pulse:{who:"bar", id:"bar:" + Date.now()}, tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
+        };
+        const bar = barAsk ? previewTranslateBar(k, state.done, target, watching ? null : tapBar, state.pulse) : null;
         const msgView = el(RN.View, {key:"msg", style:state.held ? k.selected : null},
             popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg"));
         const message = !state.shown ? null : on && !watching ? el(Press, {key:"msg", onLongPress:holdMessage, onPress:holdMessage,
@@ -8065,6 +8087,8 @@
         const actionLabel = tr(state.done ? "Show original" : "Translate");
         const doneStep1 = manual ? state.tried.tr : state.tried.back, doneStep2 = manual ? state.tried.back : state.tried.tr;
         const tip = on && !watching ? previewTip(k, state.menu ? tr("Tap {action} in the menu", {action:actionLabel}) :
+            barAsk ? (!doneStep1 ? tr(state.done ? "Tap the bar to show the original" : "Tap the bar to translate the chat") :
+                !doneStep2 ? tr(state.done ? "Tap the bar again to show the original" : "Tap the bar again to translate it") : null) :
             !doneStep1 ? tr(state.done ? "Hold the message to see the original" : "Hold the message to open its menu") :
             !doneStep2 ? tr(state.done ? "Hold it again to show the original" : "Hold it again to translate it") : null,
             state.menu ? "down" : undefined) : null;
@@ -8073,7 +8097,7 @@
             ["copy", venusIcon(5042, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu],
             ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate]], state.pulse) : null;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? startTry() : blank); }) : null,
-            previewScreen(s, "preview", "Translation preview", [message, tip, sheet],
+            previewScreen(s, "preview", "Translation preview", [bar, message, tip, sheet],
                 {header:previewHeader(k, {title:"general"}),
                  footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     watching ? storyStrip(k, s, story) : null)}));
@@ -8083,7 +8107,8 @@
     // Translate and Show original in their menu. The cog opens these settings.
     function translateBarHeader(orig, self, args) {
         const props = args[0];
-        if (!props || !props.channelId || !React || !RN || props.stickyHeader === undefined) return orig.apply(self, args);
+        // The bar is always in the tree and draws nothing unless it's wanted, so switching options never remounts the chat.
+        if (!props || !props.channelId || !React || !RN) return orig.apply(self, args);
         const bar = el(TranslateBar, {key:"venus-translate-bar", channelId:props.channelId});
         const header = props.stickyHeader ? el(RN.View, {pointerEvents:"box-none"}, props.stickyHeader, bar) : bar;
         const next = Object.assign({}, props, {stickyHeader:header});
