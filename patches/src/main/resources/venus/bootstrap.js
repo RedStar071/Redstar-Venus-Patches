@@ -8151,7 +8151,7 @@
         try { if (typeof open === "function") { open({screen:status.menu ? "VENUS_TRANSLATE" : undefined}); return; } } catch (_) {}
         openSettings();
     }
-    // A language in its own words, and in the language Venus is shown in when that's different, like "Deutsch · German".
+    // A language in its own words (TRANSLATE_NATIVE); the list shows Venus's name for it under it when that's different.
     function translateNativeName(code) { return TRANSLATE_NATIVE[code] || translateLanguageName(code); }
     // Another language (#79): one row that says which language, and opens the list only when you want to change it.
     // Each language is listed in its own words with Venus's name for it under it (#82), with Discord's search field.
