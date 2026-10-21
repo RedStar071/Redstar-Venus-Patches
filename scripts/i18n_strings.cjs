@@ -199,6 +199,27 @@ for (let i = 0; i < tokens.length - 1; i++) {
     out.forEach(value => { if (/[A-Za-z]/.test(value) && value !== 'Venus') found.add(value); });
 }
 
+// Components that take their texts as object props and pass them through tr() inside:
+// highlightColorPicker({title}) and el(PresetOrCustom, {title, hint}).
+const PROP_TEXTS = {highlightColorPicker:['title'], PresetOrCustom:['title', 'hint']};
+function propStrings(objTokens, keys) {
+    if (!objTokens || objTokens[0]?.value !== '{') return;
+    const {args: entries} = splitArgs([{type: 'punct', value: '('}].concat(objTokens.slice(1, -1), [{type: 'punct', value: ')'}]), 0);
+    entries.forEach(entry => {
+        if (entry.length > 2 && entry[0].type === 'ident' && keys.includes(entry[0].value) && entry[1].value === ':') {
+            const out = [];
+            stringsInExpr(entry.slice(2), out);
+            out.forEach(value => { if (/[A-Za-z]/.test(value)) found.add(value); });
+        }
+    });
+}
+for (let i = 0; i < tokens.length - 1; i++) {
+    const t = tokens[i];
+    if (t.type !== 'ident' || tokens[i + 1].value !== '(' || tokens[i - 1]?.value === 'function') continue;
+    const {args} = splitArgs(tokens, i + 1);
+    if (t.value === 'highlightColorPicker') propStrings(args[0], PROP_TEXTS.highlightColorPicker);
+    else if (t.value === 'el' && args[0]?.length === 1 && args[0][0].value === 'PresetOrCustom') propStrings(args[1], PROP_TEXTS.PresetOrCustom);
+}
 for (const table of ['HIGHLIGHT_PING_CHOICES', 'HIGHLIGHT_DELETED_CHOICES']) {
     const match = new RegExp('const ' + table + ' = \\[([\\s\\S]*?)\\];').exec(source);
     if (match) for (const value of match[1].matchAll(/\["\w+", "([^"]+)"/g)) found.add(value[1]);
