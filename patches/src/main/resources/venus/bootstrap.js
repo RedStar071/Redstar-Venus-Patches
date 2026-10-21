@@ -5275,8 +5275,12 @@
     }
     let reviewToastSeq = 0;
     // Discord's own toasts carry an icon for what just happened; IconComponent is optional (venusIcon).
-    function reviewToast(ui,content,IconComponent) {
-        try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open(Object.assign({key:"venus-toast:" + (++reviewToastSeq),content:tr(content)},IconComponent ? {IconComponent} : null)); } catch (_) {}
+    function reviewToast(ui,content,IconComponent) { showToast(ui,"venus-toast:" + (++reviewToastSeq),tr(content),IconComponent); }
+    // 350.8's ToastActionCreators (4809) is open(key, {text, icon}), as its presentCopiedToClipboard calls it. The old
+    // open({key, content, IconComponent}) queued a toast with no options, and ToastContainer (14287) then crashed Discord
+    // reading its position.
+    function showToast(ui,key,text,icon) {
+        try { if (ui.toasts && typeof ui.toasts.open==="function") ui.toasts.open(key,icon ? {text,icon} : {text}); } catch (_) {}
     }
     function hideReviewSheet(ui,key) { try { if (ui.sheets && typeof ui.sheets.hideActionSheet==="function") ui.sheets.hideActionSheet(key); } catch (_) {} }
     // Styles from Discord's createStyles: semantic tokens resolve
@@ -6591,8 +6595,7 @@
         const content = tr(text, vars);
         const ui = reviewUI(), Icon = venusIcon(8768, "BellIcon");
         try {
-            if (ui.toasts && typeof ui.toasts.open === "function")
-                ui.toasts.open({key:"venus-user-notif:" + userNotif.shown, content, IconComponent:Icon});
+            showToast(ui, "venus-user-notif:" + userNotif.shown, content, Icon);
         } catch (_) {}
         userNotifPushSend(content);
         notify("userNotif");
