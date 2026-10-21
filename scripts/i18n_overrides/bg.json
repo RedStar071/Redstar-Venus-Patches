@@ -886,12 +886,12 @@
  "Close the list": "Затваряне на списъка",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "От лентата най-горе в чата или от менюто на съобщение. Нищо друго не се изпраща.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Задръжте съобщение и докоснете „Превод“. Без лента най-горе в чатовете.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Докоснете лентата, за да преведете целия чат, или задръжте едно съобщение и докоснете „Превод“.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Докоснете лентата, за да преведете целия чат. В преведен чат задръжте съобщение, за да видите оригинала.",
  "Tap the bar to translate the chat": "Докоснете лентата, за да преведете чата",
  "Tap the bar to show the original": "Докоснете лентата, за да видите оригинала",
  "Tap the bar again to translate it": "Докоснете лентата отново, за да го преведете",
  "Tap the bar again to show the original": "Докоснете лентата отново, за да видите оригинала",
  "You tap the bar at the top of the chat": "Докосвате лентата най-горе в чата",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Към Google Translate се изпращат само избраните от вас съобщения или чатовете, които превеждате от лентата, всяко по веднъж и без профила ви в Discord."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Към Google Translate се изпращат само избраните от вас съобщения или чатовете, които превеждате от лентата, всяко по веднъж и без профила ви в Discord.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Чатовете със съобщения на друг език показват лента най-горе. Докоснете я, за да превеждате чата, докато не излезете. Там задръжте съобщение, за да видите оригинала.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Чатовете със съобщения на друг език показват лента най-горе. Докоснете я, за да превеждате чата, докато не излезете, или задръжте едно съобщение и докоснете „Превод“."
 }

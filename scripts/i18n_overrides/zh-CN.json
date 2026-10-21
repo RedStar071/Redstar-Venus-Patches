@@ -790,12 +790,12 @@
  "Close the list": "关闭列表",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "通过聊天顶部的栏或消息菜单翻译。不会发送任何其他数据。",
  "Hold a message and tap Translate. No bar at the top of chats.": "长按消息并点按“翻译”。聊天顶部不显示栏。",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "点按顶部栏翻译整个聊天，或长按单条消息并点按“翻译”。",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "点按顶部栏翻译整个聊天。在已翻译的聊天中，长按消息即可查看原文。",
  "Tap the bar to translate the chat": "点按顶部栏翻译聊天",
  "Tap the bar to show the original": "点按顶部栏查看原文",
  "Tap the bar again to translate it": "再次点按顶部栏进行翻译",
  "Tap the bar again to show the original": "再次点按顶部栏查看原文",
  "You tap the bar at the top of the chat": "你点按聊天顶部的栏",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "只有你选择的消息，或你从顶部栏翻译的聊天，会发送到 Google 翻译，每条只发送一次，且不使用你的 Discord 账号。"
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "只有你选择的消息，或你从顶部栏翻译的聊天，会发送到 Google 翻译，每条只发送一次，且不使用你的 Discord 账号。",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "含有其他语言消息的聊天会在顶部显示一个栏。点按它即可翻译该聊天，直到你离开。在聊天中长按消息即可查看原文。",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "含有其他语言消息的聊天会在顶部显示一个栏。点按它即可翻译该聊天，直到你离开；也可以长按单条消息并点按“翻译”。"
 }

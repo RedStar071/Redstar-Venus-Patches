@@ -7506,9 +7506,11 @@
         if (want) return true;
         const own = LATIN_LETTERS[base];
         if (own === undefined) return false;
+        // Letters the language doesn't write with, in at least two words: one loanword (caf\u00e9, na\u00efve) isn't enough.
         const allowed = new RegExp("[^a-z'" + own + "]");
-        if (words.some(word => allowed.test(word))) return true;
-        let other = 0;
+        let marked = 0;
+        for (const word of words) if (allowed.test(word) && ++marked >= 2) return true;
+        let other = marked;
         const ownWords = new Set(LATIN_WORDS[base] || []), seen = new Set();
         for (const code in LATIN_WORDS) {
             if (code === base) continue;
@@ -8277,9 +8279,9 @@
                 groupTitle("title", "How you ask"),
                 venusSegmented({key:"ask:choice", value:settings.translateAsk, disabled:!on, onChange:value => setSetting("translateAsk", value),
                     items:[{value:"both", label:tr("Both")}, {value:"bar", label:tr("Top bar")}, {value:"menu", label:tr("Message menu")}]}),
-                footnote("hint", settings.translateAsk === "bar" ? "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original." :
+                footnote("hint", settings.translateAsk === "bar" ? "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original." :
                     settings.translateAsk === "menu" ? "Hold a message and tap Translate. No bar at the top of chats." :
-                    "Tap the bar to translate the whole chat, or hold one message and tap Translate.")) : null,
+                    "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.")) : null,
             radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(12901, "ChatSmileIcon")],
                 ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6642, "MobilePhoneIcon")],
                 ["custom", tr("Another language"), translateLanguageName(settings.translateLanguage) + ".", rowIcon(15723, "LanguageIcon")]], true),

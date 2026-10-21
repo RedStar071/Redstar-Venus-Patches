@@ -918,12 +918,12 @@
  "Close the list": "Uždaryti sąrašą",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "Iš juostos pokalbio viršuje arba žinutės meniu. Nieko daugiau nesiunčiama.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Palaikyk žinutę ir bakstelėk „Versti“. Pokalbių viršuje juostos nėra.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Bakstelėk juostą, kad išverstum visą pokalbį, arba palaikyk vieną žinutę ir bakstelėk „Versti“.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Bakstelėk juostą, kad išverstum visą pokalbį. Išverstame pokalbyje palaikyk žinutę, kad pamatytum originalą.",
  "Tap the bar to translate the chat": "Bakstelėk juostą, kad išverstum pokalbį",
  "Tap the bar to show the original": "Bakstelėk juostą, kad pamatytum originalą",
  "Tap the bar again to translate it": "Bakstelėk juostą dar kartą, kad jį išverstum",
  "Tap the bar again to show the original": "Bakstelėk juostą dar kartą, kad pamatytum originalą",
  "You tap the bar at the top of the chat": "Bakstelėji juostą pokalbio viršuje",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Į Google Translate siunčiamos tik tavo pasirinktos žinutės arba pokalbiai, kuriuos išverti juosta, kiekviena tik kartą ir be tavo Discord paskyros."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Į Google Translate siunčiamos tik tavo pasirinktos žinutės arba pokalbiai, kuriuos išverti juosta, kiekviena tik kartą ir be tavo Discord paskyros.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Pokalbiuose su žinutėmis kita kalba viršuje rodoma juosta. Bakstelėk ją, kad pokalbis būtų verčiamas, kol jį paliksi. Ten palaikyk žinutę, kad pamatytum originalą.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Pokalbiuose su žinutėmis kita kalba viršuje rodoma juosta. Bakstelėk ją, kad pokalbis būtų verčiamas, kol jį paliksi, arba palaikyk vieną žinutę ir bakstelėk „Versti“."
 }

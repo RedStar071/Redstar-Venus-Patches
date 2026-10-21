@@ -918,12 +918,12 @@
  "Close the list": "Zamknij listę",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "Z paska u góry czatu albo z menu wiadomości. Nic więcej nie jest wysyłane.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Przytrzymaj wiadomość i stuknij Przetłumacz. Bez paska u góry czatów.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Stuknij pasek, aby przetłumaczyć cały czat, albo przytrzymaj jedną wiadomość i stuknij Przetłumacz.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Stuknij pasek, aby przetłumaczyć cały czat. W przetłumaczonym czacie przytrzymaj wiadomość, aby zobaczyć oryginał.",
  "Tap the bar to translate the chat": "Stuknij pasek, aby przetłumaczyć czat",
  "Tap the bar to show the original": "Stuknij pasek, aby zobaczyć oryginał",
  "Tap the bar again to translate it": "Stuknij pasek ponownie, aby go przetłumaczyć",
  "Tap the bar again to show the original": "Stuknij pasek ponownie, aby zobaczyć oryginał",
  "You tap the bar at the top of the chat": "Stukasz pasek u góry czatu",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Do Google Translate trafiają tylko wybrane przez ciebie wiadomości lub czaty przetłumaczone z paska, każda tylko raz i bez twojego konta Discord."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Do Google Translate trafiają tylko wybrane przez ciebie wiadomości lub czaty przetłumaczone z paska, każda tylko raz i bez twojego konta Discord.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Czaty z wiadomościami w innym języku pokazują pasek u góry. Stuknij go, aby tłumaczyć czat, dopóki go nie opuścisz. Przytrzymaj tam wiadomość, aby zobaczyć oryginał.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Czaty z wiadomościami w innym języku pokazują pasek u góry. Stuknij go, aby tłumaczyć czat, dopóki go nie opuścisz, albo przytrzymaj jedną wiadomość i stuknij Przetłumacz."
 }

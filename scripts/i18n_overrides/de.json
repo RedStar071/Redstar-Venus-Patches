@@ -886,12 +886,12 @@
  "Close the list": "Liste schließen",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "Über die Leiste oben im Chat oder das Menü einer Nachricht. Sonst wird nichts gesendet.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Halte eine Nachricht gedrückt und tippe auf Übersetzen. Keine Leiste oben in Chats.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Tippe auf die Leiste, um den ganzen Chat zu übersetzen, oder halte eine Nachricht gedrückt und tippe auf Übersetzen.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Tippe auf die Leiste, um den ganzen Chat zu übersetzen. In einem übersetzten Chat hältst du eine Nachricht gedrückt, um das Original zu sehen.",
  "Tap the bar to translate the chat": "Tippe auf die Leiste, um den Chat zu übersetzen",
  "Tap the bar to show the original": "Tippe auf die Leiste, um das Original zu sehen",
  "Tap the bar again to translate it": "Tippe noch einmal auf die Leiste, um ihn zu übersetzen",
  "Tap the bar again to show the original": "Tippe noch einmal auf die Leiste, um das Original zu sehen",
  "You tap the bar at the top of the chat": "Du tippst auf die Leiste oben im Chat",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Nur Nachrichten, die du auswählst, oder Chats, die du über die Leiste übersetzt, werden an Google Translate gesendet, jede nur einmal und ohne deinen Discord-Account."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Nur Nachrichten, die du auswählst, oder Chats, die du über die Leiste übersetzt, werden an Google Translate gesendet, jede nur einmal und ohne deinen Discord-Account.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Chats mit Nachrichten in einer anderen Sprache zeigen oben eine Leiste. Tippe darauf, um den Chat zu übersetzen, bis du ihn verlässt. Halte dort eine Nachricht gedrückt, um das Original zu sehen.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Chats mit Nachrichten in einer anderen Sprache zeigen oben eine Leiste. Tippe darauf, um den Chat zu übersetzen, bis du ihn verlässt, oder halte eine Nachricht gedrückt und tippe auf Übersetzen."
 }

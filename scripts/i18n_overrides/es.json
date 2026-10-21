@@ -886,12 +886,12 @@
  "Close the list": "Cerrar la lista",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "Desde la barra de arriba del chat o desde el menú de un mensaje. No se envía nada más.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Mantén pulsado un mensaje y toca Traducir. Sin barra arriba en los chats.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Toca la barra para traducir todo el chat, o mantén pulsado un mensaje y toca Traducir.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Toca la barra para traducir todo el chat. En un chat traducido, mantén pulsado un mensaje para ver el original.",
  "Tap the bar to translate the chat": "Toca la barra para traducir el chat",
  "Tap the bar to show the original": "Toca la barra para ver el original",
  "Tap the bar again to translate it": "Toca la barra otra vez para traducirlo",
  "Tap the bar again to show the original": "Toca la barra otra vez para ver el original",
  "You tap the bar at the top of the chat": "Tocas la barra de arriba del chat",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Solo se envían a Google Translate los mensajes que eliges o los chats que traduces desde la barra, una vez cada uno y sin tu cuenta de Discord."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Solo se envían a Google Translate los mensajes que eliges o los chats que traduces desde la barra, una vez cada uno y sin tu cuenta de Discord.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Los chats con mensajes en otro idioma muestran una barra arriba. Tócala para traducir el chat hasta que salgas. Ahí, mantén pulsado un mensaje para ver el original.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Los chats con mensajes en otro idioma muestran una barra arriba. Tócala para traducir el chat hasta que salgas, o mantén pulsado un mensaje y toca Traducir."
 }

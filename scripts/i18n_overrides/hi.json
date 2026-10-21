@@ -886,12 +886,12 @@
  "Close the list": "सूची बंद करें",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "चैट के ऊपर की पट्टी से या किसी मैसेज के मेन्यू से। इसके अलावा कुछ नहीं भेजा जाता।",
  "Hold a message and tap Translate. No bar at the top of chats.": "किसी मैसेज को दबाकर रखें और 'अनुवाद करें' पर टैप करें। चैट के ऊपर कोई पट्टी नहीं।",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "पूरी चैट का अनुवाद करने के लिए पट्टी पर टैप करें, या किसी एक मैसेज को दबाकर रखें और 'अनुवाद करें' पर टैप करें।",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "पूरी चैट का अनुवाद करने के लिए पट्टी पर टैप करें। अनुवादित चैट में मूल देखने के लिए किसी मैसेज को दबाकर रखें।",
  "Tap the bar to translate the chat": "चैट का अनुवाद करने के लिए पट्टी पर टैप करें",
  "Tap the bar to show the original": "मूल देखने के लिए पट्टी पर टैप करें",
  "Tap the bar again to translate it": "अनुवाद करने के लिए पट्टी पर फिर से टैप करें",
  "Tap the bar again to show the original": "मूल देखने के लिए पट्टी पर फिर से टैप करें",
  "You tap the bar at the top of the chat": "आप चैट के ऊपर की पट्टी पर टैप करते हैं",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google Translate को सिर्फ़ आपके चुने हुए मैसेज या पट्टी से अनुवाद की गई चैट भेजी जाती हैं, हर एक सिर्फ़ एक बार और आपके Discord अकाउंट के बिना।"
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google Translate को सिर्फ़ आपके चुने हुए मैसेज या पट्टी से अनुवाद की गई चैट भेजी जाती हैं, हर एक सिर्फ़ एक बार और आपके Discord अकाउंट के बिना।",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "जिन चैट में दूसरी भाषा के मैसेज हों, उनके ऊपर एक पट्टी दिखती है। चैट से निकलने तक उसका अनुवाद करने के लिए उस पर टैप करें। वहाँ मूल देखने के लिए किसी मैसेज को दबाकर रखें।",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "जिन चैट में दूसरी भाषा के मैसेज हों, उनके ऊपर एक पट्टी दिखती है। चैट से निकलने तक उसका अनुवाद करने के लिए उस पर टैप करें, या किसी एक मैसेज को दबाकर रखें और 'अनुवाद करें' पर टैप करें।"
 }

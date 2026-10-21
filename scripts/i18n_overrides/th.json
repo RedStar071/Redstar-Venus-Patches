@@ -790,12 +790,12 @@
  "Close the list": "ปิดรายการ",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "จากแถบด้านบนของแชทหรือจากเมนูของข้อความ โดยจะไม่ส่งข้อมูลอื่นใด",
  "Hold a message and tap Translate. No bar at the top of chats.": "กดข้อความค้างไว้แล้วแตะ \"แปล\" ไม่มีแถบด้านบนของแชท",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "แตะแถบเพื่อแปลทั้งแชท หรือกดข้อความค้างไว้แล้วแตะ \"แปล\" เพื่อแปลข้อความเดียว",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "แตะแถบเพื่อแปลทั้งแชท ในแชทที่แปลแล้ว กดข้อความค้างไว้เพื่อดูต้นฉบับ",
  "Tap the bar to translate the chat": "แตะแถบเพื่อแปลแชท",
  "Tap the bar to show the original": "แตะแถบเพื่อดูต้นฉบับ",
  "Tap the bar again to translate it": "แตะแถบอีกครั้งเพื่อแปล",
  "Tap the bar again to show the original": "แตะแถบอีกครั้งเพื่อดูต้นฉบับ",
  "You tap the bar at the top of the chat": "คุณแตะแถบด้านบนของแชท",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "จะส่งไปยัง Google Translate เฉพาะข้อความที่คุณเลือกหรือแชทที่คุณแปลจากแถบ ครั้งเดียวต่อรายการ และไม่ใช้บัญชี Discord ของคุณ"
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "จะส่งไปยัง Google Translate เฉพาะข้อความที่คุณเลือกหรือแชทที่คุณแปลจากแถบ ครั้งเดียวต่อรายการ และไม่ใช้บัญชี Discord ของคุณ",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "แชทที่มีข้อความเป็นภาษาอื่นจะแสดงแถบด้านบน แตะแถบเพื่อแปลแชทจนกว่าคุณจะออก ในแชทนั้น กดข้อความค้างไว้เพื่อดูต้นฉบับ",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "แชทที่มีข้อความเป็นภาษาอื่นจะแสดงแถบด้านบน แตะแถบเพื่อแปลแชทจนกว่าคุณจะออก หรือกดข้อความค้างไว้แล้วแตะ \"แปล\""
 }

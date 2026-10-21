@@ -886,12 +886,12 @@
  "Close the list": "Lijst sluiten",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "Via de balk bovenaan een chat of het menu van een bericht. Er wordt verder niets verstuurd.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Houd een bericht ingedrukt en tik op Vertalen. Geen balk bovenaan chats.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Tik op de balk om de hele chat te vertalen, of houd één bericht ingedrukt en tik op Vertalen.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Tik op de balk om de hele chat te vertalen. Houd in een vertaalde chat een bericht ingedrukt om het origineel te zien.",
  "Tap the bar to translate the chat": "Tik op de balk om de chat te vertalen",
  "Tap the bar to show the original": "Tik op de balk om het origineel te zien",
  "Tap the bar again to translate it": "Tik nog eens op de balk om hem te vertalen",
  "Tap the bar again to show the original": "Tik nog eens op de balk om het origineel te zien",
  "You tap the bar at the top of the chat": "Je tikt op de balk bovenaan de chat",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Alleen berichten die je kiest, of chats die je via de balk vertaalt, worden naar Google Translate gestuurd, elk één keer en zonder je Discord-account."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Alleen berichten die je kiest, of chats die je via de balk vertaalt, worden naar Google Translate gestuurd, elk één keer en zonder je Discord-account.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Chats met berichten in een andere taal tonen bovenaan een balk. Tik erop om de chat te vertalen tot je hem verlaat. Houd daar een bericht ingedrukt om het origineel te zien.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Chats met berichten in een andere taal tonen bovenaan een balk. Tik erop om de chat te vertalen tot je hem verlaat, of houd één bericht ingedrukt en tik op Vertalen."
 }

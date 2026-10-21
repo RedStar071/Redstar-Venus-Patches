@@ -790,12 +790,12 @@
  "Close the list": "リストを閉じる",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "チャット上部のバー、またはメッセージのメニューから翻訳します。それ以外は送信されません。",
  "Hold a message and tap Translate. No bar at the top of chats.": "メッセージを長押しして「翻訳」をタップします。チャット上部にバーは表示されません。",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "バーをタップするとチャット全体を翻訳します。1件だけならメッセージを長押しして「翻訳」をタップします。",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "バーをタップするとチャット全体を翻訳します。翻訳したチャットでは、メッセージを長押しすると原文を表示できます。",
  "Tap the bar to translate the chat": "バーをタップしてチャットを翻訳",
  "Tap the bar to show the original": "バーをタップして原文を表示",
  "Tap the bar again to translate it": "もう一度バーをタップして翻訳",
  "Tap the bar again to show the original": "もう一度バーをタップして原文を表示",
  "You tap the bar at the top of the chat": "チャット上部のバーをタップします",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google翻訳に送信されるのは、選んだメッセージかバーから翻訳したチャットだけです。それぞれ1回だけ、Discordアカウントなしで送信されます。"
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google翻訳に送信されるのは、選んだメッセージかバーから翻訳したチャットだけです。それぞれ1回だけ、Discordアカウントなしで送信されます。",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "他の言語のメッセージがあるチャットでは、上部にバーが表示されます。タップすると、チャットを離れるまで翻訳します。そこでメッセージを長押しすると原文を表示できます。",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "他の言語のメッセージがあるチャットでは、上部にバーが表示されます。タップすると、チャットを離れるまで翻訳します。1件だけならメッセージを長押しして「翻訳」をタップします。"
 }

@@ -886,12 +886,12 @@
  "Close the list": "Lista bezárása",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "A csevegés tetején lévő sávból vagy egy üzenet menüjéből. Semmi más nem kerül elküldésre.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Tarts lenyomva egy üzenetet, és koppints a Fordítás gombra. Nincs sáv a csevegések tetején.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Koppints a sávra az egész csevegés lefordításához, vagy tarts lenyomva egy üzenetet, és koppints a Fordítás gombra.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Koppints a sávra az egész csevegés lefordításához. Lefordított csevegésben tarts lenyomva egy üzenetet az eredeti megtekintéséhez.",
  "Tap the bar to translate the chat": "Koppints a sávra a csevegés lefordításához",
  "Tap the bar to show the original": "Koppints a sávra az eredeti megtekintéséhez",
  "Tap the bar again to translate it": "Koppints újra a sávra a lefordításához",
  "Tap the bar again to show the original": "Koppints újra a sávra az eredeti megtekintéséhez",
  "You tap the bar at the top of the chat": "Rákoppintasz a csevegés tetején lévő sávra",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "A Google Translate csak az általad kiválasztott üzeneteket vagy a sávból lefordított csevegéseket kapja meg, mindegyiket egyszer, a Discord-fiókod nélkül."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "A Google Translate csak az általad kiválasztott üzeneteket vagy a sávból lefordított csevegéseket kapja meg, mindegyiket egyszer, a Discord-fiókod nélkül.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Ha egy csevegésben más nyelvű üzenetek vannak, a tetején sáv jelenik meg. Koppints rá, és a csevegés le lesz fordítva, amíg el nem hagyod. Ott egy üzenetet lenyomva tartva láthatod az eredetit.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Ha egy csevegésben más nyelvű üzenetek vannak, a tetején sáv jelenik meg. Koppints rá, és a csevegés le lesz fordítva, amíg el nem hagyod, vagy tarts lenyomva egy üzenetet, és koppints a Fordítás gombra."
 }

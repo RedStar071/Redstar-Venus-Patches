@@ -886,12 +886,12 @@
  "Close the list": "Luk listen",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "Fra bjælken øverst i en chat eller fra en beskeds menu. Intet andet sendes.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Hold en besked nede, og tryk på Oversæt. Ingen bjælke øverst i chats.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Tryk på bjælken for at oversætte hele chatten, eller hold en besked nede, og tryk på Oversæt.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Tryk på bjælken for at oversætte hele chatten. I en oversat chat holder du en besked nede for at se originalen.",
  "Tap the bar to translate the chat": "Tryk på bjælken for at oversætte chatten",
  "Tap the bar to show the original": "Tryk på bjælken for at se originalen",
  "Tap the bar again to translate it": "Tryk på bjælken igen for at oversætte den",
  "Tap the bar again to show the original": "Tryk på bjælken igen for at se originalen",
  "You tap the bar at the top of the chat": "Du trykker på bjælken øverst i chatten",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Kun beskeder, du vælger, eller chats, du oversætter fra bjælken, sendes til Google Translate, hver kun én gang og uden din Discord-konto."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Kun beskeder, du vælger, eller chats, du oversætter fra bjælken, sendes til Google Translate, hver kun én gang og uden din Discord-konto.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Chats med beskeder på et andet sprog viser en bjælke øverst. Tryk på den for at oversætte chatten, indtil du forlader den. Hold en besked nede der for at se originalen.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Chats med beskeder på et andet sprog viser en bjælke øverst. Tryk på den for at oversætte chatten, indtil du forlader den, eller hold en besked nede, og tryk på Oversæt."
 }

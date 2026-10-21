@@ -918,12 +918,12 @@
  "Close the list": "Zatvori popis",
  "From the bar at the top of a chat, or a message's menu. Nothing else is sent.": "S trake na vrhu razgovora ili iz izbornika poruke. Ništa drugo se ne šalje.",
  "Hold a message and tap Translate. No bar at the top of chats.": "Držite poruku pritisnutom i dodirnite Prevedi. Bez trake na vrhu razgovora.",
- "Tap the bar to translate the whole chat, or hold one message and tap Translate.": "Dodirnite traku da biste preveli cijeli razgovor ili držite jednu poruku pritisnutom i dodirnite Prevedi.",
- "Tap the bar to translate the whole chat. In a translated chat, hold a message to see its original.": "Dodirnite traku da biste preveli cijeli razgovor. U prevedenom razgovoru držite poruku pritisnutom da biste vidjeli izvornik.",
  "Tap the bar to translate the chat": "Dodirnite traku da biste preveli razgovor",
  "Tap the bar to show the original": "Dodirnite traku da biste vidjeli izvornik",
  "Tap the bar again to translate it": "Ponovno dodirnite traku da biste ga preveli",
  "Tap the bar again to show the original": "Ponovno dodirnite traku da biste vidjeli izvornik",
  "You tap the bar at the top of the chat": "Dodirujete traku na vrhu razgovora",
- "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Na Google Translate šalju se samo poruke koje odaberete ili razgovori koje prevedete s trake, svaka samo jednom i bez vašeg Discord računa."
+ "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Na Google Translate šalju se samo poruke koje odaberete ili razgovori koje prevedete s trake, svaka samo jednom i bez vašeg Discord računa.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Razgovori s porukama na drugom jeziku prikazuju traku na vrhu. Dodirnite je da biste prevodili razgovor dok ga ne napustite. Tamo držite poruku pritisnutom da biste vidjeli izvornik.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Razgovori s porukama na drugom jeziku prikazuju traku na vrhu. Dodirnite je da biste prevodili razgovor dok ga ne napustite ili držite jednu poruku pritisnutom i dodirnite Prevedi."
 }
