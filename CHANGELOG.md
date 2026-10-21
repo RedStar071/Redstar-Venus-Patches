@@ -1,3 +1,21 @@
+## [1.18.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.17.0...v1.18.0) (2026-10-21)
+
+### 🚀 Updated App Support
+
+* **Discord:** Add support for `350.8 - Stable`, now the only supported version
+
+### ✨ New Features
+
+* **Discord - Translate messages:** Translate into any of 70 languages, not just Discord's or your phone's ([#79](https://github.com/VenusIsJaded/Venus-Patches/issues/79))
+
+### 🐛 Bug Fixes
+
+* **Discord - Translate messages:** Fixed Translate in the hold menu never saying a message was already in your language, and saying so for translations it dropped
+
+### ⚡ Performance Improvements
+
+* **Discord - Translate messages:** Skip rows nobody asked to translate before any other work, 1.44x faster per chat row
+
 ## [1.17.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.16.1...v1.17.0) (2026-10-20)
 
 ### ✨ New Features
