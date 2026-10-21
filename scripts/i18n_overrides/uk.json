@@ -1,7 +1,6 @@
 {
  "(edited)": "(змінено)",
  "17 to 20 digit user ID": "ID користувача (17–20 цифр)",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Смужка 4 dp: жовта для відповідей і згадок, червона для видалених повідомлень.",
  "A button that marks servers and DMs as read.": "Кнопка, що позначає сервери й ОП прочитаними.",
  "A button to jump to the start of any chat.": "Кнопка для переходу на початок будь-якого чату.",
  "A reply to Sam opens, ready to type": "Відкривається відповідь Сему — можна одразу писати",
@@ -897,9 +896,19 @@
  "Chinese (Traditional)": "Китайська (традиційна)",
  "No matching languages": "Відповідних мов не знайдено",
  "Search languages": "Пошук мов",
- "Reply and mention brightness": "Яскравість відповідей і згадок",
- "Faint": "Слабка",
- "Normal": "Звичайна",
- "Bright": "Яскрава",
- "Vivid": "Насичена"
+ "Look": "Вигляд",
+ "Color": "Колір",
+ "Brightness": "Яскравість",
+ "Custom": "Своє значення",
+ "Edit": "Змінити",
+ "{n}%": "{n}%",
+ "{min} to {max}": "Від {min} до {max}",
+ "Brightness, 0 to 100": "Яскравість, від 0 до 100",
+ "Messages, 1 to {max}": "Повідомлення, від 1 до {max}",
+ "Reset the look": "Скинути вигляд",
+ "Red at 50% brightness, as Discord draws a highlight.": "Червоний з яскравістю 50%, як Discord малює підсвічування.",
+ "A 4 dp bar, yellow at 50% brightness.": "Смужка 4 dp, жовта з яскравістю 50%.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Наскільки сильно підфарбовано тло збереженого повідомлення. За 0% лишається тільки смужка.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Наскільки сильно підфарбовано тло відповіді чи згадки. 50% — як у самому Discord.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Зміни одразу застосовуються в чаті, без перезапуску. Колір видалених повідомлень налаштовується в розділі «Зберігати видалені повідомлення»."
 }

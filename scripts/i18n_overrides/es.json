@@ -1,7 +1,6 @@
 {
  "(edited)": "(editado)",
  "17 to 20 digit user ID": "ID de usuario de 17 a 20 dígitos",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Una barra de 4 dp, amarilla para respuestas y menciones, roja para mensajes eliminados.",
  "A button that marks servers and DMs as read.": "Un botón que marca servidores y MD como leídos.",
  "A button to jump to the start of any chat.": "Un botón para ir al principio de cualquier chat.",
  "A reply to Sam opens, ready to type": "Se abre una respuesta a Sam, lista para escribir",
@@ -865,9 +864,19 @@
  "Chinese (Traditional)": "Chino (tradicional)",
  "No matching languages": "No hay idiomas que coincidan",
  "Search languages": "Buscar idiomas",
- "Reply and mention brightness": "Brillo de respuestas y menciones",
- "Faint": "Tenue",
- "Normal": "Normal",
- "Bright": "Brillante",
- "Vivid": "Intenso"
+ "Look": "Aspecto",
+ "Color": "Color",
+ "Brightness": "Brillo",
+ "Custom": "Personalizado",
+ "Edit": "Editar",
+ "{n}%": "{n} %",
+ "{min} to {max}": "De {min} a {max}",
+ "Brightness, 0 to 100": "Brillo, de 0 a 100",
+ "Messages, 1 to {max}": "Mensajes, de 1 a {max}",
+ "Reset the look": "Restablecer el aspecto",
+ "Red at 50% brightness, as Discord draws a highlight.": "Rojo al 50 % de brillo, como Discord dibuja un resaltado.",
+ "A 4 dp bar, yellow at 50% brightness.": "Una barra de 4 dp, amarilla al 50 % de brillo.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Cuánto se tiñe el fondo de un mensaje conservado. Al 0 % solo queda la barra.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Cuánto se tiñe el fondo de una respuesta o mención. El 50 % es como lo muestra Discord.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Los cambios se ven en el chat al instante, sin reiniciar. Los mensajes eliminados tienen su propio color en Conservar mensajes eliminados."
 }

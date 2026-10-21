@@ -1,7 +1,6 @@
 {
  "(edited)": "(edytowano)",
  "17 to 20 digit user ID": "17–20-cyfrowe ID użytkownika",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Pasek o szerokości 4 dp: żółty dla odpowiedzi i wzmianek, czerwony dla usuniętych wiadomości.",
  "A button that marks servers and DMs as read.": "Przycisk, który oznacza serwery i DM jako przeczytane.",
  "A button to jump to the start of any chat.": "Przycisk, by przejść na początek dowolnego czatu.",
  "A reply to Sam opens, ready to type": "Otwiera się odpowiedź do Sama, gotowa do wpisania",
@@ -897,9 +896,19 @@
  "Chinese (Traditional)": "Chiński (tradycyjny)",
  "No matching languages": "Brak pasujących języków",
  "Search languages": "Szukaj języków",
- "Reply and mention brightness": "Jasność odpowiedzi i wzmianek",
- "Faint": "Słaba",
- "Normal": "Normalna",
- "Bright": "Jasna",
- "Vivid": "Intensywna"
+ "Look": "Wygląd",
+ "Color": "Kolor",
+ "Brightness": "Jasność",
+ "Custom": "Własna wartość",
+ "Edit": "Edytuj",
+ "{n}%": "{n}%",
+ "{min} to {max}": "Od {min} do {max}",
+ "Brightness, 0 to 100": "Jasność, od 0 do 100",
+ "Messages, 1 to {max}": "Wiadomości, od 1 do {max}",
+ "Reset the look": "Przywróć wygląd",
+ "Red at 50% brightness, as Discord draws a highlight.": "Czerwony przy 50% jasności, tak jak Discord rysuje podświetlenie.",
+ "A 4 dp bar, yellow at 50% brightness.": "Pasek 4 dp, żółty przy 50% jasności.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Jak mocno zabarwione jest tło zachowanej wiadomości. Przy 0% zostaje tylko pasek.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Jak mocno zabarwione jest tło odpowiedzi lub wzmianki. 50% to wygląd jak w Discordzie.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Zmiany są widoczne na czacie od razu, bez ponownego uruchamiania. Usunięte wiadomości mają własny kolor w sekcji Zachowuj usunięte wiadomości."
 }

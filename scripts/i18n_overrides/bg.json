@@ -1,7 +1,6 @@
 {
  "(edited)": "(редактирано)",
  "17 to 20 digit user ID": "17- до 20-цифрено потребителско ID",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Лента от 4 dp, жълта за отговори и споменавания, червена за изтрити съобщения.",
  "A button that marks servers and DMs as read.": "Бутон, който отбелязва сървърите и директните съобщения като прочетени.",
  "A button to jump to the start of any chat.": "Бутон за преход към началото на всеки чат.",
  "A reply to Sam opens, ready to type": "Отваря се отговор до Сам, готов за писане",
@@ -865,9 +864,19 @@
  "Chinese (Traditional)": "Китайски (традиционен)",
  "No matching languages": "Няма съвпадащи езици",
  "Search languages": "Търсене на езици",
- "Reply and mention brightness": "Яркост на отговорите и споменаванията",
- "Faint": "Слаба",
- "Normal": "Нормална",
- "Bright": "Ярка",
- "Vivid": "Наситена"
+ "Look": "Външен вид",
+ "Color": "Цвят",
+ "Brightness": "Яркост",
+ "Custom": "Персонализирано",
+ "Edit": "Промени",
+ "{n}%": "{n}%",
+ "{min} to {max}": "От {min} до {max}",
+ "Brightness, 0 to 100": "Яркост, от 0 до 100",
+ "Messages, 1 to {max}": "Съобщения, от 1 до {max}",
+ "Reset the look": "Нулиране на външния вид",
+ "Red at 50% brightness, as Discord draws a highlight.": "Червено при 50% яркост, както Discord рисува осветяването.",
+ "A 4 dp bar, yellow at 50% brightness.": "Лента от 4 dp, жълта при 50% яркост.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Колко силно е оцветен фонът зад запазеното съобщение. При 0% остава само лентата.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Колко силно е оцветен фонът зад отговор или споменаване. 50% е както го показва Discord.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Промените се виждат в чата веднага, без рестартиране. Изтритите съобщения имат свой цвят в „Запазване на изтритите съобщения“."
 }

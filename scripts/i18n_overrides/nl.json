@@ -1,7 +1,6 @@
 {
  "(edited)": "(bewerkt)",
  "17 to 20 digit user ID": "Gebruikers-ID van 17 tot 20 cijfers",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Een balk van 4 dp: geel voor antwoorden en vermeldingen, rood voor verwijderde berichten.",
  "A button that marks servers and DMs as read.": "Een knop die servers en DM's als gelezen markeert.",
  "A button to jump to the start of any chat.": "Een knop om naar het begin van elke chat te gaan.",
  "A reply to Sam opens, ready to type": "Er opent een antwoord op Sam, klaar om te typen",
@@ -865,9 +864,19 @@
  "Chinese (Traditional)": "Chinees (traditioneel)",
  "No matching languages": "Geen overeenkomende talen",
  "Search languages": "Talen zoeken",
- "Reply and mention brightness": "Helderheid van antwoorden en vermeldingen",
- "Faint": "Zwak",
- "Normal": "Normaal",
- "Bright": "Helder",
- "Vivid": "Fel"
+ "Look": "Uiterlijk",
+ "Color": "Kleur",
+ "Brightness": "Helderheid",
+ "Custom": "Aangepast",
+ "Edit": "Bewerken",
+ "{n}%": "{n}%",
+ "{min} to {max}": "{min} tot {max}",
+ "Brightness, 0 to 100": "Helderheid, 0 tot 100",
+ "Messages, 1 to {max}": "Berichten, 1 tot {max}",
+ "Reset the look": "Uiterlijk herstellen",
+ "Red at 50% brightness, as Discord draws a highlight.": "Rood op 50% helderheid, zoals Discord een markering tekent.",
+ "A 4 dp bar, yellow at 50% brightness.": "Een balk van 4 dp, geel op 50% helderheid.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Hoe sterk de achtergrond van een bewaard bericht wordt gekleurd. Bij 0% blijft alleen de balk over.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Hoe sterk de achtergrond van een antwoord of vermelding wordt gekleurd. 50% is hoe Discord het toont.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Wijzigingen zijn meteen zichtbaar in de chat, zonder opnieuw opstarten. Verwijderde berichten hebben hun eigen kleur bij Verwijderde berichten bewaren."
 }

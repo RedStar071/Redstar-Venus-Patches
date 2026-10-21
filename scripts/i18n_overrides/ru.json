@@ -1,7 +1,6 @@
 {
  "(edited)": "(изменено)",
  "17 to 20 digit user ID": "ID пользователя (17–20 цифр)",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Полоска 4 dp: жёлтая для ответов и упоминаний, красная для удалённых сообщений.",
  "A button that marks servers and DMs as read.": "Кнопка, которая отмечает серверы и ЛС прочитанными.",
  "A button to jump to the start of any chat.": "Кнопка для перехода к началу любого чата.",
  "A reply to Sam opens, ready to type": "Открывается ответ Сэму — можно сразу печатать",
@@ -897,9 +896,19 @@
  "Chinese (Traditional)": "Китайский (традиционный)",
  "No matching languages": "Подходящих языков не найдено",
  "Search languages": "Поиск языков",
- "Reply and mention brightness": "Яркость ответов и упоминаний",
- "Faint": "Слабая",
- "Normal": "Обычная",
- "Bright": "Яркая",
- "Vivid": "Насыщенная"
+ "Look": "Оформление",
+ "Color": "Цвет",
+ "Brightness": "Яркость",
+ "Custom": "Своё значение",
+ "Edit": "Изменить",
+ "{n}%": "{n}%",
+ "{min} to {max}": "От {min} до {max}",
+ "Brightness, 0 to 100": "Яркость, от 0 до 100",
+ "Messages, 1 to {max}": "Сообщения, от 1 до {max}",
+ "Reset the look": "Сбросить оформление",
+ "Red at 50% brightness, as Discord draws a highlight.": "Красный с яркостью 50%, как Discord рисует подсветку.",
+ "A 4 dp bar, yellow at 50% brightness.": "Полоска 4 dp, жёлтая с яркостью 50%.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Насколько сильно подкрашен фон сохранённого сообщения. При 0% остаётся только полоска.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Насколько сильно подкрашен фон ответа или упоминания. 50% — как в самом Discord.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Изменения сразу применяются в чате, без перезапуска. Цвет удалённых сообщений задаётся в разделе «Сохранять удалённые сообщения»."
 }

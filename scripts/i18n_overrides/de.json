@@ -1,7 +1,6 @@
 {
  "(edited)": "(bearbeitet)",
  "17 to 20 digit user ID": "17- bis 20-stellige Benutzer-ID",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Eine 4-dp-Leiste, gelb für Antworten und Erwähnungen, rot für gelöschte Nachrichten.",
  "A button that marks servers and DMs as read.": "Ein Button, der Server und DMs als gelesen markiert.",
  "A button to jump to the start of any chat.": "Ein Button, mit dem du zum Anfang jedes Chats springst.",
  "A reply to Sam opens, ready to type": "Eine Antwort an Sam öffnet sich, bereit zum Tippen",
@@ -865,9 +864,19 @@
  "Chinese (Traditional)": "Chinesisch (traditionell)",
  "No matching languages": "Keine passenden Sprachen",
  "Search languages": "Sprachen suchen",
- "Reply and mention brightness": "Helligkeit von Antworten und Erwähnungen",
- "Faint": "Schwach",
- "Normal": "Normal",
- "Bright": "Hell",
- "Vivid": "Kräftig"
+ "Look": "Aussehen",
+ "Color": "Farbe",
+ "Brightness": "Helligkeit",
+ "Custom": "Eigener Wert",
+ "Edit": "Bearbeiten",
+ "{n}%": "{n} %",
+ "{min} to {max}": "{min} bis {max}",
+ "Brightness, 0 to 100": "Helligkeit, 0 bis 100",
+ "Messages, 1 to {max}": "Nachrichten, 1 bis {max}",
+ "Reset the look": "Aussehen zurücksetzen",
+ "Red at 50% brightness, as Discord draws a highlight.": "Rot mit 50 % Helligkeit, so wie Discord Hervorhebungen darstellt.",
+ "A 4 dp bar, yellow at 50% brightness.": "Eine 4-dp-Leiste, gelb mit 50 % Helligkeit.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Wie stark der Hintergrund einer behaltenen Nachricht eingefärbt wird. Bei 0 % bleibt nur die Leiste.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Wie stark der Hintergrund einer Antwort oder Erwähnung eingefärbt wird. 50 % entspricht der Darstellung in Discord.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Änderungen sind sofort im Chat sichtbar, ganz ohne Neustart. Gelöschte Nachrichten haben ihre eigene Farbe unter „Gelöschte Nachrichten behalten“."
 }

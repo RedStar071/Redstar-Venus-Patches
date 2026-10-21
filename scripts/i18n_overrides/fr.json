@@ -1,7 +1,6 @@
 {
  "(edited)": "(modifié)",
  "17 to 20 digit user ID": "Identifiant utilisateur de 17 à 20 chiffres",
- "A 4 dp bar, yellow for replies and mentions, red for deleted messages.": "Une barre de 4 dp, jaune pour les réponses et mentions, rouge pour les messages supprimés.",
  "A button that marks servers and DMs as read.": "Un bouton qui marque les serveurs et les MP comme lus.",
  "A button to jump to the start of any chat.": "Un bouton pour revenir au début de n'importe quelle discussion.",
  "A reply to Sam opens, ready to type": "Une réponse à Sam s'ouvre, prête à être écrite",
@@ -865,9 +864,19 @@
  "Chinese (Traditional)": "Chinois (traditionnel)",
  "No matching languages": "Aucune langue correspondante",
  "Search languages": "Rechercher une langue",
- "Reply and mention brightness": "Luminosité des réponses et mentions",
- "Faint": "Faible",
- "Normal": "Normale",
- "Bright": "Vive",
- "Vivid": "Intense"
+ "Look": "Apparence",
+ "Color": "Couleur",
+ "Brightness": "Luminosité",
+ "Custom": "Personnalisé",
+ "Edit": "Modifier",
+ "{n}%": "{n} %",
+ "{min} to {max}": "De {min} à {max}",
+ "Brightness, 0 to 100": "Luminosité, de 0 à 100",
+ "Messages, 1 to {max}": "Messages, de 1 à {max}",
+ "Reset the look": "Réinitialiser l'apparence",
+ "Red at 50% brightness, as Discord draws a highlight.": "Rouge à 50 % de luminosité, comme Discord affiche une surbrillance.",
+ "A 4 dp bar, yellow at 50% brightness.": "Une barre de 4 dp, jaune à 50 % de luminosité.",
+ "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "L'intensité de la teinte derrière un message conservé. À 0 %, seule la barre reste.",
+ "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "L'intensité de la teinte derrière une réponse ou une mention. 50 % correspond à l'affichage de Discord.",
+ "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages.": "Les changements s'appliquent immédiatement dans le chat, sans redémarrage. Les messages supprimés ont leur propre couleur dans Conserver les messages supprimés."
 }
