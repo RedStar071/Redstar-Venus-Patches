@@ -859,5 +859,10 @@
  "{n} icon packs": {
   "one": "{n} simge paketi",
   "other": "{n} simge paketi"
- }
+ },
+ "Another language": "Başka bir dil",
+ "Chinese (Simplified)": "Çince (Basitleştirilmiş)",
+ "Chinese (Traditional)": "Çince (Geleneksel)",
+ "No matching languages": "Eşleşen dil bulunamadı",
+ "Search languages": "Dil ara"
 }

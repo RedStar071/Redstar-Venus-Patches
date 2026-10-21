@@ -859,5 +859,10 @@
  "{n} icon packs": {
   "one": "{n} πακέτο εικονιδίων",
   "other": "{n} πακέτα εικονιδίων"
- }
+ },
+ "Another language": "Άλλη γλώσσα",
+ "Chinese (Simplified)": "Κινεζικά (Απλοποιημένα)",
+ "Chinese (Traditional)": "Κινεζικά (Παραδοσιακά)",
+ "No matching languages": "Δεν βρέθηκαν αντίστοιχες γλώσσες",
+ "Search languages": "Αναζήτηση γλωσσών"
 }

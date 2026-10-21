@@ -859,5 +859,10 @@
  "{n} icon packs": {
   "one": "{n} ikoncsomag",
   "other": "{n} ikoncsomag"
- }
+ },
+ "Another language": "Másik nyelv",
+ "Chinese (Simplified)": "Kínai (egyszerűsített)",
+ "Chinese (Traditional)": "Kínai (hagyományos)",
+ "No matching languages": "Nincs találat a nyelvek között",
+ "Search languages": "Nyelvek keresése"
 }

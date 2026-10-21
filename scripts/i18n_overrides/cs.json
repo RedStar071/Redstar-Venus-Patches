@@ -891,5 +891,10 @@
  "{n} waiting.": "Čeká: {n}.",
  "{on} of {total} features on. Turn them on or off in Features.": "Zapnuto {on} z {total} funkcí. Zapněte nebo vypněte je ve Funkcích.",
  "{on} of {total} turned on": "{on} z {total} zapnuto",
- "{text} text, {voice} voice": "{text} textových, {voice} hlasových"
+ "{text} text, {voice} voice": "{text} textových, {voice} hlasových",
+ "Another language": "Jiný jazyk",
+ "Chinese (Simplified)": "Čínština (zjednodušená)",
+ "Chinese (Traditional)": "Čínština (tradiční)",
+ "No matching languages": "Žádné odpovídající jazyky",
+ "Search languages": "Hledat jazyky"
 }

@@ -891,5 +891,10 @@
  "{n} waiting.": "Laukia: {n}.",
  "{on} of {total} features on. Turn them on or off in Features.": "Įjungta funkcijų: {on} iš {total}. Įjunk arba išjunk jas skiltyje „Funkcijos“.",
  "{on} of {total} turned on": "Įjungta {on} iš {total}",
- "{text} text, {voice} voice": "{text} tekstiniai, {voice} balso"
+ "{text} text, {voice} voice": "{text} tekstiniai, {voice} balso",
+ "Another language": "Kita kalba",
+ "Chinese (Simplified)": "Kinų (supaprastinta)",
+ "Chinese (Traditional)": "Kinų (tradicinė)",
+ "No matching languages": "Atitinkančių kalbų nerasta",
+ "Search languages": "Ieškoti kalbų"
 }

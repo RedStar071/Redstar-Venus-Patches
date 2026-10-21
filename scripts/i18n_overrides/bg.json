@@ -859,5 +859,10 @@
  "{n} waiting.": "Чакащи: {n}.",
  "{on} of {total} features on. Turn them on or off in Features.": "Включени са {on} от {total} функции. Включете или ги изключете от „Функции“.",
  "{on} of {total} turned on": "Включени: {on} от {total}",
- "{text} text, {voice} voice": "{text} текстови, {voice} гласови"
+ "{text} text, {voice} voice": "{text} текстови, {voice} гласови",
+ "Another language": "Друг език",
+ "Chinese (Simplified)": "Китайски (опростен)",
+ "Chinese (Traditional)": "Китайски (традиционен)",
+ "No matching languages": "Няма съвпадащи езици",
+ "Search languages": "Търсене на езици"
 }

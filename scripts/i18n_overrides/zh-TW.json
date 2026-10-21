@@ -763,5 +763,10 @@
  "https://.../pack/ or config.json": "https://.../pack/ 或 config.json",
  "{name} is active across Discord.": "{name} 已在整個 Discord 中啟用。",
  "{n} icon pack": "{n} 個圖示包",
- "{n} icon packs": "{n} 個圖示包"
+ "{n} icon packs": "{n} 個圖示包",
+ "Another language": "其他語言",
+ "Chinese (Simplified)": "中文（簡體）",
+ "Chinese (Traditional)": "中文（繁體）",
+ "No matching languages": "沒有符合的語言",
+ "Search languages": "搜尋語言"
 }

@@ -940,6 +940,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} van {total} functies ingeschakeld. Zet ze aan of uit bij Functies.",
   "{on} of {total} turned on": "{on} van {total} ingeschakeld",
   "{text} text, {voice} voice": "{text} tekst, {voice} spraak",
-  "{time} ago": "{time} geleden"
+  "{time} ago": "{time} geleden",
+  "Another language": "Een andere taal",
+  "Chinese (Simplified)": "Chinees (vereenvoudigd)",
+  "Chinese (Traditional)": "Chinees (traditioneel)",
+  "No matching languages": "Geen overeenkomende talen",
+  "Search languages": "Talen zoeken"
  }
 }

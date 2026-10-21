@@ -844,6 +844,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Đang bật {on}/{total} tính năng. Bật hoặc tắt trong mục Tính năng.",
   "{on} of {total} turned on": "Đang bật {on}/{total}",
   "{text} text, {voice} voice": "{text} văn bản, {voice} thoại",
-  "{time} ago": "{time} trước"
+  "{time} ago": "{time} trước",
+  "Another language": "Ngôn ngữ khác",
+  "Chinese (Simplified)": "Tiếng Trung (Giản thể)",
+  "Chinese (Traditional)": "Tiếng Trung (Phồn thể)",
+  "No matching languages": "Không tìm thấy ngôn ngữ nào khớp",
+  "Search languages": "Tìm kiếm ngôn ngữ"
  }
 }

@@ -844,6 +844,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "已開啟 {on}/{total} 項功能。可在「功能」中開啟或關閉。",
   "{on} of {total} turned on": "已開啟 {on}/{total}",
   "{text} text, {voice} voice": "{text} 個文字、{voice} 個語音",
-  "{time} ago": "{time}前"
+  "{time} ago": "{time}前",
+  "Another language": "其他語言",
+  "Chinese (Simplified)": "中文（簡體）",
+  "Chinese (Traditional)": "中文（繁體）",
+  "No matching languages": "沒有符合的語言",
+  "Search languages": "搜尋語言"
  }
 }

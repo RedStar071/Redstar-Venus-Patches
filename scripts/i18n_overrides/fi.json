@@ -859,5 +859,10 @@
  "{n} icon packs": {
   "one": "{n} kuvakepaketti",
   "other": "{n} kuvakepakettia"
- }
+ },
+ "Another language": "Jokin muu kieli",
+ "Chinese (Simplified)": "Kiina (yksinkertaistettu)",
+ "Chinese (Traditional)": "Kiina (perinteinen)",
+ "No matching languages": "Kieliä ei löytynyt haulla",
+ "Search languages": "Etsi kieliä"
 }

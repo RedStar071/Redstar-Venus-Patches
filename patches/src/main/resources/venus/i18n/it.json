@@ -940,6 +940,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} funzionalità attive su {total}. Attivale o disattivale in Funzionalità.",
   "{on} of {total} turned on": "{on} su {total} attive",
   "{text} text, {voice} voice": "{text} testuali, {voice} vocali",
-  "{time} ago": "{time} fa"
+  "{time} ago": "{time} fa",
+  "Another language": "Un'altra lingua",
+  "Chinese (Simplified)": "Cinese (semplificato)",
+  "Chinese (Traditional)": "Cinese (tradizionale)",
+  "No matching languages": "Nessuna lingua corrispondente",
+  "Search languages": "Cerca lingue"
  }
 }

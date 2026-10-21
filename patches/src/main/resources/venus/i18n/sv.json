@@ -940,6 +940,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} av {total} funktioner är på. Slå på eller av dem under Funktioner.",
   "{on} of {total} turned on": "{on} av {total} påslagna",
   "{text} text, {voice} voice": "{text} text, {voice} röst",
-  "{time} ago": "för {time} sedan"
+  "{time} ago": "för {time} sedan",
+  "Another language": "Ett annat språk",
+  "Chinese (Simplified)": "Kinesiska (förenklad)",
+  "Chinese (Traditional)": "Kinesiska (traditionell)",
+  "No matching languages": "Inga matchande språk",
+  "Search languages": "Sök bland språk"
  }
 }

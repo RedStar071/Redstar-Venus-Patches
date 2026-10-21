@@ -996,6 +996,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Включено функций: {on} из {total}. Включайте и выключайте их в разделе «Функции».",
   "{on} of {total} turned on": "Включено: {on} из {total}",
   "{text} text, {voice} voice": "{text} текстовых, {voice} голосовых",
-  "{time} ago": "{time} назад"
+  "{time} ago": "{time} назад",
+  "Another language": "Другой язык",
+  "Chinese (Simplified)": "Китайский (упрощённый)",
+  "Chinese (Traditional)": "Китайский (традиционный)",
+  "No matching languages": "Подходящих языков не найдено",
+  "Search languages": "Поиск языков"
  }
 }

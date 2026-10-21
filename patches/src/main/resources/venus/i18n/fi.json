@@ -958,6 +958,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on}/{total} ominaisuutta käytössä. Ota niitä käyttöön tai poista käytöstä Ominaisuudet-kohdassa.",
   "{on} of {total} turned on": "{on}/{total} käytössä",
   "{text} text, {voice} voice": "{text} teksti, {voice} puhe",
-  "{time} ago": "{time} sitten"
+  "{time} ago": "{time} sitten",
+  "Another language": "Jokin muu kieli",
+  "Chinese (Simplified)": "Kiina (yksinkertaistettu)",
+  "Chinese (Traditional)": "Kiina (perinteinen)",
+  "No matching languages": "Kieliä ei löytynyt haulla",
+  "Search languages": "Etsi kieliä"
  }
 }

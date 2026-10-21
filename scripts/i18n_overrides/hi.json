@@ -859,5 +859,10 @@
  "{n} icon packs": {
   "one": "{n} आइकन पैक",
   "other": "{n} आइकन पैक"
- }
+ },
+ "Another language": "कोई दूसरी भाषा",
+ "Chinese (Simplified)": "चीनी (सरलीकृत)",
+ "Chinese (Traditional)": "चीनी (पारंपरिक)",
+ "No matching languages": "कोई मेल खाने वाली भाषा नहीं मिली",
+ "Search languages": "भाषाएँ खोजें"
 }

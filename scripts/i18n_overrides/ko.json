@@ -763,5 +763,10 @@
  "https://.../pack/ or config.json": "https://.../pack/ 또는 config.json",
  "{name} is active across Discord.": "Discord 전체에 {name} 적용 중.",
  "{n} icon pack": "아이콘 팩 {n}개",
- "{n} icon packs": "아이콘 팩 {n}개"
+ "{n} icon packs": "아이콘 팩 {n}개",
+ "Another language": "다른 언어",
+ "Chinese (Simplified)": "중국어(간체)",
+ "Chinese (Traditional)": "중국어(번체)",
+ "No matching languages": "일치하는 언어 없음",
+ "Search languages": "언어 검색"
 }

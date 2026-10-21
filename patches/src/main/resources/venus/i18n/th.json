@@ -844,6 +844,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "เปิดใช้งานอยู่ {on} จาก {total} ฟีเจอร์ เปิดหรือปิดได้ในเมนูฟีเจอร์",
   "{on} of {total} turned on": "เปิดอยู่ {on} จาก {total}",
   "{text} text, {voice} voice": "ข้อความ {text} เสียง {voice}",
-  "{time} ago": "{time}ที่ผ่านมา"
+  "{time} ago": "{time}ที่ผ่านมา",
+  "Another language": "ภาษาอื่น",
+  "Chinese (Simplified)": "จีน (ตัวย่อ)",
+  "Chinese (Traditional)": "จีน (ตัวเต็ม)",
+  "No matching languages": "ไม่พบภาษาที่ตรงกับการค้นหา",
+  "Search languages": "ค้นหาภาษา"
  }
 }

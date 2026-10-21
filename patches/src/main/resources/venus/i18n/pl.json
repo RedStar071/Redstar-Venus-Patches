@@ -996,6 +996,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Włączone funkcje: {on} z {total}. Włączaj i wyłączaj je w Funkcjach.",
   "{on} of {total} turned on": "Włączono {on} z {total}",
   "{text} text, {voice} voice": "{text} tekstowych, {voice} głosowych",
-  "{time} ago": "{time} temu"
+  "{time} ago": "{time} temu",
+  "Another language": "Inny język",
+  "Chinese (Simplified)": "Chiński (uproszczony)",
+  "Chinese (Traditional)": "Chiński (tradycyjny)",
+  "No matching languages": "Brak pasujących języków",
+  "Search languages": "Szukaj języków"
  }
 }

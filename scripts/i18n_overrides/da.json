@@ -859,5 +859,10 @@
  "{n} icon packs": {
   "one": "{n} ikonpakke",
   "other": "{n} ikonpakker"
- }
+ },
+ "Another language": "Et andet sprog",
+ "Chinese (Simplified)": "Kinesisk (forenklet)",
+ "Chinese (Traditional)": "Kinesisk (traditionelt)",
+ "No matching languages": "Ingen matchende sprog",
+ "Search languages": "Søg efter sprog"
 }

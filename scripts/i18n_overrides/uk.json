@@ -891,5 +891,10 @@
  "{n} waiting.": "У черзі: {n}.",
  "{on} of {total} features on. Turn them on or off in Features.": "Увімкнено функцій: {on} з {total}. Вмикайте й вимикайте їх у розділі «Функції».",
  "{on} of {total} turned on": "Увімкнено: {on} з {total}",
- "{text} text, {voice} voice": "{text} текстових, {voice} голосових"
+ "{text} text, {voice} voice": "{text} текстових, {voice} голосових",
+ "Another language": "Інша мова",
+ "Chinese (Simplified)": "Китайська (спрощена)",
+ "Chinese (Traditional)": "Китайська (традиційна)",
+ "No matching languages": "Відповідних мов не знайдено",
+ "Search languages": "Пошук мов"
 }

@@ -958,6 +958,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} में से {on} फ़ीचर चालू हैं। इन्हें 'फ़ीचर' में जाकर चालू या बंद करें।",
   "{on} of {total} turned on": "{total} में से {on} चालू",
   "{text} text, {voice} voice": "{text} टेक्स्ट, {voice} वॉइस",
-  "{time} ago": "{time} पहले"
+  "{time} ago": "{time} पहले",
+  "Another language": "कोई दूसरी भाषा",
+  "Chinese (Simplified)": "चीनी (सरलीकृत)",
+  "Chinese (Traditional)": "चीनी (पारंपरिक)",
+  "No matching languages": "कोई मेल खाने वाली भाषा नहीं मिली",
+  "Search languages": "भाषाएँ खोजें"
  }
 }

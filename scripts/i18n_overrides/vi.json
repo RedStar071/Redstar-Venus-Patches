@@ -763,5 +763,10 @@
  "https://.../pack/ or config.json": "https://.../pack/ hoặc config.json",
  "{name} is active across Discord.": "{name} đang hoạt động trên toàn bộ Discord.",
  "{n} icon pack": "{n} gói biểu tượng",
- "{n} icon packs": "{n} gói biểu tượng"
+ "{n} icon packs": "{n} gói biểu tượng",
+ "Another language": "Ngôn ngữ khác",
+ "Chinese (Simplified)": "Tiếng Trung (Giản thể)",
+ "Chinese (Traditional)": "Tiếng Trung (Phồn thể)",
+ "No matching languages": "Không tìm thấy ngôn ngữ nào khớp",
+ "Search languages": "Tìm kiếm ngôn ngữ"
 }

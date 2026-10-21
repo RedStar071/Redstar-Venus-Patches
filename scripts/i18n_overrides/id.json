@@ -763,5 +763,10 @@
  "https://.../pack/ or config.json": "https://.../pack/ atau config.json",
  "{name} is active across Discord.": "{name} aktif di seluruh Discord.",
  "{n} icon pack": "{n} paket ikon",
- "{n} icon packs": "{n} paket ikon"
+ "{n} icon packs": "{n} paket ikon",
+ "Another language": "Bahasa lain",
+ "Chinese (Simplified)": "Tionghoa (Sederhana)",
+ "Chinese (Traditional)": "Tionghoa (Tradisional)",
+ "No matching languages": "Tidak ada bahasa yang cocok",
+ "Search languages": "Cari bahasa"
 }

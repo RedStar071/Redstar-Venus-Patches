@@ -844,6 +844,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} 件中 {on} 件の機能がオンです。「機能」でオン・オフを切り替えられます。",
   "{on} of {total} turned on": "{total} 件中 {on} 件がオン",
   "{text} text, {voice} voice": "テキスト {text}・ボイス {voice}",
-  "{time} ago": "{time}前"
+  "{time} ago": "{time}前",
+  "Another language": "その他の言語",
+  "Chinese (Simplified)": "中国語（簡体字）",
+  "Chinese (Traditional)": "中国語（繁体字）",
+  "No matching languages": "一致する言語がありません",
+  "Search languages": "言語を検索"
  }
 }

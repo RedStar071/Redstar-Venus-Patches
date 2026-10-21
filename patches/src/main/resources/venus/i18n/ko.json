@@ -844,6 +844,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "기능 {total}개 중 {on}개 켜짐. 기능에서 켜거나 끌 수 있습니다.",
   "{on} of {total} turned on": "{total}개 중 {on}개 켜짐",
   "{text} text, {voice} voice": "텍스트 {text}개, 음성 {voice}개",
-  "{time} ago": "{time} 전"
+  "{time} ago": "{time} 전",
+  "Another language": "다른 언어",
+  "Chinese (Simplified)": "중국어(간체)",
+  "Chinese (Traditional)": "중국어(번체)",
+  "No matching languages": "일치하는 언어 없음",
+  "Search languages": "언어 검색"
  }
 }

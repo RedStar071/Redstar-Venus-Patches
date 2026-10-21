@@ -940,6 +940,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} özellikten {on} tanesi açık. Özellikler'den açıp kapatabilirsin.",
   "{on} of {total} turned on": "{on} / {total} açık",
   "{text} text, {voice} voice": "{text} yazı, {voice} ses",
-  "{time} ago": "{time} önce"
+  "{time} ago": "{time} önce",
+  "Another language": "Başka bir dil",
+  "Chinese (Simplified)": "Çince (Basitleştirilmiş)",
+  "Chinese (Traditional)": "Çince (Geleneksel)",
+  "No matching languages": "Eşleşen dil bulunamadı",
+  "Search languages": "Dil ara"
  }
 }

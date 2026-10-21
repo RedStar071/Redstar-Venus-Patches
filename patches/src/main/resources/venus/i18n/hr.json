@@ -996,6 +996,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Uključeno je {on} od {total} značajki. Uključite ih ili isključite u Značajkama.",
   "{on} of {total} turned on": "{on} od {total} uključeno",
   "{text} text, {voice} voice": "{text} tekstnih, {voice} glasovnih",
-  "{time} ago": "prije {time}"
+  "{time} ago": "prije {time}",
+  "Another language": "Drugi jezik",
+  "Chinese (Simplified)": "Kineski (pojednostavljeni)",
+  "Chinese (Traditional)": "Kineski (tradicionalni)",
+  "No matching languages": "Nema odgovarajućih jezika",
+  "Search languages": "Pretraži jezike"
  }
 }

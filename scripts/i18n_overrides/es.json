@@ -859,5 +859,10 @@
  "{n} waiting.": "{n} en espera.",
  "{on} of {total} features on. Turn them on or off in Features.": "{on} de {total} funciones activadas. Actívalas o desactívalas en «Funciones».",
  "{on} of {total} turned on": "{on} de {total} activadas",
- "{text} text, {voice} voice": "{text} de texto, {voice} de voz"
+ "{text} text, {voice} voice": "{text} de texto, {voice} de voz",
+ "Another language": "Otro idioma",
+ "Chinese (Simplified)": "Chino (simplificado)",
+ "Chinese (Traditional)": "Chino (tradicional)",
+ "No matching languages": "No hay idiomas que coincidan",
+ "Search languages": "Buscar idiomas"
 }

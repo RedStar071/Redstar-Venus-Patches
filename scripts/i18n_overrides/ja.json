@@ -763,5 +763,10 @@
  "https://.../pack/ or config.json": "https://.../pack/ または config.json",
  "{name} is active across Discord.": "Discord 全体で {name} が有効です。",
  "{n} icon pack": "{n} 個のアイコンパック",
- "{n} icon packs": "{n} 個のアイコンパック"
+ "{n} icon packs": "{n} 個のアイコンパック",
+ "Another language": "その他の言語",
+ "Chinese (Simplified)": "中国語（簡体字）",
+ "Chinese (Traditional)": "中国語（繁体字）",
+ "No matching languages": "一致する言語がありません",
+ "Search languages": "言語を検索"
 }

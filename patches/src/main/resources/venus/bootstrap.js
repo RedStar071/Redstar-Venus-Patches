@@ -57,7 +57,7 @@
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
-        translate:false, translateTarget:"discord", translateMode:"auto", translateNote:true, translateOriginal:false,
+        translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
@@ -72,7 +72,7 @@
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true, systemFont: false,
             hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
             validUser: false, youBarSettings: false, splitMessages: false,
-            translate: false, translateTarget: "discord", translateMode: "auto", translateNote: true, translateOriginal: false,
+            translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
@@ -106,8 +106,13 @@
     const READ_ALL_MODES = ["guilds", "dms", "both"];
     // What double-tapping your own message does: edit it, or reply like anyone else's.
     const GESTURE_OWN_MODES = ["edit", "reply"];
-    // Which language Translate messages translates into: Discord's own language, or the phone's.
-    const TRANSLATE_TARGETS = ["discord", "phone"];
+    // Which language Translate messages translates into: Discord's own language, the phone's, or one you pick (#79).
+    const TRANSLATE_TARGETS = ["discord", "phone", "custom"];
+    // The languages you can pick for "Another language", as Google Translate codes (#79). Chinese comes in both scripts.
+    const TRANSLATE_LANGUAGES = ["af", "ar", "bg", "bn", "ca", "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "fa", "fi", "fil", "fr",
+        "ga", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "jv", "ka", "kk", "km", "ko", "la", "lt", "lv", "mk", "ml", "mn",
+        "mr", "ms", "my", "ne", "nl", "no", "pa", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tr", "uk", "ur",
+        "uz", "vi", "zh-CN", "zh-TW"];
     // When Translate messages translates: everything on screen, or only messages you pick from the hold menu.
     const TRANSLATE_MODES = ["auto", "manual"];
     // Left bar thickness multiplier (1x = 2dp default, 2x = 4dp, 3x = 6dp, 4x = 8dp) and highlight color presets (#60).
@@ -277,7 +282,7 @@
     function acceptedSetting(key, value) {
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
-            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) ||
+            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) ||
             key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "messageHighlightDeletedColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "noDeleteLimit") return deleteLimit(value);
@@ -301,8 +306,8 @@
             if (settings.gestureOwn === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.gestureOwn = value; dirty.add(key); save(); notify(key); return true;
         }
-        if (key === "translateTarget" || key === "translateMode") {
-            if (!(key === "translateMode" ? TRANSLATE_MODES : TRANSLATE_TARGETS).includes(value)) return false;
+        if (key === "translateTarget" || key === "translateMode" || key === "translateLanguage") {
+            if (!(key === "translateMode" ? TRANSLATE_MODES : key === "translateLanguage" ? TRANSLATE_LANGUAGES : TRANSLATE_TARGETS).includes(value)) return false;
             if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings[key] = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
         }
@@ -789,7 +794,7 @@
     }
     // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
     // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
-    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting"], translate:["Show the original language", "Show the original text"],
+    const FEATURE_KEYWORDS = {noDelete:["Show edit history", "Keep after restarting"], translate:["Show the original language", "Show the original text", "Another language"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
@@ -7402,6 +7407,8 @@
         return value.replace("_", "-");
     }
     function translateTarget() {
+        // Another language (#79): already a Google code, whatever Discord's or the phone's language is.
+        if (settings.translateTarget === "custom" && TRANSLATE_LANGUAGES.includes(settings.translateLanguage)) return settings.translateLanguage;
         const mode = settings.translateTarget === "phone" ? "phone" : "discord";
         let raw = null;
         try { raw = localeStore && (mode === "phone" ? localeStore.systemLocale || localeStore.locale : localeStore.locale); } catch (_) {}
@@ -7421,6 +7428,14 @@
     }
     // Language names in the language Venus is shown in.
     const languageNames = new Map();
+    // The language Translate messages writes in, by name: Discord's, the phone's or the one you picked (#79).
+    function translateTargetName() {
+        return settings.translateTarget === "custom" ? translateLanguageName(translateTarget()) : languageName(localeCode(settings.translateTarget === "phone" ? "phone" : "discord"));
+    }
+    // Both Chinese scripts can be picked, so they need names that tell them apart.
+    function translateLanguageName(code) {
+        return code === "zh-CN" ? tr("Chinese (Simplified)") : code === "zh-TW" ? tr("Chinese (Traditional)") : languageName(code);
+    }
     function languageName(code) {
         // The language actually shown: English until the chosen one has loaded, so a line never mixes two.
         const chosen = uiLanguage(), pack = i18n.packs.get(chosen);
@@ -7860,7 +7875,7 @@
         const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null, tried:{}};
         const [state, setState] = React.useState(blank), watching = on && mode === "watch", manual = settings.translateMode === "manual";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
-        const target = languageName(localeCode(settings.translateTarget === "phone" ? "phone" : "discord"));
+        const target = translateTargetName();
         const story = useStory(watching, () => {
             const steps = [[0, () => setState(Object.assign({}, blank, {shown:false}))],
                 [700, () => { animateLayout(); update({shown:true}); }, tr("Luc\u00eda writes in Spanish")]];
@@ -7917,6 +7932,30 @@
                  footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     watching ? storyStrip(k, s, story) : null)}));
     }
+    // Another language (#79): every language Translate messages can write in, by name in the language Venus is shown in,
+    // with Discord's search field once the list is long. Like the Language list, the rows have no icons of their own.
+    function TranslateLanguagePicker(props) {
+        useSettings("translate");
+        const [query, setQuery] = React.useState(""), ui = reviewUI(), on = !!props.on;
+        const RadioGroup = inspectedExport(6263, "TableRadioGroup"), RadioRow = inspectedExport(6262, "TableRadioRow");
+        const SearchField = inspectedExport(6739, "SearchField"), Group = ui.TableRowGroup || RN.View;
+        const shownIn = i18n.shownIn;
+        const all = React.useMemo(() => TRANSLATE_LANGUAGES.map(code => {
+            const label = translateLanguageName(code), english = code === "zh-CN" ? "Chinese Simplified" : code === "zh-TW" ? "Chinese Traditional" : LANGUAGE_NAMES[languageBase(code)] || "";
+            return {code, label, search:searchFold(label + " " + english + " " + code)};
+        }).sort((a, b) => a.label.localeCompare(b.label)), [shownIn, i18n.version]);
+        const needle = searchFold(query.trim());
+        const shown = needle ? all.filter(entry => entry.search.includes(needle)) : all;
+        const pick = value => { if (value !== settings.translateLanguage) { haptic("SELECTION"); setSetting("translateLanguage", value); } };
+        const search = SearchField ? el(SearchField, {key:"search", placeholder:tr("Search languages"), value:query, onChange:text => setQuery(String(text || "")), isDisabled:!on}) :
+            ui.TextInput ? el(ui.TextInput, {key:"search", placeholder:tr("Search languages"), value:query, onChange:text => setQuery(String(text || "")), editable:on}) : null;
+        const rows = !shown.length ? (ui.TableRow ? el(ui.TableRow, {key:"none", label:tr("No matching languages"), disabled:true}) : null) :
+            RadioGroup && RadioRow ? el(RadioGroup, {key:"list", title:tr("Language"), value:settings.translateLanguage, onChange:pick},
+                shown.map(entry => el(RadioRow, {key:entry.code, value:entry.code, label:entry.label, disabled:!on}))) :
+            el(Group, {key:"list", title:tr("Language")}, shown.map(entry => ui.TableRow && el(ui.TableRow, {key:entry.code, label:entry.label,
+                trailing:entry.code === settings.translateLanguage ? el(venusIcon(6823, "CheckmarkSmallIcon"), {size:"sm"}) : undefined, disabled:!on, onPress:() => pick(entry.code)})));
+        return el(RN.View, {style:{gap:12}}, el(RN.View, {style:{paddingHorizontal:16}}, search), rows);
+    }
     function TranslateSettings() {
         useSettings("translate");
         const ui = reviewUI();
@@ -7925,13 +7964,15 @@
         const name = kind => languageName(localeCode(kind));
         let saved = 0; translate.cache.forEach(entry => { if (entry.state === "done") saved++; });
         const groups = [
-            on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:name(settings.translateTarget === "phone" ? "phone" : "discord")}), IconComponent:venusIcon(15723, "LanguageIcon")}) :
+            on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:translateTargetName()}), IconComponent:venusIcon(15723, "LanguageIcon")}) :
                 offCard("status", venusIcon(15723, "LanguageIcon"), "translate"),
             el(TranslatePreview, {key:"preview", on}),
             radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(17143, "SparklesIcon")],
                 ["manual", "Only when you ask", "Hold a message and tap Translate. Nothing else is sent.", rowIcon(8956, "ReactionIcon")]]),
             radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(12901, "ChatSmileIcon")],
-                ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6642, "MobilePhoneIcon")]], true),
+                ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6642, "MobilePhoneIcon")],
+                ["custom", tr("Another language"), translateLanguageName(settings.translateLanguage) + ".", rowIcon(15723, "LanguageIcon")]], true),
+            settings.translateTarget === "custom" ? el(TranslateLanguagePicker, {key:"language", on}) : null,
             el(Group, {key:"show", title:tr("Display")},
                 switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation.", rowIcon(9099, "GlobeEarthIcon")),
                 switchRow(Switch, "translateOriginal", "Show the original text", "The untranslated message, in a quote under the translation.", rowIcon(13262, "QuoteIcon"))),
@@ -9978,7 +10019,7 @@
                     // Following Discord's language: switching it there switches Venus too.
                     try { if (typeof localeStore.addChangeListener === "function") localeStore.addChangeListener(() => {
                         if (settings.language === "auto" && uiLanguage() !== i18n.shownIn) { loadLanguage(uiLanguage()); languageChanged(); }
-                        if (enabled("translate") && settings.translateTarget !== "phone") translateChanged();
+                        if (enabled("translate") && settings.translateTarget === "discord") translateChanged();
                     }); } catch (_) {}
                 }
                 return exports;

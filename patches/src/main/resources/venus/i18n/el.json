@@ -940,6 +940,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Ενεργές {on} από {total} λειτουργίες. Ενεργοποίησέ τες ή απενεργοποίησέ τες στις «Λειτουργίες».",
   "{on} of {total} turned on": "{on} από {total} ενεργές",
   "{text} text, {voice} voice": "{text} κειμένου, {voice} φωνής",
-  "{time} ago": "πριν από {time}"
+  "{time} ago": "πριν από {time}",
+  "Another language": "Άλλη γλώσσα",
+  "Chinese (Simplified)": "Κινεζικά (Απλοποιημένα)",
+  "Chinese (Traditional)": "Κινεζικά (Παραδοσιακά)",
+  "No matching languages": "Δεν βρέθηκαν αντίστοιχες γλώσσες",
+  "Search languages": "Αναζήτηση γλωσσών"
  }
 }

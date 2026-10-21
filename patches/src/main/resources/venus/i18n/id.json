@@ -844,6 +844,11 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} dari {total} fitur aktif. Aktifkan atau nonaktifkan di Fitur.",
   "{on} of {total} turned on": "{on} dari {total} aktif",
   "{text} text, {voice} voice": "{text} teks, {voice} suara",
-  "{time} ago": "{time} yang lalu"
+  "{time} ago": "{time} yang lalu",
+  "Another language": "Bahasa lain",
+  "Chinese (Simplified)": "Tionghoa (Sederhana)",
+  "Chinese (Traditional)": "Tionghoa (Tradisional)",
+  "No matching languages": "Tidak ada bahasa yang cocok",
+  "Search languages": "Cari bahasa"
  }
 }
