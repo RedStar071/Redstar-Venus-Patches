@@ -130,7 +130,7 @@ Instead, Venus uses **single-bundle HBC98 bytecode injection** (`HbcPrelude.kt`)
 ## Upgrading to a new Discord Android version
 
 Every Discord version upgrade touches four layers that are pinned to the exact APK and `assets/index.android.bundle`:
-1. **Supported version string** (`349.9 - Stable`) in `DiscordPatches.kt`, `DISCORD_VERSION` in `bootstrap.js` (shown on the About page) and `README.md`. Keep all three the same.
+1. **Supported version string** (`350.8 - Stable`) in `DiscordPatches.kt`, `DISCORD_VERSION` in `bootstrap.js` (shown on the About page) and `README.md`. Keep all three the same.
 2. **HBC98 bundle & global `#0` constants** in `HbcPrelude.kt` and `HbcPrivacy.kt`.
 3. **Metro module IDs** in `patches/src/main/resources/venus/bootstrap.js`.
 4. **Pinned HBC98 privacy targets (104 functions)** in `HbcPrivacy.kt` and **pinned native DEX methods (137 methods)** in `PrivacyPatches.kt`.
@@ -193,9 +193,9 @@ python3 scripts/hbc/port_check.py work/new/assets/index.android.bundle
      python3 scripts/hbc/privacy_targets.py work/new/assets/index.android.bundle --locate
      ```
    - For the 3 anonymous/unnamed targets (`#17776` `__timingFunction` in `metroRequire`, `#80849` `MetricReporter.send`, `#111344` `Rust Poller.send`), locate them if their function IDs shifted:
-     - `__timingFunction` (`#18142` in 349.9): disassemble global `#0` (`B.h.dis(B.h.func(0))[:150]`) and look for `PutByIdLoose ... '__timingFunction'` right after `CreateClosure`.
-     - `MetricReporter.send` (`#81910` in 349.9): check `B.tree(mid)` of `MetricReporter.tsx` and its dependencies for the `send` method.
-     - `Poller.send` (`#112524` in 349.9): search `B.fnmods('send')` for the module referencing `'NativePollerModule'` or crash reporting.
+     - `__timingFunction` (`#18775` in 350.8): disassemble global `#0` (`B.h.dis(B.h.func(0))[:150]`) and look for `PutByIdLoose ... '__timingFunction'` right after `CreateClosure`.
+     - `MetricReporter.send` (`#83562` in 350.8; no longer in a named module, find the Sentry transport `send` of ~180 bytes that calls `forEachEnvelopeItem` and ends with `Promise.resolve({})`): check `B.tree(mid)` of `MetricReporter.tsx` and its dependencies for the `send` method.
+     - `Poller.send` (`#108009` in 350.8; the twin transport `send` ending in `resolvedSyncPromise({})`): search `B.fnmods('send')` for the module referencing `'NativePollerModule'` or crash reporting.
    - **Critical safety invariants for every `HbcPrivacy` target**:
      - Must have an expanded header (`flags & 0x20 != 0`) so its 32-bit `offset` and `size` live in the 40-byte large header.
      - Must NOT have exception handlers or generator/async flags (`flags & 0xc8 == 0`), because Hermes puts a `uint32 excCount` trailer immediately after `offset + size` when `hasExceptionHandler` (`0x40`) is set.
@@ -409,7 +409,7 @@ new page and every change to an existing one. Check each page yourself, on and o
 - Tiles are radios (`accessibilityRole:"radio"`): tapping one uses it (`customThemesUse`), holding one asks to remove it.
   Discord's colors is the way back, so tapping the theme in use does nothing.
 - Install problems show under the link field, never at the top of the page.
-- Colors are compiled into four 349.9 tables: RawColors (591), SemanticColors (589) and SemanticColorExperiments
+- Colors are compiled into four 350.8 tables: RawColors (591), SemanticColors (589) and SemanticColorExperiments
   (590), plus the theme slot keys from Themes (588: ASH=`dark`, LIGHT=`light`, DARK=`darker`, ONYX=`midnight`).
   590 wins over 589 while an experiment is on, so every themed token's overrides follow it. Changes reach the screen
   through ThemeStore (1193), the ThemeContext key (4593) and the memoized RootThemeContextProvider (9758).
@@ -423,7 +423,7 @@ new page and every change to an existing one. Check each page yourself, on and o
   write in `compileThemeIntoTables` goes through `raw.set`, and every token write through `writeSemanticTarget` or
   `touchedSem.add`, or turning a theme off won't undo it. `parseThemeColor` is cached and returns frozen objects:
   copy before changing one.
-- Test any theme change against the real 349.9 tables and the published themes:
+- Test any theme change against the real 350.8 tables and the published themes:
   `python3 scripts/hbc/color_tables.py` (decodes 589/590/591 to `work/discord_colors.json`), `python3
   tests/themes_fetch.py` (downloads every theme to `work/themes/`), then `node tests/theme_compat.cjs`. It must show
   no errors, `notRestored`, `chainLeaks` or `falseSlotsChanged`. Keep install and switch times where they are
@@ -469,7 +469,7 @@ faster on Hermes is not an optimization; revert it unless it's also simpler.
 
 1. **Get the VM once per sandbox:** `sh scripts/hbc/bench_setup.sh [Discord.apkm]` sets up everything below in one go
    (tools, compacted runtime, VM, Discord bundle). On its own, `sh scripts/hbc/hermes_vm.sh` It downloads a checksum-pinned prebuilt Hermes
-   `250829098.0.16` (HBC98, the bytecode version Discord 349.9 runs) to `work/hermes/hermes-vm`, plus the ICU 70 it
+   `250829098.0.16` (HBC98, the bytecode version Discord 350.8 runs) to `work/hermes/hermes-vm`, plus the ICU 70 it
    links against. Bytecode always comes from the pinned compiler, `work/tools/hermesc -emit-binary -O` (written by
    `python3 scripts/build.py`). Don't build Hermes yourself.
 2. **Measure with `tests/bench/hermes_bench.cjs`**, never with ad-hoc timing:
@@ -482,7 +482,7 @@ faster on Hermes is not an optimization; revert it unless it's also simpler.
      `node tests/bench/runtime_eval.cjs old.js patches/build/bootstrap.js` and then
      `node tests/bench/hermes_bench.cjs work/bench/runtime_eval.js`.
    - **Cold boot of the real Discord bundle** (required for every startup change, after the above):
-     `sh tests/bench/cold_boot.sh <old compacted bootstrap.js> [new]`. It injects each runtime into the user's 349.9
+     `sh tests/bench/cold_boot.sh <old compacted bootstrap.js> [new]`. It injects each runtime into the user's 350.8
      `index.android.bundle` with `HbcPrelude`, boots it through React Native's own initializer
      (`tests/hermes-startup.js`, which must print `HBC98_REAL_RN_ENVIRONMENT_PASS`) and compares user CPU over
      interleaved cold starts. It needs `sh scripts/hbc/setup.sh Discord.apkm` once. This is the closest number to a
