@@ -5,7 +5,7 @@
     const features = /*__FEATURES__*/;
     // Inspected Metro IDs for the SHA-256-pinned 350.8 bundle; never scan or eagerly require modules.
     // Metro IDs Venus wraps, as a dense table: decorateDefine checks it for all ~17.7k modules at startup, and an
-    // indexed read is ~3x cheaper than Set.has on Hermes (tests/bench/define_wrapper.js). 120 is RN's initializer.
+    // indexed read is ~3x cheaper than Set.has on Hermes. 120 is RN's initializer.
     // IDs past the end read as undefined, so a module added in a later bundle is simply left alone.
     const targetModules = new Uint8Array(32768);
     function selectModules(ids) { for (let i = 0; i < ids.length; i++) targetModules[ids[i]] = 1; }
@@ -270,7 +270,7 @@
     const owns = (obj, key) => obj != null && Object.prototype.hasOwnProperty.call(obj, key);
     // enabled() runs inside nearly every hook: resolve setting -> feature once, not per call.
     // Off settings (most of them) return before any lookup, and a plain object beats Map.get on Hermes
-    // (tests/bench/enabled.js, 1.23x).
+    // (1.23x on Hermes).
     const featureTable = Object.create(null);
     const enabled = key => {
         if (!settings[key]) return false;
@@ -2709,7 +2709,7 @@
     const reviewCache = new Map(), platformWrappers = new WeakMap();
     const REVIEW_API = "https://manti.vendicated.dev/api/reviewdb";
     // One cache per tone (saturation, lightness), keyed by the seed: building "0.75:0.6:<id>" on every lookup cost
-    // 5.9x more than the lookup itself on Hermes (number-to-string). tests/bench/pastel_cache.js
+    // 5.9x more than the lookup itself on Hermes (number-to-string).
     const pastelCache = new Map();
     let pastelCacheColor, pastelCacheHash;
     function pastelColor(seed, saturation, lightness) {
@@ -5000,7 +5000,7 @@
         });
     }
     function messageRow(orig, self, args) { return messageRowResult(orig.apply(self, args), args[0]); }
-    // generate(row) is called once per chat row as you scroll: skip the arguments object (2.3x, tests/bench/row_hook.js).
+    // generate(row) is called once per chat row as you scroll: skip the arguments object (2.3x).
     messageRow.call1 = (orig, self, row) => messageRowResult(orig.call(self, row), row);
     function messageRowResult(result, row) {
         if (!result || !row || row.rowType !== 1 || !result.message) return result;
@@ -5823,7 +5823,7 @@
     // Your friends who are members, online ones first, each with their status and server nickname. Who's here (one
     // getMember per friend) only changes with the member, user or friend stores, so it's kept, sorted by name, until
     // one of them changes; a presence tick (up to ~3/s) just re-reads their statuses and stable-sorts by rank
-    // (tests/bench/server_info.js: 1.63 ms -> 70 us for 300 friends, 60 here).
+    // (1.63 ms -> 70 us for 300 friends, 60 here).
     function serverFriends(guildId) {
         const ids = serverCall(serverStore(4760), "getFriendIDs") || [], members = serverStore(2125), presence = serverStore(5108);
         if (!members || !ids.length) return [];
@@ -6223,7 +6223,7 @@
         const orig = exports && exports[key];
         if (typeof orig !== "function") return exports;
         // Hot two-argument hooks (permission checks, message lookups) can declare operation.call2(orig, self, a, b):
-        // passing `arguments` on to apply is ~3x the cost of the call itself on Hermes (tests/bench/hook_call.js).
+        // passing `arguments` on to apply is ~3x the cost of the call itself on Hermes.
         // One-argument hooks (RowGenerator.generate) can declare operation.call1(orig, self, a) the same way.
         const call2 = operation.call2, call1 = operation.call1;
         const patched = typeof call2 === "function" && typeof call1 === "function" ?
@@ -7864,7 +7864,7 @@
         vi:["c\u1ee7a", "v\u00e0", "l\u00e0", "c\u00f3", "kh\u00f4ng", "\u0111\u01b0\u1ee3c", "trong", "cho", "v\u1edbi", "n\u00e0y", "\u0111\u00f3", "nh\u1eefng", "m\u1ed9t", "c\u00e1c", "ng\u01b0\u1eddi", "nh\u01b0", "khi", "th\u00ec", "m\u00e0", "r\u1ea5t", "nhi\u1ec1u", "c\u1ea3m", "\u01a1n", "xin", "ch\u00e0o"]};
     // Per target language, worked out once: the letters it doesn't use, and every other language's everyday words that
     // aren't its own. translateLooksForeign runs for rows and on every message change in a chat, so it no longer builds a
-    // RegExp and walks ~550 listed words for each message (tests/bench/translate_foreign.js).
+    // RegExp and walks ~550 listed words for each message.
     const translateForeignPlans = new Map();
     function translateForeignPlan(base) {
         if (translateForeignPlans.has(base)) return translateForeignPlans.get(base);
@@ -7922,7 +7922,7 @@
     // The translate bar: translate a whole chat, or show it as written again. Every row on screen from it is redrawn.
     // Discord replaces a chat's message collection whenever anything in it changes, so a scan of the same collection, for the
     // same language and account, gives the same answer. The bar asks on every render and on every message store change (from
-    // any chat), so only a collection it hasn't seen is walked (tests/bench/translate_scan.js). force: a full walk anyway.
+    // any chat), so only a collection it hasn't seen is walked. force: a full walk anyway.
     const translateScans = new Map();
     function translateScanChannel(channelId, force) {
         if (!channelId || !msgStore || typeof msgStore.getMessages !== "function") return false;
@@ -8162,7 +8162,7 @@
     function translateRow(message, source, channelId, id) {
         const contentSource = translateContentSource(source);
         if (!message || !Array.isArray(message.content) || !contentSource || typeof contentSource.content !== "string" || !channelId || !id) return message;
-        // Not wanted (most rows in "Only when you ask") needs no user lookup (1.44x, tests/bench/translate_row.js).
+        // Not wanted (most rows in "Only when you ask") needs no user lookup (1.44x).
         const choice = translate.choice.get(id);
         if (choice === false || choice === undefined && settings.translateMode === "manual" && !translateChatOn(channelId)) {
             translateSeen(source, channelId, id, null);
@@ -10191,7 +10191,7 @@
     };
     // Every <Image> in Discord (avatars, attachments, emojis, icons) renders through this while a pack is on, and most
     // aren't replaced, so the miss path matters. React calls a function component as (props, secondArg): call2 skips
-    // passing arguments on, and a hit no longer copies args (tests/bench/icon_image_hook.js, 2.16x).
+    // passing arguments on, and a hit no longer copies args (2.16x on Hermes).
     function imageHook(orig, self, args) {
         const props = args[0];
         if (!iconPacks.hasActive || !props) return orig.apply(self, args);
@@ -11119,7 +11119,7 @@
         if (typeof define !== "function") return define;
         return function (factory, id, dependencies) {
             // Runs for all ~17.7k modules at startup: call define(factory, id, dependencies) directly
-            // without checking arguments.length or going through Function.prototype.call (tests/bench/define_wrapper.js).
+            // without checking arguments.length or going through Function.prototype.call.
             if (targetModules[id] !== 1 || typeof factory !== "function")
                 return define(factory, id, dependencies);
             const wrappedFactory = function () {

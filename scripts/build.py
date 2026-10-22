@@ -458,9 +458,29 @@ function jsonLiterals(code) {
     return output
 
 
+BENCH_TOOLS = {"hermes_bench.cjs", "cold_boot.sh", "load_profile.cjs", "load_calls.cjs", "runtime_eval.cjs"}
+
+
+def check_benches():
+    """tests/bench/ keeps only the general tools. A bench for one optimization lives in tests/bench/scratch/ on its pull
+    request and is deleted before the merge: on main or a release tag, any scratch file fails the build."""
+    folder = ROOT / "tests/bench"
+    stray = sorted(p.name for p in folder.iterdir() if p.is_file() and p.name not in BENCH_TOOLS)
+    if stray:
+        raise SystemExit(f"tests/bench: {stray} aren't general tools; one optimization's bench goes in tests/bench/scratch/ (AGENTS.md)")
+    scratch = sorted(str(p.relative_to(ROOT)) for p in (folder / "scratch").rglob("*") if p.is_file()) if (folder / "scratch").is_dir() else []
+    if not scratch:
+        return
+    ref = os.environ.get("GITHUB_REF", "")
+    if ref == "refs/heads/main" or ref.startswith("refs/tags/") or os.environ.get("VENUS_RELEASE"):
+        raise SystemExit(f"{scratch}: per-optimization benches never reach main or a release; delete tests/bench/scratch/")
+    print(f"::warning::Delete tests/bench/scratch/ before merging: {', '.join(scratch)}", flush=True)
+
+
 def build():
     # Morphe Manager draws CHANGELOG.md as sections; a malformed entry shows as one grey block.
     run(sys.executable, ROOT / "scripts/release_notes.py", "--check")
+    check_benches()
     tools()
     runtime = compact_runtime()
     libs = BUILD / "libs"
