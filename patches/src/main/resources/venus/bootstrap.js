@@ -913,7 +913,7 @@
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
-        badges:["Game time", "Unique games", "Switch games every", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
+        badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -4411,25 +4411,112 @@
     }
     // The card at the top: the game playing right now with its real art, when the next one starts and how many so far.
     function badgeNowCard(s) {
-        const entry = badges.current, game = entry && entry.game, url = badgeIconUrl(game, 128);
+        const entries = badgeEntries(), entry = badges.current, game = entry && entry.game, url = badgeIconUrl(game, 128);
         const lines = [];
-        if (entry && badgeCycleOn()) {
+        if (entries.length > 1) lines.push(tr("Also playing {names}.", {names:entries.slice(1).map(e => e.game.name).join(", ")}));
+        if (entry && badgeCycleOn() && !badgeVarietyDone()) {
             const left = Math.max(1, Math.ceil((badgeCycleMinutes(settings.badgesCycleMinutes) * 60000 - (Date.now() - entry.startedAt)) / 60000));
             lines.push(pl(left, "Next game in about {n} minute.", "Next game in about {n} minutes."));
-        } else if (entry) lines.push(tr("Counting play time on this game."));
+        } else if (entry && badgeCycleOn()) lines.push(tr("All 100 games for the top tier are played, so games stay put now."));
+        else if (entry) lines.push(tr("Counting play time on this game."));
         else if (!badgeNeedsGame()) lines.push(tr("Turn on Game time or Unique games below."));
         else lines.push(tr("Starts a game as soon as Discord is connected."));
         if (badges.played.size) lines.push(pl(badges.played.size, "{n} game played so far.", "{n} games played so far."));
+        if (badges.granting) lines.push(tr("Adding {done} of {total} hours.", {done:badges.granting.done, total:badges.granting.total}));
         if (badges.error) lines.push(tr("Couldn't report to Discord. Trying again soon."));
         const leading = url && RN.Image ? el(RN.Image, {source:{uri:url, width:40, height:40}, style:s.art, accessibilityIgnoresInvertColors:true}) : null;
-        const share = badgeShare();
+        const share = badgeVarietyDone() ? null : badgeShare();
         return statusCard("status", lines.join("\n"), {title:entry ? tr("Playing {name}", {name:game.name}) : badgeNeedsGame() ? tr("Getting a game ready") : tr("No games playing"),
             leading, IconComponent:leading ? null : venusIcon(badges.error ? 12178 : 9207, badges.error ? "ChatWarningIcon" : "GameControllerIcon"),
             footer:share != null ? el(VenusProgress, {key:"cycle:" + game.id, value:share}) : null});
     }
+    // The three questions everyone asks first: when a game counts, how fast hours add up, and why the badge lags behind.
+    function badgeHowCard(s) {
+        const rate = badgeGamesAtOnce();
+        const rows = [
+            [9207, "GameControllerIcon", tr("When a game counts"), tr("As soon as it starts. Each game stays on a while anyway, because switching every few seconds is something no real player does.")],
+            [5051, "ClockIcon", tr("How fast hours add up"), settings.badgesGameTime ?
+                pl(rate, "{n} hour of game time for every hour Discord is open, even in the background.", "{n} hours of game time for every hour Discord is open, even in the background.") :
+                tr("Turn on Game time to count hours.")],
+            [8675, "CalendarIcon", tr("When you'll see it"), tr("Discord updates badges about once a day, so new games and hours show 12 to 72 hours later.")]];
+        const out = [];
+        rows.forEach(([icon, name, title, body], i) => {
+            if (i) out.push(el(RN.View, {key:"d" + i, style:s.divider}));
+            out.push(el(RN.View, {key:"r" + i, style:s.row},
+                el(RN.View, {style:s.icon}, el(venusIcon(icon, name), {size:"sm"})),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    badgeText(title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    badgeText(body, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:13}))));
+        });
+        return el(RN.View, {key:"how", style:{gap:10}}, groupTitle("howTitle", "How it works"), el(RN.View, {style:s.card}, out));
+    }
+    // Add hours now: steps you can't rush through. Tick three statements, type a word, pick an amount, then confirm once
+    // more in Discord's own dialog. Nothing is sent before that last confirm.
+    const BADGE_GRANT_PRESETS = [25, 100, 300, 1000];
+    const BADGE_DANGER_DARK = {box:{borderRadius:16, padding:16, gap:12, borderWidth:1, borderColor:"#f23f43", backgroundColor:"#f23f431a"}};
+    function BadgeGrantPanel(props) {
+        const [step, setStep] = React.useState(0), [word, setWord] = React.useState(""), [hours, setHours] = React.useState(100), [checks, setChecks] = React.useState([false, false, false]);
+        useSettings("badges");
+        const ui = reviewUI(), s = props.s, Button = inspectedExport(5379, "Button"), Press = RN.Pressable || RN.View;
+        const limit = badgeGrantLimit(), wait = badgeGrantWait(), granting = badges.granting, keyword = tr("RISK");
+        const danger = useThemed("badgeDanger", c => ({box:Object.assign({}, BADGE_DANGER_DARK.box, {borderColor:c.BORDER_FEEDBACK_CRITICAL || "#f23f43",
+            backgroundColor:c.BACKGROUND_FEEDBACK_CRITICAL || "#f23f431a"})}), BADGE_DANGER_DARK);
+        const button = (key, text, onPress, disabled, variant) => Button ? el(Button, {key, text, size:"md", variant:variant || "primary", disabled:!!disabled,
+                onPress:() => { haptic("SELECTION"); animateLayout(); onPress(); }}) :
+            el(Press, {key, onPress:disabled ? undefined : onPress, accessibilityRole:"button", accessibilityLabel:text, style:{padding:12, borderRadius:20, alignItems:"center", backgroundColor:variant === "secondary" ? "#4e5058" : "#da373c", opacity:disabled ? 0.5 : 1}},
+                el(RN.Text, {style:{color:"#ffffff", fontWeight:"600"}}, text));
+        const title = text => badgeText(text, "text-md/bold", "text-feedback-critical", {color:"#f23f43", fontSize:16, fontWeight:"700"});
+        const heading = text => badgeText(text, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"});
+        const body = text => badgeText(text, "text-sm/medium", "text-default", {color:"#dbdee1", fontSize:14});
+        const check = (i, text) => el(Press, {key:"c" + i, accessibilityRole:"checkbox", accessibilityLabel:text, accessibilityState:{checked:checks[i]},
+                style:{flexDirection:"row", gap:12, alignItems:"center", paddingVertical:4},
+                onPress:() => { haptic("SELECTION"); const next = checks.slice(); next[i] = !next[i]; setChecks(next); }},
+            el(RN.View, {style:{width:22, height:22, borderRadius:6, borderWidth:2, borderColor:checks[i] ? "#da373c" : "#80848e", backgroundColor:checks[i] ? "#da373c" : "transparent",
+                alignItems:"center", justifyContent:"center"}}, checks[i] ? el(RN.Text, {style:{color:"#ffffff", fontSize:13, fontWeight:"800", lineHeight:15}}, "\u2713") : null),
+            el(RN.View, {style:{flex:1}}, body(text)));
+        if (granting) return el(RN.View, {style:[s.card, {gap:8}]},
+            heading(tr("Adding hours")),
+            body(tr("{done} of {total} hours sent. Keep Discord open.", {done:granting.done, total:granting.total})),
+            el(VenusProgress, {key:"grant", value:granting.total ? granting.done / granting.total : 0}));
+        if (wait > 0 || limit < 1) return el(RN.View, {style:[s.card, {gap:8}]},
+            heading(limit < 1 ? tr("Nothing left to add") : tr("Come back tomorrow")),
+            body(limit < 1 ? tr("You're at the 5,000 hour top tier already.") :
+                pl(Math.ceil(wait / 3600000), "You can add more in {n} hour. Hours you added show within 72 hours.", "You can add more in {n} hours. Hours you added show within 72 hours.")),
+            button("close", tr("Close"), props.onClose, false, "secondary"));
+        if (step === 0) return el(RN.View, {style:danger.box},
+            title(tr("Your account could be suspended or banned")),
+            body(tr("Adding hours tells Discord you played games you never played. That breaks Discord's Terms of Service. People have reported accounts suspended for tools that do this, and hours added this way can't be taken back.")),
+            body(tr("Nobody outside Discord knows how likely that is. It could happen right away, weeks later or never. Leaving this off and letting Badge Completer play in the background is much safer.")),
+            check(0, tr("I understand this breaks Discord's rules.")),
+            check(1, tr("I understand my account could be suspended or banned.")),
+            check(2, tr("I understand added hours can't be removed.")),
+            button("next", tr("Continue"), () => setStep(1), !checks.every(Boolean), "destructive"),
+            button("cancel", tr("Cancel"), props.onClose, false, "secondary"));
+        if (step === 1) {
+            const typed = word.trim().toUpperCase() === keyword.toUpperCase();
+            return el(RN.View, {style:danger.box},
+                title(tr("Type {word} to continue", {word:keyword})),
+                body(tr("This makes sure you read the warning.")),
+                ui.TextInput ? el(ui.TextInput, {value:word, onChange:text => setWord(String(text || "")), autoCapitalize:"characters", autoCorrect:false, placeholder:keyword, maxLength:20}) :
+                    el(RN.TextInput, {value:word, onChangeText:setWord, autoCapitalize:"characters", autoCorrect:false, placeholder:keyword, maxLength:20, style:{fontSize:16, padding:12, color:"#f2f3f5"}}),
+                button("next", tr("Continue"), () => setStep(2), !typed, "destructive"),
+                button("cancel", tr("Cancel"), props.onClose, false, "secondary"));
+        }
+        const amounts = BADGE_GRANT_PRESETS.filter(n => n <= limit), items = amounts.length ? amounts : [limit];
+        const chosen = items.includes(hours) ? hours : items[Math.min(1, items.length - 1)];
+        return el(RN.View, {style:danger.box},
+            heading(tr("How many hours?")),
+            body(tr("Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.", {max:Math.min(BADGE_GRANT_MAX, limit)})),
+            venusSegmented({key:"grantHours", value:chosen, onChange:setHours, items:items.map(n => ({value:n, label:tr("{n} h", {n})}))}),
+            body(tr("They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.")),
+            button("grant", tr("Add {n} hours", {n:chosen}), () => confirmAction("Add hours now?",
+                "Last chance. This can get your account suspended or banned, and it can't be undone.", "Add hours", () => { badgeGrantHours(chosen); }), chosen < 1, "destructive"),
+            button("cancel", tr("Cancel"), props.onClose, false, "secondary"));
+    }
     function BadgeSettings() {
         useSettings("badges");
         React.useEffect(() => { if (enabled("badges")) badgeRefreshDirectory(false); }, []);
+        const [advanced, setAdvanced] = React.useState(false), [granting, setGranting] = React.useState(false);
         const ui = reviewUI(), s = badgeCardStyles();
         if (!RN) return null;
         const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, on = enabled("badges"), Button = inspectedExport(5379, "Button");
@@ -4440,18 +4527,34 @@
                 {title:tr("Personalization is off"), IconComponent:venusIcon(12178, "ChatWarningIcon"),
                  trailing:Button ? el(Button, {text:tr("Turn on"), size:"sm", variant:"primary", onPress:() => { haptic("SELECTION"); badgeTurnOnPersonalization(); }}) : null}) : null,
             badgeProgressCard(s, on),
+            on ? badgeHowCard(s) : null,
             el(Group, {key:"types", title:tr("What to count")},
-                switchRow(Switch, "badgesGameTime", "Game time", "Plays a game in the background, toward Hours Played.", rowIcon(5051, "ClockIcon")),
+                switchRow(Switch, "badgesGameTime", "Game time", "Plays games in the background, toward Hours Played.", rowIcon(5051, "ClockIcon")),
                 switchRow(Switch, "badgesUniqueGames", "Unique games", "Switches to a game you haven't played yet, toward Unique Games Played.", rowIcon(9207, "GameControllerIcon"))),
+            settings.badgesGameTime ? el(RN.View, {key:"atOnce", style:{gap:10}},
+                groupTitle("atOnceTitle", "Games at once"),
+                venusSegmented({key:"atOnceSeg", value:badgeAtOnce(settings.badgesGamesAtOnce), disabled:!on, onChange:value => setSetting("badgesGamesAtOnce", value),
+                    items:BADGE_AT_ONCE.map(n => ({value:n, label:pl(n, "{n} game", "{n} games")}))}),
+                footnote("atOnceHint", "Discord adds up the time of every game that's running, so 3 games count 3 hours each hour. More than 3 at once isn't something real players do.")) : null,
             settings.badgesUniqueGames ? el(PresetOrCustom, {key:"cycle", title:"Switch games every", value:settings.badgesCycleMinutes, disabled:!on,
-                min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX, placeholder:30,
+                min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX, placeholder:15,
                 inputLabel:tr("Minutes, {min} to {max}", {min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX}),
                 format:n => tr("{n} min", {n}),
                 onChange:value => setSetting("badgesCycleMinutes", value),
-                presets:BADGE_CYCLE_PRESETS.map(n => ({value:n, label:tr("{n} min", {n})}))}) : null,
+                presets:BADGE_CYCLE_PRESETS.map(n => ({value:n, label:tr("{n} min", {n})})),
+                hint:"Every 15 minutes reaches all 100 games for the top tier in about a day. After that, games stop switching."}) : null,
             on ? el(Group, {key:"actions", title:tr("Manage")},
-                badges.current && badgeCycleOn() ? actionRow(ui, "next", "Switch to the next game now", null, () => { haptic("SELECTION"); badgeNextGame(); }) : null,
-                actionRow(ui, "refresh", "Refresh badge progress", "Discord can take a day or two to add new play time.", () => { haptic("SELECTION"); badgeRefreshDirectory(true); })) : null,
+                badges.current && badgeCycleOn() && !badgeVarietyDone() ? actionRow(ui, "next", "Switch to the next game now", null, () => { haptic("SELECTION"); badgeNextGame(); }) : null,
+                actionRow(ui, "refresh", "Refresh badge progress", "Discord can take a day or two to add new play time.", () => { haptic("SELECTION"); badgeRefreshDirectory(true); }),
+                actionRow(ui, "advanced", advanced ? "Hide advanced" : "Advanced", advanced ? null : "Add hours now. Risky.", () => { haptic("SELECTION"); animateLayout(); setAdvanced(!advanced); setGranting(false); })) : null,
+            on && advanced ? el(RN.View, {key:"advancedBox", style:{gap:10}},
+                groupTitle("advancedTitle", "Add hours now"),
+                granting || badges.granting ? el(BadgeGrantPanel, {key:"panel", s, onClose:() => { animateLayout(); setGranting(false); }}) :
+                    el(RN.View, {style:[s.card, {gap:10}]},
+                        badgeText(tr("Get game time right away instead of waiting for it."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                        badgeText(badges.lastGrant ? tr("Last time you added {n} hours. They show on your badge within 72 hours.", {n:badges.lastGrant}) :
+                            tr("This is the risky way, so it asks you to confirm three times."), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:13}),
+                        Button ? el(Button, {text:tr("Add hours now"), size:"md", variant:"destructive", onPress:() => { haptic("SELECTION"); animateLayout(); setGranting(true); }}) : null)) : null,
             footnote("note", "Games are reported as Discord for Windows sees them, without installing or opening anything. Years Active grows with your account's age, so there's nothing to report for it.")];
         return settingsBody(ui, groups);
     }
