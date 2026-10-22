@@ -957,5 +957,20 @@
  "Venus sends it through {service}": "Venus îl trimite prin {service}",
  "You paste a link to a post on {site}": "Lipești un link către o postare de pe {site}",
  "You tap Send": "Atingi Trimite",
- "{site} is off, so the link is sent as written": "{site} e dezactivat, așa că linkul e trimis așa cum e"
+ "{site} is off, so the link is sent as written": "{site} e dezactivat, așa că linkul e trimis așa cum e",
+ "Bring back Tenor GIFs": "Readu GIF-urile Tenor",
+ "Discord's GIFs only": "Doar GIF-urile Discord",
+ "Discord's own GIFs show until it answers again.": "Până atunci se afișează GIF-urile Discord.",
+ "GIF picker preview": "Previzualizare selector de GIF-uri",
+ "GIFs from": "GIF-uri de la",
+ "Only Tenor": "Doar Tenor",
+ "Search GIFs": "Caută GIF-uri",
+ "Search Tenor": "Caută pe Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "Căutarea, tendințele și categoriile vin toate de la Tenor, ca înainte.",
+ "Tenor GIFs": "GIF-uri Tenor",
+ "Tenor GIFs show in Discord's GIF picker again.": "GIF-urile Tenor revin în selectorul de GIF-uri din Discord.",
+ "Tenor and Discord's GIFs": "Tenor și Discord",
+ "Tenor isn't answering": "Tenor nu răspunde",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Întâi cele de pe Tenor, amestecate cu cele din Discord, ca să ai cele mai multe opțiuni.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Ce cauți ajunge la Tenor fără contul tău Discord. GIF-urile alese sunt trimise ca linkuri tenor.com, care rulează pentru toți."
 }

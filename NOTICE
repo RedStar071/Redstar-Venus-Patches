@@ -60,3 +60,7 @@ Discord 350.8's own AssetRegistry and BaseIconImage modules.
 
 Custom branding renames the package, its permission and its providers the same way Morphe's
 "Clone app" patch does. Its code is written for this project against Discord 350.8's manifest.
+
+Bring back Tenor GIFs is based on the idea of Livie's BringBackTenor Vendetta plugin (lvwmwm/vendettian-plugins). Its
+code is written for this project against Discord 350.8's own GIF picker. It asks Tenor's public v1 API
+(g.tenor.com) for GIFs only while it's on. Venus Patches isn't affiliated with or endorsed by Tenor or Google.

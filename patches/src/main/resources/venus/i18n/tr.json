@@ -1003,6 +1003,21 @@
   "{on} of {total} turned on": "{on} / {total} açık",
   "{site} is off, so the link is sent as written": "{site} kapalı, bu yüzden bağlantı olduğu gibi gönderilir",
   "{text} text, {voice} voice": "{text} yazı, {voice} ses",
-  "{time} ago": "{time} önce"
+  "{time} ago": "{time} önce",
+  "Bring back Tenor GIFs": "Tenor GIF'lerini geri getir",
+  "Discord's GIFs only": "Yalnızca Discord GIF'leri",
+  "Discord's own GIFs show until it answers again.": "O zamana kadar Discord'un GIF'leri gösterilir.",
+  "GIF picker preview": "GIF seçici önizlemesi",
+  "GIFs from": "GIF kaynağı",
+  "Only Tenor": "Yalnızca Tenor",
+  "Search GIFs": "GIF ara",
+  "Search Tenor": "Tenor'da ara",
+  "Search, trending and categories all come from Tenor, like before.": "Arama, trendler ve kategorilerin hepsi eskisi gibi Tenor'dan gelir.",
+  "Tenor GIFs": "Tenor GIF'leri",
+  "Tenor GIFs show in Discord's GIF picker again.": "Tenor GIF'leri Discord'un GIF seçicisinde yeniden görünür.",
+  "Tenor and Discord's GIFs": "Tenor ve Discord",
+  "Tenor isn't answering": "Tenor yanıt vermiyor",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Önce Tenor'unkiler, Discord'unkilerle karışık gelir; böylece en çok seçeneğin olur.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Aramaların Discord hesabın olmadan Tenor'a gider. Seçtiğin GIF'ler herkes için oynayan tenor.com bağlantıları olarak gönderilir."
  }
 }

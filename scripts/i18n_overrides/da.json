@@ -924,5 +924,20 @@
  "Venus sends it through {service}": "Venus sender det via {service}",
  "You paste a link to a post on {site}": "Du indsætter et link til et opslag på {site}",
  "You tap Send": "Du trykker på Send",
- "{site} is off, so the link is sent as written": "{site} er slået fra, så linket sendes, som det er"
+ "{site} is off, so the link is sent as written": "{site} er slået fra, så linket sendes, som det er",
+ "Bring back Tenor GIFs": "Få Tenor-GIF'er tilbage",
+ "Discord's GIFs only": "Kun Discords GIF'er",
+ "Discord's own GIFs show until it answers again.": "Indtil da vises Discords egne GIF'er.",
+ "GIF picker preview": "Forhåndsvisning af GIF-vælgeren",
+ "GIFs from": "GIF'er fra",
+ "Only Tenor": "Kun Tenor",
+ "Search GIFs": "Søg efter GIF'er",
+ "Search Tenor": "Søg på Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "Søgning, trends og kategorier kommer alle fra Tenor, som før.",
+ "Tenor GIFs": "Tenor-GIF'er",
+ "Tenor GIFs show in Discord's GIF picker again.": "Tenor-GIF'er er tilbage i Discords GIF-vælger.",
+ "Tenor and Discord's GIFs": "Tenor og Discord",
+ "Tenor isn't answering": "Tenor svarer ikke",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Tenors kommer først, blandet med Discords, så du får mest at vælge imellem.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Det, du søger efter, sendes til Tenor uden din Discord-konto. De GIF'er, du vælger, sendes som tenor.com-links, der afspilles for alle."
 }

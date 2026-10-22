@@ -1003,6 +1003,21 @@
   "{on} of {total} turned on": "{on} van {total} ingeschakeld",
   "{site} is off, so the link is sent as written": "{site} staat uit, dus de link wordt verstuurd zoals hij is",
   "{text} text, {voice} voice": "{text} tekst, {voice} spraak",
-  "{time} ago": "{time} geleden"
+  "{time} ago": "{time} geleden",
+  "Bring back Tenor GIFs": "Tenor-GIF's terugbrengen",
+  "Discord's GIFs only": "Alleen GIF's van Discord",
+  "Discord's own GIFs show until it answers again.": "Tot dan zie je de GIF's van Discord.",
+  "GIF picker preview": "Voorbeeld van de GIF-kiezer",
+  "GIFs from": "GIF's van",
+  "Only Tenor": "Alleen Tenor",
+  "Search GIFs": "GIF's zoeken",
+  "Search Tenor": "Zoeken op Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "Zoeken, trends en categorieën komen allemaal van Tenor, zoals vroeger.",
+  "Tenor GIFs": "Tenor-GIF's",
+  "Tenor GIFs show in Discord's GIF picker again.": "Tenor-GIF's staan weer in de GIF-kiezer van Discord.",
+  "Tenor and Discord's GIFs": "Tenor en Discord",
+  "Tenor isn't answering": "Tenor reageert niet",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Eerst die van Tenor, gemengd met die van Discord, voor de meeste keus.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Wat je zoekt gaat naar Tenor, zonder je Discord-account. Gekozen GIF's worden als tenor.com-links verstuurd en spelen voor iedereen af."
  }
 }

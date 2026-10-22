@@ -924,5 +924,20 @@
  "Venus sends it through {service}": "Το Venus τον στέλνει μέσω {service}",
  "You paste a link to a post on {site}": "Επικολλάς έναν σύνδεσμο σε ανάρτηση από {site}",
  "You tap Send": "Πατάς Αποστολή",
- "{site} is off, so the link is sent as written": "Το {site} είναι ανενεργό, οπότε ο σύνδεσμος στέλνεται όπως είναι"
+ "{site} is off, so the link is sent as written": "Το {site} είναι ανενεργό, οπότε ο σύνδεσμος στέλνεται όπως είναι",
+ "Bring back Tenor GIFs": "Επαναφορά των GIF του Tenor",
+ "Discord's GIFs only": "Μόνο GIF του Discord",
+ "Discord's own GIFs show until it answers again.": "Μέχρι τότε εμφανίζονται τα GIF του Discord.",
+ "GIF picker preview": "Προεπισκόπηση επιλογής GIF",
+ "GIFs from": "GIF από",
+ "Only Tenor": "Μόνο Tenor",
+ "Search GIFs": "Αναζήτηση GIF",
+ "Search Tenor": "Αναζήτηση στο Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "Η αναζήτηση, οι τάσεις και οι κατηγορίες έρχονται όλες από το Tenor, όπως παλιά.",
+ "Tenor GIFs": "GIF του Tenor",
+ "Tenor GIFs show in Discord's GIF picker again.": "Τα GIF του Tenor επιστρέφουν στην επιλογή GIF του Discord.",
+ "Tenor and Discord's GIFs": "Tenor και Discord",
+ "Tenor isn't answering": "Το Tenor δεν απαντά",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Πρώτα του Tenor, ανακατεμένα με του Discord, για τη μεγαλύτερη επιλογή.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Ό,τι αναζητάς πηγαίνει στο Tenor, χωρίς τον λογαριασμό σου στο Discord. Τα GIF που διαλέγεις στέλνονται ως σύνδεσμοι tenor.com και παίζουν σε όλους."
 }

@@ -43,6 +43,7 @@
     if (features.messageHighlight) selectModules([584, 1390, 5432, 7742]);
     if (features.serverInfo) selectModules([1390, 16748]);
     if (features.fixEmbeds) selectModules([1390, 7174]);
+    if (features.tenorGifs) selectModules([1295, 9733]);
     const revision = "1.18.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -63,7 +64,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, tenorGifs:false, tenorGifsSource:"both", language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -79,7 +80,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, tenorGifs: false, tenorGifsSource: "both", language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -141,6 +142,8 @@
     // How you ask in "Only when you ask" (#82): the bar at the top of a chat, Translate in a message's menu, or both.
     // One choice instead of two switches, so there's always a way to translate.
     const TRANSLATE_ASKS = ["both", "bar", "menu"];
+    // Where the GIF picker's GIFs come from with Bring back Tenor GIFs on: Tenor first with Discord's own mixed in, or only Tenor.
+    const TENOR_SOURCES = ["both", "tenor"];
     // Left bar thickness multiplier (1x = 2dp default, 2x = 4dp, 3x = 6dp, 4x = 8dp) and highlight color presets (#60).
     const HIGHLIGHT_THICKNESSES = [1, 2, 3, 4];
     // How strongly a highlighted row is tinted behind its text, 0 to 100 %. 50 is Discord's own tint (alpha 1a, about
@@ -323,7 +326,7 @@
     function acceptedSetting(key, value) {
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
-            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) ||
+            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) || key === "tenorGifsSource" && !TENOR_SOURCES.includes(value) ||
             key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
@@ -353,6 +356,11 @@
             if (!(key === "translateMode" ? TRANSLATE_MODES : key === "translateLanguage" ? TRANSLATE_LANGUAGES : key === "translateAsk" ? TRANSLATE_ASKS : TRANSLATE_TARGETS).includes(value)) return false;
             if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings[key] = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
+        }
+        if (key === "tenorGifsSource") {
+            if (!TENOR_SOURCES.includes(value)) return false;
+            if (settings.tenorGifsSource === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.tenorGifsSource = value; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "fixEmbedsSites") {
             const clean = fixSitesText(value);
@@ -789,7 +797,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -824,7 +832,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -862,7 +870,7 @@
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
-        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"]};
+        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1147,6 +1155,7 @@
             () => ({page:FreeNitroSettings, sections:[section("Send as links", [option("emojis", "Emojis", "Emojis from other servers, and animated emojis.", "VENUS_FREENITRO"),
                 option("stickers", "Stickers", "Stickers from other servers. Animated ones may not move.", "VENUS_FREENITRO")]),
              section("Link style", [option("hyperlinks", "Short links", "In chat it looks the same either way. Short links only change what's copied or quoted.", "VENUS_FREENITRO")])]}));
+        withOptions("sending", "tenorGifs", "VENUS_TENORGIFS", "Bring back Tenor GIFs", "Tenor GIFs show in Discord's GIF picker again.", "Tenor GIFs", TenorSettings);
         withOptions("sending", "fixEmbeds", "VENUS_FIXEMBEDS", "Fix link previews", "Links to X, Instagram, TikTok, Reddit and more show the post.", "Link previews", FixEmbedsSettings);
         toggle("sending", "voice", "Send audio as voice messages", "Audio files are sent as voice messages. Android 10 or newer.");
         toggle("sending", "splitMessages", "Send long messages", "Type past the limit. Long messages are sent in parts.");
@@ -4812,6 +4821,63 @@
             el(RN.View, {style:s.card}, out),
             footnote("hint", "Tap a site to choose its service. If a preview doesn't show, another service may work."));
     }
+    // Bring back Tenor GIFs: Discord's GIF picker as you'll see it, drawn with Discord's Wumpus art (bundled in the app),
+    // never real GIFs. Each tile says where it came from, so you can see the two sources mix, or only Tenor.
+    const TENOR_SAMPLES = [["wumpusmario", 66], ["wumpuswizard", 92], ["wumpuslink", 78], ["wumpuspikachu", 70], ["wumpusash", 88], ["wumpuswump", 74],
+        ["wumpusluigi", 84], ["wumpusmario", 72]];
+    const TENOR_TINTS = ["#5865f2", "#eb459e", "#3ba55c", "#faa61a", "#ed4245", "#00a8fc", "#9b59b6", "#1abc9c"];
+    function TenorPreview(props) {
+        useSettings("tenorGifs");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on, only = settings.tenorGifsSource === "tenor";
+        const Search = venusIcon(6740, "MagnifyingGlassIcon"), Star = venusIcon(9549, "StarIcon"), Gif = venusIcon(9748, "GifIcon");
+        // Off, the picker is Discord's own: every GIF is Klipy's.
+        const from = i => !on ? "Klipy" : only || i % 2 === 0 ? "Tenor" : "Klipy";
+        const tile = (sample, i) => {
+            const source = from(i), tenorTile = source === "Tenor";
+            return el(RN.View, {key:"t" + i, style:{height:sample[1], borderRadius:4, overflow:"hidden", backgroundColor:TENOR_TINTS[i % TENOR_TINTS.length] + "33",
+                alignItems:"center", justifyContent:"center"}},
+                RN.Image ? el(RN.Image, {source:{uri:"images_native_wumpus_" + sample[0], width:84, height:66}, style:{width:56, height:44}, resizeMode:"contain"}) : null,
+                popIn("src:" + i + ":" + source, el(RN.View, {style:{position:"absolute", left:4, bottom:4, borderRadius:4, paddingHorizontal:5, paddingVertical:1,
+                    backgroundColor:tenorTile ? "#000000a6" : "#00000059"}},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:10, fontWeight:"700", opacity:tenorTile ? 1 : 0.8}}, source))));
+        };
+        const columns = [0, 1].map(c => el(RN.View, {key:"c" + c, style:{flex:1, gap:4}},
+            TENOR_SAMPLES.map((sample, i) => i % 2 === c ? tile(sample, i) : null)));
+        const tabs = el(RN.View, {key:"tabs", style:[k.segTrack, {flexDirection:"row", padding:3, gap:3, borderRadius:20, marginHorizontal:12}]},
+            [["emoji", "Emojis"], ["gif", "GIFs"], ["sticker", "Stickers"]].map(([id, label]) => el(RN.View, {key:id,
+                style:[{flex:1, paddingVertical:6, borderRadius:16, alignItems:"center"}, id === "gif" ? k.segIndicator : null]},
+                el(RN.Text, {style:[id === "gif" ? {color:s.name.color} : s.muted, {fontWeight:"600", fontSize:13}]}, tr(label)))));
+        const search = el(RN.View, {key:"search", style:[k.searchField, {flexDirection:"row", alignItems:"center", gap:8, height:36, borderRadius:18,
+            paddingHorizontal:12, marginHorizontal:12}]},
+            el(Search, {size:"xs", color:k.iconMuted.color}),
+            popIn("ph:" + (on && only), el(RN.Text, {style:[s.muted, {flex:1, fontSize:14}], numberOfLines:1}, on && only ? tr("Search Tenor") : tr("Search GIFs"))),
+            el(Star, {size:"xs", color:k.iconMuted.color}));
+        const sheet = el(RN.View, {key:"sheet", style:[k.sheet, {borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, gap:8}]},
+            el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66"}}),
+            tabs, search,
+            el(RN.View, {style:{height:236, overflow:"hidden", flexDirection:"row", gap:4, paddingHorizontal:12}}, columns));
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "GIF picker preview", [sheet], {header:el(RN.View, {key:"head", style:{flexDirection:"row", alignItems:"center", gap:8,
+                paddingHorizontal:16, paddingTop:10, paddingBottom:6}},
+                el(Gif, {size:"xs", color:k.icon.color}),
+                el(RN.Text, {style:[s.muted, {flex:1, fontSize:13, fontWeight:"600"}], numberOfLines:1},
+                    !on ? tr("Discord's GIFs only") : only ? tr("Only Tenor") : tr("Tenor and Discord's GIFs")))}));
+    }
+    function TenorSettings() {
+        useSettings("tenorGifs");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("tenorGifs"), Icon = venusIcon(9748, "GifIcon");
+        const groups = [
+            !on ? offCard("status", Icon, "tenorGifs") : tenor.down ? statusCard("status", "Discord's own GIFs show until it answers again.",
+                {title:tr("Tenor isn't answering"), IconComponent:venusIcon(8204, "ImageWarningIcon")}) : null,
+            el(TenorPreview, {key:"preview", on}),
+            radioGroup(ui, "source", "GIFs from", "tenorGifsSource", on, [
+                ["both", "Tenor and Discord's GIFs", "Tenor's come first, with Discord's mixed in, so you get the most choice.", rowIcon(11587, "ImagesIcon")],
+                ["tenor", "Only Tenor", "Search, trending and categories all come from Tenor, like before.", rowIcon(8210, "ImageIcon")]]),
+            footnote("note", "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.")];
+        return settingsBody(ui, groups);
+    }
     function FixEmbedsSettings() {
         useSettings("fixEmbeds");
         const ui = reviewUI();
@@ -7732,6 +7798,140 @@
         fixCounted();
         const next = Array.from(args); next[2] = Object.assign({}, edit, {content});
         return orig.apply(self, next);
+    }
+
+    // Bring back Tenor GIFs (#83): Discord's GIF picker asks Discord's API for /gifs/search, /gifs/trending and the rest
+    // (GIFPickerActionCreators 9732 through HTTP.get, 1295), and since Tenor's API closed to Discord those answers come from
+    // Klipy. Venus answers the same requests from Tenor's public v1 API, in the exact shape the picker's store (9731) reads,
+    // so Tenor GIFs show in Discord's own picker: no new tab or button. "Tenor and Discord's GIFs" puts Tenor first and
+    // mixes in Discord's own; "Only Tenor" uses Tenor for everything. If Tenor doesn't answer, Discord's own GIFs show.
+    // GIFs are sent as tenor.com links, which Discord still turns into a playing GIF for everyone.
+    const TENOR_API = "https://g.tenor.com/v1/", TENOR_KEY = "3Z0688EVWYKH";
+    // Only the sizes the picker draws: tinywebp tiles (animated, ~5x smaller than tinygif), tinymp4 when Discord asks for
+    // video, and the full gif for favourites. A 50-GIF page is ~70 KB of JSON instead of ~250 KB with every format.
+    const TENOR_MEDIA = "tinywebp,tinygif,gif,tinymp4";
+    const tenor = {cache:new Map(), ids:new Set(), down:false};
+    // Discord's "en-US" is Tenor's "en_US".
+    function tenorLocale(locale) { return typeof locale === "string" && /^[a-z]{2,3}(?:[-_][A-Za-z]{2,4})?$/.test(locale) ? locale.replace("-", "_") : "en_US"; }
+    function tenorHealth(up) {
+        if (tenor.down === !up) return;
+        tenor.down = !up;
+        later(() => notify("tenorGifs"), 0);
+    }
+    // Every answer is kept for 10 minutes, so scrolling further (a bigger limit), reopening the picker or going back to a
+    // search reuses the pages it already has. contentfilter=medium matches Discord's own picker (no adult results).
+    function tenorRequest(path, params) {
+        let url = TENOR_API + path + "?key=" + TENOR_KEY + "&contentfilter=medium";
+        for (const name in params) if (params[name] != null && params[name] !== "") url += "&" + name + "=" + encodeURIComponent(params[name]);
+        const now = Date.now(), hit = tenor.cache.get(url);
+        if (hit && hit.until > now) return hit.promise;
+        if (typeof global.fetch !== "function") return Promise.reject(new Error("Venus: no fetch"));
+        const Abort = global.AbortController, controller = typeof Abort === "function" ? new Abort() : null;
+        const timer = controller ? later(() => controller.abort(), 6000, false) : undefined;
+        const done = () => { if (timer !== undefined && global.clearTimeout) global.clearTimeout(timer); };
+        const promise = Promise.resolve().then(() => global.fetch(url, Object.assign({method:"GET", credentials:"omit", headers:{Accept:"application/json"}},
+            controller ? {signal:controller.signal} : {})))
+            .then(res => { if (!res || !res.ok) throw new Error("Tenor " + (res && res.status)); return res.json(); })
+            .then(body => { done(); tenorHealth(true); return body; }, error => { done(); tenor.cache.delete(url); tenorHealth(false); throw error; });
+        tenor.cache.set(url, {promise, until:now + 600000});
+        if (tenor.cache.size > 80) tenor.cache.delete(tenor.cache.keys().next().value);
+        return promise;
+    }
+    // One Tenor result as the store's item: {id, url, src, gif_src, width, height}. url is what gets sent.
+    function tenorItem(result, video) {
+        const media = result && Array.isArray(result.media) ? result.media[0] : null;
+        if (!media || typeof result.itemurl !== "string") return null;
+        const thumb = video && media.tinymp4 || media.tinywebp || media.tinygif || media.gif, full = media.gif || media.tinygif || thumb;
+        if (!thumb || typeof thumb.url !== "string") return null;
+        const dims = Array.isArray(thumb.dims) ? thumb.dims : [];
+        const id = String(result.id);
+        if (tenor.ids.size > 4000) tenor.ids.clear();
+        tenor.ids.add(id);
+        return {id, url:result.itemurl, src:thumb.url, gif_src:full.url, width:dims[0] || 0, height:dims[1] || 0};
+    }
+    // Pages of 50 (Tenor's most), fetched until the picker's limit is reached: the same page URLs every time, so they cache.
+    function tenorList(path, params, limit, format) {
+        const want = Math.max(1, Math.min(200, Number(limit) || 50)), video = /mp4|webm/.test(String(format || "")), out = [], seen = new Set();
+        const step = (pos, pages) => tenorRequest(path, Object.assign({}, params, {limit:50, pos, media_filter:TENOR_MEDIA})).then(body => {
+            const results = body && Array.isArray(body.results) ? body.results : [];
+            for (let i = 0; i < results.length && out.length < want; i++) {
+                const item = tenorItem(results[i], video);
+                if (item && !seen.has(item.id)) { seen.add(item.id); out.push(item); }
+            }
+            const next = body && typeof body.next === "string" ? body.next : "";
+            return out.length < want && results.length && next && next !== pos && next !== "0" && pages < 4 ? step(next, pages + 1) : out;
+        });
+        return step("", 1);
+    }
+    // Category tiles: Tenor sends each as a tinygif (~100 KB); the same GIF as a tinywebp is the same picture at ~8 KB.
+    function tenorCategoryImage(src) { return typeof src === "string" ? src.replace(/^(https:\/\/media\d*\.tenor\.com\/[\w-]+?)AAAAM(\/[^/?#]+)\.gif$/, "$1AAAA1$2.webp") : src; }
+    // Tenor first, then one of each: a page reads as one mixed list, and a bigger limit only adds to the end of it.
+    function tenorMix(mine, theirs, limit) {
+        const a = Array.isArray(mine) ? mine : [], b = Array.isArray(theirs) ? theirs : [], want = Math.max(1, Number(limit) || a.length + b.length), out = [];
+        for (let i = 0; out.length < want && (i < a.length || i < b.length); i++) {
+            if (i < a.length) out.push(a[i]);
+            if (i < b.length && out.length < want) out.push(b[i]);
+        }
+        return out;
+    }
+    function tenorWords(mine, theirs, limit) {
+        const out = [], seen = new Set(), want = Math.max(1, Number(limit) || 20);
+        [mine, theirs].forEach(list => { if (Array.isArray(list)) list.forEach(word => {
+            const key = typeof word === "string" ? word.trim().toLowerCase() : "";
+            if (key && !seen.has(key) && out.length < want) { seen.add(key); out.push(word); } }); });
+        return out;
+    }
+    // What Tenor answers for one picker request, or null to leave it to Discord.
+    function tenorAnswer(url, query) {
+        const locale = tenorLocale(query.locale), q = typeof query.q === "string" ? query.q.trim() : "";
+        switch (url) {
+            case "/gifs/search": return q ? {list:true, limit:query.limit, load:() => tenorList("search", {q, locale}, query.limit, query.media_format)} : null;
+            case "/gifs/trending-gifs": return {list:true, limit:query.limit, load:() => tenorList("trending", {locale}, query.limit, query.media_format)};
+            case "/gifs/trending-search": return {words:true, limit:20, load:() => tenorRequest("trending_terms", {locale, limit:20}).then(body => body && body.results || [])};
+            case "/gifs/suggest": return q ? {words:true, limit:query.limit || 10, load:() =>
+                tenorRequest("search_suggestions", {q, locale, limit:Math.min(20, Number(query.limit) || 10)}).then(body => body && body.results || [])} : null;
+            // The categories screen: Tenor's featured searches, and its top trending GIF on the Trending tile.
+            case "/gifs/trending": return {whole:true, load:() => Promise.all([tenorRequest("categories", {type:"featured", locale}),
+                tenorList("trending", {locale}, 1, query.media_format)]).then(([body, top]) => {
+                const tags = body && Array.isArray(body.tags) ? body.tags : [];
+                const categories = tags.filter(tag => tag && typeof tag.searchterm === "string" && typeof tag.image === "string")
+                    .map(tag => ({name:tag.searchterm, src:tenorCategoryImage(tag.image)}));
+                if (!categories.length || !top.length) throw new Error("Tenor: no categories");
+                return {categories, gifs:[{src:top[0].src}]};
+            })};
+            default: return null;
+        }
+    }
+    function tenorResponse(body, base) { return Object.assign({ok:true, status:200, headers:{}}, base && typeof base === "object" ? base : null, {body}); }
+    // HTTP.get(options) from HTTPUtils (1295): the picker's requests are the ones whose url starts with /gifs/.
+    function tenorGet(orig, self, args) {
+        const options = args[0], url = options && options.url;
+        if (typeof url !== "string" || url.charCodeAt(1) !== 103 || url.indexOf("/gifs/") !== 0 || !enabled("tenorGifs")) return orig.apply(self, args);
+        const answer = tenorAnswer(url, options.query && typeof options.query === "object" ? options.query : {});
+        if (!answer) return orig.apply(self, args);
+        const theirs = () => orig.apply(self, args);
+        // Only Tenor, and the categories screen in both: Discord is asked only if Tenor doesn't answer.
+        if (answer.whole || settings.tenorGifsSource === "tenor") return answer.load().then(body => tenorResponse(answer.words ? tenorWords(body, null, answer.limit) : body), () => theirs());
+        // Both: one list from the two answers. If one fails the other still shows; only both failing is an error.
+        const failed = {};
+        return Promise.all([answer.load().then(body => body, () => failed),
+            Promise.resolve().then(theirs).then(res => res, error => ({failed:error}))]).then(([mine, res]) => {
+            const discord = res && res.failed === undefined && res !== failed ? res : null;
+            if (mine === failed && !discord) throw res.failed;
+            const body = discord ? discord.body : null, own = mine === failed ? [] : mine;
+            return tenorResponse(answer.words ? tenorWords(own, body, answer.limit) : tenorMix(own, body, answer.limit), discord);
+        });
+    }
+    // Picking a GIF reports it to Discord (POST /gifs/select) for Klipy's rankings. A Tenor GIF isn't Klipy's, so that's skipped.
+    function tenorPost(orig, self, args) {
+        const options = args[0];
+        if (!options || options.url !== "/gifs/select" || !enabled("tenorGifs")) return orig.apply(self, args);
+        const body = options.body, id = body && body.id != null ? String(body.id) : "";
+        return id && tenor.ids.has(id) ? Promise.resolve(tenorResponse({}, {status:204})) : orig.apply(self, args);
+    }
+    // Discord's search box names Klipy (GifProvider 9733). It says Tenor in Only Tenor, and just GIFs while both show.
+    function tenorPlaceholder(orig, self, args) {
+        return enabled("tenorGifs") ? tr(settings.tenorGifsSource === "tenor" ? "Search Tenor" : "Search GIFs") : orig.apply(self, args);
     }
 
     // Translate messages: every message on screen that isn't in your language is shown translated, with a note
@@ -10861,6 +11061,8 @@
                 if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
                 return exports;
             case 13066: return features.favouriteAnything ? hookComponent(exports, favouriteButton) : exports;
+            case 1295: return features.tenorGifs && exports && exports.HTTP ? (hookExport(hookExport(exports.HTTP, "get", tenorGet), "post", tenorPost), exports) : exports;
+            case 9733: return features.tenorGifs ? hookExport(exports, "getSearchPlaceholder", tenorPlaceholder) : exports;
             case 9732: return features.favouriteAnything ? hookExport(exports, "addFavoriteGIF", favouriteAdd) : exports;
             case 9735: return features.favouriteAnything ? hookExport(exports, "useFavoriteGIFsMobile", favouriteList) : exports;
             case 2065: channelStore = exports.default; return exports;

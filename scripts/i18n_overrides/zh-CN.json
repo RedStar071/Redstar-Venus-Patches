@@ -825,5 +825,20 @@
  "Venus sends it through {service}": "Venus 通过 {service} 发送",
  "You paste a link to a post on {site}": "你粘贴了一个 {site} 帖子的链接",
  "You tap Send": "你点击发送",
- "{site} is off, so the link is sent as written": "{site} 已关闭，所以链接会原样发送"
+ "{site} is off, so the link is sent as written": "{site} 已关闭，所以链接会原样发送",
+ "Bring back Tenor GIFs": "找回 Tenor GIF",
+ "Discord's GIFs only": "仅 Discord 的 GIF",
+ "Discord's own GIFs show until it answers again.": "在此之前显示 Discord 自己的 GIF。",
+ "GIF picker preview": "GIF 选择器预览",
+ "GIFs from": "GIF 来源",
+ "Only Tenor": "仅 Tenor",
+ "Search GIFs": "搜索 GIF",
+ "Search Tenor": "搜索 Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "搜索、热门和分类都像以前一样来自 Tenor。",
+ "Tenor GIFs": "Tenor GIF",
+ "Tenor GIFs show in Discord's GIF picker again.": "Tenor GIF 重新出现在 Discord 的 GIF 选择器中。",
+ "Tenor and Discord's GIFs": "Tenor 和 Discord",
+ "Tenor isn't answering": "Tenor 没有响应",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "先显示 Tenor 的 GIF，并穿插 Discord 的 GIF，选择更多。",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "你搜索的内容会发送给 Tenor，不附带你的 Discord 账号。你选的 GIF 以 tenor.com 链接发送，所有人都能看到动图。"
 }

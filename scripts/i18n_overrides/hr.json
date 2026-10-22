@@ -957,5 +957,20 @@
  "Venus sends it through {service}": "Venus je šalje preko usluge {service}",
  "You paste a link to a post on {site}": "Lijepiš poveznicu na objavu sa stranice {site}",
  "You tap Send": "Dodiruješ Pošalji",
- "{site} is off, so the link is sent as written": "{site} je isključen, pa se poveznica šalje kakva jest"
+ "{site} is off, so the link is sent as written": "{site} je isključen, pa se poveznica šalje kakva jest",
+ "Bring back Tenor GIFs": "Vrati GIF-ove s Tenora",
+ "Discord's GIFs only": "Samo GIF-ovi s Discorda",
+ "Discord's own GIFs show until it answers again.": "Do tada se prikazuju GIF-ovi s Discorda.",
+ "GIF picker preview": "Pregled odabira GIF-ova",
+ "GIFs from": "GIF-ovi s",
+ "Only Tenor": "Samo Tenor",
+ "Search GIFs": "Traži GIF-ove",
+ "Search Tenor": "Traži na Tenoru",
+ "Search, trending and categories all come from Tenor, like before.": "Pretraživanje, popularno i kategorije dolaze s Tenora, kao prije.",
+ "Tenor GIFs": "GIF-ovi s Tenora",
+ "Tenor GIFs show in Discord's GIF picker again.": "GIF-ovi s Tenora vraćaju se u Discordov odabir GIF-ova.",
+ "Tenor and Discord's GIFs": "Tenor i Discord",
+ "Tenor isn't answering": "Tenor ne odgovara",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Prvo oni s Tenora, izmiješani s Discordovima, za najveći izbor.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Ono što tražiš ide Tenoru bez tvog Discord računa. Odabrani GIF-ovi šalju se kao poveznice tenor.com koje se svima reproduciraju."
 }

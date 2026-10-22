@@ -904,6 +904,21 @@
   "{on} of {total} turned on": "{on} dari {total} aktif",
   "{site} is off, so the link is sent as written": "{site} nonaktif, jadi tautan dikirim apa adanya",
   "{text} text, {voice} voice": "{text} teks, {voice} suara",
-  "{time} ago": "{time} yang lalu"
+  "{time} ago": "{time} yang lalu",
+  "Bring back Tenor GIFs": "Kembalikan GIF Tenor",
+  "Discord's GIFs only": "Hanya GIF Discord",
+  "Discord's own GIFs show until it answers again.": "Sampai saat itu, GIF Discord sendiri yang ditampilkan.",
+  "GIF picker preview": "Pratinjau pemilih GIF",
+  "GIFs from": "GIF dari",
+  "Only Tenor": "Hanya Tenor",
+  "Search GIFs": "Cari GIF",
+  "Search Tenor": "Cari di Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "Pencarian, tren, dan kategori semuanya dari Tenor, seperti dulu.",
+  "Tenor GIFs": "GIF Tenor",
+  "Tenor GIFs show in Discord's GIF picker again.": "GIF Tenor muncul lagi di pemilih GIF Discord.",
+  "Tenor and Discord's GIFs": "Tenor dan Discord",
+  "Tenor isn't answering": "Tenor tidak merespons",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "GIF Tenor tampil duluan, dicampur dengan GIF Discord, agar pilihanmu paling banyak.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Yang kamu cari dikirim ke Tenor tanpa akun Discord-mu. GIF yang kamu pilih dikirim sebagai tautan tenor.com yang diputar untuk semua orang."
  }
 }

@@ -924,5 +924,20 @@
  "Venus sends it through {service}": "Venus उसे {service} से भेजता है",
  "You paste a link to a post on {site}": "तुम {site} की किसी पोस्ट का लिंक पेस्ट करते हो",
  "You tap Send": "तुम भेजें पर टैप करते हो",
- "{site} is off, so the link is sent as written": "{site} बंद है, इसलिए लिंक वैसा ही भेजा जाता है"
+ "{site} is off, so the link is sent as written": "{site} बंद है, इसलिए लिंक वैसा ही भेजा जाता है",
+ "Bring back Tenor GIFs": "Tenor GIF वापस लाएं",
+ "Discord's GIFs only": "सिर्फ़ Discord के GIF",
+ "Discord's own GIFs show until it answers again.": "तब तक Discord के अपने GIF दिखते हैं।",
+ "GIF picker preview": "GIF पिकर का प्रीव्यू",
+ "GIFs from": "GIF कहां से",
+ "Only Tenor": "सिर्फ़ Tenor",
+ "Search GIFs": "GIF खोजें",
+ "Search Tenor": "Tenor पर खोजें",
+ "Search, trending and categories all come from Tenor, like before.": "खोज, ट्रेंडिंग और कैटेगरी सब पहले की तरह Tenor से आते हैं।",
+ "Tenor GIFs": "Tenor GIF",
+ "Tenor GIFs show in Discord's GIF picker again.": "Discord के GIF पिकर में Tenor GIF फिर से दिखते हैं।",
+ "Tenor and Discord's GIFs": "Tenor और Discord",
+ "Tenor isn't answering": "Tenor जवाब नहीं दे रहा",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "पहले Tenor के, Discord के GIF के साथ मिलाकर, ताकि सबसे ज़्यादा विकल्प मिलें।",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "आप जो खोजते हैं वह आपके Discord खाते के बिना Tenor को जाता है। आपके चुने GIF tenor.com लिंक के रूप में भेजे जाते हैं, जो सबके लिए चलते हैं।"
 }

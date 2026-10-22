@@ -825,5 +825,20 @@
  "Venus sends it through {service}": "Venus が {service} 経由で送信します",
  "You paste a link to a post on {site}": "{site} の投稿のリンクを貼り付けます",
  "You tap Send": "送信をタップします",
- "{site} is off, so the link is sent as written": "{site} はオフなので、リンクはそのまま送信されます"
+ "{site} is off, so the link is sent as written": "{site} はオフなので、リンクはそのまま送信されます",
+ "Bring back Tenor GIFs": "Tenor の GIF を復活",
+ "Discord's GIFs only": "Discord の GIF のみ",
+ "Discord's own GIFs show until it answers again.": "それまでは Discord の GIF が表示されます。",
+ "GIF picker preview": "GIF ピッカーのプレビュー",
+ "GIFs from": "GIF の取得元",
+ "Only Tenor": "Tenor のみ",
+ "Search GIFs": "GIF を検索",
+ "Search Tenor": "Tenor で検索",
+ "Search, trending and categories all come from Tenor, like before.": "検索・トレンド・カテゴリーがすべて以前のように Tenor から表示されます。",
+ "Tenor GIFs": "Tenor の GIF",
+ "Tenor GIFs show in Discord's GIF picker again.": "Discord の GIF ピッカーに Tenor の GIF が戻ります。",
+ "Tenor and Discord's GIFs": "Tenor と Discord",
+ "Tenor isn't answering": "Tenor が応答しません",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Tenor の GIF を先に、Discord の GIF と交互に並べて、選択肢を増やします。",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "検索した言葉は Discord アカウントなしで Tenor に送られます。選んだ GIF は tenor.com のリンクとして送信され、全員の画面で再生されます。"
 }

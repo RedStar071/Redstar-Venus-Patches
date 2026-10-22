@@ -1021,6 +1021,21 @@
   "{on} of {total} turned on": "{total} / {on} bekapcsolva",
   "{site} is off, so the link is sent as written": "A(z) {site} ki van kapcsolva, ezért a link változatlanul megy el",
   "{text} text, {voice} voice": "{text} szöveges, {voice} hang",
-  "{time} ago": "{time} ezelőtt"
+  "{time} ago": "{time} ezelőtt",
+  "Bring back Tenor GIFs": "Tenor GIF-ek visszahozása",
+  "Discord's GIFs only": "Csak a Discord GIF-jei",
+  "Discord's own GIFs show until it answers again.": "Addig a Discord saját GIF-jei látszanak.",
+  "GIF picker preview": "GIF-választó előnézete",
+  "GIFs from": "GIF-ek forrása",
+  "Only Tenor": "Csak Tenor",
+  "Search GIFs": "GIF-ek keresése",
+  "Search Tenor": "Keresés a Tenoron",
+  "Search, trending and categories all come from Tenor, like before.": "A keresés, a felkapottak és a kategóriák is a Tenorról jönnek, mint régen.",
+  "Tenor GIFs": "Tenor GIF-ek",
+  "Tenor GIFs show in Discord's GIF picker again.": "A Tenor GIF-ek újra megjelennek a Discord GIF-választójában.",
+  "Tenor and Discord's GIFs": "Tenor és Discord",
+  "Tenor isn't answering": "A Tenor nem válaszol",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Előbb a Tenor GIF-jei, a Discordéival keverve, hogy a legtöbb közül választhass.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Amit keresel, a Discord-fiókod nélkül jut el a Tenorhoz. A kiválasztott GIF-ek tenor.com-linkként mennek el, és mindenkinél lejátszódnak."
  }
 }

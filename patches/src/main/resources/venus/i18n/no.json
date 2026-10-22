@@ -1003,6 +1003,21 @@
   "{on} of {total} turned on": "{on} av {total} slått på",
   "{site} is off, so the link is sent as written": "{site} er av, så lenken sendes som den er",
   "{text} text, {voice} voice": "{text} tekst, {voice} tale",
-  "{time} ago": "for {time} siden"
+  "{time} ago": "for {time} siden",
+  "Bring back Tenor GIFs": "Få tilbake Tenor-GIF-er",
+  "Discord's GIFs only": "Bare Discords GIF-er",
+  "Discord's own GIFs show until it answers again.": "Fram til da vises Discords egne GIF-er.",
+  "GIF picker preview": "Forhåndsvisning av GIF-velgeren",
+  "GIFs from": "GIF-er fra",
+  "Only Tenor": "Bare Tenor",
+  "Search GIFs": "Søk etter GIF-er",
+  "Search Tenor": "Søk på Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "Søk, trender og kategorier kommer alle fra Tenor, som før.",
+  "Tenor GIFs": "Tenor-GIF-er",
+  "Tenor GIFs show in Discord's GIF picker again.": "Tenor-GIF-er er tilbake i Discords GIF-velger.",
+  "Tenor and Discord's GIFs": "Tenor og Discord",
+  "Tenor isn't answering": "Tenor svarer ikke",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Tenors kommer først, blandet med Discords, så du får mest å velge mellom.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Det du søker etter, sendes til Tenor uten Discord-kontoen din. GIF-ene du velger, sendes som tenor.com-lenker som spilles av for alle."
  }
 }

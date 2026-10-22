@@ -71,7 +71,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -670,6 +670,10 @@ val validUser = bundledPlugin("validUser", "Fix unknown mentions",
 @Suppress("unused")
 val youBarSettings = bundledPlugin("youBarSettings", "Venus button on profile bar",
     "A shortcut to Venus settings, next to the notifications bell.")
+
+@Suppress("unused")
+val bringBackTenorGifs = bundledPlugin("tenorGifs", "Bring back Tenor GIFs",
+    "Tenor GIFs show in Discord's GIF picker again, mixed with Discord's own or on their own. Inspired by BringBackTenor by Livie.")
 
 @Suppress("unused")
 val fixLinkPreviews = bundledPlugin("fixEmbeds", "Fix link previews",

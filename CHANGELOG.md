@@ -9,6 +9,7 @@
 * **Discord - Translate messages:** Translate into any of 70 languages, not just Discord's or your phone's ([#79](https://github.com/VenusIsJaded/Venus-Patches/issues/79))
 * **Discord - Keep deleted messages:** Pick the color and brightness of kept messages, and type any limit next to the Keep up to presets
 * **Discord - Message highlights:** Choose how bright replies and mentions are, from presets or any value from 0 to 100%
+* **Discord:** Add `Bring back Tenor GIFs` patch: Tenor GIFs show in Discord's own GIF picker again, mixed with Discord's or on their own ([#83](https://github.com/VenusIsJaded/Venus-Patches/issues/83))
 * **Discord:** Add `Fix link previews` patch: links to X, Instagram, TikTok, Reddit, Bluesky, Threads, Facebook, pixiv and Bilibili show the post, through a service you pick per site ([#83](https://github.com/VenusIsJaded/Venus-Patches/issues/83))
 * **Discord - Translate messages:** Translate a whole chat from a bar that appears when it has messages in another language, kept until Discord restarts, and choose whether you ask from the bar, the message menu or both ([#82](https://github.com/VenusIsJaded/Venus-Patches/issues/82))
 

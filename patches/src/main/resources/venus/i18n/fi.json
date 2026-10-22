@@ -1021,6 +1021,21 @@
   "{on} of {total} turned on": "{on}/{total} käytössä",
   "{site} is off, so the link is sent as written": "{site} on pois päältä, joten linkki lähetetään sellaisenaan",
   "{text} text, {voice} voice": "{text} teksti, {voice} puhe",
-  "{time} ago": "{time} sitten"
+  "{time} ago": "{time} sitten",
+  "Bring back Tenor GIFs": "Tenor-GIFit takaisin",
+  "Discord's GIFs only": "Vain Discordin GIFit",
+  "Discord's own GIFs show until it answers again.": "Sillä välin näytetään Discordin omat GIFit.",
+  "GIF picker preview": "GIF-valitsimen esikatselu",
+  "GIFs from": "GIFit lähteestä",
+  "Only Tenor": "Vain Tenor",
+  "Search GIFs": "Hae GIFejä",
+  "Search Tenor": "Hae Tenorista",
+  "Search, trending and categories all come from Tenor, like before.": "Haku, trendit ja kategoriat tulevat kaikki Tenorista, kuten ennen.",
+  "Tenor GIFs": "Tenor-GIFit",
+  "Tenor GIFs show in Discord's GIF picker again.": "Tenor-GIFit näkyvät taas Discordin GIF-valitsimessa.",
+  "Tenor and Discord's GIFs": "Tenor ja Discord",
+  "Tenor isn't answering": "Tenor ei vastaa",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Tenorin GIFit ensin, Discordin omien seassa, niin valinnanvaraa on eniten.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Hakusanasi lähtevät Tenorille ilman Discord-tiliäsi. Valitsemasi GIFit lähetetään tenor.com-linkkeinä, jotka toistuvat kaikille."
  }
 }

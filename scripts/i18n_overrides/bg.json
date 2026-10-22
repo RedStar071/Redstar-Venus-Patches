@@ -924,5 +924,20 @@
  "Venus sends it through {service}": "Venus я изпраща чрез {service}",
  "You paste a link to a post on {site}": "Поставяш връзка към публикация от {site}",
  "You tap Send": "Докосваш „Изпращане“",
- "{site} is off, so the link is sent as written": "{site} е изключен, затова връзката се изпраща както е"
+ "{site} is off, so the link is sent as written": "{site} е изключен, затова връзката се изпраща както е",
+ "Bring back Tenor GIFs": "Върнете GIF-овете от Tenor",
+ "Discord's GIFs only": "Само GIF-ове на Discord",
+ "Discord's own GIFs show until it answers again.": "Дотогава се показват GIF-овете на Discord.",
+ "GIF picker preview": "Преглед на избора на GIF",
+ "GIFs from": "GIF-ове от",
+ "Only Tenor": "Само Tenor",
+ "Search GIFs": "Търсене на GIF",
+ "Search Tenor": "Търсене в Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "Търсенето, популярните и категориите идват от Tenor, както преди.",
+ "Tenor GIFs": "GIF-ове от Tenor",
+ "Tenor GIFs show in Discord's GIF picker again.": "GIF-овете от Tenor отново се появяват в избора на GIF в Discord.",
+ "Tenor and Discord's GIFs": "Tenor и Discord",
+ "Tenor isn't answering": "Tenor не отговаря",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Първо тези от Tenor, смесени с тези на Discord, за най-голям избор.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Търсенията ви отиват в Tenor без профила ви в Discord. Избраните GIF-ове се изпращат като връзки към tenor.com и се възпроизвеждат за всички."
 }

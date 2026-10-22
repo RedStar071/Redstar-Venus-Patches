@@ -1060,6 +1060,21 @@
   "{on} of {total} turned on": "{on} z {total} zapnuto",
   "{site} is off, so the link is sent as written": "{site} je vypnutý, takže se odkaz odešle beze změny",
   "{text} text, {voice} voice": "{text} textových, {voice} hlasových",
-  "{time} ago": "před {time}"
+  "{time} ago": "před {time}",
+  "Bring back Tenor GIFs": "Vrátit GIFy z Tenoru",
+  "Discord's GIFs only": "Jen GIFy z Discordu",
+  "Discord's own GIFs show until it answers again.": "Do té doby se zobrazují GIFy z Discordu.",
+  "GIF picker preview": "Náhled výběru GIFů",
+  "GIFs from": "GIFy z",
+  "Only Tenor": "Jen Tenor",
+  "Search GIFs": "Hledat GIFy",
+  "Search Tenor": "Hledat na Tenoru",
+  "Search, trending and categories all come from Tenor, like before.": "Hledání, trendy i kategorie jsou z Tenoru, jako dřív.",
+  "Tenor GIFs": "GIFy z Tenoru",
+  "Tenor GIFs show in Discord's GIF picker again.": "GIFy z Tenoru se vrací do výběru GIFů v Discordu.",
+  "Tenor and Discord's GIFs": "Tenor a Discord",
+  "Tenor isn't answering": "Tenor neodpovídá",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Nejdřív ty z Tenoru, promíchané s GIFy z Discordu, ať máš co největší výběr.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Co hledáš, jde do Tenoru bez tvého účtu na Discordu. Vybrané GIFy se posílají jako odkazy tenor.com, které se přehrají všem."
  }
 }

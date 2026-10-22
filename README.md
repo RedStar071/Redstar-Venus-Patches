@@ -1,6 +1,6 @@
 # Venus Patches
 
-Extra features and privacy options for Discord on Android, built into the app with **[Morphe](https://morphe.software)**. Everything works offline, except the few features that say they use a service (ReviewDB, Translate messages, Fix link previews). Nothing is downloaded from the internet to run, and nothing is tracked.
+Extra features and privacy options for Discord on Android, built into the app with **[Morphe](https://morphe.software)**. Everything works offline, except the few features that say they use a service (ReviewDB, Translate messages, Fix link previews, Bring back Tenor GIFs). Nothing is downloaded from the internet to run, and nothing is tracked.
 
 [**Add to Morphe**](https://morphe.software/add-source?github=VenusIsJaded/Venus-Patches&name=Venus%20Patches) · [Downloads](https://github.com/VenusIsJaded/Venus-Patches/releases) · [What's new](CHANGELOG.md) · [Report a problem](https://github.com/VenusIsJaded/Venus-Patches/issues)
 
@@ -32,6 +32,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Jump to first message | A button to go straight to the start of a chat |
 | | Favourite any image or video | Star any image or video to keep it in your GIF favourites |
 | **Sending** | Send Nitro stickers and emojis as links | Sends Nitro emojis and stickers as links that show as the image |
+| | Bring back Tenor GIFs | Tenor GIFs show in Discord's own GIF picker again: search, trending and categories. Mix them with Discord's GIFs or use only Tenor. If Tenor doesn't answer, Discord's own GIFs show |
 | | Fix link previews | Links to X, Instagram, TikTok, Reddit, Bluesky, Threads, Facebook, pixiv and Bilibili show the post, with its picture or video. Pick the embed service per site (FxTwitter or vxTwitter, and so on), and share tracking like `?igsh=` is removed |
 | | Send audio as voice messages | Audio files are sent as real voice messages, with a waveform |
 | | Send long messages | Type past the character limit; long messages are sent in parts |

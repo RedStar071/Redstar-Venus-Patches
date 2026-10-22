@@ -904,6 +904,21 @@
   "{on} of {total} turned on": "เปิดอยู่ {on} จาก {total}",
   "{site} is off, so the link is sent as written": "{site} ปิดอยู่ จึงส่งลิงก์ไปตามเดิม",
   "{text} text, {voice} voice": "ข้อความ {text} เสียง {voice}",
-  "{time} ago": "{time}ที่ผ่านมา"
+  "{time} ago": "{time}ที่ผ่านมา",
+  "Bring back Tenor GIFs": "นำ GIF จาก Tenor กลับมา",
+  "Discord's GIFs only": "GIF ของ Discord เท่านั้น",
+  "Discord's own GIFs show until it answers again.": "ระหว่างนี้จะแสดง GIF ของ Discord เอง",
+  "GIF picker preview": "ตัวอย่างตัวเลือก GIF",
+  "GIFs from": "GIF จาก",
+  "Only Tenor": "Tenor เท่านั้น",
+  "Search GIFs": "ค้นหา GIF",
+  "Search Tenor": "ค้นหาใน Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "การค้นหา มาแรง และหมวดหมู่มาจาก Tenor ทั้งหมดเหมือนเดิม",
+  "Tenor GIFs": "GIF จาก Tenor",
+  "Tenor GIFs show in Discord's GIF picker again.": "GIF จาก Tenor กลับมาในตัวเลือก GIF ของ Discord",
+  "Tenor and Discord's GIFs": "Tenor และ Discord",
+  "Tenor isn't answering": "Tenor ไม่ตอบสนอง",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "แสดง GIF จาก Tenor ก่อน สลับกับของ Discord ให้มีตัวเลือกมากที่สุด",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "คำที่คุณค้นหาจะส่งไปยัง Tenor โดยไม่มีบัญชี Discord ของคุณ GIF ที่เลือกจะส่งเป็นลิงก์ tenor.com ซึ่งเล่นให้ทุกคนเห็น"
  }
 }

@@ -1060,6 +1060,21 @@
   "{on} of {total} turned on": "Включено: {on} из {total}",
   "{site} is off, so the link is sent as written": "{site} выключен, поэтому ссылка отправляется как есть",
   "{text} text, {voice} voice": "{text} текстовых, {voice} голосовых",
-  "{time} ago": "{time} назад"
+  "{time} ago": "{time} назад",
+  "Bring back Tenor GIFs": "Вернуть GIF из Tenor",
+  "Discord's GIFs only": "Только GIF из Discord",
+  "Discord's own GIFs show until it answers again.": "Пока что показываются GIF из Discord.",
+  "GIF picker preview": "Предпросмотр выбора GIF",
+  "GIFs from": "GIF из",
+  "Only Tenor": "Только Tenor",
+  "Search GIFs": "Поиск GIF",
+  "Search Tenor": "Поиск в Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "Поиск, тренды и категории — всё из Tenor, как раньше.",
+  "Tenor GIFs": "GIF из Tenor",
+  "Tenor GIFs show in Discord's GIF picker again.": "GIF из Tenor снова появляются в выборе GIF в Discord.",
+  "Tenor and Discord's GIFs": "Tenor и Discord",
+  "Tenor isn't answering": "Tenor не отвечает",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Сначала GIF из Tenor, вперемешку с GIF из Discord, чтобы выбор был больше.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Ваши поисковые запросы уходят в Tenor без вашего аккаунта Discord. Выбранные GIF отправляются ссылками tenor.com и проигрываются у всех."
  }
 }

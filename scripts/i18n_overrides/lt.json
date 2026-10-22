@@ -957,5 +957,20 @@
  "Venus sends it through {service}": "Venus išsiunčia ją per {service}",
  "You paste a link to a post on {site}": "Įklijuoji nuorodą į įrašą iš {site}",
  "You tap Send": "Bakstelėji Siųsti",
- "{site} is off, so the link is sent as written": "{site} išjungta, todėl nuoroda siunčiama nepakeista"
+ "{site} is off, so the link is sent as written": "{site} išjungta, todėl nuoroda siunčiama nepakeista",
+ "Bring back Tenor GIFs": "Grąžinti Tenor GIF",
+ "Discord's GIFs only": "Tik Discord GIF",
+ "Discord's own GIFs show until it answers again.": "Kol kas rodomi paties Discord GIF.",
+ "GIF picker preview": "GIF parinkiklio peržiūra",
+ "GIFs from": "GIF iš",
+ "Only Tenor": "Tik Tenor",
+ "Search GIFs": "Ieškoti GIF",
+ "Search Tenor": "Ieškoti Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "Paieška, populiarūs ir kategorijos – viskas iš Tenor, kaip anksčiau.",
+ "Tenor GIFs": "Tenor GIF",
+ "Tenor GIFs show in Discord's GIF picker again.": "Tenor GIF vėl rodomi Discord GIF parinkiklyje.",
+ "Tenor and Discord's GIFs": "Tenor ir Discord",
+ "Tenor isn't answering": "Tenor neatsako",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Pirmiausia Tenor GIF, sumaišyti su Discord GIF, kad turėtum didžiausią pasirinkimą.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Tai, ko ieškai, siunčiama į Tenor be tavo Discord paskyros. Pasirinkti GIF siunčiami kaip tenor.com nuorodos, kurios rodomos visiems."
 }

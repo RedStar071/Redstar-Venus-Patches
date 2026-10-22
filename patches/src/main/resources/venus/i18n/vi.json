@@ -904,6 +904,21 @@
   "{on} of {total} turned on": "Đang bật {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} đang tắt nên liên kết được gửi nguyên văn",
   "{text} text, {voice} voice": "{text} văn bản, {voice} thoại",
-  "{time} ago": "{time} trước"
+  "{time} ago": "{time} trước",
+  "Bring back Tenor GIFs": "Mang GIF Tenor trở lại",
+  "Discord's GIFs only": "Chỉ GIF của Discord",
+  "Discord's own GIFs show until it answers again.": "Trong lúc đó, GIF của Discord sẽ hiện.",
+  "GIF picker preview": "Xem trước bộ chọn GIF",
+  "GIFs from": "GIF từ",
+  "Only Tenor": "Chỉ Tenor",
+  "Search GIFs": "Tìm GIF",
+  "Search Tenor": "Tìm trên Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "Tìm kiếm, thịnh hành và danh mục đều từ Tenor, như trước đây.",
+  "Tenor GIFs": "GIF Tenor",
+  "Tenor GIFs show in Discord's GIF picker again.": "GIF Tenor xuất hiện lại trong bộ chọn GIF của Discord.",
+  "Tenor and Discord's GIFs": "Tenor và Discord",
+  "Tenor isn't answering": "Tenor không phản hồi",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "GIF Tenor hiện trước, xen kẽ với GIF của Discord, để bạn có nhiều lựa chọn nhất.",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Nội dung bạn tìm được gửi tới Tenor mà không kèm tài khoản Discord. GIF bạn chọn được gửi dưới dạng liên kết tenor.com và phát cho mọi người."
  }
 }

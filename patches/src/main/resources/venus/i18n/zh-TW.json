@@ -904,6 +904,21 @@
   "{on} of {total} turned on": "已開啟 {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} 已關閉，所以連結會照原樣傳送",
   "{text} text, {voice} voice": "{text} 個文字、{voice} 個語音",
-  "{time} ago": "{time}前"
+  "{time} ago": "{time}前",
+  "Bring back Tenor GIFs": "找回 Tenor GIF",
+  "Discord's GIFs only": "僅 Discord 的 GIF",
+  "Discord's own GIFs show until it answers again.": "在此之前會顯示 Discord 自己的 GIF。",
+  "GIF picker preview": "GIF 選擇器預覽",
+  "GIFs from": "GIF 來源",
+  "Only Tenor": "僅 Tenor",
+  "Search GIFs": "搜尋 GIF",
+  "Search Tenor": "搜尋 Tenor",
+  "Search, trending and categories all come from Tenor, like before.": "搜尋、熱門和分類都像以前一樣來自 Tenor。",
+  "Tenor GIFs": "Tenor GIF",
+  "Tenor GIFs show in Discord's GIF picker again.": "Tenor GIF 重新出現在 Discord 的 GIF 選擇器中。",
+  "Tenor and Discord's GIFs": "Tenor 和 Discord",
+  "Tenor isn't answering": "Tenor 沒有回應",
+  "Tenor's come first, with Discord's mixed in, so you get the most choice.": "先顯示 Tenor 的 GIF，並穿插 Discord 的 GIF，選擇更多。",
+  "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "你搜尋的內容會傳送給 Tenor，不附帶你的 Discord 帳號。你選的 GIF 會以 tenor.com 連結傳送，所有人都能看到動圖。"
  }
 }

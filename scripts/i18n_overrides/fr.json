@@ -924,5 +924,20 @@
  "Venus sends it through {service}": "Venus l'envoie via {service}",
  "You paste a link to a post on {site}": "Tu colles un lien vers une publication sur {site}",
  "You tap Send": "Tu appuies sur Envoyer",
- "{site} is off, so the link is sent as written": "{site} est désactivé, donc le lien est envoyé tel quel"
+ "{site} is off, so the link is sent as written": "{site} est désactivé, donc le lien est envoyé tel quel",
+ "Bring back Tenor GIFs": "Retour des GIF Tenor",
+ "Discord's GIFs only": "GIF de Discord uniquement",
+ "Discord's own GIFs show until it answers again.": "Les GIF de Discord s'affichent en attendant.",
+ "GIF picker preview": "Aperçu du sélecteur de GIF",
+ "GIFs from": "GIF de",
+ "Only Tenor": "Tenor uniquement",
+ "Search GIFs": "Rechercher des GIF",
+ "Search Tenor": "Rechercher sur Tenor",
+ "Search, trending and categories all come from Tenor, like before.": "Recherche, tendances et catégories viennent toutes de Tenor, comme avant.",
+ "Tenor GIFs": "GIF Tenor",
+ "Tenor GIFs show in Discord's GIF picker again.": "Les GIF Tenor reviennent dans le sélecteur de GIF de Discord.",
+ "Tenor and Discord's GIFs": "Tenor et Discord",
+ "Tenor isn't answering": "Tenor ne répond pas",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Les GIF Tenor d'abord, mêlés à ceux de Discord, pour plus de choix.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "Tes recherches sont envoyées à Tenor, sans ton compte Discord. Les GIF choisis sont envoyés en liens tenor.com, lus chez tout le monde."
 }

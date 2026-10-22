@@ -825,5 +825,20 @@
  "Venus sends it through {service}": "Venus가 {service}(으)로 보내요",
  "You paste a link to a post on {site}": "{site} 게시물 링크를 붙여 넣어요",
  "You tap Send": "보내기를 눌러요",
- "{site} is off, so the link is sent as written": "{site}이(가) 꺼져 있어서 링크가 그대로 보내져요"
+ "{site} is off, so the link is sent as written": "{site}이(가) 꺼져 있어서 링크가 그대로 보내져요",
+ "Bring back Tenor GIFs": "Tenor GIF 되살리기",
+ "Discord's GIFs only": "Discord GIF만",
+ "Discord's own GIFs show until it answers again.": "그동안은 Discord의 GIF가 표시돼요.",
+ "GIF picker preview": "GIF 선택기 미리 보기",
+ "GIFs from": "GIF 출처",
+ "Only Tenor": "Tenor만",
+ "Search GIFs": "GIF 검색",
+ "Search Tenor": "Tenor에서 검색",
+ "Search, trending and categories all come from Tenor, like before.": "검색, 트렌드, 카테고리 모두 예전처럼 Tenor에서 가져와요.",
+ "Tenor GIFs": "Tenor GIF",
+ "Tenor GIFs show in Discord's GIF picker again.": "Discord의 GIF 선택기에 Tenor GIF가 다시 나타나요.",
+ "Tenor and Discord's GIFs": "Tenor와 Discord",
+ "Tenor isn't answering": "Tenor가 응답하지 않아요",
+ "Tenor's come first, with Discord's mixed in, so you get the most choice.": "Tenor GIF를 먼저, Discord GIF와 섞어 보여 줘서 고를 게 더 많아져요.",
+ "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "검색어는 Discord 계정 없이 Tenor로 전송돼요. 고른 GIF는 tenor.com 링크로 보내지며 모두에게 재생돼요."
 }
