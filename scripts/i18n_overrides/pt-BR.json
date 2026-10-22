@@ -892,6 +892,6 @@
  "Tap the bar again to show the original": "Toque na barra de novo para ver o original",
  "You tap the bar at the top of the chat": "Você toca na barra no topo do chat",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Só as mensagens que você escolhe, ou os chats que você traduz pela barra, são enviados ao Google Tradutor, uma vez cada e sem sua conta do Discord.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Chats com mensagens em outro idioma mostram uma barra no topo. Toque nela para traduzir o chat até você sair. Lá, segure uma mensagem para ver o original.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Chats com mensagens em outro idioma mostram uma barra no topo. Toque nela para traduzir o chat até você sair, ou segure uma mensagem e toque em Traduzir."
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "Chats com mensagens em outro idioma mostram uma barra no topo. Toque nela para traduzir o chat até o Discord reiniciar. Lá, segure uma mensagem para ver o original.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Chats com mensagens em outro idioma mostram uma barra no topo. Toque nela para traduzir o chat até o Discord reiniciar, ou segure uma mensagem e toque em Traduzir."
 }

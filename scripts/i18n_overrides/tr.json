@@ -892,6 +892,6 @@
  "Tap the bar again to show the original": "Orijinali görmek için çubuğa tekrar dokun",
  "You tap the bar at the top of the chat": "Sohbetin üstündeki çubuğa dokunuyorsun",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google Translate'e yalnızca seçtiğin mesajlar veya çubuktan çevirdiğin sohbetler, her biri bir kez ve Discord hesabın olmadan gönderilir.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Başka dilde mesaj olan sohbetlerin üstünde bir çubuk görünür. Sohbetten çıkana kadar çevirmek için çubuğa dokun. Orada orijinali görmek için bir mesajı basılı tut.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Başka dilde mesaj olan sohbetlerin üstünde bir çubuk görünür. Sohbetten çıkana kadar çevirmek için çubuğa dokun ya da bir mesajı basılı tutup Çevir'e dokun."
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "Başka dilde mesaj olan sohbetlerin üstünde bir çubuk görünür. Sohbeti Discord yeniden başlayana kadar çevirmek için çubuğa dokun. Orada orijinali görmek için bir mesajı basılı tut.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Başka dilde mesaj olan sohbetlerin üstünde bir çubuk görünür. Sohbeti Discord yeniden başlayana kadar çevirmek için çubuğa dokun ya da bir mesajı basılı tutup Çevir'e dokun."
 }

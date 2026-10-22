@@ -924,6 +924,6 @@
  "Tap the bar again to show the original": "Klepněte na lištu znovu a zobrazte originál",
  "You tap the bar at the top of the chat": "Klepnete na lištu nahoře v chatu",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Do Google Translate se odesílají jen zprávy, které vyberete, nebo chaty přeložené z lišty, každá jen jednou a bez vašeho účtu Discord.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original.": "Chaty se zprávami v jiném jazyce mají nahoře lištu. Klepnutím na ni chat překládáte, dokud ho neopustíte. Podržením zprávy tam zobrazíte originál.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.": "Chaty se zprávami v jiném jazyce mají nahoře lištu. Klepnutím na ni chat překládáte, dokud ho neopustíte, nebo podržte jednu zprávu a klepněte na Přeložit."
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "Chaty se zprávami v jiném jazyce mají nahoře lištu. Klepnutím na ni chat překládáte až do restartu Discordu. Podržením zprávy tam zobrazíte originál.",
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Chaty se zprávami v jiném jazyce mají nahoře lištu. Klepnutím na ni chat překládáte až do restartu Discordu, nebo podržte jednu zprávu a klepněte na Přeložit."
 }

@@ -9,7 +9,7 @@
 * **Discord - Translate messages:** Translate into any of 70 languages, not just Discord's or your phone's ([#79](https://github.com/VenusIsJaded/Venus-Patches/issues/79))
 * **Discord - Keep deleted messages:** Pick the color and brightness of kept messages, and type any limit next to the Keep up to presets
 * **Discord - Message highlights:** Choose how bright replies and mentions are, from presets or any value from 0 to 100%
-* **Discord - Translate messages:** Translate a whole chat from a bar that appears when it has messages in another language, and choose whether you ask from the bar, the message menu or both ([#82](https://github.com/VenusIsJaded/Venus-Patches/issues/82))
+* **Discord - Translate messages:** Translate a whole chat from a bar that appears when it has messages in another language, kept until Discord restarts, and choose whether you ask from the bar, the message menu or both ([#82](https://github.com/VenusIsJaded/Venus-Patches/issues/82))
 
 ### 🐛 Bug Fixes
 
