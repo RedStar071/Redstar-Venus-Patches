@@ -71,7 +71,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo")
+                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -670,6 +670,10 @@ val validUser = bundledPlugin("validUser", "Fix unknown mentions",
 @Suppress("unused")
 val youBarSettings = bundledPlugin("youBarSettings", "Venus button on profile bar",
     "A shortcut to Venus settings, next to the notifications bell.")
+
+@Suppress("unused")
+val fixLinkPreviews = bundledPlugin("fixEmbeds", "Fix link previews",
+    "Links to X, Instagram, TikTok, Reddit and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.")
 
 @Suppress("unused")
 val splitLargeMessages = bundledPlugin("splitMessages", "Send long messages",

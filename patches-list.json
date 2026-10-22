@@ -458,6 +458,40 @@
       "options": []
     },
     {
+      "name": "Fix link previews",
+      "description": "Links to X, Instagram, TikTok, Reddit and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Fix unknown mentions",
       "description": "@unknown-user mentions are looked up and show the person's name. Based on ValidUser by fshin, o.oer and kmmiio99o.",
       "default": true,

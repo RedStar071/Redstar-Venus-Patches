@@ -42,6 +42,7 @@
     if (features.iconPacks) selectModules([81, 84, 328, 1205, 4817, 4831, 11191]);
     if (features.messageHighlight) selectModules([584, 1390, 5432, 7742]);
     if (features.serverInfo) selectModules([1390, 16748]);
+    if (features.fixEmbeds) selectModules([1390, 7174]);
     const revision = "1.18.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -61,7 +62,8 @@
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
-        messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true, language:"auto" };
+        messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -76,7 +78,8 @@
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
-            messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true, language: "auto"
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -325,6 +328,7 @@
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
         if (key === "noDeleteLimit") return deleteLimit(value);
+        if (key === "fixEmbedsSites") return fixSitesText(value);
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
     }
     function setSetting(key, value) {
@@ -349,6 +353,12 @@
             if (!(key === "translateMode" ? TRANSLATE_MODES : key === "translateLanguage" ? TRANSLATE_LANGUAGES : key === "translateAsk" ? TRANSLATE_ASKS : TRANSLATE_TARGETS).includes(value)) return false;
             if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings[key] = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
+        }
+        if (key === "fixEmbedsSites") {
+            const clean = fixSitesText(value);
+            if (clean === undefined) return false;
+            if (settings.fixEmbedsSites === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.fixEmbedsSites = clean; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "noDeleteLimit") {
             const limit = deleteLimit(value);
@@ -779,7 +789,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -814,7 +824,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -851,7 +861,8 @@
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
-        messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"]};
+        messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
+        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1136,6 +1147,7 @@
             () => ({page:FreeNitroSettings, sections:[section("Send as links", [option("emojis", "Emojis", "Emojis from other servers, and animated emojis.", "VENUS_FREENITRO"),
                 option("stickers", "Stickers", "Stickers from other servers. Animated ones may not move.", "VENUS_FREENITRO")]),
              section("Link style", [option("hyperlinks", "Short links", "In chat it looks the same either way. Short links only change what's copied or quoted.", "VENUS_FREENITRO")])]}));
+        withOptions("sending", "fixEmbeds", "VENUS_FIXEMBEDS", "Fix link previews", "Links to X, Instagram, TikTok, Reddit and more show the post.", "Link previews", FixEmbedsSettings);
         toggle("sending", "voice", "Send audio as voice messages", "Audio files are sent as voice messages. Android 10 or newer.");
         toggle("sending", "splitMessages", "Send long messages", "Type past the limit. Long messages are sent in parts.");
         toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing.");
@@ -4685,6 +4697,142 @@
             footnote("note","Everyone sees the image, but it's a link, not a real Nitro emoji or sticker.")];
         return settingsBody(ui,groups);
     }
+    // Fix link previews: a sent link and the preview everyone sees, for the site picked in the row of marks above it.
+    // Watch: you paste a link to a post, tap Send, Venus changes the address and the post's preview opens under it.
+    // Try it: tap Send yourself, then pick another site. Off: the finished message, so the page always shows the result.
+    const FIX_SAMPLES = {x:"/wumpus/status/1846602926837096812", instagram:"/reel/C5nYWo0P5yK/", tiktok:"/@wumpus/video/7137423965982592302",
+        reddit:"/r/discordapp/comments/1g5x4b0/", bluesky:"/profile/wumpus.bsky.social/post/3l6oveex3ii2l", threads:"/@wumpus/post/DGkNlhDyGm9",
+        facebook:"/reel/1180000000000000", pixiv:"/artworks/123456789", bilibili:"/video/BV1xx411c7mD"};
+    const FIX_VIDEO = {x:true, instagram:true, tiktok:true, facebook:true, bilibili:true};
+    const FIX_PREVIEW_DARK = {link:{color:"#00a8fc"}, embed:{backgroundColor:"#2b2d31", borderColor:"#ffffff14"}, ring:{borderColor:"#5865f2"}};
+    function useFixStyles() {
+        return useThemed("fixEmbeds", c => ({link:{color:c.TEXT_LINK || "#00a8fc"}, embed:{backgroundColor:c.BACKGROUND_SURFACE_HIGH || c.CARD_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE},
+            ring:{borderColor:c.BACKGROUND_BRAND || "#5865f2"}}), FIX_PREVIEW_DARK);
+    }
+    // A site's own mark (Discord ships the brand icons it uses for connected accounts), white on its brand color.
+    // Sites Discord has no icon for get their letter.
+    function fixBadge(site, size) {
+        const Icon = Array.isArray(site.icon) ? venusIcon(site.icon[0], site.icon[1]) : null, dark = site.color === "#000000" || site.color === "#101010";
+        return el(RN.View, {style:{width:size, height:size, borderRadius:size / 2, alignItems:"center", justifyContent:"center", backgroundColor:site.color,
+            borderWidth:dark ? 1 : 0, borderColor:"#ffffff26"}},
+            Icon ? el(Icon, {size:size >= 36 ? "sm" : size >= 24 ? "xs" : "xxs", color:"#ffffff"}) :
+                el(RN.Text, {style:{color:"#ffffff", fontWeight:"800", fontSize:Math.round(size * 0.45)}}, site.icon));
+    }
+    function FixEmbedsPreview(props) {
+        useSettings("fixEmbeds");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), f = useFixStyles(), [mode, setMode] = usePreviewMode(), on = !!props.on;
+        if (!fixEmbeds.sites) fixTables();
+        const [siteId, setSiteId] = React.useState("x");
+        const site = fixEmbeds.sites[siteId], live = fixService(site), service = live || site.services[0];
+        const host = site.hosts[0], sample = FIX_SAMPLES[siteId], original = "https://" + host + sample;
+        const fixed = live ? (fixLink(host, sample, false) || {link:original}).link : original;
+        const blank = {text:"", sent:false, embed:false, pulse:null};
+        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const update = change => setState(st => Object.assign({}, st, change));
+        const story = useStory(watching, () => [
+            [0, () => setState(blank), tr("You paste a link to a post on {site}", {site:site.name})],
+            [700, () => update({text:original.slice(0, 22)})], [250, () => update({text:original})],
+            [1300, () => update({pulse:{who:"send", id:siteId}}), tr("You tap Send")],
+            [350, () => { animateLayout(); update({text:"", sent:true}); },
+                live ? tr("Venus sends it through {service}", {service:service.name}) : tr("{site} is off, so the link is sent as written", {site:site.name})],
+            live ? [900, () => { animateLayout(); update({embed:true}); }, tr("Everyone sees the post, with its picture or video")] : null,
+            [1600, () => {}]], [siteId, service.id, !!live]);
+        const view = on && mode === "try" || watching ? state : {text:"", sent:true, embed:!!live};
+        const send = () => { if (!on || watching || view.sent) return; haptic("SELECTION"); animateLayout(); update({text:"", sent:true, embed:!!live, pulse:{who:"send", id:Date.now()}}); };
+        const pick = id => {
+            if (id === siteId) return;
+            haptic("SELECTION"); animateLayout(); setSiteId(id);
+            setState(mode === "try" ? Object.assign({}, blank, {text:"https://" + fixEmbeds.sites[id].hosts[0] + FIX_SAMPLES[id]}) : blank);
+        };
+        const Press = RN.Pressable || RN.View, Play = venusIcon(8396, "PlayIcon"), Picture = venusIcon(8210, "ImageIcon");
+        const media = el(RN.View, {style:{height:118, borderRadius:8, marginTop:8, overflow:"hidden", backgroundColor:site.color, alignItems:"center", justifyContent:"center"}},
+            el(RN.View, {style:{position:"absolute", left:0, right:0, bottom:0, height:59, backgroundColor:"#00000040"}}),
+            el(RN.View, {style:{position:"absolute", right:-24, top:-24, width:96, height:96, borderRadius:48, backgroundColor:"#ffffff1f"}}),
+            el(RN.View, {style:{width:44, height:44, borderRadius:22, alignItems:"center", justifyContent:"center", backgroundColor:"#00000080"}},
+                el(FIX_VIDEO[siteId] ? Play : Picture, {size:"sm", color:"#ffffff"})));
+        const embed = el(RN.View, {style:[f.embed, {marginTop:6, borderRadius:8, borderWidth:1, borderLeftWidth:4, borderLeftColor:site.color, padding:12, maxWidth:320}]},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6, marginBottom:4}}, fixBadge(site, 16),
+                el(RN.Text, {style:[s.muted, {fontWeight:"600"}], numberOfLines:1}, site.name)),
+            el(RN.Text, {style:[s.name, {fontSize:14}], numberOfLines:1}, "Wumpus (@wumpus)"),
+            el(RN.Text, {style:[s.text, {fontSize:14, marginTop:2}], numberOfLines:2}, tr("Just beat the final boss on my first try!")),
+            media);
+        const body = el(RN.View, null, el(RN.Text, {style:[f.link, {fontSize:15}], numberOfLines:2}, fixed), view.embed ? popIn("embed:" + siteId, embed) : null);
+        const rows = fixRows();
+        const marks = el(RN.ScrollView || RN.View, {key:"sites", horizontal:true, showsHorizontalScrollIndicator:false, accessibilityRole:"tablist",
+            contentContainerStyle:{gap:6, paddingHorizontal:10, paddingVertical:8}},
+            rows.map(row => { const item = fixEmbeds.sites[row[0]], picked = row[0] === siteId;
+                return el(Press, {key:row[0], onPress:() => pick(row[0]), accessibilityRole:"tab", accessibilityLabel:item.name, accessibilityState:{selected:picked},
+                    hitSlop:{top:4, bottom:4}, style:[{padding:2, borderRadius:20, borderWidth:2, borderColor:"transparent"}, picked ? f.ring : null, fixService(item) ? null : {opacity:0.4}]},
+                    fixBadge(item, 30)); }));
+        const tip = on && !watching ? previewTip(k, !view.sent ? tr("Tap Send to try it") : tr("Pick another site above to try it"), view.sent ? undefined : "down") : null;
+        const input = previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"}), text:view.text});
+        const message = view.sent ? popIn("msg:" + siteId + ":" + !!live, previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"), body)) :
+            el(RN.View, {key:"empty", style:{paddingHorizontal:16, paddingVertical:24}}, el(RN.Text, {style:[s.muted, {textAlign:"center"}]}, tr("Nothing sent yet")));
+        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? Object.assign({}, blank, {text:original}) : blank); }) : null,
+            previewScreen(s, "preview", "Link preview", [marks,
+                // Steady height, so picking a site with a shorter preview never makes the page jump.
+                el(RN.View, {key:"chat", style:{height:268, justifyContent:"flex-end", overflow:"hidden"}}, message, view.sent ? null : tip)],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:el(RN.View, {key:"foot"}, view.sent ? tip : null,
+                    el(on && !watching && !view.sent ? Press : RN.View, on && !watching && !view.sent ? {onPress:send, accessibilityRole:"button", accessibilityLabel:tr("Send")} : null,
+                        input, tapRipple(state.pulse, "send", {right:10, top:11})),
+                    watching ? storyStrip(k, s, story) : null)}));
+    }
+    // Every site in one card: its mark, where its links go and a switch. A site with more than one service opens a choice under it.
+    const FIX_LIST_DARK = {card:{backgroundColor:"#2b2d31", borderRadius:16, overflow:"hidden"}, divider:{height:1, marginLeft:68, backgroundColor:"#ffffff0f"}};
+    function FixSiteList(props) {
+        useSettings("fixEmbeds");
+        const [open, setOpen] = React.useState(null), on = !!props.on;
+        const s = useThemed("fixSites", c => ({card:Object.assign({}, FIX_LIST_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            divider:Object.assign({}, FIX_LIST_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), FIX_LIST_DARK);
+        const Text = inspectedExport(5088, "Text"), FormSwitch = inspectedExport(6897, "FormSwitch"), Press = RN.Pressable || RN.View;
+        const Down = venusIcon(10534, "ChevronSmallDownIcon"), Right = venusIcon(6906, "ChevronSmallRightIcon");
+        const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1}, value) : el(RN.Text, {style:fallback, numberOfLines:1}, value);
+        const rows = fixRows(), choices = fixChoices(settings.fixEmbedsSites), active = rows.filter(row => choices[row[0]] !== "off").length, out = [];
+        rows.forEach((row, i) => {
+            const site = fixEmbeds.sites[row[0]], service = fixService(site), many = site.services.length > 1, expanded = open === site.id && !!service && many && on;
+            const to = service ? typeof service.to === "string" ? service.to.replace(/^https:\/\/([^\/]+).*$/, "$1") : service.to[site.hosts[0]] : "";
+            if (i) out.push(el(RN.View, {key:"d" + i, style:s.divider}));
+            const toggleOpen = () => { if (!on || !service || !many) return; haptic("SELECTION"); animateLayout(); setOpen(expanded ? null : site.id); };
+            out.push(el(Press, {key:site.id, onPress:toggleOpen, disabled:!on || !service || !many, accessibilityRole:many && service ? "button" : undefined,
+                accessibilityLabel:site.name, accessibilityState:{expanded}, style:{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:12, opacity:on ? 1 : 0.5}},
+                el(RN.View, {style:{opacity:service ? 1 : 0.4}}, fixBadge(site, 40)),
+                el(RN.View, {style:{flex:1, gap:2}},
+                    line(site.name, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    line(service ? service.name + " \u00b7 " + to : tr("Sent as written"), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+                many && service && on ? el(expanded ? Down : Right, {size:"sm"}) : null,
+                FormSwitch ? el(FormSwitch, {value:!!service, disabled:!on, accessibilityLabel:site.name,
+                    onValueChange:value => { animateLayout(); if (!value && open === site.id) setOpen(null); fixSetChoice(site.id, value ? site.services[0].id : "off"); }}) : null));
+            if (expanded) out.push(el(RN.View, {key:site.id + ":pick", style:{paddingRight:16, paddingBottom:14, paddingLeft:68}},
+                venusSegmented({key:"fix:" + site.id, value:service.id, onChange:value => fixSetChoice(site.id, value),
+                    items:site.services.map(item => ({value:item.id, label:item.name}))})));
+        });
+        return el(RN.View, {key:"sites", style:{gap:8}},
+            groupTitle("title", tr("Sites") + " \u00b7 " + tr("{on} of {total} turned on", {on:active, total:rows.length})),
+            el(RN.View, {style:s.card}, out),
+            footnote("hint", "Tap a site to choose its service. If a preview doesn't show, another service may work."));
+    }
+    function FixEmbedsSettings() {
+        useSettings("fixEmbeds");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("fixEmbeds"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Icon = venusIcon(12910, "EmbedIcon");
+        const choices = fixChoices(settings.fixEmbedsSites), none = !fixRows().some(row => choices[row[0]] !== "off");
+        const changed = settings.fixEmbedsSites !== "" || !settings.fixEmbedsClean;
+        const groups = [
+            !on ? offCard("status", Icon, "fixEmbeds") : none ? statusCard("status", "Turn on a site below.", {title:tr("No sites turned on"), IconComponent:Icon}) :
+                fixEmbeds.count ? statusCard("status", pl(fixEmbeds.count, "Fixed {n} link since Discord opened.", "Fixed {n} links since Discord opened."),
+                    {title:tr("Fixing links"), IconComponent:Icon}) : null,
+            el(FixEmbedsPreview, {key:"preview", on}),
+            el(FixSiteList, {key:"sites", on}),
+            el(Group, {key:"privacy", title:tr("Privacy")},
+                switchRow(Switch, "fixEmbedsClean", "Remove tracking from links", "Drops share IDs like ?igsh= and ?si= from the links Venus fixes.", rowIcon(10410, "ShieldIcon"))),
+            changed ? el(Group, {key:"manage", title:tr("Manage")}, actionRow(ui, "reset", "Reset to defaults", "Every site on, through its first service.", () =>
+                confirmAction("Reset to defaults?", "Every site goes back to its first service, and tracking is removed again.", "Reset", () => {
+                    animateLayout(); setSetting("fixEmbedsSites", ""); setSetting("fixEmbedsClean", true); }), !on, true)) : null,
+            footnote("note", "Only the link changes, and only when you send or edit a message. Links in code or in <angle brackets> are sent as written.")];
+        return settingsBody(ui, groups);
+    }
     // Pastel names: a live chat preview showing names in their own pastel color (and Sam with a role color).
     // The switches below (Replace role colors, Color message text) update the preview live.
     function PastelPreview(props) {
@@ -7427,6 +7575,156 @@
                 get:() => features.splitMessages ? SPLIT_UNLIMITED : value, set:() => {}});
         }
         return exports;
+    }
+
+    // Fix link previews: links to posts on sites whose previews Discord can't build (X, Instagram, TikTok, Reddit...) are
+    // sent through an embed service that can: x.com/... becomes fixupx.com/..., and the post shows with its text, picture
+    // or video. Only the address changes: Venus fetches nothing, and nothing happens until you send.
+    // Each site: [id, name, brand color, icon (module, export) or a letter, hosts, post path (or one per host), services].
+    // A service is [id, name, {from host: to host}], or [id, name, "prefix"] for one that takes the whole link.
+    // Built only when a link is first sent or the page opens, never while Discord starts.
+    function fixSiteRows() {
+        return [
+            ["x", "X (Twitter)", "#000000", [8128, "XNeutralIcon"], ["x.com", "twitter.com"], /^\/(?:[A-Za-z0-9_]{1,15}|i(?:\/web)?)\/status(?:es)?\/\d+/,
+                [["fxtwitter", "FxTwitter", {"x.com":"fixupx.com", "twitter.com":"fxtwitter.com"}], ["vxtwitter", "vxTwitter", {"x.com":"fixvx.com", "twitter.com":"vxtwitter.com"}]]],
+            ["instagram", "Instagram", "#e1306c", [8132, "InstagramNeutralIcon"], ["instagram.com"], /^\/(?:[\w.]+\/)?(?:p|reels?|tv|share(?:\/(?:p|reels?))?)\/[\w-]+/,
+                [["oginstagram", "OGInstagram", {"instagram.com":"oginstagram.com"}], ["instafix", "InstaFix", {"instagram.com":"eeinstagram.com"}],
+                 ["kkinstagram", "KKInstagram", {"instagram.com":"kkinstagram.com"}]]],
+            ["tiktok", "TikTok", "#ee1d52", [12055, "TiktokNeutralIcon"], ["tiktok.com", "vm.tiktok.com", "vt.tiktok.com"],
+                {"tiktok.com":/^\/(?:@[\w.-]+\/(?:video|photo)\/\d+|t\/\w+)/, "vm.tiktok.com":/^\/\w+/, "vt.tiktok.com":/^\/\w+/},
+                [["fxtiktok", "fxTikTok", {"tiktok.com":"tnktok.com", "vm.tiktok.com":"vm.tnktok.com", "vt.tiktok.com":"vt.tnktok.com"}],
+                 ["tiktxk", "tiktxk", {"tiktok.com":"tiktxk.com", "vm.tiktok.com":"vm.tiktxk.com", "vt.tiktok.com":"vt.tiktxk.com"}]]],
+            ["reddit", "Reddit", "#ff4500", [9105, "RedditNeutralIcon"], ["reddit.com"], /^\/(?:r|u|user)\/[\w-]+\/(?:comments|s)\/\w+/,
+                [["vxreddit", "vxReddit", {"reddit.com":"vxreddit.com"}], ["fixreddit", "FixReddit", {"reddit.com":"fxreddit.seria.moe"}], ["rxddit", "rxddit", {"reddit.com":"rxddit.com"}]]],
+            ["bluesky", "Bluesky", "#1185fe", [9103, "BlueskyNeutralIcon"], ["bsky.app"], /^\/profile\/[^\/\s]+\/post\/\w+/,
+                [["fxbsky", "FxBluesky", {"bsky.app":"fxbsky.app"}], ["vixbluesky", "VixBluesky", {"bsky.app":"bskx.app"}]]],
+            ["threads", "Threads", "#101010", "@", ["threads.net", "threads.com"], /^\/@[\w.]+\/post\/[\w-]+/,
+                [["fixembed", "FixEmbed", "https://fixembed.app/embed?url="]]],
+            ["facebook", "Facebook", "#0866ff", [8130, "FacebookNeutralIcon"], ["facebook.com"],
+                /^\/(?:reel\/\d+|watch\/?\?|share\/[rvp]\/\w+|[\w.]+\/(?:videos|posts)\/[\w.-]+|story\.php|permalink\.php)/,
+                [["facebed", "facebed", {"facebook.com":"facebed.com"}]]],
+            ["pixiv", "pixiv", "#0096fa", "P", ["pixiv.net"], /^\/(?:[a-z]{2}\/)?artworks\/\d+/,
+                [["phixiv", "phixiv", {"pixiv.net":"phixiv.net"}], ["ppxiv", "ppxiv", {"pixiv.net":"ppxiv.net"}]]],
+            ["bilibili", "Bilibili", "#fb7299", "B", ["bilibili.com"], /^\/video\/\w+/,
+                [["bilifix", "BiliFix", {"bilibili.com":"vxbilibili.com"}]]]];
+    }
+    // Share and tracking parameters each site adds when you copy a link: who shared it, from which app, and when. They're
+    // removed from links Venus fixes, so neither the embed service nor anyone who taps the link sees them. utm_*, si and fbclid go everywhere.
+    function fixTrackingTable() {
+        return {x:/^(?:s|t|ref_src|ref_url)$/, instagram:/^(?:igsh|igshid|img_index)$/,
+            tiktok:/^(?:_r|_t|_d|is_from_webapp|sender_device|sender_web_id|web_id|share_app_id|share_link_id|u_code|preview_pb|timestamp|checksum|tt_from|enter_from|source|social_share_type|share_item_id|user_id|sec_user_id)$/,
+            reddit:/^(?:share_id|rdt|context|ref|ref_source|ref_campaign)$/, threads:/^(?:xmt|slof)$/, facebook:/^(?:mibextid|rdid|sfnsn|extid|ref|__tn__)$/,
+            bilibili:/^(?:spm_id_from|vd_source|share_source|share_medium|share_plat|share_session_id|share_tag|timestamp|unique_k|up_id|bbid|ts)$/};
+    }
+    const FIX_TRACKING_ANY = /^(?:utm_\w+|si|fbclid|gclid|mc_cid|mc_eid)$/;
+    const fixEmbeds = {hosts:null, sites:null, rows:null, tracking:null, parsed:null, parsedFrom:null, count:0};
+    // One host lookup per link instead of a regex per site.
+    function fixTables() {
+        const hosts = Object.create(null), sites = Object.create(null), rows = fixSiteRows();
+        rows.forEach(row => {
+            const site = {id:row[0], name:row[1], color:row[2], icon:row[3], hosts:row[4], path:row[5], services:row[6].map(s => ({id:s[0], name:s[1], to:s[2]}))};
+            sites[site.id] = site;
+            site.hosts.forEach(host => { hosts[host] = site; });
+        });
+        fixEmbeds.hosts = hosts; fixEmbeds.sites = sites; fixEmbeds.rows = rows; fixEmbeds.tracking = fixTrackingTable();
+    }
+    function fixRows() { if (!fixEmbeds.rows) fixTables(); return fixEmbeds.rows; }
+    function fixSite(id) { if (!fixEmbeds.sites) fixTables(); return fixEmbeds.sites[id] || null; }
+    // fixEmbedsSites keeps only what differs from the defaults (each site's first service): "x:vxtwitter,threads:off".
+    function fixChoices(raw) {
+        if (fixEmbeds.parsedFrom === raw && fixEmbeds.parsed) return fixEmbeds.parsed;
+        if (!fixEmbeds.sites) fixTables();
+        const out = Object.create(null);
+        String(raw || "").split(",").forEach(part => {
+            const at = part.indexOf(":"), id = part.slice(0, at), choice = part.slice(at + 1), site = at > 0 && fixEmbeds.sites[id];
+            if (site && (choice === "off" || site.services.some(s => s.id === choice)) && choice !== site.services[0].id) out[id] = choice;
+        });
+        fixEmbeds.parsedFrom = raw; fixEmbeds.parsed = out;
+        return out;
+    }
+    function fixChoicesText(choices) { return fixRows().filter(row => choices[row[0]]).map(row => row[0] + ":" + choices[row[0]]).join(","); }
+    // The choices written the one way they're saved; unknown sites or services are dropped. Undefined for anything else.
+    function fixSitesText(raw) { return typeof raw === "string" && raw.length <= 400 ? fixChoicesText(fixChoices(raw)) : undefined; }
+    function fixService(site) {
+        const choice = fixChoices(settings.fixEmbedsSites)[site.id];
+        return choice === "off" ? null : choice ? site.services.find(s => s.id === choice) || site.services[0] : site.services[0];
+    }
+    function fixSetChoice(siteId, choice) {
+        const site = fixSite(siteId);
+        if (!site) return;
+        const choices = Object.assign({}, fixChoices(settings.fixEmbedsSites));
+        if (choice === site.services[0].id) delete choices[siteId]; else choices[siteId] = choice;
+        setSetting("fixEmbedsSites", fixChoicesText(choices));
+    }
+    function fixClean(site, query) {
+        const own = fixEmbeds.tracking[site.id], kept = query.split("&").filter(pair => {
+            if (!pair) return false;
+            const at = pair.indexOf("="), name = at < 0 ? pair : pair.slice(0, at);
+            return !FIX_TRACKING_ANY.test(name) && !(own && own.test(name));
+        });
+        return kept.length ? "?" + kept.join("&") : "";
+    }
+    // One link: {site, service, link}, or null when it isn't a post on a site you fix. A closing ")" or "." stays outside it.
+    const FIX_TAIL = /[.,!?:;'")\]}*_~]+$/, FIX_SUBDOMAIN = /^(?:www|m|mobile|old|new|web)\./;
+    function fixLink(host, rest, clean) {
+        if (!fixEmbeds.hosts) fixTables();
+        let bare = host.toLowerCase();
+        if (FIX_SUBDOMAIN.test(bare)) bare = bare.slice(bare.indexOf(".") + 1);
+        const site = fixEmbeds.hosts[bare];
+        if (!site) return null;
+        const tail = FIX_TAIL.exec(rest), body = tail ? rest.slice(0, tail.index) : rest;
+        const path = site.path instanceof RegExp ? site.path : site.path[bare];
+        if (!path || !path.test(body)) return null;
+        const service = fixService(site);
+        if (!service) return null;
+        let address = body;
+        if (clean !== false && settings.fixEmbedsClean) {
+            const hash = address.indexOf("#"), fragment = hash < 0 ? "" : address.slice(hash), noHash = hash < 0 ? address : address.slice(0, hash), q = noHash.indexOf("?");
+            if (q >= 0) address = noHash.slice(0, q) + fixClean(site, noHash.slice(q + 1)) + fragment;
+        }
+        const fixed = typeof service.to === "string" ? service.to + encodeURIComponent("https://" + bare + address) : "https://" + service.to[bare] + address;
+        return {site, service, link:fixed + (tail ? tail[0] : "")};
+    }
+    // Code, escaped text and <links in angle brackets> (Discord's way to send a link without a preview) are left as written.
+    const FIX_SCAN = /```[\s\S]*?(?:```|$)|``[^\n]*?(?:``|$)|`[^`\n]*(?:`|$)|\\[\s\S]|<https?:\/\/[^\s>]*>|https?:\/\/([A-Za-z0-9.-]+)([\/?#][^\s<>|]*)/g;
+    function fixContent(content) {
+        // A message without a link costs one indexOf.
+        if (typeof content !== "string" || content.indexOf("://") < 0) return content;
+        let changed = 0;
+        const out = content.replace(FIX_SCAN, (match, host, rest) => {
+            if (!host) return match;
+            const fixed = fixLink(host, rest);
+            if (!fixed) return match;
+            changed++;
+            return fixed.link;
+        });
+        if (!changed) return content;
+        fixEmbeds.count += changed;
+        later(() => notify("fixEmbeds"), 0);
+        return out;
+    }
+    // Longer links never make a message too long to send: it goes as written instead, unless Send long messages splits it.
+    function fixFits(content) {
+        if (features.splitMessages && enabled("splitMessages")) return true;
+        const user = currentUser();
+        return content.length <= (user && user.premiumType === 2 ? 4000 : 2000);
+    }
+    // MessageActionCreators (7174) sendMessage(channelId, message) and editMessage(channelId, messageId, {content}).
+    function fixEmbedsSend(orig, self, args) {
+        const message = args[1];
+        if (!message || typeof message.content !== "string" || message.content.indexOf("://") < 0 || !enabled("fixEmbeds")) return orig.apply(self, args);
+        const content = fixContent(message.content);
+        if (content === message.content || !fixFits(content)) return orig.apply(self, args);
+        const next = Array.from(args); next[1] = Object.assign({}, message, {content});
+        return orig.apply(self, next);
+    }
+    function fixEmbedsEdit(orig, self, args) {
+        const edit = args[2];
+        if (!edit || typeof edit.content !== "string" || edit.content.indexOf("://") < 0 || !enabled("fixEmbeds")) return orig.apply(self, args);
+        const content = fixContent(edit.content);
+        if (content === edit.content || !fixFits(content)) return orig.apply(self, args);
+        const next = Array.from(args); next[2] = Object.assign({}, edit, {content});
+        return orig.apply(self, next);
     }
 
     // Translate messages: every message on screen that isn't in your language is shown translated, with a note
@@ -10564,7 +10862,7 @@
             case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
@@ -10648,6 +10946,11 @@
                     actions = hookExport(actions, "sendStickers", sendStickers);
                 }
                 if (splitLater) actions = hookExport(actions, "sendMessage", splitSend);
+                // Outermost, so Send long messages splits (and Nitro links converts) a message whose links are already fixed.
+                if (features.fixEmbeds) {
+                    actions = hookExport(actions, "sendMessage", fixEmbedsSend);
+                    actions = hookExport(actions, "editMessage", fixEmbedsEdit);
+                }
                 msgActions = actions;
                 return replaceValue(exports, "default", actions);
             }
