@@ -7617,7 +7617,7 @@
             bilibili:/^(?:spm_id_from|vd_source|share_source|share_medium|share_plat|share_session_id|share_tag|timestamp|unique_k|up_id|bbid|ts)$/};
     }
     const FIX_TRACKING_ANY = /^(?:utm_\w+|si|fbclid|gclid|mc_cid|mc_eid)$/;
-    const fixEmbeds = {hosts:null, sites:null, rows:null, tracking:null, parsed:null, parsedFrom:null, count:0};
+    const fixEmbeds = {hosts:null, sites:null, rows:null, tracking:null, parsed:null, parsedFrom:null, count:0, pending:0};
     // One host lookup per link instead of a regex per site.
     function fixTables() {
         const hosts = Object.create(null), sites = Object.create(null), rows = fixSiteRows();
@@ -7699,9 +7699,14 @@
             return fixed.link;
         });
         if (!changed) return content;
-        fixEmbeds.count += changed;
-        later(() => notify("fixEmbeds"), 0);
+        fixEmbeds.pending = changed;
         return out;
+    }
+    // Counted only once the fixed text is really what's sent, not when it's sent as written because it got too long.
+    function fixCounted() {
+        if (!fixEmbeds.pending) return;
+        fixEmbeds.count += fixEmbeds.pending; fixEmbeds.pending = 0;
+        later(() => notify("fixEmbeds"), 0);
     }
     // Longer links never make a message too long to send: it goes as written instead, unless Send long messages splits it.
     function fixFits(content) {
@@ -7715,6 +7720,7 @@
         if (!message || typeof message.content !== "string" || message.content.indexOf("://") < 0 || !enabled("fixEmbeds")) return orig.apply(self, args);
         const content = fixContent(message.content);
         if (content === message.content || !fixFits(content)) return orig.apply(self, args);
+        fixCounted();
         const next = Array.from(args); next[1] = Object.assign({}, message, {content});
         return orig.apply(self, next);
     }
@@ -7723,6 +7729,7 @@
         if (!edit || typeof edit.content !== "string" || edit.content.indexOf("://") < 0 || !enabled("fixEmbeds")) return orig.apply(self, args);
         const content = fixContent(edit.content);
         if (content === edit.content || !fixFits(content)) return orig.apply(self, args);
+        fixCounted();
         const next = Array.from(args); next[2] = Object.assign({}, edit, {content});
         return orig.apply(self, next);
     }
