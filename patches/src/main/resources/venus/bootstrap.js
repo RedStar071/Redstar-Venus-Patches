@@ -4707,8 +4707,8 @@
         return settingsBody(ui,groups);
     }
     // Fix link previews: a sent link and the preview everyone sees, for the site picked in the row of marks above it.
-    // Watch: you paste a link to a post, tap Send, Venus changes the address and the post's preview opens under it.
-    // Try it: tap Send yourself, then pick another site. Off: the finished message, so the page always shows the result.
+    // While on, it plays: you paste a link to a post, tap Send, Venus changes the address and the post's preview opens
+    // under it. Off: the finished message, so the page always shows the result.
     const FIX_SAMPLES = {x:"/wumpus/status/1846602926837096812", instagram:"/reel/C5nYWo0P5yK/", tiktok:"/@wumpus/video/7137423965982592302",
         reddit:"/r/discordapp/comments/1g5x4b0/", bluesky:"/profile/wumpus.bsky.social/post/3l6oveex3ii2l", threads:"/@wumpus/post/DGkNlhDyGm9",
         facebook:"/reel/1180000000000000", pixiv:"/artworks/123456789", bilibili:"/video/BV1xx411c7mD"};
@@ -4729,14 +4729,14 @@
     }
     function FixEmbedsPreview(props) {
         useSettings("fixEmbeds");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), f = useFixStyles(), [mode, setMode] = usePreviewMode(), on = !!props.on;
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), f = useFixStyles(), on = !!props.on;
         if (!fixEmbeds.sites) fixTables();
         const [siteId, setSiteId] = React.useState("x");
         const site = fixEmbeds.sites[siteId], live = fixService(site), service = live || site.services[0];
         const host = site.hosts[0], sample = FIX_SAMPLES[siteId], original = "https://" + host + sample;
         const fixed = live ? (fixLink(host, sample, false) || {link:original}).link : original;
         const blank = {text:"", sent:false, embed:false, pulse:null};
-        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const [state, setState] = React.useState(blank), watching = on;
         const update = change => setState(st => Object.assign({}, st, change));
         const story = useStory(watching, () => [
             [0, () => setState(blank), tr("You paste a link to a post on {site}", {site:site.name})],
@@ -4746,14 +4746,12 @@
                 live ? tr("Venus sends it through {service}", {service:service.name}) : tr("{site} is off, so the link is sent as written", {site:site.name})],
             live ? [900, () => { animateLayout(); update({embed:true}); }, tr("Everyone sees the post, with its picture or video")] : null,
             [1600, () => {}]], [siteId, service.id, !!live]);
-        const view = on && mode === "try" || watching ? state : {text:"", sent:true, embed:!!live};
-        const send = () => { if (!on || watching || view.sent) return; haptic("SELECTION"); animateLayout(); update({text:"", sent:true, embed:!!live, pulse:{who:"send", id:Date.now()}}); };
+        const view = watching ? state : {text:"", sent:true, embed:!!live};
         const pick = id => {
             if (id === siteId) return;
-            haptic("SELECTION"); animateLayout(); setSiteId(id);
-            setState(mode === "try" ? Object.assign({}, blank, {text:"https://" + fixEmbeds.sites[id].hosts[0] + FIX_SAMPLES[id]}) : blank);
+            haptic("SELECTION"); animateLayout(); setSiteId(id); setState(blank);
         };
-        const Press = RN.Pressable || RN.View, Play = venusIcon(8396, "PlayIcon"), Picture = venusIcon(8210, "ImageIcon");
+        const Play = venusIcon(8396, "PlayIcon"), Picture = venusIcon(8210, "ImageIcon");
         const media = el(RN.View, {style:{height:118, borderRadius:8, marginTop:8, overflow:"hidden", backgroundColor:site.color, alignItems:"center", justifyContent:"center"}},
             el(RN.View, {style:{position:"absolute", left:0, right:0, bottom:0, height:59, backgroundColor:"#00000040"}}),
             el(RN.View, {style:{position:"absolute", right:-24, top:-24, width:96, height:96, borderRadius:48, backgroundColor:"#ffffff1f"}}),
@@ -4773,18 +4771,16 @@
                 return el(Press, {key:row[0], onPress:() => pick(row[0]), accessibilityRole:"tab", accessibilityLabel:item.name, accessibilityState:{selected:picked},
                     hitSlop:{top:4, bottom:4}, style:[{padding:2, borderRadius:20, borderWidth:2, borderColor:"transparent"}, picked ? f.ring : null, fixService(item) ? null : {opacity:0.4}]},
                     fixBadge(item, 30)); }));
-        const tip = on && !watching ? previewTip(k, !view.sent ? tr("Tap Send to try it") : tr("Pick another site above to try it"), view.sent ? undefined : "down") : null;
         const input = previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"}), text:view.text});
         const message = view.sent ? popIn("msg:" + siteId + ":" + !!live, previewMessage(s, "msg", tr("You"), "#5865f2", tr("Today at 4:01 PM"), body)) :
             el(RN.View, {key:"empty", style:{paddingHorizontal:16, paddingVertical:24}}, el(RN.Text, {style:[s.muted, {textAlign:"center"}]}, tr("Nothing sent yet")));
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? Object.assign({}, blank, {text:original}) : blank); }) : null,
+        return el(RN.View, {key:"preview"},
             previewScreen(s, "preview", "Link preview", [marks,
                 // Steady height, so picking a site with a shorter preview never makes the page jump.
-                el(RN.View, {key:"chat", style:{height:268, justifyContent:"flex-end", overflow:"hidden"}}, message, view.sent ? null : tip)],
+                el(RN.View, {key:"chat", style:{height:268, justifyContent:"flex-end", overflow:"hidden"}}, message)],
                 {header:previewHeader(k, {title:"general"}),
-                 footer:el(RN.View, {key:"foot"}, view.sent ? tip : null,
-                    el(on && !watching && !view.sent ? Press : RN.View, on && !watching && !view.sent ? {onPress:send, accessibilityRole:"button", accessibilityLabel:tr("Send")} : null,
-                        input, tapRipple(state.pulse, "send", {right:10, top:11})),
+                 footer:el(RN.View, {key:"foot"},
+                    el(RN.View, null, input, tapRipple(state.pulse, "send", {right:10, top:11})),
                     watching ? storyStrip(k, s, story) : null)}));
     }
     // Every site in one card: its mark, where its links go and a switch. A site with more than one service opens a choice under it.
@@ -4821,48 +4817,6 @@
             el(RN.View, {style:s.card}, out),
             footnote("hint", "Tap a site to choose its service. If a preview doesn't show, another service may work."));
     }
-    // Bring back Tenor GIFs: Discord's GIF picker as you'll see it, drawn with Discord's Wumpus art (bundled in the app),
-    // never real GIFs. Each tile says where it came from, so you can see the two sources mix, or only Tenor.
-    const TENOR_SAMPLES = [["wumpusmario", 66], ["wumpuswizard", 92], ["wumpuslink", 78], ["wumpuspikachu", 70], ["wumpusash", 88], ["wumpuswump", 74],
-        ["wumpusluigi", 84], ["wumpusmario", 72]];
-    const TENOR_TINTS = ["#5865f2", "#eb459e", "#3ba55c", "#faa61a", "#ed4245", "#00a8fc", "#9b59b6", "#1abc9c"];
-    function TenorPreview(props) {
-        useSettings("tenorGifs");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on, only = settings.tenorGifsSource === "tenor";
-        const Search = venusIcon(6740, "MagnifyingGlassIcon"), Star = venusIcon(9549, "StarIcon"), Gif = venusIcon(9748, "GifIcon");
-        // Off, the picker is Discord's own: every GIF is Klipy's.
-        const from = i => !on ? "Klipy" : only || i % 2 === 0 ? "Tenor" : "Klipy";
-        const tile = (sample, i) => {
-            const source = from(i), tenorTile = source === "Tenor";
-            return el(RN.View, {key:"t" + i, style:{height:sample[1], borderRadius:4, overflow:"hidden", backgroundColor:TENOR_TINTS[i % TENOR_TINTS.length] + "33",
-                alignItems:"center", justifyContent:"center"}},
-                RN.Image ? el(RN.Image, {source:{uri:"images_native_wumpus_" + sample[0], width:84, height:66}, style:{width:56, height:44}, resizeMode:"contain"}) : null,
-                popIn("src:" + i + ":" + source, el(RN.View, {style:{position:"absolute", left:4, bottom:4, borderRadius:4, paddingHorizontal:5, paddingVertical:1,
-                    backgroundColor:tenorTile ? "#000000a6" : "#00000059"}},
-                    el(RN.Text, {style:{color:"#ffffff", fontSize:10, fontWeight:"700", opacity:tenorTile ? 1 : 0.8}}, source))));
-        };
-        const columns = [0, 1].map(c => el(RN.View, {key:"c" + c, style:{flex:1, gap:4}},
-            TENOR_SAMPLES.map((sample, i) => i % 2 === c ? tile(sample, i) : null)));
-        const tabs = el(RN.View, {key:"tabs", style:[k.segTrack, {flexDirection:"row", padding:3, gap:3, borderRadius:20, marginHorizontal:12}]},
-            [["emoji", "Emojis"], ["gif", "GIFs"], ["sticker", "Stickers"]].map(([id, label]) => el(RN.View, {key:id,
-                style:[{flex:1, paddingVertical:6, borderRadius:16, alignItems:"center"}, id === "gif" ? k.segIndicator : null]},
-                el(RN.Text, {style:[id === "gif" ? {color:s.name.color} : s.muted, {fontWeight:"600", fontSize:13}]}, tr(label)))));
-        const search = el(RN.View, {key:"search", style:[k.searchField, {flexDirection:"row", alignItems:"center", gap:8, height:36, borderRadius:18,
-            paddingHorizontal:12, marginHorizontal:12}]},
-            el(Search, {size:"xs", color:k.iconMuted.color}),
-            popIn("ph:" + (on && only), el(RN.Text, {style:[s.muted, {flex:1, fontSize:14}], numberOfLines:1}, on && only ? tr("Search Tenor") : tr("Search GIFs"))),
-            el(Star, {size:"xs", color:k.iconMuted.color}));
-        const sheet = el(RN.View, {key:"sheet", style:[k.sheet, {borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, gap:8}]},
-            el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66"}}),
-            tabs, search,
-            el(RN.View, {style:{height:236, overflow:"hidden", flexDirection:"row", gap:4, paddingHorizontal:12}}, columns));
-        return el(RN.View, {key:"preview"},
-            previewScreen(s, "preview", "GIF picker preview", [sheet], {header:el(RN.View, {key:"head", style:{flexDirection:"row", alignItems:"center", gap:8,
-                paddingHorizontal:16, paddingTop:10, paddingBottom:6}},
-                el(Gif, {size:"xs", color:k.icon.color}),
-                el(RN.Text, {style:[s.muted, {flex:1, fontSize:13, fontWeight:"600"}], numberOfLines:1},
-                    !on ? tr("Discord's GIFs only") : only ? tr("Only Tenor") : tr("Tenor and Discord's GIFs")))}));
-    }
     function TenorSettings() {
         useSettings("tenorGifs");
         const ui = reviewUI();
@@ -4871,7 +4825,6 @@
         const groups = [
             !on ? offCard("status", Icon, "tenorGifs") : tenor.down ? statusCard("status", "Discord's own GIFs show until it answers again.",
                 {title:tr("Tenor isn't answering"), IconComponent:venusIcon(8204, "ImageWarningIcon")}) : null,
-            el(TenorPreview, {key:"preview", on}),
             radioGroup(ui, "source", "GIFs from", "tenorGifsSource", on, [
                 ["both", "Tenor and Discord's GIFs", "Tenor's come first, with Discord's mixed in, so you get the most choice.", rowIcon(11587, "ImagesIcon")],
                 ["tenor", "Only Tenor", "Search, trending and categories all come from Tenor, like before.", rowIcon(8210, "ImageIcon")]]),
