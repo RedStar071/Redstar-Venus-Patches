@@ -34,7 +34,7 @@
     if (features.validUser) selectModules([584, 1390]);
     if (features.youBarSettings) targetModules[16858] = 1;
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
-    if (features.translate) selectModules([584, 1390, 7742, 9675, 10368]);
+    if (features.translate) selectModules([584, 1390, 5432, 7742, 9675, 10368]);
     if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
     if (features.accountSwitcher) selectModules([1390, 12129, 12130, 12131, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
@@ -3918,10 +3918,18 @@
             plan.forEach(step => { sum += step[0]; at.push(sum); });
             const total = sum, chapters = plan.map((step, i) => step[2] ? at[i] : null).filter(x => x !== null);
             const st = {i:0, t:0, timer:undefined, cancelled:false, paused:false, caption:"", chapter:0, seg:0};
+            const syncZero = () => {
+                while (st.i < plan.length && at[st.i] <= st.t) {
+                    const step = plan[st.i++];
+                    if (step[2]) { st.caption = step[2]; st.chapter++; }
+                    try { step[1](); } catch (_) {}
+                }
+            };
             const show = segment => setView({t:st.t, total, caption:st.caption, chapter:st.chapter, chapters, playing:!st.paused, segment});
             const stop = () => { if (st.timer !== undefined && global.clearTimeout) global.clearTimeout(st.timer); st.timer = undefined; };
             const schedule = () => {
                 if (st.cancelled || st.paused) return;
+                syncZero();
                 const due = st.i < at.length ? at[st.i] : total, target = Math.min(due, Math.floor(st.t / 1000) * 1000 + 1000);
                 const wait = Math.max(0, target - st.t);
                 show({from:st.t, to:target, ms:wait, id:++st.seg});
@@ -3929,12 +3937,8 @@
                     st.timer = undefined;
                     if (st.cancelled) return;
                     st.t = target;
-                    while (st.i < plan.length && at[st.i] <= st.t) {
-                        const step = plan[st.i++];
-                        if (step[2]) { st.caption = step[2]; st.chapter++; }
-                        try { step[1](); } catch (_) {}
-                    }
-                    if (st.i >= plan.length) { st.i = 0; st.t = 0; st.caption = ""; st.chapter = 0; }
+                    syncZero();
+                    if (st.i >= plan.length) { st.i = 0; st.t = 0; st.caption = ""; st.chapter = 0; syncZero(); }
                     schedule();
                 }, wait, false);
             };
@@ -4243,8 +4247,10 @@
     const segmentMeasured = new Map();
     function SegmentedSlider(props) {
         const A = motion(), [width, setWidth] = React.useState(segmentMeasured.get(props.slot) || 0), ref = React.useRef(null);
-        if (!ref.current) ref.current = {x:new A.Value(0), placed:false};
-        const state = ref.current, pill = width ? (width - 4 * (props.count - 1)) / props.count : 0, target = props.index * (pill + 4);
+        const pill = width ? (width - 4 * (props.count - 1)) / props.count : 0, target = props.index * (pill + 4);
+        if (!ref.current) ref.current = {x:new A.Value(target), placed:!!pill};
+        const state = ref.current;
+        if (!state.placed && pill) { state.placed = true; state.x.setValue(target); }
         React.useEffect(() => {
             if (!pill) return undefined;
             if (!state.placed || reduceMotion || typeof A.spring !== "function") { state.placed = true; state.x.setValue(target); return undefined; }
@@ -4262,21 +4268,21 @@
     function venusSegmented(props) {
         // -1 when the value isn't one of the pills (a custom number): no pill is shown as chosen.
         const index=props.items.findIndex(item => item.value===props.value);
-        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { haptic("IMPACT_MEDIUM"); animateLayout(); props.onChange(item.value); } };
-        const pill={flex:1,paddingVertical:9,borderRadius:20,alignItems:"center"};
+        // Once its slider has measured the track, the chosen pill slides to the new choice instead of jumping.
+        const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
+        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { haptic("IMPACT_MEDIUM"); if (!sliding) animateLayout(); props.onChange(item.value); } };
+        const pill={flex:1,minWidth:0,paddingVertical:9,paddingHorizontal:8,borderRadius:20,alignItems:"center",justifyContent:"center"};
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
             on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill}),
             {wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:"#1e1f22"},on:Object.assign({},pill,{backgroundColor:"#4e5058"}),off:pill});
         const Text=inspectedExport(5088,"Text"), Press=RN.Pressable || RN.View;
-        // Once its slider has measured the track, the chosen pill slides to the new choice instead of jumping.
-        const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
         const indicator=s.on && s.on.backgroundColor;
         return el(RN.View,{key:props.key,style:[s.wrap,{opacity:props.disabled ? 0.5 : 1}],accessibilityRole:"tablist"},
             motion() && index>=0 ? el(SegmentedSlider,{key:"slider",slot,index,count:props.items.length,color:indicator}) : null,
             props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index && !sliding ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
                 accessibilityState:{selected:i===index,disabled:!!props.disabled},disabled:!!props.disabled,onPress:() => pick(i)},
-                Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted"},item.label) :
-                    el(RN.Text,{style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600"}},item.label))));
+                Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted",lineClamp:1,style:{textAlign:"center"}},item.label) :
+                    el(RN.Text,{numberOfLines:1,style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600",textAlign:"center"}},item.label))));
     }
     // Presets as Discord's segmented pills, and under them one Custom row that says what's in use: tap it for an inline
     // number box with Use. A custom value leaves every pill unselected, so they never claim a choice you didn't make.
@@ -7484,18 +7490,27 @@
         ca:"\u00e0\u00e7\u00e8\u00e9\u00ed\u00ef\u00f2\u00f3\u00fa\u00fc", is:"\u00e1\u00e6\u00e9\u00ed\u00f0\u00f3\u00f6\u00fa\u00fd\u00fe", ga:"\u00e1\u00e9\u00ed\u00f3\u00fa",
         sq:"\u00e7\u00eb", eo:"\u0109\u011d\u0125\u0135\u015d\u016d", gl:"\u00e1\u00e9\u00ed\u00f1\u00f3\u00fa"};
     // Everyday words that are only one language's (none of them an English word), to tell Latin languages apart.
-    const LATIN_WORDS = {en:["the", "and", "you", "what", "with", "this", "that", "have", "just", "about"],
-        es:["que", "los", "las", "pero", "est\u00e1", "porque", "tambi\u00e9n", "hola", "gracias", "usted", "muy"],
-        de:["und", "nicht", "ich", "ist", "auch", "aber", "wir", "das", "noch", "schon", "danke"],
-        fr:["les", "est", "pas", "avec", "pour", "mais", "je", "c'est", "tr\u00e8s", "bonjour", "merci", "vous"],
-        it:["che", "non", "sono", "per", "anche", "ciao", "grazie", "perch\u00e9", "molto"],
-        pt:["n\u00e3o", "voc\u00ea", "com", "para", "obrigado", "est\u00e1", "tamb\u00e9m", "muito"],
-        nl:["een", "het", "niet", "ik", "ook", "maar", "wat", "dank"], sv:["och", "jag", "det", "inte", "\u00e4r", "hej", "tack"],
-        pl:["jest", "nie", "tak", "czy", "si\u0119", "dzi\u0119ki"], tr:["bir", "ve", "bu", "ne", "\u00e7ok", "te\u015fekk\u00fcrler"],
-        id:["yang", "dan", "tidak", "ini", "itu", "aku", "kamu", "terima"]};
+    const LATIN_WORDS = {
+        en:["the", "and", "you", "what", "with", "this", "that", "have", "just", "about", "from", "your", "they", "would", "there", "their", "don't", "can't", "it's", "that's"],
+        es:["que", "qu\u00e9", "los", "las", "del", "una", "uno", "por", "para", "con", "sin", "pero", "como", "c\u00f3mo", "m\u00e1s", "muy", "todo", "toda", "todos", "todas", "nada", "algo", "aqu\u00ed", "ah\u00ed", "all\u00ed", "este", "esta", "esto", "estos", "estas", "ese", "esa", "eso", "est\u00e1", "est\u00e1s", "est\u00e1n", "estoy", "eres", "somos", "tengo", "tienes", "tiene", "puede", "puedo", "hacer", "hace", "decir", "dice", "dijo", "cuando", "donde", "d\u00f3nde", "quien", "qui\u00e9n", "porque", "porqu\u00e9", "tambi\u00e9n", "siempre", "nunca", "ahora", "antes", "despu\u00e9s", "bueno", "buena", "buenos", "buenas", "bien", "mal", "hola", "ola", "gracias", "usted", "nosotros", "ellos", "ellas", "mis", "tus", "sus", "nuestro", "claro", "claramente", "verdad", "hermano", "amigo", "brochachon", "tradujiste", "traducir", "noche"],
+        de:["und", "nicht", "ich", "ist", "auch", "aber", "wir", "das", "noch", "schon", "danke", "ein", "eine", "einen", "einem", "mit", "auf", "f\u00fcr", "von", "sich", "sie", "dem", "den", "des", "dass", "wenn", "oder", "nur", "wie", "kann", "sind", "haben", "wird", "wurde", "werden", "jetzt", "immer", "alles", "etwas", "nichts", "warum", "hall\u00f6chen", "guten", "bitte", "gerne", "heute", "morgen", "wirklich"],
+        fr:["les", "des", "est", "pas", "avec", "pour", "dans", "plus", "mais", "sur", "sont", "cette", "tout", "tous", "toute", "faire", "fait", "comme", "\u00eatre", "avoir", "nous", "vous", "ils", "elles", "leur", "leurs", "m\u00eame", "aussi", "tr\u00e8s", "bien", "peut", "suis", "sais", "veux", "quand", "comment", "pourquoi", "bonjour", "salut", "merci", "oui", "alors", "donc", "rien", "quelque", "toujours", "jamais", "aujourd'hui", "c'est", "qu'il", "j'ai", "n'est"],
+        it:["che", "non", "sono", "per", "una", "con", "del", "della", "dei", "degli", "delle", "nel", "nella", "sul", "sulla", "questo", "questa", "questi", "queste", "quello", "quella", "anche", "come", "pi\u00f9", "molto", "tutto", "tutti", "fare", "fatto", "essere", "avere", "abbiamo", "hanno", "pu\u00f2", "sono", "stato", "quando", "dove", "perch\u00e9", "ciao", "grazie", "prego", "buongiorno", "sempre", "mai", "adesso", "ancora", "allora", "per\u00f2"],
+        pt:["n\u00e3o", "nao", "voc\u00ea", "voce", "voc\u00eas", "com", "para", "por", "uma", "dos", "das", "nos", "nas", "pelo", "pela", "isso", "isto", "aquilo", "esse", "essa", "este", "esta", "mais", "muito", "tudo", "todos", "todas", "como", "quando", "onde", "porque", "porqu\u00ea", "est\u00e1", "estou", "est\u00e3o", "tenho", "tem", "pode", "fazer", "feito", "dizer", "disse", "tamb\u00e9m", "sempre", "nunca", "agora", "ent\u00e3o", "mas", "bom", "boa", "ol\u00e1", "ola", "oi", "obrigado", "obrigada", "valeu", "gente", "cara"],
+        nl:["een", "het", "van", "dat", "niet", "voor", "met", "zijn", "ook", "maar", "naar", "bij", "nog", "wel", "geen", "meer", "deze", "hebben", "heeft", "heb", "kan", "worden", "wordt", "wat", "hoe", "waarom", "wanneer", "alles", "iets", "niets", "altijd", "nooit", "goed", "heel", "echt", "bedankt", "dank", "alsjeblieft"],
+        sv:["och", "att", "det", "som", "f\u00f6r", "p\u00e5", "med", "inte", "har", "den", "till", "fr\u00e5n", "n\u00e4r", "kan", "ska", "vill", "alla", "mycket", "bara", "eller", "men", "h\u00e4r", "d\u00e4r", "varf\u00f6r", "n\u00e5got", "inget", "alltid", "aldrig", "jag", "dig", "mig", "\u00e4r", "hej", "tack"],
+        pl:["jest", "nie", "tak", "czy", "si\u0119", "dzi\u0119ki", "ale", "jak", "dla", "tego", "tylko", "jeszcze", "bardzo", "wszystko", "kiedy", "gdzie", "dlaczego", "mo\u017ce", "mam", "masz", "mamy", "by\u0107", "by\u0142", "by\u0142a", "b\u0119dzie", "cze\u015b\u0107", "dobrze", "prosz\u0119"],
+        tr:["bir", "ve", "bu", "ne", "\u00e7ok", "te\u015fekk\u00fcrler", "i\u00e7in", "ile", "ama", "daha", "gibi", "var", "yok", "ben", "sen", "biz", "siz", "onlar", "olan", "olarak", "kadar", "sonra", "\u00f6nce", "\u015fimdi", "neden", "nas\u0131l", "nerede", "merhaba", "selam", "evet", "hay\u0131r", "iyi", "g\u00fczel"],
+        id:["yang", "dan", "tidak", "ini", "itu", "aku", "kamu", "terima", "untuk", "dengan", "dari", "pada", "dalam", "bisa", "akan", "sudah", "belum", "lagi", "juga", "saja", "kalau", "karena", "tapi", "atau", "apa", "siapa", "dimana", "kapan", "kenapa", "bagaimana", "banyak", "semua", "sangat", "sekali", "kasih", "halo", "baik", "enggak", "gak", "udah", "banget"],
+        ro:["este", "sunt", "pentru", "care", "dar", "mai", "foarte", "doar", "c\u00e2nd", "unde", "cum", "dac\u0103", "fost", "avea", "face", "spune", "bine", "mul\u021bumesc", "salut", "nimic", "totul"],
+        cs:["jsem", "jsi", "jsou", "nen\u00ed", "ale", "jako", "pro", "kdy\u017e", "kde", "jak", "pro\u010d", "velmi", "v\u0161echno", "nic", "n\u011bco", "dobr\u00fd", "d\u00edky", "ahoj", "pros\u00edm"],
+        hu:["hogy", "nem", "van", "egy", "meg", "csak", "m\u00e9g", "m\u00e1r", "mint", "vagy", "lesz", "volt", "nagyon", "minden", "semmi", "valami", "mikor", "hol", "mi\u00e9rt", "hogyan", "k\u00f6sz\u00f6n\u00f6m", "szia", "igen"],
+        fi:["ett\u00e4", "ei", "ole", "oli", "mutta", "kun", "jos", "niin", "vain", "my\u00f6s", "kuin", "mit\u00e4", "miss\u00e4", "milloin", "miksi", "miten", "kaikki", "jotain", "hyv\u00e4", "kiitos", "hei", "moi"],
+        vi:["c\u1ee7a", "v\u00e0", "l\u00e0", "c\u00f3", "kh\u00f4ng", "\u0111\u01b0\u1ee3c", "trong", "cho", "v\u1edbi", "n\u00e0y", "\u0111\u00f3", "nh\u1eefng", "m\u1ed9t", "c\u00e1c", "ng\u01b0\u1eddi", "nh\u01b0", "khi", "th\u00ec", "m\u00e0", "r\u1ea5t", "nhi\u1ec1u", "c\u1ea3m", "\u01a1n", "xin", "ch\u00e0o"]};
     function translateLooksForeign(text) {
         if (typeof text !== "string" || text.length < 2) return false;
         const target = translateTarget(), base = languageBase(target), want = TRANSLATE_SCRIPT_OF[base] || null;
+        if (/[\u00a1\u00bf]/.test(text) && base !== "es" && base !== "gl" && base !== "ca") return true;
         let found = null;
         for (let i = 0; i < TRANSLATE_SCRIPTS.length && !found; i++) if (TRANSLATE_SCRIPTS[i][1].test(text)) found = TRANSLATE_SCRIPTS[i][0];
         // Japanese is written with kanji too, so kanji alone never shows the bar to a Japanese reader.
@@ -7507,17 +7522,22 @@
         if (want) return true;
         const own = LATIN_LETTERS[base];
         if (own === undefined) return false;
-        // Letters the language doesn't write with, in at least two words: one loanword (caf\u00e9, na\u00efve) isn't enough.
         const allowed = new RegExp("[^a-z'" + own + "]");
         let marked = 0;
-        for (const word of words) if (allowed.test(word) && ++marked >= 2) return true;
-        let other = marked;
-        const ownWords = new Set(LATIN_WORDS[base] || []), seen = new Set();
+        for (const word of words) if (allowed.test(word) && ++marked >= 1 && (marked >= 2 || words.length <= 6)) return true;
+        let other = marked, english = 0;
+        const ownWords = new Set(LATIN_WORDS[base] || []), seen = new Set(), wordSet = new Set(words);
         for (const code in LATIN_WORDS) {
             if (code === base) continue;
-            for (const word of LATIN_WORDS[code]) if (!ownWords.has(word) && !seen.has(word) && words.includes(word)) { seen.add(word); other++; }
+            for (const word of LATIN_WORDS[code]) if (!ownWords.has(word) && !seen.has(word) && wordSet.has(word)) { seen.add(word); other++; }
         }
-        return other >= 2;
+        if (other >= 2 || other >= 1 && words.length <= 6) return true;
+        if (base === "en") {
+            for (const word of LATIN_WORDS.en) if (wordSet.has(word)) english++;
+            // Longer Latin sentence with zero common English words and typical Romance/Germanic morphology.
+            if (!english && words.length >= 3 && words.some(w => /(?:mente|ci\u00f3n|si\u00f3n|ando|iendo|aste|iste|aron|ieron|ch\u00f6n|ung|keit|heit|lich|isch|aux|eux|oir|aient|zione|ggi|nho|lho|zinho|\u00e3o|\u00f5es)$/.test(w))) return true;
+        }
+        return false;
     }
     // A row in "Only when you ask" that the bar could translate: remembered per chat, and the bar shows from then on.
     function translateNoticeForeign(channelId, text) {
@@ -7532,12 +7552,37 @@
         return choice === undefined ? translateDefault(channelId) : choice;
     }
     // The translate bar: translate a whole chat, or show it as written again. Every row on screen from it is redrawn.
+    function translateScanChannel(channelId) {
+        if (!channelId || !msgStore || typeof msgStore.getMessages !== "function") return false;
+        let msgs;
+        try { msgs = msgStore.getMessages(channelId); } catch (_) { return false; }
+        const list = msgs && (Array.isArray(msgs._array) ? msgs._array : typeof msgs.toArray === "function" ? msgs.toArray() : null);
+        if (!Array.isArray(list) || !list.length) return false;
+        const me = currentUser(), myId = me && me.id;
+        let foundForeign = false;
+        for (let i = list.length - 1; i >= 0; i--) {
+            const msg = list[i];
+            if (!msg || !msg.id) continue;
+            const contentSource = translateContentSource(msg);
+            const text = contentSource && contentSource.content;
+            if (typeof text !== "string" || !text) continue;
+            translateSeen(msg, channelId, msg.id, null);
+            const authorId = msg.author && msg.author.id || msg.authorId;
+            if (!foundForeign && (!myId || authorId !== myId) && translateLooksForeign(text)) foundForeign = true;
+        }
+        if (foundForeign && translate.foreign.get(channelId) !== true) {
+            if (translate.foreign.size >= TRANSLATE_FOREIGN) translate.foreign.delete(translate.foreign.keys().next().value);
+            translate.foreign.set(channelId, true);
+        }
+        return foundForeign;
+    }
     function translateChannel(channelId, on) {
         if (!channelId || translate.channels.has(channelId) === !!on) return;
         if (on) {
             if (translate.channels.size >= TRANSLATE_CHANNELS) translate.channels.delete(translate.channels.values().next().value);
             translate.channels.add(channelId);
         } else translate.channels.delete(channelId);
+        translateScanChannel(channelId);
         notify("translate");
         const ids = new Set();
         translate.shown.forEach((entry, id) => { if (entry.channelId === channelId) ids.add(id); });
@@ -8111,16 +8156,15 @@
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const target = translateTargetName();
         const story = useStory(watching, () => {
-            const steps = [[0, () => setState(Object.assign({}, blank, {shown:false}))],
-                [700, () => { animateLayout(); update({shown:true}); }, tr("Luc\u00eda writes in Spanish")]];
+            const steps = [[0, () => setState(blank), tr("Luc\u00eda writes in Spanish")]];
             if (barAsk) steps.push([1400, () => update({pulse:{who:"bar", id:"tap"}}), tr("You tap the bar at the top of the chat")],
-                [600, () => { animateLayout(); update({busy:true}); }]);
+                [600, () => update({busy:true})]);
             else if (manual) steps.push([1400, () => update({pulse:{who:"msg", id:"hold"}, held:true}), tr("You hold the message to open its menu")],
-                [700, () => { animateLayout(); update({menu:true}); }],
+                [700, () => update({menu:true})],
                 [1800, () => update({pulse:{who:"translate", id:"tap"}}), tr("And tap Translate")],
-                [600, () => { animateLayout(); update({menu:false, held:false, busy:true}); }]);
+                [600, () => update({menu:false, held:false, busy:true})]);
             else steps.push([1400, () => update({busy:true}), tr("Venus sees it's not in {language} and translates it on its own", {language:target})]);
-            steps.push([1600, () => { animateLayout(); update({busy:false, done:true}); }, tr("Now it reads in {language}", {language:target})]);
+            steps.push([1600, () => update({busy:false, done:true}), tr("Now it reads in {language}", {language:target})]);
             if (settings.translateNote || settings.translateOriginal) steps.push([300, () => {},
                 tr(settings.translateOriginal ? "The note under it says what it was in, with the original quoted below" : "The small note under it says what language it was in")]);
             steps.push([800, () => {}]);
@@ -8129,7 +8173,7 @@
         const startTry = () => Object.assign({}, blank, {done:!manual});
         const translated = on ? state.done : true;
         const Lang = venusIcon(15723, "LanguageIcon");
-        const body = !state.shown ? null : state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
+        const body = state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
                 el(RN.Text, {style:[s.muted, {marginTop:2}]}, tr("Translating\u2026"))) :
             !translated ? el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE) : el(RN.View, null,
                 popIn("tr", el(RN.Text, {style:s.text}, tr("Hi everyone! Who's coming tonight?"))),
@@ -8138,25 +8182,23 @@
                 settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
         const holdMessage = () => {
             if (!on || watching) return;
-            animateLayout();
             update(st => ({menu:!st.menu, held:!st.menu, pulse:{who:"msg", id:"hold:" + Date.now()}}));
         };
         const tapMenuTranslate = () => {
             if (!on || watching) return;
-            animateLayout();
             update(st => ({menu:false, held:false, done:!st.done, pulse:{who:"translate", id:"tr:" + Date.now()},
                 tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
         };
-        const closeMenu = () => { if (!on || watching) return; animateLayout(); update({menu:false, held:false}); };
+        const closeMenu = () => { if (!on || watching) return; update({menu:false, held:false}); };
         const tapBar = () => {
             if (!on || watching) return;
-            haptic("SELECTION"); animateLayout();
+            haptic("SELECTION");
             update(st => ({menu:false, held:false, done:!st.done, pulse:{who:"bar", id:"bar:" + Date.now()}, tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
         };
         const bar = barAsk ? previewTranslateBar(k, state.done, target, watching ? null : tapBar, state.pulse) : null;
         const msgView = el(RN.View, {key:"msg", style:state.held ? k.selected : null},
             popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg"));
-        const message = !state.shown ? null : on && !watching ? el(Press, {key:"msg", onLongPress:holdMessage, onPress:holdMessage,
+        const message = on && !watching ? el(Press, {key:"msg", onLongPress:holdMessage, onPress:holdMessage,
             accessibilityRole:"button", accessibilityHint:tr("Hold the message to open its menu")}, msgView) : msgView;
         const actionLabel = tr(state.done ? "Show original" : "Translate");
         const doneStep1 = manual ? state.tried.tr : state.tried.back, doneStep2 = manual ? state.tried.back : state.tried.tr;
@@ -8166,15 +8208,20 @@
             !doneStep1 ? tr(state.done ? "Hold the message to see the original" : "Hold the message to open its menu") :
             !doneStep2 ? tr(state.done ? "Hold it again to show the original" : "Hold it again to translate it") : null,
             state.menu ? "down" : undefined) : null;
-        const sheet = (watching || on) && state.menu ? previewSheet(k, s, [
-            ["reply", venusIcon(12838, "ArrowAngleLeftUpIcon"), tr("Reply"), watching ? null : closeMenu],
-            ["copy", venusIcon(5042, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu],
-            ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate]], state.pulse) : null;
+        const sheet = (watching || on) && state.menu ? el(RN.View, {key:"overlay", style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"flex-end"}]},
+            el(Press, {style:{flex:1}, onPress:watching ? undefined : closeMenu, accessibilityLabel:tr("Cancel")}),
+            popIn("sheet", previewSheet(k, s, [
+                ["reply", venusIcon(12838, "ArrowAngleLeftUpIcon"), tr("Reply"), watching ? null : closeMenu],
+                ["copy", venusIcon(5042, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu],
+                ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate]], state.pulse))) : null;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? startTry() : blank); }) : null,
-            previewScreen(s, "preview", "Translation preview", [bar, message, tip, sheet],
+            previewScreen(s, "preview", "Translation preview",
+                [el(RN.View, {key:"stage", style:{height:228, justifyContent:"space-between", overflow:"hidden"}},
+                    el(RN.View, {key:"chat", style:{paddingTop:4}}, bar, message, !state.menu ? tip : null),
+                    previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
+                    sheet)],
                 {header:previewHeader(k, {title:"general"}),
-                 footer:el(RN.View, {key:"foot"}, sheet ? null : previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
-                    watching ? storyStrip(k, s, story) : null)}));
+                 footer:watching ? storyStrip(k, s, story) : null}));
     }
     // The translate bar (#82), like Telegram's: in "Only when you ask", a slim bar appears at the top of a chat once a
     // message in it is in another language. Tap it to translate the chat, and every message you see in it; the bar
@@ -8192,28 +8239,41 @@
     // 32 dp tall, a soft pill a little in from the edges: about as much of the chat as Discord's own New messages bar.
     const TRANSLATE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", alignSelf:"center", marginHorizontal:12, marginTop:6, marginBottom:4,
         height:32, paddingLeft:12, paddingRight:2, borderRadius:16, backgroundColor:"#2b2d31f2", borderWidth:1, borderColor:"#ffffff14",
-        shadowColor:"#000000", shadowOpacity:0.18, shadowRadius:6, shadowOffset:{width:0, height:2}, elevation:2},
+        shadowColor:"#000000", shadowOpacity:0.18, shadowRadius:6, shadowOffset:{width:0, height:2}, elevation:4, zIndex:100},
         text:{color:"#949cf7"}, muted:{color:"#b5bac1"}, cog:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"},
         divider:{width:1, height:16, marginHorizontal:6, backgroundColor:"#ffffff1f"}};
     function translateBarShown(channelId) {
-        return enabled("translate") && settings.translateMode === "manual" && settings.translateAsk !== "menu" && !!channelId && !hiddenChannel(channelId) &&
-            (translate.channels.has(channelId) || translate.foreign.get(channelId) === true);
+        if (!enabled("translate") || settings.translateMode !== "manual" || settings.translateAsk === "menu" || !channelId || hiddenChannel(channelId)) return false;
+        if (translate.channels.has(channelId) || translate.foreign.get(channelId) === true) return true;
+        return translateScanChannel(channelId);
     }
     function TranslateBar(props) {
         useSettings("translate");
+        const [, bump] = React.useState(0);
+        const channelId = props.channelId;
+        React.useEffect(() => {
+            if (!channelId || !enabled("translate") || settings.translateMode !== "manual" || settings.translateAsk === "menu") return undefined;
+            if (!msgStore) msgStore = inspectedExport(5432, "default");
+            if (!msgStore || typeof msgStore.addChangeListener !== "function" || typeof msgStore.removeChangeListener !== "function") return undefined;
+            const check = () => {
+                if (translate.foreign.get(channelId) !== true && translateScanChannel(channelId)) bump(n => n + 1);
+            };
+            check();
+            msgStore.addChangeListener(check);
+            return () => msgStore.removeChangeListener(check);
+        }, [channelId, settings.translate, settings.translateMode, settings.translateAsk, settings.translateTarget, settings.translateLanguage]);
         const s = useThemed("translateBar", c => ({
             bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW,
                 borderColor:c.BORDER_SUBTLE}),
             text:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND}, muted:{color:c.TEXT_MUTED}, cog:TRANSLATE_BAR_DARK.cog,
             divider:Object.assign({}, TRANSLATE_BAR_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), TRANSLATE_BAR_DARK);
-        const channelId = props.channelId;
         if (!translateBarShown(channelId)) return null;
-        const on = translate.channels.has(channelId), Press = RN.Pressable || RN.View, Text = inspectedExport(5088, "Text");
+        const on = translate.channels.has(channelId), Press = inspectedExport(6185, "PressableOpacity") || RN.TouchableOpacity || RN.Pressable || RN.View, Text = inspectedExport(5088, "Text");
         const Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
         const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
         const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
         // Only the pill takes touches: the rest of the header row lets taps through to the chat.
-        return el(RN.View, {pointerEvents:"box-none", style:{alignItems:"center"}}, popIn("bar", el(RN.View, {style:s.bar},
+        return el(RN.View, {pointerEvents:"box-none", style:{alignItems:"center", zIndex:100}}, popIn("bar", el(RN.View, {style:s.bar},
             el(Press, {style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1},
                 accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap, hitSlop:{top:6, bottom:6}},
                 el(Lang, {size:"xs", color:on ? s.muted.color : s.text.color}),
@@ -10476,7 +10536,7 @@
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
             case 5432:
-                if (features.jumpToTop || features.messageHighlight || features.noDelete) msgStore = exports.default;
+                if (features.jumpToTop || features.messageHighlight || features.noDelete || features.translate) msgStore = exports.default;
                 if (features.noDelete) {
                     exports = replaceValue(exports, "default", hookExport(hookExport(msgStore, "getMessage", retainedMessage), "getMessages", retainedMessages));
                     restoreDeleted();
