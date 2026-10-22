@@ -7453,11 +7453,12 @@
         // With "Only when you ask", only messages set to true are translated.
         choice:new Map(), asked:new Set(),
         // Chats translated as a whole from the translate bar (#82), in "Only when you ask". A message's own choice still wins.
-        // Only while you're in the chat: leaving it (the chat closes) shows it as written again, with the bar back.
+        // Like Telegram: kept while Discord is open, so leaving and coming back still translates. Never saved, so after
+        // Discord restarts every chat asks again.
         channels:new Set(),
         // Chats with a message you could translate: one Google already said isn't in your language. Only those show the bar.
         foreign:new Map()};
-    const TRANSLATE_CHOICES = 1000, TRANSLATE_FOREIGN = 200;
+    const TRANSLATE_CHOICES = 1000, TRANSLATE_FOREIGN = 200, TRANSLATE_CHANNELS = 200;
     // What a message does when you haven't chosen for it: translated, unless you only translate when you ask and its chat isn't on.
     function translateDefault(channelId) { return settings.translateMode !== "manual" || translateChatOn(channelId); }
     // A chat you translated from the bar. Only while the bar is one of the ways you ask, so choosing "Message menu" never
@@ -7533,7 +7534,10 @@
     // The translate bar: translate a whole chat, or show it as written again. Every row on screen from it is redrawn.
     function translateChannel(channelId, on) {
         if (!channelId || translate.channels.has(channelId) === !!on) return;
-        if (on) translate.channels.add(channelId); else translate.channels.delete(channelId);
+        if (on) {
+            if (translate.channels.size >= TRANSLATE_CHANNELS) translate.channels.delete(translate.channels.values().next().value);
+            translate.channels.add(channelId);
+        } else translate.channels.delete(channelId);
         notify("translate");
         const ids = new Set();
         translate.shown.forEach((entry, id) => { if (entry.channelId === channelId) ids.add(id); });
@@ -8173,9 +8177,9 @@
                     watching ? storyStrip(k, s, story) : null)}));
     }
     // The translate bar (#82), like Telegram's: in "Only when you ask", a slim bar appears at the top of a chat once a
-    // message in it is in another language. Tap it to translate every message on screen and every one you see while
-    // you're in the chat; tap again to show it as written. Leave the chat and it's as written again, with the bar back.
-    // Single messages still have Translate and Show original in their menu. The cog opens these settings.
+    // message in it is in another language. Tap it to translate the chat, and every message you see in it; the bar
+    // stays, so one more tap shows it as written. The chat stays translated when you leave and come back, until
+    // Discord restarts. Single messages still have Translate and Show original in their menu. The cog opens these settings.
     function translateBarHeader(orig, self, args) {
         const props = args[0];
         // The bar is always in the tree and draws nothing unless it's wanted, so switching options never remounts the chat.
@@ -8185,9 +8189,12 @@
         const next = Object.assign({}, props, {stickyHeader:header});
         return args.length === 1 ? orig.call(self, next) : orig.apply(self, [next].concat(Array.prototype.slice.call(args, 1)));
     }
-    const TRANSLATE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", marginHorizontal:8, marginTop:6, marginBottom:2, minHeight:38,
-        paddingLeft:14, paddingRight:4, borderRadius:19, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#3f414766"},
-        text:{color:"#949cf7"}, muted:{color:"#949ba4"}, cog:{width:32, height:32, borderRadius:16, alignItems:"center", justifyContent:"center"}};
+    // 32 dp tall, a soft pill a little in from the edges: about as much of the chat as Discord's own New messages bar.
+    const TRANSLATE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", alignSelf:"center", marginHorizontal:12, marginTop:6, marginBottom:4,
+        height:32, paddingLeft:12, paddingRight:2, borderRadius:16, backgroundColor:"#2b2d31f2", borderWidth:1, borderColor:"#ffffff14",
+        shadowColor:"#000000", shadowOpacity:0.18, shadowRadius:6, shadowOffset:{width:0, height:2}, elevation:2},
+        text:{color:"#949cf7"}, muted:{color:"#b5bac1"}, cog:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"},
+        divider:{width:1, height:16, marginHorizontal:6, backgroundColor:"#ffffff1f"}};
     function translateBarShown(channelId) {
         return enabled("translate") && settings.translateMode === "manual" && settings.translateAsk !== "menu" && !!channelId && !hiddenChannel(channelId) &&
             (translate.channels.has(channelId) || translate.foreign.get(channelId) === true);
@@ -8195,24 +8202,26 @@
     function TranslateBar(props) {
         useSettings("translate");
         const s = useThemed("translateBar", c => ({
-            bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
-            text:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND}, muted:{color:c.TEXT_MUTED}, cog:TRANSLATE_BAR_DARK.cog}), TRANSLATE_BAR_DARK);
+            bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW,
+                borderColor:c.BORDER_SUBTLE}),
+            text:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND}, muted:{color:c.TEXT_MUTED}, cog:TRANSLATE_BAR_DARK.cog,
+            divider:Object.assign({}, TRANSLATE_BAR_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), TRANSLATE_BAR_DARK);
         const channelId = props.channelId;
-        // Leaving the chat (it closes) shows it as written again, so coming back offers the bar again.
-        React.useEffect(() => () => { if (translate.channels.has(channelId)) translateChannel(channelId, false); }, [channelId]);
         if (!translateBarShown(channelId)) return null;
         const on = translate.channels.has(channelId), Press = RN.Pressable || RN.View, Text = inspectedExport(5088, "Text");
         const Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
         const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
         const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
-        return popIn("bar", el(RN.View, {style:s.bar},
-            el(Press, {style:{flex:1, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8, minHeight:36},
-                accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap},
-                el(Lang, {size:"sm", color:on ? s.muted.color : s.text.color}),
+        // Only the pill takes touches: the rest of the header row lets taps through to the chat.
+        return el(RN.View, {pointerEvents:"box-none", style:{alignItems:"center"}}, popIn("bar", el(RN.View, {style:s.bar},
+            el(Press, {style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1},
+                accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap, hitSlop:{top:6, bottom:6}},
+                el(Lang, {size:"xs", color:on ? s.muted.color : s.text.color}),
                 popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
-                    el(RN.Text, {numberOfLines:1, style:[{fontSize:14, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
+                    el(RN.Text, {numberOfLines:1, style:[{fontSize:13, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
+            el(RN.View, {style:s.divider}),
             el(Press, {style:s.cog, accessibilityRole:"button", accessibilityLabel:tr("Translate messages"), onPress:openTranslateSettings,
-                hitSlop:{top:6, bottom:6, left:6, right:6}}, el(Cog, {size:"sm", color:s.muted.color}))));
+                hitSlop:{top:6, bottom:6, left:4, right:6}}, el(Cog, {size:"xs", color:s.muted.color})))));
     }
     function openTranslateSettings() {
         haptic("SELECTION");
@@ -8279,9 +8288,9 @@
                 groupTitle("title", "How you ask"),
                 venusSegmented({key:"ask:choice", value:settings.translateAsk, disabled:!on, onChange:value => setSetting("translateAsk", value),
                     items:[{value:"both", label:tr("Both")}, {value:"bar", label:tr("Top bar")}, {value:"menu", label:tr("Message menu")}]}),
-                footnote("hint", settings.translateAsk === "bar" ? "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave. Hold a message there to see its original." :
+                footnote("hint", settings.translateAsk === "bar" ? "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original." :
                     settings.translateAsk === "menu" ? "Hold a message and tap Translate. No bar at the top of chats." :
-                    "Chats with messages in another language show a bar at the top. Tap it to translate the chat until you leave, or hold one message and tap Translate.")) : null,
+                    "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.")) : null,
             radioGroup(ui, "target", "Translate into", "translateTarget", on, [["discord", tr("Discord's language"), tr("{language}. Change it in Discord's Language settings.", {language:name("discord")}), rowIcon(12901, "ChatSmileIcon")],
                 ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6642, "MobilePhoneIcon")],
                 ["custom", tr("Another language"), translateLanguageName(settings.translateLanguage) + ".", rowIcon(15723, "LanguageIcon")]], true),
