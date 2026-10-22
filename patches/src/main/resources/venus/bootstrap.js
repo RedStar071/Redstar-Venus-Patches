@@ -3110,16 +3110,14 @@
         if (React) useSettings("gestures");
         return enabled("gestures") ? null : orig.apply(self, args);
     }
-    // Watch: Sam asks, you double-tap to reply and say you're in, Sam says it's at 6 AM, you regret it and triple-tap
-    // your message away. Try it: the same chat, with a tip pointing at what to tap next. Both follow your choices below.
-    const GESTURE_TAP_MS = 300;
+    // While on, it plays: Sam asks, you double-tap to reply and say you're in, Sam says it's at 6 AM, you regret it and
+    // triple-tap your message away. It follows your choices below.
     function GesturePreview(props) {
         useSettings("gestures");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode();
-        const blank = {mode:null, target:null, gone:false, mine:true, late:false, draft:"", pulse:null, done:{}};
-        const [state, setState] = React.useState(blank), taps = React.useRef({who:null, count:0, at:0, timer:undefined});
-        React.useEffect(() => () => { const t = taps.current; if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer); }, []);
-        const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete, watching = on && mode === "watch";
+        const s = useChatPreviewStyles(), k = usePreviewChrome();
+        const blank = {mode:null, target:null, gone:false, mine:true, late:false, draft:"", pulse:null};
+        const [state, setState] = React.useState(blank);
+        const on = props.on, own = settings.gestureOwn === "edit", triple = settings.gestureTripleDelete, watching = on;
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const pulse = who => update(st => ({pulse:{who, id:(st.pulse ? st.pulse.n + 1 : 1) + ":" + who, n:st.pulse ? st.pulse.n + 1 : 1}}));
         // The story, built from your settings: what a double-tap on your own message does, and whether triple-tap deletes.
@@ -3139,34 +3137,7 @@
                     tr(own ? "It opens for editing, so you can fix it" : "A reply to your own message opens")], [1500, () => {}]);
             return steps;
         }, [own, triple]);
-        const act = (who, count) => {
-            if (!on || watching) return;
-            if (who === "mine" && count >= 3 && triple) {
-                animateLayout(); gestureHaptic(); update(st => ({mode:"deleted", target:"mine", gone:true, done:Object.assign({}, st.done, {del:true})}));
-                later(() => { animateLayout(); update(st => st.mode === "deleted" ? {mode:null, target:null, gone:false} : {}); }, 2200, false);
-                return;
-            }
-            if (count < 2) return;
-            animateLayout(); gestureHaptic();
-            update(st => ({mode:who === "mine" && own ? "edit" : "reply", target:who, gone:false,
-                done:Object.assign({}, st.done, who === "mine" ? {own:true} : {reply:true})}));
-        };
-        // Same rule as in chat: a third tap soon after a double-tap deletes your own message instead.
-        const tap = who => {
-            if (watching) return;
-            const t = taps.current, now = Date.now();
-            t.count = t.who === who && now - t.at < GESTURE_TAP_MS * 2 ? t.count + 1 : 1; t.who = who; t.at = now;
-            if (t.timer !== undefined && global.clearTimeout) global.clearTimeout(t.timer);
-            const waitForThird = who === "mine" && triple && t.count === 2;
-            if (t.count >= 3 || (t.count === 2 && !waitForThird)) { const n = t.count; t.count = 0; act(who, n); return; }
-            if (waitForThird) t.timer = later(() => { t.timer = undefined; if (t.count === 2) { t.count = 0; act(who, 2); } }, GESTURE_TAP_MS * 2, false);
-        };
-        const switchMode = value => { setMode(value); setState(blank); };
         const Trash = venusIcon(5049, "TrashIcon"), Spine = {borderColor:k.iconMuted.color};
-        // Try it: a tip under the message to tap next, step by step, until you've tried everything your options allow.
-        const done = state.done, next = !on || watching ? null : !done.reply ? ["theirs", tr("Double-tap Sam's message to reply")] :
-            !done.own ? ["mine", tr(own ? "Now double-tap your message to edit it" : "Now double-tap your message to reply to it")] :
-            triple && !done.del ? ["mine", tr("Now tap your message three times to delete it")] : null;
         const picked = who => state.target === who && state.mode !== "deleted";
         const replyLine = who => who !== "mine" ? null : el(RN.View, {style:{flexDirection:"row", alignItems:"center", paddingHorizontal:12, paddingTop:4, marginBottom:-2}},
             el(RN.View, {style:[{width:28, height:10, marginLeft:19, marginRight:4, marginTop:6, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6}, Spine]}),
@@ -3175,26 +3146,20 @@
             el(RN.Text, {style:[s.muted, {fontWeight:"600", marginRight:4}], numberOfLines:1}, "Sam"),
             el(RN.Text, {style:[s.muted, {flex:1}], numberOfLines:1}, tr("Anyone up for a game later?")));
         const message = (who, name, color, time, text) => el(RN.View, {key:who},
-            el(Press, {onPress:() => tap(who), accessibilityRole:"button",
-                accessibilityHint:tr(who === "mine" ? (own ? "Double-tap to edit" : "Double-tap to reply") : "Double-tap to reply")},
-                el(RN.View, {style:picked(who) ? {backgroundColor:"#5865f21f"} : null},
-                    picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#5865f2"}}) : null,
-                    replyLine(who),
-                    previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who))),
-            next && next[0] === who ? previewTip(k, next[1]) : null);
+            el(RN.View, {style:picked(who) ? {backgroundColor:"#5865f21f"} : null},
+                picked(who) ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:2, backgroundColor:"#5865f2"}}) : null,
+                replyLine(who),
+                previewMessage(s, who, name, color, time, el(RN.Text, {style:s.text}, text)), tapRipple(state.pulse, who)));
         const showMine = watching ? state.mine && !state.gone : !state.gone;
-        const close = watching ? null : () => { animateLayout(); update({mode:null, target:null, gone:false, draft:""}); };
         const bar = state.mode === "deleted" ? previewBar(k, s, Trash, tr("Message deleted"), null) :
-            state.mode === "edit" ? previewBar(k, s, null, tr("Editing message"), close) :
-            state.mode === "reply" ? previewBar(k, s, null, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), close, "bar", true) : null;
-        const allDone = on && !watching && !next && done.reply;
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, switchMode) : null,
+            state.mode === "edit" ? previewBar(k, s, null, tr("Editing message"), null) :
+            state.mode === "reply" ? previewBar(k, s, null, tr("Replying to {name}", {name:state.target === "mine" ? tr("You") : "Sam"}), null, "bar", true) : null;
+        return el(RN.View, {key:"preview"},
             previewScreen(s, "chat", "Tap gestures preview", [
                 message("theirs", "Sam", "#eb459e", tr("Today at 4:01 PM"), tr("Anyone up for a game later?")),
                 showMine ? message("mine", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("I'm in!")) : null,
                 watching && state.late ? el(RN.View, {key:"late"}, popIn("late", previewMessage(s, "late", "Sam", "#eb459e", tr("Today at 4:03 PM"),
-                    el(RN.Text, {style:s.text}, tr("Great, it starts at 6 AM!"))))) : null,
-                allDone ? previewTip(k, tr("That's everything. Double-tap again any time.")) : null],
+                    el(RN.Text, {style:s.text}, tr("Great, it starts at 6 AM!"))))) : null],
                 {header:previewHeader(k, {title:"general"}),
                  footer:el(RN.View, {key:"foot"}, previewInput(k, s, {bar, text:state.draft, placeholder:tr("Message {channel}", {channel:"#general"})}),
                     watching ? storyStrip(k, s, story) : null)}));
@@ -3870,13 +3835,6 @@
         return ref.current ? el(A.View, {style:ref.current.style, pointerEvents:"none"}, props.children) : props.children;
     }
     function popIn(key, child) { return child ? el(PopIn, {key}, child) : child; }
-    // Every preview can be watched or tried. Watch plays a short story of the feature on a loop; Try it lets you tap the
-    // preview yourself. The choice is shared by every page until Discord restarts, so you only pick it once.
-    let previewModeChoice = "watch";
-    function usePreviewMode() {
-        const [mode, setMode] = React.useState(previewModeChoice);
-        return [mode, value => { previewModeChoice = value; animateLayout(); setMode(value); }];
-    }
     // Steps that type text into a preview's message box one letter at a time.
     function typeSteps(text, set, ms) { return Array.from(text).map((_, i) => [ms || 70, () => set(text.slice(0, i + 1))]); }
     // Where the demo's finger taps: a soft circle that grows and fades once each time it mounts (key it on the tap).
@@ -3896,28 +3854,10 @@
             transform:[{scale:ref.current.interpolate({inputRange:[0, 1], outputRange:[0.5, 1.7]})}]}]});
     }
     function tapRipple(pulse, who, at) { return pulse && pulse.who === who ? el(TapRipple, {key:"tap:" + pulse.id, at}) : null; }
-    const PREVIEW_TOGGLE_DARK = {wrap:{flexDirection:"row", alignSelf:"flex-end", padding:3, gap:3, borderRadius:16, backgroundColor:"#1e1f22", marginHorizontal:12, marginBottom:4},
-        on:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13, backgroundColor:"#4e5058"},
-        off:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:10, paddingVertical:5, borderRadius:13}};
-    // The small Watch / Try it switch at the top of a preview, in Discord's segmented-control colors. Its own component,
-    // so a preview can show it only while the feature is on without changing the preview's hooks.
-    function previewToggle(mode, setMode) { return el(PreviewToggle, {key:"toggle", mode, setMode}); }
-    function PreviewToggle(props) {
-        const mode = props.mode, setMode = props.setMode;
-        const s = useThemed("previewToggle", c => ({wrap:Object.assign({}, PREVIEW_TOGGLE_DARK.wrap, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND}),
-            on:Object.assign({}, PREVIEW_TOGGLE_DARK.on, {backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}), off:PREVIEW_TOGGLE_DARK.off}), PREVIEW_TOGGLE_DARK);
-        const Text = inspectedExport(5088, "Text"), Press = RN.Pressable || RN.View;
-        const pill = (value, label, Icon) => el(Press, {key:value, style:mode === value ? s.on : s.off, accessibilityRole:"button", accessibilityLabel:tr(label),
-            accessibilityState:{selected:mode === value}, onPress:() => { if (mode !== value) setMode(value); }, hitSlop:{top:6, bottom:6, left:4, right:4}},
-            el(Icon, {size:"xxs", color:mode === value ? undefined : "#949ba4"}),
-            Text ? el(Text, {variant:"text-xs/semibold", color:mode === value ? "interactive-text-active" : "text-muted"}, tr(label)) :
-                el(RN.Text, {style:{fontSize:12, fontWeight:"600", color:mode === value ? "#ffffff" : "#949ba4"}}, tr(label)));
-        return el(RN.View, {key:"toggle", style:s.wrap}, pill("watch", "Watch", venusIcon(8396, "PlayIcon")), pill("try", "Try it", venusIcon(11015, "HandRequestSpeakIcon")));
-    }
-    // Watch plays like a short video: a story is a list of [wait ms, step, caption?]. Each caption stays up long enough
+    // A preview that plays (Watch) is a short video: a story is a list of [wait ms, step, caption?]. Each caption stays up long enough
     // to read (storyPlan stretches the wait before the next one), the clock ticks once a second, and a bar under the
     // preview shows where it is, how long it is, and lets you pause or start over. It loops, and starts over when the
-    // options below change. Its timers end when you switch to Try it or leave the page.
+    // options below change. Its timers end when the feature is turned off or you leave the page.
     function readMs(text) { return Math.max(2400, Math.min(5000, 1500 + 55 * String(text || "").length)); }
     function storyPlan(list) {
         const out = list.filter(Boolean).map(step => step.slice());
@@ -4072,17 +4012,6 @@
             onClose ? el(Press, {onPress:onClose, accessibilityRole:"button", accessibilityLabel:tr("Cancel"), hitSlop:{top:8, bottom:8, left:8, right:8}},
                 el(X, {size:"xs", color:k.icon.color})) : null);
     }
-    // A Discord tooltip pointing at what to tap in Try it: the brand color, white text and a small arrow.
-    function previewTip(k, text, side) {
-        if (!text) return null;
-        const down = side === "down";
-        return el(RN.View, {key:"tip", style:{alignItems:"flex-start", paddingHorizontal:16, paddingTop:down ? 0 : 6, paddingBottom:down ? 6 : 0}},
-            popIn("tip:" + text, el(RN.View, null,
-                down ? null : el(RN.View, {style:[k.brand, {width:10, height:10, marginLeft:22, marginBottom:-5, transform:[{rotate:"45deg"}]}]}),
-                el(RN.View, {style:[k.brand, {borderRadius:8, paddingHorizontal:12, paddingVertical:8, maxWidth:300}]},
-                    el(RN.Text, {style:[k.brandText, {fontSize:14, fontWeight:"600"}]}, text)),
-                down ? el(RN.View, {style:[k.brand, {width:10, height:10, marginLeft:22, marginTop:-5, transform:[{rotate:"45deg"}]}]}) : null)));
-    }
     // A preview's surface: Discord's chat colors, its header on top, and Watch's player strip at the bottom.
     function previewScreen(s, key, label, children, extra) {
         return el(RN.View, {key, style:[s.chat, {paddingVertical:0}], accessible:false, accessibilityLabel:tr(label)},
@@ -4128,7 +4057,7 @@
                 el(RN.Text, {style:[s.muted, {fontSize:12, minWidth:72, textAlign:"right"}]}, clockText(story.t) + " / " + clockText(story.total)),
                 button("again", Again, "Start over", story.replay)));
     }
-    // A muted line under a preview: what's happening in Watch, what to tap in Try it.
+    // A muted line under a preview.
     function previewCaption(s, text) {
         return text ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, popIn("cap:" + text, el(RN.Text, {style:s.muted}, text))) : null;
     }
@@ -4367,10 +4296,9 @@
     function count(n,word) { return pl(n,"{n} "+word,"{n} "+word+"s"); }
     // Settings page: Discord's own radio list (TableRadioGroup 6263 / TableRadioRow 6262).
     // Hidden channels: one choice, whether tapping a locked channel shows its details or does nothing.
-    // The locked channel in the preview: pressable like a real row, and it gives a small shake when tapping does nothing
-    // (each time props.shake goes up).
+    // The locked channel in the preview: it gives a small shake when tapping does nothing (each time props.shake goes up).
     function HiddenPreviewRow(props) {
-        const A = motion(), ref = React.useRef(null), Press = RN.Pressable || RN.View;
+        const A = motion(), ref = React.useRef(null);
         if (!ref.current && A) ref.current = new A.Value(0);
         React.useEffect(() => {
             const value = ref.current;
@@ -4382,19 +4310,19 @@
         }, [props.shake]);
         const row = {flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingVertical:7, marginHorizontal:8, borderRadius:8};
         const style = ref.current ? [row, {transform:[{translateX:ref.current.interpolate({inputRange:[-1, 1], outputRange:[-6, 6]})}]}] : row;
-        return el(Press, {onPress:props.onPress, accessibilityRole:"button", accessibilityLabel:props.label + ", " + tr("locked")},
+        return el(RN.View, {accessibilityLabel:props.label + ", " + tr("locked")},
             el(ref.current ? A.View : RN.View, {style}, props.children), props.ripple || null);
     }
     // A server's channel list the way Discord draws it: the server name, a category and its channels, the locked one with
-    // Discord's own # and lock icon. Watch: scrolling past it opens nothing, then a tap opens its details in Discord's
-    // dialog (or nothing at all, when details are off). Try it: tap it yourself and Discord's real dialog opens.
+    // Discord's own # and lock icon. While on, it plays: scrolling past it opens nothing, then a tap opens its details in
+    // Discord's dialog (or nothing at all, when details are off).
     const HIDDEN_SAMPLE = {id:"1180000000000000000", guild_id:"1", type:0, name:"staff-only", lastMessageId:"1290000000000000000"};
     function HiddenChannelsPreview(props) {
         useSettings("hiddenChannels");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on, menu = settings.hiddenChannelsMenu;
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = props.on, menu = settings.hiddenChannelsMenu;
         const Hash = venusIcon(15892, "HashmarkIcon"), TextLock = venusIcon(8201, "TextLockIcon"), Down = venusIcon(10534, "ChevronSmallDownIcon");
-        const blank = {shake:0, pulse:null, card:false, scroll:0, tried:false};
-        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const blank = {shake:0, pulse:null, card:false, scroll:0};
+        const [state, setState] = React.useState(blank), watching = on;
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const shake = () => update(st => ({shake:st.shake + 1}));
         const story = useStory(watching, () => [[0, () => setState(blank), tr("Locked channels show in the list with a lock, like staff-only here")],
@@ -4404,9 +4332,8 @@
             [400, () => { if (menu) { animateLayout(); update({card:true}); } else shake(); },
                 menu ? tr("You see when it was made and last used. View Anyway would open it") : tr("Nothing happens: you turned its details off")],
             [3000, () => { animateLayout(); update({card:false}); }], [600, () => {}]], [menu]);
-        const tapLocked = () => { if (!on || watching) return; update({tried:true}); if (menu) showHidden(HIDDEN_SAMPLE); else shake(); };
         const channel = (name, locked, selected) => el(locked ? HiddenPreviewRow : RN.View, locked ?
-            {key:name, onPress:tapLocked, label:name, shake:state.shake, ripple:tapRipple(state.pulse, "locked", {right:40, top:2})} :
+            {key:name, label:name, shake:state.shake, ripple:tapRipple(state.pulse, "locked", {right:40, top:2})} :
             {key:name, style:[{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingVertical:7, marginHorizontal:8, borderRadius:8},
                 selected ? k.selected : null]},
             el(locked ? TextLock : Hash, {size:"sm", color:selected ? s.name.color : locked ? k.iconMuted.color : k.channel.color}),
@@ -4424,8 +4351,6 @@
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:16, paddingVertical:6}},
                 el(Down, {size:"xxs", color:k.category.color}), el(RN.Text, {style:k.category}, tr("Text channels").toUpperCase())),
             channel("general", false, true), on ? channel("staff-only", true) : null, channel("memes", false), channel("clips", false));
-        const tip = on && !watching ? previewTip(k, !state.tried ? tr(menu ? "Tap staff-only to see its details" : "Tap staff-only: nothing will open") :
-            tr(menu ? "That's the dialog you'll see in Discord" : "Tapping a locked channel now does nothing")) : null;
         const Chevron = venusIcon(6906, "ChevronSmallRightIcon"), Search = venusIcon(6740, "MagnifyingGlassIcon");
         const server = el(RN.View, {key:"server", style:[k.header, {height:52, paddingHorizontal:16}]},
             el(RN.View, {style:{flex:1, flexDirection:"row", alignItems:"center", gap:4}},
@@ -4433,8 +4358,8 @@
                 el(Chevron, {size:"xxs", color:k.iconMuted.color})),
             el(RN.View, {style:k.headerPill}, el(Search, {size:"sm", color:k.icon.color})),
             el(RN.View, {style:k.headerPill}, el(venusIcon(9237, "MoreHorizontalIcon"), {size:"sm", color:k.icon.color})));
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
-            previewScreen(s, "preview", "Hidden channels preview", [el(RN.View, {key:"body", style:{minHeight:210, overflow:"hidden"}}, list, card), tip],
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Hidden channels preview", [el(RN.View, {key:"body", style:{minHeight:210, overflow:"hidden"}}, list, card)],
                 {header:server, footer:watching ? storyStrip(k, s, story) : null}));
     }
     function HiddenChannelsSettings() {
@@ -4451,32 +4376,26 @@
         return settingsBody(ui,groups);
     }
     // Server info's preview is the server list as Discord draws it: hold a server's icon, its menu opens with Server info
-    // as the last row, and a tap shows the sheet with the sample server's details. Watch plays that; Try it lets you do it.
+    // as the last row, and a tap shows the sheet with the sample server's details. It plays while the feature is on.
     const SERVER_SAMPLES = [["GN", "#5865f2", "Game Night"], ["AR", "#3ba55c", "Art Club"], ["WD", "#eb459e", "Wumpus Den"]];
     const SERVER_SAMPLE_FRIENDS = [{id:"a", username:"Alex"}, {id:"b", username:"Sam"}, {id:"c", username:"Jordan"}];
     function ServerInfoPreview(props) {
         useSettings("serverInfo");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), si = useServerInfoStyles(), [mode, setMode] = usePreviewMode(), on = props.on;
-        const blank = {held:false, menu:false, sheet:false, pulse:null, picked:false, tried:0};
-        const [state, setState] = React.useState(blank), watching = on && mode === "watch";
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), si = useServerInfoStyles(), on = props.on;
+        const blank = {held:false, menu:false, sheet:false, pulse:null, picked:false, n:0};
+        const [state, setState] = React.useState(blank), watching = on;
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
         const friends = settings.serverInfoFriends;
         const story = useStory(watching, () => [[0, () => setState(blank), tr("Hold a server's icon in the server list")],
-            [900, () => update(st => ({held:true, pulse:{who:"icon", id:"hold" + (st.tried + 1)}}))],
+            [900, () => update(st => ({held:true, pulse:{who:"icon", id:"hold" + (st.n + 1)}, n:st.n + 1}))],
             [500, () => { animateLayout(); update({menu:true}); }, tr("Its menu opens, with Server info at the bottom")],
             [1600, () => update({picked:true, pulse:{who:"row", id:"row"}}), tr("Tap Server info")],
             [400, () => { animateLayout(); update({menu:false, held:false, sheet:true, picked:false}); },
                 tr(friends ? "Live details, boosts, the owner and which friends are there" : "Live details, boosts and the owner, with friends Discord has loaded")],
             [3600, () => { animateLayout(); update({sheet:false}); }], [600, () => {}]], [friends]);
-        const Press = RN.Pressable || RN.View;
-        const hold = () => { if (!on || watching) return; haptic("IMPACT_MEDIUM"); animateLayout();
-            update(st => ({held:true, menu:true, sheet:false, tried:Math.max(st.tried, 1), pulse:{who:"icon", id:"try" + st.tried}})); };
-        const pick = () => { if (!on || watching) return; haptic("SELECTION"); animateLayout(); update({menu:false, held:false, sheet:true, tried:2}); };
-        const closeAll = () => { if (watching) return; animateLayout(); update({menu:false, held:false, sheet:false}); };
         const icon = ([letters, color, name], i) => {
             const first = i === 0, held = first && state.held;
-            return el(Press, {key:letters, onLongPress:first ? hold : undefined, delayLongPress:300, accessibilityRole:"button", accessibilityLabel:name,
-                style:{alignItems:"center", justifyContent:"center", width:64, height:56}},
+            return el(RN.View, {key:letters, accessibilityLabel:name, style:{alignItems:"center", justifyContent:"center", width:64, height:56}},
                 held ? el(RN.View, {style:{position:"absolute", left:0, width:4, height:36, borderTopRightRadius:4, borderBottomRightRadius:4, backgroundColor:s.name.color}}) : null,
                 el(RN.View, {style:{width:44, height:44, borderRadius:held ? 14 : 22, backgroundColor:color, alignItems:"center", justifyContent:"center",
                     transform:held ? [{scale:0.92}] : []}},
@@ -4490,13 +4409,12 @@
                 paddingVertical:6, marginHorizontal:6, borderRadius:8}, i === 0 ? k.selected : null]},
                 el(venusIcon(15892, "HashmarkIcon"), {size:"xs", color:k.channel.color}),
                 el(RN.Text, {style:[s.text, {fontSize:14, color:i === 0 ? s.name.color : k.channel.color}]}, name))));
-        const menuRow = (key, label, Icon, highlight) => el(highlight ? Press : RN.View, Object.assign({key, style:[{flexDirection:"row", alignItems:"center", gap:12,
+        const menuRow = (key, label, Icon, highlight) => el(RN.View, {key, style:[{flexDirection:"row", alignItems:"center", gap:12,
             paddingHorizontal:14, paddingVertical:10}, highlight && state.picked ? k.selected : null]},
-            highlight ? {onPress:pick, accessibilityRole:"button", accessibilityLabel:label} : null),
             el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {flex:1, fontSize:15}]}, label),
             highlight ? tapRipple(state.pulse, "row", {right:24, top:4}) : null);
         const overlay = (key, child) => el(RN.View, {key, style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"flex-end"}]},
-            el(Press, {style:{flex:1}, onPress:closeAll, accessibilityLabel:tr("Cancel")}), child);
+            el(RN.View, {style:{flex:1}}), child);
         // Discord's own rows in that menu, then ours, the way they really show.
         const menu = state.menu ? overlay("menu", popIn("menu", el(RN.View, {style:[k.sheet, {paddingHorizontal:8, paddingBottom:8}]},
             el(RN.View, {style:[k.sheetRow, {borderRadius:16, borderWidth:1, overflow:"hidden"}]},
@@ -4525,11 +4443,9 @@
                 friends ? avatarPile(SERVER_SAMPLE_FRIENDS, si.ring.borderColor) : el(venusIcon(4815, "FriendsIcon"), {size:"sm"}),
                 el(RN.Text, {style:[s.text, {flex:1, fontSize:14}]}, serverCount(friends ? 3 : 1, "{n} friend here", "{n} friends here")),
                 el(venusIcon(10262, "CrownIcon"), {size:"xs", color:"#f0b232"}))))) : null;
-        const tip = on && !watching ? previewTip(k, state.tried === 0 ? tr("Hold the Game Night icon") : state.menu ? tr("Tap Server info") :
-            state.sheet ? tr("That's the sheet you'll see in Discord. Tap outside it to close") : tr("Hold the icon again to reopen it")) : null;
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
+        return el(RN.View, {key:"preview"},
             previewScreen(s, "preview", "Server info preview",
-                [el(RN.View, {key:"body", style:{minHeight:236, flexDirection:"row", overflow:"hidden"}}, rail, channels, menu, sheet), tip],
+                [el(RN.View, {key:"body", style:{minHeight:236, flexDirection:"row", overflow:"hidden"}}, rail, channels, menu, sheet)],
                 {footer:watching ? storyStrip(k, s, story) : null}));
     }
     function ServerInfoSettings() {
@@ -4588,17 +4504,16 @@
         return el(ref.current ? A.View : RN.View, {style:motionStyle}, art);
     }
     // The message as everyone sees it: just the emoji or sticker, the way chat shows a link to one.
-    // Watch: you tap the emoji button in the message bar, pick a Nitro emoji from another server (unlocked by Venus, so
-    // there's no lock icon on it), it's sent and everyone sees it; then the same with a sticker. Try it: send one yourself.
+    // While on, it plays: you tap the emoji button in the message bar, pick a Nitro emoji from another server (unlocked
+    // by Venus, so there's no lock icon on it), it's sent and everyone sees it; then the same with a sticker.
     function NitroPicker(props) {
-        const k = props.k, s = props.s, Press = RN.Pressable || RN.View, Down = venusIcon(10534, "ChevronSmallDownIcon"),
+        const k = props.k, s = props.s, Down = venusIcon(10534, "ChevronSmallDownIcon"),
             Search = venusIcon(6740, "MagnifyingGlassIcon"), Nitro = venusIcon(9031, "NitroWheelIcon"),
             Smile = venusIcon(8956, "ReactionIcon"), Sticker = venusIcon(12274, "StickerIcon"), Backspace = venusIcon(9578, "BackspaceIcon");
-        const kinds = props.kinds, tab = props.tab, item = NITRO_SAMPLES[tab], canSwitch = kinds.length > 1;
+        const kinds = props.kinds, tab = props.tab, item = NITRO_SAMPLES[tab];
         const tabPill = (kind, label, enabledTab) => {
             const active = tab === kind;
-            return el(Press, {key:kind, onPress:enabledTab && props.onTab ? () => props.onTab(kind) : undefined,
-                disabled:!enabledTab || !props.onTab, accessibilityRole:"tab", accessibilityState:{selected:active, disabled:!enabledTab},
+            return el(RN.View, {key:kind, accessibilityRole:"tab", accessibilityState:{selected:active, disabled:!enabledTab},
                 style:[{flex:1, paddingVertical:6, borderRadius:16, alignItems:"center", opacity:enabledTab ? 1 : 0.45}, active ? k.segIndicator : null]},
                 el(RN.Text, {style:[active ? {color:s.name.color} : s.muted, {fontWeight:"600", fontSize:13}]}, label));
         };
@@ -4617,7 +4532,7 @@
                 el(RN.Text, {style:k.category}, tr("Game Night").toUpperCase()),
                 el(Nitro, {size:"xxs", color:k.brandFg.color})),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, flexWrap:"wrap", paddingHorizontal:12, paddingBottom:4}},
-                el(Press, {key:"nitro", onPress:props.onPick, accessibilityRole:"button", accessibilityLabel:item.name, accessibilityHint:tr("Tap to send it"),
+                el(RN.View, {key:"nitro", accessibilityLabel:item.name,
                     style:[{padding:6, borderRadius:10, borderWidth:1.5, borderColor:k.brandFg.color + "66", backgroundColor:k.brandFg.color + "14"}, props.highlight ? k.selected : null]},
                     el(RN.View, {style:{width:tab === "emoji" ? 33 : 64, height:tab === "emoji" ? 33 : 64, alignItems:"center", justifyContent:"center"}},
                         RN.Image ? el(RN.Image, {source:{uri:item.res, width:tab === "emoji" ? 33 : 64, height:tab === "emoji" ? 33 : 64},
@@ -4631,25 +4546,22 @@
                     el(RN.Text, {style:{color:s.name.color, fontSize:12, fontWeight:"700"}}, "G")),
                 el(tab === "emoji" ? Smile : Sticker, {size:"xs", color:k.iconMuted.color}),
                 el(RN.View, {style:{flex:1}}),
-                canSwitch && props.onTab ? el(Press, {onPress:() => props.onTab(tab === "emoji" ? "sticker" : "emoji"), accessibilityRole:"button",
-                    accessibilityLabel:tr(tab === "emoji" ? "Stickers" : "Emojis"), hitSlop:{top:8, bottom:8, left:8, right:8}},
-                    el(tab === "emoji" ? Sticker : Smile, {size:"xs", color:k.icon.color})) : null,
                 tab === "emoji" ? el(Backspace, {size:"xs", color:k.icon.color}) : null));
     }
     function NitroPreview(props) {
         useSettings("freeNitro");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), [mode, setMode] = usePreviewMode(), on = props.on;
-        const blank = {pick:0, sent:[], picker:null, open:true, pulse:null, tried:{}};
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = props.on;
+        const blank = {pick:0, sent:[], picker:null, pulse:null};
         const kinds = [settings.emojis && "emoji", settings.stickers && "sticker"].filter(Boolean);
-        const [state, setState] = React.useState(blank), watching = on && kinds.length > 0 && mode === "watch";
+        const [state, setState] = React.useState(blank), watching = on && kinds.length > 0;
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
-        const send = kind => update(st => ({picker:null, open:false, pulse:null, pick:st.pick + 1, sent:st.sent.concat([kind]).slice(-2), tried:Object.assign({}, st.tried, {[kind]:true})}));
+        const send = kind => update(st => ({picker:null, pulse:null, pick:st.pick + 1, sent:st.sent.concat([kind]).slice(-2)}));
         const link = settings.hyperlinks ? tr("a short link") : tr("a link");
         const story = useStory(watching, () => {
-            const steps = [[0, () => setState(Object.assign({}, blank, {open:false}))]];
+            const steps = [[0, () => setState(blank)]];
             kinds.forEach((kind, i) => {
                 steps.push([i ? 600 : 900, () => update({pulse:{who:"smile", id:kind}}), tr(kind === "emoji" ? "You open the emoji picker" : i ? "Then you open the sticker picker" : "You open the sticker picker")],
-                    [400, () => { animateLayout(); update({picker:kind, open:true}); }],
+                    [400, () => { animateLayout(); update({picker:kind}); }],
                     [1400, () => update({pulse:{who:"pick", id:"p" + kind}}), tr(kind === "emoji" ? "You pick a Nitro emoji from another server. Venus unlocks it so there's no lock" :
                         "You pick a Nitro sticker. Venus unlocks it too")],
                     [500, () => { animateLayout(); send(kind); }, tr(kind === "emoji" ? "Venus sends it as {link}, and everyone sees the emoji" : "It's sent as {link} too, and everyone sees the sticker", {link})],
@@ -4657,36 +4569,21 @@
             });
             return steps;
         }, [settings.emojis, settings.stickers, settings.hyperlinks]);
-        // Try it: the picker opens under the chat; tap the unlocked Nitro emoji or sticker (or the emoji button in the message bar) to send it.
-        const tab = watching ? state.picker : on && kinds.length && state.open ? (state.picker && kinds.includes(state.picker) ? state.picker : kinds[0]) : null;
-        const messages = state.sent.map((kind, i) => el(RN.View, {key:"msg" + state.pick + ":" + i}, popIn("msg" + i + kind + state.pick,
+        // Not playing (off, or nothing to send as links): the finished chat, so the page still shows what it does.
+        const tab = watching ? state.picker : null, sent = watching ? state.sent : kinds.length ? kinds : ["emoji"];
+        const messages = sent.map((kind, i) => el(RN.View, {key:"msg" + state.pick + ":" + i}, popIn("msg" + i + kind + state.pick,
             previewMessage(s, "m" + i, tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{alignItems:"flex-start", paddingTop:2}},
                 el(NitroArt, {key:kind, kind, item:NITRO_SAMPLES[kind], play:state.pick}))))));
-        const sample = state.sent.length || watching ? null : el(RN.View, {key:"empty", style:{paddingHorizontal:16, paddingVertical:20}},
-            el(RN.Text, {style:[s.muted, {textAlign:"center"}]}, tr("Nothing sent yet")));
-        const last = state.sent[state.sent.length - 1], item = last && NITRO_SAMPLES[last];
+        const last = sent[sent.length - 1], item = last && NITRO_SAMPLES[last];
         const sentAs = item ? el(RN.View, {key:"sent", style:{paddingHorizontal:16, paddingBottom:4}},
             el(RN.Text, {style:s.muted, numberOfLines:1}, tr("Sent as {link}", {link:settings.hyperlinks ? "[" + item.name + "](\u2026)" :
                 last === "emoji" ? "https://cdn.discordapp.com/emojis/\u2026.gif" : "https://media.discordapp.net/stickers/\u2026.png"}))) : null;
-        const picker = tab ? el(NitroPicker, {key:"picker", k, s, kinds, tab, pulse:state.pulse, highlight:watching && state.pulse && state.pulse.who === "pick",
-            onTab:watching ? null : kind => { animateLayout(); update({picker:kind, open:true}); },
-            onPick:watching ? null : () => { animateLayout(); send(tab); }}) : null;
-        const remaining = kinds.filter(kind => !state.tried[kind]);
-        const tip = on && !watching && kinds.length ? previewTip(k, !tab ?
-            tr(remaining.length ? "Tap the emoji button in the message bar to try a sticker" : "That's how everyone sees it. Tap the emoji button to send more") :
-            remaining.length === kinds.length ? tr(tab === "emoji" ? "Tap the Nitro emoji below to send it as a link" : "Tap the Nitro sticker below to send it as a link") :
-            remaining.length ? tr(tab === remaining[0] ? (tab === "sticker" ? "Tap the Nitro sticker below to send it as a link" : "Tap the Nitro emoji below to send it as a link") :
-                remaining[0] === "sticker" ? "Now try a sticker: tap Stickers, then the Nitro sticker" : "Now try an emoji: tap Emojis, then the Nitro emoji") :
-            tr("That's how everyone sees it. You can send more"), "down") : null;
-        const togglePicker = on && !watching && kinds.length ? () => {
-            animateLayout();
-            update(st => ({open:!st.open, picker:!st.open ? (remaining[0] || st.picker || kinds[0]) : st.picker}));
-        } : null;
-        return el(RN.View, {key:"preview"}, on && kinds.length ? previewToggle(mode, value => { setMode(value); setState(blank); }) : null,
-            previewScreen(s, "preview", "Nitro link preview", [el(RN.View, {key:"chat", style:{minHeight:watching ? 140 : 96}}, messages.length ? messages : sample), sentAs],
+        const picker = tab ? el(NitroPicker, {key:"picker", k, s, kinds, tab, pulse:state.pulse, highlight:state.pulse && state.pulse.who === "pick"}) : null;
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Nitro link preview", [el(RN.View, {key:"chat", style:{minHeight:watching ? 140 : 96}}, messages), sentAs],
                 {header:previewHeader(k, {title:"general"}),
-                 footer:el(RN.View, {key:"foot"}, tip, previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"}),
-                    pickerOpen:!!tab, onSmile:togglePicker, smileRipple:tapRipple(state.pulse, "smile", {left:-7, top:-7})}),
+                 footer:el(RN.View, {key:"foot"}, previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"}),
+                    pickerOpen:!!tab, smileRipple:tapRipple(state.pulse, "smile", {left:-7, top:-7})}),
                     picker, watching ? storyStrip(k, s, story) : null)}));
     }
     function FreeNitroSettings() {
@@ -4751,7 +4648,7 @@
             if (id === siteId) return;
             haptic("SELECTION"); animateLayout(); setSiteId(id); setState(blank);
         };
-        const Play = venusIcon(8396, "PlayIcon"), Picture = venusIcon(8210, "ImageIcon");
+        const Press = RN.Pressable || RN.View, Play = venusIcon(8396, "PlayIcon"), Picture = venusIcon(8210, "ImageIcon");
         const media = el(RN.View, {style:{height:118, borderRadius:8, marginTop:8, overflow:"hidden", backgroundColor:site.color, alignItems:"center", justifyContent:"center"}},
             el(RN.View, {style:{position:"absolute", left:0, right:0, bottom:0, height:59, backgroundColor:"#00000040"}}),
             el(RN.View, {style:{position:"absolute", right:-24, top:-24, width:96, height:96, borderRadius:48, backgroundColor:"#ffffff1f"}}),
@@ -8595,9 +8492,8 @@
             (waiting ? " " + tr("{n} waiting.", {n:waiting}) : "");
     }
     // A message in Spanish shown the way Translate messages shows it, following the Display switches.
-    // Watch: Lucía writes in Spanish and it turns into your language, on its own, or after you hold it and tap Translate
-    // in Discord's message menu (whichever you chose below). Try it: hold the message to open Discord's menu, then tap
-    // Translate or Show original in the menu, just like in real Discord.
+    // While on, it plays: Lucía writes in Spanish and it turns into your language on its own, from the bar, or after you
+    // hold it and tap Translate in Discord's message menu (whichever you chose below).
     const TRANSLATE_SAMPLE = "\u00a1Hola a todos! \u00bfQui\u00e9n viene esta noche?";
     // A message's long-press menu (LongPressMessageActionSheet 9675 + EmojiRow 12834): 5 quick reactions + Add Reaction, and a rounded card of actions.
     function previewSheet(k, s, rows, pulse) {
@@ -8629,9 +8525,9 @@
     }
     function TranslatePreview(props) {
         useSettings("translate");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), Press = RN.Pressable || RN.View, [mode, setMode] = usePreviewMode(), on = !!props.on;
-        const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null, tried:{}};
-        const [state, setState] = React.useState(blank), watching = on && mode === "watch", manual = settings.translateMode === "manual";
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on;
+        const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null};
+        const [state, setState] = React.useState(blank), watching = on, manual = settings.translateMode === "manual";
         // The translate bar (#82) is shown, and is how Watch asks, whenever "How you ask" includes it.
         const barAsk = manual && settings.translateAsk !== "menu";
         const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
@@ -8651,7 +8547,6 @@
             steps.push([800, () => {}]);
             return steps;
         }, [manual, barAsk, settings.translateNote, settings.translateOriginal, target]);
-        const startTry = () => Object.assign({}, blank, {done:!manual});
         const translated = on ? state.done : true;
         const Lang = venusIcon(15723, "LanguageIcon");
         const body = state.busy ? el(RN.View, null, el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE),
@@ -8662,46 +8557,23 @@
                 settings.translateNote || settings.translateOriginal ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
                 settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
-        const holdMessage = () => {
-            if (!on || watching) return;
-            update(st => ({menu:!st.menu, held:!st.menu, pulse:{who:"msg", id:"hold:" + Date.now()}}));
-        };
-        const tapMenuTranslate = () => {
-            if (!on || watching) return;
-            update(st => ({menu:false, held:false, done:!st.done, pulse:{who:"translate", id:"tr:" + Date.now()},
-                tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
-        };
-        const closeMenu = () => { if (!on || watching) return; update({menu:false, held:false}); };
-        const tapBar = () => {
-            if (!on || watching) return;
-            haptic("SELECTION");
-            update(st => ({menu:false, held:false, done:!st.done, pulse:{who:"bar", id:"bar:" + Date.now()}, tried:Object.assign({}, st.tried, st.done ? {back:true} : {tr:true})}));
-        };
-        const bar = barAsk ? previewTranslateBar(k, state.done, target, watching ? null : tapBar, state.pulse) : null;
+        const bar = barAsk ? previewTranslateBar(k, state.done, target, null, state.pulse) : null;
         const msgView = el(RN.View, {key:"msg", style:state.held ? k.selected : null},
             popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg"));
-        const message = on && !watching ? el(Press, {key:"msg", onLongPress:holdMessage, onPress:holdMessage,
-            accessibilityRole:"button", accessibilityHint:tr("Hold the message to open its menu")}, msgView) : msgView;
+        const message = msgView;
         const actionLabel = tr(state.done ? "Show original" : "Translate");
-        const doneStep1 = manual ? state.tried.tr : state.tried.back, doneStep2 = manual ? state.tried.back : state.tried.tr;
-        const tip = on && !watching ? previewTip(k, state.menu ? tr("Tap {action} in the menu", {action:actionLabel}) :
-            barAsk ? (!doneStep1 ? tr(state.done ? "Tap the bar to show the original" : "Tap the bar to translate the chat") :
-                !doneStep2 ? tr(state.done ? "Tap the bar again to show the original" : "Tap the bar again to translate it") : null) :
-            !doneStep1 ? tr(state.done ? "Hold the message to see the original" : "Hold the message to open its menu") :
-            !doneStep2 ? tr(state.done ? "Hold it again to show the original" : "Hold it again to translate it") : null,
-            state.menu ? "down" : undefined) : null;
-        const sheet = (watching || on) && state.menu ? el(RN.View, {key:"overlay", style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"flex-end"}]},
-            el(Press, {style:{flex:1}, onPress:watching ? undefined : closeMenu, accessibilityLabel:tr("Cancel")}),
+        const sheet = watching && state.menu ? el(RN.View, {key:"overlay", style:[k.scrim, {position:"absolute", left:0, right:0, top:0, bottom:0, justifyContent:"flex-end"}]},
+            el(RN.View, {style:{flex:1}}),
             popIn("sheet", previewSheet(k, s, [
-                ["reply", venusIcon(12838, "ArrowAngleLeftUpIcon"), tr("Reply"), watching ? null : closeMenu],
-                ["copy", venusIcon(5042, "CopyIcon"), tr("Copy Text"), watching ? null : closeMenu],
-                ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate]], state.pulse))) : null;
-        return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? startTry() : blank); }) : null,
+                ["reply", venusIcon(12838, "ArrowAngleLeftUpIcon"), tr("Reply"), null],
+                ["copy", venusIcon(5042, "CopyIcon"), tr("Copy Text"), null],
+                ["translate", Lang, actionLabel, null]], state.pulse))) : null;
+        return el(RN.View, {key:"preview"},
             previewScreen(s, "preview", "Translation preview",
                 // Steady while you watch or tap (#82), but taller when the original is quoted under the translation, so the quote never
-                // pushes the tip or the message bar out of the stage.
+                // pushes the message bar out of the stage.
                 [el(RN.View, {key:"stage", style:{height:settings.translateOriginal ? 256 : 228, justifyContent:"space-between", overflow:"hidden"}},
-                    el(RN.View, {key:"chat", style:{paddingTop:4}}, bar, message, !state.menu ? tip : null),
+                    el(RN.View, {key:"chat", style:{paddingTop:4}}, bar, message),
                     previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     sheet)],
                 {header:previewHeader(k, {title:"general"}),
