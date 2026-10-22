@@ -21,7 +21,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 fun main(args: Array<String>) {
-    require(args.isNotEmpty()) { "Usage: VerifyApkKt patched.apk [signed]" }
+    require(args.isNotEmpty()) { "Usage: VerifyApkKt patched.apk [signed] [--some]   (--some: not every patch was selected)" }
     val apk = File(args[0])
     ZipFile(apk).use { zip ->
         val script = zip.getInputStream(zip.getEntry("assets/venus/bootstrap.js")).bufferedReader().readText()
@@ -31,8 +31,12 @@ fun main(args: Array<String>) {
         // The recorded revision must match the runtime that was actually injected.
         val revision = Regex("const revision\\s*=\\s*\"([^\"]+)\"").find(script)!!.groupValues[1]
         check("\"revision\":\"$revision\"" in metadata) { "injection.json revision does not match the runtime" }
-        for (feature in listOf("copyBios", "dashless", "favouriteAnything", "freeNitro", "noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont", "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs"))
-            check("$feature:true" in script) { "Missing selected feature: $feature" }
+        // Every feature the runtime knows is in the selection object; with every patch on, all of them are true.
+        // Read from the APK itself, so the list never goes stale when a feature is added.
+        val selection = Regex("const features\\s*=\\s*\\{([^}]*)\\}").find(script)!!.groupValues[1]
+        val chosen = selection.split(",").map { it.split(":") }.associate { it[0].trim() to it.getOrNull(1)?.trim() }
+        check(chosen.size >= 30 && chosen.values.all { it == "true" || it == "false" }) { "Malformed feature selection: $selection" }
+        if ("--some" !in args.drop(1)) check(chosen.values.all { it == "true" }) { "Not selected: ${chosen.filterValues { it != "true" }.keys}" }
         check("VenusRoot" !in script && "RN.Modal" !in script && "registerRoot" !in script)
         check("SETTING_RENDERER_CONFIG" in script && "VENUS_FREENITRO" in script)
         fun number(key: String) = Regex("\"$key\":([0-9]+)").find(metadata)!!.groupValues[1].toInt()
@@ -50,7 +54,7 @@ fun main(args: Array<String>) {
         val hash = MessageDigest.getInstance("SHA-256")
         hash.update(hbc, offset + number("prefixSize"), number("originalCodeSize"))
         check(hash.digest().joinToString("") { "%02x".format(it) } ==
-            "a67c96b55c1e802c5a472a990ac5a97eb2b480f78067b63dd2f9fe4aec06aa70")
+            app.venus.patches.HbcPrelude.GLOBAL_SHA256) { "Discord's own global code changed under the prelude" }
         val footer = MessageDigest.getInstance("SHA-1")
         footer.update(hbc, 0, hbc.size - 20)
         check(footer.digest().contentEquals(hbc.copyOfRange(hbc.size - 20, hbc.size)))
@@ -199,7 +203,7 @@ fun main(args: Array<String>) {
         check(videoCalls.count { it.startsWith("Lapp/venus/") } == 1) { "getVideoDimensions has more than one Venus guard" }
         check(fontCalls.none { it == "Lapp/venus/emoji/SystemEmoji;" } && bridgeRefs.filterIsInstance<MethodReference>().none { it.definingClass == "Lapp/venus/emoji/SystemEmoji;" }) { "Emoji bridge must not share another FileModule method" }
     }
-    if (args.getOrNull(1) == "signed") {
+    if ("signed" in args.drop(1)) {
         val verification = ApkVerifier.Builder(apk).setMinCheckedPlatformVersion(26).build().verify()
         check(verification.isVerified) { "APK signature invalid: ${verification.errors}" }
         println("APK signing certificate and signature verified")
