@@ -17,6 +17,7 @@
 
 * **Discord - Message highlights:** Fixed messages that mention one of your roles not getting your custom mention color
 * **Discord - Translate messages:** Fixed Translate in the hold menu never saying a message was already in your language, and saying so for translations it dropped
+* **Discord - Custom themes:** Fixed a theme's background image only showing right after installing it, and missing from chat after Discord restarted ([#84](https://github.com/VenusIsJaded/Venus-Patches/issues/84))
 
 ### 🔧 Improvements
 

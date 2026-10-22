@@ -257,7 +257,10 @@
     }
     // A sub-option (piProfile, reviewWarning, pastelAll...) must also wake components that
     // subscribed to its plugin: those pages and badges read several of its settings at once.
+    // Counts every notify, so a component that rendered before it subscribed can tell it missed one (useSettings).
+    let notifyCount = 0;
     const notify = key => {
+        notifyCount++;
         const owner = key && key !== "*" ? featureFor(key) : null;
         listeners.forEach(entry => {
             if (!entry.key || key === "*" || entry.key === key || owner && entry.key === owner) entry.fn();
@@ -560,11 +563,16 @@
         return entry.promise;
     }
     function el() { return React.createElement.apply(React,arguments); }
+    // React subscribes only after the first commit, so a change between rendering and subscribing was lost. On a cold
+    // start Discord reopens the last chat while the saved theme is still being read, and its "loaded" notify landed in
+    // that gap: chat stayed without the theme background until something else redrew it (#84).
     function useSettings(key) {
         const [, update] = React.useState(0);
+        const seen = notifyCount;
         React.useEffect(() => {
             const entry = {key, fn: () => update(n => n + 1)};
             listeners.add(entry);
+            if (notifyCount !== seen) entry.fn();
             return () => listeners.delete(entry);
         }, [key]);
     }
