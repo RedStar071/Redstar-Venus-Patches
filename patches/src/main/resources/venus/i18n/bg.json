@@ -36,6 +36,7 @@
   "Allow Discord notifications?": "Разрешаване на известията от Discord?",
   "Allow notification permission": "Разрешаване на достъп за известия",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "Известява ви и когато Discord е затворен. Поддържа Discord свързан, което хаби повече батерия.",
+  "Always shown with the original text.": "Винаги се показва заедно с оригиналния текст.",
   "And tap Translate": "И докоснете „Превод“",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Известията на Android за Discord са изключени. Включете ги от настройките на телефона, за да получавате известия, докато Discord е затворен.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Известията на Android са изключени за Discord. Докоснете за проверка или отваряне на системните настройки.",

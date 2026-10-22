@@ -33,6 +33,7 @@
   "Allow Discord notifications?": "อนุญาตการแจ้งเตือนของ Discord หรือไม่?",
   "Allow notification permission": "อนุญาตสิทธิ์การแจ้งเตือน",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "แจ้งเตือนแม้ในขณะที่ปิดแอป Discord อยู่ โดยจะเชื่อมต่อ Discord ไว้เบื้องหลัง ซึ่งอาจใช้แบตเตอรี่มากขึ้น",
+  "Always shown with the original text.": "แสดงพร้อมข้อความต้นฉบับเสมอ",
   "And tap Translate": "แล้วแตะ \"แปล\"",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "การแจ้งเตือน Android ของ Discord ปิดอยู่ เปิดได้ในการตั้งค่าโทรศัพท์เพื่อรับการแจ้งเตือนแม้ปิด Discord อยู่",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "การแจ้งเตือนของ Android สำหรับ Discord ถูกปิดอยู่ แตะเพื่อตรวจสอบหรือเปิดการตั้งค่าระบบ",

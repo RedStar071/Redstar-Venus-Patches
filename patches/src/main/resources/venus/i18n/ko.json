@@ -33,6 +33,7 @@
   "Allow Discord notifications?": "Discord 알림을 허용하시겠어요?",
   "Allow notification permission": "알림 권한 허용",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "Discord가 닫혀 있을 때도 알림을 보냅니다. Discord 연결을 계속 유지하므로 배터리를 더 소모합니다.",
+  "Always shown with the original text.": "원문과 함께 항상 표시돼요.",
   "And tap Translate": "그리고 번역을 탭하세요",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Discord의 Android 알림이 꺼져 있습니다. Discord를 닫아도 알림을 받으려면 휴대폰 설정에서 켜 주세요.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Discord의 Android 알림이 꺼져 있습니다. 탭하여 확인하거나 시스템 설정을 여세요.",

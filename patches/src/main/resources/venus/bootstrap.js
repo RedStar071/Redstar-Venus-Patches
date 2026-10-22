@@ -7507,6 +7507,22 @@
         hu:["hogy", "nem", "van", "egy", "meg", "csak", "m\u00e9g", "m\u00e1r", "mint", "vagy", "lesz", "volt", "nagyon", "minden", "semmi", "valami", "mikor", "hol", "mi\u00e9rt", "hogyan", "k\u00f6sz\u00f6n\u00f6m", "szia", "igen"],
         fi:["ett\u00e4", "ei", "ole", "oli", "mutta", "kun", "jos", "niin", "vain", "my\u00f6s", "kuin", "mit\u00e4", "miss\u00e4", "milloin", "miksi", "miten", "kaikki", "jotain", "hyv\u00e4", "kiitos", "hei", "moi"],
         vi:["c\u1ee7a", "v\u00e0", "l\u00e0", "c\u00f3", "kh\u00f4ng", "\u0111\u01b0\u1ee3c", "trong", "cho", "v\u1edbi", "n\u00e0y", "\u0111\u00f3", "nh\u1eefng", "m\u1ed9t", "c\u00e1c", "ng\u01b0\u1eddi", "nh\u01b0", "khi", "th\u00ec", "m\u00e0", "r\u1ea5t", "nhi\u1ec1u", "c\u1ea3m", "\u01a1n", "xin", "ch\u00e0o"]};
+    // Per target language, worked out once: the letters it doesn't use, and every other language's everyday words that
+    // aren't its own. translateLooksForeign runs for rows and on every message change in a chat, so it no longer builds a
+    // RegExp and walks ~550 listed words for each message (tests/bench/translate_foreign.js).
+    const translateForeignPlans = new Map();
+    function translateForeignPlan(base) {
+        if (translateForeignPlans.has(base)) return translateForeignPlans.get(base);
+        const own = LATIN_LETTERS[base];
+        let plan = null;
+        if (own !== undefined) {
+            const ownWords = new Set(LATIN_WORDS[base] || []), foreign = new Set();
+            for (const code in LATIN_WORDS) if (code !== base) for (const word of LATIN_WORDS[code]) if (!ownWords.has(word)) foreign.add(word);
+            plan = {allowed:new RegExp("[^a-z'" + own + "]"), foreign};
+        }
+        translateForeignPlans.set(base, plan);
+        return plan;
+    }
     function translateLooksForeign(text) {
         if (typeof text !== "string" || text.length < 2) return false;
         const target = translateTarget(), base = languageBase(target), want = TRANSLATE_SCRIPT_OF[base] || null;
@@ -7520,17 +7536,14 @@
         if (!words || !words.some(word => word.length > 2)) return false;
         // Latin text for someone reading a non-Latin language.
         if (want) return true;
-        const own = LATIN_LETTERS[base];
-        if (own === undefined) return false;
-        const allowed = new RegExp("[^a-z'" + own + "]");
+        const plan = translateForeignPlan(base);
+        if (!plan) return false;
         let marked = 0;
-        for (const word of words) if (allowed.test(word) && ++marked >= 1 && (marked >= 2 || words.length <= 6)) return true;
+        for (const word of words) if (plan.allowed.test(word) && ++marked >= 1 && (marked >= 2 || words.length <= 6)) return true;
+        // Everyday words of other languages, looked up per word of the message, not per word of every list.
         let other = marked, english = 0;
-        const ownWords = new Set(LATIN_WORDS[base] || []), seen = new Set(), wordSet = new Set(words);
-        for (const code in LATIN_WORDS) {
-            if (code === base) continue;
-            for (const word of LATIN_WORDS[code]) if (!ownWords.has(word) && !seen.has(word) && wordSet.has(word)) { seen.add(word); other++; }
-        }
+        const wordSet = new Set(words);
+        wordSet.forEach(word => { if (plan.foreign.has(word)) other++; });
         if (other >= 2 || other >= 1 && words.length <= 6) return true;
         if (base === "en") {
             for (const word of LATIN_WORDS.en) if (wordSet.has(word)) english++;
@@ -7552,13 +7565,18 @@
         return choice === undefined ? translateDefault(channelId) : choice;
     }
     // The translate bar: translate a whole chat, or show it as written again. Every row on screen from it is redrawn.
-    function translateScanChannel(channelId) {
+    // Discord replaces a chat's message collection whenever anything in it changes, so a scan of the same collection, for the
+    // same language and account, gives the same answer. The bar asks on every render and on every message store change (from
+    // any chat), so only a collection it hasn't seen is walked (tests/bench/translate_scan.js). force: a full walk anyway.
+    const translateScans = new Map();
+    function translateScanChannel(channelId, force) {
         if (!channelId || !msgStore || typeof msgStore.getMessages !== "function") return false;
         let msgs;
         try { msgs = msgStore.getMessages(channelId); } catch (_) { return false; }
+        const me = currentUser(), myId = me && me.id, target = translateTarget(), last = translateScans.get(channelId);
+        if (!force && last && last.msgs === msgs && last.target === target && last.myId === myId) return last.result;
         const list = msgs && (Array.isArray(msgs._array) ? msgs._array : typeof msgs.toArray === "function" ? msgs.toArray() : null);
         if (!Array.isArray(list) || !list.length) return false;
-        const me = currentUser(), myId = me && me.id;
         let foundForeign = false;
         for (let i = list.length - 1; i >= 0; i--) {
             const msg = list[i];
@@ -7574,6 +7592,8 @@
             if (translate.foreign.size >= TRANSLATE_FOREIGN) translate.foreign.delete(translate.foreign.keys().next().value);
             translate.foreign.set(channelId, true);
         }
+        if (!last && translateScans.size >= TRANSLATE_FOREIGN) translateScans.delete(translateScans.keys().next().value);
+        translateScans.set(channelId, {msgs, target, myId, result:foundForeign});
         return foundForeign;
     }
     function translateChannel(channelId, on) {
@@ -7582,7 +7602,7 @@
             if (translate.channels.size >= TRANSLATE_CHANNELS) translate.channels.delete(translate.channels.values().next().value);
             translate.channels.add(channelId);
         } else translate.channels.delete(channelId);
-        translateScanChannel(channelId);
+        translateScanChannel(channelId, true);
         notify("translate");
         const ids = new Set();
         translate.shown.forEach((entry, id) => { if (entry.channelId === channelId) ids.add(id); });
@@ -7592,7 +7612,7 @@
         if (translate.dispatcher || !dispatcher || typeof dispatcher.dispatch !== "function") return;
         translate.dispatcher = dispatcher;
         if (typeof dispatcher.subscribe === "function") dispatcher.subscribe("LOGOUT", () => {
-            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear(); translate.channels.clear(); translate.foreign.clear();
+            translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.shown.clear(); translate.choice.clear(); translate.asked.clear(); translate.channels.clear(); translate.foreign.clear(); translateScans.clear();
             // Another account's messages must never be shown from this one's translations.
             if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         });
@@ -8092,7 +8112,7 @@
     // Only messages that are (or were) shown translated are redrawn.
     function translateChanged() {
         translate.version++;
-        translate.foreign.clear();
+        translate.foreign.clear(); translateScans.clear();
         if (enabled("translate")) translateSchedule(0);
         // Messages known to be in your language, or that failed, look the same either way unless they quote a message that doesn't.
         const ids = new Set();
@@ -8134,17 +8154,20 @@
                     style:[{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, height:48}, i ? {borderTopWidth:1, borderTopColor:k.sheetRow.borderColor} : null]},
                     el(Icon, {size:"sm", color:k.icon.color}), el(RN.Text, {style:[s.text, {fontSize:15, fontWeight:"500"}]}, label), tapRipple(pulse, key, {left:8, top:7})))));
     }
-    // The translate bar as it looks in chat (TranslateBar), drawn with the preview's own colors.
+    // The translate bar as it looks in chat (TranslateBar): the same compact 32 dp pill, centered, with its divider and cog,
+    // drawn with the preview's own colors. It used to be a full-width bar with the cog at the far edge, which the real bar isn't.
     function previewTranslateBar(k, done, target, onPress, pulse) {
         const Press = RN.Pressable || RN.View, Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
         const label = done ? tr("Show original") : tr("Translate to {language}", {language:target}), color = done ? k.iconMuted.color : k.brandFg.color;
-        return el(RN.View, {key:"bar", style:{flexDirection:"row", alignItems:"center", marginHorizontal:8, marginTop:4, marginBottom:6, minHeight:36,
-            paddingLeft:14, paddingRight:4, borderRadius:18, borderWidth:1, borderColor:k.bar.borderTopColor, backgroundColor:k.bar.backgroundColor}},
-            el(Press, {onPress, accessibilityRole:onPress ? "button" : undefined, accessibilityLabel:label,
-                style:{flex:1, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8, minHeight:34}},
-                el(Lang, {size:"sm", color}), popIn("bar:" + done, el(RN.Text, {numberOfLines:1, style:{fontSize:14, fontWeight:"600", color}}, label)),
-                tapRipple(pulse, "bar", {left:"45%", top:2})),
-            el(RN.View, {style:{width:30, height:30, alignItems:"center", justifyContent:"center"}}, el(Cog, {size:"sm", color:k.iconMuted.color})));
+        return el(RN.View, {key:"bar", style:{alignItems:"center", paddingHorizontal:12, paddingTop:6, paddingBottom:4}},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", maxWidth:"100%", height:32, paddingLeft:12, paddingRight:2, borderRadius:16,
+                borderWidth:1, borderColor:k.bar.borderTopColor, backgroundColor:k.bar.backgroundColor}},
+                el(Press, {onPress, accessibilityRole:onPress ? "button" : undefined, accessibilityLabel:label,
+                    style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1}},
+                    el(Lang, {size:"xs", color}), popIn("bar:" + done, el(RN.Text, {numberOfLines:1, style:{fontSize:13, fontWeight:"600", color}}, label)),
+                    tapRipple(pulse, "bar", {left:"40%", top:-2})),
+                el(RN.View, {style:[k.barDivider, {marginHorizontal:6}]}),
+                el(RN.View, {style:{width:28, height:28, alignItems:"center", justifyContent:"center"}}, el(Cog, {size:"xs", color:k.iconMuted.color}))));
     }
     function TranslatePreview(props) {
         useSettings("translate");
@@ -8177,7 +8200,8 @@
                 el(RN.Text, {style:[s.muted, {marginTop:2}]}, tr("Translating\u2026"))) :
             !translated ? el(RN.Text, {style:s.text}, TRANSLATE_SAMPLE) : el(RN.View, null,
                 popIn("tr", el(RN.Text, {style:s.text}, tr("Hi everyone! Who's coming tonight?"))),
-                settings.translateNote ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
+                // Like chat (translateView): the note shows when either switch is on, and says "Original:" over the quote.
+                settings.translateNote || settings.translateOriginal ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
                 settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
         const holdMessage = () => {
@@ -8216,7 +8240,9 @@
                 ["translate", Lang, actionLabel, watching ? null : tapMenuTranslate]], state.pulse))) : null;
         return el(RN.View, {key:"preview"}, on ? previewToggle(mode, value => { setMode(value); setState(value === "try" ? startTry() : blank); }) : null,
             previewScreen(s, "preview", "Translation preview",
-                [el(RN.View, {key:"stage", style:{height:228, justifyContent:"space-between", overflow:"hidden"}},
+                // Steady while you watch or tap (#82), but taller when the original is quoted under the translation, so the quote never
+                // pushes the tip or the message bar out of the stage.
+                [el(RN.View, {key:"stage", style:{height:settings.translateOriginal ? 256 : 228, justifyContent:"space-between", overflow:"hidden"}},
                     el(RN.View, {key:"chat", style:{paddingTop:4}}, bar, message, !state.menu ? tip : null),
                     previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}),
                     sheet)],
@@ -8359,7 +8385,11 @@
                 ["custom", tr("Another language"), translateLanguageName(settings.translateLanguage) + ".", rowIcon(15723, "LanguageIcon")]], true),
             settings.translateTarget === "custom" ? el(TranslateLanguagePicker, {key:"language", on}) : null,
             el(Group, {key:"show", title:tr("Display")},
-                switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation.", rowIcon(9099, "GlobeEarthIcon")),
+                // The quoted original always comes with its "Translated from" line, so while it's on that switch shows on and
+                // can't be turned off, instead of reading off while the line still shows in chat.
+                settings.translateOriginal && Switch ? el(Switch, {key:"translateNote", label:tr("Show the original language"), icon:rowIcon(9099, "GlobeEarthIcon"),
+                    subLabel:tr("Always shown with the original text."), value:true, disabled:true, onValueChange:() => {}}) :
+                    switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation.", rowIcon(9099, "GlobeEarthIcon")),
                 switchRow(Switch, "translateOriginal", "Show the original text", "The untranslated message, in a quote under the translation.", rowIcon(13262, "QuoteIcon"))),
             el(Group, {key:"clear", title:tr("Manage")}, actionRow(ui, "clear", "Clear saved translations",
                 saved ? tr("{count} kept on this phone, so chats you reopen show them at once.", {count:count(saved, "translation")}) : "Nothing saved yet.",
@@ -8370,7 +8400,7 @@
     }
     // Clear saved translations: forgets every translation, on the phone too, and translates what's on screen again.
     function translateForget() {
-        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear(); translate.channels.clear(); translate.foreign.clear();
+        translate.generation++; translate.cache.clear(); translate.queue.length = 0; translate.translated = 0; translate.error = ""; translate.choice.clear(); translate.asked.clear(); translate.channels.clear(); translate.foreign.clear(); translateScans.clear();
         if (files) Promise.resolve().then(() => files.writeFile("documents", TRANSLATE_FILE, "{\"version\":1,\"entries\":[]}", "utf8")).catch(() => {});
         translateChanged(); notify("translate");
         reviewToast(reviewUI(), "Saved translations cleared", venusIcon(5049, "TrashIcon"));

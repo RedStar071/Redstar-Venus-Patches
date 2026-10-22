@@ -36,6 +36,7 @@
   "Allow Discord notifications?": "Sallitaanko Discordin ilmoitukset?",
   "Allow notification permission": "Salli ilmoitukset",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "Ilmoittaa myös silloin, kun Discord on suljettu. Pitää Discordin yhdistettynä, mikä kuluttaa enemmän akkua.",
+  "Always shown with the original text.": "Näkyy aina alkuperäisen tekstin kanssa.",
   "And tap Translate": "Ja napauta Käännä",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Androidin ilmoitukset ovat pois päältä Discordilta. Ota ne käyttöön puhelimen asetuksista, niin saat ilmoituksia myös Discordin ollessa suljettuna.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Android-ilmoitukset ovat poissa käytöstä Discordilta. Tarkista tai avaa järjestelmän asetukset napauttamalla.",

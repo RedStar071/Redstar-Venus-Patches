@@ -36,6 +36,7 @@
   "Allow Discord notifications?": "Discord bildirimlerine izin verilsin mi?",
   "Allow notification permission": "Bildirim izni ver",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "Discord kapalıyken de bildirim gönderir. Discord'u arka planda bağlı tutar, bu da daha fazla pil tüketir.",
+  "Always shown with the original text.": "Orijinal metinle birlikte her zaman gösterilir.",
   "And tap Translate": "Ve Çevir'e dokun",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Discord için Android bildirimleri kapalı. Discord kapalıyken de bildirim almak için telefon ayarlarından aç.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Discord için Android bildirimleri kapalı. Kontrol etmek veya sistem ayarlarını açmak için dokun.",

@@ -797,5 +797,6 @@
  "You tap the bar at the top of the chat": "你点按聊天顶部的栏",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "只有你选择的消息，或你从顶部栏翻译的聊天，会发送到 Google 翻译，每条只发送一次，且不使用你的 Discord 账号。",
  "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "含有其他语言消息的聊天会在顶部显示一个栏。点按它即可翻译该聊天，直到 Discord 重新启动。在聊天中长按消息即可查看原文。",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "含有其他语言消息的聊天会在顶部显示一个栏。点按它即可翻译该聊天，直到 Discord 重新启动；也可以长按单条消息并点按“翻译”。"
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "含有其他语言消息的聊天会在顶部显示一个栏。点按它即可翻译该聊天，直到 Discord 重新启动；也可以长按单条消息并点按“翻译”。",
+ "Always shown with the original text.": "显示原文时始终显示。"
 }

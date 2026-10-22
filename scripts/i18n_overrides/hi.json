@@ -893,5 +893,6 @@
  "You tap the bar at the top of the chat": "आप चैट के ऊपर की पट्टी पर टैप करते हैं",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google Translate को सिर्फ़ आपके चुने हुए मैसेज या पट्टी से अनुवाद की गई चैट भेजी जाती हैं, हर एक सिर्फ़ एक बार और आपके Discord अकाउंट के बिना।",
  "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "जिन चैट में दूसरी भाषा के मैसेज हों, उनके ऊपर एक पट्टी दिखती है। Discord के रीस्टार्ट होने तक चैट का अनुवाद करने के लिए उस पर टैप करें। वहाँ मूल देखने के लिए किसी मैसेज को दबाकर रखें।",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "जिन चैट में दूसरी भाषा के मैसेज हों, उनके ऊपर एक पट्टी दिखती है। Discord के रीस्टार्ट होने तक चैट का अनुवाद करने के लिए उस पर टैप करें, या किसी एक मैसेज को दबाकर रखें और 'अनुवाद करें' पर टैप करें।"
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "जिन चैट में दूसरी भाषा के मैसेज हों, उनके ऊपर एक पट्टी दिखती है। Discord के रीस्टार्ट होने तक चैट का अनुवाद करने के लिए उस पर टैप करें, या किसी एक मैसेज को दबाकर रखें और 'अनुवाद करें' पर टैप करें।",
+ "Always shown with the original text.": "मूल टेक्स्ट के साथ हमेशा दिखती है।"
 }

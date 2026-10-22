@@ -925,5 +925,6 @@
  "You tap the bar at the top of the chat": "Atingi bara din partea de sus a chatului",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "La Google Translate se trimit doar mesajele pe care le alegi sau chaturile pe care le traduci din bară, fiecare o singură dată și fără contul tău Discord.",
  "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "Chaturile cu mesaje în altă limbă afișează o bară sus. Atinge-o ca să traduci chatul până la repornirea Discord. Acolo, ține apăsat un mesaj ca să vezi originalul.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Chaturile cu mesaje în altă limbă afișează o bară sus. Atinge-o ca să traduci chatul până la repornirea Discord sau ține apăsat un mesaj și atinge Tradu."
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Chaturile cu mesaje în altă limbă afișează o bară sus. Atinge-o ca să traduci chatul până la repornirea Discord sau ține apăsat un mesaj și atinge Tradu.",
+ "Always shown with the original text.": "Apare mereu împreună cu textul original."
 }

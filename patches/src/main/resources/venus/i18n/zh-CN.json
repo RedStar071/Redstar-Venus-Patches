@@ -33,6 +33,7 @@
   "Allow Discord notifications?": "允许 Discord 发送通知吗？",
   "Allow notification permission": "授予通知权限",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "在 Discord 关闭时也向你发送通知。会让 Discord 在后台保持连接，从而消耗更多电量。",
+  "Always shown with the original text.": "显示原文时始终显示。",
   "And tap Translate": "然后点按“翻译”",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Discord 的 Android 通知已关闭。请在手机设置中开启，以便在 Discord 关闭时也能收到提醒。",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Discord 的 Android 系统通知已关闭。点按以检查或打开系统设置。",

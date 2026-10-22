@@ -36,6 +36,7 @@
   "Allow Discord notifications?": "Tillåta aviseringar från Discord?",
   "Allow notification permission": "Tillåt aviseringar",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "Meddelar dig även när Discord är stängt. Håller Discord anslutet i bakgrunden, vilket drar mer batteri.",
+  "Always shown with the original text.": "Visas alltid tillsammans med originaltexten.",
   "And tap Translate": "Och tryck på Översätt",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Android-aviseringar är avstängda för Discord. Slå på dem i telefonens inställningar för att få aviseringar när Discord är stängt.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Android-aviseringar är avstängda för Discord. Tryck för att kontrollera eller öppna systeminställningarna.",

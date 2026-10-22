@@ -797,5 +797,6 @@
  "You tap the bar at the top of the chat": "チャット上部のバーをタップします",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Google翻訳に送信されるのは、選んだメッセージかバーから翻訳したチャットだけです。それぞれ1回だけ、Discordアカウントなしで送信されます。",
  "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "他の言語のメッセージがあるチャットでは、上部にバーが表示されます。タップすると、Discordを再起動するまでそのチャットを翻訳します。そこでメッセージを長押しすると原文を表示できます。",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "他の言語のメッセージがあるチャットでは、上部にバーが表示されます。タップすると、Discordを再起動するまでそのチャットを翻訳します。1件だけならメッセージを長押しして「翻訳」をタップします。"
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "他の言語のメッセージがあるチャットでは、上部にバーが表示されます。タップすると、Discordを再起動するまでそのチャットを翻訳します。1件だけならメッセージを長押しして「翻訳」をタップします。",
+ "Always shown with the original text.": "原文を表示するときは常に表示されます。"
 }

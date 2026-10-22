@@ -797,5 +797,6 @@
  "You tap the bar at the top of the chat": "Kamu mengetuk bilah di bagian atas obrolan",
  "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account.": "Hanya pesan yang kamu pilih, atau obrolan yang kamu terjemahkan dari bilah, yang dikirim ke Google Translate, masing-masing sekali dan tanpa akun Discord-mu.",
  "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts. Hold a message there to see its original.": "Obrolan dengan pesan dalam bahasa lain menampilkan bilah di bagian atas. Ketuk bilah itu untuk menerjemahkan obrolan sampai Discord dimulai ulang. Di sana, tahan pesan untuk melihat teks aslinya.",
- "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Obrolan dengan pesan dalam bahasa lain menampilkan bilah di bagian atas. Ketuk bilah itu untuk menerjemahkan obrolan sampai Discord dimulai ulang, atau tahan satu pesan lalu ketuk Terjemahkan."
+ "Chats with messages in another language show a bar at the top. Tap it to translate the chat until Discord restarts, or hold one message and tap Translate.": "Obrolan dengan pesan dalam bahasa lain menampilkan bilah di bagian atas. Ketuk bilah itu untuk menerjemahkan obrolan sampai Discord dimulai ulang, atau tahan satu pesan lalu ketuk Terjemahkan.",
+ "Always shown with the original text.": "Selalu ditampilkan bersama teks asli."
 }

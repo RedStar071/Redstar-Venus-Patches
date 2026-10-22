@@ -36,6 +36,7 @@
   "Allow Discord notifications?": "Engedélyezed a Discord-értesítéseket?",
   "Allow notification permission": "Értesítések engedélyezése",
   "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.": "Akkor is értesít, amikor a Discord be van zárva. Kapcsolatban tartja a Discordot, ami több akkumulátort fogyaszt.",
+  "Always shown with the original text.": "Az eredeti szöveggel együtt mindig megjelenik.",
   "And tap Translate": "És koppints a Fordítás gombra",
   "Android notifications are off for Discord. Turn them on in your phone's settings to get alerts while Discord is closed.": "Az Android-értesítések ki vannak kapcsolva a Discordnál. Kapcsold be őket a telefon beállításaiban, hogy akkor is kapj értesítést, ha a Discord be van zárva.",
   "Android notifications are turned off for Discord. Tap to check or open system settings.": "Az Android-értesítések ki vannak kapcsolva a Discordhoz. Koppints az ellenőrzéshez vagy a rendszerbeállítások megnyitásához.",
