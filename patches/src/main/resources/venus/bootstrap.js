@@ -26,7 +26,7 @@
     if (features.reviewDB) selectModules([13181, 14213, 14281, 10725, 6265, 6896, 1390, 584]);
     if (features.readAll) targetModules[16754] = 1;
     if (features.quests) selectModules([584, 7386, 9699, 13933, 13968]);
-    if (features.badges) selectModules([584, 1390, 2037, 5759, 8312, 9699, 13933, 13968]);
+    if (features.badges) selectModules([584, 1390, 5759, 8312, 9699, 13933, 13968]);
     if (features.hideGift) selectModules([11935, 12146]);
     if (features.hideQuestDock) selectModules([15371, 15465]);
     if (features.systemEmoji) targetModules[6820] = 1;
@@ -58,7 +58,7 @@
         noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true,
-        badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:30, badgesActivity:true, systemFont:false,
+        badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:30, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
@@ -75,7 +75,7 @@
             noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true,
-            badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 30, badgesActivity: true, systemFont: false,
+            badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 30, systemFont: false,
             hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
@@ -297,7 +297,6 @@
         if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
         if (features.userNotif && userNotif.ids.size) extra.userNotifIds = Array.from(userNotif.ids);
         if (features.badges && badges.played.size) extra.badgesPlayedIds = Array.from(badges.played);
-        if (features.badges && badges.activeDay) extra.badgesActiveDay = badges.activeDay;
         if (backup.last) extra.lastBackup = backup.last;
         if (starter.done) extra.setupDone = true;
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
@@ -494,9 +493,7 @@
                 }
                 if (features.badges) {
                     if (Array.isArray(loaded.badgesPlayedIds))
-                        loaded.badgesPlayedIds.slice(0, BADGES_MAX_PLAYED).forEach(id => { if (typeof id === "string" && /^\d{5,25}$/.test(id)) badges.played.add(id); });
-                    if (typeof loaded.badgesActiveDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(loaded.badgesActiveDay))
-                        badges.activeDay = loaded.badgesActiveDay;
+                        loaded.badgesPlayedIds.slice(0, BADGES_MAX_PLAYED).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) badges.played.add(id); });
                 }
             }
             status.storage = "ready";
@@ -508,7 +505,7 @@
             if (dirty.size || features.userNotif && userNotif.dirty) save();
             restoreDeleted();
             if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
-            if (features.badges) { if (!enabled("badges")) badgesStop(false); else badgesLoaded(); }
+            if (features.badges) { if (!enabled("badges")) badgesStop(); else badgesLoaded(); }
             if (features.userNotif) {
                 userNotifSync();
                 if (enabled("userNotif") && settings.userNotifPush) userNotifCheckPermissions();
@@ -902,7 +899,7 @@
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
-        badges:["Game time", "Unique games", "Account activity", "Switch games every", "Hours Played", "Unique Games Played", "Years Active"]};
+        badges:["Game time", "Unique games", "Switch games every", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1224,7 +1221,7 @@
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
-        withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Counts game time, unique games and daily account activity in the background.", "Badges", BadgeSettings);
+        withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Plays real PC games in the background for game time and unique games.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests]];
         const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);
@@ -3811,538 +3808,553 @@
             footnote("note", "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.")];
         return settingsBody(ui, groups);
     }
-    // Badge Completer (#81): counts game play time (Hours Played), unique detectable games (Unique Games Played)
-    // and daily account activity (Years Active) in the background. Game sessions show on your profile via
-    // LocalActivityStore (10649) and SelfPresenceStore (5759), and report play time through POST /activities
-    // the way Discord's desktop ActivityTrackingStore (14038) does: an initial report (duration 0) to start the
-    // session token, 30-minute reports while running, and a closing report (closed: true) when switching games.
-    const BADGE_SOCKET_ID = "venus-badges", BADGE_PID = 9480, BADGES_MAX_PLAYED = 1000;
-    const BADGE_REPORT_MS = 30 * 60 * 1000, BADGE_MAX_DURATION_MS = 35 * 60 * 1000, BADGE_ACTIVE_MS = 60 * 60 * 1000;
-    const BADGE_CURATED_GAMES = [
-        {id:"356875570916753408", name:"Minecraft", exePath:"javaw.exe", distributor:"discord"},
-        {id:"401518684763586560", name:"Counter-Strike 2", exePath:"game/bin/win64/cs2.exe", distributor:"steam"},
-        {id:"356875221078245376", name:"League of Legends", exePath:"league of legends.exe", distributor:"discord"},
-        {id:"700136079562375258", name:"VALORANT", exePath:"shooterGame/binaries/win64/valorant-win64-shipping.exe", distributor:"discord"},
-        {id:"356869127241072640", name:"Grand Theft Auto V", exePath:"gta5.exe", distributor:"steam"},
-        {id:"363445589247131668", name:"Roblox", exePath:"robloxplayerbeta.exe", distributor:"discord"},
-        {id:"432980957394370572", name:"Fortnite", exePath:"fortnitegame/binaries/win64/fortniteclient-win64-shipping.exe", distributor:"epic"},
-        {id:"617081209280561169", name:"Apex Legends", exePath:"r5apex.exe", distributor:"steam"},
-        {id:"356877880938070016", name:"Terraria", exePath:"terraria.exe", distributor:"steam"},
-        {id:"356876176465461248", name:"Stardew Valley", exePath:"stardew valley.exe", distributor:"steam"},
-        {id:"1146212266810019880", name:"Baldur's Gate 3", exePath:"bin/bg3.exe", distributor:"steam"},
-        {id:"1055686970276368464", name:"Elden Ring", exePath:"game/eldenring.exe", distributor:"steam"},
-        {id:"356875243173969920", name:"Dota 2", exePath:"game/bin/win64/dota2.exe", distributor:"steam"},
-        {id:"356877032724234240", name:"Rocket League", exePath:"binaries/win64/rocketleague.exe", distributor:"epic"},
-        {id:"356875257501712384", name:"Overwatch 2", exePath:"_retail_/overwatch.exe", distributor:"battlenet"},
-        {id:"356875948278349824", name:"Rust", exePath:"rustclient.exe", distributor:"steam"},
-        {id:"356876757653389312", name:"Garry's Mod", exePath:"hl2.exe", distributor:"steam"},
-        {id:"356877290325704704", name:"Team Fortress 2", exePath:"hl2.exe", distributor:"steam"},
-        {id:"356876450504409088", name:"Warframe", exePath:"warframe.x64.exe", distributor:"steam"},
-        {id:"356876832496549888", name:"Left 4 Dead 2", exePath:"left4dead2.exe", distributor:"steam"},
-        {id:"546088625989943308", name:"Hollow Knight", exePath:"hollow_knight.exe", distributor:"steam"},
-        {id:"716967157438349352", name:"Hades", exePath:"x64/hades.exe", distributor:"steam"},
-        {id:"512344755930333185", name:"Celeste", exePath:"celeste.exe", distributor:"steam"},
-        {id:"710929904379592724", name:"Cyberpunk 2077", exePath:"bin/x64/cyberpunk2077.exe", distributor:"steam"},
-        {id:"1206360448160010280", name:"Helldivers 2", exePath:"bin/helldivers2.exe", distributor:"steam"},
-        {id:"356877539534438400", name:"Path of Exile", exePath:"pathofexile_x64steam.exe", distributor:"steam"},
-        {id:"356877576008105984", name:"Dead by Daylight", exePath:"deadbydaylight/binaries/win64/deadbydaylight-win64-shipping.exe", distributor:"steam"},
-        {id:"356877254107889664", name:"Factorio", exePath:"bin/x64/factorio.exe", distributor:"steam"},
-        {id:"356877185161658368", name:"Subnautica", exePath:"subnautica.exe", distributor:"steam"},
-        {id:"356876961177567232", name:"RimWorld", exePath:"rimworldwin64.exe", distributor:"steam"}
-    ];
-    const badges = {dispatcher:null, badgeStore:null, gameStore:null, authStore:null, voiceStore:null, mediaStore:null,
-        presenceHooked:false, generation:0, user:null, catalog:[], catalogFetchedAt:0, catalogFetching:false,
-        current:null, reportTimer:undefined, cycleTimer:undefined, activeTimer:undefined, startTimer:undefined,
-        played:new Set(), cycledSession:0, minutesSession:0, activeDay:"", last:"", error:""};
-    function badgeTypesOn() { return !!(settings.badgesGameTime || settings.badgesUniqueGames || settings.badgesActivity); }
+    // Badge Completer (#81): Game Time (hours played), Game Variety (unique games played) and Account Age (years active).
+    // Discord counts Game Time and Game Variety only from what its desktop app reports about detected games, so this
+    // plays one real, detectable game at a time the way Discord for Windows does when it sees the game running:
+    // - the running game goes into RunningGameStore's RUNNING_GAMES_CHANGE and LocalActivityStore (10649), so your
+    //   profile shows the real game with its own art (the application ID is Discord's, from the detectable list);
+    // - the analytics Discord's badge progress is built from: launch_game when it starts, and running_game_heartbeat
+    //   (initial, every 5 minutes like desktop's RunningGameHeartbeatManager, and a final one when it stops), sent to
+    //   /science with your analytics token and desktop's super properties;
+    // - POST /activities (ActivityTrackingStore 14038 -> 10668) with desktop's exact body, which adds the play time to
+    //   your game stats. Play time is only counted while "Use data to personalize my Discord experience" is on.
+    // Account Age only depends on when the account was made, so there's nothing to report for it; it's shown as progress.
+    const BADGE_HEARTBEAT_MS = 5 * 60 * 1000, BADGE_ACTIVITY_MS = 30 * 60 * 1000, BADGE_MAX_DURATION_MS = 35 * 60 * 1000;
+    const BADGE_PID = 9480, BADGES_MAX_PLAYED = 2000, BADGE_CATALOG_TTL_MS = 12 * 3600 * 1000;
+    // Verified detectable PC games from Discord's own list (/games/detectable): application ID, name, the Windows
+    // executable desktop reports (last two parts, lowercase), the store it comes from and Discord's icon hash. Used
+    // until the full list loads, and if it can't.
+    const BADGE_FALLBACK_GAMES = [
+        ["1402418491272986635","Minecraft","content/minecraft.exe","microsoft","166fbad351ecdd02d11a3b464748f66b"],
+        ["1158877933042143272","Counter-Strike 2","win64/cs2.exe","steam","558f5a26ecb3b17c3dea3d15c1df537a"],
+        ["1402418696126992445","League of Legends","lolth/lolex.exe","epic","7c99428541032ac02ec6981d88b78fb7"],
+        ["700136079562375258","VALORANT","win64/valorant-win64-shipping.exe","epic","11f81959f4fdd76ca6c39c59eac256c1"],
+        ["363445589247131668","ROBLOX","roblox.exe","","f2b60e350a2097289b3b0b877495e55f"],
+        ["1402418703554842694","Fortnite","fortniteclient-win64-shipping.exe","epic","c1864b38910c209afd5bf6423b672022"],
+        ["542075586886107149","Apex Legends","apex legends/r5apex.exe","steam","91fac0600c5b6527c1aea95a93c6a8e0"],
+        ["1402418344912752671","Terraria","terraria/terraria.exe","steam","4c3c185abc0dfb4cb1ec5612de4d7366"],
+        ["359509387670192128","Stardew Valley","stardew valley/stardew valley.exe","steam","1e84012079d438b46bbb3c3bf2a409bb"],
+        ["1402418436809953330","ELDEN RING","game/eldenring.exe","steam","28c674e1de18e7a100a44559d64a55b8"],
+        ["356875988589740042","Dota 2","dota2.exe","steam","6b4b3fa4c83555d3008de69d33a60588"],
+        ["356877880938070016","Rocket League","rocketleague.exe","steam","a74899a5190c48a3e6ce9f8d2eaff348"],
+        ["356875221078245376","Overwatch","overwatch.exe","battlenet","a60bb76ba4d4acafbd4cb9aad6e61739"],
+        ["1402418594532298837","Rust","rust/rustclient.exe","steam","9ab7e18473429b016307b867e6c924a4"],
+        ["356879032584896512","Garry's Mod","bin/gmad.exe","steam","ade1008d735a1a134693b15ce02d79a8"],
+        ["356888577310851072","Team Fortress 2","hl2.exe","steam","f903d1168b9f975761f53b91e1a20b26"],
+        ["1402418586244612216","Warframe","warframe.exe","steam","c78e17a5f91ac21d0c807b0c5f7d00a7"],
+        ["356954277803065354","Left 4 Dead 2","bin/l4d2_workshop_manager.exe","steam","0a542ebb0544c5427f24deb3c67fcc99"],
+        ["363431029484027904","Hollow Knight","hollow_knight.exe","steam","b7f2b032a4f5f84e9520dff2f3fe27bb"],
+        ["1402418342127472751","Hades","hades.exe","epic","88f408a5a858b71d27091722deedb256"],
+        ["1402416901551816837","Celeste","celeste.exe","steam","59b1eb2e473f6ab7a68d3f593565b190"],
+        ["787443973538971748","Cyberpunk 2077","x64/cyberpunk2077.exe","epic","023b9ec72cd60e31e25bca878c77984a"],
+        ["356888453796986880","Path of Exile","path of exile taiwan/pathofexile.exe","epic","1f162572c3123655e42c615b18074ff3"],
+        ["357607133254254632","Dead by Daylight","deadbydaylight-egs-shipping.exe","epic","10e00dd3d2a7677eed99edb506d21c15"],
+        ["358422126602223616","Factorio","factorio.exe","steam","7624a1d91d9828ed2f2dc3510bbe09e6"],
+        ["1402418337052622949","Subnautica","subnautica.exe","epic","a6af0d56d783dbb61028759bdcaf3886"],
+        ["363413465584500737","RimWorld","rimworld914win.exe","epic","861d3eae85e0c0536588aeef94d9d5b8"],
+        ["1402418440685486130","Among Us","among us - copy/among us.exe","epic","e6cf30ebdaf6e657f636f391b29f06f8"],
+        ["1402418103702524046","Phasmophobia","phasmophobia/phasmophobia.exe","steam","5264f0edf1f23be2f7e85b213e24a60e"],
+        ["1167674267748540516","Lethal Company","lethal company/lethal company.exe","steam","4f1ee29121b9a0f4dfcc4ce6bb9bd5af"],
+        ["1124358970618953818","Valheim","valheim/valheim.exe","steam","93ac3b8489a031b721995a99102c73f1"],
+        ["1197827812623650866","Palworld","win64/palworld-win64-shipping.exe","steam","f2039761488809de552d44ebc6739ffe"],
+        ["428054228511227914","Deep Rock Galactic","fsd-win64-shipping.exe","steam","f2eb28103bedcfe67bb4d2da6ff663b9"],
+        ["1402418087793528862","Risk of Rain 2","risk of rain 2/risk of rain 2.exe","epic","b838c4c744b9cb9f8dd4c8afb82b085f"],
+        ["363409849859571722","UNDERTALE","undertale.exe","steam","99ec17659fe44ba31ab007b85fd2454c"],
+        ["359508941782122496","Portal 2","portal2.exe","steam","80c416fd6e0d3104e5eab72f9077d72d"],
+        ["1402416959819350078","Satisfactory","win64/factorygame-win64-shipping.exe","epic","7d9c387b1cb5fb7d7efd6d6e4243924c"],
+        ["443159611479031808","No Man's Sky","nms.exe","steam","a13ad44b102c5bb9ec91a72ec9c93099"],
+        ["1402418082366095493","Sea of Thieves","content/seaofthieves.exe","","1a71e40399e3d8b311b9455dd8ca28d9"],
+        ["372438022647578634","Destiny 2","destiny2.exe","epic","876323877dd2f3e3fdfc1637a30eb356"],
+        ["1402418648332898466","Red Dead Redemption 2","red dead redemption 2/rdr2.exe","steam","86479a5f873535f5b432c738a0bb400c"],
+        ["359509759642042378","Fallout 4","fallout4.exe","steam","6c903026d4fc97559ba48ecf9cc4dc04"],
+        ["359510249486417920","The Witcher 3: Wild Hunt","witcher3.exe","steam","e62d3b1c9f547792347121cac397fd9c"],
+        ["1402418075726254102","Euro Truck Simulator 2","win_x64/eurotrucks2.exe","steam","46bfdfc58e4eacbfde29b2461e118e78"],
+        ["356875762940379136","World of Warcraft","_beta_/wow-64.exe","battlenet","fc92f820c44e72085dc6205e5e746850"],
+        ["356875890958925834","Hearthstone","hearthstone.exe","battlenet","584d496943e719a759906563442d2a87"],
+        ["762434991303950386","Genshin Impact","genshinimpact.exe","epic","0a7cc00267310bf4afdd78b175a7aeea"],
+        ["1314395942253756416","Marvel Rivals","win64/marvel-win64-shipping.exe","epic","2dd7882b887306ab5afad03452869ad8"],
+        ["406637848297472017","Escape from Tarkov","escapefromtarkov.exe","steam","5157d17951501b45c4bbca41571a19fe"],
+        ["385538724592746496","DayZ","dayz/dayzuninstaller.exe","steam","cff0c274f3a4cf2c1280dab58268ce9d"],
+        ["359508004078616586","Don't Starve Together","bin/dontstarve.exe","steam","b509a5d03676eace70e0a91a8a4dca89"],
+        ["426526722322726912","Project Zomboid","projectzomboid32.exe","steam","834930e051a22db2e9f565f92cf0ce1f"],
+        ["1402418606364688549","Slay the Spire","slaythespire.exe","steam","5c9cdfe6a46f49ee5f2a3c134d62902b"],
+        ["1334673895453884566","Vampire Survivors","content/vampiresurvivors.exe","steam","abd37dfb36efe6534260d1eb454291e6"],
+        ["1402418233633669170","Dead Cells","deadcells.exe","steam","409bdf22e789337764b144046d887bbb"],
+        ["363430002181668864","Cuphead","cuphead.exe","steam","e473174ecd2bf29d56541591ed2d8c31"],
+        ["1080277149623271444","Hogwarts Legacy","win64/hogwartslegacy.exe","epic","f7e821321b9601fd3594d88fb8dd91c9"],
+        ["356944273133928458","Brawlhalla","brawlhalla/brawlhalla.exe","epic","635721ef4940b790623761863e13afb0"],
+        ["1402416946796036258","Halo Infinite","game/haloinfinite.exe","steam","9067fddddf79467cf39b659ae34b73cb"],
+        ["363411468441354240","Titanfall 2","titanfall2.exe","steam","a2b5108bc074543b2f76d1def74e5399"],
+        ["421150698168909834","Borderlands 2","borderlands2.exe","epic","75aafe852575a5c988e346fadec162f0"],
+        ["357607478105604096","War Thunder","aces.exe","steam","b23dfa191e3f3aa8142572110a99723f"],
+        ["905961880789590076","Forza Horizon 5","forzahorizon5/forzahorizon5.exe","steam","24b4df1622ea714f28adc2f31d7f28ff"],
+        ["363413743335374859","BeamNG.drive","beamng.drive.exe","epic","7cdf03d0914abf557c372f81182b4039"],
+        ["1124351704880660691","Teardown","teardown/teardown.exe","steam","92f59a749490e51cdf13345c1385f8c3"],
+        ["363429406376722442","Kerbal Space Program","ksp.exe","steam","740c9d93b022699c2cf55af48a076734"],
+        ["363408909962182683","Stellaris","stellaris.exe","steam","a7b347a29279465267bf10fb0f6b5b1b"],
+        ["358421669603311616","Hearts of Iron IV","hearts of iron iv/hoi4.exe","steam","92bb13b24ca75bc279906d80b82e755d"],
+        ["876570707306381342","Disco Elysium","disco elysium/disco.exe","steam","30831af3ba88252db9c924de9825c375"],
+        ["1161772927566495865","It Takes Two","win64/ittakestwo.exe","epic","8dc5271ca97760e0b2dd39c5e053b85c"],
+        ["479169486583496704","Overcooked! 2","overcooked! 2/overcooked2.exe","steam","28fbee56b0c9d001f863772236f9753a"],
+        ["1224418065295478955","Content Warning","content warning/content warning.exe","steam","70ba8e85259eb8a64e66cb4cedf27b0b"],
+        ["1209665818464358430","Balatro","balatro/balatro.exe","steam","4078e9124dd31d6310ed609289c55a25"],
+        ["1199745463918788740","Enshrouded","enshrouded/enshrouded.exe","steam","d22cfd53e493ad403c7276c476285de7"],
+        ["1129504121708355634","V Rising","vrising/vrising.exe","steam","4565af6ac3cf99719dc9408fdad4baa8"],
+        ["359511228445491200","Guild Wars 2","gw2-64.exe","steam","27b99b7f1ca93180827f6246e506773a"],
+        ["1180205756998488064","Old School RuneScape","client/osclient.exe","steam","0cbdb362c84776acbc5116e9e5a93d26"],
+        ["1402418239342120960","osu!","osu!.exe","","ea86f6c52576847a7cb81f1c1faa18a3"],
+        ["356942674672091136","Geometry Dash","geometry dash/geometrydash.exe","steam","67f35d9429ee338d6f2824163c1b773d"],
+        ["398632010442211348","VRChat","vrchat/start_protected_game.exe","steam","5881acfa9405ee69158591ec1a791c74"],
+        ["363408834095742976","Tabletop Simulator","tabletop simulator.exe","steam","8f6d26ef7c9aa8de296db5858d85223c"],
+        ["1402418571715543120","Bloons TD 6","bloonstd6/bloonstd6.exe","epic","a0a565c547795c027b82f58c4a391c43"],
+        ["359509007423242240","The Sims 4","ts4.exe","epic","06273f5ee526b4ee9bd35ec60d707582"],
+        ["363430471322828800","Oxygen Not Included","oxygennotincluded.exe","epic","1037d19e54f972bed70089c065ff4664"],
+        ["1402418379041804348","Frostpunk","frostpunk.exe","epic","0565b37e6c4cca654543e4b11bc01c89"],
+        ["1124351726158352456","Inscryption","inscryption/inscryption.exe","epic","de76a09d6036a197651fa432c21883ef"],
+        ["1124351860376096858","Outer Wilds","outer wilds/outerwilds.exe","steam","f37dd58f6155799f3d8c9b38d9c5f90b"],
+        ["363427839137153024","Dying Light","dyinglightgame.exe","steam","16ff36b6b1c89bda00f15655ac7e87f9"],
+        ["1124352162890264686","Metro Exodus","meenhancededition/metroexodus.exe","steam","1de6a995de00fc964280c1100db7ad7e"],
+        ["1402417032258916553","Control","control/control_dx11.exe","steam","6ce4ec16083fc0b2a5c778dece82b3fc"],
+        ["1124351719950798848","Noita","noita/noita.exe","steam","9f093e77bc3f4f44aff95122eeec7d11"],
+        ["1124352063548174466","Spelunky 2","spelunky 2/spel2.exe","steam","536d32ed2466da37dfcc40f70f674684"],
+        ["363413202090065920","Enter the Gungeon","enter the gungeon/etg.exe","epic","18599bc8cb90200d35ab13d1cea8d870"],
+        ["1124351730323308675","Cult of the Lamb","cult of the lamb/cult of the lamb.exe","steam","33c7ac43fd84d89ea4a020f33a76541f"],
+        ["376180518749995028","Darkest Dungeon","_windows/darkest.exe","steam","5cc0dece8f3a151b90a9feb5b95613fa"],
+        ["1402416803866738808","Unturned","unturned/unturned.exe","steam","c868fc1f2cb2fcfaa11631db7125e3e7"],
+        ["1124351751164801115","PowerWash Simulator","powerwash simulator/powerwashsimulator.exe","steam","31408f75fa2c8a7858003deda221791a"],
+        ["1402416810229497917","Starbound","starbound.exe","steam","3d4cd654db31681e44a5c8fbbb40713f"],
+        ["449806905901056012","Raft","raft.exe","steam","aa3b7a0ded0341cfbfd463d349e06add"],
+        ["738856512868450314","Grounded","win64/maine-win64-shipping.exe","steam","a4f0d5a22ce60594b13b5c6c8506885b"],
+        ["1080279445153263686","Sons of the Forest","sons of the forest/sonsoftheforest.exe","steam","48269894766fd44d9a144f8f7541cce0"],
+        ["363409179668512788","The Forest","the forest/theforestvr.exe","steam","d757f03369c68943d76d6252f47a4813"],
+        ["363409643973771264","7 Days to Die","7daystodie.exe","steam","bbda03dd7c05264447674d691713b344"],
+        ["1124351818437242910","Brotato","brotato/brotato.exe","steam","5049b9e12bad6ff0427800eaadb19bee"],
+        ["1276737795012165766","Deadlock","win64/deadlock.exe","steam","08e679bae42c738a66c1b2e0e546ecc0"],
+        ["1402418520662479019","Paladins","paladins.exe","epic","6b237187eda7dd2284134ed8315eac92"],
+        ["358422012990849024","SMITE","smite.exe","steam","d47e191eb893a1d6377264e11f1e901b"],
+        ["742897755160313986","Fall Guys","fallguys_client.exe","epic","87695409002d97fbd5ce7cba1796f2e8"],
+        ["385538103831429120","Human: Fall Flat","human.exe","steam","48823134f097206949116832d82dfb28"],
+        ["363409129643180032","Gang Beasts","gang beasts.exe","steam","25f58de774770f6d83e64e839cd69a0d"],
+        ["1124351985051775036","Dyson Sphere Program","dyson sphere program/dspgame.exe","steam","aeef155a17414fd86a81f2c0940e0a22"],
+        ["474081029490081792","Kenshi","kenshi/kenshi_x64.exe","steam","9f159050ec5ee7d5893624645a36298e"],
+        ["1163956401874403438","Mount & Blade II: Bannerlord","win64_shipping_client/bannerlord.exe","steam","70ff1999ed550805108084d81553e0f7"],
+        ["1124351943247155330","Chivalry 2","win64/chivalry2-win64-shipping.exe","steam","b5815c8c67a8f5a1bc15c37e7cea0e35"],
+        ["425438403819995145","For Honor","for honor/forhonor.exe","steam","02e63008d18580c53a2882ae38d71609"],
+        ["1124351854831222945","ULTRAKILL","ultrakill/ultrakill.exe","steam","2eeaba2eca9e5c844b5de4334e511da5"],
+        ["1129504770533634149","TUNIC","tunic/tunic.exe","epic","959801fcc1a6bc81b2e84496a8662118"],
+        ["1124351702972256328","Stray","win64/stray-win64-shipping.exe","epic","6ebd57686f1800d7d77dd9352a6ac910"],
+        ["356954111901433856","Cities: Skylines","cities.exe","epic","3b5eed7a9364591c629fcf47bd4a18f7"],
+        ["1402418309189603418","Age of Empires II: Definitive Edition","age of empires ii definitive edition/aoe2de_s.exe","steam","18b1d3bea8e201decfb923798300e0ad"],
+        ["1113966530531704943","Diablo IV","diablo iv/diablo iv.exe","steam","ced913ddd2b497545cd3e2931b1310ab"],
+        ["940810636273795162","Lost Ark","win64/lostark.exe","steam","2f35f5396609d5cee274b05cb95c06f9"],
+        ["1402418374851432561","Black Desert","blackdesert32.exe","steam","112e60c67a42d9d8f6c9e1f3c60e843b"]
+    ].map(([id, name, exePath, distributor, icon]) => ({id, name, exePath, distributor:distributor || null, icon:icon || null}));
+    const badges = {generation:0, user:null, catalog:null, catalogAt:0, catalogLoading:null, current:null, heartbeatTimer:undefined,
+        activityTimer:undefined, cycleTimer:undefined, startTimer:undefined, tickTimer:undefined, played:new Set(), cycled:0,
+        secondsSession:0, last:null, error:"", directoryAt:0, badgeStore:null, attached:false, patchedRunning:false, analytics:null};
     function badgeNeedsGame() { return !!(enabled("badges") && (settings.badgesGameTime || settings.badgesUniqueGames)); }
-    function badgeTodayKey() {
-        const d = new Date(), pad = n => (n < 10 ? "0" : "") + n;
-        return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate());
-    }
-    function badgeStripExePrefix(exe) {
-        if (typeof exe !== "string") return null;
-        let clean = exe.replace(/^>/, "").replace(/\\/g, "/").toLowerCase().trim();
-        if (clean.endsWith("/")) clean = clean.slice(0, -1);
-        if (!clean || /(^|\/)\.\.(\/|$)/.test(clean)) return null;
-        const parts = clean.split("/").filter(Boolean);
-        return parts.length ? parts.slice(-2).join("/") : null;
-    }
-    function badgePickExecutable(game) {
-        const list = game && Array.isArray(game.executables) ? game.executables : [];
-        const rank = name => (/(^|[\/_.-])(test|launcher|crash|helper|setup|update|install|unins|benchmark|server|editor)/i.test(name) ? 2 : 0) + (name.includes("/") ? 0 : 1);
-        const candidates = [];
-        for (let i = 0; i < list.length; i++) {
-            const e = list[i];
-            if (!e || e.os !== "win32" || e.is_launcher || typeof e.name !== "string" || !/\.exe$/i.test(e.name)) continue;
-            const stripped = badgeStripExePrefix(e.name);
-            if (stripped) candidates.push(stripped);
-        }
-        if (!candidates.length) return null;
-        candidates.sort((a, b) => rank(a) - rank(b) || (a < b ? -1 : a > b ? 1 : 0));
-        return candidates[0];
-    }
-    function badgePickDistributor(game) {
-        const skus = game && (Array.isArray(game.third_party_skus) ? game.third_party_skus : Array.isArray(game.thirdPartySkus) ? game.thirdPartySkus : []);
-        for (let i = 0; i < skus.length; i++) {
-            const dist = skus[i] && skus[i].distributor;
-            if (typeof dist === "string" && dist) return dist;
-        }
-        return "steam";
-    }
-    function badgeExtractCatalog(rawList) {
-        const seen = new Set(), out = [];
-        for (let i = 0; i < BADGE_CURATED_GAMES.length; i++) {
-            const g = BADGE_CURATED_GAMES[i];
-            seen.add(g.id); out.push(g);
-        }
-        if (Array.isArray(rawList)) {
-            for (let i = 0; i < rawList.length; i++) {
-                const g = rawList[i], id = g && typeof g.id === "string" ? g.id : null;
-                if (!id || seen.has(id) || typeof g.name !== "string" || !g.name.trim()) continue;
-                const exePath = badgePickExecutable(g);
-                if (!exePath) continue;
-                seen.add(id);
-                out.push({id, name:g.name.trim(), exePath, distributor:badgePickDistributor(g)});
-            }
-        }
-        return out;
-    }
-    async function badgeEnsureCatalog(generation) {
-        if (badges.catalog.length > BADGE_CURATED_GAMES.length && Date.now() - badges.catalogFetchedAt < 6 * 3600 * 1000)
-            return badges.catalog;
-        const store = badges.gameStore || (badges.gameStore = inspectedExport(2037, "default"));
+    function badgeCycleOn() { return !!(enabled("badges") && settings.badgesUniqueGames); }
+    function badgeClear(name) { if (badges[name] !== undefined && global.clearTimeout) global.clearTimeout(badges[name]); badges[name] = undefined; }
+    function badgeStopTimers() { ["heartbeatTimer", "activityTimer", "cycleTimer", "startTimer", "tickTimer"].forEach(badgeClear); }
+    // Discord only counts play time toward these badges with "Use data to personalize my Discord experience" on.
+    function badgeConsented() {
         try {
-            const existing = store && typeof store.games === "object" && Array.isArray(store.games) ? store.games : null;
-            if (existing && existing.length > 0) {
-                badges.catalog = badgeExtractCatalog(existing);
-                badges.catalogFetchedAt = Date.now();
-                return badges.catalog;
-            }
-        } catch (_) {}
-        if (!badges.catalogFetching) {
-            badges.catalogFetching = true;
-            try {
-                const res = await questRequest("/games/detectable", undefined, true, "get", () => generation === badges.generation && badgeNeedsGame());
-                const body = res && res.body;
-                if (Array.isArray(body) && body.length) {
-                    badges.catalog = badgeExtractCatalog(body);
-                    badges.catalogFetchedAt = Date.now();
-                    questDispatch({type:"GAMES_DATABASE_UPDATE", games:body});
-                }
-            } catch (_) {}
-            badges.catalogFetching = false;
-        }
-        if (!badges.catalog.length) badges.catalog = badgeExtractCatalog(null);
-        return badges.catalog;
+            const store = inspectedExport(5932, "default");
+            if (!store || typeof store.hasConsented !== "function") return null;
+            return !!store.hasConsented("personalization");
+        } catch (_) { return null; }
     }
-    function badgePickNextGame(catalog, avoidId) {
-        const list = Array.isArray(catalog) && catalog.length ? catalog : BADGE_CURATED_GAMES;
-        if (!settings.badgesUniqueGames && badges.current && badges.current.game && badges.current.game.id !== avoidId)
-            return badges.current.game;
-        const unplayed = [];
-        for (let i = 0; i < list.length; i++) {
-            const g = list[i];
-            if (g && g.id !== avoidId && !badges.played.has(g.id)) unplayed.push(g);
+    function badgeTurnOnPersonalization() {
+        const set = inspectedExport(15139, "setConsents");
+        if (typeof set !== "function") return;
+        try {
+            const res = set(["personalization"], []);
+            if (res && typeof res.then === "function") res.then(() => { questDispatch({type:"UPDATE_CONSENTS", consents:{personalization:{consented:true}}}); notify("badges"); }, () => {});
+        } catch (_) {}
+    }
+    function badgeIconUrl(game, size) {
+        return game && game.icon && /^[0-9a-f]{32}$/.test(game.icon) ? "https://cdn.discordapp.com/app-icons/" + game.id + "/" + game.icon + ".png?size=" + (size || 128) : null;
+    }
+    // The Windows executable desktop names for a detected game, like questExecutableName with the two-part trim.
+    function badgeExecutable(game) {
+        const list = game && Array.isArray(game.executables) ? game.executables : [];
+        const rank = name => (/(^|[\/_.-])(test|launcher|crash|helper|setup|update|install|unins|benchmark|server|editor|dedicated)/i.test(name) ? 2 : 0) + (name.includes("/") ? 0 : 1);
+        const names = [];
+        for (const e of list) {
+            if (!e || e.os !== "win32" || e.is_launcher || typeof e.name !== "string" || !/\.exe$/i.test(e.name)) continue;
+            const clean = e.name.replace(/^>/, "").replace(/\\/g, "/").toLowerCase().replace(/^\/+|\/+$/g, "");
+            if (clean && !/(^|\/)\.\.(\/|$)/.test(clean)) names.push(clean);
         }
-        if (unplayed.length) return unplayed[Math.floor(Math.random() * Math.min(unplayed.length, 50))];
-        const fallback = list.filter(g => g && g.id !== avoidId);
-        return fallback.length ? fallback[Math.floor(Math.random() * fallback.length)] : list[0] || BADGE_CURATED_GAMES[0];
+        names.sort((a, b) => rank(a) - rank(b) || (a < b ? -1 : a > b ? 1 : 0));
+        return names.length ? names[0].split("/").slice(-2).join("/") : null;
+    }
+    const BADGE_DISTRIBUTORS = ["steam", "epic", "battlenet", "riot", "gog", "origin", "uplay", "discord", "microsoft"];
+    function badgeGameFromServer(raw) {
+        if (!raw || typeof raw.id !== "string" || !/^\d{17,20}$/.test(raw.id) || typeof raw.name !== "string" || !raw.name.trim()) return null;
+        // Only real games Discord can detect on Windows, with art to show on your profile.
+        if (raw.type != null && raw.type !== 0 && raw.type !== 5) return null;
+        const exePath = badgeExecutable(raw), icon = raw.icon_hash || raw.icon || null;
+        if (!exePath || !icon) return null;
+        const skus = Array.isArray(raw.third_party_skus) ? raw.third_party_skus : Array.isArray(raw.thirdPartySkus) ? raw.thirdPartySkus : [];
+        const sku = skus.find(s => s && BADGE_DISTRIBUTORS.includes(s.distributor));
+        return {id:raw.id, name:raw.name.trim(), exePath, distributor:sku ? sku.distributor : null, icon:String(icon), sku:sku && typeof sku.id === "string" ? sku.id : null};
+    }
+    // Discord's full detectable list: the one DetectableGameStore already has, or /games/detectable (public, cached).
+    function badgeCatalog() {
+        if (badges.catalog && Date.now() - badges.catalogAt < BADGE_CATALOG_TTL_MS) return Promise.resolve(badges.catalog);
+        if (badges.catalogLoading) return badges.catalogLoading;
+        const generation = badges.generation;
+        const build = list => {
+            const out = [], seen = new Set();
+            for (const raw of list) { const g = badgeGameFromServer(raw); if (g && !seen.has(g.id)) { seen.add(g.id); out.push(g); } }
+            return out;
+        };
+        badges.catalogLoading = (async () => {
+            let list = null;
+            try {
+                const res = await questRequest("/games/detectable", undefined, false, "get", () => generation === badges.generation && badgeNeedsGame());
+                const body = res && res.body;
+                if (Array.isArray(body) && body.length > 100) list = build(body);
+            } catch (_) {}
+            if (list && list.length > 100) { badges.catalog = list; badges.catalogAt = Date.now(); }
+            badges.catalogLoading = null;
+            return badges.catalog || BADGE_FALLBACK_GAMES;
+        })();
+        return badges.catalogLoading;
+    }
+    // The next game: one you haven't played with Badge Completer yet, picked at random; the well-known ones first.
+    function badgePickGame(catalog, avoidId) {
+        const pool = g => g && g.id !== avoidId && !badges.played.has(g.id);
+        const fresh = BADGE_FALLBACK_GAMES.filter(pool);
+        if (fresh.length) return fresh[Math.floor(Math.random() * fresh.length)];
+        const rest = (catalog || []).filter(pool);
+        if (rest.length) return rest[Math.floor(Math.random() * rest.length)];
+        const any = (catalog && catalog.length ? catalog : BADGE_FALLBACK_GAMES).filter(g => g.id !== avoidId);
+        return any[Math.floor(Math.random() * any.length)] || BADGE_FALLBACK_GAMES[0];
     }
     function badgeMarkPlayed(id) {
-        if (typeof id !== "string" || !/^\d{5,25}$/.test(id) || badges.played.has(id)) return;
+        if (badges.played.has(id)) return;
         if (badges.played.size >= BADGES_MAX_PLAYED) badges.played.delete(badges.played.keys().next().value);
         badges.played.add(id);
         save();
     }
-    function badgeUpdatePresence(entry) {
-        questDispatch({
-            type:"LOCAL_ACTIVITY_UPDATE",
-            socketId:BADGE_SOCKET_ID,
-            pid:BADGE_PID,
-            activity:entry ? {
-                name:entry.game.name,
-                application_id:entry.game.id,
-                type:0,
-                timestamps:{start:entry.startedAt}
-            } : null
-        });
+    // Your analytics token, which /science needs; AuthenticationStore has it after login, /users/@me otherwise.
+    async function badgeAnalyticsToken() {
+        try {
+            const auth = inspectedExport(502, "default"), token = auth && typeof auth.getAnalyticsToken === "function" ? auth.getAnalyticsToken() : null;
+            if (typeof token === "string" && token) return token;
+        } catch (_) {}
+        if (badges.analytics && badges.analytics.user === badges.user) return badges.analytics.token;
+        const res = await questRequest("/users/@me?with_analytics_token=true", undefined, false, "get");
+        const token = res && res.body && res.body.analytics_token;
+        if (typeof token !== "string" || !token) throw new Error("no analytics token");
+        badges.analytics = {user:badges.user, token};
+        return token;
     }
-    function badgeSessionIds() {
-        let sessionId = null, voiceChannelId = null, mediaSessionId = null;
-        try {
-            const auth = badges.authStore || (badges.authStore = inspectedExport(502, "default"));
-            if (auth && typeof auth.getSessionId === "function") sessionId = auth.getSessionId() || null;
-        } catch (_) {}
-        try {
-            const voice = badges.voiceStore || (badges.voiceStore = inspectedExport(5113, "default"));
-            const uid = currentId();
-            if (voice && uid && typeof voice.getVoiceStateForUser === "function") {
-                const st = voice.getVoiceStateForUser(uid);
-                voiceChannelId = st && st.channelId || null;
-            }
-        } catch (_) {}
-        try {
-            const media = badges.mediaStore || (badges.mediaStore = inspectedExport(2012, "default"));
-            if (media && typeof media.getMediaSessionId === "function") mediaSessionId = media.getMediaSessionId() || null;
-        } catch (_) {}
-        return {sessionId, voiceChannelId, mediaSessionId};
+    let badgeSequence = 0;
+    // The same events, with the same properties, as Discord for Windows' launch_game and running_game_heartbeat.
+    function badgeEvent(type, properties) {
+        questDesktopProperties();
+        const identity = quest.desktop || {}, now = Date.now();
+        return {type, properties:Object.assign({client_track_timestamp:now, client_heartbeat_session_id:identity.session || null,
+            event_sequence_number:++badgeSequence}, properties, {launch_signature:identity.signature || null, client_app_state:"unfocused", client_send_timestamp:now})};
     }
-    // Same POST /activities payload as Discord's ActivityTrackingStore.updateActivity (14038 -> 10668):
-    // duration 0 with token null opens the session and returns a token; later reports send elapsed seconds
-    // (capped at 35 minutes like ActivityTrackingStore) with that token, and closed: true ends the session.
-    async function badgeSendActivity(entry, closed) {
-        if (!entry || !entry.game) return false;
-        const now = Date.now();
-        const elapsedMs = entry.updatedAt != null ? now - entry.updatedAt : 0;
-        const duration = elapsedMs > 0 && elapsedMs <= BADGE_MAX_DURATION_MS ? Math.floor(elapsedMs / 1000) : 0;
-        const ids = badgeSessionIds();
-        const body = {
-            application_id:entry.game.id,
-            token:entry.token || null,
-            duration,
-            share_activity:true,
-            distributor:entry.game.distributor || "steam",
-            closed:!!closed,
-            exePath:entry.game.exePath || null,
-            voice_channel_id:ids.voiceChannelId,
-            session_id:ids.sessionId,
-            media_session_id:ids.mediaSessionId
-        };
-        entry.updatedAt = now;
+    function badgeHeartbeat(entry, initial, final) {
+        const now = Date.now(), tracked = initial ? 0 : Math.max(0, Math.round(now - entry.heartbeatAt));
+        entry.heartbeatAt = now;
+        const g = entry.game;
+        return badgeEvent("running_game_heartbeat", {game_id:g.id, game_name:g.name, game_distributor:g.distributor, game_distributor_game_id:g.sku || null,
+            game_metadata:null, game_executable:g.exePath, game_detection_enabled:true, initial_heartbeat:!!initial, final_heartbeat:!!final,
+            game_session_id:entry.session, duration_tracked_ms:tracked, rtc_connection_id:null, media_session_id:null, discord_window_state:"hidden"});
+    }
+    function badgeLaunch(entry) {
+        const g = entry.game;
+        return badgeEvent("launch_game", {game:g.name, game_id:g.id, verified:true, elevated:false, is_launcher:false, game_platform:"desktop",
+            detection_method:"verified_game", distributor:g.distributor, is_overlay_enabled:false, is_overlay_game_enabled:false,
+            is_overlay_game_source:"OOP_DEFAULT_DATABASE", fullscreen_type:"UNKNOWN", hardware_display_count:1, overlay_method:"Disabled",
+            activity_status_enabled:true, activity_status_shared_guilds:[], current_user_status:"online", game_detection_enabled:true,
+            executable_path:g.exePath, voice_channel_id:null, voice_channel_type:null, voice_channel_bitrate:null, voice_channel_guild_id:null,
+            distributor_game_id:g.sku || null, hidden_by_distributor:false, game_metadata:null});
+    }
+    async function badgeScience(events) {
+        const token = await badgeAnalyticsToken();
+        await questRequest("/science", {token, events}, true, "post");
+    }
+    // A report that didn't go through is said once, quietly, and tried again with the next heartbeat.
+    function badgeProblem(error) {
+        const status = error && error.status;
+        badges.error = status || "offline";
+        notify("badges");
+    }
+    // Play time on your game stats, the same POST /activities body as ActivityTrackingStore.updateActivity.
+    async function badgeActivity(entry, closed) {
+        const now = Date.now(), elapsed = entry.activityAt != null ? now - entry.activityAt : 0;
+        const duration = elapsed > 0 && elapsed <= BADGE_MAX_DURATION_MS ? Math.floor(elapsed / 1000) : 0;
+        entry.activityAt = now;
+        const ids = {sessionId:null, mediaSessionId:null, voiceChannelId:null};
+        try { const auth = inspectedExport(502, "default"); ids.sessionId = auth && auth.getSessionId() || null; } catch (_) {}
         try {
-            const response = await questRequest("/activities", body, true, "post",
-                () => closed || entry === badges.current && entry.generation === badges.generation && badgeNeedsGame());
-            const reply = response && response.body;
-            if (reply && typeof reply.token === "string" && reply.token) entry.token = reply.token;
-            if (duration >= 60) badges.minutesSession += Math.round(duration / 60);
-            badges.error = "";
-            questDispatch({type:"ACTIVITY_UPDATE_SUCCESS", applicationId:entry.game.id, token:entry.token, duration, distributor:body.distributor});
-            badgeMarkPlayed(entry.game.id);
-            notify("badges");
+            const res = await questRequest("/activities", {application_id:entry.game.id, distributor:entry.game.distributor || "steam", share_activity:true,
+                token:entry.token || null, duration, closed:!!closed, exePath:entry.game.exePath, voice_channel_id:ids.voiceChannelId,
+                session_id:ids.sessionId, media_session_id:ids.mediaSessionId}, true, "post",
+                () => closed || entry === badges.current && entry.generation === badges.generation);
+            const token = res && res.body && res.body.token;
+            if (typeof token === "string" && token) entry.token = token;
+            badges.secondsSession += duration;
             return true;
-        } catch (error) {
-            if (!closed && entry === badges.current) {
-                entry.token = null; entry.updatedAt = null;
-                badges.error = tr("Couldn't report game activity: {problem}", {problem:String(error && error.message || error)});
-                notify("badges");
-            }
+        } catch (_) {
+            // Discord answers 404 for games it no longer tracks play time for; the analytics above still count.
+            entry.token = null;
             return false;
         }
     }
-    function badgeScheduleReport(entry) {
-        if (badges.reportTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.reportTimer);
-        badges.reportTimer = undefined;
-        if (!entry || entry !== badges.current || typeof global.setTimeout !== "function") return;
-        badges.reportTimer = global.setTimeout(() => {
-            badges.reportTimer = undefined;
-            if (entry !== badges.current || !badgeNeedsGame()) return;
-            badgeSendActivity(entry, false).then(() => {
-                if (entry === badges.current && badgeNeedsGame()) {
-                    badgeRefreshDirectory(false);
-                    badgeScheduleReport(entry);
-                }
-            });
-        }, BADGE_REPORT_MS);
+    // Your profile shows the game, with Discord's own art for it, like a game detected on your computer.
+    function badgePresence(entry) {
+        questDispatch({type:"LOCAL_ACTIVITY_UPDATE", socketId:"venus-badges", pid:BADGE_PID,
+            activity:entry ? {name:entry.game.name, application_id:entry.game.id, type:0, timestamps:{start:entry.startedAt}, flags:0} : null});
+        if (entry) try { const fetch = inspectedExport(6853, "fetchApplication"); if (typeof fetch === "function") { const r = fetch(entry.game.id); if (r && r.catch) r.catch(() => {}); } } catch (_) {}
+    }
+    function badgeScheduleHeartbeat(entry) {
+        badgeClear("heartbeatTimer");
+        badges.heartbeatTimer = later(() => {
+            badges.heartbeatTimer = undefined;
+            if (entry !== badges.current) return;
+            badgeScience([badgeHeartbeat(entry, false, false)]).then(() => { if (badges.error) { badges.error = ""; notify("badges"); } }, badgeProblem);
+            badgeScheduleHeartbeat(entry);
+        }, BADGE_HEARTBEAT_MS, false);
+        badgeClear("activityTimer");
+        badges.activityTimer = later(function again() {
+            badges.activityTimer = undefined;
+            if (entry !== badges.current) return;
+            badgeActivity(entry, false);
+            badges.activityTimer = later(again, BADGE_ACTIVITY_MS, false);
+        }, BADGE_ACTIVITY_MS, false);
     }
     function badgeScheduleCycle(entry) {
-        if (badges.cycleTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.cycleTimer);
-        badges.cycleTimer = undefined;
-        if (!entry || entry !== badges.current || !settings.badgesUniqueGames || typeof global.setTimeout !== "function") return;
-        const waitMs = badgeCycleMinutes(settings.badgesCycleMinutes) * 60 * 1000;
-        const leftMs = Math.max(5000, waitMs - (Date.now() - entry.startedAt));
-        badges.cycleTimer = global.setTimeout(() => {
-            badges.cycleTimer = undefined;
-            if (entry !== badges.current || !badgeNeedsGame() || !settings.badgesUniqueGames) return;
-            badgeCycleGame();
-        }, leftMs);
+        badgeClear("cycleTimer");
+        if (!entry || entry !== badges.current || !badgeCycleOn()) return;
+        const left = Math.max(5000, badgeCycleMinutes(settings.badgesCycleMinutes) * 60000 - (Date.now() - entry.startedAt));
+        badges.cycleTimer = later(() => { badges.cycleTimer = undefined; if (entry === badges.current && badgeCycleOn()) badgeNextGame(); }, left, false);
+    }
+    // Keeps the page's countdown and progress bar moving while it's open.
+    function badgeTick() {
+        badgeClear("tickTimer");
+        if (!badges.current) return;
+        badges.tickTimer = later(() => { badges.tickTimer = undefined; notify("badges"); badgeTick(); }, 30000, false);
+    }
+    async function badgeStopGame(entry) {
+        if (!entry) return;
+        badgeClear("heartbeatTimer"); badgeClear("activityTimer"); badgeClear("cycleTimer"); badgeClear("tickTimer");
+        badgePresence(null);
+        const final = badgeHeartbeat(entry, false, true);
+        await Promise.all([badgeScience([final]).catch(() => {}), badgeActivity(entry, true)]);
     }
     async function badgeStartGame(avoidId) {
-        const generation = badges.generation;
+        const generation = ++badges.generation;
         if (!badgeNeedsGame() || !badges.user) return;
-        const catalog = await badgeEnsureCatalog(generation);
-        if (generation !== badges.generation || !badgeNeedsGame() || !badges.user) return;
-        const game = badgePickNextGame(catalog, avoidId);
-        if (!game) return;
-        const now = Date.now();
-        const entry = {game, startedAt:now, updatedAt:null, token:null, generation};
-        badges.current = entry;
-        badges.last = game.name;
-        backgroundSync();
-        badgeUpdatePresence(entry);
-        notify("badges");
-        await badgeSendActivity(entry, false);
-        if (entry !== badges.current || generation !== badges.generation) return;
-        badgeScheduleReport(entry);
-        badgeScheduleCycle(entry);
-    }
-    async function badgeCycleGame() {
-        const prev = badges.current;
-        const avoidId = prev && prev.game ? prev.game.id : null;
-        if (prev) {
-            badges.current = null;
-            if (badges.reportTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.reportTimer);
-            if (badges.cycleTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.cycleTimer);
-            badges.reportTimer = undefined; badges.cycleTimer = undefined;
-            await badgeSendActivity(prev, true);
-            badges.cycledSession++;
-        }
-        if (badgeNeedsGame() && badges.user) await badgeStartGame(avoidId);
-        else { badgeUpdatePresence(null); backgroundSync(); notify("badges"); }
-    }
-    // Account activity: keeps GatewaySocket's QoS state active (even in the background) and checks in once each UTC day
-    // so Discord records your account as active in case you miss a day.
-    function badgePulseActive(force) {
-        if (!enabled("badges") || !settings.badgesActivity || !badges.user) return;
+        const catalog = await badgeCatalog();
+        if (generation !== badges.generation || !badgeNeedsGame() || !badges.user || badges.current) return;
+        const game = badgePickGame(catalog, avoidId), now = Date.now();
+        const entry = {game, generation, startedAt:now, heartbeatAt:now, activityAt:null, token:null, session:questUuidText(questUuid())};
+        badges.current = entry; badges.last = game;
+        badgePresence(entry);
+        backgroundSync(); notify("badges");
         try {
-            const gw = inspectedExport(13933, "default") || (global.__r ? global.__r(13933) : null);
-            const socket = gw && (gw.socket || typeof gw.getSocket === "function" && gw.getSocket());
-            if (socket && typeof socket.handleActiveStateChange === "function")
-                socket.handleActiveStateChange({active:true, ver:2, reasons:["foregrounded"]});
-        } catch (_) {}
-        const today = badgeTodayKey();
-        if (force || badges.activeDay !== today) {
-            badges.activeDay = today;
-            save();
-            badgeRefreshDirectory(true);
-            notify("badges");
-        }
+            await badgeScience([badgeHeartbeat(entry, true, false), badgeLaunch(entry)]);
+            if (entry === badges.current) { badges.error = ""; badgeMarkPlayed(game.id); }
+        } catch (error) { if (entry === badges.current) badgeProblem(error); }
+        if (entry !== badges.current) return;
+        badgeActivity(entry, false);
+        badgeScheduleHeartbeat(entry); badgeScheduleCycle(entry); badgeTick();
+        notify("badges");
     }
-    function badgeScheduleActive() {
-        if (badges.activeTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.activeTimer);
-        badges.activeTimer = undefined;
-        if (!enabled("badges") || !settings.badgesActivity || typeof global.setTimeout !== "function") return;
-        badges.activeTimer = global.setTimeout(() => {
-            badges.activeTimer = undefined;
-            if (!enabled("badges") || !settings.badgesActivity) return;
-            badgePulseActive(false);
-            badgeScheduleActive();
-        }, BADGE_ACTIVE_MS);
+    async function badgeNextGame() {
+        const prev = badges.current;
+        badges.current = null;
+        if (prev) { await badgeStopGame(prev); badges.cycled++; }
+        if (badgeNeedsGame() && badges.user) await badgeStartGame(prev ? prev.game.id : null);
+        else { backgroundSync(); notify("badges"); }
     }
     function badgeRefreshDirectory(force) {
-        const actions = inspectedExport(8317, "fetchBadgeDirectory"), uid = badges.user || currentId();
-        if (typeof actions !== "function" || !uid) return;
-        try {
-            const res = actions(uid, force ? {force:true} : undefined);
-            if (res && typeof res.catch === "function") res.catch(() => {});
-        } catch (_) {}
+        const fetch = inspectedExport(8317, "fetchBadgeDirectory"), uid = badges.user || currentId();
+        if (typeof fetch !== "function" || !uid || !force && Date.now() - badges.directoryAt < 10 * 60 * 1000) return;
+        badges.directoryAt = Date.now();
+        try { const res = fetch(uid, force ? {force:true} : undefined); if (res && typeof res.catch === "function") res.catch(() => {}); } catch (_) {}
     }
     function badgesStart(delay) {
-        if (!enabled("badges") || typeof global.setTimeout !== "function") return;
-        if (badges.startTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.startTimer);
-        badges.startTimer = global.setTimeout(() => {
+        badgeClear("startTimer");
+        if (!enabled("badges")) return;
+        badges.startTimer = later(() => {
             badges.startTimer = undefined;
+            if (!badges.user) badges.user = currentId() || null;
             if (!enabled("badges") || !badges.user) return;
             badgeRefreshDirectory(false);
-            if (settings.badgesActivity) { badgePulseActive(false); badgeScheduleActive(); }
             if (badgeNeedsGame() && !badges.current) badgeStartGame(null);
-            backgroundSync();
-            notify("badges");
-        }, delay);
+        }, delay, false);
     }
-    function badgesStop(sendClose) {
+    function badgesStop() {
         badges.generation++;
         const prev = badges.current;
         badges.current = null;
-        if (global.clearTimeout) {
-            if (badges.startTimer !== undefined) global.clearTimeout(badges.startTimer);
-            if (badges.reportTimer !== undefined) global.clearTimeout(badges.reportTimer);
-            if (badges.cycleTimer !== undefined) global.clearTimeout(badges.cycleTimer);
-            if (badges.activeTimer !== undefined) global.clearTimeout(badges.activeTimer);
-        }
-        badges.startTimer = undefined; badges.reportTimer = undefined; badges.cycleTimer = undefined; badges.activeTimer = undefined;
-        badgeUpdatePresence(null);
-        if (sendClose && prev && badges.user) badgeSendActivity(prev, true);
-        backgroundSync();
-        notify("badges");
-    }
-    function badgesReset() {
-        badgesStop(false);
-        badges.cycledSession = 0; badges.minutesSession = 0; badges.last = ""; badges.error = "";
-        notify("badges");
+        badgeStopTimers();
+        if (prev && badges.user) badgeStopGame(prev); else badgePresence(null);
+        backgroundSync(); notify("badges");
     }
     function badgesConnected(event) {
         const id = event && event.user && event.user.id || currentId();
-        if (id && badges.user && id !== badges.user) badgesReset();
+        if (id && badges.user && id !== badges.user) { badgesStop(); badges.cycled = 0; badges.secondsSession = 0; badges.played.clear(); badges.analytics = null; }
         if (id) badges.user = id;
         if (!enabled("badges")) return;
-        if (badges.current) {
-            badgeUpdatePresence(badges.current);
-            if (settings.badgesActivity) { badgePulseActive(false); badgeScheduleActive(); }
-        } else badgesStart(6000);
+        if (badges.current) badgePresence(badges.current); else badgesStart(6000);
     }
     function badgesAttachStore(store) {
         if (badges.badgeStore || !store || typeof store.getBadgeById !== "function") return;
         badges.badgeStore = store;
-        if (typeof store.addChangeListener === "function") store.addChangeListener(() => { if (features.badges) notify("badges"); });
+        if (typeof store.addChangeListener === "function") store.addChangeListener(() => { if (enabled("badges")) notify("badges"); });
     }
     function badgesInit(dispatcher) {
-        if (badges.dispatcher || !dispatcher || typeof dispatcher.subscribe !== "function") return;
-        badges.dispatcher = dispatcher;
+        if (badges.attached || !dispatcher || typeof dispatcher.subscribe !== "function") return;
+        badges.attached = true;
         dispatcher.subscribe("CONNECTION_OPEN", badgesConnected);
-        dispatcher.subscribe("LOGOUT", () => { badgesReset(); badges.user = null; });
-        dispatcher.subscribe("APP_STATE_UPDATE", event => {
-            if (!enabled("badges") || !badges.user) return;
-            if (settings.badgesActivity) badgePulseActive(false);
-            if (event && event.state === "active" && badgeNeedsGame() && !badges.current && badges.startTimer === undefined) badgesStart(2000);
-        });
+        dispatcher.subscribe("LOGOUT", () => { badgesStop(); badges.user = null; badges.analytics = null; });
+        dispatcher.subscribe("UPDATE_CONSENTS", () => { if (enabled("badges")) notify("badges"); });
     }
     function badgesLoaded() {
-        const uid = badges.user || currentId();
-        if (uid) badges.user = uid;
-        if (badges.user && badges.startTimer === undefined && !badges.current) badgesStart(4000);
+        badges.user = badges.user || currentId() || null;
+        if (badges.user && !badges.current) badgesStart(4000);
     }
     function badgesSettingChanged(key, value) {
-        if (key === "badges" && !value) { badgesStop(true); return; }
+        if (key === "badges" && !value) { badgesStop(); return; }
         if (!enabled("badges")) return;
-        if (key === "badges") { badgesStart(500); return; }
-        if (key === "badgesActivity") {
-            if (value) { badgePulseActive(true); badgeScheduleActive(); }
-            else if (badges.activeTimer !== undefined && global.clearTimeout) { global.clearTimeout(badges.activeTimer); badges.activeTimer = undefined; }
-        }
+        if (key === "badges") { badges.user = badges.user || currentId() || null; badgesStart(300); return; }
         if (key === "badgesGameTime" || key === "badgesUniqueGames") {
-            if (!badgeNeedsGame()) {
-                const prev = badges.current;
-                badges.current = null;
-                if (badges.reportTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.reportTimer);
-                if (badges.cycleTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.cycleTimer);
-                badges.reportTimer = undefined; badges.cycleTimer = undefined;
-                badgeUpdatePresence(null);
-                if (prev && badges.user) badgeSendActivity(prev, true);
-            } else if (!badges.current) {
-                badgesStart(500);
-            } else if (key === "badgesUniqueGames") {
-                if (value) badgeScheduleCycle(badges.current);
-                else if (badges.cycleTimer !== undefined && global.clearTimeout) { global.clearTimeout(badges.cycleTimer); badges.cycleTimer = undefined; }
-            }
+            if (!badgeNeedsGame()) badgesStop();
+            else if (!badges.current) badgesStart(300);
+            else badgeScheduleCycle(badges.current);
         }
-        if (key === "badgesCycleMinutes" && badges.current && settings.badgesUniqueGames) badgeScheduleCycle(badges.current);
-        backgroundSync();
-        notify("badges");
+        if (key === "badgesCycleMinutes" && badges.current) badgeScheduleCycle(badges.current);
+        backgroundSync(); notify("badges");
     }
-    // Ensures our badge game activity shows on your Discord profile while Game time or Unique games is running,
-    // even if Discord's own "Share my activity" setting was off.
+    // While a game is playing it stays on your profile, even if Discord's own "Share my activity" setting hides games.
     function hookSelfPresenceStore(exports) {
         const store = exports && exports.default;
-        if (!store || badges.presenceHooked || typeof store.getActivities !== "function") return exports;
-        badges.presenceHooked = true;
+        if (!store || badges.patchedRunning || typeof store.getActivities !== "function") return exports;
+        badges.patchedRunning = true;
         const inject = list => {
-            const arr = Array.isArray(list) ? list : [];
-            if (!badgeNeedsGame() || !badges.current) return arr;
-            const appId = badges.current.game.id;
-            for (let i = 0; i < arr.length; i++) if (arr[i] && arr[i].application_id === appId) return arr;
-            const local = inspectedExport(10649, "default");
-            let act = null;
-            try { if (local && typeof local.getApplicationActivity === "function") act = local.getApplicationActivity(appId); } catch (_) {}
-            if (!act) act = {name:badges.current.game.name, application_id:appId, type:0, timestamps:{start:badges.current.startedAt}};
-            return arr.concat([act]);
+            const arr = Array.isArray(list) ? list : [], entry = badges.current;
+            if (!entry || !badgeNeedsGame() || arr.some(a => a && a.application_id === entry.game.id)) return arr;
+            return arr.concat([{name:entry.game.name, application_id:entry.game.id, type:0, timestamps:{start:entry.startedAt}, flags:0}]);
         };
         let patched = hookExport(store, "getActivities", (orig, self, args) => inject(orig.apply(self, args)));
         if (typeof store.getUnfilteredActivities === "function")
             patched = hookExport(patched, "getUnfilteredActivities", (orig, self, args) => inject(orig.apply(self, args)));
         return replaceValue(exports, "default", patched);
     }
-    function badgeDirectoryInfo(badgeKey) {
-        const store = badges.badgeStore || (badges.badgeStore = inspectedExport(8312, "default"));
-        if (!store || typeof store.getBadgeById !== "function") return null;
-        const ids = inspectedExport(8304, "BadgeId");
-        const id = ids && ids[badgeKey] != null ? ids[badgeKey] : badgeKey.toLowerCase();
-        const uid = badges.user || currentId();
+    // A badge's progress from Discord's Badge Directory: tier name, how far along and what the next tier needs.
+    function badgeInfo(key) {
+        const store = badges.badgeStore || inspectedExport(8312, "default"), uid = badges.user || currentId();
+        if (!store || typeof store.getBadgeById !== "function" || !uid) return null;
+        const ids = inspectedExport(8304, "BadgeId"), id = ids && ids[key] != null ? ids[key] : key.toLowerCase();
         try {
-            let badge = store.getBadgeById(id, uid);
-            if (!badge && typeof badgeKey === "string") badge = store.getBadgeById(badgeKey.toLowerCase(), uid);
+            const badge = store.getBadgeById(id, uid);
             if (!badge) return null;
-            const prog = typeof store.getSingleRequirementProgress === "function" ? store.getSingleRequirementProgress(badge.badge_id || id, uid) :
-                Array.isArray(badge.progress) ? badge.progress[0] : null;
-            const tier = typeof store.getCurrentTier === "function" ? store.getCurrentTier(badge.badge_id || id, uid) : null;
-            const next = typeof store.getNextTier === "function" ? store.getNextTier(badge.badge_id || id, uid) : null;
-            const current = prog && Number.isFinite(Number(prog.current)) ? Number(prog.current) : null;
-            const threshold = prog && Number.isFinite(Number(prog.threshold)) && Number(prog.threshold) > 0 ? Number(prog.threshold) : null;
-            return {badge, current, threshold, tierName:tier && tier.name || "", nextName:next && next.name || "", owned:!!badge.owned};
+            const progress = typeof store.getSingleRequirementProgress === "function" ? store.getSingleRequirementProgress(id, uid) : null;
+            const tier = typeof store.getCurrentTier === "function" ? store.getCurrentTier(id, uid) : null;
+            const next = typeof store.getNextTier === "function" ? store.getNextTier(id, uid) : null;
+            const current = progress && Number.isFinite(Number(progress.current)) ? Number(progress.current) : null;
+            const goal = progress && Number(progress.threshold) > 0 ? Number(progress.threshold) : null;
+            return {current, goal, tier:tier && tier.name || "", next:next && next.name || "", owned:!!badge.owned};
         } catch (_) { return null; }
     }
-    function badgeProgressLine(label, info) {
-        if (!info) return null;
-        const tier = info.tierName ? " (" + info.tierName + ")" : "";
-        if (info.current != null && info.threshold != null)
-            return tr(label) + tier + ": " + info.current + " / " + info.threshold;
-        if (info.current != null)
-            return tr(label) + tier + ": " + info.current;
-        return null;
-    }
     function badgeShare() {
-        if (!enabled("badges") || !badges.current || !settings.badgesUniqueGames) return null;
-        const total = badgeCycleMinutes(settings.badgesCycleMinutes) * 60 * 1000;
-        const elapsed = Math.max(0, Date.now() - badges.current.startedAt);
-        return total > 0 ? Math.min(1, elapsed / total) : null;
+        const entry = badges.current;
+        if (!entry || !badgeCycleOn()) return null;
+        return Math.min(1, Math.max(0, (Date.now() - entry.startedAt) / (badgeCycleMinutes(settings.badgesCycleMinutes) * 60000)));
     }
-    function badgeStatusTitle() {
-        if (badges.error) return tr("Something went wrong");
-        if (!badgeTypesOn()) return tr("Nothing turned on");
-        if (badges.current) return tr("Playing {name}", {name:badges.current.game.name});
-        if (settings.badgesActivity && !badgeNeedsGame()) return tr("Keeping your account active");
-        return tr("Starting badge progress");
+    const BADGE_ROWS = [["GAME_TIME", 5051, "ClockIcon"], ["GAME_VARIETY", 9207, "GameControllerIcon"], ["ACCOUNT_AGE", 8675, "CalendarIcon"]];
+    function badgeRowText(key, info) {
+        const title = key === "GAME_TIME" ? tr("Hours Played") : key === "GAME_VARIETY" ? tr("Unique Games Played") : tr("Years Active");
+        const vars = info ? {current:info.current, goal:info.goal} : null;
+        const amount = !vars || vars.current == null || vars.goal == null ? null : key === "GAME_TIME" ? tr("{current} of {goal} hours", vars) :
+            key === "GAME_VARIETY" ? tr("{current} of {goal} games", vars) : tr("{current} of {goal} days", vars);
+        return {title, amount};
     }
-    function badgeStatusText() {
-        if (!enabled("badges")) return "Turned off. Switch it on in Features to start.";
+    const BADGE_CARD_DARK = {card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:12},
+        row:{flexDirection:"row", alignItems:"center", gap:12}, icon:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"},
+        art:{width:40, height:40, borderRadius:10, backgroundColor:"#4e50584d"}, divider:{height:1, backgroundColor:"#ffffff0f"}};
+    function badgeCardStyles() {
+        return useThemed("badgeCards", c => ({card:Object.assign({}, BADGE_CARD_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            row:BADGE_CARD_DARK.row, icon:Object.assign({}, BADGE_CARD_DARK.icon, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            art:Object.assign({}, BADGE_CARD_DARK.art, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}), divider:Object.assign({}, BADGE_CARD_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), BADGE_CARD_DARK);
+    }
+    function badgeText(text, variant, color, fallback) {
+        const Text = inspectedExport(5088, "Text");
+        return Text ? el(Text, {variant, color}, text) : el(RN.Text, {style:fallback}, text);
+    }
+    // One card with every badge: its icon, name and tier, how far along it is and a bar to the next tier.
+    function badgeProgressCard(s, on) {
+        const rows = BADGE_ROWS.map(([key, icon, iconName]) => {
+            const info = badgeInfo(key), Icon = venusIcon(icon, iconName), text = badgeRowText(key, info);
+            const counting = key === "GAME_TIME" ? on && settings.badgesGameTime : key === "GAME_VARIETY" ? on && settings.badgesUniqueGames : true;
+            const detail = !info ? "" : text.amount || (info.tier ? tr("Top tier") : "");
+            const tier = !info ? tr("Loading progress") : info.tier ? info.tier : tr("No tier yet");
+            return el(RN.View, {key, style:{gap:2}},
+                el(RN.View, {style:s.row},
+                    el(RN.View, {style:s.icon}, el(Icon, {size:"sm"})),
+                    el(RN.View, {style:{flex:1}},
+                        badgeText(text.title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                        badgeText(tier + (info && info.next ? "  \u2192  " + info.next : ""), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:13})),
+                    counting && !detail ? null : badgeText(counting ? detail : tr("Not counted"), "text-xs/semibold", "text-muted", {color:"#949ba4", fontSize:12, fontWeight:"600"})),
+                info && info.current != null && info.goal != null ? el(VenusProgress, {key:"bar:" + key, value:info.current / info.goal}) : null);
+        });
+        const out = [];
+        rows.forEach((row, i) => { if (i) out.push(el(RN.View, {key:"d" + i, style:s.divider})); out.push(row); });
+        return el(RN.View, {key:"progress", style:{gap:10}}, groupTitle("progressTitle", "Your badges"), el(RN.View, {style:s.card}, out));
+    }
+    // The card at the top: the game playing right now with its real art, when the next one starts and how many so far.
+    function badgeNowCard(s) {
+        const entry = badges.current, game = entry && entry.game, url = badgeIconUrl(game, 128);
         const lines = [];
-        if (!badgeTypesOn()) {
-            lines.push(tr("Turn on at least one badge option below."));
-            return lines.join("\n");
-        }
-        if (badges.current) {
-            if (settings.badgesUniqueGames) {
-                const cycleMins = badgeCycleMinutes(settings.badgesCycleMinutes);
-                const elapsedMins = Math.floor((Date.now() - badges.current.startedAt) / 60000);
-                const left = Math.max(1, cycleMins - elapsedMins);
-                lines.push(pl(left, "Next game in about {n} minute.", "Next game in about {n} minutes."));
-            } else {
-                lines.push(tr("Reporting play time every 30 minutes."));
-            }
-        } else if (badgeNeedsGame()) {
-            lines.push(tr("Starts reporting a game as soon as Discord connects."));
-        }
-        if (badges.cycledSession > 0)
-            lines.push(pl(badges.cycledSession, "Cycled through {n} game since Discord opened.", "Cycled through {n} games since Discord opened."));
-        if (settings.badgesActivity)
-            lines.push(tr(badges.activeDay === badgeTodayKey() ? "Account activity reported for today." : "Account activity will be reported when connected."));
-        const gt = badgeProgressLine("Game time", badgeDirectoryInfo("GAME_TIME"));
-        const gv = badgeProgressLine("Unique games", badgeDirectoryInfo("GAME_VARIETY"));
-        const aa = badgeProgressLine("Account activity", badgeDirectoryInfo("ACCOUNT_AGE"));
-        if (gt) lines.push(gt);
-        if (gv) lines.push(gv);
-        if (aa) lines.push(aa);
-        if (badges.error) lines.push(badges.error);
-        return lines.join("\n");
+        if (entry && badgeCycleOn()) {
+            const left = Math.max(1, Math.ceil((badgeCycleMinutes(settings.badgesCycleMinutes) * 60000 - (Date.now() - entry.startedAt)) / 60000));
+            lines.push(pl(left, "Next game in about {n} minute.", "Next game in about {n} minutes."));
+        } else if (entry) lines.push(tr("Counting play time on this game."));
+        else if (!badgeNeedsGame()) lines.push(tr("Turn on Game time or Unique games below."));
+        else lines.push(tr("Starts a game as soon as Discord is connected."));
+        if (badges.played.size) lines.push(pl(badges.played.size, "{n} game played so far.", "{n} games played so far."));
+        if (badges.error) lines.push(tr("Couldn't report to Discord. Trying again soon."));
+        const leading = url && RN.Image ? el(RN.Image, {source:{uri:url, width:40, height:40}, style:s.art, accessibilityIgnoresInvertColors:true}) : null;
+        const share = badgeShare();
+        return statusCard("status", lines.join("\n"), {title:entry ? tr("Playing {name}", {name:game.name}) : badgeNeedsGame() ? tr("Getting a game ready") : tr("No games playing"),
+            leading, IconComponent:leading ? null : venusIcon(badges.error ? 12178 : 9207, badges.error ? "ChatWarningIcon" : "GameControllerIcon"),
+            footer:share != null ? el(VenusProgress, {key:"cycle:" + game.id, value:share}) : null});
     }
     function BadgeSettings() {
         useSettings("badges");
         React.useEffect(() => { if (enabled("badges")) badgeRefreshDirectory(false); }, []);
-        const ui = reviewUI();
+        const ui = reviewUI(), s = badgeCardStyles();
         if (!RN) return null;
-        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, on = enabled("badges");
-        const toggle = (key, label, subLabel, icon) => switchRow(Switch, key, label, subLabel, icon);
-        const share = badgeShare();
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, on = enabled("badges"), Button = inspectedExport(5379, "Button");
+        const consent = on ? badgeConsented() : null;
         const groups = [
-            on ? statusCard("status", badgeStatusText(), {title:badgeStatusTitle(),
-                IconComponent:venusIcon(badges.error ? 12178 : badges.current ? 9207 : 8921,
-                    badges.error ? "ChatWarningIcon" : badges.current ? "GameControllerIcon" : "TrophyIcon"),
-                footer:share != null ? el(VenusProgress, {key:"progress:" + (badges.current && badges.current.game.id || "cycle"), value:share}) : null}) :
-                offCard("status", venusIcon(8921, "TrophyIcon"), "badges"),
-            el(Group, {key:"types", title:tr("Badges to complete")},
-                toggle("badgesGameTime", "Game time", "Shows Discord you're playing a game and reports play time toward your Hours Played badge.", rowIcon(5051, "ClockIcon")),
-                toggle("badgesUniqueGames", "Unique games", "Switches to a new detectable game on a timer toward your Unique Games Played badge.", rowIcon(9207, "GameControllerIcon")),
-                toggle("badgesActivity", "Account activity", "Reports your account as active each day while Discord is open or in the background, toward your Years Active badge.", rowIcon(8675, "CalendarIcon"))),
-            el(PresetOrCustom, {key:"cycle", title:"Switch games every", value:settings.badgesCycleMinutes, disabled:!on || !settings.badgesUniqueGames,
+            on ? badgeNowCard(s) : offCard("status", venusIcon(8921, "TrophyIcon"), "badges"),
+            consent === false ? statusCard("consent", "Discord only counts games toward these badges while \"Use data to personalize my Discord experience\" is on.",
+                {title:tr("Personalization is off"), IconComponent:venusIcon(12178, "ChatWarningIcon"),
+                 trailing:Button ? el(Button, {text:tr("Turn on"), size:"sm", variant:"primary", onPress:() => { haptic("SELECTION"); badgeTurnOnPersonalization(); }}) : null}) : null,
+            badgeProgressCard(s, on),
+            el(Group, {key:"types", title:tr("What to count")},
+                switchRow(Switch, "badgesGameTime", "Game time", "Plays a game in the background, toward Hours Played.", rowIcon(5051, "ClockIcon")),
+                switchRow(Switch, "badgesUniqueGames", "Unique games", "Switches to a game you haven't played yet, toward Unique Games Played.", rowIcon(9207, "GameControllerIcon"))),
+            settings.badgesUniqueGames ? el(PresetOrCustom, {key:"cycle", title:"Switch games every", value:settings.badgesCycleMinutes, disabled:!on,
                 min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX, placeholder:30,
                 inputLabel:tr("Minutes, {min} to {max}", {min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX}),
                 format:n => tr("{n} min", {n}),
                 onChange:value => setSetting("badgesCycleMinutes", value),
-                presets:BADGE_CYCLE_PRESETS.map(n => ({value:n, label:tr("{n} min", {n})})),
-                hint:"How long each game stays open before switching to the next one."}),
-            on && badgeNeedsGame() && badges.current ? el(Group, {key:"actions", title:tr("Manage")},
-                actionRow(ui, "next", "Switch to next game now", "Closes the current game and starts the next one right away.", () => { badgeCycleGame(); }, !on)) : null,
-            footnote("note", "Play time and unique games are reported as Discord for Windows, without installing or opening the games.")];
+                presets:BADGE_CYCLE_PRESETS.map(n => ({value:n, label:tr("{n} min", {n})}))}) : null,
+            on ? el(Group, {key:"actions", title:tr("Manage")},
+                badges.current && badgeCycleOn() ? actionRow(ui, "next", "Switch to the next game now", null, () => { haptic("SELECTION"); badgeNextGame(); }) : null,
+                actionRow(ui, "refresh", "Refresh badge progress", "Discord can take a day or two to add new play time.", () => { haptic("SELECTION"); badgeRefreshDirectory(true); })) : null,
+            footnote("note", "Games are reported as Discord for Windows sees them, without installing or opening anything. Years Active grows with your account's age, so there's nothing to report for it.")];
         return settingsBody(ui, groups);
     }
     // Motion, from React Native's own Animated and LayoutAnimation. Opacity, position and scale run on the native
@@ -7033,7 +7045,7 @@
     }
     function backgroundNeeded() {
         const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
-        const badgeBusy = !!(enabled("badges") && (badges.current && badgeNeedsGame() || settings.badgesActivity && badges.user));
+        const badgeBusy = !!(enabled("badges") && badges.current && badgeNeedsGame());
         const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
         return questBusy || badgeBusy || pushListening;
     }
@@ -7051,7 +7063,7 @@
     }
     function backgroundSync() {
         const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
-        const badgeBusy = !!(enabled("badges") && (badges.current && badgeNeedsGame() || settings.badgesActivity && badges.user));
+        const badgeBusy = !!(enabled("badges") && badges.current && badgeNeedsGame());
         const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
         const needed = questBusy || badgeBusy || pushListening;
         if (needed) unpauseGateway();
@@ -11374,7 +11386,6 @@
             case 9699: if ((features.quests || features.badges || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
             case 13933: return (features.quests || features.badges || features.userNotif) ? hookGatewaySocket(exports) : exports;
             case 13968: return (features.quests || features.badges || features.userNotif) ? hookPauseGateway(exports) : exports;
-            case 2037: if (features.badges && exports && exports.default) badges.gameStore = exports.default; return exports;
             case 5759: return features.badges ? hookSelfPresenceStore(exports) : exports;
             case 8312: if (features.badges && exports && exports.default) badgesAttachStore(exports.default); return exports;
             case 9675: return features.translate ? hookComponent(exports, translateSheet) : exports;
