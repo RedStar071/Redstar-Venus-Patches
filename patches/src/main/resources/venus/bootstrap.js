@@ -4096,11 +4096,11 @@
             el(Icon, {size:"xs", color:k.icon.color}));
         const steps = story.chapters.length;
         return el(RN.View, {key:"strip", style:[k.strip, {paddingHorizontal:12, paddingTop:10, paddingBottom:8, gap:8}]},
-            el(RN.View, {style:{flexDirection:"row", alignItems:"flex-start", gap:8, minHeight:40}},
-                steps ? el(RN.View, {style:[k.secondary, {borderRadius:8, paddingHorizontal:6, paddingVertical:2, marginTop:1}]},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, height:40}},
+                steps ? el(RN.View, {style:[k.secondary, {borderRadius:8, paddingHorizontal:6, paddingVertical:2}]},
                     el(RN.Text, {style:[k.secondaryText, {fontSize:12, fontWeight:"700"}]}, Math.max(1, story.chapter) + "/" + steps)) : null,
-                el(RN.View, {style:{flex:1}}, story.caption ? popIn("cap:" + story.caption,
-                    el(RN.Text, {style:[s.text, {fontSize:14, lineHeight:20}]}, story.caption)) : null)),
+                el(RN.View, {style:{flex:1, height:40, justifyContent:"center"}}, story.caption ? popIn("cap:" + story.caption,
+                    el(RN.Text, {numberOfLines:2, style:[s.text, {fontSize:14, lineHeight:20}]}, story.caption)) : null)),
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6}},
                 story.playing ? button("pause", Pause, "Pause", story.pause) : button("play", Play, "Play", story.play),
                 el(StoryTrack, {story, k}),
@@ -8230,10 +8230,12 @@
     function translateBarHeader(orig, self, args) {
         const props = args[0];
         // The bar is always in the tree and draws nothing unless it's wanted, so switching options never remounts the chat.
+        // Appended after ChatViewWrapper's children (like JumpToPresentButton) so it sits above DCDChatList's native
+        // GestureDetector on Android and receives touches directly.
         if (!props || !props.channelId || !React || !RN) return orig.apply(self, args);
         const bar = el(TranslateBar, {key:"venus-translate-bar", channelId:props.channelId});
-        const header = props.stickyHeader ? el(RN.View, {pointerEvents:"box-none"}, props.stickyHeader, bar) : bar;
-        const next = Object.assign({}, props, {stickyHeader:header});
+        const children = Array.isArray(props.children) ? props.children.concat([bar]) : [props.children, bar];
+        const next = Object.assign({}, props, {children});
         return args.length === 1 ? orig.call(self, next) : orig.apply(self, [next].concat(Array.prototype.slice.call(args, 1)));
     }
     // 32 dp tall, a soft pill a little in from the edges: about as much of the chat as Discord's own New messages bar.
@@ -8273,15 +8275,16 @@
         const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
         const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
         // Only the pill takes touches: the rest of the header row lets taps through to the chat.
-        return el(RN.View, {pointerEvents:"box-none", style:{alignItems:"center", zIndex:100}}, popIn("bar", el(RN.View, {style:s.bar},
-            el(Press, {style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1},
-                accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap, hitSlop:{top:6, bottom:6}},
-                el(Lang, {size:"xs", color:on ? s.muted.color : s.text.color}),
-                popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
-                    el(RN.Text, {numberOfLines:1, style:[{fontSize:13, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
-            el(RN.View, {style:s.divider}),
-            el(Press, {style:s.cog, accessibilityRole:"button", accessibilityLabel:tr("Translate messages"), onPress:openTranslateSettings,
-                hitSlop:{top:6, bottom:6, left:4, right:6}}, el(Cog, {size:"xs", color:s.muted.color})))));
+        return el(RN.View, {pointerEvents:"box-none", style:{position:"absolute", top:0, left:0, right:0, alignItems:"center", zIndex:100, elevation:6}},
+            el(RN.View, {style:s.bar},
+                el(Press, {style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1},
+                    accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap, hitSlop:{top:6, bottom:6}},
+                    el(Lang, {size:"xs", color:on ? s.muted.color : s.text.color}),
+                    popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
+                        el(RN.Text, {numberOfLines:1, style:[{fontSize:13, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
+                el(RN.View, {style:s.divider}),
+                el(Press, {style:s.cog, accessibilityRole:"button", accessibilityLabel:tr("Translate messages"), onPress:openTranslateSettings,
+                    hitSlop:{top:6, bottom:6, left:4, right:6}}, el(Cog, {size:"xs", color:s.muted.color}))));
     }
     function openTranslateSettings() {
         haptic("SELECTION");
