@@ -21,6 +21,7 @@ const ID = {RawColors:caseId('hookRawColorsModule'), SemanticColors:caseId('hook
     SemanticColorExperiments:caseId('hookExperimentColorsModule'),
     ThemeStore:+(/case (\d+): if \(\(features\.customThemes[^\n]*themeStore =/.exec(src) || [])[1],
     ThemeContext:+(/case (\d+): return \(features\.customThemes \|\| features\.iconPacks\) \? hookCreateThemedContext/.exec(src) || [])[1],
+    SettingsRegistry:+(/case (\d+): exports\.SETTING_RENDERER_CONFIG = nativeRegistry/.exec(src) || [])[1],
     toasts:partId('toasts'), TableRow:partId('TableRow'), TableRowGroup:partId('TableRowGroup'), TextInput:partId('TextInput')};
 for (const [name, id] of Object.entries(ID)) if (!id) throw new Error(`theme_compat: can't find ${name}'s module ID in bootstrap.js`);
 // Venus's own alias table, read from bootstrap.js so the report follows the code.
@@ -77,7 +78,7 @@ async function install(b, url, text) {
     b.api.setSetting('customThemes', true);
     let draft = url;
     b.React.useState = init => typeof init === 'string' ? [draft, v => { draft = v; }] : [init, () => {}];
-    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, 14409).SETTING_RENDERER_CONFIG;
+    const registry = b.load({SETTING_RENDERER_CONFIG:{ACCOUNT:{type:'route', IconComponent(){}}}}, ID.SettingsRegistry).SETTING_RENDERER_CONFIG;
     const page = () => pageNodes(registry.VENUS_CUSTOMTHEMES.screen.getComponent()());
     const button = page().find(n => n.props && n.props.accessibilityLabel === 'Install');
     if (!button) return {error:'no Install button (page did not render)', ms:0};
