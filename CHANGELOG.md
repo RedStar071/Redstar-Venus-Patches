@@ -23,6 +23,7 @@
 
 * **Discord - Message highlights:** The deleted messages color moved to Keep deleted messages, next to its new brightness option
 * **Discord - Translate messages:** The language list names each language in its own words and closes once you pick one
+* **Discord - Venus settings:** Previews just play: the Watch / Try it switch is gone, and pages whose description already says it all have no preview
 
 ### ⚡ Performance Improvements
 
