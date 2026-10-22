@@ -5,7 +5,7 @@ from hbc import Bundle
 
 # Each tuple is (module_path_or_None, function_id_in_350_8, function_name, promise)
 # When porting to a new Discord build, pass --locate to resolve functions by (module_path, function_name)
-# automatically instead of hardcoded 350.8 function IDs.
+# automatically instead of hardcoded function IDs.
 G = {
     'analytics': [
         ('MonitoringAgent.tsx', 35581, 'increment', False),

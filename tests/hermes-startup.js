@@ -23,7 +23,7 @@
             return function () { return false; };
         }});
     };
-    // Original 350.8 global ends with __r(1), __r(2). Run only RN setup, not Discord's account/network code.
+    // Discord's original global ends with __r(1), __r(2). Run only RN setup, not Discord's account/network code.
     let metro;
     let ran = false;
     Object.defineProperty(g, "__r", {configurable: true,
