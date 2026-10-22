@@ -26,6 +26,7 @@
     if (features.reviewDB) selectModules([13181, 14213, 14281, 10725, 6265, 6896, 1390, 584]);
     if (features.readAll) targetModules[16754] = 1;
     if (features.quests) selectModules([584, 7386, 9699, 13933, 13968]);
+    if (features.badges) selectModules([584, 1390, 2037, 5759, 8312, 9699, 13933, 13968]);
     if (features.hideGift) selectModules([11935, 12146]);
     if (features.hideQuestDock) selectModules([15371, 15465]);
     if (features.systemEmoji) targetModules[6820] = 1;
@@ -56,7 +57,8 @@
     const settings = { picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
         noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
-        quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true, systemFont:false,
+        quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true,
+        badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:30, badgesActivity:true, systemFont:false,
         hideGift:false, hideQuestDock:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
@@ -72,7 +74,8 @@
             picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
             noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
-            quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true, systemFont: false,
+            quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true,
+            badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 30, badgesActivity: true, systemFont: false,
             hideGift: false, hideQuestDock: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
@@ -149,6 +152,8 @@
     // How strongly a highlighted row is tinted behind its text, 0 to 100 %. 50 is Discord's own tint (alpha 1a, about
     // 10%); 0 leaves only the bar and 100 is about 40%, still light enough to read on. The pills are these steps.
     const BRIGHTNESS_STEPS = [0, 25, 50, 75, 100];
+    const BADGE_CYCLE_MIN = 5, BADGE_CYCLE_MAX = 240, BADGE_CYCLE_PRESETS = [15, 30, 60];
+    function badgeCycleMinutes(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(BADGE_CYCLE_MIN, Math.min(BADGE_CYCLE_MAX, n)) : 30; }
     function brightness(value) { const n = Math.round(Number(value)); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 50; }
     function highlightAlpha(level) {
         const n = brightness(level), a = n <= 50 ? Math.round(n * 26 / 50) : Math.round(26 + (n - 50) * 76 / 50);
@@ -291,6 +296,8 @@
         const extra = {};
         if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
         if (features.userNotif && userNotif.ids.size) extra.userNotifIds = Array.from(userNotif.ids);
+        if (features.badges && badges.played.size) extra.badgesPlayedIds = Array.from(badges.played);
+        if (features.badges && badges.activeDay) extra.badgesActiveDay = badges.activeDay;
         if (backup.last) extra.lastBackup = backup.last;
         if (starter.done) extra.setupDone = true;
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
@@ -334,6 +341,7 @@
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
         if (key === "noDeleteLimit") return deleteLimit(value);
+        if (key === "badgesCycleMinutes") return badgeCycleMinutes(value);
         if (key === "fixEmbedsSites") return fixSitesText(value);
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
     }
@@ -376,6 +384,13 @@
             // Leaving the box without changing it no longer rewrites your settings.
             if (limit === settings.noDeleteLimit && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.noDeleteLimit = limit; dirty.add(key); trimDeleted(); save(); notify(key); return true;
+        }
+        if (key === "badgesCycleMinutes") {
+            const mins = badgeCycleMinutes(value);
+            if (mins === settings.badgesCycleMinutes && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.badgesCycleMinutes = mins; dirty.add(key); save();
+            if (features.badges) badgesSettingChanged(key, mins);
+            notify(key); return true;
         }
         if (key === "messageHighlightThickness") {
             const mult = Number(value);
@@ -426,6 +441,7 @@
             clearSizes();
         }
         if (features.quests && featureFor(key) === "quests") questsSettingChanged(key, value);
+        if (features.badges && featureFor(key) === "badges") badgesSettingChanged(key, value);
         if (key === "systemFont" && features.systemFont && !backup.restoring && status.storage !== "loading" && status.storage !== "waiting" && value !== fontInUse) later(() => askRestart("font"), 0);
         if (key === "systemEmoji" && features.systemEmoji && !backup.restoring && status.storage !== "loading" && status.storage !== "waiting" && value !== emojiInUse) later(() => askRestart("emoji"), 0);
         save();
@@ -440,7 +456,7 @@
         if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
         if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
-        if (features.quests || features.userNotif) backgroundSync();
+        if (features.quests || features.badges || features.userNotif) backgroundSync();
         return true;
     }
     function initFiles(module) {
@@ -476,6 +492,12 @@
                     userNotif.ids.clear();
                     loaded.userNotifIds.slice(0, USER_NOTIF_MAX_IDS).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) userNotif.ids.add(id); });
                 }
+                if (features.badges) {
+                    if (Array.isArray(loaded.badgesPlayedIds))
+                        loaded.badgesPlayedIds.slice(0, BADGES_MAX_PLAYED).forEach(id => { if (typeof id === "string" && /^\d{5,25}$/.test(id)) badges.played.add(id); });
+                    if (typeof loaded.badgesActiveDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(loaded.badgesActiveDay))
+                        badges.activeDay = loaded.badgesActiveDay;
+                }
             }
             status.storage = "ready";
             if (!starter.done && Object.keys(FEATURE_ICONS).some(key => features[key] && settings[key])) starter.done = true;
@@ -486,6 +508,7 @@
             if (dirty.size || features.userNotif && userNotif.dirty) save();
             restoreDeleted();
             if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
+            if (features.badges) { if (!enabled("badges")) badgesStop(false); else badgesLoaded(); }
             if (features.userNotif) {
                 userNotifSync();
                 if (enabled("userNotif") && settings.userNotifPush) userNotifCheckPermissions();
@@ -493,7 +516,7 @@
             if (features.accountSwitcher) accountSwitcherSync();
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
             if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
-            if (features.quests || features.userNotif) backgroundSync();
+            if (features.quests || features.badges || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
             i18n.shownIn = uiLanguage(); loadLanguage(i18n.shownIn);
@@ -805,7 +828,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -839,7 +862,7 @@
         validUser:[8213, "AtIcon"], copyBios:[5042, "CopyIcon"], reviewDB:[9354, "ThumbsUpIcon"], readAll:[15928, "DoubleCheckmarkIcon"],
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
-        hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
+        badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
         customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
@@ -878,7 +901,8 @@
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
-        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"]};
+        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
+        badges:["Game time", "Unique games", "Account activity", "Switch games every", "Hours Played", "Unique Games Played", "Years Active"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
         // Hermes has normalize only with Intl; without it, accents simply have to match.
@@ -1200,6 +1224,7 @@
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
+        withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Counts game time, unique games and daily account activity in the background.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests]];
         const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);
@@ -3784,6 +3809,540 @@
             el(Group, {key:"enroll", title:tr("New Quests")},
                 toggle("questsEnroll", "Accept new Quests", "Accepts Quests you haven't started, one at a time. Off: only Quests you accept yourself.", rowIcon(6868, "CircleCheckIcon"))),
             footnote("note", "You still claim rewards yourself. Stream Quests need a real stream, so they're skipped. Discord may pause Quests on accounts that complete them automatically.")];
+        return settingsBody(ui, groups);
+    }
+    // Badge Completer (#81): counts game play time (Hours Played), unique detectable games (Unique Games Played)
+    // and daily account activity (Years Active) in the background. Game sessions show on your profile via
+    // LocalActivityStore (10649) and SelfPresenceStore (5759), and report play time through POST /activities
+    // the way Discord's desktop ActivityTrackingStore (14038) does: an initial report (duration 0) to start the
+    // session token, 30-minute reports while running, and a closing report (closed: true) when switching games.
+    const BADGE_SOCKET_ID = "venus-badges", BADGE_PID = 9480, BADGES_MAX_PLAYED = 1000;
+    const BADGE_REPORT_MS = 30 * 60 * 1000, BADGE_MAX_DURATION_MS = 35 * 60 * 1000, BADGE_ACTIVE_MS = 60 * 60 * 1000;
+    const BADGE_CURATED_GAMES = [
+        {id:"356875570916753408", name:"Minecraft", exePath:"javaw.exe", distributor:"discord"},
+        {id:"401518684763586560", name:"Counter-Strike 2", exePath:"game/bin/win64/cs2.exe", distributor:"steam"},
+        {id:"356875221078245376", name:"League of Legends", exePath:"league of legends.exe", distributor:"discord"},
+        {id:"700136079562375258", name:"VALORANT", exePath:"shooterGame/binaries/win64/valorant-win64-shipping.exe", distributor:"discord"},
+        {id:"356869127241072640", name:"Grand Theft Auto V", exePath:"gta5.exe", distributor:"steam"},
+        {id:"363445589247131668", name:"Roblox", exePath:"robloxplayerbeta.exe", distributor:"discord"},
+        {id:"432980957394370572", name:"Fortnite", exePath:"fortnitegame/binaries/win64/fortniteclient-win64-shipping.exe", distributor:"epic"},
+        {id:"617081209280561169", name:"Apex Legends", exePath:"r5apex.exe", distributor:"steam"},
+        {id:"356877880938070016", name:"Terraria", exePath:"terraria.exe", distributor:"steam"},
+        {id:"356876176465461248", name:"Stardew Valley", exePath:"stardew valley.exe", distributor:"steam"},
+        {id:"1146212266810019880", name:"Baldur's Gate 3", exePath:"bin/bg3.exe", distributor:"steam"},
+        {id:"1055686970276368464", name:"Elden Ring", exePath:"game/eldenring.exe", distributor:"steam"},
+        {id:"356875243173969920", name:"Dota 2", exePath:"game/bin/win64/dota2.exe", distributor:"steam"},
+        {id:"356877032724234240", name:"Rocket League", exePath:"binaries/win64/rocketleague.exe", distributor:"epic"},
+        {id:"356875257501712384", name:"Overwatch 2", exePath:"_retail_/overwatch.exe", distributor:"battlenet"},
+        {id:"356875948278349824", name:"Rust", exePath:"rustclient.exe", distributor:"steam"},
+        {id:"356876757653389312", name:"Garry's Mod", exePath:"hl2.exe", distributor:"steam"},
+        {id:"356877290325704704", name:"Team Fortress 2", exePath:"hl2.exe", distributor:"steam"},
+        {id:"356876450504409088", name:"Warframe", exePath:"warframe.x64.exe", distributor:"steam"},
+        {id:"356876832496549888", name:"Left 4 Dead 2", exePath:"left4dead2.exe", distributor:"steam"},
+        {id:"546088625989943308", name:"Hollow Knight", exePath:"hollow_knight.exe", distributor:"steam"},
+        {id:"716967157438349352", name:"Hades", exePath:"x64/hades.exe", distributor:"steam"},
+        {id:"512344755930333185", name:"Celeste", exePath:"celeste.exe", distributor:"steam"},
+        {id:"710929904379592724", name:"Cyberpunk 2077", exePath:"bin/x64/cyberpunk2077.exe", distributor:"steam"},
+        {id:"1206360448160010280", name:"Helldivers 2", exePath:"bin/helldivers2.exe", distributor:"steam"},
+        {id:"356877539534438400", name:"Path of Exile", exePath:"pathofexile_x64steam.exe", distributor:"steam"},
+        {id:"356877576008105984", name:"Dead by Daylight", exePath:"deadbydaylight/binaries/win64/deadbydaylight-win64-shipping.exe", distributor:"steam"},
+        {id:"356877254107889664", name:"Factorio", exePath:"bin/x64/factorio.exe", distributor:"steam"},
+        {id:"356877185161658368", name:"Subnautica", exePath:"subnautica.exe", distributor:"steam"},
+        {id:"356876961177567232", name:"RimWorld", exePath:"rimworldwin64.exe", distributor:"steam"}
+    ];
+    const badges = {dispatcher:null, badgeStore:null, gameStore:null, authStore:null, voiceStore:null, mediaStore:null,
+        presenceHooked:false, generation:0, user:null, catalog:[], catalogFetchedAt:0, catalogFetching:false,
+        current:null, reportTimer:undefined, cycleTimer:undefined, activeTimer:undefined, startTimer:undefined,
+        played:new Set(), cycledSession:0, minutesSession:0, activeDay:"", last:"", error:""};
+    function badgeTypesOn() { return !!(settings.badgesGameTime || settings.badgesUniqueGames || settings.badgesActivity); }
+    function badgeNeedsGame() { return !!(enabled("badges") && (settings.badgesGameTime || settings.badgesUniqueGames)); }
+    function badgeTodayKey() {
+        const d = new Date(), pad = n => (n < 10 ? "0" : "") + n;
+        return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate());
+    }
+    function badgeStripExePrefix(exe) {
+        if (typeof exe !== "string") return null;
+        let clean = exe.replace(/^>/, "").replace(/\\/g, "/").toLowerCase().trim();
+        if (clean.endsWith("/")) clean = clean.slice(0, -1);
+        if (!clean || /(^|\/)\.\.(\/|$)/.test(clean)) return null;
+        const parts = clean.split("/").filter(Boolean);
+        return parts.length ? parts.slice(-2).join("/") : null;
+    }
+    function badgePickExecutable(game) {
+        const list = game && Array.isArray(game.executables) ? game.executables : [];
+        const rank = name => (/(^|[\/_.-])(test|launcher|crash|helper|setup|update|install|unins|benchmark|server|editor)/i.test(name) ? 2 : 0) + (name.includes("/") ? 0 : 1);
+        const candidates = [];
+        for (let i = 0; i < list.length; i++) {
+            const e = list[i];
+            if (!e || e.os !== "win32" || e.is_launcher || typeof e.name !== "string" || !/\.exe$/i.test(e.name)) continue;
+            const stripped = badgeStripExePrefix(e.name);
+            if (stripped) candidates.push(stripped);
+        }
+        if (!candidates.length) return null;
+        candidates.sort((a, b) => rank(a) - rank(b) || (a < b ? -1 : a > b ? 1 : 0));
+        return candidates[0];
+    }
+    function badgePickDistributor(game) {
+        const skus = game && (Array.isArray(game.third_party_skus) ? game.third_party_skus : Array.isArray(game.thirdPartySkus) ? game.thirdPartySkus : []);
+        for (let i = 0; i < skus.length; i++) {
+            const dist = skus[i] && skus[i].distributor;
+            if (typeof dist === "string" && dist) return dist;
+        }
+        return "steam";
+    }
+    function badgeExtractCatalog(rawList) {
+        const seen = new Set(), out = [];
+        for (let i = 0; i < BADGE_CURATED_GAMES.length; i++) {
+            const g = BADGE_CURATED_GAMES[i];
+            seen.add(g.id); out.push(g);
+        }
+        if (Array.isArray(rawList)) {
+            for (let i = 0; i < rawList.length; i++) {
+                const g = rawList[i], id = g && typeof g.id === "string" ? g.id : null;
+                if (!id || seen.has(id) || typeof g.name !== "string" || !g.name.trim()) continue;
+                const exePath = badgePickExecutable(g);
+                if (!exePath) continue;
+                seen.add(id);
+                out.push({id, name:g.name.trim(), exePath, distributor:badgePickDistributor(g)});
+            }
+        }
+        return out;
+    }
+    async function badgeEnsureCatalog(generation) {
+        if (badges.catalog.length > BADGE_CURATED_GAMES.length && Date.now() - badges.catalogFetchedAt < 6 * 3600 * 1000)
+            return badges.catalog;
+        const store = badges.gameStore || (badges.gameStore = inspectedExport(2037, "default"));
+        try {
+            const existing = store && typeof store.games === "object" && Array.isArray(store.games) ? store.games : null;
+            if (existing && existing.length > 0) {
+                badges.catalog = badgeExtractCatalog(existing);
+                badges.catalogFetchedAt = Date.now();
+                return badges.catalog;
+            }
+        } catch (_) {}
+        if (!badges.catalogFetching) {
+            badges.catalogFetching = true;
+            try {
+                const res = await questRequest("/games/detectable", undefined, true, "get", () => generation === badges.generation && badgeNeedsGame());
+                const body = res && res.body;
+                if (Array.isArray(body) && body.length) {
+                    badges.catalog = badgeExtractCatalog(body);
+                    badges.catalogFetchedAt = Date.now();
+                    questDispatch({type:"GAMES_DATABASE_UPDATE", games:body});
+                }
+            } catch (_) {}
+            badges.catalogFetching = false;
+        }
+        if (!badges.catalog.length) badges.catalog = badgeExtractCatalog(null);
+        return badges.catalog;
+    }
+    function badgePickNextGame(catalog, avoidId) {
+        const list = Array.isArray(catalog) && catalog.length ? catalog : BADGE_CURATED_GAMES;
+        if (!settings.badgesUniqueGames && badges.current && badges.current.game && badges.current.game.id !== avoidId)
+            return badges.current.game;
+        const unplayed = [];
+        for (let i = 0; i < list.length; i++) {
+            const g = list[i];
+            if (g && g.id !== avoidId && !badges.played.has(g.id)) unplayed.push(g);
+        }
+        if (unplayed.length) return unplayed[Math.floor(Math.random() * Math.min(unplayed.length, 50))];
+        const fallback = list.filter(g => g && g.id !== avoidId);
+        return fallback.length ? fallback[Math.floor(Math.random() * fallback.length)] : list[0] || BADGE_CURATED_GAMES[0];
+    }
+    function badgeMarkPlayed(id) {
+        if (typeof id !== "string" || !/^\d{5,25}$/.test(id) || badges.played.has(id)) return;
+        if (badges.played.size >= BADGES_MAX_PLAYED) badges.played.delete(badges.played.keys().next().value);
+        badges.played.add(id);
+        save();
+    }
+    function badgeUpdatePresence(entry) {
+        questDispatch({
+            type:"LOCAL_ACTIVITY_UPDATE",
+            socketId:BADGE_SOCKET_ID,
+            pid:BADGE_PID,
+            activity:entry ? {
+                name:entry.game.name,
+                application_id:entry.game.id,
+                type:0,
+                timestamps:{start:entry.startedAt}
+            } : null
+        });
+    }
+    function badgeSessionIds() {
+        let sessionId = null, voiceChannelId = null, mediaSessionId = null;
+        try {
+            const auth = badges.authStore || (badges.authStore = inspectedExport(502, "default"));
+            if (auth && typeof auth.getSessionId === "function") sessionId = auth.getSessionId() || null;
+        } catch (_) {}
+        try {
+            const voice = badges.voiceStore || (badges.voiceStore = inspectedExport(5113, "default"));
+            const uid = currentId();
+            if (voice && uid && typeof voice.getVoiceStateForUser === "function") {
+                const st = voice.getVoiceStateForUser(uid);
+                voiceChannelId = st && st.channelId || null;
+            }
+        } catch (_) {}
+        try {
+            const media = badges.mediaStore || (badges.mediaStore = inspectedExport(2012, "default"));
+            if (media && typeof media.getMediaSessionId === "function") mediaSessionId = media.getMediaSessionId() || null;
+        } catch (_) {}
+        return {sessionId, voiceChannelId, mediaSessionId};
+    }
+    // Same POST /activities payload as Discord's ActivityTrackingStore.updateActivity (14038 -> 10668):
+    // duration 0 with token null opens the session and returns a token; later reports send elapsed seconds
+    // (capped at 35 minutes like ActivityTrackingStore) with that token, and closed: true ends the session.
+    async function badgeSendActivity(entry, closed) {
+        if (!entry || !entry.game) return false;
+        const now = Date.now();
+        const elapsedMs = entry.updatedAt != null ? now - entry.updatedAt : 0;
+        const duration = elapsedMs > 0 && elapsedMs <= BADGE_MAX_DURATION_MS ? Math.floor(elapsedMs / 1000) : 0;
+        const ids = badgeSessionIds();
+        const body = {
+            application_id:entry.game.id,
+            token:entry.token || null,
+            duration,
+            share_activity:true,
+            distributor:entry.game.distributor || "steam",
+            closed:!!closed,
+            exePath:entry.game.exePath || null,
+            voice_channel_id:ids.voiceChannelId,
+            session_id:ids.sessionId,
+            media_session_id:ids.mediaSessionId
+        };
+        entry.updatedAt = now;
+        try {
+            const response = await questRequest("/activities", body, true, "post",
+                () => closed || entry === badges.current && entry.generation === badges.generation && badgeNeedsGame());
+            const reply = response && response.body;
+            if (reply && typeof reply.token === "string" && reply.token) entry.token = reply.token;
+            if (duration >= 60) badges.minutesSession += Math.round(duration / 60);
+            badges.error = "";
+            questDispatch({type:"ACTIVITY_UPDATE_SUCCESS", applicationId:entry.game.id, token:entry.token, duration, distributor:body.distributor});
+            badgeMarkPlayed(entry.game.id);
+            notify("badges");
+            return true;
+        } catch (error) {
+            if (!closed && entry === badges.current) {
+                entry.token = null; entry.updatedAt = null;
+                badges.error = tr("Couldn't report game activity: {problem}", {problem:String(error && error.message || error)});
+                notify("badges");
+            }
+            return false;
+        }
+    }
+    function badgeScheduleReport(entry) {
+        if (badges.reportTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.reportTimer);
+        badges.reportTimer = undefined;
+        if (!entry || entry !== badges.current || typeof global.setTimeout !== "function") return;
+        badges.reportTimer = global.setTimeout(() => {
+            badges.reportTimer = undefined;
+            if (entry !== badges.current || !badgeNeedsGame()) return;
+            badgeSendActivity(entry, false).then(() => {
+                if (entry === badges.current && badgeNeedsGame()) {
+                    badgeRefreshDirectory(false);
+                    badgeScheduleReport(entry);
+                }
+            });
+        }, BADGE_REPORT_MS);
+    }
+    function badgeScheduleCycle(entry) {
+        if (badges.cycleTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.cycleTimer);
+        badges.cycleTimer = undefined;
+        if (!entry || entry !== badges.current || !settings.badgesUniqueGames || typeof global.setTimeout !== "function") return;
+        const waitMs = badgeCycleMinutes(settings.badgesCycleMinutes) * 60 * 1000;
+        const leftMs = Math.max(5000, waitMs - (Date.now() - entry.startedAt));
+        badges.cycleTimer = global.setTimeout(() => {
+            badges.cycleTimer = undefined;
+            if (entry !== badges.current || !badgeNeedsGame() || !settings.badgesUniqueGames) return;
+            badgeCycleGame();
+        }, leftMs);
+    }
+    async function badgeStartGame(avoidId) {
+        const generation = badges.generation;
+        if (!badgeNeedsGame() || !badges.user) return;
+        const catalog = await badgeEnsureCatalog(generation);
+        if (generation !== badges.generation || !badgeNeedsGame() || !badges.user) return;
+        const game = badgePickNextGame(catalog, avoidId);
+        if (!game) return;
+        const now = Date.now();
+        const entry = {game, startedAt:now, updatedAt:null, token:null, generation};
+        badges.current = entry;
+        badges.last = game.name;
+        backgroundSync();
+        badgeUpdatePresence(entry);
+        notify("badges");
+        await badgeSendActivity(entry, false);
+        if (entry !== badges.current || generation !== badges.generation) return;
+        badgeScheduleReport(entry);
+        badgeScheduleCycle(entry);
+    }
+    async function badgeCycleGame() {
+        const prev = badges.current;
+        const avoidId = prev && prev.game ? prev.game.id : null;
+        if (prev) {
+            badges.current = null;
+            if (badges.reportTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.reportTimer);
+            if (badges.cycleTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.cycleTimer);
+            badges.reportTimer = undefined; badges.cycleTimer = undefined;
+            await badgeSendActivity(prev, true);
+            badges.cycledSession++;
+        }
+        if (badgeNeedsGame() && badges.user) await badgeStartGame(avoidId);
+        else { badgeUpdatePresence(null); backgroundSync(); notify("badges"); }
+    }
+    // Account activity: keeps GatewaySocket's QoS state active (even in the background) and checks in once each UTC day
+    // so Discord records your account as active in case you miss a day.
+    function badgePulseActive(force) {
+        if (!enabled("badges") || !settings.badgesActivity || !badges.user) return;
+        try {
+            const gw = inspectedExport(13933, "default") || (global.__r ? global.__r(13933) : null);
+            const socket = gw && (gw.socket || typeof gw.getSocket === "function" && gw.getSocket());
+            if (socket && typeof socket.handleActiveStateChange === "function")
+                socket.handleActiveStateChange({active:true, ver:2, reasons:["foregrounded"]});
+        } catch (_) {}
+        const today = badgeTodayKey();
+        if (force || badges.activeDay !== today) {
+            badges.activeDay = today;
+            save();
+            badgeRefreshDirectory(true);
+            notify("badges");
+        }
+    }
+    function badgeScheduleActive() {
+        if (badges.activeTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.activeTimer);
+        badges.activeTimer = undefined;
+        if (!enabled("badges") || !settings.badgesActivity || typeof global.setTimeout !== "function") return;
+        badges.activeTimer = global.setTimeout(() => {
+            badges.activeTimer = undefined;
+            if (!enabled("badges") || !settings.badgesActivity) return;
+            badgePulseActive(false);
+            badgeScheduleActive();
+        }, BADGE_ACTIVE_MS);
+    }
+    function badgeRefreshDirectory(force) {
+        const actions = inspectedExport(8317, "fetchBadgeDirectory"), uid = badges.user || currentId();
+        if (typeof actions !== "function" || !uid) return;
+        try {
+            const res = actions(uid, force ? {force:true} : undefined);
+            if (res && typeof res.catch === "function") res.catch(() => {});
+        } catch (_) {}
+    }
+    function badgesStart(delay) {
+        if (!enabled("badges") || typeof global.setTimeout !== "function") return;
+        if (badges.startTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.startTimer);
+        badges.startTimer = global.setTimeout(() => {
+            badges.startTimer = undefined;
+            if (!enabled("badges") || !badges.user) return;
+            badgeRefreshDirectory(false);
+            if (settings.badgesActivity) { badgePulseActive(false); badgeScheduleActive(); }
+            if (badgeNeedsGame() && !badges.current) badgeStartGame(null);
+            backgroundSync();
+            notify("badges");
+        }, delay);
+    }
+    function badgesStop(sendClose) {
+        badges.generation++;
+        const prev = badges.current;
+        badges.current = null;
+        if (global.clearTimeout) {
+            if (badges.startTimer !== undefined) global.clearTimeout(badges.startTimer);
+            if (badges.reportTimer !== undefined) global.clearTimeout(badges.reportTimer);
+            if (badges.cycleTimer !== undefined) global.clearTimeout(badges.cycleTimer);
+            if (badges.activeTimer !== undefined) global.clearTimeout(badges.activeTimer);
+        }
+        badges.startTimer = undefined; badges.reportTimer = undefined; badges.cycleTimer = undefined; badges.activeTimer = undefined;
+        badgeUpdatePresence(null);
+        if (sendClose && prev && badges.user) badgeSendActivity(prev, true);
+        backgroundSync();
+        notify("badges");
+    }
+    function badgesReset() {
+        badgesStop(false);
+        badges.cycledSession = 0; badges.minutesSession = 0; badges.last = ""; badges.error = "";
+        notify("badges");
+    }
+    function badgesConnected(event) {
+        const id = event && event.user && event.user.id || currentId();
+        if (id && badges.user && id !== badges.user) badgesReset();
+        if (id) badges.user = id;
+        if (!enabled("badges")) return;
+        if (badges.current) {
+            badgeUpdatePresence(badges.current);
+            if (settings.badgesActivity) { badgePulseActive(false); badgeScheduleActive(); }
+        } else badgesStart(6000);
+    }
+    function badgesAttachStore(store) {
+        if (badges.badgeStore || !store || typeof store.getBadgeById !== "function") return;
+        badges.badgeStore = store;
+        if (typeof store.addChangeListener === "function") store.addChangeListener(() => { if (features.badges) notify("badges"); });
+    }
+    function badgesInit(dispatcher) {
+        if (badges.dispatcher || !dispatcher || typeof dispatcher.subscribe !== "function") return;
+        badges.dispatcher = dispatcher;
+        dispatcher.subscribe("CONNECTION_OPEN", badgesConnected);
+        dispatcher.subscribe("LOGOUT", () => { badgesReset(); badges.user = null; });
+        dispatcher.subscribe("APP_STATE_UPDATE", event => {
+            if (!enabled("badges") || !badges.user) return;
+            if (settings.badgesActivity) badgePulseActive(false);
+            if (event && event.state === "active" && badgeNeedsGame() && !badges.current && badges.startTimer === undefined) badgesStart(2000);
+        });
+    }
+    function badgesLoaded() {
+        const uid = badges.user || currentId();
+        if (uid) badges.user = uid;
+        if (badges.user && badges.startTimer === undefined && !badges.current) badgesStart(4000);
+    }
+    function badgesSettingChanged(key, value) {
+        if (key === "badges" && !value) { badgesStop(true); return; }
+        if (!enabled("badges")) return;
+        if (key === "badges") { badgesStart(500); return; }
+        if (key === "badgesActivity") {
+            if (value) { badgePulseActive(true); badgeScheduleActive(); }
+            else if (badges.activeTimer !== undefined && global.clearTimeout) { global.clearTimeout(badges.activeTimer); badges.activeTimer = undefined; }
+        }
+        if (key === "badgesGameTime" || key === "badgesUniqueGames") {
+            if (!badgeNeedsGame()) {
+                const prev = badges.current;
+                badges.current = null;
+                if (badges.reportTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.reportTimer);
+                if (badges.cycleTimer !== undefined && global.clearTimeout) global.clearTimeout(badges.cycleTimer);
+                badges.reportTimer = undefined; badges.cycleTimer = undefined;
+                badgeUpdatePresence(null);
+                if (prev && badges.user) badgeSendActivity(prev, true);
+            } else if (!badges.current) {
+                badgesStart(500);
+            } else if (key === "badgesUniqueGames") {
+                if (value) badgeScheduleCycle(badges.current);
+                else if (badges.cycleTimer !== undefined && global.clearTimeout) { global.clearTimeout(badges.cycleTimer); badges.cycleTimer = undefined; }
+            }
+        }
+        if (key === "badgesCycleMinutes" && badges.current && settings.badgesUniqueGames) badgeScheduleCycle(badges.current);
+        backgroundSync();
+        notify("badges");
+    }
+    // Ensures our badge game activity shows on your Discord profile while Game time or Unique games is running,
+    // even if Discord's own "Share my activity" setting was off.
+    function hookSelfPresenceStore(exports) {
+        const store = exports && exports.default;
+        if (!store || badges.presenceHooked || typeof store.getActivities !== "function") return exports;
+        badges.presenceHooked = true;
+        const inject = list => {
+            const arr = Array.isArray(list) ? list : [];
+            if (!badgeNeedsGame() || !badges.current) return arr;
+            const appId = badges.current.game.id;
+            for (let i = 0; i < arr.length; i++) if (arr[i] && arr[i].application_id === appId) return arr;
+            const local = inspectedExport(10649, "default");
+            let act = null;
+            try { if (local && typeof local.getApplicationActivity === "function") act = local.getApplicationActivity(appId); } catch (_) {}
+            if (!act) act = {name:badges.current.game.name, application_id:appId, type:0, timestamps:{start:badges.current.startedAt}};
+            return arr.concat([act]);
+        };
+        let patched = hookExport(store, "getActivities", (orig, self, args) => inject(orig.apply(self, args)));
+        if (typeof store.getUnfilteredActivities === "function")
+            patched = hookExport(patched, "getUnfilteredActivities", (orig, self, args) => inject(orig.apply(self, args)));
+        return replaceValue(exports, "default", patched);
+    }
+    function badgeDirectoryInfo(badgeKey) {
+        const store = badges.badgeStore || (badges.badgeStore = inspectedExport(8312, "default"));
+        if (!store || typeof store.getBadgeById !== "function") return null;
+        const ids = inspectedExport(8304, "BadgeId");
+        const id = ids && ids[badgeKey] != null ? ids[badgeKey] : badgeKey.toLowerCase();
+        const uid = badges.user || currentId();
+        try {
+            let badge = store.getBadgeById(id, uid);
+            if (!badge && typeof badgeKey === "string") badge = store.getBadgeById(badgeKey.toLowerCase(), uid);
+            if (!badge) return null;
+            const prog = typeof store.getSingleRequirementProgress === "function" ? store.getSingleRequirementProgress(badge.badge_id || id, uid) :
+                Array.isArray(badge.progress) ? badge.progress[0] : null;
+            const tier = typeof store.getCurrentTier === "function" ? store.getCurrentTier(badge.badge_id || id, uid) : null;
+            const next = typeof store.getNextTier === "function" ? store.getNextTier(badge.badge_id || id, uid) : null;
+            const current = prog && Number.isFinite(Number(prog.current)) ? Number(prog.current) : null;
+            const threshold = prog && Number.isFinite(Number(prog.threshold)) && Number(prog.threshold) > 0 ? Number(prog.threshold) : null;
+            return {badge, current, threshold, tierName:tier && tier.name || "", nextName:next && next.name || "", owned:!!badge.owned};
+        } catch (_) { return null; }
+    }
+    function badgeProgressLine(label, info) {
+        if (!info) return null;
+        const tier = info.tierName ? " (" + info.tierName + ")" : "";
+        if (info.current != null && info.threshold != null)
+            return tr(label) + tier + ": " + info.current + " / " + info.threshold;
+        if (info.current != null)
+            return tr(label) + tier + ": " + info.current;
+        return null;
+    }
+    function badgeShare() {
+        if (!enabled("badges") || !badges.current || !settings.badgesUniqueGames) return null;
+        const total = badgeCycleMinutes(settings.badgesCycleMinutes) * 60 * 1000;
+        const elapsed = Math.max(0, Date.now() - badges.current.startedAt);
+        return total > 0 ? Math.min(1, elapsed / total) : null;
+    }
+    function badgeStatusTitle() {
+        if (badges.error) return tr("Something went wrong");
+        if (!badgeTypesOn()) return tr("Nothing turned on");
+        if (badges.current) return tr("Playing {name}", {name:badges.current.game.name});
+        if (settings.badgesActivity && !badgeNeedsGame()) return tr("Keeping your account active");
+        return tr("Starting badge progress");
+    }
+    function badgeStatusText() {
+        if (!enabled("badges")) return "Turned off. Switch it on in Features to start.";
+        const lines = [];
+        if (!badgeTypesOn()) {
+            lines.push(tr("Turn on at least one badge option below."));
+            return lines.join("\n");
+        }
+        if (badges.current) {
+            if (settings.badgesUniqueGames) {
+                const cycleMins = badgeCycleMinutes(settings.badgesCycleMinutes);
+                const elapsedMins = Math.floor((Date.now() - badges.current.startedAt) / 60000);
+                const left = Math.max(1, cycleMins - elapsedMins);
+                lines.push(pl(left, "Next game in about {n} minute.", "Next game in about {n} minutes."));
+            } else {
+                lines.push(tr("Reporting play time every 30 minutes."));
+            }
+        } else if (badgeNeedsGame()) {
+            lines.push(tr("Starts reporting a game as soon as Discord connects."));
+        }
+        if (badges.cycledSession > 0)
+            lines.push(pl(badges.cycledSession, "Cycled through {n} game since Discord opened.", "Cycled through {n} games since Discord opened."));
+        if (settings.badgesActivity)
+            lines.push(tr(badges.activeDay === badgeTodayKey() ? "Account activity reported for today." : "Account activity will be reported when connected."));
+        const gt = badgeProgressLine("Game time", badgeDirectoryInfo("GAME_TIME"));
+        const gv = badgeProgressLine("Unique games", badgeDirectoryInfo("GAME_VARIETY"));
+        const aa = badgeProgressLine("Account activity", badgeDirectoryInfo("ACCOUNT_AGE"));
+        if (gt) lines.push(gt);
+        if (gv) lines.push(gv);
+        if (aa) lines.push(aa);
+        if (badges.error) lines.push(badges.error);
+        return lines.join("\n");
+    }
+    function BadgeSettings() {
+        useSettings("badges");
+        React.useEffect(() => { if (enabled("badges")) badgeRefreshDirectory(false); }, []);
+        const ui = reviewUI();
+        if (!RN) return null;
+        const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, on = enabled("badges");
+        const toggle = (key, label, subLabel, icon) => switchRow(Switch, key, label, subLabel, icon);
+        const share = badgeShare();
+        const groups = [
+            on ? statusCard("status", badgeStatusText(), {title:badgeStatusTitle(),
+                IconComponent:venusIcon(badges.error ? 12178 : badges.current ? 9207 : 8921,
+                    badges.error ? "ChatWarningIcon" : badges.current ? "GameControllerIcon" : "TrophyIcon"),
+                footer:share != null ? el(VenusProgress, {key:"progress:" + (badges.current && badges.current.game.id || "cycle"), value:share}) : null}) :
+                offCard("status", venusIcon(8921, "TrophyIcon"), "badges"),
+            el(Group, {key:"types", title:tr("Badges to complete")},
+                toggle("badgesGameTime", "Game time", "Shows Discord you're playing a game and reports play time toward your Hours Played badge.", rowIcon(5051, "ClockIcon")),
+                toggle("badgesUniqueGames", "Unique games", "Switches to a new detectable game on a timer toward your Unique Games Played badge.", rowIcon(9207, "GameControllerIcon")),
+                toggle("badgesActivity", "Account activity", "Reports your account as active each day while Discord is open or in the background, toward your Years Active badge.", rowIcon(8675, "CalendarIcon"))),
+            el(PresetOrCustom, {key:"cycle", title:"Switch games every", value:settings.badgesCycleMinutes, disabled:!on || !settings.badgesUniqueGames,
+                min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX, placeholder:30,
+                inputLabel:tr("Minutes, {min} to {max}", {min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX}),
+                format:n => tr("{n} min", {n}),
+                onChange:value => setSetting("badgesCycleMinutes", value),
+                presets:BADGE_CYCLE_PRESETS.map(n => ({value:n, label:tr("{n} min", {n})})),
+                hint:"How long each game stays open before switching to the next one."}),
+            on && badgeNeedsGame() && badges.current ? el(Group, {key:"actions", title:tr("Manage")},
+                actionRow(ui, "next", "Switch to next game now", "Closes the current game and starts the next one right away.", () => { badgeCycleGame(); }, !on)) : null,
+            footnote("note", "Play time and unique games are reported as Discord for Windows, without installing or opening the games.")];
         return settingsBody(ui, groups);
     }
     // Motion, from React Native's own Animated and LayoutAnimation. Opacity, position and scale run on the native
@@ -6474,8 +7033,9 @@
     }
     function backgroundNeeded() {
         const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
+        const badgeBusy = !!(enabled("badges") && (badges.current && badgeNeedsGame() || settings.badgesActivity && badges.user));
         const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
-        return questBusy || pushListening;
+        return questBusy || badgeBusy || pushListening;
     }
     function unpauseGateway() {
         let fn = bgKeepAlive.setIsPaused;
@@ -6491,8 +7051,9 @@
     }
     function backgroundSync() {
         const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
+        const badgeBusy = !!(enabled("badges") && (badges.current && badgeNeedsGame() || settings.badgesActivity && badges.user));
         const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
-        const needed = questBusy || pushListening;
+        const needed = questBusy || badgeBusy || pushListening;
         if (needed) unpauseGateway();
         const fg = bgKeepAlive.fg || inspectedExport(9699, "default");
         if (!needed) {
@@ -6503,7 +7064,9 @@
         }
         const title = tr("Venus Patches");
         const content = questBusy && quest.running ? tr("Now: {name}.", {name:quest.running.name}) :
-            questBusy ? tr("Quest Completer") : tr("Activity notifications");
+            questBusy ? tr("Quest Completer") :
+            badgeBusy && badges.current ? tr("Playing {name}", {name:badges.current.game.name}) :
+            badgeBusy ? tr("Completing badges") : tr("Activity notifications");
         if (bgKeepAlive.active && bgKeepAlive.title === title && bgKeepAlive.content === content && fg) return;
         if (fg && typeof fg.updateServiceHandler === "function") {
             bgKeepAlive.active = true; bgKeepAlive.title = title; bgKeepAlive.content = content;
@@ -10808,9 +11371,12 @@
             case 12131: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
             case 4760: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
-            case 9699: if ((features.quests || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
-            case 13933: return (features.quests || features.userNotif) ? hookGatewaySocket(exports) : exports;
-            case 13968: return (features.quests || features.userNotif) ? hookPauseGateway(exports) : exports;
+            case 9699: if ((features.quests || features.badges || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
+            case 13933: return (features.quests || features.badges || features.userNotif) ? hookGatewaySocket(exports) : exports;
+            case 13968: return (features.quests || features.badges || features.userNotif) ? hookPauseGateway(exports) : exports;
+            case 2037: if (features.badges && exports && exports.default) badges.gameStore = exports.default; return exports;
+            case 5759: return features.badges ? hookSelfPresenceStore(exports) : exports;
+            case 8312: if (features.badges && exports && exports.default) badgesAttachStore(exports.default); return exports;
             case 9675: return features.translate ? hookComponent(exports, translateSheet) : exports;
             case 9255: return features.splitMessages ? maxLengthModule(exports) : exports;
             case 16858: return (features.youBarSettings || features.accountSwitcher) ? hookComponent(exports, youBarButtons) : exports;
@@ -10904,7 +11470,7 @@
             case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
@@ -10921,6 +11487,7 @@
                 if (features.translate && exports && exports.default) translateInit(exports.default);
                 if (features.validUser && exports && exports.default) validInit(exports.default);
                 if (features.quests) questsInit(exports.default);
+                if (features.badges && exports && exports.default) badgesInit(exports.default);
                 if (features.messageHighlight && exports && exports.default && !dispatcher)
                     dispatcher = exports.default.dispatch.bind(exports.default);
                 if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {

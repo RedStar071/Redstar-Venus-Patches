@@ -85,7 +85,8 @@ internal object HbcPrivacy {
     val callParam2 = bytes(OP_LOAD_UNDEFINED, 6, OP_LOAD_PARAM, 7, 2, OP_CALL1, 6, 7, 6, OP_RET, 6)
     val returnUndefined = bytes(OP_LOAD_UNDEFINED, 6, OP_RET, 6) // LoadConstUndefined r6; Ret r6.
     private val falseTargets = setOf("shouldCollectMetrics", "isTracing", "shouldRun", "isZoomedExperimentEnabled",
-        "isJankScreenReportingEnabled", "isNavigationTTIEnabled", "recordComponentSpan")
+        "isJankScreenReportingEnabled", "isNavigationTTIEnabled", "recordComponentSpan",
+        "isClickstreamEnabled", "clickstreamExperimentEnabled")
     private val emptyObjectTargets = setOf("expandEventProperties", "getLocation", "getReadyPayloadByteSizeAnalytics")
     private val emptyStringTargets = setOf("captureException", "captureCrash")
     fun stub(target: Target) = when {
@@ -96,7 +97,6 @@ internal object HbcPrivacy {
         !target.promise -> when (target.name) {
             "startRecordingAnalyticsEvents" -> bytes(OP_LOAD_UNDEFINED, 1, OP_RET, 1)
             "trackCrash" -> bytes(OP_LOAD_UNDEFINED, 8, OP_RET, 8)
-            "scheduleHeartbeatTracking" -> bytes(OP_LOAD_UNDEFINED, 7, OP_RET, 7)
             "recordLateComponentLayout" -> bytes(OP_LOAD_FALSE, 7, OP_RET, 7)
             else -> returnUndefined
         }
@@ -124,8 +124,9 @@ internal object HbcPrivacy {
         Target(24201, "setDebugTrackedData", 28816424, 59, "700c150000c0000000000020", "a1157df804db2cf4db60589c0427e994e6abdc85e7940646bab4a71de724a62b", false, "1e566ed9378ffb594814b9ed3eddf9abc953b28df7d66279d99efa17487f2060"),
         Target(24202, "getLocation", 28816483, 51, "9c0c150000c0000000000020", "eca87ac72ee3e2ea9eafaf56bfe07d57d7de1f173d278c3e8ad830c2f6521afc", false, "640eb296b76f0500f2c5ee577bbbaf85f78e05635ccd672497d5596392d7932e"),
         Target(41733, "trackHeartbeat", 31099155, 43, "b0cd200000c0000000000020", "527ba83a41dd24045cbd9468b6857010c0750cc2eb53b7985fe3559dfce3faba", false, "f6d1e6952b8bf770adb8f596a52bb8afca793638274bc0662c8a3ad33d1cb621"),
-        Target(41736, "scheduleHeartbeatTracking", 31099356, 650, "34ce200000c0000000000020", "94e00eb9c9a98d1388f10e34b280d829b5ef1b0d0bd7751324512772dcb48596", false, "a644e65794b07e0b8fafd4713a89ed48e05dba1d7b926ad16b343ddd0d9dd420"),
-        Target(41748, "initSessionHeartbeatScheduler", 31100806, 292, "44d0200000c0000000000020", "21f6f9a19fb4607e3b48e8df1ba682800c6626f9c58d1f7e51afd1eee214c111", false, "fcd7bab3fb991aaae58326f4c7bd0be156448be403947efa0d9c8f46d02e95f4"),
+        Target(41734, "_trackHeartbeat", 31099198, 61, "dccd200000c0000000000020", "df1ccf63eddc95d1f2aa215417887fc26327edc4a246214d511c863a4e18844d", false, "8ed4ffcf42962a02f80ce20c770fb2a17f1d2db42d6980424034f56aca0690b2"),
+        Target(41754, "isClickstreamEnabled", 31101420, 115, "44d1200000c0000000000020", "645c917249a06b5466f314703015dd2a484abeb4742640596e5e2869ff2c5d5e", false, "e26a665cfc17a2caeb88a7152efe96aed48252e8210cedbcddbbb63583e03880"),
+        Target(41757, "clickstreamExperimentEnabled", 31101931, 35, "d8d1200000c0000000000020", "d0d65c42f946e3f17c0e8a281dbd9c0be58fd2f299832e8424626e5ddf6ed221", false, "2e89420c97832d6b40a083c286a4615c89df2232f8c0318c39ab9b45d9aee292"),
         Target(49336, "trackImpression", 32530591, 398, "bce4250000c0000000000020", "f50ab4baf2bf0555f4664c491dafce0c0080741c376cf2327cc349a8dc741dfe", false, "3efee175a90d27f7d60d3f04d97f6754ad50351d962686be24dc3639f399ebf4"),
         Target(49337, "useTrackImpression", 32530989, 382, "e8e4250000c0000000000020", "ec42659952276c540bf1fc5ef7a93956f627f69bb3d0626afccc422e77d37272", false, "668adfa51cef023e838530c6d6c476db9b08d3dd1f382beb39ace5d52e2691d2"),
         Target(49338, "useTrackImpression", 32531371, 131, "14e5250000c0000000000020", "37560496146a1c4c223991f08b34498dc56c2527e6442d2f067cc9c6ab999588", false, "ef9e1f13af8e45526d8dfb561367de37cb7ebc4a37fc0e97da9a06614b79d1d1"),

@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
     val groups = listOf(HbcPrivacy.analytics, HbcPrivacy.telemetry, HbcPrivacy.crash)
     val natives = NativePrivacy.crash + NativePrivacy.telemetry + NativePrivacy.attribution + NativePrivacy.advertising
     check(natives.size == 137 && natives.distinct().size == natives.size)
-    check(groups.flatten().size == 104 && groups.flatten().map { it.offset }.distinct().size == 104)
+    check(groups.flatten().size == 105 && groups.flatten().map { it.offset }.distinct().size == 105)
     check(HbcPrivacy.resolvedPromise.last() == 6.toByte())
     // Cross-check every opcode constant against scripts/hbc/ops.txt (Hermes 250829098 BytecodeList.def)
     // so an opcode number typo like LoadParam=52 (DivN) instead of 137 can never pass build validation.

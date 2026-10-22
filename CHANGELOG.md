@@ -11,10 +11,12 @@
 * **Discord - Message highlights:** Choose how bright replies and mentions are, from presets or any value from 0 to 100%
 * **Discord:** Add `Bring back Tenor GIFs` patch: Tenor GIFs show in Discord's own GIF picker again, mixed with Discord's or on their own ([#83](https://github.com/VenusIsJaded/Venus-Patches/issues/83))
 * **Discord:** Add `Fix link previews` patch: links to X, Instagram, TikTok, Reddit, Bluesky, Threads, Facebook, pixiv and Bilibili show the post, through a service you pick per site ([#83](https://github.com/VenusIsJaded/Venus-Patches/issues/83))
+* **Discord:** Add `Complete badges automatically` patch: counts game time, unique detectable games and daily account activity toward your Hours Played, Unique Games Played and Years Active badges in the background ([#81](https://github.com/VenusIsJaded/Venus-Patches/issues/81))
 * **Discord - Translate messages:** Translate a whole chat from a bar that appears when it has messages in another language, kept until Discord restarts, and choose whether you ask from the bar, the message menu or both ([#82](https://github.com/VenusIsJaded/Venus-Patches/issues/82))
 
 ### 🐛 Bug Fixes
 
+* **Discord - Disable analytics:** Fixed blocking analytics also stopping Discord's session active state and time-spent session ID from being reported on the Gateway
 * **Discord - Message highlights:** Fixed messages that mention one of your roles not getting your custom mention color
 * **Discord - Translate messages:** Fixed Translate in the hold menu never saying a message was already in your language, and saying so for translations it dropped
 * **Discord - Custom themes:** Fixed a theme's background image only showing right after installing it, and missing from chat after Discord restarted ([#84](https://github.com/VenusIsJaded/Venus-Patches/issues/84))

@@ -44,6 +44,7 @@ private var copyBiosSelected = false
 private var dashlessSelected = false
 private var favouriteAnythingSelected = false
 private var freeNitroSelected = false
+private var questAgentGuarded = false
 private val additionalSelections = mutableSetOf<String>()
 internal val discordBundleGuard = rawResourcePatch {
     execute { HbcPrivacy.verifyOriginal(get("assets/index.android.bundle")) }
@@ -59,6 +60,7 @@ private val runtimeAssets = rawResourcePatch {
         dashlessSelected = false
         favouriteAnythingSelected = false
         freeNitroSelected = false
+        questAgentGuarded = false
     }
     finalize {
         val bootstrap = object {}.javaClass.getResourceAsStream("/venus/bootstrap.js")
@@ -70,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
             "/*__FEATURES__*/",
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
-                listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "systemFont",
+                listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
                     "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
@@ -825,11 +827,36 @@ val questCompleter = bytecodePatch(
     execute {
         additionalSelections += "quests"
         // Play and Activity time only counts when it comes from the desktop app.
-        keepDesktopQuestAgent(Fingerprint(
-            definingClass = USER_AGENT_INTERCEPTOR,
-            name = "intercept",
-            returnType = "Lokhttp3/Response;",
-            parameters = listOf("Lokhttp3/Interceptor\$Chain;")
-        ).method)
+        if (!questAgentGuarded) {
+            questAgentGuarded = true
+            keepDesktopQuestAgent(Fingerprint(
+                definingClass = USER_AGENT_INTERCEPTOR,
+                name = "intercept",
+                returnType = "Lokhttp3/Response;",
+                parameters = listOf("Lokhttp3/Interceptor\$Chain;")
+            ).method)
+        }
+    }
+}
+
+@Suppress("unused")
+val badgeCompleter = bytecodePatch(
+    name = "Complete badges automatically",
+    description = "Counts game time, unique games and daily account activity toward your profile badges in the background."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    execute {
+        additionalSelections += "badges"
+        if (!questAgentGuarded) {
+            questAgentGuarded = true
+            keepDesktopQuestAgent(Fingerprint(
+                definingClass = USER_AGENT_INTERCEPTOR,
+                name = "intercept",
+                returnType = "Lokhttp3/Response;",
+                parameters = listOf("Lokhttp3/Interceptor\$Chain;")
+            ).method)
+        }
     }
 }
