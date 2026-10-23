@@ -1022,7 +1022,6 @@
  "On your profile": "आपकी प्रोफ़ाइल पर",
  "Opens your full gallery. Recent photos still show above the buttons.": "आपकी पूरी गैलरी खोलता है। हाल की फ़ोटो बटनों के ऊपर दिखती रहती हैं।",
  "Photos": "फ़ोटो",
- "Pick any file from your phone.": "अपने फ़ोन से कोई भी फ़ाइल चुनें।",
  "Polls": "पोल",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "वे Quest, शॉप, Nitro और ऐप्स बटन हटाता है जिनका आप इस्तेमाल नहीं करते।",
  "Shop": "शॉप",
@@ -1030,6 +1029,6 @@
  "The Nitro button at the bottom of your profile.": "आपकी प्रोफ़ाइल के नीचे वाला Nitro बटन।",
  "The Quests button at the bottom of your profile.": "आपकी प्रोफ़ाइल के नीचे वाला Quest बटन।",
  "The Shop button at the bottom of your profile.": "आपकी प्रोफ़ाइल के नीचे वाला शॉप बटन।",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "बचे हुए बटन पास आकर पूरी जगह भर देते हैं, इसलिए कोई खाली जगह नहीं रहती। अटैच मेन्यू में हमेशा कम से कम एक बटन रहता है।",
- "Your profile": "आपकी प्रोफ़ाइल"
+ "Your profile": "आपकी प्रोफ़ाइल",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "बचे हुए बटन पास आकर पूरी जगह भर देते हैं, इसलिए कोई खाली जगह नहीं रहती।"
 }

@@ -1022,7 +1022,6 @@
  "On your profile": "A profilodon",
  "Opens your full gallery. Recent photos still show above the buttons.": "Megnyitja a teljes galériát. A legutóbbi fotók továbbra is a gombok fölött látszanak.",
  "Photos": "Fotók",
- "Pick any file from your phone.": "Válassz bármilyen fájlt a telefonodról.",
  "Polls": "Szavazások",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Eltávolítja a Questek, Bolt, Nitro és Alkalmazások gombokat, amelyeket nem használsz.",
  "Shop": "Bolt",
@@ -1030,6 +1029,6 @@
  "The Nitro button at the bottom of your profile.": "A Nitro gomb a profilod alján.",
  "The Quests button at the bottom of your profile.": "A Questek gomb a profilod alján.",
  "The Shop button at the bottom of your profile.": "A Bolt gomb a profilod alján.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "A megmaradt gombok összezárnak és kitöltik a helyet, így nem marad hézag. A csatolás menüben mindig marad legalább egy gomb.",
- "Your profile": "A profilod"
+ "Your profile": "A profilod",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "A megmaradt gombok összezárnak és kitöltik a helyet, így nem marad hézag."
 }

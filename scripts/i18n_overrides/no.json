@@ -1022,7 +1022,6 @@
  "On your profile": "På profilen din",
  "Opens your full gallery. Recent photos still show above the buttons.": "Åpner hele galleriet ditt. De nyeste bildene vises fortsatt over knappene.",
  "Photos": "Bilder",
- "Pick any file from your phone.": "Velg en hvilken som helst fil fra telefonen.",
  "Polls": "Avstemninger",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Fjerner knappene for Quests, Butikk, Nitro og Apper som du ikke bruker.",
  "Shop": "Butikk",
@@ -1030,6 +1029,6 @@
  "The Nitro button at the bottom of your profile.": "Nitro-knappen nederst på profilen din.",
  "The Quests button at the bottom of your profile.": "Quests-knappen nederst på profilen din.",
  "The Shop button at the bottom of your profile.": "Butikk-knappen nederst på profilen din.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Knappene som er igjen, rykker sammen og fyller plassen, så det blir ingen hull. Vedleggsmenyen beholder alltid minst én knapp.",
- "Your profile": "Profilen din"
+ "Your profile": "Profilen din",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Knappene som er igjen, rykker sammen og fyller plassen, så det blir ingen hull."
 }

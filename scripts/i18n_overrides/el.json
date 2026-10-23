@@ -1022,7 +1022,6 @@
  "On your profile": "Στο προφίλ σου",
  "Opens your full gallery. Recent photos still show above the buttons.": "Ανοίγει όλη τη συλλογή σου. Οι πρόσφατες φωτογραφίες εξακολουθούν να εμφανίζονται πάνω από τα κουμπιά.",
  "Photos": "Φωτογραφίες",
- "Pick any file from your phone.": "Διάλεξε οποιοδήποτε αρχείο από το κινητό σου.",
  "Polls": "Δημοσκοπήσεις",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Αφαιρεί τα κουμπιά Quests, Κατάστημα, Nitro και Εφαρμογές που δεν χρησιμοποιείς.",
  "Shop": "Κατάστημα",
@@ -1030,6 +1029,6 @@
  "The Nitro button at the bottom of your profile.": "Το κουμπί Nitro στο κάτω μέρος του προφίλ σου.",
  "The Quests button at the bottom of your profile.": "Το κουμπί Quests στο κάτω μέρος του προφίλ σου.",
  "The Shop button at the bottom of your profile.": "Το κουμπί Κατάστημα στο κάτω μέρος του προφίλ σου.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Τα κουμπιά που μένουν πλησιάζουν μεταξύ τους και γεμίζουν τον χώρο, χωρίς κενά. Το μενού συνημμένων κρατά πάντα τουλάχιστον ένα κουμπί.",
- "Your profile": "Το προφίλ σου"
+ "Your profile": "Το προφίλ σου",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Τα κουμπιά που μένουν πλησιάζουν μεταξύ τους και γεμίζουν τον χώρο, χωρίς κενά."
 }

@@ -1060,7 +1060,6 @@
  "On your profile": "У вашому профілі",
  "Opens your full gallery. Recent photos still show above the buttons.": "Відкриває всю галерею. Нещодавні фото й далі видно над кнопками.",
  "Photos": "Фото",
- "Pick any file from your phone.": "Виберіть будь-який файл на телефоні.",
  "Polls": "Опитування",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Прибирає кнопки «Завдання», «Магазин», Nitro і «Застосунки», якими ви не користуєтеся.",
  "Shop": "Магазин",
@@ -1068,6 +1067,6 @@
  "The Nitro button at the bottom of your profile.": "Кнопка Nitro внизу вашого профілю.",
  "The Quests button at the bottom of your profile.": "Кнопка «Завдання» внизу вашого профілю.",
  "The Shop button at the bottom of your profile.": "Кнопка «Магазин» внизу вашого профілю.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Решта кнопок зсувається й заповнює місце, тож порожніх проміжків немає. У меню вкладень завжди лишається принаймні одна кнопка.",
- "Your profile": "Ваш профіль"
+ "Your profile": "Ваш профіль",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Решта кнопок зсувається й заповнює місце, тож порожніх проміжків немає."
 }

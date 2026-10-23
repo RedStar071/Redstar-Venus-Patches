@@ -908,7 +908,6 @@
  "On your profile": "你的個人檔案中",
  "Opens your full gallery. Recent photos still show above the buttons.": "開啟整個相簿。最近的照片仍會顯示在按鈕上方。",
  "Photos": "照片",
- "Pick any file from your phone.": "從手機中選擇任何檔案。",
  "Polls": "投票",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "移除你用不到的 Quest、商店、Nitro 和應用程式按鈕。",
  "Shop": "商店",
@@ -916,6 +915,6 @@
  "The Nitro button at the bottom of your profile.": "個人檔案底部的 Nitro 按鈕。",
  "The Quests button at the bottom of your profile.": "個人檔案底部的 Quest 按鈕。",
  "The Shop button at the bottom of your profile.": "個人檔案底部的商店按鈕。",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "剩下的按鈕會靠攏並填滿空間，不會留下空隙。附件選單一定會保留至少一個按鈕。",
- "Your profile": "你的個人檔案"
+ "Your profile": "你的個人檔案",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "剩下的按鈕會靠攏並填滿空間，不會留下空隙。"
 }

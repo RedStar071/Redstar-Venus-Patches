@@ -1022,7 +1022,6 @@
  "On your profile": "Sur ton profil",
  "Opens your full gallery. Recent photos still show above the buttons.": "Ouvre toute ta galerie. Les photos récentes restent affichées au-dessus des boutons.",
  "Photos": "Photos",
- "Pick any file from your phone.": "Choisis n'importe quel fichier sur ton téléphone.",
  "Polls": "Sondages",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Retire les boutons Quêtes, Boutique, Nitro et Applis que tu n'utilises pas.",
  "Shop": "Boutique",
@@ -1030,6 +1029,6 @@
  "The Nitro button at the bottom of your profile.": "Le bouton Nitro en bas de ton profil.",
  "The Quests button at the bottom of your profile.": "Le bouton Quêtes en bas de ton profil.",
  "The Shop button at the bottom of your profile.": "Le bouton Boutique en bas de ton profil.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Les boutons restants se rapprochent et prennent toute la place, sans aucun vide. Le menu des pièces jointes garde toujours au moins un bouton.",
- "Your profile": "Ton profil"
+ "Your profile": "Ton profil",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Les boutons restants se rapprochent et prennent toute la place, sans aucun vide."
 }

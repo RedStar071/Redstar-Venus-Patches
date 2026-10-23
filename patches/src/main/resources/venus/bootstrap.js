@@ -60,7 +60,7 @@
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true,
         badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:15, badgesGamesAtOnce:2, systemFont:false,
-        hideGift:false, hideQuestDock:false, hideButtons:false, hideButtonsQuests:true, hideButtonsShop:true, hideButtonsNitro:true, hideButtonsApps:true, hideButtonsPolls:false, hideButtonsPhotos:false, hideButtonsFiles:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
+        hideGift:false, hideQuestDock:false, hideButtons:false, hideButtonsQuests:true, hideButtonsShop:true, hideButtonsNitro:true, hideButtonsApps:true, hideButtonsPolls:false, hideButtonsPhotos:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
@@ -77,7 +77,7 @@
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true,
             badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 15, badgesGamesAtOnce: 2, systemFont: false,
-            hideGift: false, hideQuestDock: false, hideButtons: false, hideButtonsQuests: true, hideButtonsShop: true, hideButtonsNitro: true, hideButtonsApps: true, hideButtonsPolls: false, hideButtonsPhotos: false, hideButtonsFiles: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
+            hideGift: false, hideQuestDock: false, hideButtons: false, hideButtonsQuests: true, hideButtonsShop: true, hideButtonsNitro: true, hideButtonsApps: true, hideButtonsPolls: false, hideButtonsPhotos: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
@@ -906,7 +906,7 @@
     }
     // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
     // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
-    const FEATURE_KEYWORDS = {hideButtons:["Quests", "Shop", "Nitro", "Apps", "Polls", "Photos", "Files"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
+    const FEATURE_KEYWORDS = {hideButtons:["Quests", "Shop", "Nitro", "Apps", "Polls", "Photos"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
@@ -7094,7 +7094,7 @@
     const HIDE_PILL = [["quests", 13012, "QuestsIcon", "hideButtonsQuests"], ["shop", 11828, "ShopIcon", "hideButtonsShop"],
         ["nitro", 9031, "NitroWheelIcon", "hideButtonsNitro"], ["settings", 7092, "SettingsIcon", null]];
     const HIDE_ATTACH = [["photos", 8210, "ImageIcon", "Photos", "hideButtonsPhotos"], ["polls", 10022, "PollsIcon", "Polls", "hideButtonsPolls"],
-        ["apps", 8229, "AppsIcon", "Apps", "hideButtonsApps"], ["files", 10024, "AttachmentIcon", "Files", "hideButtonsFiles"]];
+        ["apps", 8229, "AppsIcon", "Apps", "hideButtonsApps"], ["files", 10024, "AttachmentIcon", "Files", null]];
     const HIDE_PREVIEW_DARK = {stage:{borderRadius:16, overflow:"hidden", backgroundColor:"#1a1a1e", borderWidth:1, borderColor:"#ffffff14", padding:16, gap:18},
         pill:{flexDirection:"row", alignSelf:"center", alignItems:"center", gap:8, padding:8, borderRadius:28, backgroundColor:"#2b2d31",
             shadowColor:"#000000", shadowOpacity:0.25, shadowRadius:8, shadowOffset:{width:0, height:3}, elevation:4},
@@ -7102,8 +7102,10 @@
         bar:{flexDirection:"row", gap:8, padding:8, borderRadius:20, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff0f"},
         button:{flexGrow:1, flexBasis:0, minHeight:64, alignItems:"center", justifyContent:"center", gap:6, borderRadius:14, backgroundColor:"#ffffff0f"},
         label:{color:"#dbdee1", fontSize:12, fontWeight:"600"}, caption:{color:"#949ba4", fontSize:12, fontWeight:"600", textAlign:"center"}, icon:{color:"#dbdee1"}};
-    // Like chat, the menu always keeps at least one button.
+    // Files always stays, so the row is never empty; the fallback only guards against a future Discord change.
     function attachShown(isHidden) { const left = HIDE_ATTACH.filter(b => !isHidden(b)); return left.length ? left : HIDE_ATTACH; }
+    // Written out so every label is a plain tr() call the language check can see.
+    function hideAttachLabel(k) { return k === "photos" ? tr("Photos") : k === "polls" ? tr("Polls") : k === "apps" ? tr("Apps") : tr("Files"); }
     function HideButtonsPreview(props) {
         useSettings("hideButtons");
         const s = useThemed("hidePreview", c => ({stage:Object.assign({}, HIDE_PREVIEW_DARK.stage, {backgroundColor:c.BACKGROUND_BASE_LOWER || c.CHANNEL_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE}),
@@ -7121,7 +7123,7 @@
             el(RN.Text, {style:s.caption}, tr("Attach menu")),
             el(RN.View, {style:s.bar}, attachShown(b => hidden(b[4])).map(([k, id, name, label]) =>
                 el(RN.View, {key:k, style:s.button}, el(venusIcon(id, name), {size:"md", color:s.icon.color}),
-                    el(RN.Text, {numberOfLines:1, style:s.label}, tr(label))))));
+                    el(RN.Text, {numberOfLines:1, style:s.label}, hideAttachLabel(k))))));
     }
     function HideButtonsSettings() {
         useSettings("hideButtons");
@@ -7138,9 +7140,8 @@
             el(Group, {key:"attach", title:tr("In the attach menu")},
                 switchRow(Switch, "hideButtonsApps", "Apps", "Activities and app commands.", rowIcon(8229, "AppsIcon")),
                 switchRow(Switch, "hideButtonsPolls", "Polls", "Start a poll.", rowIcon(10022, "PollsIcon")),
-                switchRow(Switch, "hideButtonsPhotos", "Photos", "Opens your full gallery. Recent photos still show above the buttons.", rowIcon(8210, "ImageIcon")),
-                switchRow(Switch, "hideButtonsFiles", "Files", "Pick any file from your phone.", rowIcon(10024, "AttachmentIcon"))),
-            footnote("note", "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.")];
+                switchRow(Switch, "hideButtonsPhotos", "Photos", "Opens your full gallery. Recent photos still show above the buttons.", rowIcon(8210, "ImageIcon"))),
+            footnote("note", "The buttons that are left move together and grow to fill the space, so there are no gaps.")];
         return settingsBody(ui, groups);
     }
     // Unlock app icons: lets you pick any Discord app icon in Settings -> App Icon without Nitro, stops

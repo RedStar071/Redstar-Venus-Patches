@@ -1022,7 +1022,6 @@
  "On your profile": "Profilinde",
  "Opens your full gallery. Recent photos still show above the buttons.": "Galerinin tamamını açar. Son fotoğraflar düğmelerin üstünde görünmeye devam eder.",
  "Photos": "Fotoğraflar",
- "Pick any file from your phone.": "Telefonundan istediğin dosyayı seç.",
  "Polls": "Anketler",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Kullanmadığın Görevler, Mağaza, Nitro ve Uygulamalar düğmelerini kaldırır.",
  "Shop": "Mağaza",
@@ -1030,6 +1029,6 @@
  "The Nitro button at the bottom of your profile.": "Profilinin altındaki Nitro düğmesi.",
  "The Quests button at the bottom of your profile.": "Profilinin altındaki Görevler düğmesi.",
  "The Shop button at the bottom of your profile.": "Profilinin altındaki Mağaza düğmesi.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Kalan düğmeler bir araya gelir ve alanı doldurur, böylece boşluk kalmaz. Ek menüsünde her zaman en az bir düğme kalır.",
- "Your profile": "Profilin"
+ "Your profile": "Profilin",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Kalan düğmeler bir araya gelir ve alanı doldurur, böylece boşluk kalmaz."
 }

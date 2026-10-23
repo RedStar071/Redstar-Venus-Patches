@@ -663,7 +663,7 @@ val hideCallButton = bundledPlugin("hideCall", "Hide the call button",
 
 @Suppress("unused")
 val hideExtraButtons = bundledPlugin("hideButtons", "Hide extra buttons",
-    "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Photos, Polls and Files in the attach menu; the rest close up with no gaps.")
+    "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Polls and Photos in the attach menu; the rest close up with no gaps.")
 
 @Suppress("unused")
 val hideQuestDock = bundledPlugin("hideQuestDock", "Hide the Quests banner",

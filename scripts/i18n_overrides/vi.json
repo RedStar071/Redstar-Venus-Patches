@@ -908,7 +908,6 @@
  "On your profile": "Trên hồ sơ của bạn",
  "Opens your full gallery. Recent photos still show above the buttons.": "Mở toàn bộ thư viện ảnh. Ảnh gần đây vẫn hiện phía trên các nút.",
  "Photos": "Ảnh",
- "Pick any file from your phone.": "Chọn bất kỳ tệp nào từ điện thoại.",
  "Polls": "Bình chọn",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Gỡ các nút Nhiệm vụ, Cửa hàng, Nitro và Ứng dụng mà bạn không dùng.",
  "Shop": "Cửa hàng",
@@ -916,6 +915,6 @@
  "The Nitro button at the bottom of your profile.": "Nút Nitro ở cuối hồ sơ của bạn.",
  "The Quests button at the bottom of your profile.": "Nút Nhiệm vụ ở cuối hồ sơ của bạn.",
  "The Shop button at the bottom of your profile.": "Nút Cửa hàng ở cuối hồ sơ của bạn.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Các nút còn lại dồn lại và lấp đầy chỗ trống nên không có khoảng hở. Menu đính kèm luôn giữ lại ít nhất một nút.",
- "Your profile": "Hồ sơ của bạn"
+ "Your profile": "Hồ sơ của bạn",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Các nút còn lại dồn lại và lấp đầy chỗ trống nên không có khoảng hở."
 }

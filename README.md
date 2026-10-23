@@ -53,7 +53,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Use your phone's emojis | Your phone's emojis instead of Discord's |
 | | Hide the gift button | Removes the Nitro gift button from the message bar |
 | | Hide the call button | Removes Call from people's profiles |
-| | Hide extra buttons | Removes the Quests, Shop and Nitro buttons from your profile and Apps from the attach menu; you can also pick Polls, Photos and Files. The rest close up, so the pill and the menu shrink with no gaps |
+| | Hide extra buttons | Removes the Quests, Shop and Nitro buttons from your profile and Apps from the attach menu; you can also pick Polls and Photos. The rest close up, so the pill and the menu shrink with no gaps |
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
 | | Custom themes | Install Revenge and Vendetta color themes from a link, then pick one from a gallery that previews each in its own colors |

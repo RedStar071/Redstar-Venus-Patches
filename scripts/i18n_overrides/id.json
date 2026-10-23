@@ -908,7 +908,6 @@
  "On your profile": "Di profilmu",
  "Opens your full gallery. Recent photos still show above the buttons.": "Membuka seluruh galerimu. Foto terbaru tetap muncul di atas tombol.",
  "Photos": "Foto",
- "Pick any file from your phone.": "Pilih file apa pun dari ponselmu.",
  "Polls": "Polling",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Menghapus tombol Quest, Toko, Nitro, dan Aplikasi yang tidak kamu pakai.",
  "Shop": "Toko",
@@ -916,6 +915,6 @@
  "The Nitro button at the bottom of your profile.": "Tombol Nitro di bagian bawah profilmu.",
  "The Quests button at the bottom of your profile.": "Tombol Quest di bagian bawah profilmu.",
  "The Shop button at the bottom of your profile.": "Tombol Toko di bagian bawah profilmu.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Tombol yang tersisa merapat dan mengisi ruang, jadi tidak ada celah. Menu lampiran selalu menyisakan setidaknya satu tombol.",
- "Your profile": "Profilmu"
+ "Your profile": "Profilmu",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Tombol yang tersisa merapat dan mengisi ruang, jadi tidak ada celah."
 }

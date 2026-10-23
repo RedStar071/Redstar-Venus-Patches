@@ -908,7 +908,6 @@
  "On your profile": "プロフィール",
  "Opens your full gallery. Recent photos still show above the buttons.": "ギャラリー全体を開きます。最近の写真は引き続きボタンの上に表示されます。",
  "Photos": "写真",
- "Pick any file from your phone.": "スマホから好きなファイルを選びます。",
  "Polls": "投票",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "使わないクエスト、ショップ、Nitro、アプリのボタンを非表示にします。",
  "Shop": "ショップ",
@@ -916,6 +915,6 @@
  "The Nitro button at the bottom of your profile.": "プロフィール下部のNitroボタン。",
  "The Quests button at the bottom of your profile.": "プロフィール下部のクエストボタン。",
  "The Shop button at the bottom of your profile.": "プロフィール下部のショップボタン。",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "残ったボタンが詰めて並び、空いたスペースを埋めるので、すき間はできません。添付メニューには常に1つ以上のボタンが残ります。",
- "Your profile": "プロフィール"
+ "Your profile": "プロフィール",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "残ったボタンが詰めて並び、空いたスペースを埋めるので、すき間はできません。"
 }

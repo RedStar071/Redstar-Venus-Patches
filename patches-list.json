@@ -595,7 +595,7 @@
     },
     {
       "name": "Hide extra buttons",
-      "description": "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Photos, Polls and Files in the attach menu; the rest close up with no gaps.",
+      "description": "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Polls and Photos in the attach menu; the rest close up with no gaps.",
       "default": true,
       "category": "Features",
       "dependencies": [

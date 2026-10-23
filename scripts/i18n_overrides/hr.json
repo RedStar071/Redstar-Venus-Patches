@@ -1060,7 +1060,6 @@
  "On your profile": "Na tvom profilu",
  "Opens your full gallery. Recent photos still show above the buttons.": "Otvara cijelu galeriju. Nedavne fotografije i dalje se prikazuju iznad gumba.",
  "Photos": "Fotografije",
- "Pick any file from your phone.": "Odaberi bilo koju datoteku s mobitela.",
  "Polls": "Ankete",
  "Removes the Quests, Shop, Nitro and Apps buttons you don't use.": "Uklanja gumbe Questovi, Trgovina, Nitro i Aplikacije koje ne koristiš.",
  "Shop": "Trgovina",
@@ -1068,6 +1067,6 @@
  "The Nitro button at the bottom of your profile.": "Gumb Nitro na dnu tvog profila.",
  "The Quests button at the bottom of your profile.": "Gumb Questovi na dnu tvog profila.",
  "The Shop button at the bottom of your profile.": "Gumb Trgovina na dnu tvog profila.",
- "The buttons that are left move together and grow to fill the space, so there are no gaps. The attach menu always keeps at least one button.": "Preostali gumbi se primaknu i ispune prostor, pa nema praznina. Izbornik privitaka uvijek zadrži barem jedan gumb.",
- "Your profile": "Tvoj profil"
+ "Your profile": "Tvoj profil",
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Preostali gumbi se primaknu i ispune prostor, pa nema praznina."
 }
