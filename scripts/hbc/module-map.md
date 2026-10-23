@@ -52,6 +52,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 4815 | `design/components/Icon/native/redesign/generated/FriendsIcon.tsx` | FriendsIcon | FriendsIcon |
 | 4817 | `design/components/Icon/native/BaseIconImage.tsx` | BaseIconImage | BaseIconImage (Icon packs) |
 | 4831 | `../discord_common/js/packages/design/components/ThemeContextProvider/ThemeContext.tsx` | createThemedContext, useThemeContext, FALLBACK_THEME_CONTEXT_VALUE | ThemeContext |
+| 4937 | `modules/client_themes/ClientThemesBackgroundStore.tsx` | default | ClientThemesBackgroundStore (Unlock Nitro themes) |
 | 4976 | `modules/main_tabs_v2/helpers/NavigationRouteUtils.native.tsx` | navigateToChannel, navigateToRootTab, pushModal, popModal | ModalAPI |
 | 4977 | `modules/main_tabs_v2/RootNavigationRef.native.tsx` | getRootNavigationRef | RootNavigationRef |
 | 5020 | `stores/GuildMemberCountStore.tsx` | default, getMemberCount, getOnlineCount | GuildMemberCountStore |
@@ -107,6 +108,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 6286 | `design/components/TextInput/native/TextInput.native.tsx` | TextInput | TextInput |
 | 6296 | `design/components/Icon/native/redesign/generated/CircleXIcon.tsx` | CircleXIcon | CircleXIcon |
 | 6307 | - | BottomSheetScrollView, BottomSheetFlatList, BottomSheetModal | @gorhom/bottom-sheet (Server info sheet scrolling) |
+| 6623 | `modules/auth/native/components/Login.tsx` | default, LinkButton | Login: Add account screen (Account switcher) |
 | 6640 | `design/components/Icon/native/redesign/generated/KeyIcon.tsx` | KeyIcon | KeyIcon |
 | 6642 | `design/components/Icon/native/redesign/generated/MobilePhoneIcon.tsx` | MobilePhoneIcon | MobilePhoneIcon |
 | 6650 | `design/components/Icon/native/redesign/generated/EyeSlashIcon.tsx` | EyeSlashIcon | EyeSlashIcon |
@@ -274,7 +276,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 14193 | `modules/guild/markGuildsAsRead.tsx` | default | markGuildsAsRead |
 | 14213 | `modules/guild_action_sheet/native/components/GuildActionSheetProgress.tsx` | default | GuildActionSheetJoinRequestRow |
 | 14281 | `design/components/ContextMenu/native/ContextMenuPopout.native.tsx` | ContextMenuPopout | ContextMenuPopout |
-| 14299 | `modules/premium/ProductCatalog.tsx` | ANIMATED_EMOJIS, EMOJIS_EVERYWHERE, STICKERS_EVERYWHERE | EmojiPermissions |
+| 14299 | `modules/premium/ProductCatalog.tsx` | ANIMATED_EMOJIS, EMOJIS_EVERYWHERE, STICKERS_EVERYWHERE, CLIENT_THEMES | EmojiPermissions |
 | 14419 | `design/void/Status/native/Status.tsx` | default, StatusWithTyping | Status |
 | 14839 | `modules/user_settings/core/native/SettingsRendererConfig.tsx` | SETTING_RENDERER_CONFIG | SettingRendererConfig |
 | 14850 | `modules/color_picker/native/showCustomColorPickerActionSheet.tsx` | CUSTOM_COLOR_PICKER_KEY, CustomColorPicker | showCustomColorPickerActionSheet |
@@ -288,6 +290,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15378 | `modules/main_tabs_v2/native/you_bar/YouBarConstants.tsx` | CONNECTION_BANNER_HEIGHT, YOU_BAR_SPRING_CONFIG, YOU_BAR_PADDING | YouBarConstants |
 | 15465 | `modules/quests/native/QuestDock/QuestDock.tsx` | PENDING, SUCCEEDED, FAILED | QuestDock |
 | 15560 | `design/components/Icon/native/redesign/generated/PaintPaletteIcon.tsx` | PaintPaletteIcon | PaintPaletteIcon |
+| 15566 | `modules/user_settings/appearance/native/SettingsAppearanceThemePickerScreen.tsx` | default | Theme picker (Unlock Nitro themes) |
 | 15612 | `design/components/Icon/native/redesign/generated/CircleMinusIcon.tsx` | CircleMinusIcon | CircleMinusIcon (Hide extra buttons) |
 | 15652 | `design/components/Icon/native/redesign/generated/EyeDropperIcon.tsx` | EyeDropperIcon | EyeDropperIcon |
 | 15723 | `design/components/Icon/native/redesign/generated/LanguageIcon.tsx` | LanguageIcon | LanguageIcon |
@@ -310,6 +313,6 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16857 | `modules/main_tabs_v2/native/you_bar/YouBarButton.tsx` | default, YouBarButtonIcon, YouBarButtonContainer | YouBarButton |
 | 16858 | `modules/main_tabs_v2/native/you_bar/YouBarNotificationsButton.tsx` | default | YouBarButtons |
 | 16947 | `design/components/Icon/native/redesign/generated/PaintbrushThinIcon.tsx` | PaintbrushThinIcon | PaintbrushThinIcon |
-| 17143 | `design/components/Icon/native/redesign/generated/SparklesIcon.tsx` | SparklesIcon | SparklesIcon |
+| 17143 | `design/components/Icon/native/redesign/generated/SparklesIcon.tsx` | SparklesIcon | SparklesIcon (Unlock Nitro themes) |
 | 17697 | `modules/app_icons/native/AppIconsCoachmark.tsx` | default | AppIconsCoachmark |
 | 18051 | `modules/app_icons/native/AppIconPremiumManager.tsx` | default | AppIconPremiumManager |

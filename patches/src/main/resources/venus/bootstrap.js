@@ -910,7 +910,7 @@
     const FEATURE_KEYWORDS = {hideButtons:["Quests", "Shop", "Nitro", "Apps", "Polls", "Photos"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
-        userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar"],
+        userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],

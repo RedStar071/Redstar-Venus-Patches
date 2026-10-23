@@ -14,6 +14,8 @@
 * **Discord:** Add `Complete badges automatically` patch: plays real detectable PC games in the background, up to 3 at once for up to 3x the game time, toward your Hours Played and Unique Games Played badges, with their real art on your profile. Its page explains when a game counts and when the badge updates, and an Advanced Add hours now option asks you to confirm three times. It's marked Risky and Experimental, and asks "Are you sure?" before it turns on ([#81](https://github.com/VenusIsJaded/Venus-Patches/issues/81))
 * **Discord:** Add `Hide extra buttons` patch: hide the Quests, Shop and Nitro buttons on your profile and the Apps, Polls or Photos buttons in the attach menu, with the rest closing up neatly ([#85](https://github.com/VenusIsJaded/Venus-Patches/issues/85))
 * **Discord - Translate messages:** Translate a whole chat from a bar that appears when it has messages in another language, kept until Discord restarts, and choose whether you ask from the bar, the message menu or both. The bar floats as a small pill under Discord's own banners, like the blue New messages bar, never on top of them ([#82](https://github.com/VenusIsJaded/Venus-Patches/issues/82))
+* **Discord:** Add `Unlock Nitro themes` patch: use Discord's gradient themes without Nitro, on your phone
+* **Discord - Account switcher:** Create a new account from Discord's Add account screen or the Account switcher page, without logging out ([#86](https://github.com/VenusIsJaded/Venus-Patches/issues/86))
 
 ### 🐛 Bug Fixes
 
