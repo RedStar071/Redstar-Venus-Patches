@@ -1308,8 +1308,8 @@
       "options": []
     },
     {
-      "name": "Unlock app icons",
-      "description": "Use any Discord app icon in Settings without Nitro.",
+      "name": "Unlock Nitro themes",
+      "description": "Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -1342,8 +1342,8 @@
       "options": []
     },
     {
-      "name": "Unlock Nitro themes",
-      "description": "Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them.",
+      "name": "Unlock app icons",
+      "description": "Use any Discord app icon in Settings without Nitro.",
       "default": true,
       "category": "Features",
       "dependencies": [
