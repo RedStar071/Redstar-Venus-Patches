@@ -842,7 +842,7 @@ val questCompleter = bytecodePatch(
 @Suppress("unused")
 val badgeCompleter = bytecodePatch(
     name = "Complete badges automatically",
-    description = "Plays real PC games in the background toward your Hours Played and Unique Games Played badges."
+    description = "Plays real PC games in the background, up to 3 at once, toward your Hours Played and Unique Games Played badges."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
