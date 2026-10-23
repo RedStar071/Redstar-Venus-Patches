@@ -8,6 +8,12 @@ global-function constants and string IDs are in `HbcPrelude.kt` and `HbcPrivacy.
 and `scripts/hbc/port_check.py`; target counts come from `PrivacyTest.kt`. Never copy version numbers, module IDs,
 hashes or counts into this file: they go stale on the next port.
 
+## Never reply on GitHub
+
+**Never post a reply, comment or review on a pull request or an issue**, and never close, label or react to one, unless
+the user asks you to in that conversation. Read comments and issues to learn what to fix, then fix it in commits.
+Only the user answers people on GitHub. Writing or updating a pull request's own title and description is fine.
+
 ## Release notes
 
 Morphe Manager shows "What's new" from `CHANGELOG.md` on `main` (it derives the URL from
