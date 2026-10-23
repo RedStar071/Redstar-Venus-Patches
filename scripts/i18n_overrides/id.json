@@ -890,5 +890,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Ruang yang masih terlihat seperti main sungguhan: {n} jam. Bertambah setiap hari.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Jumlah kecil lebih mirip permainan sungguhan. Kamu bisa menambahkan hingga {max} jam sekali sehari.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Jam diberi tanggal seperti main sungguhan: tersebar di hari-harimu sebelumnya pada sore, malam, dan akhir pekan, dengan hari libur dan tidak pernah lebih dari 2 game sekaligus. Setiap kali dilanjutkan ke hari yang lebih lama, jadi tidak ada hari yang diisi dua kali. Jam muncul di lencanamu dalam 72 jam.",
- "Your past days are as full as real play gets. More room opens up every day.": "Hari-harimu sebelumnya sudah sepenuh yang bisa dicapai main sungguhan. Ruang baru terbuka setiap hari."
+ "Your past days are as full as real play gets. More room opens up every day.": "Hari-harimu sebelumnya sudah sepenuh yang bisa dicapai main sungguhan. Ruang baru terbuka setiap hari.",
+ "Are you sure?": "Yakin?",
+ "Risky": "Berisiko",
+ "Experimental": "Eksperimental",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord tidak mengizinkan pelaporan game yang tidak kamu mainkan, jadi akunmu bisa ditangguhkan atau diblokir. Gunakan dengan risiko sendiri.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Ini fitur eksperimental. Fitur ini memberi tahu Discord bahwa kamu sedang memainkan game yang tidak kamu mainkan, yang melanggar Ketentuan Layanan Discord dan bisa membuat akunmu ditangguhkan atau diblokir."
 }

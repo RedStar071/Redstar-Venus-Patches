@@ -1042,5 +1042,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Запас, що ще схожий на справжню гру: {n} год. Він зростає щодня.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Невеликі кількості більше схожі на справжню гру. Можна додавати до {max} год раз на день.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Вони датуються як справжня гра: розподіляються по минулих днях — удень, увечері та на вихідних, з днями без гри й не більше 2 ігор одночасно. Щоразу продовжується з давніших днів, тож жоден день не заповнюється двічі. Вони з’являться на значку протягом 72 годин.",
- "Your past days are as full as real play gets. More room opens up every day.": "Минулі дні заповнені настільки, наскільки це буває під час справжньої гри. Щодня з’являється новий запас."
+ "Your past days are as full as real play gets. More room opens up every day.": "Минулі дні заповнені настільки, наскільки це буває під час справжньої гри. Щодня з’являється новий запас.",
+ "Are you sure?": "Ви впевнені?",
+ "Risky": "Ризиковано",
+ "Experimental": "Експериментально",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord не дозволяє повідомляти про ігри, у які ви не граєте, тож ваш обліковий запис можуть заблокувати або забанити. Використовуйте на власний ризик.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Це експериментальна функція. Вона повідомляє Discord, що ви граєте в ігри, у які не граєте. Це порушує Умови використання Discord і може призвести до блокування або бану облікового запису."
 }

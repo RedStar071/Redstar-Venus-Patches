@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Hely, ami még valódi játéknak tűnik: {n} ó. Minden nappal nő.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "A kisebb mennyiségek jobban hasonlítanak a valódi játékra. Naponta egyszer legfeljebb {max} órát adhatsz hozzá.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Valódi játékként keltezzük őket: szétosztva a korábbi napjaidra, délutánokra, estékre és hétvégékre, szabadnapokkal és sosem több mint 2 játékkal egyszerre. Minden alkalommal régebbi napokon folytatódik, így egy nap sem telik meg kétszer. 72 órán belül megjelennek a jelvényeden.",
- "Your past days are as full as real play gets. More room opens up every day.": "A korábbi napjaid olyan tele vannak, amennyire a valódi játék engedi. Minden nap újabb hely nyílik."
+ "Your past days are as full as real play gets. More room opens up every day.": "A korábbi napjaid olyan tele vannak, amennyire a valódi játék engedi. Minden nap újabb hely nyílik.",
+ "Are you sure?": "Biztos vagy benne?",
+ "Risky": "Kockázatos",
+ "Experimental": "Kísérleti",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "A Discord nem engedi, hogy olyan játékokat jelents, amelyekkel nem játszol, ezért a fiókodat felfüggeszthetik vagy kitilthatják. Csak saját felelősségre használd.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Ez kísérleti funkció. Azt jelzi a Discordnak, hogy olyan játékokkal játszol, amelyekkel nem. Ez sérti a Discord Szolgáltatási feltételeit, és a fiókod felfüggesztésével vagy kitiltásával járhat."
 }

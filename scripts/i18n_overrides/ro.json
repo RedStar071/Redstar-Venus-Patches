@@ -1042,5 +1042,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Spațiu care încă arată a joc real: {n} h. Crește în fiecare zi.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Cantitățile mai mici seamănă mai mult cu jocul real. Poți adăuga până la {max} ore o dată pe zi.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Sunt datate ca jocul real: împărțite pe zilele tale trecute, după-amiaza, seara și în weekend, cu zile libere și niciodată mai mult de 2 jocuri deodată. De fiecare dată continuă cu zile mai vechi, așa că nicio zi nu e umplută de două ori. Apar pe insignă în cel mult 72 de ore.",
- "Your past days are as full as real play gets. More room opens up every day.": "Zilele tale trecute sunt atât de pline cât poate fi jocul real. În fiecare zi se eliberează mai mult spațiu."
+ "Your past days are as full as real play gets. More room opens up every day.": "Zilele tale trecute sunt atât de pline cât poate fi jocul real. În fiecare zi se eliberează mai mult spațiu.",
+ "Are you sure?": "Ești sigur?",
+ "Risky": "Riscant",
+ "Experimental": "Experimental",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord nu permite raportarea jocurilor pe care nu le joci, așa că îți poate fi suspendat sau banat contul. Folosește pe propriul risc.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Este experimental. Îi spune lui Discord că joci jocuri pe care nu le joci, ceea ce încalcă Termenii și condițiile Discord și îți poate aduce suspendarea sau banarea contului."
 }

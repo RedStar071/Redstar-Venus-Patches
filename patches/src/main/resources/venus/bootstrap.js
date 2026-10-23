@@ -1055,7 +1055,7 @@
     function settingNode(key, title, description, parent) {
         const node = { type: "toggle", parent, useTitle: () => { useLanguage(); return tr(title); },
             useValue: function () { useSettings(key); return settings[key]; },
-            onValueChange: value => setSetting(key, value) };
+            onValueChange: value => turnOnAsking(key, value) };
         // No description, no empty second line under the title.
         if (description) node.useDescription = () => tr(description);
         return node;
@@ -1089,6 +1089,60 @@
     // A main-list row with its own switch and a small arrow to its page. Tapping anywhere else on the row opens the page too,
     // so the arrow only has to say "there's more": no divider and no filled circle, which used to take a third of the row
     // and squeeze the title and description into a narrow column.
+    // Features that can get an account in trouble (#81): their Features row says so with red Risky and Experimental chips
+    // under the title, and switching one on asks first in Discord's own dialog. Switching off, restoring a backup and
+    // Reset never ask. The switch is controlled, so it stays off until you confirm.
+    const RISKY_FEATURES = {badges:() => tr("This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.")};
+    // Cancelling remounts the switch (riskCancels is in its key), so a native switch that already slid on slides back.
+    let riskCancels = 0;
+    function turnOnAsking(key, value) {
+        if (!value || !RISKY_FEATURES[key] || settings[key]) { setSetting(key, value); return; }
+        const cancel = () => { riskCancels++; notify(key); };
+        const title = tr("Are you sure?"), body = RISKY_FEATURES[key](), yes = tr("Turn on"), ui = reviewUI();
+        const confirm = () => { animateLayout(); setSetting(key, true); };
+        if (ui.alerts && typeof ui.alerts.show === "function") try {
+            ui.alerts.show({title, body, confirmText:yes, cancelText:tr("Cancel"), confirmColor:(inspectedExport(1203, "ButtonColors") || {}).RED, onConfirm:confirm, onCancel:cancel}); return;
+        } catch (_) {}
+        if (RN && RN.Alert) RN.Alert.alert(title, body, [{text:tr("Cancel"), style:"cancel", onPress:cancel}, {text:yes, style:"destructive", onPress:confirm}],
+            {cancelable:true, onDismiss:cancel});
+        else cancel();
+    }
+    const RISK_CHIP_DARK = {row:{flexDirection:"row", flexWrap:"wrap", gap:6, marginTop:4, marginBottom:2},
+        chip:{flexDirection:"row", alignItems:"center", gap:4, height:20, paddingLeft:6, paddingRight:8, borderRadius:10, borderWidth:1,
+            borderColor:"#f23f43", backgroundColor:"#f23f431f"}, text:{color:"#f57376", fontSize:11, fontWeight:"700", letterSpacing:0.3}};
+    // The row's description with the chips above it: [⚠ Risky] [⚗ Experimental], outlined in Discord's danger red.
+    function RiskyDescription(props) {
+        useLanguage();
+        const s = useRiskChips();
+        const Text = inspectedExport(5088, "Text");
+        return el(RN.View, {accessible:true, accessibilityLabel:tr("Risky") + ", " + tr("Experimental") + ". " + tr(props.hint)},
+            riskChips(s),
+            Text ? el(Text, {variant:"text-xs/medium", color:"text-subtle"}, tr(props.hint)) : el(RN.Text, {style:{color:"#949ba4", fontSize:12}}, tr(props.hint)));
+    }
+    function riskChips(s, flush) {
+        const chip = (key, Icon, label) => el(RN.View, {key, style:s.chip},
+            el(Icon, {size:"xxs", color:s.text.color}),
+            el(RN.Text, {numberOfLines:1, style:s.text}, tr(label).toLocaleUpperCase()));
+        return el(RN.View, {style:flush ? [s.row, {marginTop:0, marginBottom:0}] : s.row}, chip("risky", venusIcon(7567, "WarningIcon"), "Risky"), chip("experimental", venusIcon(15894, "BeakerIcon"), "Experimental"));
+    }
+    function useRiskChips() {
+        return useThemed("riskChips", c => ({row:RISK_CHIP_DARK.row,
+            chip:Object.assign({}, RISK_CHIP_DARK.chip, {borderColor:c.BORDER_FEEDBACK_CRITICAL || c.TEXT_FEEDBACK_CRITICAL, backgroundColor:c.BACKGROUND_FEEDBACK_CRITICAL}),
+            text:Object.assign({}, RISK_CHIP_DARK.text, {color:c.TEXT_FEEDBACK_CRITICAL})}), RISK_CHIP_DARK);
+    }
+    // The top of a risky feature's page: a card outlined in red with the same chips and what the risk is.
+    const RISK_CARD_DARK = {card:{borderRadius:16, borderWidth:1.5, borderColor:"#f23f43", backgroundColor:"#f23f4314", paddingHorizontal:16, paddingVertical:14, gap:8,
+        flexDirection:"row", alignItems:"flex-start"}, badge:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#f23f4329"}};
+    function riskCard(key, body) {
+        const s = useRiskChips(), c = useThemed("riskCard", t => ({card:Object.assign({}, RISK_CARD_DARK.card, {borderColor:t.BORDER_FEEDBACK_CRITICAL || t.TEXT_FEEDBACK_CRITICAL,
+            backgroundColor:t.BACKGROUND_FEEDBACK_CRITICAL}), badge:RISK_CARD_DARK.badge}), RISK_CARD_DARK);
+        const Warn = venusIcon(7567, "WarningIcon");
+        return el(RN.View, {key, style:[c.card, {gap:12}], accessible:true, accessibilityLabel:tr("Risky") + ", " + tr("Experimental") + ". " + tr(body)},
+            el(RN.View, {style:c.badge}, el(Warn, {size:"sm", color:s.text.color})),
+            el(RN.View, {style:{flex:1, gap:6}},
+                riskChips(s, true),
+                badgeText(tr(body), "text-sm/medium", "text-default", {color:"#dbdee1", fontSize:14})));
+    }
     let stackNavigation, trailingSwitch, trailingChevron;
     function SubpageTrailing(props) {
         useSettings(props.setting);
@@ -1098,7 +1152,7 @@
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View;
         const on = !!settings[props.setting];
         return el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:2}},
-            FormSwitch ? el(FormSwitch, {value:on, accessibilityLabel:props.label, onValueChange:value => setSetting(props.setting, value)}) : null,
+            FormSwitch ? el(FormSwitch, {key:"switch:" + riskCancels, value:on, accessibilityLabel:props.label, onValueChange:value => turnOnAsking(props.setting, value)}) : null,
             // A 24 dp arrow with a full 44 dp touch target, the same arrow Discord puts on rows that open a page.
             el(Press, {style:{width:24, height:24, alignItems:"center", justifyContent:"center", marginRight:-4}, onPress:props.open,
                 accessibilityRole:"button", accessibilityLabel:tr("More options"), hitSlop:{top:10, bottom:10, left:8, right:10}},
@@ -1174,7 +1228,7 @@
                     navigators.set(rowId, stackNavigation ? stackNavigation() : null);
                     return el(SubpageTrailing, {setting:key, label:tr(title), open});
                 } };
-            if (hint) next[rowId].useDescription = () => tr(hint);
+            if (hint) next[rowId].useDescription = RISKY_FEATURES[key] ? () => el(RiskyDescription, {hint}) : () => tr(hint);
         }
         // Option IDs are the ones earlier releases used, so nothing that points at them moves.
         const OPTION_IDS = {emojis:"VENUS_EMOJIS", stickers:"VENUS_STICKERS", hyperlinks:"VENUS_HYPERLINKS", pastelAll:"VENUS_PASTELALL", pastelContent:"VENUS_PASTELCONTENT", piDmHeader:"VENUS_PI_DM", piUserList:"VENUS_PI_LIST", piProfile:"VENUS_PI_PROFILE", piHideMobile:"VENUS_PI_MOBILE"};
@@ -4671,6 +4725,7 @@
         const Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, on = enabled("badges"), Button = inspectedExport(5379, "Button");
         const consent = on ? badgeConsented() : null;
         const groups = [
+            riskCard("risk", "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk."),
             on ? badgeNowCard(s) : offCard("status", venusIcon(8921, "TrophyIcon"), "badges"),
             consent === false ? statusCard("consent", "Discord only counts games toward these badges while \"Use data to personalize my Discord experience\" is on.",
                 {title:tr("Personalization is off"), IconComponent:venusIcon(12178, "ChatWarningIcon"),
@@ -5086,7 +5141,7 @@
         const FormSwitch=feature && features[feature] ? inspectedExport(6897,"FormSwitch") : null;
         const title=tr("Turned off");
         return VenusStatusCard({key,title,IconComponent,body:tr(FormSwitch ? "Turn it on here to start." : "Switch it on in Features to start."),
-            trailing:FormSwitch ? el(FormSwitch,{value:false,accessibilityLabel:title,onValueChange:value => { if (!value) return; animateLayout(); setSetting(feature,true); }}) : null});
+            trailing:FormSwitch ? el(FormSwitch,{key:"switch:"+riskCancels,value:false,accessibilityLabel:title,onValueChange:value => { if (!value) return; if (RISKY_FEATURES[feature]) { turnOnAsking(feature,true); return; } animateLayout(); setSetting(feature,true); }}) : null});
     }
     // A small chat surface for page previews, in the theme's chat colors (same tokens as the Message highlights one).
     const CHAT_PREVIEW_DARK = {chat:{borderRadius:16, overflow:"hidden", backgroundColor:"#1a1a1e", borderWidth:1, borderColor:"#ffffff14", paddingVertical:8},

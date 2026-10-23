@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Ruimte die nog op echt spelen lijkt: {n} u. Die groeit elke dag.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Kleinere aantallen lijken meer op echt spelen. Je kunt één keer per dag tot {max} uur toevoegen.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Ze worden gedateerd als echt spelen: verspreid over je afgelopen dagen, 's middags, 's avonds en in het weekend, met vrije dagen en nooit meer dan 2 games tegelijk. Elke keer gaat het verder op oudere dagen, dus geen dag wordt twee keer gevuld. Ze verschijnen binnen 72 uur op je badge.",
- "Your past days are as full as real play gets. More room opens up every day.": "Je afgelopen dagen zitten zo vol als echt spelen kan. Elke dag komt er ruimte bij."
+ "Your past days are as full as real play gets. More room opens up every day.": "Je afgelopen dagen zitten zo vol als echt spelen kan. Elke dag komt er ruimte bij.",
+ "Are you sure?": "Weet je het zeker?",
+ "Risky": "Riskant",
+ "Experimental": "Experimenteel",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord staat niet toe dat je games doorgeeft die je niet speelt, dus je account kan worden geschorst of verbannen. Gebruik op eigen risico.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Dit is experimenteel. Het vertelt Discord dat je games speelt die je niet speelt. Dat is in strijd met de Servicevoorwaarden van Discord en kan ertoe leiden dat je account wordt geschorst of verbannen."
 }

@@ -1042,5 +1042,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Prostor koji još izgleda kao pravo igranje: {n} h. Raste svaki dan.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Manje količine više nalikuju pravom igranju. Možeš dodati do {max} h jednom dnevno.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Datiraju se kao pravo igranje: raspoređeni po tvojim prošlim danima, poslijepodne, navečer i vikendom, s danima bez igranja i nikad više od 2 igre odjednom. Svaki put nastavlja se na starijim danima, pa se nijedan dan ne puni dvaput. Pojavit će se na znački u roku od 72 sata.",
- "Your past days are as full as real play gets. More room opens up every day.": "Tvoji prošli dani puni su koliko pravo igranje može biti. Svaki dan otvara se novi prostor."
+ "Your past days are as full as real play gets. More room opens up every day.": "Tvoji prošli dani puni su koliko pravo igranje može biti. Svaki dan otvara se novi prostor.",
+ "Are you sure?": "Jesi li siguran?",
+ "Risky": "Rizično",
+ "Experimental": "Eksperimentalno",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord ne dopušta prijavljivanje igara koje ne igraš, pa bi tvoj račun mogao biti suspendiran ili zabranjen. Koristiš na vlastitu odgovornost.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Ovo je eksperimentalno. Javlja Discordu da igraš igre koje ne igraš, što krši Discordove Uvjete pružanja usluge i može dovesti do suspenzije ili zabrane tvog računa."
 }

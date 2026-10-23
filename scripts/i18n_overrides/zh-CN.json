@@ -890,5 +890,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "仍像真实游玩的剩余空间：{n} 小时。每天都会增加。",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "数量越少越像真实游玩。你每天可以添加一次，最多 {max} 小时。",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "它们会像真实游玩一样标注日期：分布在你过去的日子里的下午、晚上和周末，有休息日，同时最多 2 款游戏。每次都从更早的日子接着加，所以同一天不会被填两次。会在 72 小时内显示在徽章上。",
- "Your past days are as full as real play gets. More room opens up every day.": "你过去的日子已经填到真实游玩的上限了。每天都会多出新的空间。"
+ "Your past days are as full as real play gets. More room opens up every day.": "你过去的日子已经填到真实游玩的上限了。每天都会多出新的空间。",
+ "Are you sure?": "确定吗？",
+ "Risky": "有风险",
+ "Experimental": "实验性",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord 不允许报告你没在玩的游戏，因此你的账号可能会被暂停或封禁。使用风险自负。",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "这是一项实验性功能。它会告诉 Discord 你在玩实际上没在玩的游戏，这违反了 Discord 服务条款，可能导致你的账号被暂停或封禁。"
 }

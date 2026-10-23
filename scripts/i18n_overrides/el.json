@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Περιθώριο που μοιάζει ακόμα με πραγματικό παιχνίδι: {n} ώ. Μεγαλώνει κάθε μέρα.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Οι μικρότερες ποσότητες μοιάζουν περισσότερο με πραγματικό παιχνίδι. Μπορείς να προσθέτεις έως {max} ώρες μία φορά τη μέρα.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Χρονολογούνται σαν πραγματικό παιχνίδι: μοιράζονται στις προηγούμενες μέρες σου, απογεύματα, βράδια και Σαββατοκύριακα, με μέρες χωρίς παιχνίδι και ποτέ πάνω από 2 παιχνίδια ταυτόχρονα. Κάθε φορά συνεχίζει σε παλαιότερες μέρες, οπότε καμία μέρα δεν γεμίζει δύο φορές. Εμφανίζονται στο έμβλημά σου μέσα σε 72 ώρες.",
- "Your past days are as full as real play gets. More room opens up every day.": "Οι προηγούμενες μέρες σου είναι τόσο γεμάτες όσο μπορεί να είναι το πραγματικό παιχνίδι. Κάθε μέρα ανοίγει νέο περιθώριο."
+ "Your past days are as full as real play gets. More room opens up every day.": "Οι προηγούμενες μέρες σου είναι τόσο γεμάτες όσο μπορεί να είναι το πραγματικό παιχνίδι. Κάθε μέρα ανοίγει νέο περιθώριο.",
+ "Are you sure?": "Είσαι σίγουρος;",
+ "Risky": "Επικίνδυνο",
+ "Experimental": "Πειραματικό",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Το Discord δεν επιτρέπει να αναφέρεις παιχνίδια που δεν παίζεις, οπότε ο λογαριασμός σου μπορεί να ανασταλεί ή να αποκλειστεί. Χρησιμοποίησέ το με δική σου ευθύνη.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Είναι πειραματικό. Λέει στο Discord ότι παίζεις παιχνίδια που δεν παίζεις, κάτι που παραβιάζει τους Όρους Χρήσης του Discord και μπορεί να οδηγήσει σε αναστολή ή αποκλεισμό του λογαριασμού σου."
 }

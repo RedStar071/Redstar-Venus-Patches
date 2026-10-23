@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Platz, der noch nach echtem Spielen aussieht: {n} Std. Er wächst jeden Tag.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Kleinere Mengen sehen eher nach echtem Spielen aus. Du kannst einmal am Tag bis zu {max} Stunden hinzufügen.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Sie werden wie echtes Spielen datiert: verteilt auf deine vergangenen Tage, nachmittags, abends und am Wochenende, mit freien Tagen und nie mehr als 2 Spielen gleichzeitig. Jedes Mal geht es bei älteren Tagen weiter, sodass kein Tag doppelt gefüllt wird. Sie erscheinen innerhalb von 72 Stunden auf deinem Abzeichen.",
- "Your past days are as full as real play gets. More room opens up every day.": "Deine vergangenen Tage sind so voll, wie echtes Spielen sein kann. Jeden Tag kommt neuer Platz dazu."
+ "Your past days are as full as real play gets. More room opens up every day.": "Deine vergangenen Tage sind so voll, wie echtes Spielen sein kann. Jeden Tag kommt neuer Platz dazu.",
+ "Are you sure?": "Bist du sicher?",
+ "Risky": "Riskant",
+ "Experimental": "Experimentell",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord erlaubt nicht, Spiele zu melden, die du gar nicht spielst. Dein Konto könnte deshalb gesperrt oder gebannt werden. Nutzung auf eigenes Risiko.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Das ist experimentell. Es meldet Discord Spiele, die du gar nicht spielst. Das verstößt gegen die Nutzungsbedingungen von Discord und kann dazu führen, dass dein Konto gesperrt oder gebannt wird."
 }

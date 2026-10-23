@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Utrymme som fortfarande ser ut som riktigt spelande: {n} tim. Det växer varje dag.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Mindre mängder ser mer ut som riktigt spelande. Du kan lägga till upp till {max} timmar en gång om dagen.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "De dateras som riktigt spelande: utspridda över dina tidigare dagar, på eftermiddagar, kvällar och helger, med lediga dagar och aldrig fler än 2 spel samtidigt. Varje gång fortsätter det på äldre dagar, så ingen dag fylls två gånger. De syns på ditt märke inom 72 timmar.",
- "Your past days are as full as real play gets. More room opens up every day.": "Dina tidigare dagar är så fulla som riktigt spelande kan bli. Mer utrymme tillkommer varje dag."
+ "Your past days are as full as real play gets. More room opens up every day.": "Dina tidigare dagar är så fulla som riktigt spelande kan bli. Mer utrymme tillkommer varje dag.",
+ "Are you sure?": "Är du säker?",
+ "Risky": "Riskabelt",
+ "Experimental": "Experimentellt",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord tillåter inte att du rapporterar spel som du inte spelar, så ditt konto kan stängas av eller bannas. Använd på egen risk.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Det här är experimentellt. Det säger till Discord att du spelar spel som du inte spelar, vilket bryter mot Discords användarvillkor och kan leda till att ditt konto stängs av eller bannas."
 }

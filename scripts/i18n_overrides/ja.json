@@ -890,5 +890,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "本当のプレイらしく見える残りの余地：{n} 時間。毎日増えます。",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "少なめの量のほうが本当のプレイらしく見えます。追加できるのは 1 日 1 回 {max} 時間までです。",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "本当のプレイのように日付が付きます。過去の日々の午後・夜・週末に分散され、遊ばない日もあり、同時に 2 本を超えることはありません。毎回さらに前の日から続けるので、同じ日が 2 回埋まることはありません。72 時間以内にバッジに反映されます。",
- "Your past days are as full as real play gets. More room opens up every day.": "過去の日々は本当のプレイとして自然な上限まで埋まっています。余地は毎日増えます。"
+ "Your past days are as full as real play gets. More room opens up every day.": "過去の日々は本当のプレイとして自然な上限まで埋まっています。余地は毎日増えます。",
+ "Are you sure?": "本当によろしいですか？",
+ "Risky": "リスクあり",
+ "Experimental": "試験運用",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discordでは、プレイしていないゲームを報告することは認められていないため、アカウントが停止またはBANされる可能性があります。自己責任でご利用ください。",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "これは試験運用中の機能です。実際にはプレイしていないゲームをプレイ中だとDiscordに伝えるため、Discordの利用規約に違反し、アカウントが停止またはBANされる可能性があります。"
 }

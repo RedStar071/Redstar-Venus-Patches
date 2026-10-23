@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "असली खेलने जैसा दिखने वाला बचा हुआ समय: {n} घं.। यह हर दिन बढ़ता है।",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "कम मात्रा असली खेलने जैसी ज़्यादा लगती है। आप दिन में एक बार ज़्यादा से ज़्यादा {max} घंटे जोड़ सकते हैं।",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "इन पर असली खेलने जैसी तारीख़ें लगती हैं: आपके पिछले दिनों में दोपहर, शाम और वीकेंड पर बंटे हुए, बीच में बिना खेले दिन, और एक साथ कभी 2 से ज़्यादा गेम नहीं। हर बार यह और पुराने दिनों से आगे बढ़ता है, इसलिए कोई दिन दो बार नहीं भरता। ये 72 घंटों के अंदर आपके बैज पर दिखते हैं।",
- "Your past days are as full as real play gets. More room opens up every day.": "आपके पिछले दिन उतने भरे हैं जितना असली खेलना हो सकता है। हर दिन और जगह बनती है।"
+ "Your past days are as full as real play gets. More room opens up every day.": "आपके पिछले दिन उतने भरे हैं जितना असली खेलना हो सकता है। हर दिन और जगह बनती है।",
+ "Are you sure?": "क्या आप पक्का चाहते हैं?",
+ "Risky": "जोखिम भरा",
+ "Experimental": "प्रायोगिक",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord उन गेम की रिपोर्ट करने की अनुमति नहीं देता जो आप नहीं खेल रहे, इसलिए आपका अकाउंट निलंबित या बैन हो सकता है। अपने जोखिम पर इस्तेमाल करें।",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "यह एक प्रायोगिक सुविधा है। यह Discord को बताती है कि आप ऐसे गेम खेल रहे हैं जो आप नहीं खेल रहे। यह Discord की सेवा की शर्तों का उल्लंघन है और इससे आपका अकाउंट निलंबित या बैन हो सकता है।"
 }

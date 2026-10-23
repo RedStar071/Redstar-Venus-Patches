@@ -25,6 +25,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 1112 | `modules/routing/router_utils.tsx` | shouldNavigate, transitionTo, transitionToGuild | NavigationUtils |
 | 1126 | `intl/index.native.tsx` | intl, getSystemLocale, getAvailableLocales | Intl / Locale strings |
 | 1162 | `../discord_common/js/packages/rtn-codegen/js/NativeFileModule.tsx` | default | NativeFileModule |
+| 1203 | `design/void/Button/native/Button.tsx` | ButtonColors | ButtonColors (red confirm on risky features) |
 | 1205 | `modules/user_settings/ThemeStore.tsx` | default, UNSET, SET | ThemeStore |
 | 1264 | - | murmur, noConflict | MurmurHashV3 |
 | 1295 | `../discord_common/js/packages/http-utils/HTTPUtils.tsx` | INVALID_FORM_BODY_ERROR_CODE, convertSkemaError, stringifyErrors | HTTPUtils |
@@ -137,6 +138,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 7382 | `modules/quests/utils/QuestDataUtils.tsx` | THIRTY_DAYS_MS, earnedDecisionIsValid, findQuestOrReplacement | QuestDataUtils |
 | 7386 | `modules/quests/QuestStore.tsx` | default | QuestStore |
 | 7394 | `modules/quests/utils/QuestServerUtils.tsx` | isQuestWithKnownConfigVersion, questConfigFromServer, questUserStatusFromServer | questUserStatusFromServer |
+| 7567 | `design/components/Icon/native/redesign/generated/WarningIcon.tsx` | WarningIcon | WarningIcon (Risky chip) |
 | 7701 | `design/components/Icon/native/redesign/generated/LinkExternalSmallIcon.tsx` | LinkExternalSmallIcon | LinkExternalSmallIcon |
 | 7742 | `modules/messages/native/renderer/RowGenerator.tsx` | default | RowGenerator |
 | 7752 | `lib/uploader/CloudUpload.tsx` | NOT_STARTED, STARTED, UPLOADING | CloudUpload |
@@ -287,6 +289,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15831 | `modules/user_settings/app_icon/native/UserSettingsAppIcons.tsx` | default | UserSettingsAppIcons |
 | 15832 | `modules/app_icons/native/AppIconRows.tsx` | default | AppIconRows |
 | 15892 | `design/components/Icon/native/redesign/generated/HashmarkIcon.tsx` | HashmarkIcon | HashmarkIcon |
+| 15894 | `design/components/Icon/native/redesign/generated/BeakerIcon.tsx` | BeakerIcon | BeakerIcon (Experimental chip) |
 | 15928 | `design/components/Icon/native/redesign/generated/DoubleCheckmarkIcon.tsx` | DoubleCheckmarkIcon | DoubleCheckmarkIcon |
 | 15974 | `design/components/Icon/native/redesign/generated/LettersIcon.tsx` | LettersIcon | LettersIcon |
 | 16121 | `design/components/Icon/native/redesign/generated/BugIcon.tsx` | BugIcon | BugIcon |

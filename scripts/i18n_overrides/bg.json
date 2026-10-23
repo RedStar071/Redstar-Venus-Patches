@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Място, което още изглежда като истинска игра: {n} ч. Расте всеки ден.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "По-малките количества приличат повече на истинска игра. Можеш да добавяш до {max} ч веднъж на ден.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Датират се като истинска игра: разпределени по изминалите ти дни, следобед, вечер и през уикенда, с почивни дни и никога повече от 2 игри наведнъж. Всеки път продължава с по-стари дни, така че никой ден не се запълва два пъти. Появяват се на значката до 72 часа.",
- "Your past days are as full as real play gets. More room opens up every day.": "Изминалите ти дни са толкова пълни, колкото може да е истинската игра. Всеки ден се освобождава още място."
+ "Your past days are as full as real play gets. More room opens up every day.": "Изминалите ти дни са толкова пълни, колкото може да е истинската игра. Всеки ден се освобождава още място.",
+ "Are you sure?": "Сигурни ли сте?",
+ "Risky": "Рисковано",
+ "Experimental": "Експериментално",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord не позволява да се отчитат игри, които не играете, така че акаунтът ви може да бъде спрян или блокиран. Използвайте на своя отговорност.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Това е експериментално. То казва на Discord, че играете игри, които не играете, което нарушава Условията за ползване на Discord и може акаунтът ви да бъде спрян или блокиран."
 }

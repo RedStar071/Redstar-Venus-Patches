@@ -890,5 +890,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Phần còn lại vẫn trông như chơi thật: {n} giờ. Tăng lên mỗi ngày.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Số lượng nhỏ trông giống chơi thật hơn. Bạn có thể thêm tối đa {max} giờ mỗi ngày một lần.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Chúng được ghi ngày như chơi thật: rải trên những ngày trước của bạn, vào buổi chiều, buổi tối và cuối tuần, có ngày nghỉ và không bao giờ quá 2 trò cùng lúc. Mỗi lần sẽ tiếp tục từ những ngày cũ hơn, nên không ngày nào bị thêm hai lần. Chúng sẽ hiện trên huy hiệu trong vòng 72 giờ.",
- "Your past days are as full as real play gets. More room opens up every day.": "Những ngày trước của bạn đã đầy như chơi thật có thể. Mỗi ngày sẽ có thêm chỗ."
+ "Your past days are as full as real play gets. More room opens up every day.": "Những ngày trước của bạn đã đầy như chơi thật có thể. Mỗi ngày sẽ có thêm chỗ.",
+ "Are you sure?": "Bạn chắc chứ?",
+ "Risky": "Rủi ro",
+ "Experimental": "Thử nghiệm",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "Discord không cho phép báo cáo những trò chơi bạn không chơi, nên tài khoản của bạn có thể bị tạm ngưng hoặc bị cấm. Bạn tự chịu rủi ro khi sử dụng.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Đây là tính năng thử nghiệm. Tính năng này báo với Discord rằng bạn đang chơi những trò chơi bạn không chơi, vi phạm Điều khoản dịch vụ của Discord và có thể khiến tài khoản của bạn bị tạm ngưng hoặc bị cấm."
 }

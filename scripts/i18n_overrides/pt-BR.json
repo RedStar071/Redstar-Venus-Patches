@@ -1004,5 +1004,10 @@
  "Room left that still looks like real play: {n} h. It grows every day.": "Espaço que ainda parece jogo de verdade: {n} h. Ele cresce todo dia.",
  "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Quantidades menores parecem mais com jogo de verdade. Você pode adicionar até {max} horas uma vez por dia.",
  "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Elas são datadas como jogo de verdade: espalhadas pelos seus dias passados, à tarde, à noite e nos fins de semana, com dias de folga e nunca mais de 2 jogos ao mesmo tempo. Cada vez continua em dias mais antigos, então nenhum dia é preenchido duas vezes. Elas aparecem no seu emblema em até 72 horas.",
- "Your past days are as full as real play gets. More room opens up every day.": "Seus dias passados estão tão cheios quanto jogo de verdade pode ficar. Mais espaço abre todo dia."
+ "Your past days are as full as real play gets. More room opens up every day.": "Seus dias passados estão tão cheios quanto jogo de verdade pode ficar. Mais espaço abre todo dia.",
+ "Are you sure?": "Tem certeza?",
+ "Risky": "Arriscado",
+ "Experimental": "Experimental",
+ "Discord doesn't allow reporting games you aren't playing, so this could get your account suspended or banned. Use it at your own risk.": "O Discord não permite informar jogos que você não está jogando, então sua conta pode ser suspensa ou banida. Use por sua conta e risco.",
+ "This is experimental. It tells Discord you're playing games you aren't, which breaks Discord's Terms of Service and could get your account suspended or banned.": "Isso é experimental. Ele diz ao Discord que você está jogando jogos que não está jogando, o que viola os Termos de Serviço do Discord e pode fazer sua conta ser suspensa ou banida."
 }
