@@ -871,8 +871,6 @@
  "Nothing left to add": "Không còn gì để thêm",
  "Plays games in the background, toward Hours Played.": "Chơi trò chơi ở chế độ nền, tính vào số giờ đã chơi.",
  "RISK": "RỦI RO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Số lượng nhỏ trông giống chơi thật hơn. Bạn có thể thêm tối đa {max} giờ mỗi ngày một lần, và tổng cộng không bao giờ quá 5.000.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Chúng được gửi thành các phiên 2 đến 8 giờ trên những trò bạn đã chơi, và hiện trên huy hiệu trong vòng 72 giờ.",
  "This is the risky way, so it asks you to confirm three times.": "Đây là cách có rủi ro, nên bạn phải xác nhận ba lần.",
  "This makes sure you read the warning.": "Để chắc chắn bạn đã đọc cảnh báo.",
  "Turn on Game time to count hours.": "Bật Thời gian chơi để tính giờ.",
@@ -888,5 +886,9 @@
  "{n} game": "{n} trò",
  "{n} h": "{n} giờ",
  "{n} hours of game time for every hour Discord is open, even in the background.": "{n} giờ chơi cho mỗi giờ Discord mở, kể cả ở chế độ nền.",
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} giờ chơi cho mỗi giờ Discord mở, kể cả ở chế độ nền."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} giờ chơi cho mỗi giờ Discord mở, kể cả ở chế độ nền.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Phần còn lại vẫn trông như chơi thật: {n} giờ. Tăng lên mỗi ngày.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Số lượng nhỏ trông giống chơi thật hơn. Bạn có thể thêm tối đa {max} giờ mỗi ngày một lần.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Chúng được ghi ngày như chơi thật: rải trên những ngày trước của bạn, vào buổi chiều, buổi tối và cuối tuần, có ngày nghỉ và không bao giờ quá 2 trò cùng lúc. Mỗi lần sẽ tiếp tục từ những ngày cũ hơn, nên không ngày nào bị thêm hai lần. Chúng sẽ hiện trên huy hiệu trong vòng 72 giờ.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Những ngày trước của bạn đã đầy như chơi thật có thể. Mỗi ngày sẽ có thêm chỗ."
 }

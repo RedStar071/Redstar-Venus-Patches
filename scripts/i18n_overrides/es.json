@@ -976,8 +976,6 @@
  "Nothing left to add": "No queda nada por añadir",
  "Plays games in the background, toward Hours Played.": "Juega juegos en segundo plano, para las horas jugadas.",
  "RISK": "RIESGO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Las cantidades pequeñas parecen más juego real. Puedes añadir hasta {max} horas una vez al día, y nunca más de 5000 en total.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Se envían como sesiones de 2 a 8 horas en juegos que ya jugaste, y aparecen en tu insignia en un plazo de 72 horas.",
  "This is the risky way, so it asks you to confirm three times.": "Esta es la forma arriesgada, así que te pide confirmar tres veces.",
  "This makes sure you read the warning.": "Así nos aseguramos de que leíste la advertencia.",
  "Turn on Game time to count hours.": "Activa Tiempo de juego para contar horas.",
@@ -1002,5 +1000,9 @@
   "one": "{n} hora de juego por cada hora que Discord está abierto, incluso en segundo plano.",
   "other": "{n} horas de juego por cada hora que Discord está abierto, incluso en segundo plano."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} hora de juego por cada hora que Discord está abierto, incluso en segundo plano."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} hora de juego por cada hora que Discord está abierto, incluso en segundo plano.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Margen que aún parece juego real: {n} h. Crece cada día.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Las cantidades pequeñas parecen más juego real. Puedes añadir hasta {max} horas una vez al día.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Se fechan como juego real: repartidas en tus días pasados, por la tarde, por la noche y los fines de semana, con días sin jugar y nunca más de 2 juegos a la vez. Cada vez sigue con días más antiguos, así que ningún día se llena dos veces. Aparecen en tu insignia en un plazo de 72 horas.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Tus días pasados están tan llenos como puede estarlo el juego real. Cada día se abre más margen."
 }

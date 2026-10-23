@@ -1011,8 +1011,6 @@
  "Nothing left to add": "Nu mai e nimic de adăugat",
  "Plays games in the background, toward Hours Played.": "Joacă jocuri în fundal, pentru orele jucate.",
  "RISK": "RISC",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Cantitățile mai mici seamănă mai mult cu jocul real. Poți adăuga până la {max} ore o dată pe zi și niciodată peste 5.000 în total.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Sunt trimise ca sesiuni de 2 până la 8 ore în jocuri pe care le-ai jucat deja și apar pe insignă în cel mult 72 de ore.",
  "This is the risky way, so it asks you to confirm three times.": "Aceasta e varianta riscantă, așa că îți cere să confirmi de trei ori.",
  "This makes sure you read the warning.": "Așa ne asigurăm că ai citit avertismentul.",
  "Turn on Game time to count hours.": "Activează Timp de joc ca să se numere orele.",
@@ -1040,5 +1038,9 @@
   "few": "{n} ore de joc pentru fiecare oră în care Discord e deschis, chiar și în fundal.",
   "other": "{n} de ore de joc pentru fiecare oră în care Discord e deschis, chiar și în fundal."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} oră de joc pentru fiecare oră în care Discord e deschis, chiar și în fundal."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} oră de joc pentru fiecare oră în care Discord e deschis, chiar și în fundal.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Spațiu care încă arată a joc real: {n} h. Crește în fiecare zi.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Cantitățile mai mici seamănă mai mult cu jocul real. Poți adăuga până la {max} ore o dată pe zi.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Sunt datate ca jocul real: împărțite pe zilele tale trecute, după-amiaza, seara și în weekend, cu zile libere și niciodată mai mult de 2 jocuri deodată. De fiecare dată continuă cu zile mai vechi, așa că nicio zi nu e umplută de două ori. Apar pe insignă în cel mult 72 de ore.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Zilele tale trecute sunt atât de pline cât poate fi jocul real. În fiecare zi se eliberează mai mult spațiu."
 }

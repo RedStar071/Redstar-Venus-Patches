@@ -976,8 +976,6 @@
  "Nothing left to add": "Inget mer att lägga till",
  "Plays games in the background, toward Hours Played.": "Spelar spel i bakgrunden, för spelade timmar.",
  "RISK": "RISK",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Mindre mängder ser mer ut som riktigt spelande. Du kan lägga till upp till {max} timmar en gång om dagen, och aldrig mer än 5 000 totalt.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "De skickas som spelsessioner på 2 till 8 timmar i spel du redan har spelat, och syns på ditt märke inom 72 timmar.",
  "This is the risky way, so it asks you to confirm three times.": "Det här är det riskabla sättet, så du får bekräfta tre gånger.",
  "This makes sure you read the warning.": "Så vet vi att du har läst varningen.",
  "Turn on Game time to count hours.": "Slå på Speltid för att räkna timmar.",
@@ -1002,5 +1000,9 @@
   "one": "{n} timme speltid för varje timme Discord är öppet, även i bakgrunden.",
   "other": "{n} timmar speltid för varje timme Discord är öppet, även i bakgrunden."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} timme speltid för varje timme Discord är öppet, även i bakgrunden."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} timme speltid för varje timme Discord är öppet, även i bakgrunden.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Utrymme som fortfarande ser ut som riktigt spelande: {n} tim. Det växer varje dag.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Mindre mängder ser mer ut som riktigt spelande. Du kan lägga till upp till {max} timmar en gång om dagen.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "De dateras som riktigt spelande: utspridda över dina tidigare dagar, på eftermiddagar, kvällar och helger, med lediga dagar och aldrig fler än 2 spel samtidigt. Varje gång fortsätter det på äldre dagar, så ingen dag fylls två gånger. De syns på ditt märke inom 72 timmar.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Dina tidigare dagar är så fulla som riktigt spelande kan bli. Mer utrymme tillkommer varje dag."
 }

@@ -3835,7 +3835,7 @@
     const BADGE_HEARTBEAT_MS = 5 * 60 * 1000, BADGE_ACTIVITY_MS = 30 * 60 * 1000, BADGE_MAX_DURATION_MS = 35 * 60 * 1000;
     const BADGE_PID = 9480, BADGES_MAX_PLAYED = 2000, BADGE_CATALOG_TTL_MS = 12 * 3600 * 1000;
     // Discord's top tiers: 100 unique games and 5,000 hours. Add hours now sends at most BADGE_GRANT_MAX hours a day.
-    const BADGE_VARIETY_TOP = 100, BADGE_TIME_TOP = 5000, BADGE_GRANT_MAX = 1000, BADGE_GRANT_BATCH = 8, BADGE_GRANT_COOLDOWN_MS = 24 * 3600 * 1000;
+    const BADGE_VARIETY_TOP = 100, BADGE_TIME_TOP = 5000, BADGE_GRANT_MAX = 500, BADGE_GRANT_BATCH = 8, BADGE_GRANT_COOLDOWN_MS = 24 * 3600 * 1000;
     // Verified detectable PC games from Discord's own list (/games/detectable): application ID, name, the Windows
     // executable desktop reports (last two parts, lowercase), the store it comes from and Discord's icon hash. Used
     // until the full list loads, and if it can't.
@@ -3966,7 +3966,7 @@
     ].map(([id, name, exePath, distributor, icon]) => ({id, name, exePath, distributor:distributor || null, icon:icon || null}));
     const badges = {generation:0, user:null, catalog:null, catalogAt:0, catalogLoading:null, current:null, heartbeatTimer:undefined,
         activityTimer:undefined, cycleTimer:undefined, startTimer:undefined, tickTimer:undefined, played:new Set(), cycled:0,
-        secondsSession:0, last:null, error:"", extra:[], grants:{}, granting:null, directoryAt:0, badgeStore:null, attached:false, patchedRunning:false, analytics:null};
+        secondsSession:0, last:null, error:"", extra:[], grants:{}, granting:null, roomCache:null, directoryAt:0, badgeStore:null, attached:false, patchedRunning:false, analytics:null};
     function badgeNeedsGame() { return !!(enabled("badges") && (settings.badgesGameTime || settings.badgesUniqueGames)); }
     function badgeCycleOn() { return !!(enabled("badges") && settings.badgesUniqueGames); }
     function badgeClear(name) { if (badges[name] !== undefined && global.clearTimeout) global.clearTimeout(badges[name]); badges[name] = undefined; }
@@ -4151,7 +4151,7 @@
             badges.heartbeatTimer = undefined;
             const all = badgeEntries();
             if (!all.length) return;
-            badgeScience(all.map(entry => badgeHeartbeat(entry, false, false))).then(() => { if (badges.error) { badges.error = ""; notify("badges"); } }, badgeProblem);
+            badgeScience(all.map(entry => badgeHeartbeat(entry, false, false))).then(() => { badgeMarkLiveDay(); if (badges.error) { badges.error = ""; notify("badges"); } }, badgeProblem);
             badgeScheduleHeartbeat();
         }, BADGE_HEARTBEAT_MS, false);
         if (badges.activityTimer !== undefined) return;
@@ -4186,7 +4186,7 @@
         badgePresence(entry, slot);
         try {
             await badgeScience([badgeHeartbeat(entry, true, false), badgeLaunch(entry)]);
-            if (entry.generation === badges.generation) { badges.error = ""; badgeMarkPlayed(entry.game.id); }
+            if (entry.generation === badges.generation) { badges.error = ""; badgeMarkPlayed(entry.game.id); badgeMarkLiveDay(); }
         } catch (error) { if (entry.generation === badges.generation) badgeProblem(error); }
         badgeActivity(entry, false);
     }
@@ -4302,13 +4302,63 @@
             patched = hookExport(patched, "getUnfilteredActivities", (orig, self, args) => inject(orig.apply(self, args)));
         return replaceValue(exports, "default", patched);
     }
-    // Add hours now (advanced, off unless you go through its warning): past play sessions sent the way the desktop app
-    // reports a session that just ended (initial heartbeat at its start, launch_game, a final heartbeat with its length).
-    // They're laid out like a real play history: 2 to 8 hour sessions with breaks between them, at most 3 games at the
-    // same time, going back from where the last grant stopped and never before December 8, 2025, when Game Time starts.
-    // At most BADGE_GRANT_MAX hours a day, and never past the 5,000 hour top tier counting hours Discord hasn't shown yet.
-    const BADGE_GRANT_LANES = 3, BADGE_GAME_TIME_START = Date.UTC(2025, 11, 8), BADGE_GRANT_PENDING_MS = 72 * 3600 * 1000;
-    // Kept per account: {at, hours, from, recent:[[at, hours]]}, so switching accounts can't reuse or skip a cooldown.
+    // Add hours now (advanced, behind its warning). Discord only sees play sessions, so each one is sent the way the
+    // desktop app reports a session that ended (initial heartbeat at its start, launch_game, a final heartbeat with its
+    // length), dated into a play history that looks like a person's:
+    // - every past day since Game Time started counting (December 8, 2025, and never before the account existed) has
+    //   its own schedule, worked out from the account and the date, so it's the same every time it's looked at: days
+    //   off, longer weekends, afternoon and evening play in the phone's time zone, breaks between games, at most 2
+    //   games at once and never the same game twice at once;
+    // - each grant continues where the last one stopped, newest days first, so a day is never filled twice or stacked;
+    // - today, and days Venus already played on in the background, are left alone;
+    // - the badge's total never goes past what those days could hold, or the 5,000 hour top tier.
+    const BADGE_GAME_TIME_START = new Date(2025, 11, 8).getTime(), BADGE_GRANT_PENDING_MS = 72 * 3600 * 1000, BADGE_DAY_MS = 86400000;
+    function badgeDayKey(ms) { const d = new Date(ms); return String(d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()); }
+    function badgeDayBefore(dayStart) { const d = new Date(dayStart); return new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1).getTime(); }
+    // A small seeded generator: the same text always gives the same numbers.
+    function badgeRandom(text) {
+        let h = 2166136261;
+        for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return () => {
+            h = h + 0x6D2B79F5 | 0;
+            let t = Math.imul(h ^ h >>> 15, 1 | h);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+    // One day of believable play, [{start, ms}] sorted by start. Same account and date, same day.
+    function badgeDaySchedule(user, dayStart) {
+        const rand = badgeRandom(user + ":" + badgeDayKey(dayStart)), weekday = new Date(dayStart).getDay(), hour = 3600000, minute = 60000;
+        if (rand() < 0.14) return [];
+        const weekend = weekday === 0 || weekday === 6;
+        let budget = (weekend ? 4 + rand() * 8 : weekday === 5 ? 3 + rand() * 6 : 2 + rand() * 6) * hour;
+        if (rand() < 0.15) budget += (3 + rand() * 4) * hour;
+        budget = Math.min(budget, 16 * hour);
+        const out = [], end = dayStart + 26 * hour;
+        // One game after another from late morning on weekends, the afternoon otherwise, with breaks between them.
+        let t = dayStart + ((weekend ? 10 : 15) * 60 + Math.floor(rand() * (weekend ? 240 : 300))) * minute + Math.floor(rand() * minute);
+        while (budget > 20 * minute && t < end - 30 * minute) {
+            const ms = Math.min(budget, end - t, Math.round((0.4 + Math.pow(rand(), 1.6) * 4.6) * hour + rand() * 59000));
+            if (ms < 15 * minute) break;
+            out.push({start:t, ms});
+            budget -= ms; t += ms + Math.round((10 + rand() * 110) * minute);
+        }
+        // What's left runs next to it, like a second game left open the same evening.
+        if (budget > 30 * minute && out.length) {
+            const first = out[0].start, last = out[out.length - 1].start + out[out.length - 1].ms;
+            const start = first + Math.round(rand() * Math.max(0, last - first - budget)), ms = Math.min(budget, last - start, 5 * hour);
+            if (ms > 30 * minute) out.push({start, ms});
+        }
+        return out.sort((x, y) => x.start - y.start);
+    }
+    // Past days that can hold play, newest first: yesterday back to when Game Time started or the account was made.
+    function badgeGrantDays(user) {
+        const created = snowflakeMs(user), first = Math.max(BADGE_GAME_TIME_START, Number.isFinite(created) ? created + BADGE_DAY_MS : 0);
+        const now = new Date(), out = [];
+        for (let day = badgeDayBefore(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()); day >= first && out.length < 1000; day = badgeDayBefore(day)) out.push(day);
+        return out;
+    }
+    // Kept per account: {at, hours, recent:[[at, hours]], days:{YYYYMMDD: sessions of that day sent, or -1 played live}}.
     function badgeGrantsLoad(raw) {
         const out = {};
         if (!raw || typeof raw !== "object") return out;
@@ -4316,20 +4366,61 @@
             const g = raw[id];
             if (!/^\d{17,20}$/.test(id) || !g || !Number.isFinite(g.at) || !Number.isFinite(g.hours)) continue;
             const now = Date.now(), recent = Array.isArray(g.recent) ? g.recent.filter(r => Array.isArray(r) && Number.isFinite(r[0]) && Number.isFinite(r[1]) && r[0] <= now).slice(-10) : [];
-            out[id] = {at:Math.min(g.at, now), hours:Math.max(0, Math.min(BADGE_TIME_TOP, Math.floor(g.hours))),
-                from:Number.isFinite(g.from) ? Math.max(BADGE_GAME_TIME_START, Math.min(g.from, now)) : 0, recent:recent.map(r => [r[0], Math.max(0, Math.floor(r[1]))])};
+            const record = {at:Math.min(g.at, now), hours:Math.max(0, Math.min(BADGE_TIME_TOP, Math.floor(g.hours))), recent:recent.map(r => [r[0], Math.max(0, Math.floor(r[1]))]), days:{}};
+            if (g.days && typeof g.days === "object") {
+                for (const key of Object.keys(g.days).sort().slice(-800)) {
+                    const v = g.days[key];
+                    if (/^\d{8}$/.test(key) && Number.isInteger(v) && v >= -1 && v <= 50) record.days[key] = v;
+                }
+            } else if (record.hours > 0) {
+                // Hours added before days were kept went back from the newest days, so those count as full.
+                let left = record.hours * 3600000;
+                for (const day of badgeGrantDays(id)) {
+                    if (left <= 0) break;
+                    const plan = badgeDaySchedule(id, day);
+                    record.days[badgeDayKey(day)] = plan.length; left -= plan.reduce((sum, x) => sum + x.ms, 0);
+                }
+            }
+            out[id] = record;
         }
         return out;
     }
-    function badgeGrantRecord() { return badges.user && badges.grants[badges.user] || {at:0, hours:0, from:0, recent:[]}; }
+    function badgeGrantRecord() { return badges.user && badges.grants[badges.user] || {at:0, hours:0, recent:[], days:{}}; }
+    // A day Venus played on in the background already has real-time play, so nothing is added to it later.
+    function badgeMarkLiveDay() {
+        const user = badges.user;
+        if (!user) return;
+        const key = badgeDayKey(Date.now()), record = badges.grants[user] || (badges.grants[user] = {at:0, hours:0, recent:[], days:{}});
+        if (record.days[key] === -1) return;
+        record.days[key] = -1;
+        const keys = Object.keys(record.days).sort();
+        if (keys.length > 800) keys.slice(0, keys.length - 800).forEach(k => { delete record.days[k]; });
+        save();
+    }
+    // Hours left that still fit the play history, and everything those days could hold.
+    function badgeGrantRoom() {
+        const user = badges.user;
+        if (!user) return {free:0, total:0};
+        const record = badgeGrantRecord(), key = user + ":" + badgeDayKey(Date.now()) + ":" + record.at + ":" + Object.keys(record.days).length;
+        if (badges.roomCache && badges.roomCache.key === key) return badges.roomCache;
+        let free = 0, total = 0;
+        for (const day of badgeGrantDays(user)) {
+            const done = record.days[badgeDayKey(day)] || 0;
+            badgeDaySchedule(user, day).forEach((x, i) => { total += x.ms; if (done >= 0 && i >= done) free += x.ms; });
+        }
+        badges.roomCache = {key, free:Math.floor(free / 3600000), total:Math.floor(total / 3600000)};
+        return badges.roomCache;
+    }
     // Added hours Discord may not show on the badge yet.
     function badgeGrantPending() {
         const since = Date.now() - BADGE_GRANT_PENDING_MS;
         return badgeGrantRecord().recent.reduce((sum, [at, hours]) => at > since ? sum + hours : sum, 0);
     }
+    function badgeGrantHave() { const info = badgeInfo("GAME_TIME"); return (info && info.current != null ? info.current : 0) + badgeGrantPending(); }
+    function badgeGrantTopReached() { return badgeGrantHave() >= BADGE_TIME_TOP || badgeGrantRecord().hours >= BADGE_TIME_TOP; }
     function badgeGrantLimit() {
-        const info = badgeInfo("GAME_TIME"), have = info && info.current != null ? info.current : 0, record = badgeGrantRecord();
-        return Math.max(0, Math.min(BADGE_GRANT_MAX, BADGE_TIME_TOP - have - badgeGrantPending(), BADGE_TIME_TOP - record.hours));
+        const have = badgeGrantHave(), room = badgeGrantRoom();
+        return Math.max(0, Math.min(BADGE_GRANT_MAX, room.free, room.total - have, BADGE_TIME_TOP - have, BADGE_TIME_TOP - badgeGrantRecord().hours));
     }
     function badgeGrantWait() { return Math.max(0, badgeGrantRecord().at + BADGE_GRANT_COOLDOWN_MS - Date.now()); }
     function badgeSessionEvents(game, start, ms) {
@@ -4340,23 +4431,36 @@
         last.properties.duration_tracked_ms = ms; last.properties.client_track_timestamp = start + ms;
         return [first, launch, last];
     }
-    // Sessions for `hours`, newest first, each lane walking back in time with a break before the next session.
-    function badgeGrantPlan(hours, games, from) {
-        const lanes = Array.from({length:BADGE_GRANT_LANES}, (_, i) => from - i * (20 + Math.floor(Math.random() * 40)) * 60000);
-        const sessions = [];
-        let left = hours * 3600000, g = Math.floor(Math.random() * games.length);
-        while (left > 0) {
-            const lane = lanes.indexOf(Math.max.apply(null, lanes));
-            const ms = Math.min(left, Math.round((2 + Math.random() * 6) * 3600000)), start = lanes[lane] - ms;
-            if (start < BADGE_GAME_TIME_START) break;
-            const busy = new Set(sessions.filter(x => x.start < lanes[lane] && x.start + x.ms > start).map(x => x.game.id));
-            let game = games[g++ % games.length];
-            for (let i = 0; busy.has(game.id) && i < games.length; i++) game = games[g++ % games.length];
-            sessions.push({game, start, ms});
-            lanes[lane] = start - Math.round((0.5 + Math.random() * 3.5) * 3600000);
-            left -= ms;
+    // The next sessions to send, newest days first, until `hours` is reached, each with the game it's on. A few
+    // favourite games get most of the time, the same ones every grant, like a real player's library.
+    function badgeGrantPlan(user, hours, games, record) {
+        const want = hours * 3600000, sessions = [];
+        let sum = 0;
+        for (const day of badgeGrantDays(user)) {
+            if (sum >= want) break;
+            const key = badgeDayKey(day), done = record.days[key] || 0;
+            if (done < 0) continue;
+            const plan = badgeDaySchedule(user, day);
+            for (let i = done; i < plan.length && sum < want; i++) {
+                const ms = Math.min(plan[i].ms, want - sum);
+                if (ms < 15 * 60000) break;
+                sessions.push({start:plan[i].start, ms, key, index:i}); sum += ms;
+            }
         }
-        return {sessions, from:Math.min.apply(null, lanes)};
+        const rank = id => badgeRandom(user + ":" + id)();
+        const library = games.slice().sort((x, y) => rank(x.id) - rank(y.id)), weights = library.map((_, i) => 1 / Math.pow(i + 1, 1.1));
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        sessions.sort((x, y) => x.start - y.start);
+        for (const x of sessions) {
+            const busy = new Set(sessions.filter(y => y !== x && y.game && y.start < x.start + x.ms && y.start + y.ms > x.start).map(y => y.game.id));
+            let roll = badgeRandom(user + ":" + x.start)() * totalWeight, pick = 0;
+            while (pick < library.length - 1 && roll > weights[pick]) { roll -= weights[pick]; pick++; }
+            for (let i = 0; i < library.length; i++) {
+                const game = library[(pick + i) % library.length], made = snowflakeMs(game.id);
+                if (!busy.has(game.id) && !(made > x.start)) { x.game = game; break; }
+            }
+        }
+        return sessions.filter(x => x.game);
     }
     async function badgeGrantHours(hours) {
         if (badges.granting || !badges.user) return false;
@@ -4366,24 +4470,24 @@
         badges.granting = {done:0, total:hours}; badges.error = ""; backgroundSync(); notify("badges");
         const catalog = await badgeCatalog();
         const pool = BADGE_FALLBACK_GAMES.concat(catalog || []).filter((g, i, all) => badges.played.has(g.id) && all.findIndex(x => x.id === g.id) === i);
-        const games = pool.length >= 5 ? pool : BADGE_FALLBACK_GAMES;
-        const record = badgeGrantRecord(), from = Math.min(Date.now() - 3600000, record.from || Infinity);
-        const plan = badgeGrantPlan(hours, games, from);
-        let sent = 0, ok = plan.sessions.length > 0, oldest = from;
-        for (let i = 0; i < plan.sessions.length && ok && badges.user === user; i += BADGE_GRANT_BATCH) {
-            const batch = plan.sessions.slice(i, i + BADGE_GRANT_BATCH);
+        const games = pool.length >= 3 ? pool : BADGE_FALLBACK_GAMES.slice(0, 12);
+        const record = badgeGrantRecord(), sessions = badgeGrantPlan(user, hours, games, record), reached = {};
+        let sent = 0, ok = sessions.length > 0;
+        // Oldest first, like a desktop app sending what it saved while it was offline.
+        for (let i = 0; i < sessions.length && ok && badges.user === user; i += BADGE_GRANT_BATCH) {
+            const batch = sessions.slice(i, i + BADGE_GRANT_BATCH);
             try {
                 await badgeScience([].concat.apply([], batch.map(x => badgeSessionEvents(x.game, x.start, x.ms))));
-                sent += batch.reduce((sum, x) => sum + x.ms, 0);
-                oldest = Math.min.apply(null, [oldest].concat(batch.map(x => x.start)));
+                batch.forEach(x => { sent += x.ms; reached[x.key] = Math.max(reached[x.key] || 0, x.index + 1); });
                 badges.granting.done = Math.floor(sent / 3600000); notify("badges");
             } catch (error) { ok = false; badgeProblem(error); }
-            if (ok && i + BADGE_GRANT_BATCH < plan.sessions.length) await questSleep(1500 + Math.floor(Math.random() * 1500));
+            if (ok && i + BADGE_GRANT_BATCH < sessions.length) await questSleep(3000 + Math.floor(Math.random() * 4000));
         }
         const added = Math.floor(sent / 3600000);
-        if (added > 0) {
-            const now = Date.now();
-            badges.grants[user] = {at:now, hours:record.hours + added, from:Math.max(BADGE_GAME_TIME_START, oldest - 3600000),
+        if (sent > 0) {
+            const now = Date.now(), days = Object.assign({}, record.days);
+            Object.keys(reached).forEach(key => { if (days[key] !== -1) days[key] = Math.max(days[key] || 0, reached[key]); });
+            badges.grants[user] = {at:now, hours:record.hours + added, days,
                 recent:record.recent.filter(r => r[0] > now - BADGE_GRANT_PENDING_MS).concat([[now, added]]).slice(-10)};
             save();
         }
@@ -4494,7 +4598,7 @@
     }
     // Add hours now: steps you can't rush through. Tick three statements, type a word, pick an amount, then confirm once
     // more in Discord's own dialog. Nothing is sent before that last confirm.
-    const BADGE_GRANT_PRESETS = [25, 100, 300, 1000];
+    const BADGE_GRANT_PRESETS = [25, 100, 250, 500];
     const BADGE_DANGER_DARK = {box:{borderRadius:16, padding:16, gap:12, borderWidth:1, borderColor:"#f23f43", backgroundColor:"#f23f431a"}};
     function BadgeGrantPanel(props) {
         const [step, setStep] = React.useState(0), [word, setWord] = React.useState(""), [hours, setHours] = React.useState(100), [checks, setChecks] = React.useState([false, false, false]);
@@ -4522,7 +4626,7 @@
             el(VenusProgress, {key:"grant", value:granting.total ? granting.done / granting.total : 0}));
         if (wait > 0 || limit < 1) return el(RN.View, {style:[s.card, {gap:8}]},
             heading(limit < 1 ? tr("Nothing left to add") : tr("Come back tomorrow")),
-            body(limit < 1 ? tr("You're at the 5,000 hour top tier already.") :
+            body(limit < 1 ? (badgeGrantTopReached() ? tr("You're at the 5,000 hour top tier already.") : tr("Your past days are as full as real play gets. More room opens up every day.")) :
                 pl(Math.ceil(wait / 3600000), "You can add more in {n} hour. Hours you added show within 72 hours.", "You can add more in {n} hours. Hours you added show within 72 hours.")),
             button("close", tr("Close"), props.onClose, false, "secondary"));
         if (step === 0) return el(RN.View, {style:danger.box},
@@ -4550,9 +4654,10 @@
         const chosen = items.includes(hours) ? hours : items[Math.min(1, items.length - 1)];
         return el(RN.View, {style:danger.box},
             heading(tr("How many hours?")),
-            body(tr("Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.", {max:Math.min(BADGE_GRANT_MAX, limit)})),
+            body(tr("Smaller amounts look more like real play. You can add up to {max} hours once a day.", {max:limit})),
+            body(tr("Room left that still looks like real play: {n} h. It grows every day.", {n:Math.max(0, Math.min(badgeGrantRoom().free, badgeGrantRoom().total - badgeGrantHave()))})),
             venusSegmented({key:"grantHours", value:chosen, onChange:setHours, items:items.map(n => ({value:n, label:tr("{n} h", {n})}))}),
-            body(tr("They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.")),
+            body(tr("They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.")),
             button("grant", tr("Add {n} hours", {n:chosen}), () => confirmAction("Add hours now?",
                 "Last chance. This can get your account suspended or banned, and it can't be undone.", "Add hours", () => { badgeGrantHours(chosen); }), chosen < 1, "destructive"),
             button("cancel", tr("Cancel"), props.onClose, false, "secondary"));

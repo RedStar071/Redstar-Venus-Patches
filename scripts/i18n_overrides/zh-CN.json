@@ -871,8 +871,6 @@
  "Nothing left to add": "没有可添加的了",
  "Plays games in the background, toward Hours Played.": "在后台玩游戏，计入游玩时长。",
  "RISK": "风险",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "数量越少越像真实游玩。你每天可以添加一次，最多 {max} 小时，总计不超过 5,000 小时。",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "它们会以 2 到 8 小时的游戏时段发送，用你已经玩过的游戏，并在 72 小时内显示在徽章上。",
  "This is the risky way, so it asks you to confirm three times.": "这是有风险的方式，所以需要确认三次。",
  "This makes sure you read the warning.": "这样可以确保你读过了警告。",
  "Turn on Game time to count hours.": "打开游戏时长才能计算小时数。",
@@ -888,5 +886,9 @@
  "{n} game": "{n} 款游戏",
  "{n} h": "{n} 小时",
  "{n} hours of game time for every hour Discord is open, even in the background.": "Discord 每打开 1 小时可获得 {n} 小时游戏时长，在后台也算。",
- "{n} hour of game time for every hour Discord is open, even in the background.": "Discord 每打开 1 小时可获得 {n} 小时游戏时长，在后台也算。"
+ "{n} hour of game time for every hour Discord is open, even in the background.": "Discord 每打开 1 小时可获得 {n} 小时游戏时长，在后台也算。",
+ "Room left that still looks like real play: {n} h. It grows every day.": "仍像真实游玩的剩余空间：{n} 小时。每天都会增加。",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "数量越少越像真实游玩。你每天可以添加一次，最多 {max} 小时。",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "它们会像真实游玩一样标注日期：分布在你过去的日子里的下午、晚上和周末，有休息日，同时最多 2 款游戏。每次都从更早的日子接着加，所以同一天不会被填两次。会在 72 小时内显示在徽章上。",
+ "Your past days are as full as real play gets. More room opens up every day.": "你过去的日子已经填到真实游玩的上限了。每天都会多出新的空间。"
 }

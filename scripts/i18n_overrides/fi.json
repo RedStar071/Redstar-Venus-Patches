@@ -976,8 +976,6 @@
  "Nothing left to add": "Ei enää lisättävää",
  "Plays games in the background, toward Hours Played.": "Pelaa pelejä taustalla pelattuihin tunteihin.",
  "RISK": "RISKI",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Pienemmät määrät näyttävät enemmän oikealta pelaamiselta. Voit lisätä enintään {max} tuntia kerran päivässä etkä koskaan yli 5 000 yhteensä.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Ne lähetetään 2–8 tunnin pelikertoina peleistä, joita olet jo pelannut, ja ne näkyvät merkissäsi 72 tunnin kuluessa.",
  "This is the risky way, so it asks you to confirm three times.": "Tämä on riskialtis tapa, joten sinun täytyy vahvistaa kolme kertaa.",
  "This makes sure you read the warning.": "Näin varmistetaan, että luit varoituksen.",
  "Turn on Game time to count hours.": "Laita Peliaika päälle, niin tunnit lasketaan.",
@@ -1002,5 +1000,9 @@
   "one": "{n} tunti peliaikaa jokaista tuntia kohden, jonka Discord on auki, myös taustalla.",
   "other": "{n} tuntia peliaikaa jokaista tuntia kohden, jonka Discord on auki, myös taustalla."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} tunti peliaikaa jokaista tuntia kohden, jonka Discord on auki, myös taustalla."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} tunti peliaikaa jokaista tuntia kohden, jonka Discord on auki, myös taustalla.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Tilaa, joka näyttää yhä oikealta pelaamiselta: {n} t. Se kasvaa joka päivä.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Pienemmät määrät näyttävät enemmän oikealta pelaamiselta. Voit lisätä enintään {max} tuntia kerran päivässä.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Ne päivätään kuin oikea pelaaminen: jaettuna menneille päivillesi iltapäiviin, iltoihin ja viikonloppuihin, välillä vapaapäiviä eikä koskaan yli 2 peliä kerralla. Joka kerta jatketaan vanhemmista päivistä, joten mitään päivää ei täytetä kahdesti. Ne näkyvät merkissäsi 72 tunnin kuluessa.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Menneet päiväsi ovat niin täynnä kuin oikea pelaaminen voi olla. Tilaa vapautuu joka päivä lisää."
 }

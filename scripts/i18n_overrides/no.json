@@ -976,8 +976,6 @@
  "Nothing left to add": "Ingenting mer å legge til",
  "Plays games in the background, toward Hours Played.": "Spiller spill i bakgrunnen, for spilte timer.",
  "RISK": "RISIKO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Mindre mengder ser mer ut som ekte spilling. Du kan legge til opptil {max} timer én gang om dagen, og aldri mer enn 5000 totalt.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "De sendes som økter på 2 til 8 timer i spill du allerede har spilt, og vises på merket ditt innen 72 timer.",
  "This is the risky way, so it asks you to confirm three times.": "Dette er den risikable måten, så du må bekrefte tre ganger.",
  "This makes sure you read the warning.": "Slik vet vi at du har lest advarselen.",
  "Turn on Game time to count hours.": "Slå på Spilletid for å telle timer.",
@@ -1002,5 +1000,9 @@
   "one": "{n} time spilletid for hver time Discord er åpen, også i bakgrunnen.",
   "other": "{n} timer spilletid for hver time Discord er åpen, også i bakgrunnen."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} time spilletid for hver time Discord er åpen, også i bakgrunnen."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} time spilletid for hver time Discord er åpen, også i bakgrunnen.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Plass som fortsatt ser ut som ekte spilling: {n} t. Den vokser hver dag.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Mindre mengder ser mer ut som ekte spilling. Du kan legge til opptil {max} timer én gang om dagen.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "De dateres som ekte spilling: spredt over dagene dine bakover i tid, på ettermiddager, kvelder og i helger, med fridager og aldri mer enn 2 spill samtidig. Hver gang fortsetter det på eldre dager, så ingen dag fylles to ganger. De vises på merket ditt innen 72 timer.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Dagene dine bakover i tid er så fulle som ekte spilling kan bli. Det kommer mer plass hver dag."
 }

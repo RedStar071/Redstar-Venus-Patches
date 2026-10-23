@@ -976,8 +976,6 @@
  "Nothing left to add": "जोड़ने के लिए कुछ नहीं बचा",
  "Plays games in the background, toward Hours Played.": "खेले गए घंटों के लिए बैकग्राउंड में गेम खेलता है।",
  "RISK": "जोखिम",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "कम मात्रा असली खेलने जैसी ज़्यादा लगती है। आप दिन में एक बार ज़्यादा से ज़्यादा {max} घंटे जोड़ सकते हैं, और कुल मिलाकर कभी 5,000 से ज़्यादा नहीं।",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "इन्हें आपके पहले खेले गए गेम पर 2 से 8 घंटे के सेशन के रूप में भेजा जाता है, और ये 72 घंटों के अंदर आपके बैज पर दिखते हैं।",
  "This is the risky way, so it asks you to confirm three times.": "यह जोखिम भरा तरीका है, इसलिए यह तीन बार पुष्टि मांगता है।",
  "This makes sure you read the warning.": "इससे पक्का होता है कि आपने चेतावनी पढ़ ली है।",
  "Turn on Game time to count hours.": "घंटे गिनने के लिए गेम का समय चालू करें।",
@@ -1002,5 +1000,9 @@
   "one": "Discord खुला रहने के हर घंटे के लिए {n} घंटा गेम का समय, बैकग्राउंड में भी।",
   "other": "Discord खुला रहने के हर घंटे के लिए {n} घंटे गेम का समय, बैकग्राउंड में भी।"
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "Discord खुला रहने के हर घंटे के लिए {n} घंटा गेम का समय, बैकग्राउंड में भी।"
+ "{n} hour of game time for every hour Discord is open, even in the background.": "Discord खुला रहने के हर घंटे के लिए {n} घंटा गेम का समय, बैकग्राउंड में भी।",
+ "Room left that still looks like real play: {n} h. It grows every day.": "असली खेलने जैसा दिखने वाला बचा हुआ समय: {n} घं.। यह हर दिन बढ़ता है।",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "कम मात्रा असली खेलने जैसी ज़्यादा लगती है। आप दिन में एक बार ज़्यादा से ज़्यादा {max} घंटे जोड़ सकते हैं।",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "इन पर असली खेलने जैसी तारीख़ें लगती हैं: आपके पिछले दिनों में दोपहर, शाम और वीकेंड पर बंटे हुए, बीच में बिना खेले दिन, और एक साथ कभी 2 से ज़्यादा गेम नहीं। हर बार यह और पुराने दिनों से आगे बढ़ता है, इसलिए कोई दिन दो बार नहीं भरता। ये 72 घंटों के अंदर आपके बैज पर दिखते हैं।",
+ "Your past days are as full as real play gets. More room opens up every day.": "आपके पिछले दिन उतने भरे हैं जितना असली खेलना हो सकता है। हर दिन और जगह बनती है।"
 }

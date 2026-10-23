@@ -976,8 +976,6 @@
  "Nothing left to add": "Niets meer toe te voegen",
  "Plays games in the background, toward Hours Played.": "Speelt games op de achtergrond, voor gespeelde uren.",
  "RISK": "RISICO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Kleinere aantallen lijken meer op echt spelen. Je kunt één keer per dag tot {max} uur toevoegen, en in totaal nooit meer dan 5.000.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Ze worden verstuurd als sessies van 2 tot 8 uur op games die je al hebt gespeeld, en verschijnen binnen 72 uur op je badge.",
  "This is the risky way, so it asks you to confirm three times.": "Dit is de riskante manier, dus je moet drie keer bevestigen.",
  "This makes sure you read the warning.": "Zo weten we zeker dat je de waarschuwing hebt gelezen.",
  "Turn on Game time to count hours.": "Zet Speeltijd aan om uren te tellen.",
@@ -1002,5 +1000,9 @@
   "one": "{n} uur speeltijd voor elk uur dat Discord open is, ook op de achtergrond.",
   "other": "{n} uur speeltijd voor elk uur dat Discord open is, ook op de achtergrond."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} uur speeltijd voor elk uur dat Discord open is, ook op de achtergrond."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} uur speeltijd voor elk uur dat Discord open is, ook op de achtergrond.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Ruimte die nog op echt spelen lijkt: {n} u. Die groeit elke dag.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Kleinere aantallen lijken meer op echt spelen. Je kunt één keer per dag tot {max} uur toevoegen.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Ze worden gedateerd als echt spelen: verspreid over je afgelopen dagen, 's middags, 's avonds en in het weekend, met vrije dagen en nooit meer dan 2 games tegelijk. Elke keer gaat het verder op oudere dagen, dus geen dag wordt twee keer gevuld. Ze verschijnen binnen 72 uur op je badge.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Je afgelopen dagen zitten zo vol als echt spelen kan. Elke dag komt er ruimte bij."
 }

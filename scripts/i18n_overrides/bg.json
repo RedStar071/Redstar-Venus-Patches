@@ -976,8 +976,6 @@
  "Nothing left to add": "Няма какво повече да се добави",
  "Plays games in the background, toward Hours Played.": "Пуска игри във фонов режим, за изиграните часове.",
  "RISK": "РИСК",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "По-малките количества приличат повече на истинска игра. Можеш да добавяш до {max} ч веднъж на ден и никога над 5000 общо.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Изпращат се като сесии от 2 до 8 часа в игри, които вече си играл, и се появяват на значката до 72 часа.",
  "This is the risky way, so it asks you to confirm three times.": "Това е рисковият начин, затова иска да потвърдиш три пъти.",
  "This makes sure you read the warning.": "Така сме сигурни, че си прочел предупреждението.",
  "Turn on Game time to count hours.": "Включи Игрово време, за да се броят часове.",
@@ -1002,5 +1000,9 @@
   "one": "{n} час игрово време за всеки час, в който Discord е отворен, дори във фонов режим.",
   "other": "{n} часа игрово време за всеки час, в който Discord е отворен, дори във фонов режим."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} час игрово време за всеки час, в който Discord е отворен, дори във фонов режим."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} час игрово време за всеки час, в който Discord е отворен, дори във фонов режим.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Място, което още изглежда като истинска игра: {n} ч. Расте всеки ден.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "По-малките количества приличат повече на истинска игра. Можеш да добавяш до {max} ч веднъж на ден.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Датират се като истинска игра: разпределени по изминалите ти дни, следобед, вечер и през уикенда, с почивни дни и никога повече от 2 игри наведнъж. Всеки път продължава с по-стари дни, така че никой ден не се запълва два пъти. Появяват се на значката до 72 часа.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Изминалите ти дни са толкова пълни, колкото може да е истинската игра. Всеки ден се освобождава още място."
 }

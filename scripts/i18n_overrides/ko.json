@@ -871,8 +871,6 @@
  "Nothing left to add": "더 추가할 게 없어요",
  "Plays games in the background, toward Hours Played.": "백그라운드에서 게임을 플레이해 플레이 시간에 반영해요.",
  "RISK": "위험",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "적은 양일수록 실제 플레이처럼 보여요. 하루에 한 번 최대 {max}시간까지 추가할 수 있고, 총 5,000시간을 넘을 수 없어요.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "이미 플레이한 게임에서 2~8시간짜리 세션으로 전송되며, 72시간 이내에 배지에 표시돼요.",
  "This is the risky way, so it asks you to confirm three times.": "위험한 방법이라 세 번 확인해야 해요.",
  "This makes sure you read the warning.": "경고를 읽었는지 확인하기 위한 단계예요.",
  "Turn on Game time to count hours.": "시간을 세려면 게임 시간을 켜세요.",
@@ -888,5 +886,9 @@
  "{n} game": "게임 {n}개",
  "{n} h": "{n}시간",
  "{n} hours of game time for every hour Discord is open, even in the background.": "Discord가 열려 있는 1시간마다 게임 시간 {n}시간이 쌓여요. 백그라운드에서도요.",
- "{n} hour of game time for every hour Discord is open, even in the background.": "Discord가 열려 있는 1시간마다 게임 시간 {n}시간이 쌓여요. 백그라운드에서도요."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "Discord가 열려 있는 1시간마다 게임 시간 {n}시간이 쌓여요. 백그라운드에서도요.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "실제 플레이처럼 보이는 남은 여유: {n}시간. 매일 늘어나요.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "적은 양일수록 실제 플레이처럼 보여요. 하루에 한 번 최대 {max}시간까지 추가할 수 있어요.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "실제 플레이처럼 날짜가 매겨져요. 지난 날들의 오후, 저녁, 주말에 나뉘어 들어가고, 쉬는 날도 있으며 동시에 2개를 넘지 않아요. 매번 더 이전 날부터 이어가서 같은 날이 두 번 채워지지 않아요. 72시간 이내에 배지에 표시돼요.",
+ "Your past days are as full as real play gets. More room opens up every day.": "지난 날들이 실제 플레이로 채울 수 있는 만큼 찼어요. 여유는 매일 늘어나요."
 }

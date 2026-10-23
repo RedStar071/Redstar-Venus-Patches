@@ -871,8 +871,6 @@
  "Nothing left to add": "Tidak ada lagi yang bisa ditambahkan",
  "Plays games in the background, toward Hours Played.": "Memainkan game di latar belakang, untuk jam bermain.",
  "RISK": "RISIKO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Jumlah kecil lebih mirip permainan sungguhan. Kamu bisa menambahkan hingga {max} jam sekali sehari, dan tidak pernah lebih dari 5.000 secara total.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Jam dikirim sebagai sesi 2 sampai 8 jam di game yang sudah pernah kamu mainkan, dan muncul di lencanamu dalam 72 jam.",
  "This is the risky way, so it asks you to confirm three times.": "Ini cara yang berisiko, jadi kamu diminta mengonfirmasi tiga kali.",
  "This makes sure you read the warning.": "Ini memastikan kamu sudah membaca peringatannya.",
  "Turn on Game time to count hours.": "Aktifkan Waktu bermain untuk menghitung jam.",
@@ -888,5 +886,9 @@
  "{n} game": "{n} game",
  "{n} h": "{n} jam",
  "{n} hours of game time for every hour Discord is open, even in the background.": "{n} jam waktu bermain untuk setiap jam Discord terbuka, bahkan di latar belakang.",
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} jam waktu bermain untuk setiap jam Discord terbuka, bahkan di latar belakang."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} jam waktu bermain untuk setiap jam Discord terbuka, bahkan di latar belakang.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Ruang yang masih terlihat seperti main sungguhan: {n} jam. Bertambah setiap hari.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Jumlah kecil lebih mirip permainan sungguhan. Kamu bisa menambahkan hingga {max} jam sekali sehari.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Jam diberi tanggal seperti main sungguhan: tersebar di hari-harimu sebelumnya pada sore, malam, dan akhir pekan, dengan hari libur dan tidak pernah lebih dari 2 game sekaligus. Setiap kali dilanjutkan ke hari yang lebih lama, jadi tidak ada hari yang diisi dua kali. Jam muncul di lencanamu dalam 72 jam.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Hari-harimu sebelumnya sudah sepenuh yang bisa dicapai main sungguhan. Ruang baru terbuka setiap hari."
 }

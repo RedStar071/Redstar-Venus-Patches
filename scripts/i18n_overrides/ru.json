@@ -1011,8 +1011,6 @@
  "Nothing left to add": "Больше нечего добавлять",
  "Plays games in the background, toward Hours Played.": "Запускает игры в фоне для значка «Сыграно часов».",
  "RISK": "РИСК",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Небольшие количества больше похожи на настоящую игру. Можно добавлять до {max} ч раз в день и не больше 5000 всего.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Они отправляются как сеансы по 2–8 часов в играх, в которые вы уже играли, и появятся на значке в течение 72 часов.",
  "This is the risky way, so it asks you to confirm three times.": "Это рискованный способ, поэтому нужно подтвердить три раза.",
  "This makes sure you read the warning.": "Так мы убедимся, что вы прочитали предупреждение.",
  "Turn on Game time to count hours.": "Включите «Время в играх», чтобы считать часы.",
@@ -1040,5 +1038,9 @@
   "few": "{n} часа игрового времени за каждый час, пока открыт Discord, даже в фоне.",
   "many": "{n} часов игрового времени за каждый час, пока открыт Discord, даже в фоне."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} час игрового времени за каждый час, пока открыт Discord, даже в фоне."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} час игрового времени за каждый час, пока открыт Discord, даже в фоне.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Запас, который ещё похож на настоящую игру: {n} ч. Он растёт каждый день.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Небольшие количества больше похожи на настоящую игру. Можно добавлять до {max} ч раз в день.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Они датируются как настоящая игра: распределяются по прошедшим дням — днём, вечером и в выходные, с днями без игры и не больше 2 игр одновременно. Каждый раз продолжается с более ранних дней, поэтому ни один день не заполняется дважды. Они появятся на значке в течение 72 часов.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Прошедшие дни заполнены настолько, насколько это бывает при настоящей игре. Каждый день появляется новый запас."
 }

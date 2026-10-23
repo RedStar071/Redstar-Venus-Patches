@@ -1011,8 +1011,6 @@
  "Nothing left to add": "Už není co přidat",
  "Plays games in the background, toward Hours Played.": "Hraje hry na pozadí, do odehraných hodin.",
  "RISK": "RIZIKO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Menší množství vypadají víc jako skutečné hraní. Můžeš přidat až {max} h jednou denně a celkem nikdy víc než 5 000.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Odesílají se jako 2 až 8hodinové relace ve hrách, které jsi už hrál, a na odznaku se ukážou do 72 hodin.",
  "This is the risky way, so it asks you to confirm three times.": "Tohle je riskantní způsob, proto musíš potvrdit třikrát.",
  "This makes sure you read the warning.": "Tak víme, že sis varování přečetl.",
  "Turn on Game time to count hours.": "Zapni Herní čas, aby se počítaly hodiny.",
@@ -1040,5 +1038,9 @@
   "few": "{n} hodiny herního času za každou hodinu, kdy je Discord otevřený, i na pozadí.",
   "other": "{n} hodin herního času za každou hodinu, kdy je Discord otevřený, i na pozadí."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} hodina herního času za každou hodinu, kdy je Discord otevřený, i na pozadí."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} hodina herního času za každou hodinu, kdy je Discord otevřený, i na pozadí.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Rezerva, která pořád vypadá jako skutečné hraní: {n} h. Každý den roste.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Menší množství vypadají víc jako skutečné hraní. Můžeš přidat až {max} h jednou denně.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Datují se jako skutečné hraní: rozložené do tvých minulých dnů, odpoledne, večer a o víkendech, s dny bez hraní a nikdy víc než 2 hrami najednou. Pokaždé se pokračuje staršími dny, takže žádný den se nenaplní dvakrát. Na odznaku se ukážou do 72 hodin.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Tvé minulé dny jsou tak plné, jak skutečné hraní dovolí. Každý den přibude místo."
 }

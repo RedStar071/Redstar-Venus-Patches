@@ -1011,8 +1011,6 @@
  "Nothing left to add": "Nema više što dodati",
  "Plays games in the background, toward Hours Played.": "Pokreće igre u pozadini, za odigrane sate.",
  "RISK": "RIZIK",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Manje količine više nalikuju pravom igranju. Možeš dodati do {max} h jednom dnevno, a ukupno nikad više od 5000.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Šalju se kao sesije od 2 do 8 sati u igrama koje si već igrao i pojavit će se na znački u roku od 72 sata.",
  "This is the risky way, so it asks you to confirm three times.": "Ovo je rizičan način, pa traži da potvrdiš tri puta.",
  "This makes sure you read the warning.": "Tako znamo da si pročitao upozorenje.",
  "Turn on Game time to count hours.": "Uključi Vrijeme igranja da se broje sati.",
@@ -1040,5 +1038,9 @@
   "few": "{n} sata vremena igranja za svaki sat dok je Discord otvoren, čak i u pozadini.",
   "other": "{n} sati vremena igranja za svaki sat dok je Discord otvoren, čak i u pozadini."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} sat vremena igranja za svaki sat dok je Discord otvoren, čak i u pozadini."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} sat vremena igranja za svaki sat dok je Discord otvoren, čak i u pozadini.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Prostor koji još izgleda kao pravo igranje: {n} h. Raste svaki dan.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Manje količine više nalikuju pravom igranju. Možeš dodati do {max} h jednom dnevno.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Datiraju se kao pravo igranje: raspoređeni po tvojim prošlim danima, poslijepodne, navečer i vikendom, s danima bez igranja i nikad više od 2 igre odjednom. Svaki put nastavlja se na starijim danima, pa se nijedan dan ne puni dvaput. Pojavit će se na znački u roku od 72 sata.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Tvoji prošli dani puni su koliko pravo igranje može biti. Svaki dan otvara se novi prostor."
 }

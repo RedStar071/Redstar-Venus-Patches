@@ -976,8 +976,6 @@
  "Nothing left to add": "Intet mere at tilføje",
  "Plays games in the background, toward Hours Played.": "Spiller spil i baggrunden, til spillede timer.",
  "RISK": "RISIKO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Mindre mængder ligner mere rigtigt spil. Du kan tilføje op til {max} timer én gang om dagen og aldrig mere end 5.000 i alt.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "De sendes som sessioner på 2 til 8 timer i spil, du allerede har spillet, og vises på dit emblem inden for 72 timer.",
  "This is the risky way, so it asks you to confirm three times.": "Det her er den risikable måde, så du skal bekræfte tre gange.",
  "This makes sure you read the warning.": "Sådan ved vi, at du har læst advarslen.",
  "Turn on Game time to count hours.": "Slå Spiltid til for at tælle timer.",
@@ -1002,5 +1000,9 @@
   "one": "{n} times spilletid for hver time, Discord er åben, også i baggrunden.",
   "other": "{n} timers spilletid for hver time, Discord er åben, også i baggrunden."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} times spilletid for hver time, Discord er åben, også i baggrunden."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} times spilletid for hver time, Discord er åben, også i baggrunden.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Plads, der stadig ligner rigtigt spil: {n} t. Den vokser hver dag.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Mindre mængder ligner mere rigtigt spil. Du kan tilføje op til {max} timer én gang om dagen.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "De dateres som rigtigt spil: fordelt over dine tidligere dage, om eftermiddagen, om aftenen og i weekenden, med fridage og aldrig mere end 2 spil ad gangen. Hver gang fortsætter det på ældre dage, så ingen dag fyldes to gange. De vises på dit emblem inden for 72 timer.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Dine tidligere dage er så fyldte, som rigtigt spil kan blive. Der kommer mere plads hver dag."
 }

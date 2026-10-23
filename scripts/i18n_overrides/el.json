@@ -976,8 +976,6 @@
  "Nothing left to add": "Δεν υπάρχει κάτι άλλο να προστεθεί",
  "Plays games in the background, toward Hours Played.": "Παίζει παιχνίδια στο παρασκήνιο, για τις ώρες παιχνιδιού.",
  "RISK": "ΚΙΝΔΥΝΟΣ",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Οι μικρότερες ποσότητες μοιάζουν περισσότερο με πραγματικό παιχνίδι. Μπορείς να προσθέτεις έως {max} ώρες μία φορά τη μέρα, και ποτέ πάνω από 5.000 συνολικά.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Στέλνονται ως συνεδρίες 2 έως 8 ωρών σε παιχνίδια που έχεις ήδη παίξει, και εμφανίζονται στο έμβλημά σου μέσα σε 72 ώρες.",
  "This is the risky way, so it asks you to confirm three times.": "Αυτός είναι ο επικίνδυνος τρόπος, γι' αυτό ζητά επιβεβαίωση τρεις φορές.",
  "This makes sure you read the warning.": "Έτσι είμαστε σίγουροι ότι διάβασες την προειδοποίηση.",
  "Turn on Game time to count hours.": "Ενεργοποίησε τον Χρόνο παιχνιδιού για να μετράνε ώρες.",
@@ -1002,5 +1000,9 @@
   "one": "{n} ώρα παιχνιδιού για κάθε ώρα που το Discord είναι ανοιχτό, ακόμα και στο παρασκήνιο.",
   "other": "{n} ώρες παιχνιδιού για κάθε ώρα που το Discord είναι ανοιχτό, ακόμα και στο παρασκήνιο."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} ώρα παιχνιδιού για κάθε ώρα που το Discord είναι ανοιχτό, ακόμα και στο παρασκήνιο."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} ώρα παιχνιδιού για κάθε ώρα που το Discord είναι ανοιχτό, ακόμα και στο παρασκήνιο.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Περιθώριο που μοιάζει ακόμα με πραγματικό παιχνίδι: {n} ώ. Μεγαλώνει κάθε μέρα.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Οι μικρότερες ποσότητες μοιάζουν περισσότερο με πραγματικό παιχνίδι. Μπορείς να προσθέτεις έως {max} ώρες μία φορά τη μέρα.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Χρονολογούνται σαν πραγματικό παιχνίδι: μοιράζονται στις προηγούμενες μέρες σου, απογεύματα, βράδια και Σαββατοκύριακα, με μέρες χωρίς παιχνίδι και ποτέ πάνω από 2 παιχνίδια ταυτόχρονα. Κάθε φορά συνεχίζει σε παλαιότερες μέρες, οπότε καμία μέρα δεν γεμίζει δύο φορές. Εμφανίζονται στο έμβλημά σου μέσα σε 72 ώρες.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Οι προηγούμενες μέρες σου είναι τόσο γεμάτες όσο μπορεί να είναι το πραγματικό παιχνίδι. Κάθε μέρα ανοίγει νέο περιθώριο."
 }

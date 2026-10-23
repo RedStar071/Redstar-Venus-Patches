@@ -60,11 +60,12 @@ function world(opts = {}) {
         function questDispatch(a) { dispatched.push(a); }
         function questSleep(ms) { return new Promise(r => later(r, ms)); }
         function hookExport() {} function replaceValue() {}
+        function snowflakeMs(id) { if (typeof id !== "string" || !/^[0-9]{17,20}$/.test(id)) return NaN; try { return Number(BigInt(id) >> BigInt(22)) + 1420070400000; } catch (_) { return NaN; } }
         function badgeInfo(key) { const v = env.progress[key]; return v == null ? null : {current:v, goal:100}; }
         ${limits}
         ${engine}
         return {badges, badgeStartGame, badgesStop, badgesSettingChanged, badgeGrantHours, badgeGrantLimit, badgeGrantWait,
-            badgeGrantRecord, badgeGrantsLoad, badgeGrantPlan, badgeEntries, BADGE_FALLBACK_GAMES, BADGE_GAME_TIME_START};
+            badgeGrantRecord, badgeGrantsLoad, badgeGrantPlan, badgeGrantRoom, badgeDaySchedule, badgeGrantDays, badgeDayKey, badgeEntries, BADGE_FALLBACK_GAMES, BADGE_GAME_TIME_START};
     `);
     const api = factory(env, later, clearTimeout, http, () => now, dispatched);
     api.badges.user = '111111111111111111';
@@ -126,41 +127,87 @@ const heartbeats = w => events(w, 'running_game_heartbeat');
         await w.advance(60 * 60000);
         ok(w.api.badges.current.game.id === id, 'games stop switching once the 100 game top tier is reached');
     }
+    // Add hours now: the dates have to look like a person's play history, and stay that way across grants.
+    const sessionsOf = (w, from) => w.sent.slice(from).flatMap(x => x.events)
+        .filter(e => e.type === 'running_game_heartbeat' && e.properties.final_heartbeat)
+        .map(e => ({id: e.properties.game_id, end: e.properties.client_track_timestamp, start: e.properties.client_track_timestamp - e.properties.duration_tracked_ms}));
+    const dayOf = ms => { const d = new Date(ms); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
     {
         const w = world({progress: {GAME_TIME: 10, GAME_VARIETY: 3}});
-        w.api.BADGE_FALLBACK_GAMES.slice(0, 6).forEach(g => w.api.badges.played.add(g.id));
-        ok(w.api.badgeGrantLimit() === 1000, 'Add hours now allows up to 1,000 hours a day');
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        ok(w.api.badgeGrantLimit() === 500, 'Add hours now allows up to 500 hours a day (' + w.api.badgeGrantLimit() + ')');
+        const user = w.api.badges.user, days = w.api.badgeGrantDays(user);
+        ok(days.length > 300 && dayOf(days[0]) < dayOf(w.now()), 'only past days are used, never today');
+        ok(days.every(d => d >= w.api.BADGE_GAME_TIME_START), 'no day before Game Time started counting');
+        const again = days.slice(0, 60).every(d => JSON.stringify(w.api.badgeDaySchedule(user, d)) === JSON.stringify(w.api.badgeDaySchedule(user, d)));
+        ok(again, 'a day always has the same schedule, however often it is looked at');
+        const other = days.slice(0, 60).some(d => JSON.stringify(w.api.badgeDaySchedule(user, d)) !== JSON.stringify(w.api.badgeDaySchedule('222222222222222222', d)));
+        ok(other, 'another account gets a different history');
+        const perDay = days.map(d => w.api.badgeDaySchedule(user, d).reduce((a, x) => a + x.ms, 0) / 3600000);
+        const off = perDay.filter(h => h === 0).length / perDay.length, avg = perDay.reduce((a, b) => a + b, 0) / perDay.length;
+        ok(off > 0.05 && off < 0.3, 'some days have no play at all (' + Math.round(off * 100) + '%)');
+        ok(Math.max(...perDay) <= 18 && avg > 3 && avg < 9, 'about ' + avg.toFixed(1) + ' h a day on average, never more than 18 (' + Math.max(...perDay).toFixed(1) + ')');
+        const sizes = new Set(perDay.map(h => Math.round(h)));
+        ok(sizes.size >= 8, 'days are different lengths, not the same amount over and over (' + sizes.size + ' sizes)');
         const p = w.api.badgeGrantHours(300);
-        await w.advance(5 * 60000);
+        await w.advance(10 * 60000);
         ok(await p === true, 'adding 300 hours finishes');
-        const finals = heartbeats(w).filter(e => e.properties.final_heartbeat);
-        const total = finals.reduce((s, e) => s + e.properties.duration_tracked_ms, 0);
+        const first = sessionsOf(w, 0), total = first.reduce((a, x) => a + x.end - x.start, 0);
         ok(Math.abs(total - 300 * 3600000) < 1000, 'exactly 300 hours are sent');
-        ok(finals.every(e => e.properties.duration_tracked_ms <= 8 * 3600000 + 1), 'no session is longer than 8 hours');
-        ok(w.sent.every(s => s.events.length <= 24), 'at most 8 sessions go in one request');
-        const sessions = finals.map(e => ({id: e.properties.game_id, end: e.properties.client_track_timestamp,
-            start: e.properties.client_track_timestamp - e.properties.duration_tracked_ms}));
-        ok(sessions.every(x => x.end <= w.now()), 'no session ends in the future');
-        ok(sessions.every(x => x.start >= w.api.BADGE_GAME_TIME_START), 'no session starts before Game Time began counting');
+        ok(first.every(x => x.end <= w.now() && dayOf(x.start) < dayOf(w.now())), 'every session is in the past, before today');
+        ok(first.every(x => x.end - x.start <= 5.1 * 3600000), 'no session is longer than about 5 hours');
         let most = 0, running = 0;
-        for (const [, d] of sessions.flatMap(x => [[x.start, 1], [x.end, -1]]).sort((p, q) => p[0] - q[0] || p[1] - q[1])) { running += d; most = Math.max(most, running); }
-        ok(most <= 3, 'never more than 3 games at the same moment (' + most + ')');
-        ok(!sessions.some(x => sessions.some(y => y !== x && y.id === x.id && y.start < x.end && y.end > x.start)), 'the same game never overlaps itself');
-        ok(sessions.every(x => w.api.badges.played.has(x.id)), 'only games already played are used');
-        const inits = heartbeats(w).filter(e => e.properties.initial_heartbeat);
-        ok(inits.every(e => finals.some(f => f.properties.game_session_id === e.properties.game_session_id)), 'every session opens and closes with the same session ID');
-        ok(w.api.badgeGrantWait() > 23 * 3600000, 'then there is a 24 hour wait');
-        ok(await w.api.badgeGrantHours(10) === false, 'a second grant inside 24 hours is refused');
-        ok(w.api.badgeGrantRecord().hours === 300, 'the account remembers its 300 added hours');
+        for (const [, d] of first.flatMap(x => [[x.start, 1], [x.end, -1]]).sort((p, q) => p[0] - q[0] || p[1] - q[1])) { running += d; most = Math.max(most, running); }
+        ok(most <= 2, 'never more than 2 games at the same moment (' + most + ')');
+        ok(!first.some(x => first.some(y => y !== x && y.id === x.id && y.start < x.end && y.end > x.start)), 'the same game never overlaps itself');
+        const hours = first.map(x => new Date(x.start).getHours());
+        ok(hours.filter(h => h >= 4 && h < 9).length === 0, 'nobody starts a session between 4 and 9 in the morning');
+        const byGame = {};
+        first.forEach(x => { byGame[x.id] = (byGame[x.id] || 0) + x.end - x.start; });
+        const shares = Object.values(byGame).sort((a, b) => b - a);
+        ok(shares[0] / total > 0.2, 'a favourite game gets most of the time (' + Math.round(shares[0] / total * 100) + '%)');
+        ok(first.every(x => w.api.badges.played.has(x.id)), 'only games already played are used');
+        ok(w.api.badgeGrantWait() > 23 * 3600000 && await w.api.badgeGrantHours(10) === false, 'then there is a 24 hour wait');
+        // Coming back the next day: the next grant must continue on older days, never fill a day again.
         w.setNow(w.now() + 25 * 3600000);
-        w.env.progress.GAME_TIME = 4500;
-        ok(w.api.badgeGrantLimit() === 200, "hours Discord hasn't shown yet count toward 5,000 (" + w.api.badgeGrantLimit() + ')');
-        const oldest = Math.min(...sessions.map(x => x.start)), before = w.sent.length;
-        const p2 = w.api.badgeGrantHours(25); await w.advance(60000); await p2;
-        const second = w.sent.slice(before).flatMap(s => s.events).filter(e => e.properties.final_heartbeat);
-        ok(second.length && second.every(e => e.properties.client_track_timestamp <= oldest), 'the next grant goes further back instead of overlapping the last one');
+        const before = w.sent.length, p2 = w.api.badgeGrantHours(200); await w.advance(10 * 60000); await p2;
+        const second = sessionsOf(w, before);
+        const firstDays = new Set(first.map(x => dayOf(x.start))), secondDays = new Set(second.map(x => dayOf(x.start)));
+        const shared = [...secondDays].filter(d => firstDays.has(d));
+        const overlap = second.some(x => first.some(y => y.start < x.end && y.end > x.start));
+        ok(second.length > 0 && !overlap, 'the next day\'s grant never overlaps anything already sent');
+        ok(shared.length <= 1, 'the next grant moves on to older days (' + shared.length + ' day shared, the one the last grant stopped in)');
+        ok(Math.min(...second.map(x => x.start)) < Math.min(...first.map(x => x.start)), 'it continues further back in time');
+        const all = first.concat(second), perSent = {};
+        all.forEach(x => { perSent[dayOf(x.start)] = (perSent[dayOf(x.start)] || 0) + x.end - x.start; });
+        ok(Object.values(perSent).every(ms => ms <= 18 * 3600000), 'no day ever ends up with more than 18 hours');
+        // The total stays inside what those days could really hold, and below 5,000.
+        w.setNow(w.now() + 25 * 3600000);
+        w.env.progress.GAME_TIME = 4900;
+        ok(w.api.badgeGrantLimit() <= 100, 'hours Discord hasn\'t shown yet count toward 5,000 (' + w.api.badgeGrantLimit() + ')');
         w.api.badges.user = '222222222222222222';
-        ok(w.api.badgeGrantWait() === 0 && w.api.badgeGrantRecord().hours === 0, 'another account has its own cooldown and total');
+        ok(w.api.badgeGrantWait() === 0 && w.api.badgeGrantRecord().hours === 0, 'another account has its own cooldown, total and days');
+    }
+    {
+        // A day Venus played on live is never filled again later.
+        const w = world({progress: {GAME_TIME: 0}});
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        const user = w.api.badges.user, yesterday = w.api.badgeGrantDays(user)[0];
+        w.setNow(yesterday + 20 * 3600000);
+        await w.api.badgeStartGame(null); await w.advance(6 * 60000); w.api.badgesStop(); await w.flush();
+        ok(w.api.badgeGrantRecord().days[w.api.badgeDayKey(yesterday)] === -1, 'a day played live is remembered');
+        w.setNow(yesterday + 2 * 86400000);
+        const before = w.sent.length, p = w.api.badgeGrantHours(25); await w.advance(5 * 60000); await p;
+        ok(sessionsOf(w, before).every(x => dayOf(x.start) !== dayOf(yesterday)), 'nothing is added to a day that was played live');
+    }
+    {
+        // A brand new account: nothing before it existed.
+        const w = world({progress: {GAME_TIME: 0}});
+        const created = w.now() - 20 * 86400000, id = String((BigInt(created - 1420070400000) << 22n));
+        w.api.badges.user = id;
+        const days = w.api.badgeGrantDays(id);
+        ok(days.length <= 20 && days.every(d => d > created), 'a 20 day old account only gets days after it was made');
+        ok(w.api.badgeGrantLimit() < 200, 'and only as many hours as those few days could hold (' + w.api.badgeGrantLimit() + ')');
     }
     {
         const w = world();
@@ -172,20 +219,11 @@ const heartbeats = w => events(w, 'running_game_heartbeat');
     }
     {
         const w = world();
-        const g = w.api.badgeGrantsLoad({'111111111111111111': {at: 1, hours: 99999, from: 5, recent: [[1, 2], 'x']}, bad: {at: 1, hours: 1}, '3': null});
+        const g = w.api.badgeGrantsLoad({'111111111111111111': {at: 1, hours: 99999, recent: [[1, 2], 'x'], days: {'20260101': 3, bad: 2, '20260102': 999}}, bad: {at: 1, hours: 1}, '3': null});
         const r = g['111111111111111111'];
-        ok(Object.keys(g).length === 1 && r.hours === 5000 && r.from === w.api.BADGE_GAME_TIME_START && r.recent.length === 1, 'saved grants are checked when loaded');
-    }
-    {
-        // Five 1,000 hour grants in a row (the whole 5,000) must fit after December 8, 2025.
-        const w = world(), games = Array.from({length: 6}, (_, i) => ({id: 'g' + i}));
-        let from = w.now() - 3600000, total = 0;
-        for (let k = 0; k < 5; k++) {
-            const p = w.api.badgeGrantPlan(1000, games, from);
-            total += p.sessions.reduce((a, x) => a + x.ms, 0);
-            from = Math.min(...p.sessions.map(x => x.start)) - 3600000;
-        }
-        ok(Math.round(total / 3600000) === 5000 && from > w.api.BADGE_GAME_TIME_START, 'all 5,000 hours fit after December 8, 2025');
+        ok(Object.keys(g).length === 1 && r.hours === 5000 && r.recent.length === 1 && r.days['20260101'] === 3 && !('bad' in r.days) && !('20260102' in r.days), 'saved grants are checked when loaded');
+        const old = w.api.badgeGrantsLoad({'111111111111111111': {at: 1, hours: 300, recent: []}})['111111111111111111'];
+        ok(Object.keys(old.days).length > 10, 'hours added by the older version mark the newest days as used');
     }
     console.log(`\n${checks - failures}/${checks} passed`);
     process.exit(failures ? 1 : 0);

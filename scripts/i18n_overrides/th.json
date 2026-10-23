@@ -871,8 +871,6 @@
  "Nothing left to add": "ไม่มีอะไรให้เพิ่มแล้ว",
  "Plays games in the background, toward Hours Played.": "เล่นเกมในเบื้องหลัง เพื่อนับชั่วโมงที่เล่น",
  "RISK": "เสี่ยง",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "จำนวนน้อยดูเหมือนการเล่นจริงมากกว่า คุณเพิ่มได้สูงสุด {max} ชั่วโมงวันละครั้ง และรวมแล้วไม่เกิน 5,000",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "จะส่งเป็นเซสชันละ 2 ถึง 8 ชั่วโมงในเกมที่คุณเคยเล่นแล้ว และจะแสดงบนป้ายภายใน 72 ชั่วโมง",
  "This is the risky way, so it asks you to confirm three times.": "นี่เป็นวิธีที่มีความเสี่ยง จึงต้องยืนยันสามครั้ง",
  "This makes sure you read the warning.": "เพื่อให้แน่ใจว่าคุณอ่านคำเตือนแล้ว",
  "Turn on Game time to count hours.": "เปิดเวลาเล่นเกมเพื่อนับชั่วโมง",
@@ -888,5 +886,9 @@
  "{n} game": "{n} เกม",
  "{n} h": "{n} ชม.",
  "{n} hours of game time for every hour Discord is open, even in the background.": "ได้เวลาเล่นเกม {n} ชั่วโมงในทุกชั่วโมงที่เปิด Discord แม้อยู่ในเบื้องหลัง",
- "{n} hour of game time for every hour Discord is open, even in the background.": "ได้เวลาเล่นเกม {n} ชั่วโมงในทุกชั่วโมงที่เปิด Discord แม้อยู่ในเบื้องหลัง"
+ "{n} hour of game time for every hour Discord is open, even in the background.": "ได้เวลาเล่นเกม {n} ชั่วโมงในทุกชั่วโมงที่เปิด Discord แม้อยู่ในเบื้องหลัง",
+ "Room left that still looks like real play: {n} h. It grows every day.": "พื้นที่ที่ยังดูเหมือนการเล่นจริง: {n} ชม. เพิ่มขึ้นทุกวัน",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "จำนวนน้อยดูเหมือนการเล่นจริงมากกว่า คุณเพิ่มได้สูงสุด {max} ชั่วโมงวันละครั้ง",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "จะลงวันที่เหมือนการเล่นจริง: กระจายไปในวันที่ผ่านมา ช่วงบ่าย ค่ำ และวันหยุดสุดสัปดาห์ มีวันที่ไม่เล่น และไม่เกิน 2 เกมพร้อมกัน แต่ละครั้งจะต่อจากวันที่เก่ากว่า จึงไม่มีวันไหนถูกเติมซ้ำ จะแสดงบนป้ายภายใน 72 ชั่วโมง",
+ "Your past days are as full as real play gets. More room opens up every day.": "วันที่ผ่านมาเต็มเท่าที่การเล่นจริงจะเป็นได้แล้ว พื้นที่ใหม่จะเพิ่มขึ้นทุกวัน"
 }

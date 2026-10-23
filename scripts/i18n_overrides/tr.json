@@ -976,8 +976,6 @@
  "Nothing left to add": "Eklenecek bir şey kalmadı",
  "Plays games in the background, toward Hours Played.": "Oynanan saatler için arka planda oyunlar oynar.",
  "RISK": "RİSK",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Küçük miktarlar gerçek oyuna daha çok benzer. Günde bir kez en fazla {max} saat ekleyebilirsin, toplamda ise asla 5.000'i geçemezsin.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Daha önce oynadığın oyunlarda 2 ila 8 saatlik oturumlar olarak gönderilir ve 72 saat içinde rozetinde görünür.",
  "This is the risky way, so it asks you to confirm three times.": "Bu riskli yol, bu yüzden üç kez onaylamanı ister.",
  "This makes sure you read the warning.": "Böylece uyarıyı okuduğundan emin oluruz.",
  "Turn on Game time to count hours.": "Saatlerin sayılması için Oyun süresi'ni aç.",
@@ -1002,5 +1000,9 @@
   "one": "Discord açık olduğu her saat için {n} saat oyun süresi, arka planda bile.",
   "other": "Discord açık olduğu her saat için {n} saat oyun süresi, arka planda bile."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "Discord açık olduğu her saat için {n} saat oyun süresi, arka planda bile."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "Discord açık olduğu her saat için {n} saat oyun süresi, arka planda bile.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Hâlâ gerçek oyun gibi görünen alan: {n} sa. Her gün artar.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Küçük miktarlar gerçek oyuna daha çok benzer. Günde bir kez en fazla {max} saat ekleyebilirsin.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Gerçek oyun gibi tarihlenir: geçmiş günlerine öğleden sonra, akşam ve hafta sonu saatlerinde dağıtılır, oyunsuz günler olur ve aynı anda asla 2'den fazla oyun olmaz. Her seferinde daha eski günlerden devam eder, böylece hiçbir gün iki kez doldurulmaz. 72 saat içinde rozetinde görünür.",
+ "Your past days are as full as real play gets. More room opens up every day.": "Geçmiş günlerin gerçek oyunun olabileceği kadar dolu. Her gün yeni alan açılır."
 }

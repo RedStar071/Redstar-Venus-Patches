@@ -976,8 +976,6 @@
  "Nothing left to add": "Non c'è altro da aggiungere",
  "Plays games in the background, toward Hours Played.": "Avvia giochi in background, per le ore di gioco.",
  "RISK": "RISCHIO",
- "Smaller amounts look more like real play. You can add up to {max} hours once a day, and never past 5,000 in total.": "Quantità più piccole sembrano più un gioco reale. Puoi aggiungere fino a {max} ore una volta al giorno, e mai oltre 5.000 in totale.",
- "They're sent as 2 to 8 hour sessions on games you've already played, and show on your badge within 72 hours.": "Vengono inviate come sessioni da 2 a 8 ore su giochi a cui hai già giocato, e compaiono sul tuo badge entro 72 ore.",
  "This is the risky way, so it asks you to confirm three times.": "Questo è il modo rischioso, quindi ti chiede di confermare tre volte.",
  "This makes sure you read the warning.": "Così siamo sicuri che tu abbia letto l'avviso.",
  "Turn on Game time to count hours.": "Attiva Tempo di gioco per contare le ore.",
@@ -1002,5 +1000,9 @@
   "one": "{n} ora di gioco per ogni ora in cui Discord è aperto, anche in background.",
   "other": "{n} ore di gioco per ogni ora in cui Discord è aperto, anche in background."
  },
- "{n} hour of game time for every hour Discord is open, even in the background.": "{n} ora di gioco per ogni ora in cui Discord è aperto, anche in background."
+ "{n} hour of game time for every hour Discord is open, even in the background.": "{n} ora di gioco per ogni ora in cui Discord è aperto, anche in background.",
+ "Room left that still looks like real play: {n} h. It grows every day.": "Spazio rimasto che sembra ancora gioco reale: {n} h. Cresce ogni giorno.",
+ "Smaller amounts look more like real play. You can add up to {max} hours once a day.": "Quantità più piccole sembrano più un gioco reale. Puoi aggiungere fino a {max} ore una volta al giorno.",
+ "They're dated like real play: spread over your past days at afternoon, evening and weekend hours, with days off and never more than 2 games at once. Each time picks up on older days, so no day is filled twice. They show on your badge within 72 hours.": "Vengono datate come gioco reale: distribuite sui tuoi giorni passati, di pomeriggio, di sera e nel weekend, con giorni di pausa e mai più di 2 giochi insieme. Ogni volta si riparte da giorni più vecchi, così nessun giorno viene riempito due volte. Compaiono sul tuo badge entro 72 ore.",
+ "Your past days are as full as real play gets. More room opens up every day.": "I tuoi giorni passati sono pieni quanto può esserlo il gioco reale. Ogni giorno si libera nuovo spazio."
 }
