@@ -9498,22 +9498,15 @@
     }
     // The translate bar as it looks in chat (TranslateBar): the same compact 32 dp pill, centered, with its divider and cog,
     // drawn with the preview's own colors. It used to be a full-width bar with the cog at the far edge, which the real bar isn't.
-    function previewTranslateBar(k, done, target, onPress, pulse) {
-        const Press = RN.Pressable || RN.View, Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
-        const label = done ? tr("Show original") : tr("Translate to {language}", {language:target}), color = done ? k.iconMuted.color : k.brandFg.color;
-        return el(RN.View, {key:"bar", style:{alignItems:"center", paddingHorizontal:12, paddingTop:6, paddingBottom:4}},
-            el(RN.View, {style:{flexDirection:"row", alignItems:"center", maxWidth:"100%", height:32, paddingLeft:12, paddingRight:2, borderRadius:16,
-                borderWidth:1, borderColor:k.bar.borderTopColor, backgroundColor:k.bar.backgroundColor}},
-                el(Press, {onPress, accessibilityRole:onPress ? "button" : undefined, accessibilityLabel:label,
-                    style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1}},
-                    el(Lang, {size:"xs", color}), popIn("bar:" + done, el(RN.Text, {numberOfLines:1, style:{fontSize:13, fontWeight:"600", color}}, label)),
-                    tapRipple(pulse, "bar", {left:"40%", top:-2})),
-                el(RN.View, {style:[k.barDivider, {marginHorizontal:6}]}),
-                el(RN.View, {style:{width:28, height:28, alignItems:"center", justifyContent:"center"}}, el(Cog, {size:"xs", color:k.iconMuted.color}))));
+    // The translate bar as it looks in chat: the very same pill (translatePill), floating over the top of the chat.
+    function previewTranslateBar(s, done, target, onPress, pulse) {
+        const label = done ? tr("Show original") : tr("Translate to {language}", {language:target});
+        return el(RN.View, {key:"bar", style:{alignItems:"center", paddingHorizontal:12, paddingTop:8, paddingBottom:4}},
+            translatePill(s, done, label, onPress, null, null, tapRipple(pulse, "bar", {left:"40%", top:-2})));
     }
     function TranslatePreview(props) {
         useSettings("translate");
-        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on;
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), barStyles = useTranslateBarStyles(), on = !!props.on;
         const blank = {shown:true, done:false, busy:false, menu:false, held:false, pulse:null};
         const [state, setState] = React.useState(blank), watching = on, manual = settings.translateMode === "manual";
         // The translate bar (#82) is shown, and is how Watch asks, whenever "How you ask" includes it.
@@ -9545,7 +9538,7 @@
                 settings.translateNote || settings.translateOriginal ? el(RN.Text, {style:[s.muted, {marginTop:2}]}, settings.translateOriginal ? tr("Translated from {language}. Original:", {language:languageName("es")}) :
                     tr("Translated from {language}", {language:languageName("es")})) : null,
                 settings.translateOriginal ? el(RN.View, {style:s.quote}, el(RN.Text, {style:s.muted}, TRANSLATE_SAMPLE)) : null);
-        const bar = barAsk ? previewTranslateBar(k, state.done, target, null, state.pulse) : null;
+        const bar = barAsk ? previewTranslateBar(barStyles, state.done, target, null, state.pulse) : null;
         const msgView = el(RN.View, {key:"msg", style:state.held ? k.selected : null},
             popIn("msg", previewMessage(s, "msg", "Luc\u00eda", "#faa61a", tr("Today at 4:01 PM"), body)), tapRipple(state.pulse, "msg"));
         const message = msgView;
@@ -9579,15 +9572,71 @@
         if (!props || !props.channelId || !React || !RN) return orig.apply(self, args);
         const bar = el(TranslateBar, {key:"venus-translate-bar", channelId:props.channelId});
         const children = Array.isArray(props.children) ? props.children.concat([bar]) : [props.children, bar];
-        const next = Object.assign({}, props, {children});
+        // Discord's own sticky header (the blue "25+ new messages" bar, thread and safety banners) is measured, so the
+        // pill always sits just under whatever Discord shows there instead of on top of it (#82).
+        // Only a header Discord already passes is wrapped: StickyWrapper (10380) fills the chat with its header box on Android,
+        // so adding one where there was none could take touches from the messages.
+        const next = Object.assign({}, props, props.stickyHeader ? {children, stickyHeader:el(TranslateHeaderMeasure, {channelId:props.channelId}, props.stickyHeader)} : {children});
         return args.length === 1 ? orig.call(self, next) : orig.apply(self, [next].concat(Array.prototype.slice.call(args, 1)));
     }
-    // 32 dp tall, a soft pill a little in from the edges: about as much of the chat as Discord's own New messages bar.
-    const TRANSLATE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", alignSelf:"center", marginHorizontal:12, marginTop:6, marginBottom:4,
-        height:32, paddingLeft:12, paddingRight:2, borderRadius:16, backgroundColor:"#2b2d31f2", borderWidth:1, borderColor:"#ffffff14",
-        shadowColor:"#000000", shadowOpacity:0.18, shadowRadius:6, shadowOffset:{width:0, height:2}, elevation:4, zIndex:100},
-        text:{color:"#949cf7"}, muted:{color:"#b5bac1"}, cog:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"},
-        divider:{width:1, height:16, marginHorizontal:6, backgroundColor:"#ffffff1f"}};
+    // How tall Discord's sticky header is right now, per channel. Only the bar listens, so a change never redraws the chat.
+    const translateHeader = {heights:new Map(), listeners:new Set()};
+    function TranslateHeaderMeasure(props) {
+        const channelId = props.channelId;
+        React.useEffect(() => () => { if (translateHeader.heights.delete(channelId)) translateHeader.listeners.forEach(fn => fn()); }, [channelId]);
+        const onLayout = event => {
+            const h = Math.max(0, Math.round(event && event.nativeEvent && event.nativeEvent.layout ? event.nativeEvent.layout.height : 0));
+            if (translateHeader.heights.get(channelId) === h) return;
+            translateHeader.heights.set(channelId, h);
+            translateHeader.listeners.forEach(fn => fn());
+        };
+        // box-none: the wrapper itself never takes a touch, so Discord's banners work exactly as before.
+        return el(RN.View, {pointerEvents:"box-none", onLayout, collapsable:false}, props.children);
+    }
+    function useTranslateHeaderHeight(channelId) {
+        const [h, setH] = React.useState(() => translateHeader.heights.get(channelId) || 0);
+        React.useEffect(() => {
+            const fn = () => setH(translateHeader.heights.get(channelId) || 0);
+            translateHeader.listeners.add(fn); fn();
+            return () => { translateHeader.listeners.delete(fn); };
+        }, [channelId]);
+        return h;
+    }
+    // A floating pill, centered, 36 dp: a round brand badge with the language icon, what a tap does, and a cog.
+    // Once the chat is translated the badge turns quiet and the label says how to go back.
+    const TRANSLATE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", height:36, paddingLeft:4, paddingRight:4, borderRadius:18,
+        backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff14",
+        shadowColor:"#000000", shadowOpacity:0.28, shadowRadius:10, shadowOffset:{width:0, height:4}, elevation:8},
+        badge:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        badgeOn:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505899"},
+        badgeIcon:{color:"#ffffff"}, text:{color:"#f2f3f5"}, muted:{color:"#b5bac1"},
+        cog:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center"},
+        divider:{width:1, height:16, marginHorizontal:4, backgroundColor:"#ffffff1f"}};
+    function useTranslateBarStyles() {
+        return useThemed("translateBar", c => ({
+            bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.BACKGROUND_SURFACE_HIGHEST || c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.CARD_BACKGROUND_DEFAULT,
+                borderColor:c.BORDER_SUBTLE}),
+            badge:Object.assign({}, TRANSLATE_BAR_DARK.badge, {backgroundColor:c.BACKGROUND_BRAND}),
+            badgeOn:Object.assign({}, TRANSLATE_BAR_DARK.badgeOn, {backgroundColor:c.BACKGROUND_MOD_STRONG || c.BACKGROUND_MOD_NORMAL}),
+            badgeIcon:{color:c.CONTROL_BRAND_FOREGROUND_NEW || c.WHITE || "#ffffff"}, text:{color:c.TEXT_STRONG}, muted:{color:c.TEXT_MUTED},
+            cog:TRANSLATE_BAR_DARK.cog, divider:Object.assign({}, TRANSLATE_BAR_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), TRANSLATE_BAR_DARK);
+    }
+    // The pill's insides, shared by chat and the settings preview so both always look the same.
+    function translatePill(s, on, label, onPress, onCog, Press, extra) {
+        Press = Press || RN.View;
+        const Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
+        const Text = inspectedExport(5088, "Text");
+        return el(RN.View, {style:s.bar},
+            el(Press, {style:{flexDirection:"row", alignItems:"center", gap:8, height:34, paddingRight:6, flexShrink:1},
+                accessibilityRole:onPress ? "button" : undefined, accessibilityLabel:label, accessibilityState:{checked:on}, onPress, hitSlop:{top:6, bottom:6, left:6}},
+                popIn("badge:" + on, el(RN.View, {style:on ? s.badgeOn : s.badge}, el(Lang, {size:"xs", color:on ? s.muted.color : s.badgeIcon.color}))),
+                popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
+                    el(RN.Text, {numberOfLines:1, style:[{fontSize:14, fontWeight:"600"}, on ? s.muted : s.text]}, label)),
+                extra || null),
+            el(RN.View, {style:s.divider}),
+            el(onCog ? Press : RN.View, {style:s.cog, accessibilityRole:onCog ? "button" : undefined, accessibilityLabel:tr("Translate messages"), onPress:onCog,
+                hitSlop:{top:6, bottom:6, left:4, right:6}}, el(Cog, {size:"xs", color:s.muted.color})));
+    }
     function translateBarShown(channelId) {
         if (!enabled("translate") || settings.translateMode !== "manual" || settings.translateAsk === "menu" || !channelId || hiddenChannel(channelId)) return false;
         if (translate.channels.has(channelId) || translate.foreign.get(channelId) === true) return true;
@@ -9596,7 +9645,7 @@
     function TranslateBar(props) {
         useSettings("translate");
         const [, bump] = React.useState(0);
-        const channelId = props.channelId;
+        const channelId = props.channelId, headerHeight = useTranslateHeaderHeight(channelId);
         React.useEffect(() => {
             if (!channelId || !enabled("translate") || settings.translateMode !== "manual" || settings.translateAsk === "menu") return undefined;
             if (!msgStore) msgStore = inspectedExport(5432, "default");
@@ -9608,27 +9657,27 @@
             msgStore.addChangeListener(check);
             return () => msgStore.removeChangeListener(check);
         }, [channelId, settings.translate, settings.translateMode, settings.translateAsk, settings.translateTarget, settings.translateLanguage]);
-        const s = useThemed("translateBar", c => ({
-            bar:Object.assign({}, TRANSLATE_BAR_DARK.bar, {backgroundColor:c.MOBILE_FLOATING_ACCESSORY_BACKGROUND || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW,
-                borderColor:c.BORDER_SUBTLE}),
-            text:{color:c.TEXT_BRAND || c.BACKGROUND_BRAND}, muted:{color:c.TEXT_MUTED}, cog:TRANSLATE_BAR_DARK.cog,
-            divider:Object.assign({}, TRANSLATE_BAR_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), TRANSLATE_BAR_DARK);
+        const s = useTranslateBarStyles();
+        // The pill glides down under Discord's banner when one appears and back up when it goes (native driver).
+        const A = motion(), slide = React.useRef(null);
+        if (!slide.current && A) slide.current = new A.Value(headerHeight);
+        React.useEffect(() => {
+            const value = slide.current;
+            if (!value) return undefined;
+            if (reduceMotion || typeof A.spring !== "function") { value.setValue(headerHeight); return undefined; }
+            const run = A.spring(value, {toValue:headerHeight, speed:16, bounciness:4, useNativeDriver:true});
+            run.start();
+            return () => run.stop();
+        }, [headerHeight]);
         if (!translateBarShown(channelId)) return null;
-        const on = translate.channels.has(channelId), Press = inspectedExport(6185, "PressableOpacity") || RN.TouchableOpacity || RN.Pressable || RN.View, Text = inspectedExport(5088, "Text");
-        const Lang = venusIcon(15723, "LanguageIcon"), Cog = venusIcon(15285, "FiltersHorizontalIcon", venusIcon(7092, "SettingsIcon"));
+        const on = translate.channels.has(channelId), Press = inspectedExport(6185, "PressableOpacity") || RN.TouchableOpacity || RN.Pressable || RN.View;
         const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
         const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
-        // Only the pill takes touches: the rest of the header row lets taps through to the chat.
-        return el(RN.View, {pointerEvents:"box-none", style:{position:"absolute", top:0, left:0, right:0, alignItems:"center", zIndex:100, elevation:6}},
-            el(RN.View, {style:s.bar},
-                el(Press, {style:{flexDirection:"row", alignItems:"center", gap:6, height:30, paddingRight:2, flexShrink:1},
-                    accessibilityRole:"button", accessibilityLabel:label, accessibilityState:{checked:on}, onPress:tap, hitSlop:{top:6, bottom:6}},
-                    el(Lang, {size:"xs", color:on ? s.muted.color : s.text.color}),
-                    popIn("label:" + on, Text ? el(Text, {variant:"text-sm/semibold", style:on ? s.muted : s.text, lineClamp:1}, label) :
-                        el(RN.Text, {numberOfLines:1, style:[{fontSize:13, fontWeight:"600"}, on ? s.muted : s.text]}, label))),
-                el(RN.View, {style:s.divider}),
-                el(Press, {style:s.cog, accessibilityRole:"button", accessibilityLabel:tr("Translate messages"), onPress:openTranslateSettings,
-                    hitSlop:{top:6, bottom:6, left:4, right:6}}, el(Cog, {size:"xs", color:s.muted.color}))));
+        // Only the pill takes touches: the rest of the row lets taps through to the chat.
+        const Box = slide.current ? A.View : RN.View;
+        return el(Box, {pointerEvents:"box-none", style:{position:"absolute", top:0, left:0, right:0, alignItems:"center", paddingHorizontal:12, paddingTop:8, zIndex:100, elevation:8,
+                transform:[{translateY:slide.current || headerHeight}]}},
+            popIn("bar", translatePill(s, on, label, tap, openTranslateSettings, Press)));
     }
     function openTranslateSettings() {
         haptic("SELECTION");
