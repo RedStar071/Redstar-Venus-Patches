@@ -4486,14 +4486,16 @@
         if (step === 0) return el(RN.View, {style:danger.box},
             title(tr("Your account could be suspended or banned")),
             body(tr("Adding hours tells Discord you played games you never played. That breaks Discord's Terms of Service. People have reported accounts suspended for tools that do this, and hours added this way can't be taken back.")),
-            body(tr("Nobody outside Discord knows how likely that is. It could happen right away, weeks later or never. Leaving this off and letting Badge Completer play in the background is much safer.")),
+            body(tr("Nobody outside Discord knows how likely that is. It could happen right away, weeks later or never. Leaving this off and letting Venus play games in the background is much safer.")),
             check(0, tr("I understand this breaks Discord's rules.")),
             check(1, tr("I understand my account could be suspended or banned.")),
             check(2, tr("I understand added hours can't be removed.")),
             button("next", tr("Continue"), () => setStep(1), !checks.every(Boolean), "destructive"),
             button("cancel", tr("Cancel"), props.onClose, false, "secondary"));
         if (step === 1) {
-            const typed = word.trim().toUpperCase() === keyword.toUpperCase();
+            // Turkish İ/ı and typing in lower case both still match the word.
+            const fold = text => String(text || "").trim().toUpperCase().replace(/[İı]/g, "I");
+            const typed = fold(word) === fold(keyword);
             return el(RN.View, {style:danger.box},
                 title(tr("Type {word} to continue", {word:keyword})),
                 body(tr("This makes sure you read the warning.")),
