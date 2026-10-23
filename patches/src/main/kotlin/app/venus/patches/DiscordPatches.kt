@@ -73,7 +73,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -704,6 +704,10 @@ val accountSwitcher = bundledPlugin("accountSwitcher", "Account switcher",
 @Suppress("unused")
 val unlockAppIcons = bundledPlugin("appIcons", "Unlock app icons",
     "Use any Discord app icon in Settings without Nitro.")
+
+@Suppress("unused")
+val unlockNitroThemes = bundledPlugin("nitroThemes", "Unlock Nitro themes",
+    "Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them.")
 
 @Suppress("unused")
 val customThemes = bundledPlugin("customThemes", "Custom themes",

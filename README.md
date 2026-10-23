@@ -56,6 +56,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide extra buttons | Removes the Quests, Shop and Nitro buttons from your profile and Apps from the attach menu; you can also pick Polls and Photos. The rest close up, so the pill and the menu shrink with no gaps |
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
+| | Unlock Nitro themes | Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them |
 | | Custom themes | Install Revenge and Vendetta color themes from a link, then pick one from a gallery that previews each in its own colors |
 | | Icon packs | Replace Discord's icons across the app with built-in community icon packs (Rosiecord Plumpy, Rosiecord Iconsax, MD3, Solar, Deco, Material Two Tone, Iconsax Bulk) or a custom icon pack link |
 | **Quests** | Complete Quests automatically | Finishes video, Play and timed Activity Quests in the background |

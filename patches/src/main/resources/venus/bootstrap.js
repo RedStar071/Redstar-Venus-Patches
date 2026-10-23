@@ -40,6 +40,7 @@
     if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
     if (features.accountSwitcher) selectModules([1390, 12129, 12130, 12131, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
+    if (features.nitroThemes) selectModules([1390, 4769, 4937, 14299, 15566]);
     if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 11191, 10368]);
     if (features.iconPacks) selectModules([81, 84, 328, 1205, 4817, 4831, 11191]);
     if (features.messageHighlight) selectModules([584, 1390, 5432, 7742]);
@@ -64,7 +65,7 @@
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
-        accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, customThemes:false, customThemesBackground:true,
+        accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
         fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, tenorGifs:false, tenorGifsSource:"both", language:"auto" };
@@ -81,7 +82,7 @@
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
-            accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, customThemes: false, customThemesBackground: true,
+            accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
             fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, tenorGifs: false, tenorGifsSource: "both", language: "auto"
@@ -874,7 +875,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1285,6 +1286,7 @@
         withOptions("appearance", "hideButtons", "VENUS_HIDEBUTTONS", "Hide extra buttons", "Removes the Quests, Shop, Nitro and Apps buttons you don't use.", "Extra buttons", HideButtonsSettings);
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus next to the notifications bell.");
         toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon without Nitro.");
+        toggle("appearance", "nitroThemes", "Unlock Nitro themes", "Use Discord's gradient themes without Nitro, on this phone.");
         withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install Revenge and Vendetta color themes from a link.", "Custom themes", CustomThemesSettings);
         withOptions("appearance", "iconPacks", "VENUS_ICONPACKS", "Icon packs", "Replace Discord's icons with community icon packs or a custom pack.", "Icon packs", IconPacksSettings);
         // Quests
@@ -1814,6 +1816,7 @@
         if (!nativeCapabilities && user && args[1] && args[1].id === user.id && emojiCatalog) {
             if (enabled("emojis") && (feature === emojiCatalog.EMOJIS_EVERYWHERE || feature === emojiCatalog.ANIMATED_EMOJIS)) return true;
             if (enabled("appIcons") && feature === emojiCatalog.APP_ICONS) return true;
+            if (enabled("nitroThemes") && feature === emojiCatalog.CLIENT_THEMES) return true;
         }
         return orig.apply(self, args);
     }
@@ -7207,6 +7210,31 @@
         }
         return props === node.props ? node : React.cloneElement(node, props);
     }
+    // Unlock Nitro themes: Discord's gradient themes are a Nitro perk. The capability check (PremiumUtils 4769
+    // canUseClientThemes, ProductCatalog 14299 CLIENT_THEMES) says yes for you, the theme picker (15566) is told the themes
+    // aren't locked, and ClientThemesBackgroundStore (4937) stops treating a chosen gradient as a preview it throws away.
+    // Only this phone changes: a gradient theme is a local look, and nobody else ever sees it.
+    function hookThemeBackgroundStore(exports) {
+        const themeStore = exports && exports.default;
+        if (!themeStore || typeof themeStore !== "object") return exports;
+        let holder = themeStore, own = null;
+        while (holder && !(own = Object.getOwnPropertyDescriptor(holder, "isPreview"))) holder = Object.getPrototypeOf(holder);
+        if (own && typeof own.get === "function") {
+            const get = own.get;
+            try {
+                Object.defineProperty(themeStore, "isPreview", {configurable:true, enumerable:false,
+                    get() { return enabled("nitroThemes") ? false : get.call(this); }});
+            } catch (_) {}
+        }
+        return exports;
+    }
+    function nitroThemePicker(orig, self, args) {
+        useSettings("nitroThemes");
+        const props = args[0];
+        if (!enabled("nitroThemes") || !props || props.themeSelector !== "nitro") return orig.apply(self, args);
+        const next = Array.from(args); next[0] = Object.assign({}, props, {themeSelector:undefined});
+        return orig.apply(self, next);
+    }
     function appIconsScreen(orig, self, args) {
         useSettings("appIcons");
         const rendered = orig.apply(self, args);
@@ -11909,6 +11937,8 @@
             case 9464: return features.appIcons ? hookAppIconConstants(exports) : exports;
             case 18051: return features.appIcons ? hookAppIconPremiumManager(exports) : exports;
             case 15831: case 15832: case 17697: return features.appIcons ? hookComponent(exports, appIconsScreen) : exports;
+            case 4937: return features.nitroThemes ? hookThemeBackgroundStore(exports) : exports;
+            case 15566: return features.nitroThemes ? hookComponent(exports, nitroThemePicker) : exports;
             case 589: return features.customThemes ? hookSemanticColorsModule(exports) : exports;
             case 591: return features.customThemes ? hookRawColorsModule(exports) : exports;
             case 590: return features.customThemes ? hookExperimentColorsModule(exports) : exports;
@@ -12118,13 +12148,13 @@
                 return replaceValue(exports, "default", actions);
             }
             case 14299:
-                if (!features.freeNitro && !features.appIcons) return exports;
+                if (!features.freeNitro && !features.appIcons && !features.nitroThemes) return exports;
                 emojiCatalog = exports;
                 return hookExport(exports, "canUserUse", catalogEligibility);
             case 5987: if (features.freeNitro) emojiStore = exports.default; return exports;
             case 6030: if (features.freeNitro) stickerStore = exports.default; return exports;
             case 4769: {
-                if (!features.freeNitro && !features.appIcons) return exports;
+                if (!features.freeNitro && !features.appIcons && !features.nitroThemes) return exports;
                 // The pinned build exports the capabilities on a default singleton;
                 // named aliases are not used by its picker. Hook the inspected object.
                 let capabilities = exports.default || exports;
@@ -12137,6 +12167,11 @@
                     patchCapability("canUseAnimatedEmojis", "emojis");
                     // Keep sticker eligibility stock: only the inspected premium-only sendability result is relaxed.
                     premiumOriginal.canUseCustomStickersEverywhere = typeof capabilities.canUseCustomStickersEverywhere === "function" ? capabilities.canUseCustomStickersEverywhere.bind(capabilities) : undefined;
+                }
+                if (features.nitroThemes) {
+                    patchCapability("canUseClientThemes", "nitroThemes");
+                    if (typeof exports.canUseClientThemes === "function" && exports.default)
+                        exports = hookExport(exports, "canUseClientThemes", premiumOverride("canUseClientThemes", "nitroThemes"));
                 }
                 if (features.appIcons) {
                     patchCapability("canUsePremiumAppIcons", "appIcons");
