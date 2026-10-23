@@ -38,7 +38,7 @@
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
     if (features.translate) selectModules([584, 1390, 5432, 7742, 9675, 10368]);
     if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
-    if (features.accountSwitcher) selectModules([1390, 12129, 12130, 12131, 16858]);
+    if (features.accountSwitcher) selectModules([1390, 6623, 12129, 12130, 12131, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
     if (features.nitroThemes) selectModules([1390, 4769, 4937, 14299, 15566]);
     if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 11191, 10368]);
@@ -8365,6 +8365,34 @@
         const loginRoute = screens && screens.LOGIN || "login";
         openManageAccounts(loginRoute);
     }
+    // Create a new account (#86): Discord's Add account screen (Login 6623 with isMultiAccount) only signs in, and its
+    // registration flow lives in the logged-out navigator, out of reach while you're signed in. So the screen gets a
+    // "Create a new account" link next to Discord's own links, opening Discord's sign-up page. Then you come back and
+    // sign in with the new account here, without logging out of the others.
+    const REGISTER_URL = "https://discord.com/register";
+    function openRegister() { openLink(REGISTER_URL); }
+    function addAccountLogin(orig, self, args) {
+        const rendered = orig.apply(self, args);
+        const props = args[0];
+        if (!enabled("accountSwitcher") || !props || !props.isMultiAccount || !React) return rendered;
+        const LinkButton = inspectedExport(6623, "LinkButton");
+        if (typeof LinkButton !== "function" && !(LinkButton && LinkButton.$$typeof)) return rendered;
+        let added = false;
+        const isLink = child => child && typeof child === "object" && child.type === LinkButton;
+        const withRegister = cloneTree(rendered, function (node, nodeProps) {
+            if (added) return nodeProps;
+            const kids = nodeProps.children;
+            const list = Array.isArray(kids) ? kids : [kids];
+            let last = -1;
+            for (let i = 0; i < list.length; i++) if (isLink(list[i])) last = i;
+            if (last < 0) return nodeProps;
+            added = true;
+            const next = list.slice();
+            next.splice(last + 1, 0, el(LinkButton, {key:"venus-register", text:tr("Create a new account"), onPress:openRegister}));
+            return Object.assign({}, nodeProps, {children:next});
+        }, 0, () => added);
+        return withRegister;
+    }
     function switchToAccount(userId) {
         if (typeof userId !== "string" || !userId) return;
         const me = currentUser();
@@ -8465,6 +8493,8 @@
                 accountRows,
                 Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."), icon:rowIcon(5032, "UserPlusIcon"),
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
+                Row ? el(Row, {key:"register", label:tr("Create a new account"), subLabel:tr("Opens Discord's sign-up page. Then come back and add it here."), icon:rowIcon(7701, "LinkExternalSmallIcon"),
+                    arrow:true, disabled:!on, onPress:openRegister}) : null,
                 Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(7092, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
                 null),
@@ -11951,6 +11981,7 @@
                 if (features.translate) exports = hookComponent(exports, translateBarHeader);
                 return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
             case 12129: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
+            case 6623: return features.accountSwitcher ? hookComponent(exports, addAccountLogin) : exports;
             case 12131: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
             case 4760: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
