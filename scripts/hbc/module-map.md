@@ -79,6 +79,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 5434 | `modules/messages/MessageRecordUtils.tsx` | createMessageRecord, updateServerMessage, updateMessageRecord | MessageRecordUtils |
 | 5632 | `modules/messages/isMessageMentioned.tsx` | isRawMessageMentioned, isMentioned, mention_roles | isMessageMentioned (Message highlights: role mentions) |
 | 5759 | `stores/SelfPresenceStore.tsx` | default | SelfPresenceStore (Badge Completer) |
+| 5932 | `stores/ConsentStore.tsx` | default | ConsentStore (Badge Completer) |
 | 5963 | `stores/SortedGuildStore.tsx` | default, GuildsNodeType, insertUnsortedGuilds | SortedGuildStore |
 | 5967 | `modules/read_states/ReadStateConstants.tsx` | CHANNEL, GUILD_EVENT, NOTIFICATION_CENTER | ReadStateTypes |
 | 5979 | `../discord_common/js/shared/shared-constants/AdCreativeType.tsx` | INVALID, QUEST, QUEST_HOME_HERO | AdCreativeType |
@@ -115,6 +116,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 6820 | `modules/emojis/native/Emoji.tsx` | default | Emoji |
 | 6823 | `design/components/Icon/native/redesign/generated/CheckmarkSmallIcon.tsx` | CheckmarkSmallIcon | CheckmarkSmallIcon |
 | 6839 | `design/components/Sheet/native/BottomSheetTitleHeader.native.tsx` | BottomSheetTitleHeader | BottomSheetTitleHeader |
+| 6853 | `modules/applications/ApplicationActionCreators.tsx` | fetchApplication | ApplicationActionCreators (Badge Completer) |
 | 6868 | `design/components/Icon/native/redesign/generated/CircleCheckIcon.tsx` | CircleCheckIcon | CircleCheckIcon |
 | 6889 | - | Clipboard, Platform, addListener | Clipboard |
 | 6891 | `modules/action_sheet/native/showSimpleActionSheet.tsx` | showSimpleActionSheet | SimpleActionSheet |
@@ -272,6 +274,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 14850 | `modules/color_picker/native/showCustomColorPickerActionSheet.tsx` | CUSTOM_COLOR_PICKER_KEY, CustomColorPicker | showCustomColorPickerActionSheet |
 | 14971 | `modules/settings/native/renderer/SettingListRenderer.tsx` | SettingsList, SearchableSettingsList | SettingsList |
 | 14974 | `modules/settings/native/renderer/SettingRendererUtils.tsx` | onRouteSettingOnPress, getSettingTitle, getSettingSearchableTitles | SettingScreens |
+| 15139 | `actions/ConsentActionCreators.tsx` | setConsents | ConsentActionCreators (Badge Completer) |
 | 15232 | `design/components/Icon/native/redesign/generated/LaptopPhoneIcon.tsx` | LaptopPhoneIcon | LaptopPhoneIcon |
 | 15241 | `design/components/Icon/native/redesign/generated/PuzzlePieceIcon.tsx` | PuzzlePieceIcon | PuzzlePieceIcon |
 | 15285 | `design/components/Icon/native/redesign/generated/FiltersHorizontalIcon.tsx` | FiltersHorizontalIcon | FiltersHorizontalIcon (translate bar, #82) |

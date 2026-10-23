@@ -314,11 +314,14 @@ BOOTSTRAP_MODULES = [
     (5051, 'design/components/Icon/native/redesign/generated/ClockIcon.tsx', ['ClockIcon'], 'ClockIcon (Badge Completer)'),
     (5113, 'stores/VoiceStateStore.tsx', ['default'], 'VoiceStateStore (Badge Completer)'),
     (5759, 'stores/SelfPresenceStore.tsx', ['default'], 'SelfPresenceStore (Badge Completer)'),
+    (5932, 'stores/ConsentStore.tsx', ['default'], 'ConsentStore (Badge Completer)'),
+    (6853, 'modules/applications/ApplicationActionCreators.tsx', ['fetchApplication'], 'ApplicationActionCreators (Badge Completer)'),
     (8304, '../discord_common/js/shared/shared-constants/BadgeId.tsx', ['BadgeId'], 'BadgeId (Badge Completer)'),
     (8312, 'modules/badges/BadgeDirectoryStore.tsx', ['default'], 'BadgeDirectoryStore (Badge Completer)'),
     (8317, 'modules/badges/BadgeDirectoryActionCreators.tsx', ['fetchBadgeDirectory'], 'BadgeDirectoryActionCreators (Badge Completer)'),
     (8921, 'design/components/Icon/native/redesign/generated/TrophyIcon.tsx', ['TrophyIcon'], 'TrophyIcon (Badge Completer)'),
     (10649, 'stores/LocalActivityStore.tsx', ['default'], 'LocalActivityStore (Badge Completer)'),
+    (15139, 'actions/ConsentActionCreators.tsx', ['setConsents'], 'ConsentActionCreators (Badge Completer)'),
 ]
 
 
