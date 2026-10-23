@@ -177,6 +177,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 9099 | `design/components/Icon/native/redesign/generated/GlobeEarthIcon.tsx` | GlobeEarthIcon | GlobeEarthIcon |
 | 9103 | `design/components/Icon/native/redesign/generated/BlueskyNeutralIcon.tsx` | BlueskyNeutralIcon | BlueskyNeutralIcon (Fix link previews) |
 | 9105 | `design/components/Icon/native/redesign/generated/RedditNeutralIcon.tsx` | RedditNeutralIcon | RedditNeutralIcon (Fix link previews) |
+| 9115 | `modules/main_tabs_v2/native/tabs/you/YouBannerDecorations.tsx` | default | YouBannerDecorations (Hide extra buttons: profile pill) |
 | 9167 | `modules/quests/QuestActionCreators.tsx` | SUCCESS, UNKNOWN_ERROR, fetchCurrentQuests | QuestActionCreators |
 | 9207 | `design/components/Icon/native/redesign/generated/GameControllerIcon.tsx` | GameControllerIcon | GameControllerIcon |
 | 9237 | `design/components/Icon/native/redesign/generated/MoreHorizontalIcon.tsx` | MoreHorizontalIcon | MoreHorizontalIcon (preview server header) |
@@ -201,7 +202,9 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 9748 | `design/components/Icon/native/redesign/generated/GifIcon.tsx` | GifIcon | GifIcon (Bring back Tenor GIFs) |
 | 9778 | `modules/premium/components/native/NitroUpsellButton.tsx` | default | NitroUpsellButton |
 | 10013 | `design/components/Icon/native/redesign/generated/IdIcon.tsx` | IdIcon | IdIcon |
+| 10022 | `design/components/Icon/native/redesign/generated/PollsIcon.tsx` | PollsIcon | PollsIcon (Hide extra buttons) |
 | 10024 | `design/components/Icon/native/redesign/generated/AttachmentIcon.tsx` | AttachmentIcon | AttachmentIcon |
+| 10028 | `modules/media_keyboard/native/components/MediaKeyboardBottomSheetActions.tsx` | default | MediaKeyboardBottomSheetActions (Hide extra buttons: attach menu) |
 | 10229 | `modules/main_tabs_v2/native/shared_components/user_list/UserRow.tsx` | CALL, MESSAGE, ACCEPT | UserRow |
 | 10262 | `design/components/Icon/native/redesign/generated/CrownIcon.tsx` | CrownIcon | CrownIcon |
 | 10287 | `design/components/Icon/native/redesign/generated/UserCircleIcon.tsx` | UserCircleIcon | UserCircleIcon |
@@ -232,6 +235,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 11540 | `design/components/Icon/native/redesign/generated/GiftIcon.tsx` | GiftIcon | GiftIcon |
 | 11587 | `design/components/Icon/native/redesign/generated/ImagesIcon.tsx` | ImagesIcon | ImagesIcon (Bring back Tenor GIFs) |
 | 11668 | `actions/TypingActionCreators.tsx` | default | TypingActionCreators |
+| 11828 | `design/components/Icon/native/redesign/generated/ShopIcon.tsx` | ShopIcon | ShopIcon (Hide extra buttons) |
 | 11841 | `design/components/Icon/native/redesign/generated/ArrowsUpDownIcon.tsx` | ArrowsUpDownIcon | ArrowsUpDownIcon |
 | 11935 | `modules/chat_input/native/action_buttons/ChatInputActions.tsx` | displayName, default | ChatInputSendAndGiftButton |
 | 11968 | `components_native/chat/JumpToPresentButton.tsx` | default | JumpToPresentButton |
@@ -284,6 +288,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15378 | `modules/main_tabs_v2/native/you_bar/YouBarConstants.tsx` | CONNECTION_BANNER_HEIGHT, YOU_BAR_SPRING_CONFIG, YOU_BAR_PADDING | YouBarConstants |
 | 15465 | `modules/quests/native/QuestDock/QuestDock.tsx` | PENDING, SUCCEEDED, FAILED | QuestDock |
 | 15560 | `design/components/Icon/native/redesign/generated/PaintPaletteIcon.tsx` | PaintPaletteIcon | PaintPaletteIcon |
+| 15612 | `design/components/Icon/native/redesign/generated/CircleMinusIcon.tsx` | CircleMinusIcon | CircleMinusIcon (Hide extra buttons) |
 | 15652 | `design/components/Icon/native/redesign/generated/EyeDropperIcon.tsx` | EyeDropperIcon | EyeDropperIcon |
 | 15723 | `design/components/Icon/native/redesign/generated/LanguageIcon.tsx` | LanguageIcon | LanguageIcon |
 | 15831 | `modules/user_settings/app_icon/native/UserSettingsAppIcons.tsx` | default | UserSettingsAppIcons |

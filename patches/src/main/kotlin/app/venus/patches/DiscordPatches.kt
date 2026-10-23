@@ -73,7 +73,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -660,6 +660,10 @@ val messageGestures = bundledPlugin("gestures", "Double-tap to reply",
 @Suppress("unused")
 val hideCallButton = bundledPlugin("hideCall", "Hide the call button",
     "Removes Call from people's profiles. Message fills the space.")
+
+@Suppress("unused")
+val hideExtraButtons = bundledPlugin("hideButtons", "Hide extra buttons",
+    "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Photos, Polls and Files in the attach menu; the rest close up with no gaps.")
 
 @Suppress("unused")
 val hideQuestDock = bundledPlugin("hideQuestDock", "Hide the Quests banner",
