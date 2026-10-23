@@ -9756,26 +9756,15 @@
             return () => msgStore.removeChangeListener(check);
         }, [channelId, settings.translate, settings.translateMode, settings.translateAsk, settings.translateTarget, settings.translateLanguage]);
         const s = useTranslateBarStyles();
-        // The pill glides down under Discord's banner when one appears and back up when it goes (native driver).
-        const A = motion(), slide = React.useRef(null);
-        if (!slide.current && A) slide.current = new A.Value(headerHeight);
-        React.useEffect(() => {
-            const value = slide.current;
-            if (!value) return undefined;
-            if (reduceMotion || typeof A.spring !== "function") { value.setValue(headerHeight); return undefined; }
-            const run = A.spring(value, {toValue:headerHeight, speed:16, bounciness:4, useNativeDriver:true});
-            run.start();
-            return () => run.stop();
-        }, [headerHeight]);
         if (!translateBarShown(channelId)) return null;
         const on = translate.channels.has(channelId), Press = inspectedExport(6185, "PressableOpacity") || RN.TouchableOpacity || RN.Pressable || RN.View;
         const label = on ? tr("Show original") : tr("Translate to {language}", {language:translateTargetName()});
         const tap = () => { haptic("SELECTION"); animateLayout(); translateChannel(channelId, !on); };
-        // Only the pill takes touches: the rest of the row lets taps through to the chat.
-        const Box = slide.current ? A.View : RN.View;
-        return el(Box, {pointerEvents:"box-none", style:{position:"absolute", top:0, left:0, right:0, alignItems:"center", paddingHorizontal:12, paddingTop:8, zIndex:100, elevation:8,
-                transform:[{translateY:slide.current || headerHeight}]}},
-            popIn("bar", translatePill(s, on, label, tap, openTranslateSettings, Press)));
+        // A plain view placed with layout (top), never a native-driven transform or popIn wrapper: on Android those draw the
+        // pill where it belongs but leave its touch area behind, so taps did nothing (#82). Only the pill takes touches.
+        return el(RN.View, {pointerEvents:"box-none", style:{position:"absolute", top:headerHeight, left:0, right:0, alignItems:"center", paddingHorizontal:12, paddingTop:8,
+                zIndex:100, elevation:8}},
+            translatePill(s, on, label, tap, openTranslateSettings, Press));
     }
     function openTranslateSettings() {
         haptic("SELECTION");
