@@ -1030,5 +1030,9 @@
  "The Quests button at the bottom of your profile.": "Questit-painike profiilisi alareunassa.",
  "The Shop button at the bottom of your profile.": "Kauppa-painike profiilisi alareunassa.",
  "Your profile": "Profiilisi",
- "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Jäljelle jäävät painikkeet siirtyvät yhteen ja täyttävät tilan, joten väliin ei jää aukkoja."
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "Jäljelle jäävät painikkeet siirtyvät yhteen ja täyttävät tilan, joten väliin ei jää aukkoja.",
+ "Create a new account": "Luo uusi tili",
+ "Opens Discord's sign-up page. Then come back and add it here.": "Avaa Discordin rekisteröitymissivun. Palaa sitten ja lisää tili tähän.",
+ "Unlock Nitro themes": "Avaa Nitro-teemat",
+ "Use Discord's gradient themes without Nitro, on this phone.": "Käytä Discordin liukuväriteemoja ilman Nitro-tilausta tässä puhelimessa."
 }

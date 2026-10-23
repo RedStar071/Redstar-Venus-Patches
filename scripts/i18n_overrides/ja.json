@@ -916,5 +916,9 @@
  "The Quests button at the bottom of your profile.": "プロフィール下部のクエストボタン。",
  "The Shop button at the bottom of your profile.": "プロフィール下部のショップボタン。",
  "Your profile": "プロフィール",
- "The buttons that are left move together and grow to fill the space, so there are no gaps.": "残ったボタンが詰めて並び、空いたスペースを埋めるので、すき間はできません。"
+ "The buttons that are left move together and grow to fill the space, so there are no gaps.": "残ったボタンが詰めて並び、空いたスペースを埋めるので、すき間はできません。",
+ "Create a new account": "新しいアカウントを作成",
+ "Opens Discord's sign-up page. Then come back and add it here.": "Discord の登録ページを開きます。作成したら戻ってきてここで追加してください。",
+ "Unlock Nitro themes": "Nitro テーマを解放",
+ "Use Discord's gradient themes without Nitro, on this phone.": "この端末で、Nitro なしで Discord のグラデーションテーマを使えます。"
 }
