@@ -234,19 +234,31 @@ internal object HbcPrelude {
             // An array + join is linear-time and reuses existing literal strings. No string table changes.
             // DefineOwnInDenseArray / DefineOwnInDenseArrayL write directly to the pre-allocated dense
             // storage (0..65534) instead of going through JSObject::defineOwnProperty on every piece.
+            // The pieces go into blocks of at most 65535, each joined on its own, then the block strings are joined.
+            // NewArray's capacity and DefineOwnInDenseArrayL's index are 16-bit: one array for all ~380k pieces sent
+            // every piece past 65535 through DefineOwnByIndexL (generic defineOwnProperty, growing storage), the
+            // single biggest Venus cost of a cold boot (HBC98 VM, real 350.8 bundle).
             emit(61, 10) // GetGlobalObject r10
-            val initialCapacity = minOf(partCount, 65535)
-            emit(8, 11, initialCapacity and 255, initialCapacity ushr 8) // NewArray r11
-            for (index in 0 until partCount) {
-                string(12, parts[index])
-                if (index < 256) emit(90, 11, 12, index) // DefineOwnInDenseArray
-                else if (index < initialCapacity) emit(91, 11, 12, index and 255, index ushr 8) // DefineOwnInDenseArrayL
-                else { emit(89, 11, 12); u32(index) } // DefineOwnByIndexL
+            val blockCount = (partCount + 65534) / 65535
+            require(blockCount <= 256) { "Bootstrap too large for HBC98" }
+            emit(8, 14, blockCount and 255, blockCount ushr 8) // NewArray r14: one string per block
+            for (block in 0 until blockCount) {
+                val first = block * 65535
+                val size = minOf(65535, partCount - first)
+                emit(8, 11, size and 255, size ushr 8) // NewArray r11
+                for (index in 0 until size) {
+                    string(12, parts[first + index])
+                    if (index < 256) emit(90, 11, 12, index) // DefineOwnInDenseArray
+                    else emit(91, 11, 12, index and 255, index ushr 8) // DefineOwnInDenseArrayL
+                }
+                // Cache slots are per function. Never reuse the original global's 0..24 caches.
+                emit(69, 12, 11, reads, JOIN_ID and 255, JOIN_ID ushr 8) // GetById join
+                string(13, 255) // empty delimiter
+                emit(110, 11, 12, 11, 13) // Call2 join -> r11
+                emit(90, 14, 11, block) // DefineOwnInDenseArray r14[block] = r11
             }
-            // Cache slots are per function. Never reuse the original global's 0..24 caches.
-            emit(69, 12, 11, reads, JOIN_ID and 255, JOIN_ID ushr 8) // GetById join
-            string(13, 255) // empty delimiter
-            emit(110, 11, 12, 11, 13) // Call2 join -> r11
+            emit(69, 12, 14, reads, JOIN_ID and 255, JOIN_ID ushr 8) // GetById join
+            emit(110, 11, 12, 14, 13) // Call2 join -> r11
             emit(69, 12, 10, reads + 1, EVAL_ID and 255, EVAL_ID ushr 8) // GetById eval
             emit(110, 13, 12, 10, 11) // indirect eval of the bundled IIFE
             val end = prefix.size()
