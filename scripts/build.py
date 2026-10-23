@@ -122,13 +122,103 @@ async function compactLazyChunks(code) {
     }
     if (found.length !== 2) throw new Error('expected the core and settings UI chunks, found ' + found.length);
     for (const [start, end] of found.reverse()) {
-        const chunk = JSON.parse(code.slice(start, end));
+        const chunk = lazyGroups(JSON.parse(code.slice(start, end)), 400, 60000);
         const result = await context.Terser.minify(chunk, {compress:false, mangle:{toplevel:false},
             format:{comments:false, ascii_only:true, quote_style:1}});
         if (/[^.\w$](eval|Function)\s*\(|\bwith\s*\(/.test(chunk)) throw new Error('lazy chunk uses eval/with: renaming is unsafe');
         const literal = JSON.stringify(result.code).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
         code = code.slice(0, start) + literal + code.slice(end);
     }
+    return code;
+}
+// Hermes compiles a function body on its first call, and the first call of $core (when the first hooked Discord module
+// loads) builds a closure for every one of its ~570 top-level functions. Most of them are only ever reached from one
+// feature: a function and the helpers that nothing else calls form a group. Each group moves into one builder function,
+// and the group's entry point becomes a small stub with the same name and the same .length that builds the group on
+// its first call and forwards to it. Every feature is still in the chunk and works the same; the cost of a group is
+// paid only when its feature first runs. Groups are 400-60k characters; an entry point that's constructed with new is
+// left alone. HBC98 VM, real 350.8 bundle: boot plus loading every hooked module 1.04x faster (136 -> 131 ms p10, 80
+// interleaved runs); the plain cold boot is unchanged (within noise).
+function lazyGroups(code, min, max) {
+    const acorn = require(process.argv[3]);
+    if (code.includes('$lz')) throw new Error('lazy chunk already uses the $lz prefix');
+    const body = acorn.parse(code, {ecmaVersion: 'latest'}).body[0].expression.body.body;
+    const refs = node => {
+        const r = new Set();
+        (function walk(n, parent, key) {
+            if (!n || typeof n !== 'object') return;
+            if (Array.isArray(n)) { for (const x of n) walk(x, parent, key); return; }
+            if (n.type === 'Identifier') {
+                if (parent && parent.type === 'MemberExpression' && key === 'property' && !parent.computed) return;
+                if (parent && /^(Property|MethodDefinition|PropertyDefinition)$/.test(parent.type) && key === 'key' && !parent.computed && !parent.shorthand) return;
+                r.add(n.name);
+                return;
+            }
+            for (const k in n) if (k !== 'type' && k !== 'start' && k !== 'end') walk(n[k], n, k);
+        })(node);
+        return r;
+    };
+    const items = body.map((s, i) => {
+        const names = [];
+        if (s.type === 'FunctionDeclaration' || s.type === 'ClassDeclaration') names.push(s.id.name);
+        else if (s.type === 'VariableDeclaration') for (const d of s.declarations) for (const n of refs(d.id)) names.push(n);
+        return {i, s, names, refs: refs(s), len: s.end - s.start, fn: s.type === 'FunctionDeclaration'};
+    });
+    const owner = new Map();
+    for (const it of items) for (const n of it.names) owner.set(n, it.i);
+    const users = items.map(() => new Set());
+    for (const it of items) for (const r of it.refs) { const j = owner.get(r); if (j !== undefined && j !== it.i) users[j].add(it.i); }
+    // A function joins a group when every top-level user of it is already in the group (names are matched
+    // conservatively: a shadowed name still counts as a use, which only keeps a function out).
+    const group = root => {
+        const set = new Set([root]);
+        for (let grew = true; grew;) {
+            grew = false;
+            for (const it of items) if (it.fn && !set.has(it.i) && users[it.i].size && [...users[it.i]].every(u => set.has(u))) { set.add(it.i); grew = true; }
+        }
+        return set;
+    };
+    const usesThisOrArguments = fnNode => {
+        let hit = false;
+        (function walk(n) {
+            if (!n || typeof n !== 'object' || hit) return;
+            if (Array.isArray(n)) { for (const x of n) walk(x); return; }
+            if (n !== fnNode && (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression')) return;
+            if (n.type === 'ThisExpression' || n.type === 'MetaProperty' || (n.type === 'Identifier' && n.name === 'arguments')) { hit = true; return; }
+            for (const k in n) if (k !== 'type' && k !== 'start' && k !== 'end') walk(n[k]);
+        })(fnNode);
+        return hit;
+    };
+    const candidates = items.filter(it => it.fn).map(it => {
+        const set = group(it.i);
+        let len = 0;
+        for (const i of set) len += items[i].len;
+        return {root: it.s, set, len};
+    }).filter(c => c.set.size > 1 && c.len >= min && c.len <= max).sort((a, b) => b.len - a.len);
+    const taken = new Set(), edits = [];
+    let n = 0;
+    for (const c of candidates) {
+        if ([...c.set].some(i => taken.has(i))) continue;
+        const name = c.root.id.name;
+        if (new RegExp('\\bnew\\s+' + name.replace(/\$/g, '\\$') + '\\b').test(code)) continue;
+        for (const i of c.set) taken.add(i);
+        const build = '$lzG' + n, cache = '$lzg' + n++;
+        const simple = c.root.params.every(p => p.type === 'Identifier') && !usesThisOrArguments(c.root);
+        // Same .length as the original: parameters before the first default or rest.
+        let length = 0;
+        while (length < c.root.params.length && c.root.params[length].type === 'Identifier') length++;
+        const params = simple ? c.root.params.map(p => p.name) : Array.from({length}, (_, i) => '$lzp' + i);
+        const call = simple ? '(' + params.join(',') + ')' : '.apply(this,arguments)';
+        const members = [...c.set].filter(i => items[i].s !== c.root).sort((a, b) => a - b).map(i => code.slice(items[i].s.start, items[i].s.end));
+        // Anonymous, so the entry point's own name inside its body still means the stub, the same function as before.
+        const impl = (c.root.async ? 'async ' : '') + 'function' + (c.root.generator ? '*' : '') + code.slice(c.root.id.end, c.root.end);
+        edits.push([c.root.start, c.root.end, 'function ' + name + '(' + params.join(',') + '){return(' + cache + '||(' + cache + '=' + build + '()))' + call + '}' +
+            'var ' + cache + ';function ' + build + '(){' + members.join('\n') + '\nreturn ' + impl + '}']);
+        for (const i of c.set) if (items[i].s !== c.root) edits.push([items[i].s.start, items[i].s.end, '']);
+    }
+    edits.sort((a, b) => b[0] - a[0]);
+    for (const [s, e, r] of edits) code = code.slice(0, s) + r + code.slice(e);
+    acorn.parse(code, {ecmaVersion: 'latest'});
     return code;
 }
 // At startup (load_calls.cjs), only 5 functions run: the outer IIFE, selectModules, decorateDefine,
