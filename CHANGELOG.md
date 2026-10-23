@@ -31,7 +31,7 @@
 ### ⚡ Performance Improvements
 
 * **Discord - Translate messages:** Skip rows nobody asked to translate before any other work, 1.44x faster per chat row
-* **Discord:** Discord starts faster: the startup bytecode prelude builds the Venus runtime in blocks instead of one oversized array, and the runtime is 28% smaller, making a cold boot 1.11x faster than 1.17.0. Each feature's code is now set up the first time that feature runs, so getting Discord's screens ready after launch takes less work
+* **Discord:** Discord starts faster: the startup bytecode prelude builds the Venus runtime in blocks instead of one oversized array, and the runtime is 28% smaller, and the code features only need later is no longer read at launch at all, making a cold boot about 1.2x faster than 1.17.0. Each feature's code is now set up the first time that feature runs, so getting Discord's screens ready after launch takes less work
 
 ## [1.17.0](https://github.com/VenusIsJaded/Venus-Patches/compare/v1.16.1...v1.17.0) (2026-10-20)
 
