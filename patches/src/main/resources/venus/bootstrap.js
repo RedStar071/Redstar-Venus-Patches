@@ -8334,7 +8334,7 @@
     // (YouBarNotificationsButton 16858 / YouBarButton 16857).
     const ACCOUNT_SWITCHER_DEFAULT_LIMIT = 5, ACCOUNT_SWITCHER_RAISED_LIMIT = 50;
     const accountSwitcher = {store:null, origUsers:null, origValidUsers:null, realMaxAccounts:ACCOUNT_SWITCHER_DEFAULT_LIMIT,
-        youBarParts:null};
+        youBarParts:null, registering:false};
     function multiAccountLimit() {
         // MultiAccountStore (12129) and PushNotificationActionCreators (12128) read MAX_ACCOUNTS /
         // MAX_PUSH_SYNC_ACCOUNTS once at module evaluation time during startup (before venus-patches.json
@@ -8492,16 +8492,18 @@
         const loginRoute = screens && screens.LOGIN || "login";
         openManageAccounts(loginRoute);
     }
-    // Create a new account (#86): Discord's Add account screen (Login 6623 with isMultiAccount) only shows the
-    // primary "Log In" Button, and ManageAccountsModal (16840) only registers four screens (manage_accounts,
-    // account_disabled_or_deletion_scheduled, login, mfa) without Discord's native registration screens from
-    // RegistrationStepsUtils (16375) or TrackRegistrationContext (16373). We add a native Discord secondary
-    // "Register" Button (5379, size="lg", variant="secondary", using Discord's own localized t.pV8xeR string)
-    // right under "Log In" on the Add account screen, mount all native registration screens (register_identity,
-    // register_display_name, register_account_information, age_gate, age_gate_underage, verify_phone,
-    // country_select, external_link) inside ManageAccountsModal with TrackRegistrationContext.Provider, and
-    // route multi-account registration completion (16387) through switchAccountToken (5930) so the newly
-    // created account is added alongside your existing accounts without losing them.
+    // Create a new account (#86): Discord's Add account screen (Login 6623 with isMultiAccount) only signs in, and
+    // ManageAccountsModal (16840) only registers four screens (MANAGE_ACCOUNTS, LOGIN, MFA,
+    // ACCOUNT_DISABLED_OR_DELETION_SCHEDULED). The Add account screen gets a "Create a new account" link drawn with
+    // Discord's own LinkButton, next to "Forgot your password?", so the screen keeps Discord's look. The modal also
+    // mounts Discord's sign-up screens (REGISTER_IDENTITY, REGISTER_DISPLAY_NAME, REGISTER_ACCOUNT_INFORMATION,
+    // VERIFY_PHONE, AGE_GATE…) from RegistrationStepsUtils.getAllAuthScreens (16375) inside
+    // TrackRegistrationContext (16373). When registerFull (16387) succeeds, its REGISTER_SUCCESS token goes to
+    // switchAccountToken (5930) instead of replacing the signed-in token, so the new account is added next to the
+    // others.
+    // AuthStates (1085) values of Discord's sign-up steps, including the screens they open along the way.
+    const REGISTRATION_ROUTES = ["REGISTER_IDENTITY", "REGISTER_DISPLAY_NAME", "REGISTER_ACCOUNT_INFORMATION", "VERIFY_PHONE",
+        "AGE_GATE", "AGE_GATE_UNDERAGE", "COUNTRY_SELECT", "EXTERNAL_LINK"];
     function resetMultiAccountRegistration() {
         const resetReg = inspectedExport(16376, "resetRegistration");
         try { if (typeof resetReg === "function") resetReg(); } catch (_) {}
@@ -8514,65 +8516,60 @@
         resetMultiAccountRegistration();
         openManageAccounts(registerIdentityRoute());
     }
-    function discordRegisterLabel() {
-        try {
-            const intlMod = global.__r && global.__r(1126);
-            const intl = intlMod && intlMod.intl, t = intlMod && intlMod.t;
-            if (intl && typeof intl.string === "function" && t && t.pV8xeR != null) {
-                const s = intl.string(t.pV8xeR);
-                if (typeof s === "string" && s) return s;
-            }
-        } catch (_) {}
-        return tr("Create a new account");
-    }
     function addAccountLogin(orig, self, args) {
-        const rendered = orig.apply(self, args);
-        const props = args[0];
-        if (!enabled("accountSwitcher") || !props || !props.isMultiAccount || !React || !RN) return rendered;
-        const Button = inspectedExport(5379, "Button") || inspectedExport(5379, "default");
-        if (typeof Button !== "function" && !(Button && Button.$$typeof)) return rendered;
+        // Login itself calls useNavigation; calling it here too, before any early return, keeps the hook order
+        // stable when Account switcher is toggled. Inside the Add account modal it's the modal's own stack.
         const useNav = inspectedExport(1503, "useNavigation");
         let nav = null;
         try { if (typeof useNav === "function") nav = useNav(); } catch (_) {}
+        const rendered = orig.apply(self, args);
+        const props = args[0];
+        if (!enabled("accountSwitcher") || !props || !props.isMultiAccount || !React) return rendered;
+        const LinkButton = inspectedExport(6623, "LinkButton");
+        if (typeof LinkButton !== "function" && !(LinkButton && LinkButton.$$typeof)) return rendered;
         const onRegister = () => {
             resetMultiAccountRegistration();
             const route = registerIdentityRoute();
-            try {
-                if (nav && typeof nav.navigate === "function") { nav.navigate(route); return; }
-            } catch (_) {}
+            try { if (nav && typeof nav.navigate === "function") { nav.navigate(route); return; } } catch (_) {}
             openManageAccounts(route);
         };
         let added = false;
-        const hasLoginButton = node => {
-            if (!node || typeof node !== "object") return false;
-            const p = node.props;
-            if (!p) return false;
-            const c = p.children;
-            if (c && typeof c === "object" && !Array.isArray(c) && (c.type === Button || (c.props && c.props.variant === "primary" && c.props.size === "lg"))) return true;
-            if (Array.isArray(c)) {
-                for (let i = 0; i < c.length; i++) {
-                    const k = c[i];
-                    if (k && typeof k === "object" && (k.type === Button || (k.props && k.props.variant === "primary" && k.props.size === "lg"))) return true;
-                }
-            }
-            return false;
-        };
+        const isLink = child => child && typeof child === "object" && child.type === LinkButton;
         const withRegister = cloneTree(rendered, function (node, nodeProps) {
             if (added) return nodeProps;
             const kids = nodeProps.children;
-            if (!Array.isArray(kids)) return nodeProps;
-            let btnIdx = -1;
-            for (let i = 0; i < kids.length; i++) {
-                if (hasLoginButton(kids[i])) { btnIdx = i; break; }
-            }
-            if (btnIdx < 0) return nodeProps;
+            const list = Array.isArray(kids) ? kids : [kids];
+            let last = -1;
+            for (let i = 0; i < list.length; i++) if (isLink(list[i])) last = i;
+            if (last < 0) return nodeProps;
             added = true;
-            const next = kids.slice();
-            next.splice(btnIdx + 1, 0, el(RN.View, {key:"venus-register", style:{width:"100%", marginTop:8}},
-                el(Button, {size:"lg", variant:"secondary", text:discordRegisterLabel(), onPress:onRegister})));
+            const next = list.slice();
+            next.splice(last + 1, 0, el(LinkButton, {key:"venus-register", text:tr("Create a new account"), onPress:onRegister}));
             return Object.assign({}, nodeProps, {children:next});
         }, 0, () => added);
         return withRegister;
+    }
+    // One screen per sign-up step. Built in its own function: the pinned hermesc compiles let/const in a loop body
+    // as one shared variable, so closures made inside the loop all saw the last screen (COMPANION_REMOTE_AUTH, the
+    // endless "Connecting…" page) instead of their own.
+    function registrationScreen(screenType, routeName, cfg, parts) {
+        const options = routeProps => {
+            const nav = routeProps && routeProps.navigation;
+            const opts = {headerTitle:typeof cfg.headerTitle === "function" ? cfg.headerTitle : () => null};
+            if (cfg.headerShown === false) opts.headerShown = false;
+            if (parts.HeaderBackImage && parts.BackButtonWithTracking && nav && typeof nav.goBack === "function") {
+                const backImage = () => el(parts.HeaderBackImage, {});
+                opts.headerLeft = headerProps => {
+                    const backProps = Object.assign({}, headerProps, {backImage});
+                    return typeof cfg.headerLeft === "function" ? cfg.headerLeft(backProps) : el(parts.BackButtonWithTracking, backProps);
+                };
+            }
+            return opts;
+        };
+        const screenProps = {key:"venus-auth:" + routeName, name:routeName, options};
+        if (typeof cfg.render === "function") screenProps.children = p => cfg.render(p && p.route && p.route.params, p && p.navigation);
+        else screenProps.component = cfg.screen;
+        return el(screenType, screenProps);
     }
     function manageAccountsModalWithRegister(orig, self, args) {
         const rendered = orig.apply(self, args);
@@ -8582,8 +8579,7 @@
         let authScreens = null;
         try { authScreens = getAllAuthScreens(); } catch (_) {}
         if (!authScreens || typeof authScreens !== "object") return rendered;
-        const BackButtonWithTracking = inspectedExport(16384, "BackButtonWithTracking");
-        const HeaderBackImage = inspectedExport(6201, "default");
+        const parts = {BackButtonWithTracking:inspectedExport(16384, "BackButtonWithTracking"), HeaderBackImage:inspectedExport(6201, "HeaderBackImage")};
         const TrackRegistrationContext = inspectedExport(16373, "TrackRegistrationContext");
         const getTrackRegTransition = inspectedExport(16384, "getTrackRegTransition");
         let patched = false;
@@ -8606,30 +8602,11 @@
             const keys = Object.keys(authScreens);
             for (let i = 0; i < keys.length; i++) {
                 const routeName = keys[i];
-                if (existingNames.has(routeName)) continue;
+                // Only the sign-up steps: Welcome, Log in with Meta Horizon and the rest stay out of the Add account modal.
+                if (existingNames.has(routeName) || REGISTRATION_ROUTES.indexOf(routeName) < 0) continue;
                 const cfg = authScreens[routeName];
                 if (!cfg || (typeof cfg.render !== "function" && !cfg.screen)) continue;
-                const screenOpts = routeProps => {
-                    const nav = routeProps && routeProps.navigation;
-                    const baseOpts = typeof cfg.navigationOptions === "function" ? cfg.navigationOptions(routeProps) : (cfg.navigationOptions || {});
-                    const headerLeft = BackButtonWithTracking && HeaderBackImage && nav && typeof nav.goBack === "function"
-                        ? (headerProps => {
-                            const backProps = Object.assign({}, headerProps, {
-                                backImage:() => el(HeaderBackImage, {tintColor:headerProps && headerProps.tintColor}),
-                                onPress:() => nav.goBack()
-                            });
-                            return typeof cfg.headerLeft === "function" ? cfg.headerLeft(backProps) : el(BackButtonWithTracking, backProps);
-                        })
-                        : baseOpts.headerLeft;
-                    return Object.assign({headerTitle:cfg.headerTitle || (() => null)}, baseOpts, headerLeft ? {headerLeft} : null);
-                };
-                next.push(el(screenType, Object.assign({
-                    key:"venus-auth:" + routeName,
-                    name:routeName,
-                    options:screenOpts
-                }, typeof cfg.render === "function"
-                    ? {children:screenProps => cfg.render(screenProps && screenProps.route && screenProps.route.params, screenProps && screenProps.navigation)}
-                    : {component:cfg.screen})));
+                next.push(registrationScreen(screenType, routeName, cfg, parts));
             }
             return Object.assign({}, nodeProps, {children:next});
         }, 0, () => patched);
@@ -8643,23 +8620,26 @@
     function hookRegisterForMultiAccount(exports) {
         if (!exports || typeof exports !== "object") return exports;
         const wrapRegister = function (orig, self, args) {
-            if (!enabled("accountSwitcher") || !currentUser()) return orig.apply(self, args);
+            if (!enabled("accountSwitcher") || !currentUser() || accountSwitcher.registering) return orig.apply(self, args);
             accountSwitcherSync();
-            const d = fluxDispatcher();
+            const d = inspectedExport(584, "default");
             const authActions = inspectedExport(5930, "default");
             if (!d || typeof d.dispatch !== "function" || !authActions || typeof authActions.switchAccountToken !== "function") {
                 return orig.apply(self, args);
             }
+            // registerFull dispatches REGISTER_SUCCESS {token}; AuthenticationStore would then swap the signed-in
+            // token in place. Hold it back and switch to the new account the way Add account does.
             const realDispatch = d.dispatch;
             let capturedToken = null;
+            accountSwitcher.registering = true;
             d.dispatch = function (event) {
-                if (event && event.type === "LOGIN_SUCCESS" && typeof event.token === "string" && event.token) {
+                if (event && event.type === "REGISTER_SUCCESS" && typeof event.token === "string" && event.token) {
                     capturedToken = event.token;
                     return Promise.resolve();
                 }
                 return realDispatch.apply(this, arguments);
             };
-            const restore = () => { if (d.dispatch !== realDispatch) d.dispatch = realDispatch; };
+            const restore = () => { accountSwitcher.registering = false; if (d.dispatch !== realDispatch) d.dispatch = realDispatch; };
             let res;
             try {
                 res = orig.apply(self, args);
