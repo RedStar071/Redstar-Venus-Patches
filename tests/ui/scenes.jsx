@@ -7,6 +7,7 @@
 //   scene=readAll      the server list with the Read all pill above the servers
 //   scene=readAllHold  Read all held: the one-time choices sheet
 //   scene=reviews      Alex's profile with Venus's Reviews card under the note (reviews=0: none yet; signed in: set={"reviewAuth":{"token":"x","account":"123456789012345678"}})
+//   scene=hiddenChannel  a locked channel (staff-only) tapped: Venus's details dialog in Discord's alert
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 import * as React from "react";
 import * as RN from "react-native-web";
@@ -31,7 +32,7 @@ const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181];
+export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -66,8 +67,30 @@ export function modules(store, me) {
     8575: { FormRow, FormLabel: p => <D.Text variant="text-md/semibold" color="text-strong" style={p.style}>{p.text}</D.Text>,
       FormSubLabel: p => <D.Text variant="text-sm/medium" color="text-default" style={p.style}>{p.text}</D.Text> },
     6182: { Card: p => <RN.View style={{ gap: 8 }}>{p.title ? <D.Text variant="text-sm/semibold" color="text-muted">{p.title}</D.Text> : null}{p.children}</RN.View> },
+    // A locked channel: Discord can't show it to you, but it sent its record (created, last message, last pin).
+    1085: { Permissions: { VIEW_CHANNEL: 1024 } },
+    2065: { default: store({ getChannel: id => CHANNELS[id] || null, getBasicChannel: id => CHANNELS[id] || null }) },
+    4750: { default: { can: (bit, channel) => !(channel && channel.id === LOCKED), canBasicChannel: (bit, channel) => !(channel && channel.id === LOCKED) } },
+    1112: { transitionTo: route => console.log("TOAST navigated " + route), replaceWith() {}, transitionToGuild() {} },
+    // Discord's alert (AlertActionCreators.show): title, body, Venus's details as children, and two buttons.
+    5300: { default: { show: o => host && host.show("alert", <Alert {...o} />) } },
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
   };
+}
+// The channel's ID is its creation date, like every Discord ID.
+const LOCKED = snowflake(now - 500 * DAY);
+const CHANNELS = { [LOCKED]: { id: LOCKED, guild_id: guild.id, type: 0, name: "staff-only", lastMessageId: snowflake(now - 2 * 3600000), lastPinTimestamp: new Date(now - 12 * DAY).toISOString() } };
+function Alert(p) {
+  const close = () => host && host.hide("alert");
+  return <RN.View style={{ marginHorizontal: 24, marginTop: 120, borderRadius: 24, padding: 24, gap: 16, backgroundColor: D.tok("MOBILE_ALERT_BACKGROUND_DEFAULT") }}>
+    <D.Text variant="heading-lg/bold" color="text-strong">{p.title}</D.Text>
+    {p.body ? <D.Text variant="text-md/medium" color="text-default">{p.body}</D.Text> : null}
+    {p.children || null}
+    <RN.View style={{ gap: 8 }}>
+      <D.Button text={p.confirmText} variant="primary" onPress={() => { close(); p.onConfirm && p.onConfirm(); }} />
+      {p.cancelText ? <D.Button text={p.cancelText} variant="secondary" onPress={() => { close(); p.onCancel && p.onCancel(); }} /> : null}
+    </RN.View>
+  </RN.View>;
 }
 function FormRow(p) {
   return <RN.Pressable onLongPress={p.onLongPress} style={[{ flexDirection: "row", gap: 12, padding: 12, alignItems: "flex-start" }, p.style]}>
@@ -170,6 +193,7 @@ export function Scene({ name, defined }) {
   const [sheets, setSheets] = React.useState([]);
   host = { show: (key, content) => setSheets(list => list.filter(s => s.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(s => s.key !== key)) };
   React.useEffect(() => {
+    if (name === "hiddenChannel") defined[1112].exports.transitionTo("/channels/" + guild.id + "/" + LOCKED);
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
     // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
     if (name === "readAllHold") setTimeout(() => {
@@ -184,7 +208,7 @@ export function Scene({ name, defined }) {
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
   // screenshot shows the whole sheet the way you'd scroll through it.
   if (top) return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_SCRIM") }}>
-    <RN.View style={{ height: 72 }} />
+    {top.key === "alert" ? null : <RN.View style={{ height: 72 }} />}
     {top.content}
   </RN.View>;
   return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
