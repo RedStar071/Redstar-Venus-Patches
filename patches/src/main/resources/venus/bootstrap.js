@@ -6763,8 +6763,8 @@
         const rows=error ? el(RN.View,{style:{gap:8}},
             el(RN.Text,{accessibilityRole:"alert",style:styles.text},tr("Couldn't load reviews: {problem}",{problem:error})),
             reviewRetry(refetch)) :
-            reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},tr("Loading reviews…")) :
-            !shown.length ? el(RN.Text,{style:styles.muted},tr("No reviews yet.")) :
+            reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:[styles.muted,{paddingHorizontal:8,paddingVertical:4}]},tr("Loading reviews…")) :
+            !shown.length ? el(RN.Text,{style:[styles.muted,{paddingHorizontal:8,paddingVertical:4}]},tr("No reviews yet.")) :
             el(RN.View,null,shown.map((review,index) => el(React.Fragment,{key:(review.id==null ? "" : String(review.id))+":"+index},
                 index && review.type!==3 && shown[index-1].type!==3 ? el(RN.View,{style:[{height:1,marginLeft:56},styles.divider]}) : null,
                 el(ReviewRow,{review,owner:userId,ui,styles,refetch}))));
