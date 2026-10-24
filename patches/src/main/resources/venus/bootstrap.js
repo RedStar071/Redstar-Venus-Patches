@@ -7032,7 +7032,8 @@
                     snap.online != null ? dot(STATUS_HEX.online, tr("{count} online", {count:serverNumber(snap.online)})) : null,
                     snap.members != null ? dot(STATUS_HEX.offline, serverCount(snap.members, "{n} member", "{n} members")) : null)));
     }
-    // A grid of what's in the server; parts Discord hasn't loaded are left out rather than shown as zero.
+    // A grid of what's in the server; parts Discord hasn't loaded are left out rather than shown as zero. Boosts have
+    // their own card below, with the level and a bar.
     function serverTiles(s, snap) {
         const tile = (key, Icon, value, label, sub) => el(RN.View, {key, style:s.tile, accessible:true, accessibilityLabel:label + ": " + serverNumber(value)},
             el(Icon, {size:"sm"}),
@@ -7044,7 +7045,6 @@
             snap.roles != null ? tile("roles", venusIcon(8617, "ShieldUserIcon"), snap.roles, tr("Roles")) : null,
             tile("emojis", venusIcon(8956, "ReactionIcon"), snap.emojis, tr("Emojis")),
             tile("stickers", venusIcon(12274, "StickerIcon"), snap.stickers, tr("Stickers")),
-            tile("boosts", serverBoostIcon(snap.boost.level), snap.boost.boosts, tr("Boosts")),
             snap.events ? tile("events", venusIcon(8675, "CalendarIcon"), snap.events, tr("Events")) : null];
         return el(RN.View, {key:"tiles", style:{flexDirection:"row", flexWrap:"wrap", gap:8}}, tiles.filter(Boolean));
     }
