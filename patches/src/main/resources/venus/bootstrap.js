@@ -3023,8 +3023,10 @@
     // Holding the button: Discord's own action sheet with the three one-time choices.
     function readAllChooser() {
         const ui=reviewUI();
-        const options=[["guilds",tr("Mark servers as read")],["dms",tr("Mark DMs as read")],["both",tr("Mark servers and DMs as read")]]
-            .map(([mode,label]) => ({label, onPress:() => readAll(mode)}));
+        // Each with the icon its choice has in Read all's settings, and the one a plain tap does marked as such.
+        const options=[["guilds",tr("Mark servers as read"),venusIcon(9239,"ServerIcon")],["dms",tr("Mark DMs as read"),venusIcon(6770,"EnvelopeIcon")],
+            ["both",tr("Mark servers and DMs as read"),venusIcon(15928,"DoubleCheckmarkIcon")]]
+            .map(([mode,label,icon]) => ({label, icon, subtitle:mode===settings.readAllMode ? tr("What a tap does") : undefined, onPress:() => readAll(mode)}));
         if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:"VenusReadAll",header:{title:tr("Read all")},options}); return; } catch (_) {}
         if (RN && RN.Alert) RN.Alert.alert(tr("Read all"),undefined,options.map(option => ({text:option.label,onPress:option.onPress})).concat([{text:tr("Cancel"),style:"cancel"}]));
     }

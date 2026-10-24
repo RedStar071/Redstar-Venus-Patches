@@ -777,6 +777,7 @@
   "Watching {n} person": "正在关注 {n} 人",
   "Web": "网页",
   "What a message said before it was edited, faded and crossed out above it. Up to 10 versions each.": "将编辑前的原始内容淡化并加删除线显示在消息上方。每条消息最多保留 10 个历史版本。",
+  "What a tap does": "轻点时执行这个",
   "What people write is colored too, in a lighter shade of their name.": "消息正文也会一并着色，采用比名字颜色更浅的同色系色调。",
   "What to count": "统计内容",
   "What you search for goes to Tenor, without your Discord account. GIFs you pick are sent as tenor.com links, which play for everyone.": "你搜索的内容会发送给 Tenor，不附带你的 Discord 账号。你选的 GIF 以 tenor.com 链接发送，所有人都能看到动图。",

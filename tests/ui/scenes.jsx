@@ -86,7 +86,8 @@ function SheetClose(props) {
 function SimpleSheet(props) {
   return <ActionSheet header={props.header ? <SheetHeader title={props.header.title} /> : null}>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 24 }}><D.TableRowGroup>
-      {props.options.map(o => <D.TableRow key={o.label} label={o.label} onPress={() => { host && host.hide(props.key); o.onPress && o.onPress(); }} />)}
+      {props.options.map(o => <D.TableRow key={o.label} label={o.label} subLabel={o.subtitle} icon={o.icon ? <D.TableRowIcon IconComponent={o.icon} /> : null}
+        onPress={() => { host && host.hide(props.key); o.onPress && o.onPress(); }} />)}
     </D.TableRowGroup></RN.View>
   </ActionSheet>;
 }
