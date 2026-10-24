@@ -8228,7 +8228,8 @@
     function userNotifSummaryTitle() {
         if (!enabled("userNotif")) return tr("Turned off");
         const watched = userNotifWatchedIds().length;
-        if (!watched) return tr("No one chosen yet");
+        // All friends with nobody in it: the friends list hasn't loaded (or is empty), not "no one chosen".
+        if (!watched) return settings.userNotifFriends ? tr("No friends found") : tr("No one chosen yet");
         if (!userNotifAnyEvent()) return tr("Nothing to notify about");
         // People picked earlier stay saved for People I pick; while they're all friends anyway, it's still "all friends".
         return settings.userNotifFriends && watched === userNotifFriendIds().length ? pl(watched, "Watching {n} friend", "Watching all {n} friends") :
@@ -8236,7 +8237,7 @@
     }
     function userNotifSummary() {
         if (!enabled("userNotif")) return tr("Turned off. Switch it on in Features to start.");
-        if (!userNotifWatchedIds().length) return tr("Choose who to watch below.");
+        if (!userNotifWatchedIds().length) return settings.userNotifFriends ? tr("Open your friends list once if Discord hasn't loaded it yet.") : tr("Choose who to watch below.");
         if (!userNotifAnyEvent()) return tr("Turn on at least one thing to be notified about.");
         const countLine = userNotif.shown ? pl(userNotif.shown, "Shown {n} notification since Discord opened.", "Shown {n} notifications since Discord opened.") :
             tr("No notifications shown yet since Discord opened.");
