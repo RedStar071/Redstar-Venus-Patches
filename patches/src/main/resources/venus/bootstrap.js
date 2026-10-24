@@ -10077,7 +10077,7 @@
     function translateStatus() {
         if (translate.error) return translate.error;
         const waiting = translate.queue.length;
-        return (translate.translated ? pl(translate.translated, "Translated {n} message since Discord opened.", "Translated {n} messages since Discord opened.") : tr("Nothing translated yet since Discord opened.")) +
+        return pl(translate.translated, "Translated {n} message since Discord opened.", "Translated {n} messages since Discord opened.") +
             (waiting ? " " + tr("{n} waiting.", {n:waiting}) : "");
     }
     // A message in Spanish shown the way Translate messages shows it, following the Display switches.
@@ -10324,7 +10324,8 @@
         const name = kind => languageName(localeCode(kind));
         let saved = 0; translate.cache.forEach(entry => { if (entry.state === "done") saved++; });
         const groups = [
-            on ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:translateTargetName()}), IconComponent:venusIcon(15723, "LanguageIcon")}) :
+            // While on, the card only speaks up when there's news (a count or an error): "Into English" alone repeats Translate into below.
+            on ? (translate.error || translate.translated ? statusCard("status", translateStatus(), {title:tr("Into {language}", {language:translateTargetName()}), IconComponent:venusIcon(15723, "LanguageIcon")}) : null) :
                 offCard("status", venusIcon(15723, "LanguageIcon"), "translate"),
             el(TranslatePreview, {key:"preview", on}),
             radioGroup(ui, "mode", "When to translate", "translateMode", on, [["auto", "Automatically", "Every message on screen in another language.", rowIcon(17143, "SparklesIcon")],
