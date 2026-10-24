@@ -5166,17 +5166,21 @@
         return styles || fallback;
     }
     const STATUS_CARD_DARK = {card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, flexDirection:"row", alignItems:"center", gap:14},
-        badge:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}};
+        badge:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"},
+        accent:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f229"}, accentIcon:{color:"#94a8ff"}};
     // The card at the top of an option page: an optional icon or avatars, a bold title line and the details under it.
     function VenusStatusCard(props) {
         // Called straight from a page render (not as its own component), so its texts stay part of the page.
         const s = useThemed("statusCard", c => ({card:Object.assign({}, STATUS_CARD_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
-            badge:Object.assign({}, STATUS_CARD_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})}), STATUS_CARD_DARK);
+            badge:Object.assign({}, STATUS_CARD_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            accent:Object.assign({}, STATUS_CARD_DARK.accent, {backgroundColor:c.TOGGLEBUTTON_BACKGROUND_SELECTED || c.MENTION_BACKGROUND}),
+            accentIcon:{color:c.ICON_BRAND || c.TEXT_BRAND}}), STATUS_CARD_DARK);
         const Text = inspectedExport(5088, "Text"), Icon = props.IconComponent, title = props.title, body = props.body;
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
         return el(RN.View, {key:props.key, style:s.card, accessible:true},
             // The badge pops in when the page opens, and again whenever the card's state (its title) changes.
-            popIn("badge:" + (title || ""), props.leading || (Icon ? el(RN.View, {style:s.badge}, el(Icon, {size:"md"})) : null)),
+            popIn("badge:" + (title || ""), props.leading || (Icon ? el(RN.View, {style:props.accent ? s.accent : s.badge},
+                el(Icon, props.accent ? {size:"md", color:s.accentIcon.color} : {size:"md"})) : null)),
             el(RN.View, {style:{flex:1, gap:2}},
                 title ? line(title, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}) : null,
                 body ? line(body, "text-sm/medium", title ? "text-muted" : "text-default", {color:title ? "#949ba4" : "#dbdee1", fontSize:14}) : null,
@@ -5211,10 +5215,13 @@
     // Pages share one look for "off": a muted title and the hint to switch it on.
     // With the feature's key, the card carries Discord's own switch, so you can turn it on right here instead of going back to
     // Features. The page fills in below as it turns on (animateLayout), and the switch gives Discord's own haptic tick.
+    // The switch already says it's off, so the card introduces the feature instead: its name and what it does, the same
+    // words as its row on the Features list, with its icon in the brand color.
     function offCard(key,IconComponent,feature) {
         const FormSwitch=feature && features[feature] ? inspectedExport(6897,"FormSwitch") : null;
-        const title=tr("Turned off");
-        return VenusStatusCard({key,title,IconComponent,body:tr(FormSwitch ? "Turn it on here to start." : "Switch it on in Features to start."),
+        const row=feature && featureSearch.rows.find(entry => entry.key===feature);
+        const title=row ? tr(row.title) : tr("Turned off");
+        return VenusStatusCard({key,title,IconComponent,accent:true,body:row && row.hint ? tr(row.hint) : tr(FormSwitch ? "Turn it on here to start." : "Switch it on in Features to start."),
             trailing:FormSwitch ? el(FormSwitch,{key:"switch:"+riskCancels,value:false,accessibilityLabel:title,onValueChange:value => { if (!value) return; if (RISKY_FEATURES[feature]) { turnOnAsking(feature,true); return; } animateLayout(); setSetting(feature,true); }}) : null});
     }
     // A small chat surface for page previews, in the theme's chat colors (same tokens as the Message highlights one).
