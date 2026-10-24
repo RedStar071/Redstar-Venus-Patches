@@ -38,7 +38,7 @@
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
     if (features.translate) selectModules([584, 1390, 5432, 7742, 9675, 10368]);
     if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
-    if (features.accountSwitcher) selectModules([1390, 6623, 12129, 12130, 12131, 16387, 16840, 16858]);
+    if (features.accountSwitcher) selectModules([1390, 5938, 6623, 12129, 12130, 12131, 16387, 16840, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
     if (features.nitroThemes) selectModules([584, 1390, 2046, 4769, 4937, 14299, 15566]);
     if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 11191, 10368]);
@@ -8649,7 +8649,11 @@
             }
             return Promise.resolve(res).then(val => {
                 restore();
-                if (capturedToken) {
+                // A token equal to the signed-in one would only reconnect to the same account; never switch to it.
+                const tokenMgr = inspectedExport(1111, "getToken") ? global.__r(1111) : null;
+                let activeToken = null;
+                try { activeToken = tokenMgr ? tokenMgr.getToken() : null; } catch (_) {}
+                if (capturedToken && capturedToken !== activeToken) {
                     try { authActions.switchAccountToken(capturedToken, true); } catch (_) {}
                 }
                 return val;
@@ -8660,6 +8664,31 @@
         };
         if (typeof exports.registerFull === "function") exports = hookExport(exports, "registerFull", wrapRegister);
         if (typeof exports.default === "function") exports = hookExport(exports, "default", wrapRegister);
+        return exports;
+    }
+    // Every request carries the signed-in account's token (superagentPatch adds Authorization unless the request sets
+    // it). Discord's Add account login sends authorization:"" for that reason, but its sign-up requests never had to:
+    // signed in, POST /auth/register and /auth/register/phone ran as the current account, the token that came back
+    // was that account's own, and the switch reconnected to the same account ("Switch failed, sorry :("). Sign-up
+    // requests made while signed in now go out signed out, like the Add account login.
+    function isSignUpUrl(url) {
+        if (typeof url !== "string") return false;
+        const endpoints = inspectedExport(1085, "Endpoints");
+        const register = endpoints && endpoints.REGISTER || "/auth/register";
+        const registerPhone = endpoints && endpoints.REGISTER_PHONE || "/auth/register/phone";
+        return url === register || url === registerPhone;
+    }
+    function signUpSignedOut(orig, self, args) {
+        const options = args[0];
+        if (!enabled("accountSwitcher") || !options || typeof options !== "object" || !isSignUpUrl(options.url) || !currentUser())
+            return orig.apply(self, args);
+        const next = Array.prototype.slice.call(args);
+        next[0] = Object.assign({}, options, {headers:Object.assign({}, options.headers, {authorization:""})});
+        return orig.apply(self, next);
+    }
+    function hookTrackedHttpForSignUp(exports) {
+        const http = exports && exports.default;
+        if (http && typeof http.post === "function") hookExport(http, "post", signUpSignedOut);
         return exports;
     }
     function switchToAccount(userId) {
@@ -12258,6 +12287,7 @@
             case 6623: return features.accountSwitcher ? hookComponent(exports, addAccountLogin) : exports;
             case 16840: return features.accountSwitcher ? hookComponent(exports, manageAccountsModalWithRegister) : exports;
             case 16387: return features.accountSwitcher ? hookRegisterForMultiAccount(exports) : exports;
+            case 5938: return features.accountSwitcher ? hookTrackedHttpForSignUp(exports) : exports;
             case 12131: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
             case 4760: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;

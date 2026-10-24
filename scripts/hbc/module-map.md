@@ -87,6 +87,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 5759 | `stores/SelfPresenceStore.tsx` | default | SelfPresenceStore (Badge Completer) |
 | 5930 | `actions/AuthenticationActionCreators.tsx` | default | AuthenticationActionCreators (Account switcher) |
 | 5932 | `stores/ConsentStore.tsx` | default | ConsentStore (Badge Completer) |
+| 5938 | `utils/TrackedHTTPUtils.tsx` | default | TrackedHTTPUtils (Account switcher: sign-up requests go out signed out) |
 | 5963 | `stores/SortedGuildStore.tsx` | default, GuildsNodeType, insertUnsortedGuilds | SortedGuildStore |
 | 5967 | `modules/read_states/ReadStateConstants.tsx` | CHANNEL, GUILD_EVENT, NOTIFICATION_CENTER | ReadStateTypes |
 | 5979 | `../discord_common/js/shared/shared-constants/AdCreativeType.tsx` | INVALID, QUEST, QUEST_HOME_HERO | AdCreativeType |

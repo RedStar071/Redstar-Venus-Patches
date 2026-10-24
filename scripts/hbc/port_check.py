@@ -346,6 +346,7 @@ BOOTSTRAP_MODULES = [
     (16384, 'modules/auth/native/RegistrationUtils.tsx', ['BackButtonWithTracking', 'getTrackRegTransition'], 'RegistrationUtils (Account switcher)'),
     (16387, 'modules/auth/register.tsx', ['default', 'registerFull'], 'register (Account switcher)'),
     (16840, 'modules/multi_account/native/ManageAccountsModal.tsx', ['default'], 'ManageAccountsModal (Account switcher)'),
+    (5938, 'utils/TrackedHTTPUtils.tsx', ['default'], 'TrackedHTTPUtils (Account switcher: sign-up requests go out signed out)'),
 ]
 
 
