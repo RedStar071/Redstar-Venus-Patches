@@ -6706,7 +6706,16 @@
         let theme=null;
         if (reviewThemeHook) try {theme=reviewThemeHook();} catch (_) {}
         const authenticated=!!reviewAuth(), canSend=authenticated && !busy && text.trim().length>0;
-        const placeholder=tr(!authenticated ? "Sign in to ReviewDB in Venus settings to write a review." : props.shouldEdit ? "Tap to edit your review" : "Tap to add a review");
+        // Signed out, a button that signs in right here, instead of a box that can't be typed in and points to settings.
+        if (!authenticated) {
+            const Button=inspectedExport(5379,"Button"), pending=reviewAuthState==="exchanging", label=tr(pending ? "Signing in…" : "Sign in to write a review");
+            return el(RN.View,{style:{paddingHorizontal:8,paddingVertical:4}},Button ?
+                el(Button,{text:label,size:"md",variant:"secondary",disabled:pending,onPress:authenticateReviews}) :
+                el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:label,disabled:pending,onPress:authenticateReviews,
+                    style:{height:40,borderRadius:20,alignItems:"center",justifyContent:"center",backgroundColor:"#4e505899"}},
+                    el(RN.Text,{style:[styles.text,{fontWeight:"600"}]},label)));
+        }
+        const placeholder=tr(props.shouldEdit ? "Tap to edit your review" : "Tap to add a review");
         function send() {
             if (!canSend || !text.trim()) return;
             setBusy(true);
