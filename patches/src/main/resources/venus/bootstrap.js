@@ -38,7 +38,7 @@
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
     if (features.translate) selectModules([584, 1390, 5432, 7742, 9675, 10368]);
     if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
-    if (features.accountSwitcher) selectModules([1390, 6623, 12129, 12130, 12131, 16858]);
+    if (features.accountSwitcher) selectModules([1390, 6623, 12129, 12130, 12131, 16387, 16840, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
     if (features.nitroThemes) selectModules([584, 1390, 2046, 4769, 4937, 14299, 15566]);
     if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 11191, 10368]);
@@ -8492,33 +8492,195 @@
         const loginRoute = screens && screens.LOGIN || "login";
         openManageAccounts(loginRoute);
     }
-    // Create a new account (#86): Discord's Add account screen (Login 6623 with isMultiAccount) only signs in, and its
-    // registration flow lives in the logged-out navigator, out of reach while you're signed in. So the screen gets a
-    // "Create a new account" link next to Discord's own links, opening Discord's sign-up page. Then you come back and
-    // sign in with the new account here, without logging out of the others.
-    const REGISTER_URL = "https://discord.com/register";
-    function openRegister() { openLink(REGISTER_URL); }
+    // Create a new account (#86): Discord's Add account screen (Login 6623 with isMultiAccount) only shows the
+    // primary "Log In" Button, and ManageAccountsModal (16840) only registers four screens (manage_accounts,
+    // account_disabled_or_deletion_scheduled, login, mfa) without Discord's native registration screens from
+    // RegistrationStepsUtils (16375) or TrackRegistrationContext (16373). We add a native Discord secondary
+    // "Register" Button (5379, size="lg", variant="secondary", using Discord's own localized t.pV8xeR string)
+    // right under "Log In" on the Add account screen, mount all native registration screens (register_identity,
+    // register_display_name, register_account_information, age_gate, age_gate_underage, verify_phone,
+    // country_select, external_link) inside ManageAccountsModal with TrackRegistrationContext.Provider, and
+    // route multi-account registration completion (16387) through switchAccountToken (5930) so the newly
+    // created account is added alongside your existing accounts without losing them.
+    function resetMultiAccountRegistration() {
+        const resetReg = inspectedExport(16376, "resetRegistration");
+        try { if (typeof resetReg === "function") resetReg(); } catch (_) {}
+    }
+    function registerIdentityRoute() {
+        const auth = inspectedExport(1085, "AuthStates");
+        return auth && auth.REGISTER_IDENTITY || "register_identity";
+    }
+    function openRegister() {
+        resetMultiAccountRegistration();
+        openManageAccounts(registerIdentityRoute());
+    }
+    function discordRegisterLabel() {
+        try {
+            const intlMod = global.__r && global.__r(1126);
+            const intl = intlMod && intlMod.intl, t = intlMod && intlMod.t;
+            if (intl && typeof intl.string === "function" && t && t.pV8xeR != null) {
+                const s = intl.string(t.pV8xeR);
+                if (typeof s === "string" && s) return s;
+            }
+        } catch (_) {}
+        return tr("Create a new account");
+    }
     function addAccountLogin(orig, self, args) {
         const rendered = orig.apply(self, args);
         const props = args[0];
-        if (!enabled("accountSwitcher") || !props || !props.isMultiAccount || !React) return rendered;
-        const LinkButton = inspectedExport(6623, "LinkButton");
-        if (typeof LinkButton !== "function" && !(LinkButton && LinkButton.$$typeof)) return rendered;
+        if (!enabled("accountSwitcher") || !props || !props.isMultiAccount || !React || !RN) return rendered;
+        const Button = inspectedExport(5379, "Button") || inspectedExport(5379, "default");
+        if (typeof Button !== "function" && !(Button && Button.$$typeof)) return rendered;
+        const useNav = inspectedExport(1503, "useNavigation");
+        let nav = null;
+        try { if (typeof useNav === "function") nav = useNav(); } catch (_) {}
+        const onRegister = () => {
+            resetMultiAccountRegistration();
+            const route = registerIdentityRoute();
+            try {
+                if (nav && typeof nav.navigate === "function") { nav.navigate(route); return; }
+            } catch (_) {}
+            openManageAccounts(route);
+        };
         let added = false;
-        const isLink = child => child && typeof child === "object" && child.type === LinkButton;
+        const hasLoginButton = node => {
+            if (!node || typeof node !== "object") return false;
+            const p = node.props;
+            if (!p) return false;
+            const c = p.children;
+            if (c && typeof c === "object" && !Array.isArray(c) && (c.type === Button || (c.props && c.props.variant === "primary" && c.props.size === "lg"))) return true;
+            if (Array.isArray(c)) {
+                for (let i = 0; i < c.length; i++) {
+                    const k = c[i];
+                    if (k && typeof k === "object" && (k.type === Button || (k.props && k.props.variant === "primary" && k.props.size === "lg"))) return true;
+                }
+            }
+            return false;
+        };
         const withRegister = cloneTree(rendered, function (node, nodeProps) {
             if (added) return nodeProps;
             const kids = nodeProps.children;
-            const list = Array.isArray(kids) ? kids : [kids];
-            let last = -1;
-            for (let i = 0; i < list.length; i++) if (isLink(list[i])) last = i;
-            if (last < 0) return nodeProps;
+            if (!Array.isArray(kids)) return nodeProps;
+            let btnIdx = -1;
+            for (let i = 0; i < kids.length; i++) {
+                if (hasLoginButton(kids[i])) { btnIdx = i; break; }
+            }
+            if (btnIdx < 0) return nodeProps;
             added = true;
-            const next = list.slice();
-            next.splice(last + 1, 0, el(LinkButton, {key:"venus-register", text:tr("Create a new account"), onPress:openRegister}));
+            const next = kids.slice();
+            next.splice(btnIdx + 1, 0, el(RN.View, {key:"venus-register", style:{width:"100%", marginTop:8}},
+                el(Button, {size:"lg", variant:"secondary", text:discordRegisterLabel(), onPress:onRegister})));
             return Object.assign({}, nodeProps, {children:next});
         }, 0, () => added);
         return withRegister;
+    }
+    function manageAccountsModalWithRegister(orig, self, args) {
+        const rendered = orig.apply(self, args);
+        if (!enabled("accountSwitcher") || !rendered || !React) return rendered;
+        const getAllAuthScreens = inspectedExport(16375, "getAllAuthScreens");
+        if (typeof getAllAuthScreens !== "function") return rendered;
+        let authScreens = null;
+        try { authScreens = getAllAuthScreens(); } catch (_) {}
+        if (!authScreens || typeof authScreens !== "object") return rendered;
+        const BackButtonWithTracking = inspectedExport(16384, "BackButtonWithTracking");
+        const HeaderBackImage = inspectedExport(6201, "default");
+        const TrackRegistrationContext = inspectedExport(16373, "TrackRegistrationContext");
+        const getTrackRegTransition = inspectedExport(16384, "getTrackRegTransition");
+        let patched = false;
+        const tree = cloneTree(rendered, function (node, nodeProps) {
+            if (patched) return nodeProps;
+            const kids = nodeProps.children;
+            if (!Array.isArray(kids) || kids.length < 2) return nodeProps;
+            let screenType = null;
+            const existingNames = new Set();
+            for (let i = 0; i < kids.length; i++) {
+                const k = kids[i];
+                if (k && typeof k === "object" && k.props && typeof k.props.name === "string" && (k.props.component || k.props.children)) {
+                    screenType = k.type;
+                    existingNames.add(k.props.name);
+                }
+            }
+            if (!screenType || (!existingNames.has("login") && !existingNames.has("LOGIN"))) return nodeProps;
+            patched = true;
+            const next = kids.slice();
+            const keys = Object.keys(authScreens);
+            for (let i = 0; i < keys.length; i++) {
+                const routeName = keys[i];
+                if (existingNames.has(routeName)) continue;
+                const cfg = authScreens[routeName];
+                if (!cfg || (typeof cfg.render !== "function" && !cfg.screen)) continue;
+                const screenOpts = routeProps => {
+                    const nav = routeProps && routeProps.navigation;
+                    const baseOpts = typeof cfg.navigationOptions === "function" ? cfg.navigationOptions(routeProps) : (cfg.navigationOptions || {});
+                    const headerLeft = BackButtonWithTracking && HeaderBackImage && nav && typeof nav.goBack === "function"
+                        ? (headerProps => {
+                            const backProps = Object.assign({}, headerProps, {
+                                backImage:() => el(HeaderBackImage, {tintColor:headerProps && headerProps.tintColor}),
+                                onPress:() => nav.goBack()
+                            });
+                            return typeof cfg.headerLeft === "function" ? cfg.headerLeft(backProps) : el(BackButtonWithTracking, backProps);
+                        })
+                        : baseOpts.headerLeft;
+                    return Object.assign({headerTitle:cfg.headerTitle || (() => null)}, baseOpts, headerLeft ? {headerLeft} : null);
+                };
+                next.push(el(screenType, Object.assign({
+                    key:"venus-auth:" + routeName,
+                    name:routeName,
+                    options:screenOpts
+                }, typeof cfg.render === "function"
+                    ? {children:screenProps => cfg.render(screenProps && screenProps.route && screenProps.route.params, screenProps && screenProps.navigation)}
+                    : {component:cfg.screen})));
+            }
+            return Object.assign({}, nodeProps, {children:next});
+        }, 0, () => patched);
+        if (TrackRegistrationContext && typeof getTrackRegTransition === "function") {
+            let trackVal = null;
+            try { trackVal = getTrackRegTransition({current:undefined}); } catch (_) {}
+            if (trackVal) return el(TrackRegistrationContext.Provider || TrackRegistrationContext, {value:trackVal}, tree);
+        }
+        return tree;
+    }
+    function hookRegisterForMultiAccount(exports) {
+        if (!exports || typeof exports !== "object") return exports;
+        const wrapRegister = function (orig, self, args) {
+            if (!enabled("accountSwitcher") || !currentUser()) return orig.apply(self, args);
+            accountSwitcherSync();
+            const d = fluxDispatcher();
+            const authActions = inspectedExport(5930, "default");
+            if (!d || typeof d.dispatch !== "function" || !authActions || typeof authActions.switchAccountToken !== "function") {
+                return orig.apply(self, args);
+            }
+            const realDispatch = d.dispatch;
+            let capturedToken = null;
+            d.dispatch = function (event) {
+                if (event && event.type === "LOGIN_SUCCESS" && typeof event.token === "string" && event.token) {
+                    capturedToken = event.token;
+                    return Promise.resolve();
+                }
+                return realDispatch.apply(this, arguments);
+            };
+            const restore = () => { if (d.dispatch !== realDispatch) d.dispatch = realDispatch; };
+            let res;
+            try {
+                res = orig.apply(self, args);
+            } catch (err) {
+                restore();
+                throw err;
+            }
+            return Promise.resolve(res).then(val => {
+                restore();
+                if (capturedToken) {
+                    try { authActions.switchAccountToken(capturedToken, true); } catch (_) {}
+                }
+                return val;
+            }, err => {
+                restore();
+                throw err;
+            });
+        };
+        if (typeof exports.registerFull === "function") exports = hookExport(exports, "registerFull", wrapRegister);
+        if (typeof exports.default === "function") exports = hookExport(exports, "default", wrapRegister);
+        return exports;
     }
     function switchToAccount(userId) {
         if (typeof userId !== "string" || !userId) return;
@@ -8620,8 +8782,8 @@
                 accountRows,
                 Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."), icon:rowIcon(5032, "UserPlusIcon"),
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
-                Row ? el(Row, {key:"register", label:tr("Create a new account"), subLabel:tr("Opens Discord's sign-up page. Then come back and add it here."), icon:rowIcon(7701, "LinkExternalSmallIcon"),
-                    arrow:true, disabled:!on, onPress:openRegister}) : null,
+                Row ? el(Row, {key:"register", label:tr("Create a new account"), subLabel:tr("Register a new Discord account right inside the app."), icon:rowIcon(5032, "UserPlusIcon"),
+                    arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openRegister}) : null,
                 Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(7092, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
                 null),
@@ -12114,6 +12276,8 @@
                 return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
             case 12129: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
             case 6623: return features.accountSwitcher ? hookComponent(exports, addAccountLogin) : exports;
+            case 16840: return features.accountSwitcher ? hookComponent(exports, manageAccountsModalWithRegister) : exports;
+            case 16387: return features.accountSwitcher ? hookRegisterForMultiAccount(exports) : exports;
             case 12131: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
             case 4760: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;

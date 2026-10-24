@@ -333,6 +333,19 @@ BOOTSTRAP_MODULES = [
     (8921, 'design/components/Icon/native/redesign/generated/TrophyIcon.tsx', ['TrophyIcon'], 'TrophyIcon (Badge Completer)'),
     (10649, 'stores/LocalActivityStore.tsx', ['default'], 'LocalActivityStore (Badge Completer)'),
     (15139, 'actions/ConsentActionCreators.tsx', ['setConsents'], 'ConsentActionCreators (Badge Completer)'),
+    (1095, 'modules/user_settings/UserSettingsConstants.tsx', ['UserSettingsDelay'], 'UserSettingsConstants (Unlock Nitro themes)'),
+    (1209, '../discord_common/js/packages/protos/discord_protos/discord_users/v1/preloaded_user_settings.tsx', ['ClientThemeSettings'], 'ClientThemeSettings proto (Unlock Nitro themes)'),
+    (1240, '../discord_common/js/packages/protos/google/protobuf/wrappers.tsx', ['UInt64Value', 'UInt32Value', 'FloatValue'], 'Protobuf wrappers (Unlock Nitro themes)'),
+    (2046, 'modules/user_settings/UserSettingsProtoActionCreators.tsx', ['PreloadedUserSettingsActionCreators'], 'UserSettingsProtoActionCreators (Unlock Nitro themes)'),
+    (5930, 'actions/AuthenticationActionCreators.tsx', ['default'], 'AuthenticationActionCreators (Account switcher)'),
+    (6201, 'design/components/Navigator/native/NavigatorHeader.native.tsx', ['default', 'HeaderBackImage'], 'NavigatorHeader (Account switcher)'),
+    (15460, 'modules/client_themes/ClientThemesBackgroundActionCreators.tsx', ['updateBackgroundGradientPreset', 'resetPreviewClientTheme'], 'ClientThemesBackgroundActionCreators (Unlock Nitro themes)'),
+    (16373, 'modules/auth/native/components/Auth.tsx', ['default', 'TrackRegistrationContext'], 'Auth & TrackRegistrationContext (Account switcher)'),
+    (16375, 'modules/auth/native/RegistrationStepsUtils.tsx', ['getAllAuthScreens'], 'RegistrationStepsUtils (Account switcher)'),
+    (16376, 'modules/auth/native/RegistrationUIStore.tsx', ['resetRegistration'], 'RegistrationUIStore (Account switcher)'),
+    (16384, 'modules/auth/native/RegistrationUtils.tsx', ['BackButtonWithTracking', 'getTrackRegTransition'], 'RegistrationUtils (Account switcher)'),
+    (16387, 'modules/auth/register.tsx', ['default', 'registerFull'], 'register (Account switcher)'),
+    (16840, 'modules/multi_account/native/ManageAccountsModal.tsx', ['default'], 'ManageAccountsModal (Account switcher)'),
 ]
 
 

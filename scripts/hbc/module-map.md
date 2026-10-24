@@ -20,6 +20,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 590 | `../discord_common/js/packages/tokens/colors/generated/native/experiment-definitions.tsx` | _private, SemanticColorExperiments | SemanticColorExperiments (Custom themes: experiment overrides win over SemanticColors) |
 | 591 | `../discord_common/js/packages/tokens/colors/generated/raw-color-definitions.tsx` | _private, RawColors | RawColors |
 | 1085 | - | A11Y_RUNTIME_VIOLATION, ACCOUNT_SCHEDULED_FOR_DELETION | Discord Constants |
+| 1095 | `modules/user_settings/UserSettingsConstants.tsx` | UserSettingsDelay | UserSettingsConstants (Unlock Nitro themes) |
 | 1096 | `../discord_common/js/shared/Constants.tsx` | PRIMARY_NORMAL, PRIMARY_NORMAL_ITALIC, PRIMARY_MEDIUM | Permissions constant |
 | 1111 | `../discord_common/js/shared/lib/TokenManager.tsx` | init, getAnalyticsToken, getToken | TokenManager |
 | 1112 | `modules/routing/router_utils.tsx` | shouldNavigate, transitionTo, transitionToGuild | NavigationUtils |
@@ -27,6 +28,8 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 1162 | `../discord_common/js/packages/rtn-codegen/js/NativeFileModule.tsx` | default | NativeFileModule |
 | 1203 | `design/void/Button/native/Button.tsx` | ButtonColors | ButtonColors (red confirm on risky features) |
 | 1205 | `modules/user_settings/ThemeStore.tsx` | default, UNSET, SET | ThemeStore |
+| 1209 | `../discord_common/js/packages/protos/discord_protos/discord_users/v1/preloaded_user_settings.tsx` | ClientThemeSettings | ClientThemeSettings proto (Unlock Nitro themes) |
+| 1240 | `../discord_common/js/packages/protos/google/protobuf/wrappers.tsx` | UInt64Value, UInt32Value, FloatValue | Protobuf wrappers (Unlock Nitro themes) |
 | 1264 | - | murmur, noConflict | MurmurHashV3 |
 | 1295 | `../discord_common/js/packages/http-utils/HTTPUtils.tsx` | INVALID_FORM_BODY_ERROR_CODE, convertSkemaError, stringifyErrors | HTTPUtils |
 | 1360 | `../discord_common/js/packages/analytics-utils/getSuperProperties.tsx` | browser_user_agent, browser_version, os_sdk_version | SuperProperties |
@@ -36,6 +39,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 1999 | `stores/native/AppStateStore.tsx` | default | AppStateStore |
 | 2012 | `stores/MediaEngineStore.tsx` | default | MediaEngineStore (Badge Completer) |
 | 2037 | `stores/DetectableGameStore.tsx` | default | DetectableGameStore (Badge Completer) |
+| 2046 | `modules/user_settings/UserSettingsProtoActionCreators.tsx` | PreloadedUserSettingsActionCreators | UserSettingsProtoActionCreators (Unlock Nitro themes) |
 | 2065 | `stores/ChannelStore.tsx` | Basic, Full, default | ChannelStore |
 | 2087 | `stores/GuildStore.tsx` | default | GuildStore |
 | 2116 | `stores/SelectedChannelStore.tsx` | default, findFirstVoiceChannelId, handleConnectionOpen | SelectedChannelStore (Hidden channels never opens a locked channel by itself) |
@@ -81,6 +85,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 5434 | `modules/messages/MessageRecordUtils.tsx` | createMessageRecord, updateServerMessage, updateMessageRecord | MessageRecordUtils |
 | 5632 | `modules/messages/isMessageMentioned.tsx` | isRawMessageMentioned, isMentioned, mention_roles | isMessageMentioned (Message highlights: role mentions) |
 | 5759 | `stores/SelfPresenceStore.tsx` | default | SelfPresenceStore (Badge Completer) |
+| 5930 | `actions/AuthenticationActionCreators.tsx` | default | AuthenticationActionCreators (Account switcher) |
 | 5932 | `stores/ConsentStore.tsx` | default | ConsentStore (Badge Completer) |
 | 5963 | `stores/SortedGuildStore.tsx` | default, GuildsNodeType, insertUnsortedGuilds | SortedGuildStore |
 | 5967 | `modules/read_states/ReadStateConstants.tsx` | CHANNEL, GUILD_EVENT, NOTIFICATION_CENTER | ReadStateTypes |
@@ -100,6 +105,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 6182 | `design/components/Card/native/Card.native.tsx` | Card, InternalCard | Card |
 | 6185 | `design/void/Pressables/native/Pressables.tsx` | PressableOpacity | PressableOpacity (translate bar, #82) |
 | 6188 | `design/components/TableRow/native/TableRowIcon.native.tsx` | TableRowIcon | TableRowIcon |
+| 6201 | `design/components/Navigator/native/NavigatorHeader.native.tsx` | default, HeaderBackImage | NavigatorHeader (Account switcher) |
 | 6205 | `design/components/Icon/native/redesign/generated/ArrowLargeLeftIcon.tsx` | ArrowLargeLeftIcon | ArrowLargeLeftIcon (preview channel header) |
 | 6208 | `design/components/Icon/native/redesign/generated/XSmallIcon.tsx` | XSmallIcon | XSmallIcon |
 | 6262 | `design/components/TableRow/native/TableRadioRow.native.tsx` | TableRadioRow | TableRadioRow |
@@ -288,6 +294,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15285 | `design/components/Icon/native/redesign/generated/FiltersHorizontalIcon.tsx` | FiltersHorizontalIcon | FiltersHorizontalIcon (translate bar, #82) |
 | 15371 | `modules/quests/native/QuestHooks.native.tsx` | useMobileQuestDockHeight, useMobileQuestDock, useIsMobileQuestDockVisibleToUser | useMobileQuestDock |
 | 15378 | `modules/main_tabs_v2/native/you_bar/YouBarConstants.tsx` | CONNECTION_BANNER_HEIGHT, YOU_BAR_SPRING_CONFIG, YOU_BAR_PADDING | YouBarConstants |
+| 15460 | `modules/client_themes/ClientThemesBackgroundActionCreators.tsx` | updateBackgroundGradientPreset, resetPreviewClientTheme | ClientThemesBackgroundActionCreators (Unlock Nitro themes) |
 | 15465 | `modules/quests/native/QuestDock/QuestDock.tsx` | PENDING, SUCCEEDED, FAILED | QuestDock |
 | 15560 | `design/components/Icon/native/redesign/generated/PaintPaletteIcon.tsx` | PaintPaletteIcon | PaintPaletteIcon |
 | 15566 | `modules/user_settings/appearance/native/SettingsAppearanceThemePickerScreen.tsx` | default | Theme picker (Unlock Nitro themes) |
@@ -301,6 +308,11 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15928 | `design/components/Icon/native/redesign/generated/DoubleCheckmarkIcon.tsx` | DoubleCheckmarkIcon | DoubleCheckmarkIcon |
 | 15974 | `design/components/Icon/native/redesign/generated/LettersIcon.tsx` | LettersIcon | LettersIcon |
 | 16121 | `design/components/Icon/native/redesign/generated/BugIcon.tsx` | BugIcon | BugIcon |
+| 16373 | `modules/auth/native/components/Auth.tsx` | default, TrackRegistrationContext | Auth & TrackRegistrationContext (Account switcher) |
+| 16375 | `modules/auth/native/RegistrationStepsUtils.tsx` | getAllAuthScreens | RegistrationStepsUtils (Account switcher) |
+| 16376 | `modules/auth/native/RegistrationUIStore.tsx` | resetRegistration | RegistrationUIStore (Account switcher) |
+| 16384 | `modules/auth/native/RegistrationUtils.tsx` | BackButtonWithTracking, getTrackRegTransition | RegistrationUtils (Account switcher) |
+| 16387 | `modules/auth/register.tsx` | default, registerFull | register (Account switcher) |
 | 16475 | `modules/main_tabs_v2/native/tabs/messages/items/channel/MessagesItemChannelContent.tsx` | default | MessagesItemChannelContent |
 | 16663 | `design/components/Icon/native/redesign/generated/BoostTier2Icon.tsx` | BoostTier2Icon | BoostTier2Icon |
 | 16671 | `modules/guild_sidebar/native/ChannelInfo.tsx` | default | ChannelInfo |
@@ -309,6 +321,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16754 | `modules/guilds_bar/native/hooks/useGuildsBarProps.tsx` | MESSAGES, FAVORITES, PENDING_JOIN_REQUESTS | useGuildsBarProps |
 | 16834 | `modules/main_tabs_v2/native/tabs/you/utils/showYouAccountActionSheet.tsx` | showYouAccountActionSheet | showYouAccountActionSheet |
 | 16839 | `modules/multi_account/native/openManageAccountsModal.tsx` | default | openManageAccountsModal |
+| 16840 | `modules/multi_account/native/ManageAccountsModal.tsx` | default | ManageAccountsModal (Account switcher) |
 | 16841 | `modules/multi_account/native/ManageAccountsConstants.tsx` | MANAGE_ACCOUNTS, LOGIN, ACCOUNT_DISABLED_OR_DELETION_SCHEDULED | ManageAccountsConstants |
 | 16857 | `modules/main_tabs_v2/native/you_bar/YouBarButton.tsx` | default, YouBarButtonIcon, YouBarButtonContainer | YouBarButton |
 | 16858 | `modules/main_tabs_v2/native/you_bar/YouBarNotificationsButton.tsx` | default | YouBarButtons |
