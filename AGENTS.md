@@ -179,6 +179,9 @@ node tests/ui/shot.cjs features 'page=VENUS_PLUGINS'   # -> work/ui/shots/featur
 node tests/ui/shot.cjs nd-off 'page=VENUS_NODELETE' nd-on 'page=VENUS_NODELETE&on=noDelete'
 node tests/ui/shot.cjs --all before                    # every page, on and off, plus a fresh install
 python3 tests/ui/sheet.py work/ui/shots/cmp.png a.png b.png --scale 0.6   # side by side, to compare
+sh tests/ui/check.sh                                   # before committing: runtime parses, every text translated
+python3 tests/ui/icon.py NewUserIcon                   # which module exports a Discord icon
+python3 tests/ui/i18n.py drop "Old text"               # remove (or `add texts.json`) a text in every language at once
 ```
 
 - **Query:** `page=` a route (`VENUS_PLUGINS`, `VENUS_GENERAL`, `VENUS_BACKUP`, `VENUS_LANGUAGE`, `VENUS_<FEATURE>`),
