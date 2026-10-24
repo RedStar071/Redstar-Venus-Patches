@@ -6,6 +6,7 @@
 //   scene=serverInfo   the Server info sheet (Server info tapped in that menu)
 //   scene=readAll      the server list with the Read all pill above the servers
 //   scene=readAllHold  Read all held: the one-time choices sheet
+//   scene=reviews      Alex's profile with Venus's Reviews card under the note (reviews=0: none yet; signed in: set={"reviewAuth":{"token":"x","account":"123456789012345678"}})
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 import * as React from "react";
 import * as RN from "react-native-web";
@@ -30,7 +31,7 @@ const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754];
+export const hooked = [1390, 5108, 16748, 16754, 13181];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -59,8 +60,43 @@ export function modules(store, me) {
     16748: { default: () => [{ IconComponent: D.makeIcon("EnvelopeIcon"), label: "Invite", action() {} },
       { IconComponent: D.makeIcon("BellIcon"), label: "Mute Server", action() {} }, { IconComponent: D.makeIcon("SettingsIcon"), label: "Settings", action() {} }] },
     // useGuildsBarProps: the server list's sections (DMs, a separator, then servers), drawn one by one.
+    // UserProfileNote: the last card of a profile, under which Venus adds Reviews.
+    13181: { default: () => <D.TableRowGroup><D.TableRow label="Note" subLabel="Tap to add a note" icon={<D.TableRowIcon IconComponent={D.makeIcon("PaperPlusIcon")} />} arrow /></D.TableRowGroup> },
+    // Discord's old Form parts and Card, which the Reviews card is built from.
+    8575: { FormRow, FormLabel: p => <D.Text variant="text-md/semibold" color="text-strong" style={p.style}>{p.text}</D.Text>,
+      FormSubLabel: p => <D.Text variant="text-sm/medium" color="text-default" style={p.style}>{p.text}</D.Text> },
+    6182: { Card: p => <RN.View style={{ gap: 8 }}>{p.title ? <D.Text variant="text-sm/semibold" color="text-muted">{p.title}</D.Text> : null}{p.children}</RN.View> },
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
   };
+}
+function FormRow(p) {
+  return <RN.Pressable onLongPress={p.onLongPress} style={[{ flexDirection: "row", gap: 12, padding: 12, alignItems: "flex-start" }, p.style]}>
+    {p.leading || null}<RN.View style={{ flex: 1, gap: 2 }}>{p.label}{p.subLabel}</RN.View></RN.Pressable>;
+}
+// ReviewDB answers from made-up reviews, so the card draws without the network.
+const REVIEWS = q.get("reviews") === "0" ? [] : [
+  { id: 1, type: 3, comment: "Spreading hate is not okay. Be respectful.", sender: { username: "ReviewDB", discordID: "0", badges: [] }, timestamp: now / 1000 },
+  { id: 2, type: 0, comment: "Great teammate, always shows up for game night!", sender: { username: "sam_", discordID: allPeople[1].id, badges: [] }, timestamp: (now - 20 * DAY) / 1000 },
+  { id: 3, type: 0, comment: "Helped me set up my server. 10/10", sender: { username: "jordan", discordID: allPeople[2].id, badges: [] }, timestamp: (now - 90 * DAY) / 1000 } ];
+const realFetch = window.fetch;
+window.fetch = (url, o) => /manti\.vendicated\.dev/.test(String(url)) ?
+  Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(/admins/.test(url) ? [] : { success: true, reviews: REVIEWS }) }) : realFetch(url, o);
+// A profile: banner, avatar, name, then its cards ending with the note (and what Venus adds after it).
+function Profile({ defined }) {
+  const Note = defined[13181].exports.default;
+  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+    <RN.View style={{ height: 110, backgroundColor: "#3ba55c" }} />
+    <RN.View style={{ paddingHorizontal: 16, marginTop: -44, gap: 4 }}>
+      <RN.View style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 6, borderColor: D.tok("BACKGROUND_BASE_LOWER"), backgroundColor: "#3ba55c", alignItems: "center", justifyContent: "center" }}>
+        <D.Text variant="heading-xl/bold" style={{ color: "#fff" }}>A</D.Text></RN.View>
+      <D.Text variant="heading-xl/bold" color="text-strong">Alex</D.Text>
+      <D.Text variant="text-md/medium" color="text-muted">alex</D.Text>
+    </RN.View>
+    <RN.View style={{ padding: 16, gap: 12 }}>
+      <D.TableRowGroup title="About Me"><D.TableRow label="Plays way too much Valorant." /></D.TableRowGroup>
+      <Note userId={allPeople[0].id} />
+    </RN.View>
+  </RN.View>;
 }
 const SECTIONS = { MESSAGES: 0, SEPARATOR: 6, GUILD: 7 };
 
@@ -143,6 +179,7 @@ export function Scene({ name, defined }) {
       if (fiber) fiber.memoizedProps.onLongPress({}); else console.warn("No Read all hold");
     }, 50);
   }, []);
+  if (name === "reviews") return <Profile defined={defined} />;
   const top = sheets[sheets.length - 1];
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
   // screenshot shows the whole sheet the way you'd scroll through it.
