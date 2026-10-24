@@ -144,8 +144,10 @@
     "Completing badges": "बैज पूरे करना",
     "Console": "कंसोल",
     "Continue": "जारी रखें",
+    "Copied the rest of your message": "आपके मैसेज का बाकी हिस्सा कॉपी हो गया",
     "Copy Text": "टेक्स्ट कॉपी करें",
     "Copy profile bios": "प्रोफ़ाइल बायो कॉपी करें",
+    "Copy the rest": "बाकी कॉपी करें",
     "Copy to clipboard": "क्लिपबोर्ड पर कॉपी करें",
     "Couldn't download icon pack (HTTP {status}).": "आइकन पैक डाउनलोड नहीं हो सका (HTTP {status})।",
     "Couldn't download theme (HTTP {status}).": "थीम डाउनलोड नहीं हो सकी (HTTP {status})।",
@@ -934,6 +936,7 @@
     "Your badges": "आपके बैज",
     "Your clipboard is empty. Copy a Venus backup first.": "क्लिपबोर्ड खाली है। पहले कोई Venus बैकअप कॉपी करें।",
     "Your current Venus settings will be replaced.": "आपकी मौजूदा Venus सेटिंग बदल दी जाएँगी।",
+    "Your long message didn't finish sending": "आपका लंबा मैसेज पूरा नहीं भेजा जा सका",
     "Your past days are as full as real play gets. More room opens up every day.": "आपके पिछले दिन उतने भरे हैं जितना असली खेलना हो सकता है। हर दिन और जगह बनती है।",
     "Your phone's language": "आपके फ़ोन की भाषा",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "आपके चुने हुए दोस्त और कस्टम यूज़र ID साफ़ कर दिए जाएँगे, और 'सभी दोस्त' फिर से चालू हो जाएगा।",
@@ -1083,6 +1086,11 @@
     "{n} options changed": {
       "one": "{n} विकल्प बदला गया",
       "other": "{n} विकल्प बदले गए"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} हिस्सा नहीं भेजा गया। इसे कॉपी करके मैसेज बॉक्स में पेस्ट करें और फिर से भेजें।",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} हिस्सा नहीं भेजा गया। इसे कॉपी करके मैसेज बॉक्स में पेस्ट करें और फिर से भेजें।",
+      "other": "{n} हिस्से नहीं भेजे गए। इन्हें कॉपी करके मैसेज बॉक्स में पेस्ट करें और फिर से भेजें।"
     },
     "{n} people watched": {
       "one": "{n} व्यक्ति पर नज़र",

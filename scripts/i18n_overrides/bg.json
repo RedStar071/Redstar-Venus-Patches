@@ -132,8 +132,10 @@
   "Completing badges": "Изпълнение на значки",
   "Console": "Конзола",
   "Continue": "Продължи",
+  "Copied the rest of your message": "Останалата част от съобщението е копирана",
   "Copy Text": "Копиране на текста",
   "Copy profile bios": "Копиране на описанията на профилите",
+  "Copy the rest": "Копирай останалото",
   "Copy to clipboard": "Копиране в клипборда",
   "Couldn't download icon pack (HTTP {status}).": "Пакетът с икони не можа да бъде изтеглен (HTTP {status}).",
   "Couldn't download theme (HTTP {status}).": "Темата не можа да бъде изтеглена (HTTP {status}).",
@@ -864,6 +866,7 @@
   "Your badges": "Твоите значки",
   "Your clipboard is empty. Copy a Venus backup first.": "Клипбордът е празен. Първо копирайте резервно копие на Venus.",
   "Your current Venus settings will be replaced.": "Текущите ви настройки във Venus ще бъдат заменени.",
+  "Your long message didn't finish sending": "Дългото ти съобщение не беше изпратено докрай",
   "Your past days are as full as real play gets. More room opens up every day.": "Изминалите ти дни са толкова пълни, колкото може да е истинската игра. Всеки ден се освобождава още място.",
   "Your phone's language": "Езикът на телефона",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Избраните приятели и потребителски ID ще бъдат изчистени, а „Всички приятели“ ще се включи отново.",
@@ -991,6 +994,11 @@
   "{n} options changed": {
     "one": "{n} променена опция",
     "other": "{n} променени опции"
+  },
+  "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} част не беше изпратена. Копирай я, постави я в полето за съобщение и я изпрати отново.",
+  "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+    "one": "{n} част не беше изпратена. Копирай я, постави я в полето за съобщение и я изпрати отново.",
+    "other": "{n} части не бяха изпратени. Копирай ги, постави ги в полето за съобщение и ги изпрати отново."
   },
   "{n} people watched": {
     "one": "{n} наблюдаван човек",

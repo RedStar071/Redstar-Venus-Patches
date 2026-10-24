@@ -144,8 +144,10 @@
     "Completing badges": "Abzeichen abschließen",
     "Console": "Konsole",
     "Continue": "Weiter",
+    "Copied the rest of your message": "Rest deiner Nachricht kopiert",
     "Copy Text": "Text kopieren",
     "Copy profile bios": "Profil-Bios kopieren",
+    "Copy the rest": "Rest kopieren",
     "Copy to clipboard": "In die Zwischenablage kopieren",
     "Couldn't download icon pack (HTTP {status}).": "Icon-Paket konnte nicht heruntergeladen werden (HTTP {status}).",
     "Couldn't download theme (HTTP {status}).": "Theme konnte nicht heruntergeladen werden (HTTP {status}).",
@@ -934,6 +936,7 @@
     "Your badges": "Deine Abzeichen",
     "Your clipboard is empty. Copy a Venus backup first.": "Deine Zwischenablage ist leer. Kopiere zuerst ein Venus-Backup.",
     "Your current Venus settings will be replaced.": "Deine aktuellen Venus-Einstellungen werden ersetzt.",
+    "Your long message didn't finish sending": "Deine lange Nachricht wurde nicht vollständig gesendet",
     "Your past days are as full as real play gets. More room opens up every day.": "Deine vergangenen Tage sind so voll, wie echtes Spielen sein kann. Jeden Tag kommt neuer Platz dazu.",
     "Your phone's language": "Sprache deines Handys",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Deine ausgewählten Freunde und Benutzer-IDs werden gelöscht und „Alle Freunde“ wird wieder eingeschaltet.",
@@ -1071,6 +1074,11 @@
     "{n} options changed": {
       "one": "{n} Option geändert",
       "other": "{n} Optionen geändert"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} Teil wurde nicht gesendet. Kopiere ihn, füge ihn ins Nachrichtenfeld ein und sende ihn erneut.",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} Teil wurde nicht gesendet. Kopiere ihn, füge ihn ins Nachrichtenfeld ein und sende ihn erneut.",
+      "other": "{n} Teile wurden nicht gesendet. Kopiere sie, füge sie ins Nachrichtenfeld ein und sende sie erneut."
     },
     "{n} people watched": {
       "one": "{n} Person beobachtet",

@@ -132,8 +132,10 @@
   "Completing badges": "Badges voltooien",
   "Console": "Console",
   "Continue": "Doorgaan",
+  "Copied the rest of your message": "Rest van je bericht gekopieerd",
   "Copy Text": "Tekst kopiëren",
   "Copy profile bios": "Profielbio's kopiëren",
+  "Copy the rest": "Rest kopiëren",
   "Copy to clipboard": "Kopiëren naar klembord",
   "Couldn't download icon pack (HTTP {status}).": "Kon icoonpakket niet downloaden (HTTP {status}).",
   "Couldn't download theme (HTTP {status}).": "Kon thema niet downloaden (HTTP {status}).",
@@ -864,6 +866,7 @@
   "Your badges": "Jouw badges",
   "Your clipboard is empty. Copy a Venus backup first.": "Je klembord is leeg. Kopieer eerst een Venus-back-up.",
   "Your current Venus settings will be replaced.": "Je huidige Venus-instellingen worden vervangen.",
+  "Your long message didn't finish sending": "Je lange bericht is niet helemaal verstuurd",
   "Your past days are as full as real play gets. More room opens up every day.": "Je afgelopen dagen zitten zo vol als echt spelen kan. Elke dag komt er ruimte bij.",
   "Your phone's language": "Taal van je telefoon",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Je gekozen vrienden en toegevoegde gebruikers-ID's worden gewist en Alle vrienden wordt weer ingeschakeld.",
@@ -991,6 +994,11 @@
   "{n} options changed": {
     "one": "{n} optie gewijzigd",
     "other": "{n} opties gewijzigd"
+  },
+  "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} deel is niet verstuurd. Kopieer het, plak het in het berichtvak en verstuur het opnieuw.",
+  "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+    "one": "{n} deel is niet verstuurd. Kopieer het, plak het in het berichtvak en verstuur het opnieuw.",
+    "other": "{n} delen zijn niet verstuurd. Kopieer ze, plak ze in het berichtvak en verstuur ze opnieuw."
   },
   "{n} people watched": {
     "one": "{n} persoon gevolgd",

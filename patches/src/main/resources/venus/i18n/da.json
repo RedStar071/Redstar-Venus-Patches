@@ -144,8 +144,10 @@
     "Completing badges": "Fuldfører emblemer",
     "Console": "Konsol",
     "Continue": "Fortsæt",
+    "Copied the rest of your message": "Resten af din besked er kopieret",
     "Copy Text": "Kopiér tekst",
     "Copy profile bios": "Kopiér profilbeskrivelser",
+    "Copy the rest": "Kopiér resten",
     "Copy to clipboard": "Kopiér til udklipsholder",
     "Couldn't download icon pack (HTTP {status}).": "Ikonpakken kunne ikke downloades (HTTP {status}).",
     "Couldn't download theme (HTTP {status}).": "Temaet kunne ikke downloades (HTTP {status}).",
@@ -934,6 +936,7 @@
     "Your badges": "Dine badges",
     "Your clipboard is empty. Copy a Venus backup first.": "Din udklipsholder er tom. Kopiér en Venus-sikkerhedskopi først.",
     "Your current Venus settings will be replaced.": "Dine nuværende Venus-indstillinger bliver erstattet.",
+    "Your long message didn't finish sending": "Din lange besked blev ikke sendt helt",
     "Your past days are as full as real play gets. More room opens up every day.": "Dine tidligere dage er så fyldte, som rigtigt spil kan blive. Der kommer mere plads hver dag.",
     "Your phone's language": "Telefonens sprog",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Dine valgte venner og bruger-ID'er ryddes, og Alle venner slås til igen.",
@@ -1071,6 +1074,11 @@
     "{n} options changed": {
       "one": "{n} indstilling ændret",
       "other": "{n} indstillinger ændret"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} del blev ikke sendt. Kopiér den, indsæt den i beskedfeltet, og send den igen.",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} del blev ikke sendt. Kopiér den, indsæt den i beskedfeltet, og send den igen.",
+      "other": "{n} dele blev ikke sendt. Kopiér dem, indsæt dem i beskedfeltet, og send dem igen."
     },
     "{n} people watched": {
       "one": "{n} person overvåget",

@@ -132,8 +132,10 @@
   "Completing badges": "Jelvények teljesítése",
   "Console": "Konzol",
   "Continue": "Tovább",
+  "Copied the rest of your message": "Az üzeneted maradéka kimásolva",
   "Copy Text": "Szöveg másolása",
   "Copy profile bios": "Profilleírások másolása",
+  "Copy the rest": "Maradék másolása",
   "Copy to clipboard": "Másolás vágólapra",
   "Couldn't download icon pack (HTTP {status}).": "Nem sikerült letölteni az ikoncsomagot (HTTP {status}).",
   "Couldn't download theme (HTTP {status}).": "Nem sikerült letölteni a témát (HTTP {status}).",
@@ -864,6 +866,7 @@
   "Your badges": "Jelvényeid",
   "Your clipboard is empty. Copy a Venus backup first.": "A vágólap üres. Előbb másolj ki egy Venus-biztonsági mentést.",
   "Your current Venus settings will be replaced.": "A jelenlegi Venus-beállításaid lecserélődnek.",
+  "Your long message didn't finish sending": "A hosszú üzeneted nem ment el teljesen",
   "Your past days are as full as real play gets. More room opens up every day.": "A korábbi napjaid olyan tele vannak, amennyire a valódi játék engedi. Minden nap újabb hely nyílik.",
   "Your phone's language": "A telefon nyelve",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "A kiválasztott ismerősök és egyéni felhasználói azonosítók törlődnek, és a Minden ismerős lehetőség újra bekapcsol.",
@@ -991,6 +994,11 @@
   "{n} options changed": {
     "one": "{n} beállítás módosítva",
     "other": "{n} beállítás módosítva"
+  },
+  "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} rész nem ment el. Másold ki, illeszd be az üzenetmezőbe, és küldd el újra.",
+  "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+    "one": "{n} rész nem ment el. Másold ki, illeszd be az üzenetmezőbe, és küldd el újra.",
+    "other": "{n} rész nem ment el. Másold ki őket, illeszd be az üzenetmezőbe, és küldd el újra."
   },
   "{n} people watched": {
     "one": "{n} követett személy",

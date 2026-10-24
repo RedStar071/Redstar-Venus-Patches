@@ -135,8 +135,10 @@
   "Completing badges": "Ženklelių rinkimas",
   "Console": "Konsolė",
   "Continue": "Tęsti",
+  "Copied the rest of your message": "Likusi žinutės dalis nukopijuota",
   "Copy Text": "Kopijuoti tekstą",
   "Copy profile bios": "Kopijuoti profilių aprašus",
+  "Copy the rest": "Kopijuoti likusią dalį",
   "Copy to clipboard": "Kopijuoti į iškarpinę",
   "Couldn't download icon pack (HTTP {status}).": "Nepavyko atsisiųsti piktogramų paketo (HTTP {status}).",
   "Couldn't download theme (HTTP {status}).": "Nepavyko atsisiųsti temos (HTTP {status}).",
@@ -878,6 +880,7 @@
   "Your badges": "Tavo ženkleliai",
   "Your clipboard is empty. Copy a Venus backup first.": "Iškarpinė tuščia. Pirmiausia nukopijuok Venus atsarginę kopiją.",
   "Your current Venus settings will be replaced.": "Dabartiniai Venus nustatymai bus pakeisti.",
+  "Your long message didn't finish sending": "Ilga žinutė nebuvo išsiųsta iki galo",
   "Your past days are as full as real play gets. More room opens up every day.": "Tavo praėjusios dienos tokios pilnos, kokios gali būti žaidžiant tikrai. Kasdien atsiranda daugiau vietos.",
   "Your phone's language": "Telefono kalba",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Pasirinkti draugai ir pridėti naudotojų ID bus išvalyti, o parinktis „Visi draugai“ vėl bus įjungta.",
@@ -1023,6 +1026,12 @@
     "few": "Pakeistos {n} parinktys",
     "one": "Pakeista {n} parinktis",
     "other": "Pakeista {n} parinkčių"
+  },
+  "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} dalis neišsiųsta. Nukopijuok ją, įklijuok į žinutės laukelį ir išsiųsk dar kartą.",
+  "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+    "one": "{n} dalis neišsiųsta. Nukopijuok ją, įklijuok į žinutės laukelį ir išsiųsk dar kartą.",
+    "few": "{n} dalys neišsiųstos. Nukopijuok jas, įklijuok į žinutės laukelį ir išsiųsk dar kartą.",
+    "other": "{n} dalių neišsiųsta. Nukopijuok jas, įklijuok į žinutės laukelį ir išsiųsk dar kartą."
   },
   "{n} people watched": {
     "few": "Stebimi {n} žmonės",

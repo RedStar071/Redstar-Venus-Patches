@@ -144,8 +144,10 @@
     "Completing badges": "Merkkien suorittaminen",
     "Console": "Konsoli",
     "Continue": "Jatka",
+    "Copied the rest of your message": "Viestisi loppuosa kopioitiin",
     "Copy Text": "Kopioi teksti",
     "Copy profile bios": "Kopioi profiilikuvauksia",
+    "Copy the rest": "Kopioi loput",
     "Copy to clipboard": "Kopioi leikepöydälle",
     "Couldn't download icon pack (HTTP {status}).": "Kuvakepakettia ei voitu ladata (HTTP {status}).",
     "Couldn't download theme (HTTP {status}).": "Teemaa ei voitu ladata (HTTP {status}).",
@@ -934,6 +936,7 @@
     "Your badges": "Merkkisi",
     "Your clipboard is empty. Copy a Venus backup first.": "Leikepöytä on tyhjä. Kopioi ensin Venus-varmuuskopio.",
     "Your current Venus settings will be replaced.": "Nykyiset Venus-asetuksesi korvataan.",
+    "Your long message didn't finish sending": "Pitkää viestiäsi ei lähetetty kokonaan",
     "Your past days are as full as real play gets. More room opens up every day.": "Menneet päiväsi ovat niin täynnä kuin oikea pelaaminen voi olla. Tilaa vapautuu joka päivä lisää.",
     "Your phone's language": "Puhelimen kieli",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Valitut kaverit ja lisätyt käyttäjä-ID:t tyhjennetään, ja Kaikki kaverit otetaan taas käyttöön.",
@@ -1083,6 +1086,11 @@
     "{n} options changed": {
       "one": "{n} asetus muutettu",
       "other": "{n} asetusta muutettu"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} osa jäi lähettämättä. Kopioi se, liitä se viestikenttään ja lähetä uudelleen.",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} osa jäi lähettämättä. Kopioi se, liitä se viestikenttään ja lähetä uudelleen.",
+      "other": "{n} osaa jäi lähettämättä. Kopioi ne, liitä ne viestikenttään ja lähetä uudelleen."
     },
     "{n} people watched": {
       "one": "{n} seurattu henkilö",

@@ -132,8 +132,10 @@
   "Completing badges": "Completar insignias",
   "Console": "Consola",
   "Continue": "Continuar",
+  "Copied the rest of your message": "Se copió el resto de tu mensaje",
   "Copy Text": "Copiar texto",
   "Copy profile bios": "Copiar biografías de perfil",
+  "Copy the rest": "Copiar el resto",
   "Copy to clipboard": "Copiar al portapapeles",
   "Couldn't download icon pack (HTTP {status}).": "No se pudo descargar el paquete de iconos (HTTP {status}).",
   "Couldn't download theme (HTTP {status}).": "No se pudo descargar el tema (HTTP {status}).",
@@ -864,6 +866,7 @@
   "Your badges": "Tus insignias",
   "Your clipboard is empty. Copy a Venus backup first.": "Tu portapapeles está vacío. Copia primero una copia de seguridad de Venus.",
   "Your current Venus settings will be replaced.": "Tus ajustes actuales de Venus se reemplazarán.",
+  "Your long message didn't finish sending": "Tu mensaje largo no se envió completo",
   "Your past days are as full as real play gets. More room opens up every day.": "Tus días pasados están tan llenos como puede estarlo el juego real. Cada día se abre más margen.",
   "Your phone's language": "Idioma de tu teléfono",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Se borrarán tus amigos elegidos e IDs de usuario y se volverá a activar «Todos los amigos».",
@@ -991,6 +994,11 @@
   "{n} options changed": {
     "one": "{n} opción cambiada",
     "other": "{n} opciones cambiadas"
+  },
+  "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} parte no se envió. Cópiala, pégala en el cuadro de mensaje y vuelve a enviarla.",
+  "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+    "one": "{n} parte no se envió. Cópiala, pégala en el cuadro de mensaje y vuelve a enviarla.",
+    "other": "{n} partes no se enviaron. Cópialas, pégalas en el cuadro de mensaje y vuelve a enviarlas."
   },
   "{n} people watched": {
     "one": "{n} persona vigilada",

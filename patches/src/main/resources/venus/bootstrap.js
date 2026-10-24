@@ -9012,6 +9012,9 @@
         const followMessageBase = {tts:!!message.tts, invalidEmojis:message.invalidEmojis || [],
             validNonShortcutEmojis:message.validNonShortcutEmojis || []};
         // The rest follow one at a time, without the reply or attachments, only after the previous part succeeds.
+        // sendMessage rejects when a part fails (rate limit, AutoMod, no connection): the parts after it were dropped
+        // without a word, so the end of a long message was lost. Now you're told, and can copy what wasn't sent.
+        let sent = 1;
         let chain = Promise.resolve(result).then(res => !(res && res.hasErr), () => false);
         for (let i = 1; i < chunks.length; i++) {
             const content = chunks[i];
@@ -9020,10 +9023,27 @@
                 return new Promise(resolve => later(resolve, gap)).then(() => {
                     if (!stillOn()) return false;
                     return orig.call(self, channelId, Object.assign({content}, followMessageBase), waitForReady, Object.assign({}, followOptions));
-                }).then(res => !(res && res.hasErr), () => false);
+                }).then(res => { if (res && res.hasErr) return false; sent++; return true; }, () => false);
             });
         }
+        // Only when a part really failed: turning the feature off on purpose, or switching account, stops quietly.
+        chain.then(() => { if (sent < chunks.length && stillOn()) splitUnsent(chunks.slice(sent)); }, () => {});
         return result;
+    }
+    // The parts that didn't go out, joined back as they were split, so pasting them into the box sends them again.
+    function splitUnsent(rest) {
+        const text = rest.join("\n"), ui = reviewUI();
+        const copy = () => {
+            try { (ui.clipboard || RN.Clipboard).setString(text); } catch (_) { return; }
+            reviewToast(ui, "Copied the rest of your message", venusIcon(5042, "CopyIcon"));
+        };
+        const title = tr("Your long message didn't finish sending");
+        const body = pl(rest.length, "{n} part wasn't sent. Copy it to paste it into the message box and send it again.",
+            "{n} parts weren't sent. Copy them to paste them into the message box and send them again.");
+        if (ui.alerts && typeof ui.alerts.show === "function") try {
+            ui.alerts.show({title, body, confirmText:tr("Copy the rest"), cancelText:tr("Not now"), onConfirm:copy}); return;
+        } catch (_) {}
+        try { RN.Alert.alert(title, body, [{text:tr("Not now"), style:"cancel"}, {text:tr("Copy the rest"), onPress:copy}]); } catch (_) {}
     }
     // useMessageMaxLength (9255): the message box, its counter and the "too long" check all ask it.
     // Its internal useStateFromStores closure (101129 / 101130) reads MAX_MESSAGE_LENGTH / MAX_MESSAGE_LENGTH_PREMIUM

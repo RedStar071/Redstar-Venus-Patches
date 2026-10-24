@@ -147,8 +147,10 @@
     "Completing badges": "Получение значков",
     "Console": "Консоль",
     "Continue": "Продолжить",
+    "Copied the rest of your message": "Остаток сообщения скопирован",
     "Copy Text": "Копировать текст",
     "Copy profile bios": "Копировать описание профиля",
+    "Copy the rest": "Скопировать остаток",
     "Copy to clipboard": "Скопировать в буфер обмена",
     "Couldn't download icon pack (HTTP {status}).": "Не удалось скачать набор иконок (HTTP {status}).",
     "Couldn't download theme (HTTP {status}).": "Не удалось скачать тему (HTTP {status}).",
@@ -948,6 +950,7 @@
     "Your badges": "Ваши значки",
     "Your clipboard is empty. Copy a Venus backup first.": "Буфер обмена пуст. Сначала скопируйте резервную копию Venus.",
     "Your current Venus settings will be replaced.": "Текущие настройки Venus будут заменены.",
+    "Your long message didn't finish sending": "Длинное сообщение отправилось не полностью",
     "Your past days are as full as real play gets. More room opens up every day.": "Прошедшие дни заполнены настолько, насколько это бывает при настоящей игре. Каждый день появляется новый запас.",
     "Your phone's language": "Язык телефона",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Список выбранных друзей и добавленных ID пользователей будет очищен, и снова включится режим «Все друзья».",
@@ -1119,6 +1122,12 @@
       "one": "Изменён {n} параметр",
       "few": "Изменено {n} параметра",
       "many": "Изменено {n} параметров"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} часть не отправилась. Скопируй её, вставь в поле сообщения и отправь снова.",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} часть не отправилась. Скопируй её, вставь в поле сообщения и отправь снова.",
+      "few": "{n} части не отправились. Скопируй их, вставь в поле сообщения и отправь снова.",
+      "many": "{n} частей не отправилось. Скопируй их, вставь в поле сообщения и отправь снова."
     },
     "{n} people watched": {
       "one": "Отслеживается {n} человек",

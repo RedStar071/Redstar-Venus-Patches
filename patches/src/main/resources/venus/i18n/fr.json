@@ -144,8 +144,10 @@
     "Completing badges": "Complétion des badges",
     "Console": "Console",
     "Continue": "Continuer",
+    "Copied the rest of your message": "La suite de ton message a été copiée",
     "Copy Text": "Copier le texte",
     "Copy profile bios": "Copier les bios de profil",
+    "Copy the rest": "Copier la suite",
     "Copy to clipboard": "Copier dans le presse-papiers",
     "Couldn't download icon pack (HTTP {status}).": "Impossible de télécharger le pack d'icônes (HTTP {status}).",
     "Couldn't download theme (HTTP {status}).": "Impossible de télécharger le thème (HTTP {status}).",
@@ -934,6 +936,7 @@
     "Your badges": "Tes badges",
     "Your clipboard is empty. Copy a Venus backup first.": "Votre presse-papiers est vide. Copiez d'abord une sauvegarde Venus.",
     "Your current Venus settings will be replaced.": "Vos paramètres Venus actuels seront remplacés.",
+    "Your long message didn't finish sending": "Ton long message n'a pas été envoyé en entier",
     "Your past days are as full as real play gets. More room opens up every day.": "Tes jours passés sont aussi remplis qu'un vrai joueur peut l'être. De la place se libère chaque jour.",
     "Your phone's language": "Langue de votre téléphone",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Vos amis sélectionnés et les identifiants ajoutés seront effacés, et Tous les amis sera réactivé.",
@@ -1083,6 +1086,11 @@
     "{n} options changed": {
       "one": "{n} option modifiée",
       "other": "{n} options modifiées"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} partie n'a pas été envoyée. Copie-la, colle-la dans la zone de message et renvoie-la.",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} partie n'a pas été envoyée. Copie-la, colle-la dans la zone de message et renvoie-la.",
+      "other": "{n} parties n'ont pas été envoyées. Copie-les, colle-les dans la zone de message et renvoie-les."
     },
     "{n} people watched": {
       "one": "{n} personne suivie",

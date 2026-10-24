@@ -147,8 +147,10 @@
     "Completing badges": "Plnění odznaků",
     "Console": "Konzole",
     "Continue": "Pokračovat",
+    "Copied the rest of your message": "Zbytek zprávy je zkopírovaný",
     "Copy Text": "Kopírovat text",
     "Copy profile bios": "Kopírovat popisky profilů",
+    "Copy the rest": "Zkopírovat zbytek",
     "Copy to clipboard": "Kopírovat do schránky",
     "Couldn't download icon pack (HTTP {status}).": "Balíček ikon se nepodařilo stáhnout (HTTP {status}).",
     "Couldn't download theme (HTTP {status}).": "Motiv se nepodařilo stáhnout (HTTP {status}).",
@@ -948,6 +950,7 @@
     "Your badges": "Tvé odznaky",
     "Your clipboard is empty. Copy a Venus backup first.": "Schránka je prázdná. Nejprve zkopírujte zálohu Venus.",
     "Your current Venus settings will be replaced.": "Vaše současné nastavení Venus bude nahrazeno.",
+    "Your long message didn't finish sending": "Dlouhou zprávu se nepodařilo odeslat celou",
     "Your past days are as full as real play gets. More room opens up every day.": "Tvé minulé dny jsou tak plné, jak skutečné hraní dovolí. Každý den přibude místo.",
     "Your phone's language": "Jazyk telefonu",
     "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Vybraní přátelé a vlastní ID uživatelů budou vymazáni a znovu se zapne Všichni přátelé.",
@@ -1119,6 +1122,12 @@
       "one": "{n} změněná možnost",
       "few": "{n} změněné možnosti",
       "other": "{n} změněných možností"
+    },
+    "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} část se neodeslala. Zkopíruj ji, vlož ji do pole pro zprávu a odešli ji znovu.",
+    "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+      "one": "{n} část se neodeslala. Zkopíruj ji, vlož ji do pole pro zprávu a odešli ji znovu.",
+      "few": "{n} části se neodeslaly. Zkopíruj je, vlož je do pole pro zprávu a odešli je znovu.",
+      "other": "{n} částí se neodeslalo. Zkopíruj je, vlož je do pole pro zprávu a odešli je znovu."
     },
     "{n} people watched": {
       "one": "{n} sledovaná osoba",

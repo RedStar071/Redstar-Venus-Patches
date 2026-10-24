@@ -132,8 +132,10 @@
   "Completing badges": "Fullfører merker",
   "Console": "Konsoll",
   "Continue": "Fortsett",
+  "Copied the rest of your message": "Resten av meldingen er kopiert",
   "Copy Text": "Kopier tekst",
   "Copy profile bios": "Kopier profilbioer",
+  "Copy the rest": "Kopier resten",
   "Copy to clipboard": "Kopier til utklippstavlen",
   "Couldn't download icon pack (HTTP {status}).": "Kunne ikke laste ned ikonpakken (HTTP {status}).",
   "Couldn't download theme (HTTP {status}).": "Kunne ikke laste ned temaet (HTTP {status}).",
@@ -864,6 +866,7 @@
   "Your badges": "Merkene dine",
   "Your clipboard is empty. Copy a Venus backup first.": "Utklippstavlen er tom. Kopier en Venus-sikkerhetskopi først.",
   "Your current Venus settings will be replaced.": "De nåværende Venus-innstillingene dine blir erstattet.",
+  "Your long message didn't finish sending": "Den lange meldingen din ble ikke sendt helt",
   "Your past days are as full as real play gets. More room opens up every day.": "Dagene dine bakover i tid er så fulle som ekte spilling kan bli. Det kommer mer plass hver dag.",
   "Your phone's language": "Telefonens språk",
   "Your picked friends and custom user IDs will be cleared, and All friends will be turned back on.": "Valgte venner og egendefinerte bruker-ID-er tømmes, og Alle venner slås på igjen.",
@@ -991,6 +994,11 @@
   "{n} options changed": {
     "one": "{n} alternativ endret",
     "other": "{n} alternativer endret"
+  },
+  "{n} part wasn't sent. Copy it to paste it into the message box and send it again.": "{n} del ble ikke sendt. Kopier den, lim den inn i meldingsfeltet og send den på nytt.",
+  "{n} parts weren't sent. Copy them to paste them into the message box and send them again.": {
+    "one": "{n} del ble ikke sendt. Kopier den, lim den inn i meldingsfeltet og send den på nytt.",
+    "other": "{n} deler ble ikke sendt. Kopier dem, lim dem inn i meldingsfeltet og send dem på nytt."
   },
   "{n} people watched": {
     "one": "{n} person overvåkes",
