@@ -2736,7 +2736,9 @@
         const relative = preciseAgo(ms);
         if (relative === null) return {relative:fallback, absolute:null};
         let absolute = null;
-        try { absolute = new Date(ms).toLocaleString(); } catch (_) {}
+        // The date and time to the minute, in the language Venus is shown in: seconds are noise here.
+        try { absolute = new Date(ms).toLocaleString(uiLanguage(), {year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}); } catch (_) {}
+        if (!absolute) try { absolute = new Date(ms).toLocaleString(); } catch (_) {}
         return {relative, absolute};
     }
     function hiddenDetails(channel) {
