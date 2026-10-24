@@ -4804,7 +4804,8 @@
             consent === false ? statusCard("consent", "Discord only counts games toward these badges while \"Use data to personalize my Discord experience\" is on.",
                 {title:tr("Personalization is off"), IconComponent:venusIcon(12178, "ChatWarningIcon"),
                  trailing:Button ? el(Button, {text:tr("Turn on"), size:"sm", variant:"primary", onPress:() => { haptic("SELECTION"); badgeTurnOnPersonalization(); }}) : null}) : null,
-            badgeProgressCard(s, on),
+            // Off, progress never loads, so the card would only say "Loading progress" three times.
+            on || BADGE_ROWS.some(([key]) => badgeInfo(key)) ? badgeProgressCard(s, on) : null,
             on ? badgeHowCard(s) : null,
             el(Group, {key:"types", title:tr("What to count")},
                 switchRow(Switch, "badgesGameTime", "Game time", "Plays games in the background, toward Hours Played.", rowIcon(5051, "ClockIcon")),
