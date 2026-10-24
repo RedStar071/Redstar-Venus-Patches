@@ -5754,7 +5754,7 @@
         const s = useThemed("fixSites", c => ({card:Object.assign({}, FIX_LIST_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
             divider:Object.assign({}, FIX_LIST_DARK.divider, {backgroundColor:c.BORDER_SUBTLE})}), FIX_LIST_DARK);
         const Text = inspectedExport(5088, "Text"), FormSwitch = inspectedExport(6897, "FormSwitch"), Press = RN.Pressable || RN.View;
-        const Down = venusIcon(10534, "ChevronSmallDownIcon"), Right = venusIcon(6906, "ChevronSmallRightIcon");
+        const Down = venusIcon(10534, "ChevronSmallDownIcon");
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1}, value) : el(RN.Text, {style:fallback, numberOfLines:1}, value);
         const rows = fixRows();
         const siteRow = (site, i, out) => {
@@ -5768,7 +5768,8 @@
                 el(RN.View, {style:{flex:1, gap:2}},
                     line(site.name, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                     line(detail, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
-                many && service && on ? el(expanded ? Down : Right, {size:"sm"}) : null,
+                // It opens in place, so a down chevron that flips up, not a "goes to another page" arrow.
+                many && service && on ? el(RN.View, {style:expanded ? {transform:[{rotate:"180deg"}]} : null}, el(Down, {size:"sm"})) : null,
                 FormSwitch ? el(FormSwitch, {value:!!service, disabled:!on, accessibilityLabel:site.name,
                     onValueChange:value => { animateLayout(); if (!value && open === site.id) setOpen(null); fixSetChoice(site.id, value ? site.services[0].id : "off"); }}) : null));
             if (expanded) out.push(el(RN.View, {key:site.id + ":pick", style:{paddingRight:16, paddingBottom:14, paddingLeft:68}},
