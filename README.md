@@ -33,7 +33,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Favourite any image or video | Star any image or video to keep it in your GIF favourites |
 | **Sending** | Send Nitro stickers and emojis as links | Sends Nitro emojis and stickers as links that show as the image |
 | | Bring back Tenor GIFs | Tenor GIFs show in Discord's own GIF picker again: search, trending and categories. Mix them with Discord's GIFs or use only Tenor. If Tenor doesn't answer, Discord's own GIFs show |
-| | Fix link previews | Links to X, Instagram, TikTok, Reddit, Bluesky, Threads, Facebook, pixiv and Bilibili show the post, with its picture or video. Pick the embed service per site (FxTwitter or vxTwitter, and so on), and share tracking like `?igsh=` is removed |
+| | Fix link previews | Links to X, Instagram, TikTok, Reddit, Bluesky, Threads, Tumblr, Facebook, PTT, Twitch clips, Bilibili, pixiv, DeviantArt and Fur Affinity show the post, with its picture or video. YouTube, Spotify, Mastodon and Pinterest can be turned on too. Pick the embed service per site (FxTwitter, vxTwitter or FixEmbed, and so on), Tumblr posts can be drawn dark to match Discord, and share tracking like `?igsh=` is removed |
 | | Send audio as voice messages | Audio files are sent as real voice messages, with a waveform |
 | | Send long messages | Type past the character limit; long messages are sent in parts |
 | | Hide typing indicator | Others won't see when you're typing |

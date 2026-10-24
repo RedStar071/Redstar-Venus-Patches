@@ -683,7 +683,7 @@ val bringBackTenorGifs = bundledPlugin("tenorGifs", "Bring back Tenor GIFs",
 
 @Suppress("unused")
 val fixLinkPreviews = bundledPlugin("fixEmbeds", "Fix link previews",
-    "Links to X, Instagram, TikTok, Reddit and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.")
+    "Links to X, Instagram, TikTok, Tumblr and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.")
 
 @Suppress("unused")
 val splitLargeMessages = bundledPlugin("splitMessages", "Send long messages",

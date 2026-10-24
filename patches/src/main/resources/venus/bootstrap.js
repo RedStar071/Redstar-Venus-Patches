@@ -68,7 +68,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true,
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, tenorGifs:false, tenorGifsSource:"both", language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -85,7 +85,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true,
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, tenorGifs: false, tenorGifsSource: "both", language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -928,7 +928,8 @@
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
-        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Facebook", "pixiv", "Bilibili", "FxTwitter", "vxTwitter", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
+        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
+            "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
@@ -1269,7 +1270,7 @@
                 option("stickers", "Stickers", "Stickers from other servers. Animated ones may not move.", "VENUS_FREENITRO")]),
              section("Link style", [option("hyperlinks", "Short links", "In chat it looks the same either way. Short links only change what's copied or quoted.", "VENUS_FREENITRO")])]}));
         withOptions("sending", "tenorGifs", "VENUS_TENORGIFS", "Bring back Tenor GIFs", "Tenor GIFs show in Discord's GIF picker again.", "Tenor GIFs", TenorSettings);
-        withOptions("sending", "fixEmbeds", "VENUS_FIXEMBEDS", "Fix link previews", "Links to X, Instagram, TikTok, Reddit and more show the post.", "Link previews", FixEmbedsSettings);
+        withOptions("sending", "fixEmbeds", "VENUS_FIXEMBEDS", "Fix link previews", "Links to X, Instagram, TikTok, Tumblr and more show the post.", "Link previews", FixEmbedsSettings);
         toggle("sending", "voice", "Send audio as voice messages", "Audio files are sent as voice messages. Android 10 or newer.");
         toggle("sending", "splitMessages", "Send long messages", "Type past the limit. Long messages are sent in parts.");
         toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing.");
@@ -5665,8 +5666,11 @@
     // under it. Off: the finished message, so the page always shows the result.
     const FIX_SAMPLES = {x:"/wumpus/status/1846602926837096812", instagram:"/reel/C5nYWo0P5yK/", tiktok:"/@wumpus/video/7137423965982592302",
         reddit:"/r/discordapp/comments/1g5x4b0/", bluesky:"/profile/wumpus.bsky.social/post/3l6oveex3ii2l", threads:"/@wumpus/post/DGkNlhDyGm9",
-        facebook:"/reel/1180000000000000", pixiv:"/artworks/123456789", bilibili:"/video/BV1xx411c7mD"};
-    const FIX_VIDEO = {x:true, instagram:true, tiktok:true, facebook:true, bilibili:true};
+        tumblr:"/wumpus/752839474927902720", facebook:"/reel/1180000000000000", mastodon:"/@wumpus/113289104412093482",
+        ptt:"/bbs/C_Chat/M.1729000000.A.1B2.html", youtube:"/watch?v=dQw4w9WgXcQ", twitch:"/wumpus/clip/GoodGoodWaffleTwitchRaid",
+        bilibili:"/video/BV1xx411c7mD", spotify:"/track/4cOdK2wGLETKBW3PvgPWqT", pixiv:"/artworks/123456789",
+        deviantart:"/wumpus/art/Final-Boss-1093497633", furaffinity:"/view/42140481", pinterest:"/pin/424605071145119869/"};
+    const FIX_VIDEO = {x:true, instagram:true, tiktok:true, facebook:true, bilibili:true, youtube:true, twitch:true, spotify:true};
     const FIX_PREVIEW_DARK = {link:{color:"#00a8fc"}, embed:{backgroundColor:"#2b2d31", borderColor:"#ffffff14"}, ring:{borderColor:"#5865f2"}};
     function useFixStyles() {
         return useThemed("fixEmbeds", c => ({link:{color:c.TEXT_LINK || "#00a8fc"}, embed:{backgroundColor:c.BACKGROUND_SURFACE_HIGH || c.CARD_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE},
@@ -5674,12 +5678,14 @@
     }
     // A site's own mark (Discord ships the brand icons it uses for connected accounts), white on its brand color.
     // Sites Discord has no icon for get their letter.
+    // Very dark brand colors (X, Threads, Tumblr) get a faint ring, so the mark doesn't vanish on a dark card.
     function fixBadge(site, size) {
-        const Icon = Array.isArray(site.icon) ? venusIcon(site.icon[0], site.icon[1]) : null, dark = site.color === "#000000" || site.color === "#101010";
+        const Icon = Array.isArray(site.icon) ? venusIcon(site.icon[0], site.icon[1]) : null, hex = parseInt(site.color.slice(1), 16);
+        const dark = 0.2126 * (hex >> 16 & 255) + 0.7152 * (hex >> 8 & 255) + 0.0722 * (hex & 255) < 48, letters = Icon ? 1 : String(site.icon).length;
         return el(RN.View, {style:{width:size, height:size, borderRadius:size / 2, alignItems:"center", justifyContent:"center", backgroundColor:site.color,
             borderWidth:dark ? 1 : 0, borderColor:"#ffffff26"}},
             Icon ? el(Icon, {size:size >= 36 ? "sm" : size >= 24 ? "xs" : "xxs", color:"#ffffff"}) :
-                el(RN.Text, {style:{color:"#ffffff", fontWeight:"800", fontSize:Math.round(size * 0.45)}}, site.icon));
+                el(RN.Text, {style:{color:"#ffffff", fontWeight:"800", fontSize:Math.round(size * (letters > 2 ? 0.26 : letters > 1 ? 0.34 : 0.45))}}, site.icon));
     }
     function FixEmbedsPreview(props) {
         useSettings("fixEmbeds");
@@ -5737,7 +5743,8 @@
                     el(RN.View, null, input, tapRipple(state.pulse, "send", {right:10, top:11})),
                     watching ? storyStrip(k, s, story) : null)}));
     }
-    // Every site in one card: its mark, where its links go and a switch. A site with more than one service opens a choice under it.
+    // Sites in three cards by what's shared (posts, videos and music, art): each row has the site's mark, where its links go and
+    // a switch. A site with more than one service opens a choice under it. Sites that start off say why: Discord's own preview works.
     const FIX_LIST_DARK = {card:{backgroundColor:"#2b2d31", borderRadius:16, overflow:"hidden"}, divider:{height:1, marginLeft:68, backgroundColor:"#ffffff0f"}};
     function FixSiteList(props) {
         useSettings("fixEmbeds");
@@ -5747,29 +5754,49 @@
         const Text = inspectedExport(5088, "Text"), FormSwitch = inspectedExport(6897, "FormSwitch"), Press = RN.Pressable || RN.View;
         const Down = venusIcon(10534, "ChevronSmallDownIcon"), Right = venusIcon(6906, "ChevronSmallRightIcon");
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1}, value) : el(RN.Text, {style:fallback, numberOfLines:1}, value);
-        const rows = fixRows(), choices = fixChoices(settings.fixEmbedsSites), active = rows.filter(row => choices[row[0]] !== "off").length, out = [];
-        rows.forEach((row, i) => {
-            const site = fixEmbeds.sites[row[0]], service = fixService(site), many = site.services.length > 1, expanded = open === site.id && !!service && many && on;
-            const to = service ? typeof service.to === "string" ? service.to.replace(/^https:\/\/([^\/]+).*$/, "$1") : service.to[site.hosts[0]] : "";
-            if (i) out.push(el(RN.View, {key:"d" + i, style:s.divider}));
+        const rows = fixRows(), active = rows.filter(row => fixService(fixEmbeds.sites[row[0]])).length;
+        const siteRow = (site, i, out) => {
+            const service = fixService(site), many = site.services.length > 1, expanded = open === site.id && !!service && many && on;
+            if (i) out.push(el(RN.View, {key:"d" + site.id, style:s.divider}));
             const toggleOpen = () => { if (!on || !service || !many) return; haptic("SELECTION"); animateLayout(); setOpen(expanded ? null : site.id); };
+            const detail = service ? service.name + " \u00b7 " + fixServiceHost(site, service) : tr(site.start === "off" ? "Discord shows its own preview" : "Sent as written");
             out.push(el(Press, {key:site.id, onPress:toggleOpen, disabled:!on || !service || !many, accessibilityRole:many && service ? "button" : undefined,
                 accessibilityLabel:site.name, accessibilityState:{expanded}, style:{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:12, opacity:on ? 1 : 0.5}},
                 el(RN.View, {style:{opacity:service ? 1 : 0.4}}, fixBadge(site, 40)),
                 el(RN.View, {style:{flex:1, gap:2}},
                     line(site.name, "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
-                    line(service ? service.name + " \u00b7 " + to : tr("Sent as written"), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+                    line(detail, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
                 many && service && on ? el(expanded ? Down : Right, {size:"sm"}) : null,
                 FormSwitch ? el(FormSwitch, {value:!!service, disabled:!on, accessibilityLabel:site.name,
                     onValueChange:value => { animateLayout(); if (!value && open === site.id) setOpen(null); fixSetChoice(site.id, value ? site.services[0].id : "off"); }}) : null));
             if (expanded) out.push(el(RN.View, {key:site.id + ":pick", style:{paddingRight:16, paddingBottom:14, paddingLeft:68}},
-                venusSegmented({key:"fix:" + site.id, value:service.id, onChange:value => fixSetChoice(site.id, value),
-                    items:site.services.map(item => ({value:item.id, label:item.name}))})));
-        });
-        return el(RN.View, {key:"sites", style:{gap:8}},
+                // More than four services don't fit as pills, so they become a list of choices.
+                site.services.length <= 4 ? venusSegmented({key:"fix:" + site.id, value:service.id, onChange:value => fixSetChoice(site.id, value),
+                    items:site.services.map(item => ({value:item.id, label:item.name}))}) : fixServiceChoices(site, service, line)));
+        };
+        const card = (group, title) => {
+            const out = [];
+            rows.filter(row => fixEmbeds.sites[row[0]].group === group).forEach((row, i) => siteRow(fixEmbeds.sites[row[0]], i, out));
+            return el(RN.View, {key:group, style:{gap:8}}, title, el(RN.View, {style:s.card}, out));
+        };
+        const cards = [card("social", groupTitle("t:social", "Social")), card("video", groupTitle("t:video", "Video and music")), card("art", groupTitle("t:art", "Art"))];
+        return el(RN.View, {key:"sites", style:{gap:16}},
             groupTitle("title", tr("Sites") + " \u00b7 " + tr("{on} of {total} turned on", {on:active, total:rows.length})),
-            el(RN.View, {style:s.card}, out),
+            cards,
             footnote("hint", "Tap a site to choose its service. If a preview doesn't show, another service may work."));
+    }
+    // A long list of services as radio rows: the service's name, where links go and a check on the one in use.
+    function fixServiceChoices(site, service, line) {
+        const Press = RN.Pressable || RN.View, Check = venusIcon(6823, "CheckmarkSmallIcon");
+        return el(RN.View, {style:{gap:2}}, site.services.map(item => {
+            const picked = item.id === service.id;
+            return el(Press, {key:item.id, accessibilityRole:"radio", accessibilityLabel:item.name, accessibilityState:{selected:picked},
+                onPress:() => { if (picked) return; haptic("SELECTION"); animateLayout(); fixSetChoice(site.id, item.id); },
+                style:{flexDirection:"row", alignItems:"center", gap:8, paddingVertical:8}},
+                el(RN.View, {style:{flex:1}}, line(item.name, picked ? "text-sm/semibold" : "text-sm/medium", picked ? "text-strong" : "text-default", {color:"#dbdee1", fontSize:14}),
+                    line(fixServiceHost(site, item), "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12})),
+                picked ? popIn("check:" + site.id + ":" + item.id, el(Check, {size:"sm"})) : null);
+        }));
     }
     function TenorSettings() {
         useSettings("tenorGifs");
@@ -5790,8 +5817,8 @@
         const ui = reviewUI();
         if (!React || !RN) return null;
         const on = enabled("fixEmbeds"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Icon = venusIcon(12910, "EmbedIcon");
-        const choices = fixChoices(settings.fixEmbedsSites), none = !fixRows().some(row => choices[row[0]] !== "off");
-        const changed = settings.fixEmbedsSites !== "" || !settings.fixEmbedsClean;
+        const none = !fixRows().some(row => fixService(fixEmbeds.sites[row[0]])), tumblr = fixService(fixSite("tumblr"));
+        const changed = settings.fixEmbedsSites !== "" || !settings.fixEmbedsClean || !settings.fixEmbedsDark;
         const groups = [
             !on ? offCard("status", Icon, "fixEmbeds") : none ? statusCard("status", "Turn on a site below.", {title:tr("No sites turned on"), IconComponent:Icon}) :
                 fixEmbeds.count ? statusCard("status", pl(fixEmbeds.count, "Fixed {n} link since Discord opened.", "Fixed {n} links since Discord opened."),
@@ -5800,9 +5827,12 @@
             el(FixSiteList, {key:"sites", on}),
             el(Group, {key:"privacy", title:tr("Privacy")},
                 switchRow(Switch, "fixEmbedsClean", "Remove tracking from links", "Drops share IDs like ?igsh= and ?si= from the links Venus fixes.", rowIcon(10410, "ShieldIcon"))),
-            changed ? el(Group, {key:"manage", title:tr("Manage")}, actionRow(ui, "reset", "Reset to defaults", "Every site on, through its first service.", () =>
-                confirmAction("Reset to defaults?", "Every site goes back to its first service, and tracking is removed again.", "Reset", () => {
-                    animateLayout(); setSetting("fixEmbedsSites", ""); setSetting("fixEmbedsClean", true); }), !on, true)) : null,
+            // Only fxtumblr can draw a dark post, so the switch shows while Tumblr links go through it (#87).
+            tumblr && tumblr.dark ? el(Group, {key:"look", title:tr("Look")},
+                switchRow(Switch, "fixEmbedsDark", "Dark Tumblr posts", "Tumblr posts are drawn on a dark background, to match Discord.", rowIcon(12689, "ThemeDarkIcon"))) : null,
+            changed ? el(Group, {key:"manage", title:tr("Manage")}, actionRow(ui, "reset", "Reset to defaults", "Every site back to how it started.", () =>
+                confirmAction("Reset to defaults?", "Every site goes back to how it started, and tracking is removed again.", "Reset", () => {
+                    animateLayout(); setSetting("fixEmbedsSites", ""); setSetting("fixEmbedsClean", true); setSetting("fixEmbedsDark", true); }), !on, true)) : null,
             footnote("note", "Only the link changes, and only when you send or edit a message. Links in code or in <angle brackets> are sent as written.")];
         return settingsBody(ui, groups);
     }
@@ -8994,36 +9024,67 @@
         return exports;
     }
 
-    // Fix link previews: links to posts on sites whose previews Discord can't build (X, Instagram, TikTok, Reddit...) are
+    // Fix link previews: links to posts on sites whose previews Discord can't build (X, Instagram, TikTok, Tumblr...) are
     // sent through an embed service that can: x.com/... becomes fixupx.com/..., and the post shows with its text, picture
     // or video. Only the address changes: Venus fetches nothing, and nothing happens until you send.
-    // Each site: [id, name, brand color, icon (module, export) or a letter, hosts, post path (or one per host), services].
-    // A service is [id, name, {from host: to host}], or [id, name, "prefix"] for one that takes the whole link.
+    // Each site: [id, name, brand color, icon (module, export) or letters, hosts, post path (or one per host), services, options].
+    // A service is [id, name, {from host: to host}, extra], or [id, name, "template"] for one that takes the whole link:
+    // {url} is the link, encoded; {host} and {path} are its parts. A "*.tumblr.com" host matches any blog's own address and
+    // keeps the blog's name ("staff.tumblr.com" becomes "staff.tpmblr.com"). extra.dark: the query that asks for a dark post.
+    // Options: group (where the site is listed), off (starts off: Discord already shows a fair preview), sub (blog addresses).
+    // Every service here was checked with Discord's own link crawler against real posts.
     // Built only when a link is first sent or the page opens, never while Discord starts.
     function fixSiteRows() {
+        const FIXEMBED = ["fixembed", "FixEmbed", "https://fixembed.app/embed?url={url}"];
         return [
-            ["x", "X (Twitter)", "#000000", [8128, "XNeutralIcon"], ["x.com", "twitter.com"], /^\/(?:[A-Za-z0-9_]{1,15}|i(?:\/web)?)\/status(?:es)?\/\d+/,
-                [["fxtwitter", "FxTwitter", {"x.com":"fixupx.com", "twitter.com":"fxtwitter.com"}], ["vxtwitter", "vxTwitter", {"x.com":"fixvx.com", "twitter.com":"vxtwitter.com"}]]],
+            ["x", "X (Twitter)", "#000000", [8128, "XNeutralIcon"], ["x.com", "twitter.com", "nitter.net", "xcancel.com"], /^\/(?:[A-Za-z0-9_]{1,15}|i(?:\/web)?)\/status(?:es)?\/\d+/,
+                [["fxtwitter", "FxTwitter", {"x.com":"fixupx.com", "twitter.com":"fxtwitter.com", "nitter.net":"fixupx.com", "xcancel.com":"fixupx.com"}],
+                 ["vxtwitter", "vxTwitter", {"x.com":"fixvx.com", "twitter.com":"vxtwitter.com", "nitter.net":"fixvx.com", "xcancel.com":"fixvx.com"}], FIXEMBED], {group:"social"}],
             ["instagram", "Instagram", "#e1306c", [8132, "InstagramNeutralIcon"], ["instagram.com"], /^\/(?:[\w.]+\/)?(?:p|reels?|tv|share(?:\/(?:p|reels?))?)\/[\w-]+/,
                 [["oginstagram", "OGInstagram", {"instagram.com":"oginstagram.com"}], ["instafix", "InstaFix", {"instagram.com":"eeinstagram.com"}],
-                 ["kkinstagram", "KKInstagram", {"instagram.com":"kkinstagram.com"}]]],
+                 ["kkinstagram", "KKInstagram", {"instagram.com":"kkinstagram.com"}], ["vxinstagram", "vxInstagram", {"instagram.com":"vxinstagram.com"}], FIXEMBED], {group:"social"}],
             ["tiktok", "TikTok", "#ee1d52", [12055, "TiktokNeutralIcon"], ["tiktok.com", "vm.tiktok.com", "vt.tiktok.com"],
                 {"tiktok.com":/^\/(?:@[\w.-]+\/(?:video|photo)\/\d+|t\/\w+)/, "vm.tiktok.com":/^\/\w+/, "vt.tiktok.com":/^\/\w+/},
                 [["fxtiktok", "fxTikTok", {"tiktok.com":"tnktok.com", "vm.tiktok.com":"vm.tnktok.com", "vt.tiktok.com":"vt.tnktok.com"}],
-                 ["tiktxk", "tiktxk", {"tiktok.com":"tiktxk.com", "vm.tiktok.com":"vm.tiktxk.com", "vt.tiktok.com":"vt.tiktxk.com"}]]],
+                 ["tiktxk", "tiktxk", {"tiktok.com":"tiktxk.com", "vm.tiktok.com":"vm.tiktxk.com", "vt.tiktok.com":"vt.tiktxk.com"}], FIXEMBED], {group:"video"}],
             ["reddit", "Reddit", "#ff4500", [9105, "RedditNeutralIcon"], ["reddit.com"], /^\/(?:r|u|user)\/[\w-]+\/(?:comments|s)\/\w+/,
-                [["vxreddit", "vxReddit", {"reddit.com":"vxreddit.com"}], ["fixreddit", "FixReddit", {"reddit.com":"fxreddit.seria.moe"}], ["rxddit", "rxddit", {"reddit.com":"rxddit.com"}]]],
+                [["vxreddit", "vxReddit", {"reddit.com":"vxreddit.com"}], ["fixreddit", "FixReddit", {"reddit.com":"fxreddit.seria.moe"}], ["rxddit", "rxddit", {"reddit.com":"rxddit.com"}], FIXEMBED],
+                {group:"social"}],
             ["bluesky", "Bluesky", "#1185fe", [9103, "BlueskyNeutralIcon"], ["bsky.app"], /^\/profile\/[^\/\s]+\/post\/\w+/,
-                [["fxbsky", "FxBluesky", {"bsky.app":"fxbsky.app"}], ["vixbluesky", "VixBluesky", {"bsky.app":"bskx.app"}]]],
+                [["fxbsky", "FxBluesky", {"bsky.app":"fxbsky.app"}], ["vixbluesky", "VixBluesky", {"bsky.app":"bskx.app"}], ["fixbluesky", "FixBluesky", {"bsky.app":"bsyy.app"}],
+                 ["bskye", "bskye", {"bsky.app":"bskye.app"}]], {group:"social"}],
             ["threads", "Threads", "#101010", "@", ["threads.net", "threads.com"], /^\/@[\w.]+\/post\/[\w-]+/,
-                [["fixembed", "FixEmbed", "https://fixembed.app/embed?url="]]],
+                [FIXEMBED, ["fixthreads", "FixThreads", {"threads.net":"fixthreads.seria.moe", "threads.com":"fixthreads.seria.moe"}]], {group:"social"}],
+            // Tumblr (#87): fxtumblr shows the whole post, drawn as a picture, and can draw it dark.
+            ["tumblr", "Tumblr", "#001935", "t", ["tumblr.com"], {"tumblr.com":/^\/[\w-]+\/\d+/, "*.tumblr.com":/^\/post\/\d+/},
+                [["fxtumblr", "fxtumblr", {"tumblr.com":"tpmblr.com", "*.tumblr.com":"*.tpmblr.com"}, {dark:"dark"}], FIXEMBED], {group:"social", sub:true}],
             ["facebook", "Facebook", "#0866ff", [8130, "FacebookNeutralIcon"], ["facebook.com"],
                 /^\/(?:reel\/\d+|watch\/?\?|share\/[rvp]\/\w+|[\w.]+\/(?:videos|posts)\/[\w.-]+|story\.php|permalink\.php)/,
-                [["facebed", "facebed", {"facebook.com":"facebed.com"}]]],
+                [["facebed", "facebed", {"facebook.com":"facebed.com"}]], {group:"social"}],
+            ["mastodon", "Mastodon", "#6364ff", "M", ["mastodon.social", "mstdn.social", "mastodon.online", "mastodon.world", "mas.to", "mstdn.jp", "fosstodon.org",
+                "hachyderm.io", "infosec.exchange", "techhub.social", "mastodon.art", "mastodon.cloud"], /^\/@[\w.]+(?:@[\w.-]+)?\/\d+/,
+                [["fxmastodon", "FxMastodon", "https://fxmas.to/{host}{path}"]], {group:"social", off:true}],
+            ["ptt", "PTT", "#1f1f1f", "PTT", ["ptt.cc"], /^\/bbs\/\w+\/M\.\d+\.A\.\w+\.html/,
+                [["fxptt", "fxptt", {"ptt.cc":"fxptt.seria.moe"}]], {group:"social"}],
+            ["youtube", "YouTube", "#ff0033", [9101, "YoutubeNeutralIcon"], ["youtube.com", "youtu.be", "music.youtube.com"],
+                {"youtube.com":/^\/(?:watch\?(?:[^#]*&)?v=[\w-]{11}|shorts\/[\w-]{11}|live\/[\w-]{11})/, "youtu.be":/^\/[\w-]{11}/, "music.youtube.com":/^\/watch\?(?:[^#]*&)?v=[\w-]{11}/},
+                [["koutube", "Koutube", {"youtube.com":"koutube.com", "youtu.be":"koutu.be", "music.youtube.com":"music.koutube.com"}], FIXEMBED], {group:"video", off:true}],
+            ["twitch", "Twitch clips", "#9146ff", [9107, "TwitchNeutralIcon"], ["twitch.tv", "clips.twitch.tv"],
+                {"twitch.tv":/^\/(?:[\w-]+\/)?clip\/[\w-]+/, "clips.twitch.tv":/^\/(?!embed\b)[\w-]{3,}/},
+                [["fxtwitch", "fxtwitch", {"twitch.tv":"fxtwitch.seria.moe", "clips.twitch.tv":"fxtwitch.seria.moe/clip"}], FIXEMBED], {group:"video"}],
+            ["bilibili", "Bilibili", "#fb7299", "B", ["bilibili.com", "b23.tv"], {"bilibili.com":/^\/video\/\w+/, "b23.tv":/^\/\w+/},
+                [["bilifix", "BiliFix", {"bilibili.com":"vxbilibili.com", "b23.tv":"vxb23.tv"}], ["fxbilibili", "fxbilibili", {"bilibili.com":"fxbilibili.seria.moe", "b23.tv":"fxbilibili.seria.moe/b23"}],
+                 FIXEMBED], {group:"video"}],
+            ["spotify", "Spotify", "#1db954", [16521, "SpotifyNeutralIcon"], ["open.spotify.com"], /^\/(?:intl-[\w-]+\/)?track\/\w+/,
+                [["fxspotify", "FxSpotify", {"open.spotify.com":"fxspotify.com"}]], {group:"video", off:true}],
             ["pixiv", "pixiv", "#0096fa", "P", ["pixiv.net"], /^\/(?:[a-z]{2}\/)?artworks\/\d+/,
-                [["phixiv", "phixiv", {"pixiv.net":"phixiv.net"}], ["ppxiv", "ppxiv", {"pixiv.net":"ppxiv.net"}]]],
-            ["bilibili", "Bilibili", "#fb7299", "B", ["bilibili.com"], /^\/video\/\w+/,
-                [["bilifix", "BiliFix", {"bilibili.com":"vxbilibili.com"}]]]];
+                [["phixiv", "phixiv", {"pixiv.net":"phixiv.net"}], ["ppxiv", "ppxiv", {"pixiv.net":"ppxiv.net"}], FIXEMBED], {group:"art"}],
+            ["deviantart", "DeviantArt", "#00c853", "D", ["deviantart.com"], /^\/[\w-]+\/art\/[\w-]+-\d+/,
+                [["fixdeviantart", "fixDeviantArt", {"deviantart.com":"fixdeviantart.com"}], FIXEMBED], {group:"art"}],
+            ["furaffinity", "Fur Affinity", "#2e3b41", "FA", ["furaffinity.net"], /^\/(?:view|full)\/\d+/,
+                [["xfuraffinity", "xfuraffinity", {"furaffinity.net":"xfuraffinity.net"}]], {group:"art"}],
+            ["pinterest", "Pinterest", "#e60023", "P", ["pinterest.com"], /^\/pin\/\d+/,
+                [FIXEMBED, ["embedez", "EmbedEZ", {"pinterest.com":"pinterestez.com"}]], {group:"art", off:true}]];
     }
     // Share and tracking parameters each site adds when you copy a link: who shared it, from which app, and when. They're
     // removed from links Venus fixes, so neither the embed service nor anyone who taps the link sees them. utm_*, si and fbclid go everywhere.
@@ -9031,7 +9092,9 @@
         return {x:/^(?:s|t|ref_src|ref_url)$/, instagram:/^(?:igsh|igshid|img_index)$/,
             tiktok:/^(?:_r|_t|_d|is_from_webapp|sender_device|sender_web_id|web_id|share_app_id|share_link_id|u_code|preview_pb|timestamp|checksum|tt_from|enter_from|source|social_share_type|share_item_id|user_id|sec_user_id)$/,
             reddit:/^(?:share_id|rdt|context|ref|ref_source|ref_campaign)$/, threads:/^(?:xmt|slof)$/, facebook:/^(?:mibextid|rdid|sfnsn|extid|ref|__tn__)$/,
-            bilibili:/^(?:spm_id_from|vd_source|share_source|share_medium|share_plat|share_session_id|share_tag|timestamp|unique_k|up_id|bbid|ts)$/};
+            bilibili:/^(?:spm_id_from|vd_source|share_source|share_medium|share_plat|share_session_id|share_tag|timestamp|unique_k|up_id|bbid|ts)$/,
+            tumblr:/^(?:source|ref)$/, youtube:/^(?:feature|pp|ab_channel|embeds_\w+)$/, spotify:/^(?:context|nd|go|dl_branch)$/, twitch:/^(?:tt_\w+|filter|range|sort)$/,
+            pinterest:/^(?:invite_code|sender|sfo|mweb_unauth_id)$/, deviantart:/^(?:ga_\w+|_gl)$/};
     }
     const FIX_TRACKING_ANY = /^(?:utm_\w+|si|fbclid|gclid|mc_cid|mc_eid)$/;
     const fixEmbeds = {hosts:null, sites:null, rows:null, tracking:null, parsed:null, parsedFrom:null, count:0, pending:0};
@@ -9039,7 +9102,9 @@
     function fixTables() {
         const hosts = Object.create(null), sites = Object.create(null), rows = fixSiteRows();
         rows.forEach(row => {
-            const site = {id:row[0], name:row[1], color:row[2], icon:row[3], hosts:row[4], path:row[5], services:row[6].map(s => ({id:s[0], name:s[1], to:s[2]}))};
+            const opts = row[7] || {}, services = row[6].map(s => ({id:s[0], name:s[1], to:s[2], dark:s[3] && s[3].dark || null}));
+            const site = {id:row[0], name:row[1], color:row[2], icon:row[3], hosts:row[4], path:row[5], services, group:opts.group || "social", sub:!!opts.sub,
+                start:opts.off ? "off" : services[0].id};
             sites[site.id] = site;
             site.hosts.forEach(host => { hosts[host] = site; });
         });
@@ -9047,31 +9112,37 @@
     }
     function fixRows() { if (!fixEmbeds.rows) fixTables(); return fixEmbeds.rows; }
     function fixSite(id) { if (!fixEmbeds.sites) fixTables(); return fixEmbeds.sites[id] || null; }
-    // fixEmbedsSites keeps only what differs from the defaults (each site's first service): "x:vxtwitter,threads:off".
+    // fixEmbedsSites keeps only what differs from how each site starts (its first service, or off for sites that start off):
+    // "x:vxtwitter,threads:off,youtube:koutube".
     function fixChoices(raw) {
         if (fixEmbeds.parsedFrom === raw && fixEmbeds.parsed) return fixEmbeds.parsed;
         if (!fixEmbeds.sites) fixTables();
         const out = Object.create(null);
         String(raw || "").split(",").forEach(part => {
             const at = part.indexOf(":"), id = part.slice(0, at), choice = part.slice(at + 1), site = at > 0 && fixEmbeds.sites[id];
-            if (site && (choice === "off" || site.services.some(s => s.id === choice)) && choice !== site.services[0].id) out[id] = choice;
+            if (site && (choice === "off" || site.services.some(s => s.id === choice)) && choice !== site.start) out[id] = choice;
         });
         fixEmbeds.parsedFrom = raw; fixEmbeds.parsed = out;
         return out;
     }
     function fixChoicesText(choices) { return fixRows().filter(row => choices[row[0]]).map(row => row[0] + ":" + choices[row[0]]).join(","); }
     // The choices written the one way they're saved; unknown sites or services are dropped. Undefined for anything else.
-    function fixSitesText(raw) { return typeof raw === "string" && raw.length <= 400 ? fixChoicesText(fixChoices(raw)) : undefined; }
+    function fixSitesText(raw) { return typeof raw === "string" && raw.length <= 800 ? fixChoicesText(fixChoices(raw)) : undefined; }
     function fixService(site) {
-        const choice = fixChoices(settings.fixEmbedsSites)[site.id];
-        return choice === "off" ? null : choice ? site.services.find(s => s.id === choice) || site.services[0] : site.services[0];
+        const choice = fixChoices(settings.fixEmbedsSites)[site.id] || site.start;
+        return choice === "off" ? null : site.services.find(s => s.id === choice) || site.services[0];
     }
     function fixSetChoice(siteId, choice) {
         const site = fixSite(siteId);
         if (!site) return;
         const choices = Object.assign({}, fixChoices(settings.fixEmbedsSites));
-        if (choice === site.services[0].id) delete choices[siteId]; else choices[siteId] = choice;
+        if (choice === site.start) delete choices[siteId]; else choices[siteId] = choice;
         setSetting("fixEmbedsSites", fixChoicesText(choices));
+    }
+    // Where a service sends links, for the list: "fixupx.com".
+    function fixServiceHost(site, service) {
+        const to = typeof service.to === "string" ? service.to.replace(/^https:\/\//, "") : service.to[site.hosts[0]] || "";
+        return to.split("/")[0].replace("*.", "");
     }
     function fixClean(site, query) {
         const own = fixEmbeds.tracking[site.id], kept = query.split("&").filter(pair => {
@@ -9082,24 +9153,39 @@
         return kept.length ? "?" + kept.join("&") : "";
     }
     // One link: {site, service, link}, or null when it isn't a post on a site you fix. A closing ")" or "." stays outside it.
-    const FIX_TAIL = /[.,!?:;'")\]}*_~]+$/, FIX_SUBDOMAIN = /^(?:www|m|mobile|old|new|web)\./;
+    const FIX_TAIL = /[.,!?:;'")\]}*_~]+$/, FIX_SUBDOMAIN = /^(?:www|m|mobile|old|new|web)\./, FIX_BLOG = /^[a-z0-9-]{1,32}$/;
     function fixLink(host, rest, clean) {
         if (!fixEmbeds.hosts) fixTables();
-        let bare = host.toLowerCase();
+        let bare = host.toLowerCase(), key, blog = "";
         if (FIX_SUBDOMAIN.test(bare)) bare = bare.slice(bare.indexOf(".") + 1);
-        const site = fixEmbeds.hosts[bare];
-        if (!site) return null;
+        let site = fixEmbeds.hosts[bare];
+        if (site) key = bare;
+        else {
+            // A blog's own address: staff.tumblr.com.
+            const dot = bare.indexOf("."), parent = dot > 0 ? fixEmbeds.hosts[bare.slice(dot + 1)] : null;
+            if (!parent || !parent.sub || !FIX_BLOG.test(bare.slice(0, dot))) return null;
+            site = parent; blog = bare.slice(0, dot); key = "*." + bare.slice(dot + 1);
+        }
         const tail = FIX_TAIL.exec(rest), body = tail ? rest.slice(0, tail.index) : rest;
-        const path = site.path instanceof RegExp ? site.path : site.path[bare];
+        const path = site.path instanceof RegExp ? site.path : site.path[key];
         if (!path || !path.test(body)) return null;
         const service = fixService(site);
         if (!service) return null;
         let address = body;
+        const hash = address.indexOf("#"), fragment = hash < 0 ? "" : address.slice(hash);
+        let noHash = hash < 0 ? address : address.slice(0, hash);
         if (clean !== false && settings.fixEmbedsClean) {
-            const hash = address.indexOf("#"), fragment = hash < 0 ? "" : address.slice(hash), noHash = hash < 0 ? address : address.slice(0, hash), q = noHash.indexOf("?");
-            if (q >= 0) address = noHash.slice(0, q) + fixClean(site, noHash.slice(q + 1)) + fragment;
+            const q = noHash.indexOf("?");
+            if (q >= 0) noHash = noHash.slice(0, q) + fixClean(site, noHash.slice(q + 1));
         }
-        const fixed = typeof service.to === "string" ? service.to + encodeURIComponent("https://" + bare + address) : "https://" + service.to[bare] + address;
+        // Dark posts (#87): fxtumblr draws the post on a dark background.
+        if (service.dark && settings.fixEmbedsDark && !new RegExp("[?&]" + service.dark + "(?:[=&]|$)").test(noHash))
+            noHash += (noHash.indexOf("?") < 0 ? "?" : "&") + service.dark;
+        address = noHash + fragment;
+        let fixed;
+        if (typeof service.to === "string") fixed = service.to.replace(/\{(url|host|path)\}/g, (_, part) =>
+            part === "url" ? encodeURIComponent("https://" + bare + address) : part === "host" ? bare : address);
+        else fixed = "https://" + service.to[key].replace("*", blog) + address;
         return {site, service, link:fixed + (tail ? tail[0] : "")};
     }
     // Code, escaped text and <links in angle brackets> (Discord's way to send a link without a preview) are left as written.

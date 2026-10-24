@@ -527,7 +527,7 @@
     },
     {
       "name": "Fix link previews",
-      "description": "Links to X, Instagram, TikTok, Reddit and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.",
+      "description": "Links to X, Instagram, TikTok, Tumblr and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.",
       "default": true,
       "category": "Features",
       "dependencies": [

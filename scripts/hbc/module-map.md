@@ -184,8 +184,10 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 9031 | `design/components/Icon/native/redesign/generated/NitroWheelIcon.tsx` | NitroWheelIcon | NitroWheelIcon |
 | 9071 | `design/components/Icon/native/redesign/generated/TagIcon.tsx` | TagIcon | TagIcon |
 | 9099 | `design/components/Icon/native/redesign/generated/GlobeEarthIcon.tsx` | GlobeEarthIcon | GlobeEarthIcon |
+| 9101 | `design/components/Icon/native/redesign/generated/YoutubeNeutralIcon.tsx` | YoutubeNeutralIcon | YoutubeNeutralIcon (Fix link previews) |
 | 9103 | `design/components/Icon/native/redesign/generated/BlueskyNeutralIcon.tsx` | BlueskyNeutralIcon | BlueskyNeutralIcon (Fix link previews) |
 | 9105 | `design/components/Icon/native/redesign/generated/RedditNeutralIcon.tsx` | RedditNeutralIcon | RedditNeutralIcon (Fix link previews) |
+| 9107 | `design/components/Icon/native/redesign/generated/TwitchNeutralIcon.tsx` | TwitchNeutralIcon | TwitchNeutralIcon (Fix link previews) |
 | 9115 | `modules/main_tabs_v2/native/tabs/you/YouBannerDecorations.tsx` | default | YouBannerDecorations (Hide extra buttons: profile pill) |
 | 9167 | `modules/quests/QuestActionCreators.tsx` | SUCCESS, UNKNOWN_ERROR, fetchCurrentQuests | QuestActionCreators |
 | 9207 | `design/components/Icon/native/redesign/generated/GameControllerIcon.tsx` | GameControllerIcon | GameControllerIcon |
@@ -263,6 +265,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 12595 | `design/components/Icon/native/redesign/generated/WaveformIcon.tsx` | WaveformIcon | WaveformIcon |
 | 12605 | `design/components/Icon/native/redesign/generated/MagicWandIcon.tsx` | MagicWandIcon | MagicWandIcon |
 | 12627 | `design/components/Icon/native/redesign/generated/RetryIcon.tsx` | RetryIcon | RetryIcon (preview Start over / New people) |
+| 12689 | `design/components/Icon/native/redesign/generated/ThemeDarkIcon.tsx` | ThemeDarkIcon | ThemeDarkIcon (Fix link previews, Dark Tumblr posts) |
 | 12803 | - | pick, saveDocuments, keepLocalCopy, errorCodes, isErrorWithCode, types | DocumentPicker (Backup and restore, 1.16.0) |
 | 12822 | `design/components/Icon/native/redesign/generated/KeyboardIcon.tsx` | KeyboardIcon | KeyboardIcon |
 | 12837 | `modules/double_tap_to_react/native/DoubleTapEmojiEditNudge.tsx` | DoubleTapEmojiEditNudge | DoubleTapEmojiEditNudge |
@@ -315,6 +318,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16384 | `modules/auth/native/RegistrationUtils.tsx` | BackButtonWithTracking, getTrackRegTransition | RegistrationUtils (Account switcher) |
 | 16387 | `modules/auth/register.tsx` | default, registerFull | register (Account switcher) |
 | 16475 | `modules/main_tabs_v2/native/tabs/messages/items/channel/MessagesItemChannelContent.tsx` | default | MessagesItemChannelContent |
+| 16521 | `design/components/Icon/native/redesign/generated/SpotifyNeutralIcon.tsx` | SpotifyNeutralIcon | SpotifyNeutralIcon (Fix link previews) |
 | 16663 | `design/components/Icon/native/redesign/generated/BoostTier2Icon.tsx` | BoostTier2Icon | BoostTier2Icon |
 | 16671 | `modules/guild_sidebar/native/ChannelInfo.tsx` | default | ChannelInfo |
 | 16744 | `modules/guilds_bar/native/GuildsBarConstants.tsx` | MESSAGES, FAVORITES, PENDING_JOIN_REQUESTS | FastListRenderSections |
