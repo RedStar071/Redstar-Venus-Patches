@@ -5941,12 +5941,14 @@
         const tryBar = on ? el(RN.View, {key:"try", style:[k.strip, {padding:12, gap:10}]},
             el(PreviewSegmented, {key:"platformScreen", value:screen, onChange:value => update({screen:value}),
                 items:PLATFORM_SCREENS.map(([key]) => ({value:key, label:tr(key === "piDmHeader" ? "DM" : key === "piUserList" ? "Members" : "Profile")}))}),
+            // One compact row: where Alex is right now, and a round button that switches to another mix of devices.
             el(Press, {onPress:() => { animateLayout(); update(st => ({demo:st.demo + 1, pulse:{who:"alex", id:"t" + (st.demo + 1)}})); },
-                accessibilityRole:"button", accessibilityHint:tr("Tap to change Alex's devices"),
-                style:[k.secondary, {borderRadius:20, paddingVertical:10, flexDirection:"row", alignItems:"center", justifyContent:"center", gap:8}]},
-                el(venusIcon(15232, "LaptopPhoneIcon"), {size:"sm", color:k.secondaryText.color}),
-                el(Text, {style:[k.secondaryText, {fontWeight:"600"}]}, tr("Change Alex's devices"))),
-            el(Text, {style:[s.muted, {fontSize:13}]}, tr("Alex is on: {devices}", {devices:now}))) : null;
+                accessibilityRole:"button", accessibilityLabel:tr("Change Alex's devices"), accessibilityHint:tr("Tap to change Alex's devices"),
+                style:{flexDirection:"row", alignItems:"center", gap:10, paddingLeft:4}},
+                el(venusIcon(15232, "LaptopPhoneIcon"), {size:"sm", color:s.muted.color}),
+                el(Text, {style:[s.muted, {flex:1, fontSize:13}], numberOfLines:2}, tr("Alex is on: {devices}", {devices:now})),
+                el(RN.View, {style:[k.secondary, {width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center"}]},
+                    el(venusIcon(12627, "RetryIcon"), {size:"sm", color:k.secondaryText.color})))) : null;
         return el(RN.View, {key:"preview"},
             previewScreen(s, "preview", "Device indicators preview", [el(RN.View, {key:"screen:" + screen, style:{minHeight:236}}, popIn("screen:" + screen,
                 el(RN.View, null, body))), off],
