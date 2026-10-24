@@ -10346,9 +10346,10 @@
                     subLabel:tr("Always shown with the original text."), value:true, disabled:true, onValueChange:() => {}}) :
                     switchRow(Switch, "translateNote", "Show the original language", "A small \"Translated from Spanish\" line under each translation.", rowIcon(9099, "GlobeEarthIcon")),
                 switchRow(Switch, "translateOriginal", "Show the original text", "The untranslated message, in a quote under the translation.", rowIcon(13262, "QuoteIcon"))),
-            el(Group, {key:"clear", title:tr("Manage")}, actionRow(ui, "clear", "Clear saved translations",
-                saved ? tr("{count} kept on this phone, so chats you reopen show them at once.", {count:count(saved, "translation")}) : "Nothing saved yet.",
-                () => confirmAction("Clear saved translations?", "Messages on screen will be translated again.", "Clear", translateForget), !saved, true)),
+            // Only once something is saved: a greyed-out "Nothing saved yet" row has nothing to offer.
+            saved ? el(Group, {key:"clear", title:tr("Manage")}, actionRow(ui, "clear", "Clear saved translations",
+                tr("{count} kept on this phone, so chats you reopen show them at once.", {count:count(saved, "translation")}),
+                () => confirmAction("Clear saved translations?", "Messages on screen will be translated again.", "Clear", translateForget), false, true)) : null,
             footnote("note", settings.translateMode === "manual" ? "Only messages you choose, or chats you translate from the bar, are sent to Google Translate, once each, without your Discord account." :
                 "Only messages on screen are sent to Google Translate, once each, without your Discord account. Hold a message to show its original, or translate your own.")];
         return settingsBody(ui, groups);
