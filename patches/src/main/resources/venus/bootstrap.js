@@ -6818,8 +6818,7 @@
         React.useEffect(() => {setOpen(false);},[props.guildId]);
         if (!enabled("reviewDB") || !RN || !ui.TableRow) return null;
         return el(RN.View,null,
-            el(ui.TableRowGroup || RN.View,null,el(ui.TableRow,{label:tr("Reviews"),arrow:!open,
-                subLabel:tr(open ? "Tap to close server reviews." : "Read and write community reviews for this server."),
+            el(ui.TableRowGroup || RN.View,null,el(ui.TableRow,{label:tr("Reviews"),icon:rowIcon(9354,"ThumbsUpIcon"),arrow:!open,
                 accessibilityState:{expanded:open},onPress:() => {if (enabled("reviewDB")) setOpen(value => !value);}})),
             open ? el(ReviewSection,{key:props.guildId,userId:props.guildId,standalone:true}) : null);
     }
