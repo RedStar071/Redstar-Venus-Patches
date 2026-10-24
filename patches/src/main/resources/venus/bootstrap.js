@@ -8360,10 +8360,8 @@
                 groupTitle("title", "Who to watch"),
                 venusSegmented({key:"choice", value:allFriends ? "all" : "picked", disabled:!on, onChange:setWho,
                     items:[{value:"all", label:tr("All friends")}, {value:"picked", label:tr("People I pick")}]}),
-                allFriends ? el(Group, {key:"all"},
-                    Row ? el(Row, {key:"all", label:friends.length ? pl(friends.length, "{n} friend", "{n} friends") : tr("All friends"),
-                        subLabel:tr("Everyone on your friends list, new friends too."), icon:rowIcon(4815, "FriendsIcon"), disabled:!on,
-                        trailing:watchedUsers.length ? avatarPile(watchedUsers, rowColor) : undefined}) : null) : null),
+                // The pill and the card at the top already say who's watched, so just what "all" means.
+                allFriends ? footnote("allHint", "Everyone on your friends list, new friends too.") : null),
             allFriends ? null : el(RN.View, {key:"friends", style:{gap:8}},
                 searchBox,
                 el(Group, {title:pickedFriendsCount ? pl(pickedFriendsCount, "Friends \u00b7 {n} picked", "Friends \u00b7 {n} picked") : tr("Friends")}, friendRows)),

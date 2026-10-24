@@ -950,12 +950,7 @@
     "one": "{n} funzionalità sarà attiva.",
     "other": "{n} funzionalità saranno attive."
   },
-  "{n} friend": "{n} amico",
   "{n} friend here": "{n} amico qui",
-  "{n} friends": {
-    "one": "{n} amico",
-    "other": "{n} amici"
-  },
   "{n} friends here": {
     "one": "{n} amico qui",
     "other": "{n} amici qui"

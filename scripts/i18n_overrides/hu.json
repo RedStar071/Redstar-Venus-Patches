@@ -950,12 +950,7 @@
     "one": "{n} funkció lesz bekapcsolva.",
     "other": "{n} funkció lesz bekapcsolva."
   },
-  "{n} friend": "{n} ismerős",
   "{n} friend here": "{n} barát van itt",
-  "{n} friends": {
-    "one": "{n} ismerős",
-    "other": "{n} ismerős"
-  },
   "{n} friends here": {
     "one": "{n} barát van itt",
     "other": "{n} barát van itt"

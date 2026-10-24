@@ -973,13 +973,7 @@
     "many": "Włączonych zostanie {n} funkcji.",
     "one": "Włączona zostanie {n} funkcja."
   },
-  "{n} friend": "{n} znajomy",
   "{n} friend here": "{n} znajomy tutaj",
-  "{n} friends": {
-    "few": "{n} znajomych",
-    "many": "{n} znajomych",
-    "one": "{n} znajomy"
-  },
   "{n} friends here": {
     "few": "{n} znajomych tutaj",
     "many": "{n} znajomych tutaj",

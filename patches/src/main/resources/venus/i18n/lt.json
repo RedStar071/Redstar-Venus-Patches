@@ -1051,13 +1051,7 @@
       "few": "Bus įjungtos {n} funkcijos.",
       "other": "Bus įjungta {n} funkcijų."
     },
-    "{n} friend": "{n} draugas",
     "{n} friend here": "Čia {n} draugas",
-    "{n} friends": {
-      "one": "{n} draugas",
-      "few": "{n} draugai",
-      "other": "{n} draugų"
-    },
     "{n} friends here": {
       "one": "Čia {n} draugas",
       "few": "Čia {n} draugai",

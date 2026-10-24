@@ -950,12 +950,7 @@
     "one": "{n} özellik açık olacak.",
     "other": "{n} özellik açık olacak."
   },
-  "{n} friend": "{n} arkadaş",
   "{n} friend here": "Burada {n} arkadaş",
-  "{n} friends": {
-    "one": "{n} arkadaş",
-    "other": "{n} arkadaş"
-  },
   "{n} friends here": {
     "one": "Burada {n} arkadaş",
     "other": "Burada {n} arkadaş"

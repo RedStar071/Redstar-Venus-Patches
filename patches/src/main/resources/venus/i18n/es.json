@@ -1024,12 +1024,7 @@
       "one": "Se activará {n} función.",
       "other": "Se activarán {n} funciones."
     },
-    "{n} friend": "{n} amigo",
     "{n} friend here": "{n} amigo aquí",
-    "{n} friends": {
-      "one": "{n} amigo",
-      "other": "{n} amigos"
-    },
     "{n} friends here": {
       "one": "{n} amigo aquí",
       "other": "{n} amigos aquí"

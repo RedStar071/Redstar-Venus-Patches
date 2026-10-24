@@ -950,12 +950,7 @@
     "one": "{n} Funktion wird eingeschaltet.",
     "other": "{n} Funktionen werden eingeschaltet."
   },
-  "{n} friend": "{n} Freund",
   "{n} friend here": "{n} Freund hier",
-  "{n} friends": {
-    "one": "{n} Freund",
-    "other": "{n} Freunde"
-  },
   "{n} friends here": {
     "one": "{n} Freund hier",
     "other": "{n} Freunde hier"

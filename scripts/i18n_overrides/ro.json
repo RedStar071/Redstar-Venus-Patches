@@ -973,13 +973,7 @@
     "one": "{n} funcție va fi activată.",
     "other": "{n} de funcții vor fi activate."
   },
-  "{n} friend": "{n} prieten",
   "{n} friend here": "{n} prieten aici",
-  "{n} friends": {
-    "few": "{n} prieteni",
-    "one": "{n} prieten",
-    "other": "{n} de prieteni"
-  },
   "{n} friends here": {
     "few": "{n} prieteni aici",
     "one": "{n} prieten aici",

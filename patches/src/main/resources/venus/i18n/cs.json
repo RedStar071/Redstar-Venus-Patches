@@ -1051,13 +1051,7 @@
       "few": "Zapnou se {n} funkce.",
       "other": "Zapne se {n} funkcí."
     },
-    "{n} friend": "{n} přítel",
     "{n} friend here": "{n} přítel tady",
-    "{n} friends": {
-      "one": "{n} přítel",
-      "few": "{n} přátelé",
-      "other": "{n} přátel"
-    },
     "{n} friends here": {
       "one": "{n} přítel tady",
       "few": "{n} přátelé tady",

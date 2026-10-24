@@ -1027,12 +1027,7 @@
       "one": "{n} fonctionnalité sera activée.",
       "other": "{n} fonctionnalités seront activées."
     },
-    "{n} friend": "{n} ami",
     "{n} friend here": "{n} ami ici",
-    "{n} friends": {
-      "one": "{n} ami",
-      "other": "{n} amis"
-    },
     "{n} friends here": {
       "one": "{n} ami ici",
       "other": "{n} amis ici"

@@ -1051,13 +1051,7 @@
       "few": "{n} funcții vor fi activate.",
       "other": "{n} de funcții vor fi activate."
     },
-    "{n} friend": "{n} prieten",
     "{n} friend here": "{n} prieten aici",
-    "{n} friends": {
-      "one": "{n} prieten",
-      "few": "{n} prieteni",
-      "other": "{n} de prieteni"
-    },
     "{n} friends here": {
       "one": "{n} prieten aici",
       "few": "{n} prieteni aici",

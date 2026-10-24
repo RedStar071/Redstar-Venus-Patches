@@ -973,13 +973,7 @@
     "one": "Zapne se {n} funkce.",
     "other": "Zapne se {n} funkcí."
   },
-  "{n} friend": "{n} přítel",
   "{n} friend here": "{n} přítel tady",
-  "{n} friends": {
-    "few": "{n} přátelé",
-    "one": "{n} přítel",
-    "other": "{n} přátel"
-  },
   "{n} friends here": {
     "few": "{n} přátelé tady",
     "one": "{n} přítel tady",

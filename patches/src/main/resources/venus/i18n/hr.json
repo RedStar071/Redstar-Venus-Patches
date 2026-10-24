@@ -1051,13 +1051,7 @@
       "few": "Uključit će se {n} značajke.",
       "other": "Uključit će se {n} značajki."
     },
-    "{n} friend": "{n} prijatelja",
     "{n} friend here": "Ovdje je {n} prijatelj",
-    "{n} friends": {
-      "one": "{n} prijatelja",
-      "few": "{n} prijatelja",
-      "other": "{n} prijatelja"
-    },
     "{n} friends here": {
       "one": "Ovdje je {n} prijatelj",
       "few": "Ovdje su {n} prijatelja",

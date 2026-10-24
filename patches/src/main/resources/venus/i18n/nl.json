@@ -1024,12 +1024,7 @@
       "one": "{n} functie gaat aan.",
       "other": "{n} functies gaan aan."
     },
-    "{n} friend": "{n} vriend",
     "{n} friend here": "{n} vriend hier",
-    "{n} friends": {
-      "one": "{n} vriend",
-      "other": "{n} vrienden"
-    },
     "{n} friends here": {
       "one": "{n} vriend hier",
       "other": "{n} vrienden hier"

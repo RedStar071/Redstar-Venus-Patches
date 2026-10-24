@@ -950,12 +950,7 @@
     "one": "{n} recurso ficará ativado.",
     "other": "{n} recursos ficarão ativados."
   },
-  "{n} friend": "{n} amigo",
   "{n} friend here": "{n} amigo aqui",
-  "{n} friends": {
-    "one": "{n} amigo",
-    "other": "{n} amigos"
-  },
   "{n} friends here": {
     "one": "{n} amigo aqui",
     "other": "{n} amigos aqui"

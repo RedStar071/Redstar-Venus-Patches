@@ -1051,13 +1051,7 @@
       "few": "Włączone zostaną {n} funkcje.",
       "many": "Włączonych zostanie {n} funkcji."
     },
-    "{n} friend": "{n} znajomy",
     "{n} friend here": "{n} znajomy tutaj",
-    "{n} friends": {
-      "one": "{n} znajomy",
-      "few": "{n} znajomych",
-      "many": "{n} znajomych"
-    },
     "{n} friends here": {
       "one": "{n} znajomy tutaj",
       "few": "{n} znajomych tutaj",

@@ -1024,12 +1024,7 @@
       "one": "{n} funktion bliver slået til.",
       "other": "{n} funktioner bliver slået til."
     },
-    "{n} friend": "{n} ven",
     "{n} friend here": "{n} ven her",
-    "{n} friends": {
-      "one": "{n} ven",
-      "other": "{n} venner"
-    },
     "{n} friends here": {
       "one": "{n} ven her",
       "other": "{n} venner her"

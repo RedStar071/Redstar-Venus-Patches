@@ -950,12 +950,7 @@
     "one": "{n} ominaisuus kytketään päälle.",
     "other": "{n} ominaisuutta kytketään päälle."
   },
-  "{n} friend": "{n} kaveri",
   "{n} friend here": "{n} kaveri täällä",
-  "{n} friends": {
-    "one": "{n} kaveri",
-    "other": "{n} kaveria"
-  },
   "{n} friends here": {
     "one": "{n} kaveri täällä",
     "other": "{n} kaveria täällä"

@@ -950,12 +950,7 @@
     "one": "{n} funksjon blir slått på.",
     "other": "{n} funksjoner blir slått på."
   },
-  "{n} friend": "{n} venn",
   "{n} friend here": "{n} venn her",
-  "{n} friends": {
-    "one": "{n} venn",
-    "other": "{n} venner"
-  },
   "{n} friends here": {
     "one": "{n} venn her",
     "other": "{n} venner her"
