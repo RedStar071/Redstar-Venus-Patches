@@ -913,8 +913,8 @@
       "one": "Voit tallentaa enintään {n} tilin.",
       "other": "Voit tallentaa enintään {n} tiliä."
     },
+    "You can't open this channel, but Discord already sent these details.": "Et voi avata tätä kanavaa, mutta Discord on jo lähettänyt nämä tiedot.",
     "You change your mind and tap your message three times": "Muutat mielesi ja napautat viestiäsi kolmesti",
-    "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Sinulla ei ole oikeutta nähdä tätä kanavaa. Nämä tiedot ovat peräisin siitä, mitä Discord on jo lähettänyt sovelluksellesi.",
     "You double-tap Sam's message": "Kaksoisnapautat Samin viestiä",
     "You double-tap your own message": "Kaksoisnapautat omaa viestiäsi",
     "You hold the message to open its menu": "Pidät viestiä painettuna avataksesi sen valikon",

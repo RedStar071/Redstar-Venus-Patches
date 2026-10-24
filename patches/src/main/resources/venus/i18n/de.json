@@ -913,8 +913,8 @@
       "one": "Du kannst bis zu {n} Account speichern.",
       "other": "Du kannst bis zu {n} Accounts speichern."
     },
+    "You can't open this channel, but Discord already sent these details.": "Du kannst diesen Kanal nicht öffnen, aber Discord hat diese Details schon gesendet.",
     "You change your mind and tap your message three times": "Du überlegst es dir anders und tippst dreimal auf deine Nachricht",
-    "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Du hast keine Berechtigung, diesen Kanal anzusehen. Diese Details stammen aus dem, was Discord deinem Client bereits gesendet hat.",
     "You double-tap Sam's message": "Du tippst doppelt auf Sams Nachricht",
     "You double-tap your own message": "Du tippst doppelt auf deine eigene Nachricht",
     "You hold the message to open its menu": "Du hältst die Nachricht gedrückt, um ihr Menü zu öffnen",

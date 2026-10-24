@@ -927,8 +927,8 @@
       "few": "Gali išsaugoti iki {n} paskyrų.",
       "other": "Gali išsaugoti iki {n} paskyrų."
     },
+    "You can't open this channel, but Discord already sent these details.": "Šio kanalo atidaryti negali, bet Discord jau atsiuntė šią informaciją.",
     "You change your mind and tap your message three times": "Persigalvoji ir baksteli savo žinutę tris kartus",
-    "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Neturi leidimo peržiūrėti šio kanalo. Ši informacija gauta iš duomenų, kuriuos Discord jau atsiuntė tavo programėlei.",
     "You double-tap Sam's message": "Dukart baksteli Sam žinutę",
     "You double-tap your own message": "Dukart baksteli savo paties žinutę",
     "You hold the message to open its menu": "Palaikai žinutę, kad atidarytum jos meniu",

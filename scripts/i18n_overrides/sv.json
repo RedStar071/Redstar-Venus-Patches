@@ -843,8 +843,8 @@
     "one": "Du kan spara upp till {n} konto.",
     "other": "Du kan spara upp till {n} konton."
   },
+  "You can't open this channel, but Discord already sent these details.": "Du kan inte öppna den här kanalen, men Discord har redan skickat de här uppgifterna.",
   "You change your mind and tap your message three times": "Du ångrar dig och trycker tre gånger på ditt meddelande",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Du har inte behörighet att visa den här kanalen. Uppgifterna kommer från data som Discord redan har skickat till din klient.",
   "You double-tap Sam's message": "Du dubbeltrycker på Sams meddelande",
   "You double-tap your own message": "Du dubbeltrycker på ditt eget meddelande",
   "You hold the message to open its menu": "Du håller in meddelandet för att öppna menyn",

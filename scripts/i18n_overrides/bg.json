@@ -843,8 +843,8 @@
     "one": "Можете да запазите до {n} профил.",
     "other": "Можете да запазите до {n} профила."
   },
+  "You can't open this channel, but Discord already sent these details.": "Не можете да отворите този канал, но Discord вече е изпратил тези данни.",
   "You change your mind and tap your message three times": "Размисляте и докосвате съобщението си три пъти",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Нямате разрешение да виждате този канал. Тези данни идват от това, което Discord вече е изпратил на приложението ви.",
   "You double-tap Sam's message": "Докосвате двукратно съобщението на Сам",
   "You double-tap your own message": "Докосвате двукратно собственото си съобщение",
   "You hold the message to open its menu": "Задържате съобщението, за да отворите менюто му",

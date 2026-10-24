@@ -843,8 +843,8 @@
     "one": "Du kan gemme op til {n} konto.",
     "other": "Du kan gemme op til {n} konti."
   },
+  "You can't open this channel, but Discord already sent these details.": "Du kan ikke åbne denne kanal, men Discord har allerede sendt disse oplysninger.",
   "You change your mind and tap your message three times": "Du ombestemmer dig og trykker tre gange på din besked",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Du har ikke tilladelse til at se denne kanal. Oplysningerne kommer fra det, Discord allerede har sendt til din app.",
   "You double-tap Sam's message": "Du dobbelttrykker på Sams besked",
   "You double-tap your own message": "Du dobbelttrykker på din egen besked",
   "You hold the message to open its menu": "Du holder beskeden nede for at åbne dens menu",

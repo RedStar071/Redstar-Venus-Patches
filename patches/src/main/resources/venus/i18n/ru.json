@@ -927,8 +927,8 @@
       "few": "Можно сохранить до {n} аккаунтов.",
       "many": "Можно сохранить до {n} аккаунтов."
     },
+    "You can't open this channel, but Discord already sent these details.": "Открыть этот канал нельзя, но Discord уже передал эти сведения.",
     "You change your mind and tap your message three times": "Вы передумали и трижды касаетесь своего сообщения",
-    "You don't have permission to view this channel. These details come from what Discord already sent your client.": "У вас нет доступа к этому каналу. Эти сведения получены из данных, которые Discord уже передал вашему клиенту.",
     "You double-tap Sam's message": "Вы дважды касаетесь сообщения Сэма",
     "You double-tap your own message": "Вы дважды касаетесь своего сообщения",
     "You hold the message to open its menu": "Вы удерживаете сообщение, чтобы открыть меню",

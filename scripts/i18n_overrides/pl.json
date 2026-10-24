@@ -857,8 +857,8 @@
     "many": "Możesz zapisać maksymalnie {n} kont.",
     "one": "Możesz zapisać maksymalnie {n} konto."
   },
+  "You can't open this channel, but Discord already sent these details.": "Nie możesz otworzyć tego kanału, ale Discord już przesłał te informacje.",
   "You change your mind and tap your message three times": "Zmieniasz zdanie i stukasz swoją wiadomość trzy razy",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nie masz uprawnień do wyświetlania tego kanału. Te informacje pochodzą z danych, które Discord już przesłał do twojej aplikacji.",
   "You double-tap Sam's message": "Stukasz dwukrotnie wiadomość Sama",
   "You double-tap your own message": "Stukasz dwukrotnie własną wiadomość",
   "You hold the message to open its menu": "Przytrzymujesz wiadomość, aby otworzyć jej menu",

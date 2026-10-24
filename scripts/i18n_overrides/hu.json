@@ -843,8 +843,8 @@
     "one": "Legfeljebb {n} fiókot menthetsz.",
     "other": "Legfeljebb {n} fiókot menthetsz."
   },
+  "You can't open this channel, but Discord already sent these details.": "Ezt a csatornát nem nyithatod meg, de a Discord már elküldte ezeket az adatokat.",
   "You change your mind and tap your message three times": "Meggondolod magad, és háromszor rákoppintasz az üzenetedre",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nincs jogosultságod megtekinteni ezt a csatornát. Ezek az adatok abból származnak, amit a Discord már elküldött az alkalmazásodnak.",
   "You double-tap Sam's message": "Duplán koppintasz Sam üzenetére",
   "You double-tap your own message": "Duplán koppintasz a saját üzenetedre",
   "You hold the message to open its menu": "Lenyomva tartod az üzenetet a menüje megnyitásához",

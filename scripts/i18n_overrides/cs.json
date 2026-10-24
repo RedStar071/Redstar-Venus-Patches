@@ -857,8 +857,8 @@
     "one": "Uložit můžete až {n} účet.",
     "other": "Uložit můžete až {n} účtů."
   },
+  "You can't open this channel, but Discord already sent these details.": "Tento kanál otevřít nemůžete, ale Discord už poslal tyto údaje.",
   "You change your mind and tap your message three times": "Rozmyslíte si to a třikrát klepnete na svou zprávu",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nemáte oprávnění zobrazit tento kanál. Tyto údaje pocházejí z toho, co už Discord poslal vaší aplikaci.",
   "You double-tap Sam's message": "Dvakrát klepnete na Samovu zprávu",
   "You double-tap your own message": "Dvakrát klepnete na svou vlastní zprávu",
   "You hold the message to open its menu": "Podržením zprávy otevřete její nabídku",

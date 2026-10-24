@@ -927,8 +927,8 @@
       "few": "Možete spremiti najviše {n} računa.",
       "other": "Možete spremiti najviše {n} računa."
     },
+    "You can't open this channel, but Discord already sent these details.": "Ne možete otvoriti ovaj kanal, ali Discord je već poslao ove podatke.",
     "You change your mind and tap your message three times": "Predomislite se i triput dodirnete svoju poruku",
-    "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Nemate dopuštenje za pregled ovog kanala. Ovi podaci potječu iz onoga što je Discord već poslao vašoj aplikaciji.",
     "You double-tap Sam's message": "Dvaput dodirnete Samovu poruku",
     "You double-tap your own message": "Dvaput dodirnete vlastitu poruku",
     "You hold the message to open its menu": "Držite poruku pritisnutom kako biste otvorili njezin izbornik",

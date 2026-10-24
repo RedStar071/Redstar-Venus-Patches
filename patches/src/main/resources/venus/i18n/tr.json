@@ -913,8 +913,8 @@
       "one": "En fazla {n} hesap kaydedebilirsin.",
       "other": "En fazla {n} hesap kaydedebilirsin."
     },
+    "You can't open this channel, but Discord already sent these details.": "Bu kanalı açamazsın ama Discord bu ayrıntıları zaten gönderdi.",
     "You change your mind and tap your message three times": "Fikrini değiştirip mesajına üç kez dokunursun",
-    "You don't have permission to view this channel. These details come from what Discord already sent your client.": "Bu kanalı görüntüleme iznin yok. Bu ayrıntılar Discord'un istemcine zaten gönderdiği verilerden alınır.",
     "You double-tap Sam's message": "Sam'in mesajına çift dokunursun",
     "You double-tap your own message": "Kendi mesajına çift dokunursun",
     "You hold the message to open its menu": "Menüsünü açmak için mesajı basılı tutarsın",

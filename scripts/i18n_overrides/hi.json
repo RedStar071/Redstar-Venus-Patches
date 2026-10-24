@@ -843,8 +843,8 @@
     "one": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।",
     "other": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।"
   },
+  "You can't open this channel, but Discord already sent these details.": "आप यह चैनल नहीं खोल सकते, लेकिन Discord ये विवरण पहले ही भेज चुका है।",
   "You change your mind and tap your message three times": "आप अपना मन बदलते हैं और अपने मैसेज पर तीन बार टैप करते हैं",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "आपको यह चैनल देखने की अनुमति नहीं है। ये विवरण उस डेटा से हैं जो Discord पहले ही आपके ऐप को भेज चुका है।",
   "You double-tap Sam's message": "आप सैम के मैसेज पर डबल-टैप करते हैं",
   "You double-tap your own message": "आप अपने ही मैसेज पर डबल-टैप करते हैं",
   "You hold the message to open its menu": "आप मैसेज का मेन्यू खोलने के लिए उसे दबाकर रखते हैं",

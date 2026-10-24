@@ -2775,7 +2775,7 @@
         const confirm = () => { settle(); if (typeof onViewAnyway === "function") onViewAnyway(); };
         const rows = hiddenDetails(channel);
         const title = tr(channel.type === 2 || channel.type === 13 ? "Locked voice channel" : "Locked channel");
-        const body = tr("You don't have permission to view this channel. These details come from what Discord already sent your client.");
+        const body = tr("You can't open this channel, but Discord already sent these details.");
         // Discord's native alert (the "Delete Message" dialog): blurred backdrop,
         // themed card, Discord buttons. String title/body/confirmText + children
         // selects the modern AlertModal path in AlertActionCreators.show (module 5300).

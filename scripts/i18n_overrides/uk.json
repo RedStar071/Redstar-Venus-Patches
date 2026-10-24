@@ -857,8 +857,8 @@
     "many": "Можна зберегти до {n} акаунтів.",
     "one": "Можна зберегти до {n} акаунта."
   },
+  "You can't open this channel, but Discord already sent these details.": "Відкрити цей канал не можна, але Discord уже передав ці відомості.",
   "You change your mind and tap your message three times": "Ви передумали й тричі торкаєтеся свого повідомлення",
-  "You don't have permission to view this channel. These details come from what Discord already sent your client.": "У вас немає доступу до цього каналу. Ці відомості отримано з даних, які Discord уже передав вашому клієнту.",
   "You double-tap Sam's message": "Ви двічі торкаєтеся повідомлення Сема",
   "You double-tap your own message": "Ви двічі торкаєтеся свого повідомлення",
   "You hold the message to open its menu": "Ви утримуєте повідомлення, щоб відкрити меню",
