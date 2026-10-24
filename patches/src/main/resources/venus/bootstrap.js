@@ -9030,6 +9030,30 @@
         chain.then(() => { if (sent < chunks.length && stillOn()) splitUnsent(chunks.slice(sent)); }, () => {});
         return result;
     }
+    // An edit replaces one message, so it can't be split. The message box allows any length while this is on, and Discord
+    // ends editing as soon as it saves (handleSaveEditing, 11665), so an edit over the limit was refused and its text lost.
+    // Now it isn't sent: you're told why and can copy it.
+    function splitEdit(orig, self, args) {
+        const edit = args[2];
+        if (!edit || typeof edit.content !== "string" || edit.content.length <= 2000 || !enabled("splitMessages")) return orig.apply(self, args);
+        const limit = messageLimit();
+        if (edit.content.length <= limit) return orig.apply(self, args);
+        const text = edit.content, ui = reviewUI();
+        const copy = () => {
+            try { (ui.clipboard || RN.Clipboard).setString(text); } catch (_) { return; }
+            reviewToast(ui, "Copied your edit", venusIcon(5042, "CopyIcon"));
+        };
+        const title = tr("This edit is too long");
+        const body = tr("Edits can't be sent in parts, so they have to fit in one message: {count} of {limit} characters. Copy your edit to shorten it or send it as a new message.",
+            {count:serverNumber(text.length), limit:serverNumber(limit)});
+        later(() => {
+            if (ui.alerts && typeof ui.alerts.show === "function") try {
+                ui.alerts.show({title, body, confirmText:tr("Copy edit"), cancelText:tr("Not now"), onConfirm:copy}); return;
+            } catch (_) {}
+            try { RN.Alert.alert(title, body, [{text:tr("Not now"), style:"cancel"}, {text:tr("Copy edit"), onPress:copy}]); } catch (_) {}
+        }, 0);
+        return Promise.resolve();
+    }
     // The parts that didn't go out, joined back as they were split, so pasting them into the box sends them again.
     function splitUnsent(rest) {
         const text = rest.join("\n"), ui = reviewUI();
@@ -9268,8 +9292,9 @@
         later(() => notify("fixEmbeds"), 0);
     }
     // Longer links never make a message too long to send: it goes as written instead, unless Send long messages splits it.
-    function fixFits(content) {
-        if (features.splitMessages && enabled("splitMessages")) return true;
+    // An edit is never split, so it always has to fit.
+    function fixFits(content, edit) {
+        if (!edit && features.splitMessages && enabled("splitMessages")) return true;
         const user = currentUser();
         return content.length <= (user && user.premiumType === 2 ? 4000 : 2000);
     }
@@ -9287,7 +9312,7 @@
         const edit = args[2];
         if (!edit || typeof edit.content !== "string" || edit.content.indexOf("://") < 0 || !enabled("fixEmbeds")) return orig.apply(self, args);
         const content = fixContent(edit.content);
-        if (content === edit.content || !fixFits(content)) return orig.apply(self, args);
+        if (content === edit.content || !fixFits(content, true)) return orig.apply(self, args);
         fixCounted();
         const next = Array.from(args); next[2] = Object.assign({}, edit, {content});
         return orig.apply(self, next);
@@ -12680,7 +12705,10 @@
                     actions = hookExport(actions, "_sendMessage", sendMessage);
                     actions = hookExport(actions, "sendStickers", sendStickers);
                 }
-                if (splitLater) actions = hookExport(actions, "sendMessage", splitSend);
+                if (splitLater) {
+                    actions = hookExport(actions, "sendMessage", splitSend);
+                    actions = hookExport(actions, "editMessage", splitEdit);
+                }
                 // Outermost, so Send long messages splits (and Nitro links converts) a message whose links are already fixed.
                 if (features.fixEmbeds) {
                     actions = hookExport(actions, "sendMessage", fixEmbedsSend);
