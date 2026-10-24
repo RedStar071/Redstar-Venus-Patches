@@ -8937,6 +8937,8 @@
     // Splits at the last line break, else the last space, else anywhere. A code block cut in two is closed at
     // the end of one part and opened again, with its language, at the start of the next.
     const FENCE = /```([^\s`]{0,20})/g;
+    // Discord's SILENT_RE (7367): "@silent" at the very start, followed by whitespace or the end.
+    const SPLIT_SILENT = /^@silent(?:\s|$)/;
     function splitContent(text, limit) {
         const chunks = [];
         let start = 0, prefix = "";
@@ -9001,6 +9003,9 @@
         const result = orig.apply(self, first);
         const gap = splitGapMs(channelId);
         const followOptions = splitFollowUpOptions(options);
+        // _sendMessage turns a leading "@silent" into SUPPRESS_NOTIFICATIONS (parseContentForSuppressNotifications, 7367), but
+        // only the first part starts with it: without the flag every later part pinged everyone the message mentioned.
+        if (SPLIT_SILENT.test(message.content)) followOptions.flags = (Number(followOptions.flags) || 0) | 4096;
         const followMessageBase = {tts:!!message.tts, invalidEmojis:message.invalidEmojis || [],
             validNonShortcutEmojis:message.validNonShortcutEmojis || []};
         // The rest follow one at a time, without the reply or attachments, only after the previous part succeeds.
