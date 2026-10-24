@@ -928,7 +928,7 @@
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
-        fixEmbeds:["Remove tracking from links", "Sites", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
+        fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
@@ -5756,7 +5756,7 @@
         const Text = inspectedExport(5088, "Text"), FormSwitch = inspectedExport(6897, "FormSwitch"), Press = RN.Pressable || RN.View;
         const Down = venusIcon(10534, "ChevronSmallDownIcon"), Right = venusIcon(6906, "ChevronSmallRightIcon");
         const line = (value, variant, color, fallback) => Text ? el(Text, {variant, color, lineClamp:1}, value) : el(RN.Text, {style:fallback, numberOfLines:1}, value);
-        const rows = fixRows(), active = rows.filter(row => fixService(fixEmbeds.sites[row[0]])).length;
+        const rows = fixRows();
         const siteRow = (site, i, out) => {
             const service = fixService(site), many = site.services.length > 1, expanded = open === site.id && !!service && many && on;
             if (i) out.push(el(RN.View, {key:"d" + site.id, style:s.divider}));
@@ -5783,9 +5783,8 @@
         };
         const cards = [card("social", groupTitle("t:social", "Social")), card("video", groupTitle("t:video", "Video and music")), card("art", groupTitle("t:art", "Art"))];
         return el(RN.View, {key:"sites", style:{gap:16}},
-            groupTitle("title", tr("Sites") + " \u00b7 " + tr("{on} of {total} turned on", {on:active, total:rows.length})),
             cards,
-            footnote("hint", "Tap a site to choose its service. If a preview doesn't show, another service may work."));
+            footnote("hint", "Preview not showing? Try another service."));
     }
     // A long list of services as radio rows: the service's name, where links go and a check on the one in use.
     function fixServiceChoices(site, service, line) {
