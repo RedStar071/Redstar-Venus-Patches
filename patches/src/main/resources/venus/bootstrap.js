@@ -7240,11 +7240,11 @@
         const groups = [
             on ? null : offCard("status", venusIcon(15612, "CircleMinusIcon"), "hideButtons"),
             el(HideButtonsPreview, {key:"preview", on}),
-            el(Group, {key:"profile", title:tr("On your profile")},
+            el(Group, {key:"profile", title:tr("Hide on your profile")},
                 switchRow(Switch, "hideButtonsQuests", "Quests", "The Quests button at the bottom of your profile.", rowIcon(13012, "QuestsIcon")),
                 switchRow(Switch, "hideButtonsShop", "Shop", "The Shop button at the bottom of your profile.", rowIcon(11828, "ShopIcon")),
                 switchRow(Switch, "hideButtonsNitro", "Nitro", "The Nitro button at the bottom of your profile.", rowIcon(9031, "NitroWheelIcon"))),
-            el(Group, {key:"attach", title:tr("In the attach menu")},
+            el(Group, {key:"attach", title:tr("Hide in the attach menu")},
                 switchRow(Switch, "hideButtonsApps", "Apps", "Activities and app commands.", rowIcon(8229, "AppsIcon")),
                 switchRow(Switch, "hideButtonsPolls", "Polls", "Start a poll.", rowIcon(10022, "PollsIcon")),
                 switchRow(Switch, "hideButtonsPhotos", "Photos", "Opens your full gallery. Recent photos still show above the buttons.", rowIcon(8210, "ImageIcon"))),
