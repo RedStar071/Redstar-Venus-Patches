@@ -7016,10 +7016,12 @@
         const dot = (color, label) => el(RN.View, {key:label, style:{flexDirection:"row", alignItems:"center", gap:6}},
             el(RN.View, {style:{width:10, height:10, borderRadius:5, backgroundColor:color}}),
             serverText(label, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}));
+        // A server without a banner starts with its icon, not an empty grey block.
+        const art = banner && RN.Image;
         return el(RN.View, {key:"hero"},
-            el(RN.View, {style:[s.banner, {borderRadius:16, overflow:"hidden"}]},
-                banner && RN.Image ? el(RN.Image, {source:{uri:banner}, style:{width:"100%", height:"100%"}, resizeMode:"cover"}) : null),
-            el(RN.View, {style:{paddingHorizontal:16, marginTop:-40, gap:8}},
+            art ? el(RN.View, {style:[s.banner, {borderRadius:16, overflow:"hidden"}]},
+                el(RN.Image, {source:{uri:banner}, style:{width:"100%", height:"100%"}, resizeMode:"cover"})) : null,
+            el(RN.View, {style:{paddingHorizontal:art ? 16 : 4, marginTop:art ? -40 : 0, gap:8}},
                 popIn("icon:" + snap.id, el(RN.View, {style:[s.ring, {width:84, height:84, borderRadius:28, borderWidth:4, overflow:"hidden", alignItems:"center", justifyContent:"center"}]},
                     icon && RN.Image ? el(RN.Image, {source:{uri:icon}, style:{width:76, height:76}}) :
                         el(RN.View, {style:[s.acronym, {width:76, height:76, alignItems:"center", justifyContent:"center"}]},
