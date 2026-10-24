@@ -1378,10 +1378,11 @@
                 text(keys.length ? tr("{on} of {total} turned on", {on, total:keys.length}) : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                 keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
                 el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:4}}, chips)),
-            el(RN.View, {key:"status", style:[s.card, {flexDirection:"row", alignItems:"center", gap:14}]},
+            // Only when there's something to know: a green "Everything's working" card on every visit is just filler.
+            health === "online" ? null : el(RN.View, {key:"status", style:[s.card, {flexDirection:"row", alignItems:"center", gap:14}]},
                 el(RN.View, {style:{width:12, height:12, borderRadius:6, backgroundColor:STATUS_HEX[health]}}),
                 el(RN.View, {style:{flex:1, gap:2}},
-                    text(tr(health === "online" ? "Everything's working" : health === "idle" ? (status.storage === "waiting" || status.storage === "loading" ? "Loading your settings" : "Working, with a note below") : "Something went wrong"),
+                    text(tr(health === "idle" ? (status.storage === "waiting" || status.storage === "loading" ? "Loading your settings" : "Working, with a note below") : "Something went wrong"),
                         "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
                     text(aboutText(), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}))),
             el(Group, {key:"links", title:tr("Links")},
