@@ -79,7 +79,7 @@ export function modules(store, me) {
     5300: { default: { show: o => host && host.show("alert", <Alert {...o} />) } },
     // The profile bar's round buttons (YouBarButton) and the bell Venus adds its buttons after.
     16857: { default: YouBarButton }, 15378: { YOU_BAR_BUTTON_ICON_SIZE: 20 },
-    16858: { default: () => <YouBarButton icon={React.createElement(D.makeIcon("BellIcon"), { size: "custom", style: { width: 20, height: 20 } })} accessibilityLabel="Notifications" /> },
+    16858: { default: () => <YouBarButton badge={15} icon={React.createElement(D.makeIcon("BellIcon"), { size: "custom", style: { width: 20, height: 20 } })} accessibilityLabel="Notifications" /> },
     // A chat: ChatViewWrapper with Discord's messages, and the message store the Translate pill reads.
     10368: { default: p => <RN.View style={{ flex: 1, position: "relative" }}>{p.children}</RN.View> },
     5432: { default: store({ getMessages: () => ({ _array: SPANISH }) }) },
@@ -105,18 +105,23 @@ function Alert(p) {
     </RN.View>
   </RN.View>;
 }
+// YouBarButton (16857): Discord's IconButton, "tertiary" (a bare icon), or "secondary-overlay" over a nameplate.
 function YouBarButton(p) {
-  return <RN.Pressable accessibilityLabel={p.accessibilityLabel} onPress={p.onPress} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center",
-    backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>{p.icon}</RN.Pressable>;
+  return <RN.Pressable accessibilityLabel={p.accessibilityLabel} onPress={p.onPress} style={{ height: 40, minWidth: 40, paddingHorizontal: p.badge ? 10 : 0, borderRadius: 20,
+    flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center", backgroundColor: p.hasNameplate || p.badge ? D.tok("BACKGROUND_MOD_SUBTLE") : "transparent" }}>
+    {p.icon}{p.badge ? <RN.View style={{ minWidth: 22, height: 18, borderRadius: 9, paddingHorizontal: 5, alignItems: "center", justifyContent: "center", backgroundColor: D.tok("STATUS_DANGER") }}>
+      <D.Text variant="text-xs/bold" style={{ color: "#fff" }}>{p.badge}</D.Text></RN.View> : null}</RN.Pressable>;
 }
+// The profile bar under the server and channel lists: avatar, name and status, then the bell and what Venus adds.
 function YouBar({ defined }) {
   const Bell = defined[16858].exports.default;
-  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWER"), justifyContent: "flex-end" }}>
-    <RN.View style={{ margin: 12, flexDirection: "row", alignItems: "center", gap: 10, padding: 10, borderRadius: 28, backgroundColor: D.tok("MOBILE_FLOATINGBAR_BACKGROUND_HIGHER") }}>
-      <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: D.tok("BACKGROUND_BRAND"), alignItems: "center", justifyContent: "center" }}>
-        <D.Text variant="text-md/bold" style={{ color: "#fff" }}>V</D.Text></RN.View>
-      <RN.View style={{ flex: 1 }}><D.Text variant="text-md/semibold" color="text-strong">Venus</D.Text><D.Text variant="text-sm/medium" color="text-muted">Online</D.Text></RN.View>
-      <RN.View style={{ flexDirection: "row", gap: 8 }}><Bell /></RN.View>
+  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST"), justifyContent: "flex-end" }}>
+    <RN.View style={{ marginLeft: 8, marginRight: 12, marginBottom: 12, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 84, paddingRight: 8, height: 64,
+      borderRadius: 20, borderWidth: 1, borderColor: D.tok("BORDER_SUBTLE"), backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+      <RN.View style={{ position: "absolute", left: 4, bottom: 4, width: 72, height: 72, borderRadius: 36, backgroundColor: "#f0b232" }}>
+        <RN.View style={{ position: "absolute", right: 2, bottom: 2, width: 20, height: 20, borderRadius: 10, borderWidth: 4, borderColor: D.tok("BACKGROUND_BASE_LOWER"), backgroundColor: D.tok("STATUS_ONLINE") }} /></RN.View>
+      <RN.View style={{ flex: 1 }}><D.Text variant="text-md/semibold" color="text-strong" numberOfLines={1}>Venus</D.Text><D.Text variant="text-sm/medium" color="text-muted">Online</D.Text></RN.View>
+      <Bell />
     </RN.View>
   </RN.View>;
 }
@@ -266,9 +271,21 @@ function GuildMenu({ defined }) {
 
 // Discord's Settings screen: its own sections around Account, run through createList (10664), which Venus hooks to add
 // its section. Discord's rows are labels only; Venus's rows are the real registry nodes.
-const DISCORD_SECTIONS = [["Account Settings", [["ACCOUNT", "Account", "UserCircleIcon"], ["PRIVACY", "Content & Social", "ShieldIcon"], ["DATA", "Data & Privacy", "LockIcon"],
-  ["DEVICES", "Devices", "MobilePhoneIcon"], ["CONNECTIONS", "Connections", "LinkIcon"]]],
-  ["App Settings", [["VOICE", "Voice", "MicrophoneIcon"], ["APPEARANCE", "Appearance", "PaintPaletteIcon"], ["LANGUAGE", "Language", "LanguageIcon"], ["NOTIFICATIONS", "Notifications", "BellIcon"]]]];
+// Discord 350.8's own sections and rows (SettingsOverviewScreen 17675), with each row's icon from its setting def.
+const DISCORD_SECTIONS = [["Account Settings", [["PREMIUM", "Get Nitro", "NitroWheelIcon"], ["ACCOUNT", "Account", "UserCircleIcon"],
+  ["CONTENT_AND_SOCIAL", "Content & Social", "FriendsIcon"], ["DATA_AND_PRIVACY", "Data & Privacy", "ShieldLockIcon"],
+  ["SPONSORED_CONTENT_PREFERENCES", "Sponsored Content", "QuestsIcon"], ["FAMILY_CENTER", "Family Center", "GroupIcon"],
+  ["AUTHORIZED_APPS", "Authorized Apps", "KeyIcon"], ["DEVICES", "Devices", "LaptopPhoneIcon"], ["CONNECTIONS", "Connections", "PuzzlePieceIcon"],
+  ["CLIPS", "Clips", "ClipsIcon"], ["SCAN_QR_CODE", "Scan QR Code", "QrCodeIcon"]]],
+  ["Billing Settings", [["COLLECTIBLES_SHOP", "Shop", "ShopIcon"], ["QUEST_HOME", "Quests", "QuestsIcon"],
+    ["PREMIUM_GUILD_BOOSTING", "Server Boost", "BoostGemIcon"], ["PREMIUM_GIFTING", "Gift Inventory", "GiftIcon"]]],
+  ["App Settings", [["VOICE", "Voice", "MicrophoneIcon"], ["APPEARANCE", "Appearance", "PaintPaletteIcon"], ["ACCESSIBILITY", "Accessibility", "AccessibilityIcon"],
+    ["LANGUAGE", "Language", "LanguageIcon"], ["CHAT", "Chat", "ImageTextIcon"], ["WEB_BROWSER", "Web Browser", "GlobeEarthIcon"],
+    ["NOTIFICATIONS", "Notifications", "BellIcon"], ["ADVANCED", "Advanced", "SettingsIcon"]]],
+  ["Support", [["SUPPORT", "Support", "CircleQuestionIcon"], ["UPLOAD_DEBUG_LOGS", "Upload debug logs to Discord Support", "CircleInformationIcon"],
+    ["ACKNOWLEDGEMENTS", "Acknowledgements", "CircleInformationIcon"]]],
+  ["What's New", [["CHANGE_LOG", "What's New", "CircleInformationIcon"]]],
+  [null, [["LOGOUT", "Log Out", "DoorExitIcon"]]]];
 function SettingsScreen({ defined, registry }) {
   const plain = Object.fromEntries(DISCORD_SECTIONS.flatMap(([, rows]) => rows.map(([id, label, icon]) => [id, { type: "route", title: label, IconComponent: D.makeIcon(icon) }])));
   const config = defined[10664].exports.createList({ sections: DISCORD_SECTIONS.map(([label, rows]) => ({ label, settings: rows.map(r => r[0]) })) });
@@ -276,6 +293,7 @@ function SettingsScreen({ defined, registry }) {
   const all = Object.assign({}, registry, plain);
   return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
     <RN.View style={{ height: 56, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}><D.Text variant="heading-lg/bold" color="text-strong">Settings</D.Text></RN.View>
+    <RN.View style={{ paddingHorizontal: 12, paddingBottom: 16 }}><D.SearchField placeholder="Search" /></RN.View>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 24, gap: 24 }}>
       {config.sections.map((section, i) => <D.TableRowGroup key={i} title={section.label}>
         {section.settings.map(id => { const n = all[id]; if (!n) return null;
