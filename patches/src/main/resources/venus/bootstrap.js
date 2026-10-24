@@ -1931,7 +1931,7 @@
     let archiveTimer;
     const hiddenViews = new Map(), hiddenNames = new Map(), hiddenScans = new Map();
     let hiddenAccount;
-    const HIDDEN_CHANNEL = "Hidden channel (name unavailable)", HIDDEN_CATEGORY = "Hidden category (name unavailable)";
+    const HIDDEN_CHANNEL = "Hidden channel", HIDDEN_CATEGORY = "Hidden category";
     function receivedName(channel) {
         if (!channel || typeof channel.name !== "string") return null;
         const trimmed = channel.name.trim();
