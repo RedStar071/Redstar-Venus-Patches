@@ -9014,8 +9014,8 @@
         // The rest follow one at a time, without the reply or attachments, only after the previous part succeeds.
         // sendMessage rejects when a part fails (rate limit, AutoMod, no connection): the parts after it were dropped
         // without a word, so the end of a long message was lost. Now you're told, and can copy what wasn't sent.
-        let sent = 1;
-        let chain = Promise.resolve(result).then(res => !(res && res.hasErr), () => false);
+        let sent = 0;
+        let chain = Promise.resolve(result).then(res => { if (res && res.hasErr) return false; sent++; return true; }, () => false);
         for (let i = 1; i < chunks.length; i++) {
             const content = chunks[i];
             chain = chain.then(ok => {
