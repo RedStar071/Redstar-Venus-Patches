@@ -134,7 +134,13 @@ export function Scene({ name, defined }) {
   host = { show: (key, content) => setSheets(list => list.filter(s => s.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(s => s.key !== key)) };
   React.useEffect(() => {
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
-    if (name === "readAllHold") setTimeout(() => { const pill = document.querySelector('[aria-label="Read all"]'); if (pill) pill.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true })); }, 50);
+    // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
+    if (name === "readAllHold") setTimeout(() => {
+      const pill = document.querySelector('[aria-label="Read all"]'), key = pill && Object.keys(pill).find(k => k.startsWith("__reactFiber"));
+      let fiber = key && pill[key];
+      while (fiber && !(fiber.memoizedProps && fiber.memoizedProps.onLongPress)) fiber = fiber.return;
+      if (fiber) fiber.memoizedProps.onLongPress({}); else console.warn("No Read all hold");
+    }, 50);
   }, []);
   const top = sheets[sheets.length - 1];
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
