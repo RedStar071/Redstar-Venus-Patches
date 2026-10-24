@@ -164,6 +164,35 @@ sh tests/bench/cold_boot.sh <old bootstrap.js>     # the real bundle boots with 
 5. **Version string:** `AppTarget` in `DiscordPatches.kt`, `DISCORD_VERSION` in `bootstrap.js`, `README.md`.
 6. Check every feature in the patched app. Functions Discord changed (a toast API, a store getter) only show up there.
 
+## Seeing the UI
+
+**Look at the UI before and after every UI change**, and whenever you're asked to improve, review or change how anything in
+Venus looks or reads. Code that looks right can still draw badly: text that wraps into three lines, a card with nothing
+in it, a row that's greyed out for no reason, an icon that doesn't show. Use it any other time it helps, too: to check an
+edge case (a long translation, everything off, a fresh install) or to show what a page looks like.
+
+`tests/ui` draws the real `bootstrap.js` (every feature patched in) in Chromium, at a phone's width, with Discord's own
+icons, gg sans font and color tokens taken from the APK, and saves screenshots you can open with the image viewer.
+
+```bash
+sh tests/ui/setup.sh                                   # once per sandbox, about a minute (work/ui; safe to rerun after a reset)
+node tests/ui/shot.cjs features 'page=VENUS_PLUGINS'   # -> work/ui/shots/features.png
+node tests/ui/shot.cjs nd-off 'page=VENUS_NODELETE' nd-on 'page=VENUS_NODELETE&on=noDelete'
+node tests/ui/shot.cjs --all before                    # every page, on and off, plus a fresh install
+python3 tests/ui/sheet.py work/ui/shots/cmp.png a.png b.png --scale 0.6   # side by side, to compare
+```
+
+- **Query:** `page=` a route (`VENUS_PLUGINS`, `VENUS_GENERAL`, `VENUS_BACKUP`, `VENUS_LANGUAGE`, `VENUS_<FEATURE>`),
+  `on=` features or switches turned on, `set=` any other saved settings as JSON (`set={"readAllMode":"dms"}`), `fresh=1`
+  for a first launch, `theme=light|midnight|darker`, `lang=de`, `search=` typed into the Features search bar.
+- `DPR=2` gives sharper shots for reading small text; `WIDTH=360` checks a narrow phone. The script prints the page's
+  errors, warnings, dialogs and toasts.
+- Check every page you touch **on and off**, and at least one **other theme and a long language** (`lang=de`, `lang=ru`).
+- It's a close stand-in, not Discord: `tests/ui/discord.jsx` redraws Discord's components (rows, switches, buttons) from
+  their sizes and tokens, and animations jump to their end. Judge layout, wording, spacing, states and empty or redundant
+  parts with it; things that depend on Discord's native code (exact ripples, the real chat list) still need a phone. When a
+  page reads a Discord module the preview doesn't have, add a stand-in to `entry.jsx`.
+
 ## Settings design
 
 Venus settings should feel like part of Discord: simple, modern and calm, never a wall of switches. Every screen
@@ -444,8 +473,8 @@ What belongs in the repository:
   prelude injects cleanly) and `tests/native/VerifyApk.kt` (the patched APK is consistent; run it with
   `sh scripts/verify_apk.sh`, which patches with the newest Morphe CLI first).
 - **General performance tools:** the five files in `tests/bench/` and `tests/hermes-startup.js`.
-- **Developer tools with a future use:** `tests/theme_compat.cjs` and `tests/themes_fetch.py`, and the porting tools
-  in `scripts/hbc/`.
+- **Developer tools with a future use:** `tests/theme_compat.cjs` and `tests/themes_fetch.py`, the UI preview in `tests/ui/`
+  (see "Seeing the UI"), and the porting tools in `scripts/hbc/`.
 - **Build gates** in `scripts/build.py`: changelog format, HBC98 compilation of the runtime, language files (valid,
   placeholders kept, everything translated) and the bench rule above.
 
