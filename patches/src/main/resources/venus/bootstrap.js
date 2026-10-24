@@ -6990,15 +6990,16 @@
         }, [guildId]);
     }
     const SERVER_INFO_DARK = {banner:{height:112, backgroundColor:"#4e50584d"}, ring:{borderColor:"#232428", backgroundColor:"#2b2d31"},
-        card:{backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:10},
-        tile:{flexGrow:1, flexBasis:"30%", minWidth:96, backgroundColor:"#2b2d31", borderRadius:16, paddingHorizontal:12, paddingVertical:12, gap:4},
+        card:{backgroundColor:"#97979f1f", borderRadius:16, paddingHorizontal:16, paddingVertical:14, gap:10},
+        tile:{flexGrow:1, flexBasis:"30%", minWidth:96, backgroundColor:"#97979f1f", borderRadius:16, paddingHorizontal:12, paddingVertical:12, gap:4},
         chip:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:8, paddingVertical:3, borderRadius:10, backgroundColor:"#4e50584d"},
         acronym:{backgroundColor:"#5865f2"}};
     function useServerInfoStyles() {
         return useThemed("serverInfo", c => ({banner:Object.assign({}, SERVER_INFO_DARK.banner, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
             ring:{borderColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW, backgroundColor:c.CARD_BACKGROUND_DEFAULT},
-            card:Object.assign({}, SERVER_INFO_DARK.card, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
-            tile:Object.assign({}, SERVER_INFO_DARK.tile, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            // The sheet itself is CARD_BACKGROUND_DEFAULT, so cards on it take the subtle tint that shows on any surface.
+            card:Object.assign({}, SERVER_INFO_DARK.card, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            tile:Object.assign({}, SERVER_INFO_DARK.tile, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
             chip:Object.assign({}, SERVER_INFO_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
             acronym:{backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}}), SERVER_INFO_DARK);
     }
