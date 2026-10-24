@@ -5,6 +5,7 @@
 //   set={"readAllMode":"dms"} any other saved settings, as JSON
 //   fresh=1                   a fresh install: nothing saved yet (shows Start with the essentials)
 //   theme=dark|light|midnight|darker   lang=de   search=pin   (search: typed into the Features search bar)
+//   tap=Custom                 taps the element with that accessibility label or text once the page is drawn
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import * as RNW from "react-native-web";
@@ -88,3 +89,10 @@ window.__venusStart = function () {
   ReactDOM.createRoot(document.getElementById("root")).render(<Frame />);
   window.__venus = global.__venusPatches;
 };
+
+// tap=<text>: taps the first element whose accessibility label or text is exactly that, after the page draws.
+if (q.get("tap")) setTimeout(() => {
+  const want = q.get("tap"), all = Array.from(document.querySelectorAll("#root [aria-label], #root div[tabindex], #root [role]"));
+  const hit = all.find(e => e.getAttribute("aria-label") === want) || all.find(e => (e.innerText || "").trim() === want);
+  if (hit) hit.click(); else console.warn("tap: nothing labelled " + want);
+}, 400);

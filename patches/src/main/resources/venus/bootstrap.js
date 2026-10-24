@@ -5285,47 +5285,42 @@
         const index=props.items.findIndex(item => item.value===props.value);
         // Once its slider has measured the track, the chosen pill slides to the new choice instead of jumping.
         const slot=String(props.key)+":"+props.items.length, sliding=!!motion() && segmentMeasured.has(slot);
-        const pick=i => { const item=props.items[i]; if (item && !props.disabled && item.value!==props.value) { haptic("IMPACT_MEDIUM"); if (!sliding) animateLayout(); props.onChange(item.value); } };
+        const pick=i => { const item=props.items[i]; if (!item || props.disabled) return;
+            if (item.value===props.value) { if (props.onReselect) props.onReselect(item.value); return; }
+            haptic("IMPACT_MEDIUM"); if (!sliding) animateLayout(); props.onChange(item.value); };
         const pill={flex:1,minWidth:0,paddingVertical:9,paddingHorizontal:8,borderRadius:20,alignItems:"center",justifyContent:"center"};
         const s=useThemed("segmented",c => ({wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:c.MOBILE_SEGMENTED_CONTROL_BACKGROUND},
-            on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill}),
-            {wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:"#1e1f22"},on:Object.assign({},pill,{backgroundColor:"#4e5058"}),off:pill});
+            on:Object.assign({},pill,{backgroundColor:c.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND}),off:pill,
+            label:{on:c.INTERACTIVE_TEXT_ACTIVE,off:c.TEXT_MUTED}}),
+            {wrap:{flexDirection:"row",padding:4,gap:4,borderRadius:24,backgroundColor:"#1e1f22"},on:Object.assign({},pill,{backgroundColor:"#4e5058"}),off:pill,
+             label:{on:"#ffffff",off:"#949ba4"}});
         const Text=inspectedExport(5088,"Text"), Press=RN.Pressable || RN.View;
         const indicator=s.on && s.on.backgroundColor;
         return el(RN.View,{key:props.key,style:[s.wrap,{opacity:props.disabled ? 0.5 : 1}],accessibilityRole:"tablist"},
             motion() && index>=0 ? el(SegmentedSlider,{key:"slider",slot,index,count:props.items.length,color:indicator}) : null,
             props.items.map((item,i) => el(Press,{key:String(item.value),style:i===index && !sliding ? s.on : s.off,accessibilityRole:"tab",accessibilityLabel:item.label,
                 accessibilityState:{selected:i===index,disabled:!!props.disabled},disabled:!!props.disabled,onPress:() => pick(i)},
-                Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted",lineClamp:1,style:{textAlign:"center"}},item.label) :
-                    el(RN.Text,{numberOfLines:1,style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600",textAlign:"center"}},item.label))));
+                item.icon && !item.text ? el(item.icon,{size:"xs",color:i===index ? s.label.on : s.label.off}) :
+                Text ? el(Text,{variant:"text-sm/semibold",color:i===index ? "interactive-text-active" : "text-muted",lineClamp:1,style:{textAlign:"center"}},item.text || item.label) :
+                    el(RN.Text,{numberOfLines:1,style:{color:i===index ? "#ffffff" : "#949ba4",fontWeight:"600",textAlign:"center"}},item.text || item.label))));
     }
-    // Presets as Discord's segmented pills, and under them one Custom row that says what's in use: tap it for an inline
-    // number box with Use. A custom value leaves every pill unselected, so they never claim a choice you didn't make.
+    // Presets as segmented pills with one more at the end for any other number: a pencil, or the number itself once it's
+    // custom (then that pill is the chosen one). Tapping it opens a number box right under the pills.
+    const PRESET_CUSTOM = "\u0000custom";
     function PresetOrCustom(props) {
         const [editing, setEditing] = React.useState(false), [draft, setDraft] = React.useState("");
-        const s = useThemed("presetCustom", c => ({row:{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:12,
-            borderRadius:16, backgroundColor:c.CARD_BACKGROUND_DEFAULT}, chip:{paddingHorizontal:12, paddingVertical:5, borderRadius:12,
-            backgroundColor:c.BACKGROUND_MOD_SUBTLE}, active:{backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}}),
-            {row:{flexDirection:"row", alignItems:"center", gap:12, paddingHorizontal:16, paddingVertical:12, borderRadius:16, backgroundColor:"#2b2d31"},
-             chip:{paddingHorizontal:12, paddingVertical:5, borderRadius:12, backgroundColor:"#4e50584d"}, active:{backgroundColor:"#5865f2"}});
-        const ui = reviewUI(), Text = inspectedExport(5088, "Text"), Press = RN.Pressable || RN.View, Pencil = venusIcon(9720, "PencilIcon");
+        const ui = reviewUI(), Pencil = venusIcon(9720, "PencilIcon");
         const value = props.value, preset = props.presets.some(item => item.value === value), on = !props.disabled;
-        const label = (text, variant, color) => Text ? el(Text, {variant, color}, text) :
-            el(RN.Text, {style:{color:color === "text-strong" ? "#f2f3f5" : color === "always-white" ? "#ffffff" : "#949ba4", fontSize:variant.indexOf("text-md") === 0 ? 16 : 13, fontWeight:"600"}}, text);
         const number = Number(draft), valid = draft !== "" && Number.isFinite(number) && number >= props.min && number <= props.max;
         const apply = () => { if (!on || !valid) return; haptic("SELECTION"); animateLayout(); props.onChange(number); setEditing(false); setDraft(""); };
-        const open = () => { if (!on) return; animateLayout(); setDraft(String(value)); setEditing(true); };
+        const open = () => { if (!on) return; animateLayout(); setDraft(preset ? "" : String(value)); setEditing(!editing); };
+        const items = props.presets.concat([{value:PRESET_CUSTOM, label:tr("Custom"), icon:Pencil, text:preset ? "" : props.format(value)}]);
         return el(RN.View, {key:props.key, style:{gap:10}},
             groupTitle("title", props.title),
-            venusSegmented({key:props.key + ":pills", value:preset ? value : undefined, disabled:!on, onChange:next => { setEditing(false); props.onChange(next); }, items:props.presets}),
-            el(Press, {accessibilityRole:"button", accessibilityLabel:tr("Custom"), disabled:!on || editing, onPress:open, style:[s.row, {opacity:on ? 1 : 0.5}]},
-                el(Pencil, {size:"sm"}),
-                el(RN.View, {style:{flex:1}}, label(tr("Custom"), "text-md/semibold", "text-strong"),
-                    label(tr("{min} to {max}", {min:props.format(props.min), max:props.format(props.max)}), "text-sm/medium", "text-muted")),
-                popIn("custom:" + (preset ? "off" : value), el(RN.View, {style:[s.chip, preset ? null : s.active]},
-                    label(preset ? tr("Edit") : props.format(value), "text-sm/semibold", preset ? "text-muted" : "always-white")))),
+            venusSegmented({key:props.key + ":pills", value:preset ? value : PRESET_CUSTOM, disabled:!on, items, onReselect:next => { if (next === PRESET_CUSTOM) open(); },
+                onChange:next => { if (next === PRESET_CUSTOM) { open(); return; } setEditing(false); props.onChange(next); }}),
             editing ? inputWithButton(ui, "input", {value:draft, label:props.inputLabel, keyboardType:"number-pad", maxLength:String(props.max).length,
-                autoFocus:true, returnKeyType:"done", onSubmitEditing:apply, placeholder:String(props.placeholder), editable:on, isDisabled:!on},
+                autoFocus:true, returnKeyType:"done", onSubmitEditing:apply, placeholder:String(preset ? props.placeholder : value), editable:on, isDisabled:!on},
                 text => setDraft(String(text || "").replace(/[^0-9]/g, "")), "Use", apply, !valid) : null,
             props.hint ? footnote("hint", props.hint) : null);
     }

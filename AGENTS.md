@@ -186,7 +186,7 @@ python3 tests/ui/i18n.py drop "Old text"               # remove (or `add texts.j
 
 - **Query:** `page=` a route (`VENUS_PLUGINS`, `VENUS_GENERAL`, `VENUS_BACKUP`, `VENUS_LANGUAGE`, `VENUS_<FEATURE>`),
   `on=` features or switches turned on, `set=` any other saved settings as JSON (`set={"readAllMode":"dms"}`), `fresh=1`
-  for a first launch, `theme=light|midnight|darker`, `lang=de`, `search=` typed into the Features search bar.
+  for a first launch, `theme=light|midnight|darker`, `lang=de`, `search=` typed into the Features search bar, `tap=` the label or text of something to tap first.
 - `DPR=2` gives sharper shots for reading small text; `WIDTH=360` checks a narrow phone. The script prints the page's
   errors, warnings, dialogs and toasts.
 - Look at a page you change on and off, in another theme and in a long language (`lang=de`, `lang=ru`).
