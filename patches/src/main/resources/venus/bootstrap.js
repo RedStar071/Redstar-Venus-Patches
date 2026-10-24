@@ -12079,7 +12079,7 @@
                     el(RN.Text, {style:s.text}, tr("Switched to {pack} — every icon updates at once!", {pack:packLabel})),
                     el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8, marginTop:2}},
                         [[8956, "ReactionIcon", "3"], [12838, "ArrowAngleLeftUpIcon", tr("Reply")], [5042, "CopyIcon", tr("Copy Text")], [9549, "StarIcon", ""]].map(([id, name, label]) =>
-                            el(RN.View, {key:name, style:[k.headerPill, {flexDirection:"row", width:undefined, height:28, paddingHorizontal:9, gap:5}]},
+                            el(RN.View, {key:name, style:{flexDirection:"row", alignItems:"center", height:28, borderRadius:14, paddingHorizontal:9, gap:5, backgroundColor:k.headerPill.backgroundColor}},
                                 el(PackIcon, {pack, id, name, px:16, color:k.icon.color}),
                                 label ? el(RN.Text, {style:[s.muted, {fontSize:12, fontWeight:"600"}]}, label) : null))))));
         const tabs = el(RN.View, {key:"tabs", style:[k.strip, {flexDirection:"row", alignItems:"center", paddingHorizontal:8}]},
