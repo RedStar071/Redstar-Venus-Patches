@@ -6,10 +6,13 @@
 //   fresh=1                   a fresh install: nothing saved yet (shows Start with the essentials)
 //   theme=dark|light|midnight|darker   lang=de   search=pin   (search: typed into the Features search bar)
 //   tap=Custom                 taps the element with that accessibility label or text once the page is drawn
+//   scene=serverMenu|readAll   instead of a settings page, a Discord screen with what Venus adds to it, on made-up
+//                              data (tests/ui/scenes.jsx); sheets Venus opens (Server info, Read all) slide up over it
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import * as RNW from "react-native-web";
 import * as D from "./discord.jsx";
+import * as S from "./scenes.jsx";
 
 const q = new URLSearchParams(location.search);
 // Every feature patched in, like selecting every patch in Morphe.
@@ -51,6 +54,7 @@ const modules = {
   4809: { default: { open: (key, o) => console.log("TOAST " + (o && o.text)) } },
   6889: { Clipboard: { setString() {}, getString: () => Promise.resolve("") } },
 };
+Object.assign(modules, S.modules(store, me));
 const icons = {};
 const fallback = new Proxy({}, { get: (_, k) => typeof k === "string" && /Icon$/.test(k) ? icons[k] || (icons[k] = D.makeIcon(k)) : undefined });
 
@@ -66,13 +70,14 @@ function boot() {
   modules[10664] = { createList: x => x };
   const define = (id, exports) => global.__d((g, r, i, a, module) => { module.exports = exports; }, id, []);
   define(120, { default: () => {} });
-  [17, 19, 1162, 6265, 6896, 14971, 10664, 14839].forEach(id => define(id, modules[id]));
+  [17, 19, 1162, 6265, 6896, 14971, 10664, 14839].concat(S.hooked).forEach(id => define(id, modules[id]));
   defined[120].exports.default();
   registry = defined[14839].exports.SETTING_RENDERER_CONFIG;
 }
 
 window.__venusStart = function () {
   boot();
+  if (q.get("scene")) { ReactDOM.createRoot(document.getElementById("root")).render(<S.Scene name={q.get("scene")} defined={defined} />); return; }
   const page = q.get("page") || "VENUS_PLUGINS", node = registry[page];
   const Page = node && node.screen && node.screen.getComponent();
   if (q.get("search")) setTimeout(() => { const input = document.querySelector("input"); if (input) { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(input, q.get("search")); input.dispatchEvent(new Event("input", { bubbles: true })); } }, 300);

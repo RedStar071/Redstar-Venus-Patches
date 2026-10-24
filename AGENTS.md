@@ -187,6 +187,10 @@ python3 tests/ui/i18n.py drop "Old text"               # remove (or `add texts.j
 - **Query:** `page=` a route (`VENUS_PLUGINS`, `VENUS_GENERAL`, `VENUS_BACKUP`, `VENUS_LANGUAGE`, `VENUS_<FEATURE>`),
   `on=` features or switches turned on, `set=` any other saved settings as JSON (`set={"readAllMode":"dms"}`), `fresh=1`
   for a first launch, `theme=light|midnight|darker`, `lang=de`, `search=` typed into the Features search bar, `tap=` the label or text of something to tap first.
+- **Inside Discord:** `scene=` draws a Discord screen with what Venus adds to it, instead of a settings page
+  (`tests/ui/scenes.jsx`): `serverMenu` (the server hold menu with Server info), `serverInfo` (the Server info sheet),
+  `readAll` and `readAllHold` (the Read all pill and its choices). Check these too when a feature's settings change what
+  it does in Discord, and add a scene for any other place Venus draws.
 - `DPR=2` gives sharper shots for reading small text; `WIDTH=360` checks a narrow phone. The script prints the page's
   errors, warnings, dialogs and toasts.
 - Look at a page you change on and off, in another theme and in a long language (`lang=de`, `lang=ru`).
