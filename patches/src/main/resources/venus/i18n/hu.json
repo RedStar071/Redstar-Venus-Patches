@@ -561,7 +561,6 @@
     "Read all button": "Mind olvasott gomb",
     "Read and write ReviewDB reviews on profiles and servers.": "ReviewDB-értékelések olvasása és írása profilokon és szervereken.",
     "Read and write community reviews for this server.": "Közösségi értékelések olvasása és írása erről a szerverről.",
-    "Reading reviews": "Értékelések olvasása",
     "Red": "Piros",
     "Red at 50% brightness, as Discord draws a highlight.": "Piros 50%-os fényerővel, ahogy a Discord a kiemelést rajzolja.",
     "Refresh badge progress": "Jelvények előrehaladásának frissítése",
@@ -706,6 +705,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Értékelés írásához jelentkezz be a ReviewDB-be a Venus beállításaiban.",
     "Sign in to another Discord account on this phone.": "Jelentkezz be egy másik Discord-fiókba ezen a telefonon.",
     "Sign out of ReviewDB": "Kijelentkezés a ReviewDB-ből",
+    "Signed in": "Bejelentkezve",
     "Signed in as {name}": "Bejelentkezve mint {name}",
     "Signed in as {name}.": "Bejelentkezve mint {name}.",
     "Signed in to ReviewDB": "Bejelentkezve a ReviewDB-be",
@@ -909,7 +909,6 @@
       "one": "{n} óra múlva adhatsz hozzá újabbakat. A hozzáadott órák 72 órán belül megjelennek.",
       "other": "{n} óra múlva adhatsz hozzá újabbakat. A hozzáadott órák 72 órán belül megjelennek."
     },
-    "You can read reviews. Sign in to write your own.": "Olvashatod az értékeléseket. Saját értékelés írásához jelentkezz be.",
     "You can read, write, delete and report reviews.": "Olvashatsz, írhatsz, törölhetsz és jelenthetsz értékeléseket.",
     "You can save up to {n} account.": "Legfeljebb {n} fiókot menthetsz.",
     "You can save up to {n} accounts.": {

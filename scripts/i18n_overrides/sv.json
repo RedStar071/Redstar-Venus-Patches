@@ -508,7 +508,6 @@
   "Read all button": "Knappen Markera allt som läst",
   "Read and write ReviewDB reviews on profiles and servers.": "Läs och skriv ReviewDB-recensioner på profiler och servrar.",
   "Read and write community reviews for this server.": "Läs och skriv recensioner från communityn för den här servern.",
-  "Reading reviews": "Läsa recensioner",
   "Red": "Röd",
   "Red at 50% brightness, as Discord draws a highlight.": "Röd med 50 % ljusstyrka, så som Discord ritar en markering.",
   "Refresh badge progress": "Uppdatera märkesframsteg",
@@ -650,6 +649,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "Logga in på ReviewDB i Venus-inställningarna för att skriva en recension.",
   "Sign in to another Discord account on this phone.": "Logga in på ett till Discord-konto på den här telefonen.",
   "Sign out of ReviewDB": "Logga ut från ReviewDB",
+  "Signed in": "Inloggad",
   "Signed in as {name}": "Inloggad som {name}",
   "Signed in as {name}.": "Inloggad som {name}.",
   "Signed in to ReviewDB": "Inloggad på ReviewDB",
@@ -839,7 +839,6 @@
     "one": "Du kan lägga till fler om {n} timme. Timmar du lagt till syns inom 72 timmar.",
     "other": "Du kan lägga till fler om {n} timmar. Timmar du lagt till syns inom 72 timmar."
   },
-  "You can read reviews. Sign in to write your own.": "Du kan läsa recensioner. Logga in för att skriva egna.",
   "You can read, write, delete and report reviews.": "Du kan läsa, skriva, ta bort och rapportera recensioner.",
   "You can save up to {n} account.": "Du kan spara upp till {n} konto.",
   "You can save up to {n} accounts.": {

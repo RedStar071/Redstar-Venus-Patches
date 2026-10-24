@@ -514,7 +514,6 @@
   "Read all button": "Butonul Citește tot",
   "Read and write ReviewDB reviews on profiles and servers.": "Citește și scrie recenzii ReviewDB pe profiluri și servere.",
   "Read and write community reviews for this server.": "Citește și scrie recenzii ale comunității pentru acest server.",
-  "Reading reviews": "Citirea recenziilor",
   "Red": "Roșu",
   "Red at 50% brightness, as Discord draws a highlight.": "Roșu la 50% luminozitate, așa cum desenează Discord o evidențiere.",
   "Refresh badge progress": "Reîmprospătează progresul insignelor",
@@ -659,6 +658,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "Conectează-te la ReviewDB în setările Venus pentru a scrie o recenzie.",
   "Sign in to another Discord account on this phone.": "Conectează-te la un alt cont Discord pe acest telefon.",
   "Sign out of ReviewDB": "Deconectează-te de la ReviewDB",
+  "Signed in": "Conectat",
   "Signed in as {name}": "Conectat ca {name}",
   "Signed in as {name}.": "Conectat ca {name}.",
   "Signed in to ReviewDB": "Conectat la ReviewDB",
@@ -852,7 +852,6 @@
     "one": "Poți adăuga mai multe peste {n} oră. Orele adăugate apar în cel mult 72 de ore.",
     "other": "Poți adăuga mai multe peste {n} de ore. Orele adăugate apar în cel mult 72 de ore."
   },
-  "You can read reviews. Sign in to write your own.": "Poți citi recenziile. Conectează-te pentru a scrie una.",
   "You can read, write, delete and report reviews.": "Poți citi, scrie, șterge și raporta recenzii.",
   "You can save up to {n} account.": "Poți salva până la {n} cont.",
   "You can save up to {n} accounts.": {

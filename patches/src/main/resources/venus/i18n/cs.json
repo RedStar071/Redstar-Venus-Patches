@@ -567,7 +567,6 @@
     "Read all button": "Tlačítko Přečíst vše",
     "Read and write ReviewDB reviews on profiles and servers.": "Čtěte a pište recenze ReviewDB na profilech a serverech.",
     "Read and write community reviews for this server.": "Čtěte a pište komunitní recenze tohoto serveru.",
-    "Reading reviews": "Čtení recenzí",
     "Red": "Červená",
     "Red at 50% brightness, as Discord draws a highlight.": "Červená s jasem 50 %, jak zvýraznění vykresluje Discord.",
     "Refresh badge progress": "Obnovit postup odznaků",
@@ -715,6 +714,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Pro napsání recenze se přihlaste do ReviewDB v nastavení Venus.",
     "Sign in to another Discord account on this phone.": "Přihlaste se k dalšímu účtu Discord v tomto telefonu.",
     "Sign out of ReviewDB": "Odhlásit se z ReviewDB",
+    "Signed in": "Přihlášeno",
     "Signed in as {name}": "Přihlášen(a) jako {name}",
     "Signed in as {name}.": "Přihlášen(a) jako {name}.",
     "Signed in to ReviewDB": "Přihlášeno do ReviewDB",
@@ -922,7 +922,6 @@
       "few": "Další můžeš přidat za {n} hodiny. Přidané hodiny se ukážou do 72 hodin.",
       "other": "Další můžeš přidat za {n} hodin. Přidané hodiny se ukážou do 72 hodin."
     },
-    "You can read reviews. Sign in to write your own.": "Můžete číst recenze. Pro napsání vlastní se přihlaste.",
     "You can read, write, delete and report reviews.": "Můžete číst, psát, mazat a nahlašovat recenze.",
     "You can save up to {n} account.": "Uložit můžete až {n} účet.",
     "You can save up to {n} accounts.": {

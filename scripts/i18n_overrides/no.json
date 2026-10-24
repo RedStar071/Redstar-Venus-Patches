@@ -508,7 +508,6 @@
   "Read all button": "Les alt-knapp",
   "Read and write ReviewDB reviews on profiles and servers.": "Les og skriv ReviewDB-anmeldelser på profiler og servere.",
   "Read and write community reviews for this server.": "Les og skriv fellesskapsanmeldelser for denne serveren.",
-  "Reading reviews": "Lese anmeldelser",
   "Red": "Rød",
   "Red at 50% brightness, as Discord draws a highlight.": "Rød med 50 % lysstyrke, slik Discord tegner en utheving.",
   "Refresh badge progress": "Oppdater merkefremgang",
@@ -650,6 +649,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "Logg inn på ReviewDB i Venus-innstillingene for å skrive en anmeldelse.",
   "Sign in to another Discord account on this phone.": "Logg inn på en annen Discord-konto på denne telefonen.",
   "Sign out of ReviewDB": "Logg ut av ReviewDB",
+  "Signed in": "Logget inn",
   "Signed in as {name}": "Logget inn som {name}",
   "Signed in as {name}.": "Logget inn som {name}.",
   "Signed in to ReviewDB": "Logget inn på ReviewDB",
@@ -839,7 +839,6 @@
     "one": "Du kan legge til flere om {n} time. Timer du har lagt til, vises innen 72 timer.",
     "other": "Du kan legge til flere om {n} timer. Timer du har lagt til, vises innen 72 timer."
   },
-  "You can read reviews. Sign in to write your own.": "Du kan lese anmeldelser. Logg inn for å skrive dine egne.",
   "You can read, write, delete and report reviews.": "Du kan lese, skrive, slette og rapportere anmeldelser.",
   "You can save up to {n} account.": "Du kan lagre opptil {n} konto.",
   "You can save up to {n} accounts.": {

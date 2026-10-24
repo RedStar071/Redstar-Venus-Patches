@@ -567,7 +567,6 @@
     "Read all button": "Кнопка «Прочитать всё»",
     "Read and write ReviewDB reviews on profiles and servers.": "Читайте и пишите отзывы ReviewDB в профилях и на серверах.",
     "Read and write community reviews for this server.": "Читайте и оставляйте отзывы сообщества об этом сервере.",
-    "Reading reviews": "Просмотр отзывов",
     "Red": "Красный",
     "Red at 50% brightness, as Discord draws a highlight.": "Красный с яркостью 50%, как Discord рисует подсветку.",
     "Refresh badge progress": "Обновить прогресс значков",
@@ -715,6 +714,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Войдите в ReviewDB в настройках Venus, чтобы оставить отзыв.",
     "Sign in to another Discord account on this phone.": "Войдите в ещё один аккаунт Discord на этом телефоне.",
     "Sign out of ReviewDB": "Выйти из ReviewDB",
+    "Signed in": "Вход выполнен",
     "Signed in as {name}": "Вы вошли как {name}",
     "Signed in as {name}.": "Вы вошли как {name}.",
     "Signed in to ReviewDB": "Вход в ReviewDB выполнен",
@@ -922,7 +922,6 @@
       "few": "Добавить ещё можно будет через {n} часа. Добавленные часы появятся в течение 72 часов.",
       "many": "Добавить ещё можно будет через {n} часов. Добавленные часы появятся в течение 72 часов."
     },
-    "You can read reviews. Sign in to write your own.": "Вы можете читать отзывы. Войдите, чтобы оставлять свои.",
     "You can read, write, delete and report reviews.": "Вы можете читать, писать, удалять отзывы и жаловаться на них.",
     "You can save up to {n} account.": "Можно сохранить до {n} аккаунта.",
     "You can save up to {n} accounts.": {

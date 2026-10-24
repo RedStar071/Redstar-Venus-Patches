@@ -508,7 +508,6 @@
   "Read all button": "Бутон „Прочитане на всичко“",
   "Read and write ReviewDB reviews on profiles and servers.": "Четете и пишете отзиви в ReviewDB за профили и сървъри.",
   "Read and write community reviews for this server.": "Четете и пишете отзиви от общността за този сървър.",
-  "Reading reviews": "Четене на отзиви",
   "Red": "Червено",
   "Red at 50% brightness, as Discord draws a highlight.": "Червено при 50% яркост, както Discord рисува осветяването.",
   "Refresh badge progress": "Обнови напредъка на значките",
@@ -650,6 +649,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "Влезте в ReviewDB от настройките на Venus, за да напишете отзив.",
   "Sign in to another Discord account on this phone.": "Влезте в друг профил в Discord на този телефон.",
   "Sign out of ReviewDB": "Изход от ReviewDB",
+  "Signed in": "Влезли сте",
   "Signed in as {name}": "Влезли сте като {name}",
   "Signed in as {name}.": "Влезли сте като {name}.",
   "Signed in to ReviewDB": "Влезли сте в ReviewDB",
@@ -839,7 +839,6 @@
     "one": "Можеш да добавиш още след {n} час. Добавените часове се появяват до 72 часа.",
     "other": "Можеш да добавиш още след {n} часа. Добавените часове се появяват до 72 часа."
   },
-  "You can read reviews. Sign in to write your own.": "Можете да четете отзиви. Влезте, за да напишете свой.",
   "You can read, write, delete and report reviews.": "Можете да четете, пишете, изтривате и докладвате отзиви.",
   "You can save up to {n} account.": "Можете да запазите до {n} профил.",
   "You can save up to {n} accounts.": {

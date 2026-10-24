@@ -508,7 +508,6 @@
   "Read all button": "सब पढ़ें बटन",
   "Read and write ReviewDB reviews on profiles and servers.": "प्रोफ़ाइल और सर्वर पर ReviewDB रिव्यू पढ़ें और लिखें।",
   "Read and write community reviews for this server.": "इस सर्वर के लिए कम्युनिटी रिव्यू पढ़ें और लिखें।",
-  "Reading reviews": "रिव्यू पढ़े जा रहे हैं",
   "Red": "लाल",
   "Red at 50% brightness, as Discord draws a highlight.": "50% चमक पर लाल, जैसे Discord हाइलाइट दिखाता है।",
   "Refresh badge progress": "बैज की प्रगति रिफ़्रेश करें",
@@ -650,6 +649,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "रिव्यू लिखने के लिए Venus सेटिंग में जाकर ReviewDB में साइन इन करें।",
   "Sign in to another Discord account on this phone.": "इस फ़ोन पर किसी दूसरे Discord अकाउंट में साइन इन करें।",
   "Sign out of ReviewDB": "ReviewDB से साइन आउट करें",
+  "Signed in": "साइन इन है",
   "Signed in as {name}": "{name} के रूप में साइन इन है",
   "Signed in as {name}.": "{name} के रूप में साइन इन है।",
   "Signed in to ReviewDB": "ReviewDB में साइन इन है",
@@ -839,7 +839,6 @@
     "one": "आप {n} घंटे में और जोड़ सकते हैं। जोड़े गए घंटे 72 घंटों के अंदर दिखते हैं।",
     "other": "आप {n} घंटे में और जोड़ सकते हैं। जोड़े गए घंटे 72 घंटों के अंदर दिखते हैं।"
   },
-  "You can read reviews. Sign in to write your own.": "आप रिव्यू पढ़ सकते हैं। अपना रिव्यू लिखने के लिए साइन इन करें।",
   "You can read, write, delete and report reviews.": "आप रिव्यू पढ़ सकते हैं, लिख सकते हैं, हटा सकते हैं और उनकी रिपोर्ट कर सकते हैं।",
   "You can save up to {n} account.": "आप ज़्यादा से ज़्यादा {n} अकाउंट सेव कर सकते हैं।",
   "You can save up to {n} accounts.": {

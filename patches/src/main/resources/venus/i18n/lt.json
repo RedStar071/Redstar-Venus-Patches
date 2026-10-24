@@ -567,7 +567,6 @@
     "Read all button": "Mygtukas „Perskaityti viską“",
     "Read and write ReviewDB reviews on profiles and servers.": "Skaityk ir rašyk ReviewDB atsiliepimus profiliuose ir serveriuose.",
     "Read and write community reviews for this server.": "Skaityk ir rašyk bendruomenės atsiliepimus apie šį serverį.",
-    "Reading reviews": "Atsiliepimų skaitymas",
     "Red": "Raudona",
     "Red at 50% brightness, as Discord draws a highlight.": "Raudona, 50 % ryškumo, kaip Discord piešia paryškinimą.",
     "Refresh badge progress": "Atnaujinti ženklelių pažangą",
@@ -715,6 +714,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Norėdamas parašyti atsiliepimą, prisijunk prie ReviewDB Venus nustatymuose.",
     "Sign in to another Discord account on this phone.": "Prisijunk prie kitos Discord paskyros šiame telefone.",
     "Sign out of ReviewDB": "Atsijungti nuo ReviewDB",
+    "Signed in": "Prisijungta",
     "Signed in as {name}": "Prisijungta kaip {name}",
     "Signed in as {name}.": "Prisijungta kaip {name}.",
     "Signed in to ReviewDB": "Prisijungta prie ReviewDB",
@@ -922,7 +922,6 @@
       "few": "Daugiau galėsi pridėti po {n} valandų. Pridėtos valandos atsiras per 72 valandas.",
       "other": "Daugiau galėsi pridėti po {n} valandų. Pridėtos valandos atsiras per 72 valandas."
     },
-    "You can read reviews. Sign in to write your own.": "Gali skaityti atsiliepimus. Prisijunk, kad parašytum savo.",
     "You can read, write, delete and report reviews.": "Gali skaityti, rašyti, ištrinti ir pranešti apie atsiliepimus.",
     "You can save up to {n} account.": "Gali išsaugoti iki {n} paskyros.",
     "You can save up to {n} accounts.": {

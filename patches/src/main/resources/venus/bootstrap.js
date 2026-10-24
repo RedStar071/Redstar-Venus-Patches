@@ -6493,10 +6493,11 @@
         const me=currentUser(), myName=me && (me.globalName || me.global_name || me.username);
         const groups=[
             !on ? offCard("status",venusIcon(9354,"ThumbsUpIcon"), "reviewDB") :
-                statusCard("status",authenticated ? "You can read, write, delete and report reviews." : "You can read reviews. Sign in to write your own.",
-                    {title:authenticated && myName ? tr("Signed in as {name}",{name:myName}) : tr(pending ? "Signing in…" : "Reading reviews"),
-                        IconComponent:venusIcon(9354,"ThumbsUpIcon"),leading:authenticated && me ? avatarBubble(me,40) : null}),
-            // One row: the action you can take now. The status card already says whether you're signed in.
+                // Signed out, the Sign in row below says it all; signed in, the card shows who you are.
+                authenticated ? statusCard("status","You can read, write, delete and report reviews.",
+                    {title:myName ? tr("Signed in as {name}",{name:myName}) : tr("Signed in"),
+                        IconComponent:venusIcon(9354,"ThumbsUpIcon"),leading:me ? avatarBubble(me,40) : null}) : null,
+            // One row: the action you can take now.
             el(Group,{key:"auth",title:tr("Account")},
                 authenticated ? el(ui.TableRow,{key:"logout",label:tr("Sign out of ReviewDB"),icon:rowIcon(10994,"DoorExitIcon"),variant:"danger",onPress:clearReviewAuth,
                     subLabel:tr("ReviewDB stays in Discord's Authorized Apps until you remove it there.")}) :

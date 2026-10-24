@@ -508,7 +508,6 @@
   "Read all button": "Κουμπί Ανάγνωση όλων",
   "Read and write ReviewDB reviews on profiles and servers.": "Διάβασε και γράψε κριτικές ReviewDB σε προφίλ και διακομιστές.",
   "Read and write community reviews for this server.": "Διάβασε και γράψε κριτικές της κοινότητας για αυτόν τον διακομιστή.",
-  "Reading reviews": "Ανάγνωση κριτικών",
   "Red": "Κόκκινο",
   "Red at 50% brightness, as Discord draws a highlight.": "Κόκκινο στο 50% φωτεινότητα, όπως σχεδιάζει το Discord μια επισήμανση.",
   "Refresh badge progress": "Ανανέωση προόδου εμβλημάτων",
@@ -650,6 +649,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "Συνδέσου στο ReviewDB από τις ρυθμίσεις Venus για να γράψεις κριτική.",
   "Sign in to another Discord account on this phone.": "Συνδέσου σε άλλον λογαριασμό Discord σε αυτό το τηλέφωνο.",
   "Sign out of ReviewDB": "Αποσύνδεση από το ReviewDB",
+  "Signed in": "Συνδεδεμένος",
   "Signed in as {name}": "Συνδέθηκες ως {name}",
   "Signed in as {name}.": "Συνδέθηκες ως {name}.",
   "Signed in to ReviewDB": "Συνδέθηκες στο ReviewDB",
@@ -839,7 +839,6 @@
     "one": "Μπορείς να προσθέσεις κι άλλες σε {n} ώρα. Οι ώρες που πρόσθεσες εμφανίζονται μέσα σε 72 ώρες.",
     "other": "Μπορείς να προσθέσεις κι άλλες σε {n} ώρες. Οι ώρες που πρόσθεσες εμφανίζονται μέσα σε 72 ώρες."
   },
-  "You can read reviews. Sign in to write your own.": "Μπορείς να διαβάζεις κριτικές. Συνδέσου για να γράψεις τη δική σου.",
   "You can read, write, delete and report reviews.": "Μπορείς να διαβάζεις, να γράφεις, να διαγράφεις και να αναφέρεις κριτικές.",
   "You can save up to {n} account.": "Μπορείς να αποθηκεύσεις έως {n} λογαριασμό.",
   "You can save up to {n} accounts.": {

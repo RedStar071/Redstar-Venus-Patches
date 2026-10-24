@@ -561,7 +561,6 @@
     "Read all button": "Lue kaikki -painike",
     "Read and write ReviewDB reviews on profiles and servers.": "Lue ja kirjoita ReviewDB-arvosteluja profiileihin ja palvelimille.",
     "Read and write community reviews for this server.": "Lue ja kirjoita yhteisön arvosteluja tälle palvelimelle.",
-    "Reading reviews": "Arvostelujen lukeminen",
     "Red": "Punainen",
     "Red at 50% brightness, as Discord draws a highlight.": "Punainen 50 %:n kirkkaudella, kuten Discord piirtää korostuksen.",
     "Refresh badge progress": "Päivitä merkkien edistyminen",
@@ -706,6 +705,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Kirjaudu ReviewDB:hen Venus-asetuksissa kirjoittaaksesi arvostelun.",
     "Sign in to another Discord account on this phone.": "Kirjaudu toiselle Discord-tilille tällä puhelimella.",
     "Sign out of ReviewDB": "Kirjaudu ulos ReviewDB:stä",
+    "Signed in": "Kirjautunut",
     "Signed in as {name}": "Kirjautuneena nimellä {name}",
     "Signed in as {name}.": "Kirjautuneena nimellä {name}.",
     "Signed in to ReviewDB": "Kirjautuneena ReviewDB:hen",
@@ -909,7 +909,6 @@
       "one": "Voit lisätä lisää {n} tunnin kuluttua. Lisäämäsi tunnit näkyvät 72 tunnin kuluessa.",
       "other": "Voit lisätä lisää {n} tunnin kuluttua. Lisäämäsi tunnit näkyvät 72 tunnin kuluessa."
     },
-    "You can read reviews. Sign in to write your own.": "Voit lukea arvosteluja. Kirjaudu sisään kirjoittaaksesi omasi.",
     "You can read, write, delete and report reviews.": "Voit lukea, kirjoittaa, poistaa ja ilmiantaa arvosteluja.",
     "You can save up to {n} account.": "Voit tallentaa enintään {n} tilin.",
     "You can save up to {n} accounts.": {

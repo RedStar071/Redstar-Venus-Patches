@@ -514,7 +514,6 @@
   "Read all button": "Gumb Pročitaj sve",
   "Read and write ReviewDB reviews on profiles and servers.": "Čitajte i pišite ReviewDB recenzije na profilima i serverima.",
   "Read and write community reviews for this server.": "Čitajte i pišite recenzije zajednice za ovaj server.",
-  "Reading reviews": "Čitanje recenzija",
   "Red": "Crvena",
   "Red at 50% brightness, as Discord draws a highlight.": "Crvena na 50 % svjetline, kako Discord prikazuje isticanje.",
   "Refresh badge progress": "Osvježi napredak znački",
@@ -659,6 +658,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "Prijavite se u ReviewDB u postavkama Venusa kako biste napisali recenziju.",
   "Sign in to another Discord account on this phone.": "Prijavite se na drugi Discord račun na ovom telefonu.",
   "Sign out of ReviewDB": "Odjavi se iz ReviewDB-a",
+  "Signed in": "Prijavljeni ste",
   "Signed in as {name}": "Prijavljeni ste kao {name}",
   "Signed in as {name}.": "Prijavljeni ste kao {name}.",
   "Signed in to ReviewDB": "Prijavljeni ste u ReviewDB",
@@ -852,7 +852,6 @@
     "one": "Još možeš dodati za {n} sat. Dodani sati pojavljuju se u roku od 72 sata.",
     "other": "Još možeš dodati za {n} sati. Dodani sati pojavljuju se u roku od 72 sata."
   },
-  "You can read reviews. Sign in to write your own.": "Možete čitati recenzije. Prijavite se kako biste napisali vlastitu.",
   "You can read, write, delete and report reviews.": "Možete čitati, pisati, brisati i prijavljivati recenzije.",
   "You can save up to {n} account.": "Možete spremiti najviše {n} račun.",
   "You can save up to {n} accounts.": {

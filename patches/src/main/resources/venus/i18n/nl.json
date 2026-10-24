@@ -561,7 +561,6 @@
     "Read all button": "Alles-gelezen-knop",
     "Read and write ReviewDB reviews on profiles and servers.": "Lees en schrijf ReviewDB-reviews op profielen en servers.",
     "Read and write community reviews for this server.": "Lees en schrijf communityreviews voor deze server.",
-    "Reading reviews": "Reviews lezen",
     "Red": "Rood",
     "Red at 50% brightness, as Discord draws a highlight.": "Rood op 50% helderheid, zoals Discord een markering tekent.",
     "Refresh badge progress": "Badgevoortgang vernieuwen",
@@ -706,6 +705,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Log in de Venus-instellingen in bij ReviewDB om een review te schrijven.",
     "Sign in to another Discord account on this phone.": "Log op deze telefoon in op een ander Discord-account.",
     "Sign out of ReviewDB": "Uitloggen bij ReviewDB",
+    "Signed in": "Ingelogd",
     "Signed in as {name}": "Ingelogd als {name}",
     "Signed in as {name}.": "Ingelogd als {name}.",
     "Signed in to ReviewDB": "Ingelogd bij ReviewDB",
@@ -909,7 +909,6 @@
       "one": "Je kunt over {n} uur meer toevoegen. Toegevoegde uren verschijnen binnen 72 uur.",
       "other": "Je kunt over {n} uur meer toevoegen. Toegevoegde uren verschijnen binnen 72 uur."
     },
-    "You can read reviews. Sign in to write your own.": "Je kunt reviews lezen. Log in om er zelf een te schrijven.",
     "You can read, write, delete and report reviews.": "Je kunt reviews lezen, schrijven, verwijderen en rapporteren.",
     "You can save up to {n} account.": "Je kunt maximaal {n} account opslaan.",
     "You can save up to {n} accounts.": {

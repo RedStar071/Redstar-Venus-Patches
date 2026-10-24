@@ -508,7 +508,6 @@
   "Read all button": "Tümünü oku düğmesi",
   "Read and write ReviewDB reviews on profiles and servers.": "Profillerde ve sunucularda ReviewDB incelemeleri oku ve yaz.",
   "Read and write community reviews for this server.": "Bu sunucu için topluluk incelemelerini oku ve yaz.",
-  "Reading reviews": "İncelemeler okunuyor",
   "Red": "Kırmızı",
   "Red at 50% brightness, as Discord draws a highlight.": "%50 parlaklıkta kırmızı; Discord'un vurgu rengi gibi.",
   "Refresh badge progress": "Rozet ilerlemesini yenile",
@@ -650,6 +649,7 @@
   "Sign in to ReviewDB in Venus settings to write a review.": "İnceleme yazmak için Venus ayarlarından ReviewDB'ye giriş yap.",
   "Sign in to another Discord account on this phone.": "Bu telefonda başka bir Discord hesabına giriş yap.",
   "Sign out of ReviewDB": "ReviewDB'den çıkış yap",
+  "Signed in": "Giriş yapıldı",
   "Signed in as {name}": "{name} olarak giriş yapıldı",
   "Signed in as {name}.": "{name} olarak giriş yapıldı.",
   "Signed in to ReviewDB": "ReviewDB'ye giriş yapıldı",
@@ -839,7 +839,6 @@
     "one": "{n} saat sonra daha fazla ekleyebilirsin. Eklediğin saatler 72 saat içinde görünür.",
     "other": "{n} saat sonra daha fazla ekleyebilirsin. Eklediğin saatler 72 saat içinde görünür."
   },
-  "You can read reviews. Sign in to write your own.": "İncelemeleri okuyabilirsin. Kendi incelemeni yazmak için giriş yap.",
   "You can read, write, delete and report reviews.": "İncelemeleri okuyabilir, yazabilir, silebilir ve bildirebilirsin.",
   "You can save up to {n} account.": "En fazla {n} hesap kaydedebilirsin.",
   "You can save up to {n} accounts.": {

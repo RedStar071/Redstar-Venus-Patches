@@ -561,7 +561,6 @@
     "Read all button": "Botão Ler tudo",
     "Read and write ReviewDB reviews on profiles and servers.": "Leia e escreva avaliações do ReviewDB em perfis e servidores.",
     "Read and write community reviews for this server.": "Leia e escreva avaliações da comunidade para este servidor.",
-    "Reading reviews": "Leitura de avaliações",
     "Red": "Vermelho",
     "Red at 50% brightness, as Discord draws a highlight.": "Vermelho com 50% de brilho, como o Discord desenha um destaque.",
     "Refresh badge progress": "Atualizar o progresso dos emblemas",
@@ -706,6 +705,7 @@
     "Sign in to ReviewDB in Venus settings to write a review.": "Entre no ReviewDB nas configurações do Venus para escrever uma avaliação.",
     "Sign in to another Discord account on this phone.": "Entre em outra conta do Discord neste celular.",
     "Sign out of ReviewDB": "Sair do ReviewDB",
+    "Signed in": "Conectado",
     "Signed in as {name}": "Conectado como {name}",
     "Signed in as {name}.": "Conectado como {name}.",
     "Signed in to ReviewDB": "Conectado ao ReviewDB",
@@ -909,7 +909,6 @@
       "one": "Você pode adicionar mais em {n} hora. As horas adicionadas aparecem em até 72 horas.",
       "other": "Você pode adicionar mais em {n} horas. As horas adicionadas aparecem em até 72 horas."
     },
-    "You can read reviews. Sign in to write your own.": "Você pode ler as avaliações. Entre para escrever a sua.",
     "You can read, write, delete and report reviews.": "Você pode ler, escrever, excluir e denunciar avaliações.",
     "You can save up to {n} account.": "Você pode salvar até {n} conta.",
     "You can save up to {n} accounts.": {
