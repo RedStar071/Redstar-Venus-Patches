@@ -5950,7 +5950,7 @@
                 el(RN.View, {style:[k.secondary, {width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center"}]},
                     el(venusIcon(12627, "RetryIcon"), {size:"sm", color:k.secondaryText.color})))) : null;
         return el(RN.View, {key:"preview"},
-            previewScreen(s, "preview", "Device indicators preview", [el(RN.View, {key:"screen:" + screen, style:{minHeight:236}}, popIn("screen:" + screen,
+            previewScreen(s, "preview", "Device indicators preview", [el(RN.View, {key:"screen:" + screen, style:{minHeight:236, justifyContent:screen === "piDmHeader" ? "flex-end" : "flex-start"}}, popIn("screen:" + screen,
                 el(RN.View, null, body))), off],
                 {header, footer:tryBar}));
     }
