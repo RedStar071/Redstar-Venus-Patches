@@ -1402,7 +1402,7 @@
         useSettings("language");
         const ui = reviewUI();
         if (!React || !RN) return null;
-        const choices = [["auto", tr("Same as Discord"), tr("Follows Discord's Language setting.")]].concat(UI_LANGUAGES.map(([code, name, english]) => [code, name, english]));
+        const choices = [["auto", tr("Same as Discord"), tr("Follows Discord's Language setting.")]].concat(UI_LANGUAGES.map(([code, name, english]) => [code, name, english === name ? null : english]));
         const groups = [
             radioGroup(ui, "language", "Show Venus settings in", "language", true, choices, true),
             footnote("note", i18n.loading.has(uiLanguage()) ? "Loading the language…" : "Only Venus's own settings and messages change. Discord's language is set in Discord's Language settings.")];
