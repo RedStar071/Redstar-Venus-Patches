@@ -12381,8 +12381,9 @@
             el(PresetOrCustom, {key:"brightness", title:"Brightness", value:settings.messageHighlightBrightness, disabled:!on, min:0, max:100, placeholder:50,
                 inputLabel:tr("Brightness, 0 to 100"), format:n => tr("{n}%", {n}), onChange:value => setSetting("messageHighlightBrightness", value),
                 presets:BRIGHTNESS_STEPS.map(n => ({value:n, label:tr("{n}%", {n})})), hint:"How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it."}),
-            el(ui.TableRowGroup || RN.View, {key:"manage", title:tr("Manage")},
-                actionRow(ui, "reset", "Reset to defaults", "A 4 dp bar, yellow at 50% brightness.", resetAll, !on || !changed)),
+            // Only while something differs from the defaults: a greyed-out Reset that can't do anything is just clutter.
+            changed ? el(ui.TableRowGroup || RN.View, {key:"manage", title:tr("Manage")},
+                actionRow(ui, "reset", "Reset to defaults", "A 4 dp bar, yellow at 50% brightness.", resetAll, !on)) : null,
             footnote("note", showDeleted ? "Changes show in chat right away, with no restart. Deleted messages have their own color in Keep deleted messages." :
                 "Changes show in chat right away, with no restart.")
         ];
