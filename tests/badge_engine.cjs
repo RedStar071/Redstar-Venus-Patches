@@ -65,7 +65,7 @@ function world(opts = {}) {
         ${limits}
         ${engine}
         return {badges, badgeStartGame, badgesStop, badgesSettingChanged, badgeGrantHours, badgeGrantLimit, badgeGrantWait,
-            badgeGrantRecord, badgeGrantsLoad, badgeGrantPlan, badgeGrantRoom, badgeDaySchedule, badgeGrantDays, badgeDayKey, badgeEntries, BADGE_FALLBACK_GAMES, BADGE_GAME_TIME_START};
+            badgeGrantRecord, badgeGrantsLoad, badgeAdoptLegacyGrant, badgeGrantPendingWait, badgeGrantHave, badgeGrantPlan, badgeGrantRoom, badgeDaySchedule, badgeGrantDays, badgeDayKey, badgeEntries, BADGE_FALLBACK_GAMES, BADGE_GAME_TIME_START};
     `);
     const api = factory(env, later, clearTimeout, http, () => now, dispatched);
     api.badges.user = '111111111111111111';
@@ -172,11 +172,19 @@ const heartbeats = w => events(w, 'running_game_heartbeat');
         w.setNow(w.now() + 25 * 3600000);
         const before = w.sent.length, p2 = w.api.badgeGrantHours(200); await w.advance(10 * 60000); await p2;
         const second = sessionsOf(w, before);
-        const firstDays = new Set(first.map(x => dayOf(x.start))), secondDays = new Set(second.map(x => dayOf(x.start)));
-        const shared = [...secondDays].filter(d => firstDays.has(d));
-        const overlap = second.some(x => first.some(y => y.start < x.end && y.end > x.start));
-        ok(second.length > 0 && !overlap, 'the next day\'s grant never overlaps anything already sent');
-        ok(shared.length <= 1, 'the next grant moves on to older days (' + shared.length + ' day shared, the one the last grant stopped in)');
+        const both = first.concat(second);
+        let most2 = 0, run2 = 0;
+        for (const [, d] of both.flatMap(x => [[x.start, 1], [x.end, -1]]).sort((p, q) => p[0] - q[0] || p[1] - q[1])) { run2 += d; most2 = Math.max(most2, run2); }
+        const repeated = second.some(x => first.some(y => y.start === x.start));
+        const selfOverlap = both.some(x => both.some(y => y !== x && y.id === x.id && y.start < x.end && y.end > x.start));
+        ok(second.length > 0 && !repeated && most2 <= 2 && !selfOverlap, 'the next grant sends no session twice, and with the first never has more than 2 games at once (' + most2 + ')');
+        // Only days that weren't past yet at the first grant, the day it stopped in (whose evening can run past midnight)
+        // and older days.
+        const oldestStart = Math.min(...first.map(x => x.start)), od = new Date(oldestStart);
+        const stopDayEnd = new Date(od.getFullYear(), od.getMonth(), od.getDate()).getTime() + 26 * 3600000;
+        const newest = Math.max(...first.map(x => dayOf(x.start)));
+        const filledAgain = second.filter(x => x.start >= stopDayEnd && dayOf(x.start) < newest);
+        ok(filledAgain.length === 0, 'the next grant never goes back into days the last one filled (' + filledAgain.length + ')');
         ok(Math.min(...second.map(x => x.start)) < Math.min(...first.map(x => x.start)), 'it continues further back in time');
         const all = first.concat(second), perSent = {};
         all.forEach(x => { perSent[dayOf(x.start)] = (perSent[dayOf(x.start)] || 0) + x.end - x.start; });
@@ -224,6 +232,89 @@ const heartbeats = w => events(w, 'running_game_heartbeat');
         ok(Object.keys(g).length === 1 && r.hours === 5000 && r.recent.length === 1 && r.days['20260101'] === 3 && !('bad' in r.days) && !('20260102' in r.days), 'saved grants are checked when loaded');
         const old = w.api.badgeGrantsLoad({'111111111111111111': {at: 1, hours: 300, recent: []}})['111111111111111111'];
         ok(Object.keys(old.days).length > 10, 'hours added by the older version mark the newest days as used');
+    }
+    // Timing: heartbeats keep a steady 5 minute beat for games that keep running, and never claim time the phone slept.
+    {
+        const w = world({settings: {badgesGamesAtOnce: 2}});
+        await w.api.badgeStartGame(null); await w.flush();
+        const keep = w.api.badges.extra[0].game.id;
+        await w.advance(4 * 60000); w.api.badgesSettingChanged('badgesCycleMinutes', 15); w.api.badgesSettingChanged('badgesGamesAtOnce', 2);
+        await w.advance(61 * 60000);
+        const beats = w.sent.filter(s => s.events.some(e => e.type === 'running_game_heartbeat' && e.properties.game_id === keep && !e.properties.initial_heartbeat));
+        let gap = 0; for (let i = 1; i < beats.length; i++) gap = Math.max(gap, beats[i].at - beats[i - 1].at);
+        ok(gap <= 5 * 60000 + 1000, 'a game that keeps running gets a heartbeat every 5 minutes, through switches and setting changes (' + gap / 60000 + ' min)');
+        const tracked = heartbeats(w).filter(e => !e.properties.initial_heartbeat && e.properties.game_id === keep).map(e => e.properties.duration_tracked_ms);
+        ok(tracked.every(ms => ms <= 300000 + 1000), 'and each one covers 5 minutes, never more (' + Math.max(...tracked) / 1000 + ' s)');
+        ok(w.activities.some(a => a.application_id === keep && !a.closed), 'the extra game reports its play time to /activities too');
+        w.setNow(w.now() + 3 * 3600000); await w.advance(1000);
+        const after = heartbeats(w).filter(e => !e.properties.initial_heartbeat).map(e => e.properties.duration_tracked_ms);
+        ok(Math.max(...after) <= 10 * 60000, 'after the phone slept 3 hours, a heartbeat claims at most 10 minutes (' + Math.max(...after) / 60000 + ' min)');
+    }
+    {
+        // Granting right after midnight: yesterday's late sessions may not even be over yet.
+        const w = world({progress: {GAME_TIME: 0}});
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        const d = new Date(w.now()); w.setNow(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 20).getTime());
+        const at = w.now(), p = w.api.badgeGrantHours(500); await w.advance(20 * 60000); await p;
+        ok(sessionsOf(w, 0).every(x => x.end <= at - 3600000), 'no session ends in the future or in the last hour');
+    }
+    {
+        // A day played live is never touched by a late session from the day before running past midnight.
+        const w = world({progress: {GAME_TIME: 0}});
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        const user = w.api.badges.user, days = w.api.badgeGrantDays(user);
+        const marked = {};
+        days.slice(0, 120).forEach(day => { marked[w.api.badgeDayKey(day)] = -1; });
+        days.slice(0, 120).forEach((day, i) => { if (i % 2) delete marked[w.api.badgeDayKey(day)]; });
+        w.api.badges.grants[user] = {at: 0, hours: 0, recent: [], days: marked};
+        const p = w.api.badgeGrantHours(500); await w.advance(20 * 60000); await p;
+        ok(sessionsOf(w, 0).every(x => marked[w.api.badgeDayKey(x.start)] !== -1 && marked[w.api.badgeDayKey(x.end)] !== -1), 'nothing lands on a live day, even past midnight');
+    }
+    {
+        // Nothing can be added before Discord has loaded the badge, since the 5,000 cap can't be checked.
+        const w = world({progress: {GAME_TIME: null}});
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        ok(w.api.badgeGrantLimit() === 0 && await w.api.badgeGrantHours(25) === false && w.sent.length === 0, 'nothing is added while the badge is still loading');
+    }
+    {
+        // Hours that already show on the badge aren't counted twice.
+        const w = world({progress: {GAME_TIME: 100}});
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        const p = w.api.badgeGrantHours(500); await w.advance(20 * 60000); await p;
+        ok(w.api.badgeGrantHave() >= 599 && w.api.badgeGrantHave() <= 600, 'right after adding 500 to 100, the badge is expected at 600 (' + w.api.badgeGrantHave() + ')');
+        w.env.progress.GAME_TIME = 600;
+        ok(w.api.badgeGrantHave() === 600, 'once Discord shows them, they are not counted again (' + w.api.badgeGrantHave() + ')');
+        w.env.progress.GAME_TIME = 650;
+        ok(w.api.badgeGrantHave() === 650, 'and live play on top counts once (' + w.api.badgeGrantHave() + ')');
+    }
+    {
+        // 1,000 hours added with the first test build ({at, hours} for every account), then this version.
+        const w = world({progress: {GAME_TIME: 0}});
+        w.api.BADGE_FALLBACK_GAMES.slice(0, 8).forEach(g => w.api.badges.played.add(g.id));
+        const at = w.now() - 30 * 3600000;
+        w.api.badges.legacyGrant = {at, hours: 1000};
+        w.api.badgeAdoptLegacyGrant();
+        const r = w.api.badgeGrantRecord();
+        ok(r.hours === 1000 && r.at === at && r.recent.length === 1, 'a grant from the first test build is kept for the signed-in account');
+        const room = w.api.badgeGrantRoom().total;
+        ok(w.api.badgeGrantHave() === 1000 && w.api.badgeGrantLimit() === Math.min(500, room - 1000), 'before they show, those 1,000 hours count once (' + w.api.badgeGrantLimit() + ')');
+        w.env.progress.GAME_TIME = 1000;
+        ok(w.api.badgeGrantHave() === 1000 && w.api.badgeGrantLimit() === Math.min(500, room - 1000), 'and once they show, still once, not 2,000 (' + w.api.badgeGrantLimit() + ')');
+        const p = w.api.badgeGrantHours(100); await w.advance(10 * 60000); await p;
+        const day = new Date(at), key = w.api.badgeDayKey(new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime());
+        ok(sessionsOf(w, 0).every(x => w.api.badgeDayKey(x.start) !== key && w.api.badgeDayKey(x.end) !== key), 'nothing is added on the day the old 1,000 hours landed');
+    }
+    {
+        // 1,000 hours added with the second test build (per account, no days), shown on the badge.
+        const w = world({progress: {GAME_TIME: 1000}});
+        const at = w.now() - 30 * 3600000;
+        w.api.badges.grants = w.api.badgeGrantsLoad({'111111111111111111': {at, hours: 1000, from: at - 20 * 86400000, recent: [[at, 1000]]}});
+        ok(w.api.badgeGrantLimit() > 0 && w.api.badgeGrantLimit() <= 500, 'a grant from the second test build isn\'t counted twice once it shows (' + w.api.badgeGrantLimit() + ')');
+        // More than the past days could hold, still pending: waiting for it to show is what opens room again.
+        const big = world({progress: {GAME_TIME: 0}});
+        big.api.badges.grants = big.api.badgeGrantsLoad({'111111111111111111': {at, hours: 2500, recent: [[at, 2500]], days: {}}});
+        const left = big.api.badgeGrantPendingWait();
+        ok(big.api.badgeGrantLimit() === 0 && left > 41 * 3600000 && left <= 42 * 3600000, 'when only pending hours block it, the panel says when to come back instead of nothing left (' + (left / 3600000).toFixed(1) + ' h)');
     }
     console.log(`\n${checks - failures}/${checks} passed`);
     process.exit(failures ? 1 : 0);

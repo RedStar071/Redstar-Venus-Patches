@@ -49,8 +49,14 @@ fun main(args: Array<String>) {
         check(header.getInt(large + 12) == number("prefixSize") + number("originalCodeSize"))
         check(hbc[large + 36].toInt() and 8 != 0 && hbc[large + 36].toInt() and 16 == 0)
         check(header.getInt(large + 40) == 1)
-        check(header.getInt(large + 44) == 0 && header.getInt(large + 48) == number("prefixSize") - 7)
-        check(header.getInt(large + 52) == number("prefixSize") - 2)
+        // The prelude ends: JmpLong +7 over Catch r14, then LoadConstUndefined r15 and r16 that both paths run, so the
+        // exception range ends at the jump and the handler is the Catch.
+        val prefix = number("prefixSize")
+        val tail = offset + prefix - 11
+        check(header.getInt(large + 44) == 0 && header.getInt(large + 48) == prefix - 11) { "Exception range doesn't end at the prelude's jump" }
+        check(header.getInt(large + 52) == prefix - 6) { "Exception handler isn't the prelude's Catch" }
+        check(hbc[tail].toInt() and 255 == 175 && ByteBuffer.wrap(hbc, tail + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getInt() == 7 &&
+            hbc[tail + 5].toInt() and 255 == 119 && hbc[tail + 7].toInt() and 255 == 147 && hbc[tail + 9].toInt() and 255 == 147) { "Prelude tail changed" }
         val hash = MessageDigest.getInstance("SHA-256")
         hash.update(hbc, offset + number("prefixSize"), number("originalCodeSize"))
         check(hash.digest().joinToString("") { "%02x".format(it) } ==
