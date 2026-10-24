@@ -4704,7 +4704,7 @@
     function badgeHowCard(s) {
         const rate = badgeGamesAtOnce();
         const rows = [
-            [9207, "GameControllerIcon", tr("When a game counts"), tr("As soon as it starts. Each game stays on a while anyway, because switching every few seconds is something no real player does.")],
+            [9207, "GameControllerIcon", tr("When a game counts"), tr("As soon as it starts.")],
             [5051, "ClockIcon", tr("How fast hours add up"), settings.badgesGameTime ?
                 pl(rate, "{n} hour of game time for every hour Discord is open, even in the background.", "{n} hours of game time for every hour Discord is open, even in the background.") :
                 tr("Turn on Game time to count hours.")],
@@ -4814,8 +4814,7 @@
             settings.badgesGameTime ? el(RN.View, {key:"atOnce", style:{gap:10}},
                 groupTitle("atOnceTitle", "Games at once"),
                 venusSegmented({key:"atOnceSeg", value:badgeAtOnce(settings.badgesGamesAtOnce), disabled:!on, onChange:value => setSetting("badgesGamesAtOnce", value),
-                    items:BADGE_AT_ONCE.map(n => ({value:n, label:pl(n, "{n} game", "{n} games")}))}),
-                footnote("atOnceHint", "Discord adds up the time of every game that's running, so 3 games count 3 hours each hour. More than 3 at once isn't something real players do.")) : null,
+                    items:BADGE_AT_ONCE.map(n => ({value:n, label:pl(n, "{n} game", "{n} games")}))})) : null,
             settings.badgesUniqueGames ? el(PresetOrCustom, {key:"cycle", title:"Switch games every", value:settings.badgesCycleMinutes, disabled:!on,
                 min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX, placeholder:15,
                 inputLabel:tr("Minutes, {min} to {max}", {min:BADGE_CYCLE_MIN, max:BADGE_CYCLE_MAX}),
