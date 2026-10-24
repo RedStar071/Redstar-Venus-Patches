@@ -8998,7 +8998,10 @@
         if (message.content.length <= limit) return orig.apply(self, args);
         const chunks = splitContent(message.content, limit);
         if (!chunks || chunks.length < 2) return orig.apply(self, args);
-        const generation = split.generation;
+        const generation = split.generation, author = currentUser(), authorId = author && author.id;
+        // Every later part is still sent by the account that wrote the message: switching accounts (Account switcher) or
+        // signing out while parts wait used to post the rest under the next account.
+        const stillOn = () => { const user = currentUser(); return enabled("splitMessages") && split.generation === generation && !!user && user.id === authorId; };
         const first = Array.from(args); first[1] = Object.assign({}, message, {content:chunks[0]});
         const result = orig.apply(self, first);
         const gap = splitGapMs(channelId);
@@ -9013,9 +9016,9 @@
         for (let i = 1; i < chunks.length; i++) {
             const content = chunks[i];
             chain = chain.then(ok => {
-                if (!ok || !enabled("splitMessages") || split.generation !== generation) return false;
+                if (!ok || !stillOn()) return false;
                 return new Promise(resolve => later(resolve, gap)).then(() => {
-                    if (!enabled("splitMessages") || split.generation !== generation) return false;
+                    if (!stillOn()) return false;
                     return orig.call(self, channelId, Object.assign({content}, followMessageBase), waitForReady, Object.assign({}, followOptions));
                 }).then(res => !(res && res.hasErr), () => false);
             });
