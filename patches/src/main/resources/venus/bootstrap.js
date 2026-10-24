@@ -7082,7 +7082,9 @@
             icon:avatarBubble(friend.user, 32, friend.status, ring), arrow:true, onPress:() => serverOpenProfile(friend.id, guildId)}) : null;
         const friendsTitle = friends.length ? serverCount(friends.length, "{n} friend here", "{n} friends here") :
             tr(looking ? "Looking for friends\u2026" : "None of your friends are here");
-        const detail = (key, label, value, id, name, onPress) => Row ? el(Row, {key, label:tr(label), subLabel:value, icon:rowIcon(id, name), onPress}) : null;
+        // Rows you can tap to copy carry Discord's copy icon, so it shows without a note at the bottom.
+        const detail = (key, label, value, id, name, onPress) => Row ? el(Row, {key, label:tr(label), subLabel:value, icon:rowIcon(id, name), onPress,
+            trailing:onPress ? el(venusIcon(5042, "CopyIcon"), {size:"sm"}) : undefined}) : null;
         const body = [
             serverHero(s, snap),
             serverTiles(s, snap),
@@ -7105,8 +7107,7 @@
                 snap.vanity ? detail("vanity", "Invite link", "discord.gg/" + snap.vanity, 5038, "LinkIcon", () => serverCopy("https://discord.gg/" + snap.vanity, "Link copied")) : null,
                 detail("verification", "Verification", serverVerification(snap.verification), 10410, "ShieldIcon"),
                 snap.locale ? detail("locale", "Language", languageName(snap.locale), 9099, "GlobeEarthIcon") : null,
-                detail("id", "Server ID", snap.id, 10013, "IdIcon", () => serverCopy(snap.id, "Server ID copied"))),
-            footnote("note", "Tap the invite link or the server ID to copy it.")];
+                detail("id", "Server ID", snap.id, 10013, "IdIcon", () => serverCopy(snap.id, "Server ID copied")))];
         const content = el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:20}}, body.filter(Boolean));
         // Discord's own long sheets (channel picker, forum tags) pass scrollable and scroll with the sheet's
         // BottomSheetScrollView (6307). A plain RN ScrollView fought the sheet's drag: swiping up either scrolled the
