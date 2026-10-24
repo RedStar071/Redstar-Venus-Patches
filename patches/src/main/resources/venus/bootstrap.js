@@ -6478,13 +6478,13 @@
             const c=ui.colors;
             if (typeof ui.createStyles==="function" && c) try {
                 reviewStyleHook=ui.createStyles({card:{backgroundColor:c.CARD_BACKGROUND_DEFAULT,borderRadius:16,padding:8},
-                    row:{backgroundColor:c.CARD_SECONDARY_BG},text:{color:c.TEXT_DEFAULT},muted:{color:c.TEXT_MUTED},
+                    row:{backgroundColor:c.CARD_SECONDARY_BG},divider:{backgroundColor:c.BORDER_SUBTLE},text:{color:c.TEXT_DEFAULT},muted:{color:c.TEXT_MUTED},
                     placeholder:{color:c.INPUT_PLACEHOLDER_TEXT_DEFAULT}});
             } catch (_) { reviewStyleHook=null; }
         }
         let styles=null;
         if (reviewStyleHook) try { styles=reviewStyleHook(); } catch (_) {}
-        return styles || {card:{borderRadius:16,padding:8},row:{},text:{},muted:{},placeholder:{}};
+        return styles || {card:{borderRadius:16,padding:8},row:{},divider:{backgroundColor:"#ffffff0f"},text:{},muted:{color:"#949ba4"},placeholder:{}};
     }
     function ReviewSettings() {
         useReviews();
@@ -6687,11 +6687,17 @@
                 el(RN.Pressable,{key:String(index),style:{marginLeft:4},onPress:() => reviewToast(ui,String(badge.name || ""))},
                     el(RN.Image,{source:{uri:badge.icon,width:16,height:16},style:{width:16,height:16}})))),
             el(ui.FormLabel,{text:timestamp,style:[styles.muted,{marginLeft:5}]}));
-        return el(ui.TableRowGroup || RN.View,{style:[styles.row]},
-            el(ui.FormRow,{style:[styles.row],label,
-                subLabel:el(ui.FormSubLabel,{text:review.comment,style:styles.text}),
-                leading:reviewImage(sender.profilePhoto) ? el(RN.Image,{style:{height:36,width:36,borderRadius:18},source:{uri:sender.profilePhoto}}) : undefined,
-                onLongPress:() => reviewActions(review,props.owner,ui,props.refetch)}));
+        // ReviewDB's be-respectful note is a quiet line above the reviews, not a review of its own.
+        if (review.type===3) return el(RN.Pressable,{onLongPress:() => reviewActions(review,props.owner,ui,props.refetch),
+            style:{flexDirection:"row",alignItems:"center",gap:8,paddingHorizontal:8,paddingVertical:4}},
+            el(venusIcon(10410,"ShieldIcon"),{size:"xs",color:styles.muted.color}),
+            el(RN.Text,{style:[styles.muted,{flex:1,fontSize:13}]},review.comment));
+        // Every review is a row of one card, with the reviewer's picture (or first letter) like Discord's own lists.
+        return el(ui.FormRow,{label,
+            subLabel:el(ui.FormSubLabel,{text:review.comment,style:styles.text}),
+            leading:reviewImage(sender.profilePhoto) ? el(RN.Image,{style:{height:36,width:36,borderRadius:18},source:{uri:sender.profilePhoto}}) :
+                avatarBubble({id:String(sender.discordID || sender.username || "?"),username:String(sender.username || "?")},36),
+            onLongPress:() => reviewActions(review,props.owner,ui,props.refetch)});
     }
     let reviewThemeHook, reviewThemeTried=false;
     function ReviewInput(props) {
@@ -6759,7 +6765,9 @@
             reviewRetry(refetch)) :
             reviews===null ? el(RN.Text,{accessibilityLiveRegion:"polite",style:styles.muted},tr("Loading reviews…")) :
             !shown.length ? el(RN.Text,{style:styles.muted},tr("No reviews yet.")) :
-            shown.map((review,index) => el(ReviewRow,{key:(review.id==null ? "" : String(review.id))+":"+index,review,owner:userId,ui,styles,refetch}));
+            el(RN.View,null,shown.map((review,index) => el(React.Fragment,{key:(review.id==null ? "" : String(review.id))+":"+index},
+                index && review.type!==3 && shown[index-1].type!==3 ? el(RN.View,{style:[{height:1,marginLeft:56},styles.divider]}) : null,
+                el(ReviewRow,{review,owner:userId,ui,styles,refetch}))));
         return el(RN.View,{style:[styles.card]},
             el(Card,props.standalone ? {accessibilityLabel:tr("Reviews")} : {title:tr("Reviews")},
                 el(RN.View,{style:{gap:8}},rows),
