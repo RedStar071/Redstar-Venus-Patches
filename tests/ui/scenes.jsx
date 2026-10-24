@@ -6,6 +6,7 @@
 //   scene=serverInfo   the Server info sheet (Server info tapped in that menu)
 //   scene=readAll      the server list with the Read all pill above the servers
 //   scene=readAllHold  Read all held: the one-time choices sheet
+// Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 import * as React from "react";
 import * as RN from "react-native-web";
 import * as D from "./discord.jsx";
@@ -15,14 +16,15 @@ const DAY = 86400000, now = Date.now();
 const GUILD = "1100000000000000001";
 // Snowflakes that decode to real dates, so "Created" and "You joined" read like a real server.
 const snowflake = ms => String((BigInt(ms - 1420070400000) << 22n) + 1n);
-const people = [
+const allPeople = [
   { id: "1200000000000000001", username: "alex", globalName: "Alex", avatar: null, status: "online", nick: null },
   { id: "1200000000000000002", username: "sam_", globalName: "Sam", avatar: null, status: "idle", nick: "Sammy" },
   { id: "1200000000000000003", username: "jordan", globalName: "Jordan", avatar: null, status: "dnd", nick: null },
 ];
+const people = q.get("friends") === "0" ? [] : allPeople;
 const guild = { id: snowflake(now - 3.2 * 365 * DAY), name: "Game Night", icon: null, banner: null, splash: null,
   description: q.get("desc") === "0" ? "" : "Weekly game nights, clips and memes. Be nice.",
-  memberCount: 1284, premiumSubscriberCount: 9, premiumTier: 2, ownerId: people[0].id, vanityURLCode: "gamenight",
+  memberCount: 1284, premiumSubscriberCount: 9, premiumTier: 2, ownerId: q.get("owner") === "me" ? "123456789012345678" : allPeople[0].id, vanityURLCode: "gamenight",
   verificationLevel: 2, preferredLocale: "en-US", features: new Set(["COMMUNITY"]) };
 const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null }, { id: "1100000000000000003", name: "Work Devs", icon: null }];
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
@@ -31,14 +33,14 @@ const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i
 export const hooked = [1390, 5108, 16748, 16754];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
-  const user = id => id === me.id ? me : people.find(p => p.id === id) || null;
+  const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
   return {
     1390: { default: store({ getCurrentUser: () => me, getUser: user }) },
     4760: { default: store({ getFriendIDs: () => people.map(p => p.id), getRelationships: () => ({}) }) },
-    5108: { default: store({ getStatus: id => (people.find(p => p.id === id) || {}).status || "offline" }) },
+    5108: { default: store({ getStatus: id => (allPeople.find(p => p.id === id) || {}).status || "offline" }) },
     2087: { default: store({ getGuild: id => guilds.find(g => g.id === id) || null, getGuilds: () => Object.fromEntries(guilds.map(g => [g.id, g])) }) },
     5020: { default: store({ getMemberCount: () => 1284, getOnlineCount: () => 312 }) },
-    2125: { default: store({ getMember: (g, id) => { const p = people.find(x => x.id === id); return p && id !== people[2].id ? { nick: p.nick } : null; },
+    2125: { default: store({ getMember: (g, id) => { const p = allPeople.find(x => x.id === id); return p && id !== allPeople[2].id ? { nick: p.nick } : null; },
       getSelfMemberJoinedAt: () => new Date(now - 400 * DAY) }) },
     2119: { default: store({ getNumRoles: () => 10 }) },
     4748: { default: store({ getChannels: () => ({ SELECTABLE: chan(12), VOCAL: chan(3) }) }) },
