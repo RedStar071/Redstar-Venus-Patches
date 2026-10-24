@@ -8826,7 +8826,7 @@
         const me = currentUser();
         const limit = multiAccountLimit();
         // The card's title already gives the count, so the details say who you are and how many fit.
-        const room = accounts.length ? pl(limit, "You can save up to {n} account.", "You can save up to {n} accounts.") : tr("No accounts saved yet (up to {max}).", {max:limit});
+        const room = pl(limit, "You can save up to {n} account.", "You can save up to {n} accounts.");
         const activeName = me && (me.globalName || me.global_name || me.username);
         return activeName ? tr("Signed in as {name}.", {name:activeName}) + "\n" + room : room;
     }
@@ -8871,16 +8871,16 @@
                 onLongPress:!active ? () => confirmAction("Remove account?",
                     tr("Remove {name} from this phone's account switcher? You can add it again anytime.", {name:displayName}),
                     "Remove", () => removeSavedAccount(acc.id)) : undefined});
-        }) : [Row ? el(Row, {key:"empty", label:tr("No saved accounts yet"), subLabel:tr("Tap Add account below to sign in to another account."), disabled:true}) : null];
+        }) : [];
         const groups = [
-            on ? statusCard("status", accountSwitcherSummary(), {title:accounts.length > 1 ? pl(accounts.length, "{n} account", "{n} accounts") : tr("One account so far"),
+            on ? statusCard("status", accountSwitcherSummary(), {title:accounts.length > 1 ? pl(accounts.length, "{n} account", "{n} accounts") : accounts.length ? tr("One account so far") : tr("No saved accounts yet"),
                 IconComponent:venusIcon(8212, "GroupIcon"), leading:accounts.length ? avatarPile(accounts.slice(0, 4).map(acc => (myId && acc.id === myId ? me : userStore && userStore.getUser(acc.id)) || acc)) : null}) :
                 offCard("status", venusIcon(8212, "GroupIcon"), "accountSwitcher"),
             el(Group, {key:"accounts", title:tr("Accounts")},
                 accountRows,
                 Row ? el(Row, {key:"add", label:tr("Add account"), subLabel:tr("Sign in to another Discord account on this phone."), icon:rowIcon(5032, "UserPlusIcon"),
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
-                Row ? el(Row, {key:"register", label:tr("Create a new account"), subLabel:tr("Register a new Discord account right inside the app."), icon:rowIcon(5032, "UserPlusIcon"),
+                Row ? el(Row, {key:"register", label:tr("Create a new account"), subLabel:tr("Register a new Discord account right inside the app."), icon:rowIcon(13139, "NewUserIcon"),
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openRegister}) : null,
                 Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(7092, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
