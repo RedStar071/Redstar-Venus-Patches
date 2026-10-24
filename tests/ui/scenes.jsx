@@ -9,6 +9,8 @@
 //   scene=reviews      Alex's profile with Venus's Reviews card under the note (reviews=0: none yet; signed in: set={"reviewAuth":{"token":"x","account":"123456789012345678"}})
 //   scene=hiddenChannel  a locked channel (staff-only) tapped: Venus's details dialog in Discord's alert
 //   scene=settings     Discord's main Settings screen, with the Venus section where Venus puts it
+//   scene=youBar       the profile bar at the bottom: Discord's bell, then Venus's Switch accounts and settings buttons
+//   scene=translateBar a chat in Spanish with the Translate pill at the top (translateMode manual)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 import * as React from "react";
 import * as RN from "react-native-web";
@@ -33,7 +35,7 @@ const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112];
+export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -75,6 +77,12 @@ export function modules(store, me) {
     1112: { transitionTo: route => console.log("TOAST navigated " + route), replaceWith() {}, transitionToGuild() {} },
     // Discord's alert (AlertActionCreators.show): title, body, Venus's details as children, and two buttons.
     5300: { default: { show: o => host && host.show("alert", <Alert {...o} />) } },
+    // The profile bar's round buttons (YouBarButton) and the bell Venus adds its buttons after.
+    16857: { default: YouBarButton }, 15378: { YOU_BAR_BUTTON_ICON_SIZE: 20 },
+    16858: { default: () => <YouBarButton icon={React.createElement(D.makeIcon("BellIcon"), { size: "custom", style: { width: 20, height: 20 } })} accessibilityLabel="Notifications" /> },
+    // A chat: ChatViewWrapper with Discord's messages, and the message store the Translate pill reads.
+    10368: { default: p => <RN.View style={{ flex: 1, position: "relative" }}>{p.children}</RN.View> },
+    5432: { default: store({ getMessages: () => ({ _array: SPANISH }) }) },
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
   };
 }
@@ -91,6 +99,39 @@ function Alert(p) {
       <D.Button text={p.confirmText} variant="primary" onPress={() => { close(); p.onConfirm && p.onConfirm(); }} />
       {p.cancelText ? <D.Button text={p.cancelText} variant="secondary" onPress={() => { close(); p.onCancel && p.onCancel(); }} /> : null}
     </RN.View>
+  </RN.View>;
+}
+function YouBarButton(p) {
+  return <RN.Pressable accessibilityLabel={p.accessibilityLabel} onPress={p.onPress} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center",
+    backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>{p.icon}</RN.Pressable>;
+}
+function YouBar({ defined }) {
+  const Bell = defined[16858].exports.default;
+  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWER"), justifyContent: "flex-end" }}>
+    <RN.View style={{ margin: 12, flexDirection: "row", alignItems: "center", gap: 10, padding: 10, borderRadius: 28, backgroundColor: D.tok("MOBILE_FLOATINGBAR_BACKGROUND_HIGHER") }}>
+      <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: D.tok("BACKGROUND_BRAND"), alignItems: "center", justifyContent: "center" }}>
+        <D.Text variant="text-md/bold" style={{ color: "#fff" }}>V</D.Text></RN.View>
+      <RN.View style={{ flex: 1 }}><D.Text variant="text-md/semibold" color="text-strong">Venus</D.Text><D.Text variant="text-sm/medium" color="text-muted">Online</D.Text></RN.View>
+      <RN.View style={{ flexDirection: "row", gap: 8 }}><Bell /></RN.View>
+    </RN.View>
+  </RN.View>;
+}
+const CHAT = "1400000000000000001";
+const SPANISH = [{ id: "1", channel_id: CHAT, content: "¡Hola a todos! ¿Quién viene esta noche?", author: { id: allPeople[0].id, username: "lucia" } },
+  { id: "2", channel_id: CHAT, content: "Yo llego a las ocho, guárdenme un sitio.", author: { id: allPeople[1].id, username: "sam_" } }];
+function Chat({ defined }) {
+  const Wrapper = defined[10368].exports.default;
+  return <RN.View style={{ width: 412, height: 520, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+    <RN.View style={{ height: 52, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderColor: D.tok("BORDER_SUBTLE") }}>
+      {React.createElement(D.makeIcon("HashmarkIcon"), { size: "sm", color: D.tok("CHANNEL_ICON") })}<D.Text variant="text-md/bold" color="text-strong">general</D.Text></RN.View>
+    <Wrapper channelId={CHAT}>
+      <RN.View style={{ flex: 1, justifyContent: "flex-end", padding: 16, gap: 14 }}>
+        {SPANISH.map(m => <RN.View key={m.id} style={{ flexDirection: "row", gap: 12 }}>
+          <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: m.id === "1" ? "#f0b232" : "#eb459e" }} />
+          <RN.View style={{ flex: 1 }}><D.Text variant="text-md/semibold" color="text-strong">{m.author.username}</D.Text><D.Text variant="text-md/normal" color="text-default">{m.content}</D.Text></RN.View>
+        </RN.View>)}
+      </RN.View>
+    </Wrapper>
   </RN.View>;
 }
 function FormRow(p) {
@@ -227,6 +268,8 @@ export function Scene({ name, defined, registry }) {
     }, 50);
   }, []);
   if (name === "reviews") return <Profile defined={defined} />;
+  if (name === "youBar") return <YouBar defined={defined} />;
+  if (name === "translateBar") return <Chat defined={defined} />;
   if (name === "settings") return <SettingsScreen defined={defined} registry={registry} />;
   const top = sheets[sheets.length - 1];
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
