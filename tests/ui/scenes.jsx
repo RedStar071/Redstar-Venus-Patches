@@ -8,6 +8,7 @@
 //   scene=readAllHold  Read all held: the one-time choices sheet
 //   scene=reviews      Alex's profile with Venus's Reviews card under the note (reviews=0: none yet; signed in: set={"reviewAuth":{"token":"x","account":"123456789012345678"}})
 //   scene=hiddenChannel  a locked channel (staff-only) tapped: Venus's details dialog in Discord's alert
+//   scene=settings     Discord's main Settings screen, with the Venus section where Venus puts it
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 import * as React from "react";
 import * as RN from "react-native-web";
@@ -189,7 +190,29 @@ function GuildMenu({ defined }) {
   </RN.View>;
 }
 
-export function Scene({ name, defined }) {
+// Discord's Settings screen: its own sections around Account, run through createList (10664), which Venus hooks to add
+// its section. Discord's rows are labels only; Venus's rows are the real registry nodes.
+const DISCORD_SECTIONS = [["Account Settings", [["ACCOUNT", "Account", "UserCircleIcon"], ["PRIVACY", "Content & Social", "ShieldIcon"], ["DATA", "Data & Privacy", "LockIcon"],
+  ["DEVICES", "Devices", "MobilePhoneIcon"], ["CONNECTIONS", "Connections", "LinkIcon"]]],
+  ["App Settings", [["VOICE", "Voice", "MicrophoneIcon"], ["APPEARANCE", "Appearance", "PaintPaletteIcon"], ["LANGUAGE", "Language", "LanguageIcon"], ["NOTIFICATIONS", "Notifications", "BellIcon"]]]];
+function SettingsScreen({ defined, registry }) {
+  const plain = Object.fromEntries(DISCORD_SECTIONS.flatMap(([, rows]) => rows.map(([id, label, icon]) => [id, { type: "route", title: label, IconComponent: D.makeIcon(icon) }])));
+  const config = defined[10664].exports.createList({ sections: DISCORD_SECTIONS.map(([label, rows]) => ({ label, settings: rows.map(r => r[0]) })) });
+  const List = defined[14971] ? defined[14971].exports.SettingsList : null;
+  const all = Object.assign({}, registry, plain);
+  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
+    <RN.View style={{ height: 56, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}><D.Text variant="heading-lg/bold" color="text-strong">Settings</D.Text></RN.View>
+    <RN.View style={{ paddingHorizontal: 12, paddingBottom: 24, gap: 24 }}>
+      {config.sections.map((section, i) => <D.TableRowGroup key={i} title={section.label}>
+        {section.settings.map(id => { const n = all[id]; if (!n) return null;
+          const title = n.useTitle ? n.useTitle() : n.title, desc = n.useDescription ? n.useDescription() : null;
+          return <D.TableRow key={id} label={title} subLabel={desc} icon={n.IconComponent ? <D.TableRowIcon IconComponent={n.IconComponent} /> : null} arrow />; })}
+      </D.TableRowGroup>)}
+    </RN.View>
+  </RN.View>;
+}
+
+export function Scene({ name, defined, registry }) {
   const [sheets, setSheets] = React.useState([]);
   host = { show: (key, content) => setSheets(list => list.filter(s => s.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(s => s.key !== key)) };
   React.useEffect(() => {
@@ -204,6 +227,7 @@ export function Scene({ name, defined }) {
     }, 50);
   }, []);
   if (name === "reviews") return <Profile defined={defined} />;
+  if (name === "settings") return <SettingsScreen defined={defined} registry={registry} />;
   const top = sheets[sheets.length - 1];
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
   // screenshot shows the whole sheet the way you'd scroll through it.

@@ -77,7 +77,7 @@ function boot() {
 
 window.__venusStart = function () {
   boot();
-  if (q.get("scene")) { ReactDOM.createRoot(document.getElementById("root")).render(<S.Scene name={q.get("scene")} defined={defined} />); return; }
+  if (q.get("scene")) { ReactDOM.createRoot(document.getElementById("root")).render(<S.Scene name={q.get("scene")} defined={defined} registry={registry} />); return; }
   const page = q.get("page") || "VENUS_PLUGINS", node = registry[page];
   const Page = node && node.screen && node.screen.getComponent();
   if (q.get("search")) setTimeout(() => { const input = document.querySelector("input"); if (input) { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(input, q.get("search")); input.dispatchEvent(new Event("input", { bubbles: true })); } }, 300);
