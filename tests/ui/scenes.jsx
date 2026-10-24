@@ -35,7 +35,7 @@ const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432];
+export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -83,6 +83,10 @@ export function modules(store, me) {
     // A chat: ChatViewWrapper with Discord's messages, and the message store the Translate pill reads.
     10368: { default: p => <RN.View style={{ flex: 1, position: "relative" }}>{p.children}</RN.View> },
     5432: { default: store({ getMessages: () => ({ _array: SPANISH }) }) },
+    // LongPressMessageActionSheet: a message's hold menu, Discord's rows that Venus adds Translate after.
+    9675: { default: MessageMenu },
+    // GuildActionSheetJoinRequestRow: the server sheet's last row, which Venus turns into its Reviews row.
+    14213: { default: () => null },
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
   };
 }
@@ -162,6 +166,35 @@ function Profile({ defined }) {
       <Note userId={allPeople[0].id} />
     </RN.View>
   </RN.View>;
+}
+// Discord's message hold menu: the message, then a group of rows.
+const MESSAGE_ROWS = [["Reply", "ArrowAngleLeftUpIcon"], ["Forward", "ArrowAngleRightUpIcon"], ["Copy Text", "CopyIcon"], ["Mark Unread", "ChatMarkUnreadIcon"]];
+function MessageMenu(p) {
+  const rows = MESSAGE_ROWS.map(([label, icon]) => <D.TableRow key={label} label={label} icon={<D.TableRowIcon IconComponent={D.makeIcon(icon)} />} onPress={() => {}} />);
+  return <ActionSheet>
+    <RN.View style={{ paddingHorizontal: 16, paddingBottom: 24, gap: 16 }}>
+      <D.Text variant="text-md/normal" color="text-default" numberOfLines={2}>{p.message.content}</D.Text>
+      <D.TableRowGroup>{rows}</D.TableRowGroup>
+    </RN.View>
+  </ActionSheet>;
+}
+// Discord's server sheet: the server, its buttons, a few rows, then the join request row.
+function GuildSheet({ defined }) {
+  const Join = defined[14213].exports.default;
+  return <ActionSheet>
+    <RN.View style={{ paddingHorizontal: 16, paddingBottom: 24, gap: 16 }}>
+      <RN.View style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: D.tok("BACKGROUND_SURFACE_HIGH"), alignItems: "center", justifyContent: "center" }}>
+        <D.Text variant="heading-lg/bold" color="text-strong">GN</D.Text></RN.View>
+      <RN.View style={{ gap: 2 }}><D.Text variant="heading-xl/bold" color="text-strong">{guild.name}</D.Text>
+        <D.Text variant="text-sm/medium" color="text-muted">312 Online · 1,284 Members</D.Text></RN.View>
+      <D.TableRowGroup>
+        <D.TableRow label="Invite" icon={<D.TableRowIcon IconComponent={D.makeIcon("UserPlusIcon")} />} arrow />
+        <D.TableRow label="Notifications" icon={<D.TableRowIcon IconComponent={D.makeIcon("BellIcon")} />} arrow />
+        <D.TableRow label="Settings" icon={<D.TableRowIcon IconComponent={D.makeIcon("SettingsIcon")} />} arrow />
+      </D.TableRowGroup>
+      <Join guild={guild} />
+    </RN.View>
+  </ActionSheet>;
 }
 const SECTIONS = { MESSAGES: 0, SEPARATOR: 6, GUILD: 7 };
 
@@ -258,6 +291,8 @@ export function Scene({ name, defined, registry }) {
   host = { show: (key, content) => setSheets(list => list.filter(s => s.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(s => s.key !== key)) };
   React.useEffect(() => {
     if (name === "hiddenChannel") defined[1112].exports.transitionTo("/channels/" + guild.id + "/" + LOCKED);
+    if (name === "messageMenu") host.show("MessageLongPressActionSheet", React.createElement(defined[9675].exports.default, { message: SPANISH[0], onClose() {} }));
+    if (name === "serverSheet") host.show("guild", <GuildSheet defined={defined} />);
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
     // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
     if (name === "readAllHold") setTimeout(() => {
