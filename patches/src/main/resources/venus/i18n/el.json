@@ -3,7 +3,9 @@
   "name": "Greek",
   "strings": {
     "(edited)": "(επεξεργασμένο)",
+    "0% leaves only the bar.": "Στο 0% μένει μόνο η γραμμή.",
     "17 to 20 digit user ID": "ID χρήστη 17 έως 20 ψηφίων",
+    "50% is how Discord draws it.": "Στο 50% είναι όπως το δείχνει το Discord.",
     "A 4 dp bar, yellow at 50% brightness.": "Μια γραμμή 4 dp, κίτρινη στο 50% φωτεινότητα.",
     "A button that marks servers and DMs as read.": "Ένα κουμπί που επισημαίνει διακομιστές και άμεσα μηνύματα ως αναγνωσμένα.",
     "A button to jump to the start of any chat.": "Ένα κουμπί για μετάβαση στην αρχή κάθε συνομιλίας.",
@@ -321,8 +323,6 @@
     "How fast hours add up": "Πόσο γρήγορα μαζεύονται ώρες",
     "How it works": "Πώς λειτουργεί",
     "How many hours?": "Πόσες ώρες;",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Πόσο έντονα χρωματίζεται το φόντο πίσω από ένα διατηρημένο μήνυμα. Στο 0% μένει μόνο η γραμμή.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Πόσο έντονα χρωματίζεται το φόντο πίσω από μια απάντηση ή αναφορά. Στο 50% είναι όπως το δείχνει το Discord.",
     "How you ask": "Πώς ζητάς μετάφραση",
     "Hungarian": "Ουγγρικά",
     "I understand added hours can't be removed.": "Καταλαβαίνω ότι οι ώρες που προστίθενται δεν αφαιρούνται.",

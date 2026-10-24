@@ -3,7 +3,9 @@
   "name": "Korean",
   "strings": {
     "(edited)": "(수정됨)",
+    "0% leaves only the bar.": "0%에서는 막대만 남습니다.",
     "17 to 20 digit user ID": "17~20자리 사용자 ID",
+    "50% is how Discord draws it.": "50%는 Discord 기본 모습입니다.",
     "A 4 dp bar, yellow at 50% brightness.": "4 dp 막대, 밝기 50%의 노란색.",
     "A button that marks servers and DMs as read.": "서버와 DM을 읽음으로 표시하는 버튼.",
     "A button to jump to the start of any chat.": "어느 채팅이든 처음으로 이동하는 버튼.",
@@ -306,8 +308,6 @@
     "How fast hours add up": "시간이 쌓이는 속도",
     "How it works": "작동 방식",
     "How many hours?": "몇 시간?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "보관된 메시지 뒤 배경을 얼마나 진하게 칠할지 정합니다. 0%에서는 막대만 남습니다.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "답장이나 멘션 뒤 배경을 얼마나 진하게 칠할지 정합니다. 50%는 Discord 기본 모습입니다.",
     "How you ask": "번역 요청 방법",
     "Hungarian": "헝가리어",
     "I understand added hours can't be removed.": "추가한 시간은 지울 수 없다는 걸 이해했어요.",

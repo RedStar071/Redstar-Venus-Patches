@@ -1,6 +1,8 @@
 {
   "(edited)": "(bewerkt)",
+  "0% leaves only the bar.": "Bij 0% blijft alleen de balk over.",
   "17 to 20 digit user ID": "Gebruikers-ID van 17 tot 20 cijfers",
+  "50% is how Discord draws it.": "50% is hoe Discord het toont.",
   "A 4 dp bar, yellow at 50% brightness.": "Een balk van 4 dp, geel op 50% helderheid.",
   "A button that marks servers and DMs as read.": "Een knop die servers en DM's als gelezen markeert.",
   "A button to jump to the start of any chat.": "Een knop om naar het begin van elke chat te gaan.",
@@ -292,8 +294,6 @@
   "How fast hours add up": "Hoe snel uren oplopen",
   "How it works": "Zo werkt het",
   "How many hours?": "Hoeveel uur?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Hoe sterk de achtergrond van een bewaard bericht wordt gekleurd. Bij 0% blijft alleen de balk over.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Hoe sterk de achtergrond van een antwoord of vermelding wordt gekleurd. 50% is hoe Discord het toont.",
   "How you ask": "Zo vraag je het",
   "I understand added hours can't be removed.": "Ik begrijp dat toegevoegde uren niet kunnen worden verwijderd.",
   "I understand my account could be suspended or banned.": "Ik begrijp dat mijn account geschorst of verbannen kan worden.",

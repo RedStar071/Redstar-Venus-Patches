@@ -3,7 +3,9 @@
   "name": "Lithuanian",
   "strings": {
     "(edited)": "(redaguota)",
+    "0% leaves only the bar.": "Esant 0 %, lieka tik juosta.",
     "17 to 20 digit user ID": "17–20 skaitmenų naudotojo ID",
+    "50% is how Discord draws it.": "50 % – taip, kaip rodo Discord.",
     "A 4 dp bar, yellow at 50% brightness.": "4 dp juosta, geltona, 50 % ryškumo.",
     "A button that marks servers and DMs as read.": "Mygtukas, kuris serverius ir tiesiogines žinutes pažymi kaip perskaitytus.",
     "A button to jump to the start of any chat.": "Mygtukas, nukeliantis į bet kurio pokalbio pradžią.",
@@ -326,8 +328,6 @@
     "How fast hours add up": "Kaip greitai kaupiasi valandos",
     "How it works": "Kaip tai veikia",
     "How many hours?": "Kiek valandų?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Kaip stipriai nuspalvinamas išsaugotos žinutės fonas. Esant 0 %, lieka tik juosta.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Kaip stipriai nuspalvinamas atsakymo ar paminėjimo fonas. 50 % – taip, kaip rodo Discord.",
     "How you ask": "Kaip paprašyti vertimo",
     "Hungarian": "vengrų",
     "I understand added hours can't be removed.": "Suprantu, kad pridėtų valandų pašalinti negalima.",

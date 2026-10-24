@@ -6556,7 +6556,7 @@
                         onSubmitEditing:applyHex,returnKeyType:"done",editable:on,isDisabled:!on},text => setHexDraft(String(text || "")),"Use",applyHex,!on || !validHex) : null)),
             el(PresetOrCustom,{key:"brightness",title:"Brightness",value:settings.noDeleteBrightness,disabled:!on,min:0,max:100,placeholder:50,
                 inputLabel:tr("Brightness, 0 to 100"),format:n => tr("{n}%",{n}),onChange:value => setSetting("noDeleteBrightness",value),
-                presets:BRIGHTNESS_STEPS.map(n => ({value:n,label:tr("{n}%",{n})})),hint:"How strongly a kept message is tinted behind its text. 0% leaves only the bar."}),
+                presets:BRIGHTNESS_STEPS.map(n => ({value:n,label:tr("{n}%",{n})})),hint:"0% leaves only the bar."}),
             el(PresetOrCustom,{key:"limit",title:"Keep up to",value:settings.noDeleteLimit,disabled:!on,min:1,max:MAX_DELETED,placeholder:512,
                 inputLabel:tr("Messages, 1 to {max}",{max:MAX_DELETED}),format:n => String(n),onChange:value => setSetting("noDeleteLimit",value),
                 presets:NODELETE_LIMITS.map(n => ({value:n,label:String(n)})),hint:"When it's full, the oldest is removed first."}),
@@ -12387,7 +12387,7 @@
                         onSubmitEditing:applyHex, returnKeyType:"done", editable:on, isDisabled:!on}, text => setHexDraft(String(text || "")), "Use", applyHex, !on || !validHex) : null)),
             el(PresetOrCustom, {key:"brightness", title:"Brightness", value:settings.messageHighlightBrightness, disabled:!on, min:0, max:100, placeholder:50,
                 inputLabel:tr("Brightness, 0 to 100"), format:n => tr("{n}%", {n}), onChange:value => setSetting("messageHighlightBrightness", value),
-                presets:BRIGHTNESS_STEPS.map(n => ({value:n, label:tr("{n}%", {n})})), hint:"How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it."}),
+                presets:BRIGHTNESS_STEPS.map(n => ({value:n, label:tr("{n}%", {n})})), hint:"50% is how Discord draws it."}),
             // Only while something differs from the defaults: a greyed-out Reset that can't do anything is just clutter.
             changed ? el(ui.TableRowGroup || RN.View, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "reset", "Reset to defaults", "A 4 dp bar, yellow at 50% brightness.", resetAll, !on)) : null,

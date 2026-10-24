@@ -1,6 +1,8 @@
 {
   "(edited)": "(edited)",
+  "0% leaves only the bar.": "Pada 0% hanya bilahnya yang tersisa.",
   "17 to 20 digit user ID": "ID pengguna 17 hingga 20 digit",
+  "50% is how Discord draws it.": "50% sama seperti tampilan Discord.",
   "A 4 dp bar, yellow at 50% brightness.": "Bilah 4 dp, kuning dengan kecerahan 50%.",
   "A button that marks servers and DMs as read.": "Tombol yang menandai server dan pesan langsung sudah dibaca.",
   "A button to jump to the start of any chat.": "Tombol untuk melompat ke awal obrolan apa pun.",
@@ -277,8 +279,6 @@
   "How fast hours add up": "Seberapa cepat jam bertambah",
   "How it works": "Cara kerjanya",
   "How many hours?": "Berapa jam?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Seberapa kuat warna di belakang pesan yang disimpan. Pada 0% hanya bilahnya yang tersisa.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Seberapa kuat warna di belakang balasan atau sebutan. 50% sama seperti tampilan Discord.",
   "How you ask": "Cara meminta terjemahan",
   "I understand added hours can't be removed.": "Saya paham jam yang ditambahkan tidak bisa dihapus.",
   "I understand my account could be suspended or banned.": "Saya paham akun saya bisa ditangguhkan atau diblokir.",

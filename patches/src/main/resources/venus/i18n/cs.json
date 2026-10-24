@@ -3,7 +3,9 @@
   "name": "Czech",
   "strings": {
     "(edited)": "(upraveno)",
+    "0% leaves only the bar.": "Při 0 % zůstane jen lišta.",
     "17 to 20 digit user ID": "17 až 20místné ID uživatele",
+    "50% is how Discord draws it.": "50 % odpovídá vzhledu v Discordu.",
     "A 4 dp bar, yellow at 50% brightness.": "Lišta 4 dp, žlutá s jasem 50 %.",
     "A button that marks servers and DMs as read.": "Tlačítko, které označí servery a DM jako přečtené.",
     "A button to jump to the start of any chat.": "Tlačítko pro skok na začátek libovolného chatu.",
@@ -326,8 +328,6 @@
     "How fast hours add up": "Jak rychle přibývají hodiny",
     "How it works": "Jak to funguje",
     "How many hours?": "Kolik hodin?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Jak výrazně je podbarvené pozadí uchované zprávy. Při 0 % zůstane jen lišta.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Jak výrazně je podbarvené pozadí odpovědi nebo zmínky. 50 % odpovídá vzhledu v Discordu.",
     "How you ask": "Jak požádat o překlad",
     "Hungarian": "maďarština",
     "I understand added hours can't be removed.": "Chápu, že přidané hodiny nejde odebrat.",

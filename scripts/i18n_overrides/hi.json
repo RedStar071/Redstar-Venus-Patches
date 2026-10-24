@@ -1,6 +1,8 @@
 {
   "(edited)": "(संपादित)",
+  "0% leaves only the bar.": "0% पर सिर्फ़ पट्टी रहती है।",
   "17 to 20 digit user ID": "17 से 20 अंकों की यूज़र ID",
+  "50% is how Discord draws it.": "50% पर यह वैसा ही दिखता है जैसा Discord में।",
   "A 4 dp bar, yellow at 50% brightness.": "4 dp की पट्टी, 50% चमक पर पीली।",
   "A button that marks servers and DMs as read.": "एक बटन जो सर्वर और डायरेक्ट मैसेज को पढ़ा हुआ मार्क करता है।",
   "A button to jump to the start of any chat.": "किसी भी चैट की शुरुआत पर जाने के लिए एक बटन।",
@@ -292,8 +294,6 @@
   "How fast hours add up": "घंटे कितनी तेज़ी से जुड़ते हैं",
   "How it works": "यह कैसे काम करता है",
   "How many hours?": "कितने घंटे?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "बचाए गए मैसेज के पीछे का रंग कितना गहरा हो। 0% पर सिर्फ़ पट्टी रहती है।",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "जवाब या मेंशन के पीछे का रंग कितना गहरा हो। 50% पर यह वैसा ही दिखता है जैसा Discord में।",
   "How you ask": "अनुवाद कैसे माँगें",
   "I understand added hours can't be removed.": "मैं समझता हूं कि जोड़े गए घंटे हटाए नहीं जा सकते।",
   "I understand my account could be suspended or banned.": "मैं समझता हूं कि मेरा अकाउंट निलंबित या बैन हो सकता है।",

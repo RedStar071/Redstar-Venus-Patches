@@ -3,7 +3,9 @@
   "name": "Bulgarian",
   "strings": {
     "(edited)": "(редактирано)",
+    "0% leaves only the bar.": "При 0% остава само лентата.",
     "17 to 20 digit user ID": "17- до 20-цифрено потребителско ID",
+    "50% is how Discord draws it.": "50% е както го показва Discord.",
     "A 4 dp bar, yellow at 50% brightness.": "Лента от 4 dp, жълта при 50% яркост.",
     "A button that marks servers and DMs as read.": "Бутон, който отбелязва сървърите и директните съобщения като прочетени.",
     "A button to jump to the start of any chat.": "Бутон за преход към началото на всеки чат.",
@@ -321,8 +323,6 @@
     "How fast hours add up": "Колко бързо се трупат часове",
     "How it works": "Как работи",
     "How many hours?": "Колко часа?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Колко силно е оцветен фонът зад запазеното съобщение. При 0% остава само лентата.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Колко силно е оцветен фонът зад отговор или споменаване. 50% е както го показва Discord.",
     "How you ask": "Как да поискате превод",
     "Hungarian": "унгарски",
     "I understand added hours can't be removed.": "Разбирам, че добавените часове не могат да се премахнат.",

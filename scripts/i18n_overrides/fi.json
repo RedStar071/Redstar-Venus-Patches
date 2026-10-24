@@ -1,6 +1,8 @@
 {
   "(edited)": "(muokattu)",
+  "0% leaves only the bar.": "0 %:lla jää vain palkki.",
   "17 to 20 digit user ID": "17–20-numeroinen käyttäjä-ID",
+  "50% is how Discord draws it.": "50 % vastaa Discordin omaa tyyliä.",
   "A 4 dp bar, yellow at 50% brightness.": "4 dp:n palkki, keltainen 50 %:n kirkkaudella.",
   "A button that marks servers and DMs as read.": "Painike, joka merkitsee palvelimet ja yksityisviestit luetuiksi.",
   "A button to jump to the start of any chat.": "Painike, jolla pääset minkä tahansa keskustelun alkuun.",
@@ -292,8 +294,6 @@
   "How fast hours add up": "Kuinka nopeasti tunteja kertyy",
   "How it works": "Näin se toimii",
   "How many hours?": "Montako tuntia?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Kuinka voimakkaasti säilytetyn viestin tausta sävytetään. 0 %:lla jää vain palkki.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Kuinka voimakkaasti vastauksen tai maininnan tausta sävytetään. 50 % vastaa Discordin omaa tyyliä.",
   "How you ask": "Näin pyydät käännöstä",
   "I understand added hours can't be removed.": "Ymmärrän, ettei lisättyjä tunteja voi poistaa.",
   "I understand my account could be suspended or banned.": "Ymmärrän, että tilini voidaan jäädyttää tai estää.",

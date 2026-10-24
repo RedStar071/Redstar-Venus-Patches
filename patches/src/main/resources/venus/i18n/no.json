@@ -3,7 +3,9 @@
   "name": "Norwegian",
   "strings": {
     "(edited)": "(redigert)",
+    "0% leaves only the bar.": "Ved 0 % er bare linjen igjen.",
     "17 to 20 digit user ID": "Bruker-ID på 17 til 20 sifre",
+    "50% is how Discord draws it.": "50 % er slik Discord viser det.",
     "A 4 dp bar, yellow at 50% brightness.": "En linje på 4 dp, gul med 50 % lysstyrke.",
     "A button that marks servers and DMs as read.": "En knapp som markerer servere og direktemeldinger som lest.",
     "A button to jump to the start of any chat.": "En knapp for å hoppe til starten av enhver chat.",
@@ -321,8 +323,6 @@
     "How fast hours add up": "Hvor raskt timene legges sammen",
     "How it works": "Slik fungerer det",
     "How many hours?": "Hvor mange timer?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Hvor kraftig bakgrunnen bak en beholdt melding farges. Ved 0 % er bare linjen igjen.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Hvor kraftig bakgrunnen bak et svar eller en omtale farges. 50 % er slik Discord viser det.",
     "How you ask": "Slik ber du om oversettelse",
     "Hungarian": "ungarsk",
     "I understand added hours can't be removed.": "Jeg forstår at timer som er lagt til, ikke kan fjernes.",

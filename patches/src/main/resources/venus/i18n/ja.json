@@ -3,7 +3,9 @@
   "name": "Japanese",
   "strings": {
     "(edited)": "(編集済み)",
+    "0% leaves only the bar.": "0% ではバーだけが残ります。",
     "17 to 20 digit user ID": "17〜20桁のユーザーID",
+    "50% is how Discord draws it.": "50% で Discord 標準と同じ表示になります。",
     "A 4 dp bar, yellow at 50% brightness.": "4 dp のバー、明るさ 50% の黄色。",
     "A button that marks servers and DMs as read.": "サーバーと DM を既読にするボタン。",
     "A button to jump to the start of any chat.": "どのチャットでも最初まで飛べるボタン。",
@@ -306,8 +308,6 @@
     "How fast hours add up": "時間が貯まる速さ",
     "How it works": "しくみ",
     "How many hours?": "何時間？",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "保持したメッセージの背景をどれだけ濃く色付けするか。0% ではバーだけが残ります。",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "返信やメンションの背景をどれだけ濃く色付けするか。50% で Discord 標準と同じ表示になります。",
     "How you ask": "翻訳の頼み方",
     "Hungarian": "ハンガリー語",
     "I understand added hours can't be removed.": "追加した時間は取り消せないことを理解しました。",

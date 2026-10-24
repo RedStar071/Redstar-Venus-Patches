@@ -3,7 +3,9 @@
   "name": "Croatian",
   "strings": {
     "(edited)": "(uređeno)",
+    "0% leaves only the bar.": "Na 0 % ostaje samo traka.",
     "17 to 20 digit user ID": "Korisnički ID od 17 do 20 znamenki",
+    "50% is how Discord draws it.": "50 % je kako to prikazuje Discord.",
     "A 4 dp bar, yellow at 50% brightness.": "Traka od 4 dp, žuta na 50 % svjetline.",
     "A button that marks servers and DMs as read.": "Gumb koji servere i izravne poruke označava pročitanima.",
     "A button to jump to the start of any chat.": "Gumb za skok na početak bilo kojeg chata.",
@@ -326,8 +328,6 @@
     "How fast hours add up": "Koliko brzo se skupljaju sati",
     "How it works": "Kako radi",
     "How many hours?": "Koliko sati?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Koliko je jako obojena pozadina sačuvane poruke. Na 0 % ostaje samo traka.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Koliko je jako obojena pozadina odgovora ili spominjanja. 50 % je kako to prikazuje Discord.",
     "How you ask": "Kako tražite prijevod",
     "Hungarian": "mađarski",
     "I understand added hours can't be removed.": "Razumijem da se dodani sati ne mogu ukloniti.",

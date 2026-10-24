@@ -1,6 +1,8 @@
 {
   "(edited)": "(editat)",
+  "0% leaves only the bar.": "La 0% rămâne doar bara.",
   "17 to 20 digit user ID": "ID de utilizator din 17 până la 20 de cifre",
+  "50% is how Discord draws it.": "50% e cum îl afișează Discord.",
   "A 4 dp bar, yellow at 50% brightness.": "O bară de 4 dp, galbenă la 50% luminozitate.",
   "A button that marks servers and DMs as read.": "Un buton care marchează serverele și mesajele directe ca citite.",
   "A button to jump to the start of any chat.": "Un buton pentru a sări la începutul oricărui chat.",
@@ -297,8 +299,6 @@
   "How fast hours add up": "Cât de repede se adună orele",
   "How it works": "Cum funcționează",
   "How many hours?": "Câte ore?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Cât de puternic e colorat fundalul unui mesaj păstrat. La 0% rămâne doar bara.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Cât de puternic e colorat fundalul unui răspuns sau al unei mențiuni. 50% e cum îl afișează Discord.",
   "How you ask": "Cum ceri traducerea",
   "I understand added hours can't be removed.": "Înțeleg că orele adăugate nu pot fi eliminate.",
   "I understand my account could be suspended or banned.": "Înțeleg că mi se poate suspenda sau bana contul.",

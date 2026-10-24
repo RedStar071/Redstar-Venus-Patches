@@ -3,7 +3,9 @@
   "name": "German",
   "strings": {
     "(edited)": "(bearbeitet)",
+    "0% leaves only the bar.": "Bei 0 % bleibt nur die Leiste.",
     "17 to 20 digit user ID": "17- bis 20-stellige Benutzer-ID",
+    "50% is how Discord draws it.": "50 % entspricht der Darstellung in Discord.",
     "A 4 dp bar, yellow at 50% brightness.": "Eine 4-dp-Leiste, gelb mit 50 % Helligkeit.",
     "A button that marks servers and DMs as read.": "Ein Button, der Server und DMs als gelesen markiert.",
     "A button to jump to the start of any chat.": "Ein Button, mit dem du zum Anfang jedes Chats springst.",
@@ -321,8 +323,6 @@
     "How fast hours add up": "Wie schnell Stunden zusammenkommen",
     "How it works": "So funktioniert's",
     "How many hours?": "Wie viele Stunden?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Wie stark der Hintergrund einer behaltenen Nachricht eingefärbt wird. Bei 0 % bleibt nur die Leiste.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Wie stark der Hintergrund einer Antwort oder Erwähnung eingefärbt wird. 50 % entspricht der Darstellung in Discord.",
     "How you ask": "So fragst du",
     "Hungarian": "Ungarisch",
     "I understand added hours can't be removed.": "Mir ist klar, dass hinzugefügte Stunden nicht entfernt werden können.",

@@ -3,7 +3,9 @@
   "name": "Thai",
   "strings": {
     "(edited)": "(แก้ไขแล้ว)",
+    "0% leaves only the bar.": "ที่ 0% จะเหลือเพียงแถบ",
     "17 to 20 digit user ID": "ID ผู้ใช้ 17 ถึง 20 หลัก",
+    "50% is how Discord draws it.": "50% คือแบบที่ Discord แสดง",
     "A 4 dp bar, yellow at 50% brightness.": "แถบขนาด 4 dp สีเหลืองที่ความสว่าง 50%",
     "A button that marks servers and DMs as read.": "ปุ่มสำหรับทำเครื่องหมายเซิร์ฟเวอร์และข้อความส่วนตัวว่าอ่านแล้ว",
     "A button to jump to the start of any chat.": "ปุ่มสำหรับกระโดดไปยังจุดเริ่มต้นของแชทใดก็ได้",
@@ -306,8 +308,6 @@
     "How fast hours add up": "ชั่วโมงเพิ่มขึ้นเร็วแค่ไหน",
     "How it works": "วิธีการทำงาน",
     "How many hours?": "กี่ชั่วโมง",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "ระดับความเข้มของสีพื้นหลังข้อความที่เก็บไว้ ที่ 0% จะเหลือเพียงแถบ",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "ระดับความเข้มของสีพื้นหลังการตอบกลับหรือการกล่าวถึง 50% คือแบบที่ Discord แสดง",
     "How you ask": "วิธีขอแปล",
     "Hungarian": "ฮังการี",
     "I understand added hours can't be removed.": "ฉันเข้าใจว่าชั่วโมงที่เพิ่มแล้วลบออกไม่ได้",

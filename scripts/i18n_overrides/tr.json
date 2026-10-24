@@ -1,6 +1,8 @@
 {
   "(edited)": "(düzenlendi)",
+  "0% leaves only the bar.": "%0'da yalnızca çubuk kalır.",
   "17 to 20 digit user ID": "17 ila 20 haneli kullanıcı ID'si",
+  "50% is how Discord draws it.": "%50, Discord'un gösterdiği gibidir.",
   "A 4 dp bar, yellow at 50% brightness.": "4 dp genişliğinde, %50 parlaklıkta sarı çubuk.",
   "A button that marks servers and DMs as read.": "Sunucuları ve direkt mesajları okundu olarak işaretleyen bir düğme.",
   "A button to jump to the start of any chat.": "Herhangi bir sohbetin başına atlamak için bir düğme.",
@@ -292,8 +294,6 @@
   "How fast hours add up": "Saatler ne kadar hızlı birikir",
   "How it works": "Nasıl çalışır",
   "How many hours?": "Kaç saat?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Saklanan bir mesajın arka planının ne kadar renkleneceği. %0'da yalnızca çubuk kalır.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Bir yanıtın veya bahsetmenin arka planının ne kadar renkleneceği. %50, Discord'un gösterdiği gibidir.",
   "How you ask": "Nasıl istersin",
   "I understand added hours can't be removed.": "Eklenen saatlerin kaldırılamayacağını anlıyorum.",
   "I understand my account could be suspended or banned.": "Hesabımın askıya alınabileceğini veya yasaklanabileceğini anlıyorum.",

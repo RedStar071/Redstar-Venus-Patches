@@ -1,6 +1,8 @@
 {
   "(edited)": "(змінено)",
+  "0% leaves only the bar.": "За 0% лишається тільки смужка.",
   "17 to 20 digit user ID": "ID користувача (17–20 цифр)",
+  "50% is how Discord draws it.": "50% — як у самому Discord.",
   "A 4 dp bar, yellow at 50% brightness.": "Смужка 4 dp, жовта з яскравістю 50%.",
   "A button that marks servers and DMs as read.": "Кнопка, що позначає сервери й ОП прочитаними.",
   "A button to jump to the start of any chat.": "Кнопка для переходу на початок будь-якого чату.",
@@ -297,8 +299,6 @@
   "How fast hours add up": "Як швидко накопичуються години",
   "How it works": "Як це працює",
   "How many hours?": "Скільки годин?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Наскільки сильно підфарбовано тло збереженого повідомлення. За 0% лишається тільки смужка.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Наскільки сильно підфарбовано тло відповіді чи згадки. 50% — як у самому Discord.",
   "How you ask": "Як попросити переклад",
   "I understand added hours can't be removed.": "Я розумію, що додані години не можна прибрати.",
   "I understand my account could be suspended or banned.": "Я розумію, що мій акаунт можуть тимчасово або назавжди заблокувати.",

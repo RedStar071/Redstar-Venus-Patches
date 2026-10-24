@@ -1,6 +1,8 @@
 {
   "(edited)": "(modifié)",
+  "0% leaves only the bar.": "À 0 %, seule la barre reste.",
   "17 to 20 digit user ID": "Identifiant utilisateur de 17 à 20 chiffres",
+  "50% is how Discord draws it.": "50 % correspond à l'affichage de Discord.",
   "A 4 dp bar, yellow at 50% brightness.": "Une barre de 4 dp, jaune à 50 % de luminosité.",
   "A button that marks servers and DMs as read.": "Un bouton qui marque les serveurs et les MP comme lus.",
   "A button to jump to the start of any chat.": "Un bouton pour revenir au début de n'importe quelle discussion.",
@@ -292,8 +294,6 @@
   "How fast hours add up": "Vitesse à laquelle les heures s'accumulent",
   "How it works": "Comment ça marche",
   "How many hours?": "Combien d'heures ?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "L'intensité de la teinte derrière un message conservé. À 0 %, seule la barre reste.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "L'intensité de la teinte derrière une réponse ou une mention. 50 % correspond à l'affichage de Discord.",
   "How you ask": "Comment demander",
   "I understand added hours can't be removed.": "Je comprends que les heures ajoutées ne peuvent pas être retirées.",
   "I understand my account could be suspended or banned.": "Je comprends que mon compte pourrait être suspendu ou banni.",

@@ -1,6 +1,8 @@
 {
   "(edited)": "(đã chỉnh sửa)",
+  "0% leaves only the bar.": "Ở 0% chỉ còn lại thanh màu.",
   "17 to 20 digit user ID": "ID người dùng gồm 17 đến 20 chữ số",
+  "50% is how Discord draws it.": "50% là cách Discord hiển thị.",
   "A 4 dp bar, yellow at 50% brightness.": "Thanh dày 4 dp, màu vàng ở độ sáng 50%.",
   "A button that marks servers and DMs as read.": "Nút đánh dấu máy chủ và tin nhắn trực tiếp là đã đọc.",
   "A button to jump to the start of any chat.": "Nút để nhảy về đầu bất kỳ cuộc trò chuyện nào.",
@@ -277,8 +279,6 @@
   "How fast hours add up": "Giờ tăng nhanh thế nào",
   "How it works": "Cách hoạt động",
   "How many hours?": "Bao nhiêu giờ?",
-  "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Mức đậm của màu nền phía sau tin nhắn được giữ lại. Ở 0% chỉ còn lại thanh màu.",
-  "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Mức đậm của màu nền phía sau trả lời hoặc lượt nhắc. 50% là cách Discord hiển thị.",
   "How you ask": "Cách yêu cầu dịch",
   "I understand added hours can't be removed.": "Tôi hiểu số giờ đã thêm không thể xóa.",
   "I understand my account could be suspended or banned.": "Tôi hiểu tài khoản của tôi có thể bị tạm khóa hoặc bị cấm.",

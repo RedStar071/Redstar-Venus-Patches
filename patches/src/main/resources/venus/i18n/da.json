@@ -3,7 +3,9 @@
   "name": "Danish",
   "strings": {
     "(edited)": "(redigeret)",
+    "0% leaves only the bar.": "Ved 0 % er der kun bjælken tilbage.",
     "17 to 20 digit user ID": "Bruger-ID på 17 til 20 cifre",
+    "50% is how Discord draws it.": "50 % er sådan, Discord viser det.",
     "A 4 dp bar, yellow at 50% brightness.": "En bjælke på 4 dp, gul med 50 % lysstyrke.",
     "A button that marks servers and DMs as read.": "En knap, der markerer servere og direkte beskeder som læst.",
     "A button to jump to the start of any chat.": "En knap, der springer til starten af enhver chat.",
@@ -321,8 +323,6 @@
     "How fast hours add up": "Hvor hurtigt timerne tæller op",
     "How it works": "Sådan virker det",
     "How many hours?": "Hvor mange timer?",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "Hvor kraftigt baggrunden bag en beholdt besked farves. Ved 0 % er der kun bjælken tilbage.",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "Hvor kraftigt baggrunden bag et svar eller en omtale farves. 50 % er sådan, Discord viser det.",
     "How you ask": "Sådan beder du om oversættelse",
     "Hungarian": "ungarsk",
     "I understand added hours can't be removed.": "Jeg forstår, at tilføjede timer ikke kan fjernes.",

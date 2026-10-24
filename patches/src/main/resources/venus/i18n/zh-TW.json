@@ -3,7 +3,9 @@
   "name": "Chinese (Traditional)",
   "strings": {
     "(edited)": "（已編輯）",
+    "0% leaves only the bar.": "0% 時只保留色條。",
     "17 to 20 digit user ID": "17 至 20 位數字使用者 ID",
+    "50% is how Discord draws it.": "50% 與 Discord 預設顯示相同。",
     "A 4 dp bar, yellow at 50% brightness.": "4 dp 色條，50% 亮度的黃色。",
     "A button that marks servers and DMs as read.": "將伺服器和私訊標為已讀的按鈕。",
     "A button to jump to the start of any chat.": "一鍵跳到任何聊天開頭的按鈕。",
@@ -306,8 +308,6 @@
     "How fast hours add up": "時數累積速度",
     "How it works": "運作方式",
     "How many hours?": "多少小時？",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "保留的訊息背後著色的深淺。0% 時只保留色條。",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "回覆或提及背後著色的深淺。50% 與 Discord 預設顯示相同。",
     "How you ask": "如何要求翻譯",
     "Hungarian": "匈牙利文",
     "I understand added hours can't be removed.": "我了解新增的時數無法移除。",

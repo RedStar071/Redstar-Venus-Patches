@@ -3,7 +3,9 @@
   "name": "Chinese (Simplified)",
   "strings": {
     "(edited)": "（已编辑）",
+    "0% leaves only the bar.": "0% 时只保留色条。",
     "17 to 20 digit user ID": "17 至 20 位数字用户 ID",
+    "50% is how Discord draws it.": "50% 与 Discord 默认显示相同。",
     "A 4 dp bar, yellow at 50% brightness.": "4 dp 色条，50% 亮度的黄色。",
     "A button that marks servers and DMs as read.": "将服务器和私信标为已读的按钮。",
     "A button to jump to the start of any chat.": "一键跳到任意聊天开头的按钮。",
@@ -306,8 +308,6 @@
     "How fast hours add up": "时长增长速度",
     "How it works": "工作原理",
     "How many hours?": "多少小时？",
-    "How strongly a kept message is tinted behind its text. 0% leaves only the bar.": "保留的消息背后着色的深浅。0% 时只保留色条。",
-    "How strongly a reply or mention is tinted behind its text. 50% is how Discord draws it.": "回复或提及背后着色的深浅。50% 与 Discord 默认显示相同。",
     "How you ask": "如何请求翻译",
     "Hungarian": "匈牙利语",
     "I understand added hours can't be removed.": "我明白添加的时长无法移除。",
