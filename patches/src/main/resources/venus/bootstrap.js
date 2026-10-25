@@ -3107,7 +3107,7 @@
     // first. Edit now waits long enough for that single tap: a quick third tap lands 400-550 ms after
     // the double-tap. A second double-tap (tap four) still counts too.
     const GESTURE_TRIPLE_MS = 650, GESTURE_PAIR_MS = 1500, GESTURE_DELETED_MS = 3000;
-    const gesture = {timer:undefined, pending:null, channel:null, chatInputRef:null, pendingAt:0, deleted:null, deletedAt:0, handlers:null,
+    const gesture = {timer:undefined, pending:null, channel:null, chatInputRef:null, pendingAt:0, deleted:null, deletedAt:0, handlers:null, tapping:0,
         replyFn:null, editFn:null, canEditFn:null, canReplyFn:null};
     function gestureCancel() { if (gesture.timer !== undefined && global.clearTimeout) global.clearTimeout(gesture.timer); gesture.timer = undefined; gesture.pending = null; gesture.channel = null; gesture.chatInputRef = null; }
     function gestureOwn(message) {
@@ -3196,7 +3196,8 @@
             const dbl = handlers && handlers.handleDoubleTapMessage;
             if (typeof dbl === "function") handlers.handleDoubleTapMessage = function () {
                 gesture.handlers = handlers;
-                return dbl.apply(this, arguments);
+                gesture.tapping++;
+                try { return dbl.apply(this, arguments); } finally { gesture.tapping--; }
             };
             return handlers;
         }
@@ -3211,7 +3212,10 @@
         gestureReply(message, channel, chatInputRef);
     }
     function doubleTapMessage(orig, self, args) {
-        if (!enabled("gestures")) return orig.apply(self, args);
+        // Only a real double-tap. TalkBack's "Add quick reaction" action (handleMessageAccessibilityAction, 10694) calls this
+        // too: it used to reply or edit instead of reacting, and choosing it twice deleted your message. When the handlers
+        // couldn't be wrapped (gesture.handlers is null), every call is still taken as a double-tap, as before.
+        if (!enabled("gestures") || gesture.handlers && !gesture.tapping) return orig.apply(self, args);
         const message = args[0], channel = args[1], id = message && message.id;
         if (!id) return orig.apply(self, args);
         const now = Date.now(), ref = gestureChatInputRef(channel);
