@@ -8955,15 +8955,24 @@
             if (cut <= start) cut = searchEnd;
             const code = text.charCodeAt(cut - 1);
             if (code >= 0xD800 && code <= 0xDBFF && cut - 1 > start) cut--;
+            const from = start;
             let piece = prefix + text.slice(start, cut);
             start = cut;
             if (text[start] === "\n" || text[start] === " ") start++;
-            let open = false, language = "";
+            let open = false, language = "", opened = -1;
             if (piece.indexOf("```") >= 0) {
                 let match;
                 FENCE.lastIndex = 0;
-                while ((match = FENCE.exec(piece))) { open = !open; if (open) language = match[1]; }
+                while ((match = FENCE.exec(piece))) { open = !open; if (open) { language = match[1]; opened = match.index; } }
             }
+            // A code block that opens right where the part ends would be an empty box here and start for real in the next
+            // part: move the whole block to the next part instead.
+            if (open && opened > prefix.length && !piece.slice(opened + 3 + language.length).trim()) {
+                start = from + opened - prefix.length;
+                piece = piece.slice(0, opened);
+                open = false;
+            }
+            if (piece.charCodeAt(piece.length - 1) === 13) piece = piece.slice(0, -1); // the \r of a \r\n line break
             if (open) { piece += "\n```"; prefix = "```" + language + "\n"; } else prefix = "";
             if (piece.trim()) chunks.push(piece);
         }
