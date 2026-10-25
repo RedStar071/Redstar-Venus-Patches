@@ -11658,8 +11658,8 @@
     // Status colors (online, idle, Do Not Disturb, danger) stay Discord's, so they keep meaning what they mean.
     const MY_PRESETS = [["blue", "Blue", "#4a6fd8"], ["teal", "Teal", "#00877a"], ["green", "Green", "#4b7d2b"],
         ["pink", "Pink", "#c2407e"], ["purple", "Purple", "#7b52c4"]];
-    const MY_TINTS = ["subtle", "balanced", "rich"];
-    const MY_TINT_SCALE = {subtle:0.45, balanced:1, rich:2.4};
+    const MY_TINTS = ["subtle", "balanced", "vivid"];
+    const MY_TINT_SCALE = {subtle:0.45, balanced:1, vivid:2.4};
     const MY_BRIDGE = "venus-monet-v1:";
     const materialYou = {system:null, asked:false, asking:false, spec:null, specKey:"", appState:null};
     function myIsColor(value) { return value === "wallpaper" || MY_PRESETS.some(p => p[0] === value) || typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value); }
@@ -11789,11 +11789,11 @@
         const overridden = on && !!customThemesActiveEntry();
         const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
         // The preview: Discord's Light and Dark looks side by side, in the colors you'd get.
-        const tile = (key, label, light) => el(RN.View, {key, style:s.tile, accessible:true, accessibilityLabel:tr(label)},
+        const tile = (key, label, light) => el(RN.View, {key, style:s.tile, accessible:true, accessibilityLabel:label},
             themeMiniChat(myPalette(light)),
-            el(RN.View, {style:{paddingHorizontal:8, paddingTop:8, paddingBottom:6}}, text(tr(label), "text-sm/semibold", "text-strong", {color:"#f2f3f5", fontSize:14, fontWeight:"600"})));
+            el(RN.View, {style:{paddingHorizontal:8, paddingTop:8, paddingBottom:6}}, text(label, "text-sm/semibold", "text-strong", {color:"#f2f3f5", fontSize:14, fontWeight:"600"})));
         const preview = el(RN.View, {key:"preview", style:{gap:8}}, groupTitle("previewTitle", "Preview"),
-            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-between", opacity:on ? 1 : 0.6}}, tile("light", "Light", true), tile("dark", "Dark", false)));
+            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-between", opacity:on ? 1 : 0.6}}, tile("light", tr("Light"), true), tile("dark", tr("Dark"), false)));
         // Colors: your wallpaper first, five Material colors, then any color from Discord's own picker.
         const pick = value => { if (on && value !== choice) { haptic("SELECTION"); setSetting("materialYouColor", value); } };
         const pickAny = () => {
@@ -11832,13 +11832,13 @@
                     "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}) : null));
         const tint = el(RN.View, {key:"tint", style:{gap:8}}, groupTitle("tintTitle", "Background tint"),
             venusSegmented({key:"tintSeg", value:settings.materialYouTint, disabled:!on, onChange:value => setSetting("materialYouTint", value),
-                items:[{value:"subtle", label:tr("Subtle")}, {value:"balanced", label:tr("Balanced")}, {value:"rich", label:tr("Rich")}]}));
+                items:[{value:"subtle", label:tr("Subtle")}, {value:"balanced", label:tr("Balanced")}, {value:"vivid", label:tr("Vivid")}]}));
         const groups = [
             on ? null : offCard("status", venusIcon(15560, "PaintPaletteIcon"), "materialYou"),
             overridden ? statusCard("override", "Your custom theme's colors show instead. Pick Discord's colors in Custom themes to see these.",
                 {title:tr("A custom theme is in use"), IconComponent:venusIcon(15652, "EyeDropperIcon")}) : null,
             preview, colors, tint,
-            footnote("note", "Light, Dark and Midnight follow Discord's own Appearance setting.")];
+            footnote("note", "Light or dark follows your Appearance setting in Discord.")];
         return settingsBody(ui, groups);
     }
     // Icon packs (#61): replaces Discord's icons across the app with community icon packs (Themes+ / Rosiecord / MD3 /
