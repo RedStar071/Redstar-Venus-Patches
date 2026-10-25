@@ -899,10 +899,82 @@ internal fun materialYouBridge(method: app.morphe.patcher.util.proxy.mutableType
     """)
 }
 
+internal const val COLOR_UTILS = "Lcom/discord/theme/utils/ColorUtilsKt;"
+/** Instructions [materialYouNativeColors] adds before Discord's saturation code, counting the nop its label lands on. */
+internal const val MATERIAL_YOU_NATIVE_SIZE = 5
+
+/**
+ * Every theme color Discord's native views draw with (the chat list, voice overlay, reactions, notifications, the window
+ * background: all 672 colors of each appearance) comes from getColorCompat, which passes it through this one method.
+ * While Material You is on, the color is swapped for its Material You twin first, and Discord's own saturation setting
+ * still applies on top. While it's off, one field read. applySaturationFactor(I)I is static: 12 registers, p0 = color.
+ */
+internal fun materialYouNativeColors(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if (method.parameterTypes.map { it.toString() } != listOf("I") || method.returnType != "I" ||
+        method.accessFlags and 8 == 0 || (method.implementation?.registerCount ?: 0) - 1 < 1)
+        throw PatchException("ColorUtilsKt.applySaturationFactor ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        sget-boolean v0, $SYSTEM_COLORS->enabled:Z
+        if-eqz v0, :venus_native_color
+        invoke-static {p0}, $SYSTEM_COLORS->remap(I)I
+        move-result p0
+        :venus_native_color
+        nop
+    """)
+}
+
+/**
+ * A few native views read a brand color straight from resources instead of through getColorCompat (the voice message
+ * progress, call-to-action and forum buttons). Each of those reads gets the same Material You swap right after it.
+ * Returns how many reads were found.
+ */
+internal fun materialYouDirectColors(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod): Int {
+    val code = method.implementation?.instructions?.toList() ?: throw PatchException("${method.name} has no code")
+    val reads = ArrayList<Pair<Int, Int>>()
+    for (i in 0 until code.size - 1) {
+        val ref = (code[i] as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference?.toString()
+        if (code[i].opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_VIRTUAL || ref != "Landroid/content/Context;->getColor(I)I") continue
+        val next = code[i + 1]
+        if (next.opcode != com.android.tools.smali.dexlib2.Opcode.MOVE_RESULT) throw PatchException("${method.name}: getColor result isn't kept")
+        reads += (i + 2) to (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
+    }
+    if (reads.isEmpty()) throw PatchException("${method.definingClass}->${method.name} no longer reads a color directly")
+    for ((at, register) in reads.asReversed()) {
+        if (register > 255) throw PatchException("${method.name}: color register v$register is out of range")
+        method.addInstructions(at, """
+            invoke-static {v$register}, $SYSTEM_COLORS->remap(I)I
+            move-result v$register
+        """)
+    }
+    return reads.size
+}
+
+/** The native views that read brand colors directly: class, method name, parameter types. */
+internal val MATERIAL_YOU_DIRECT_READS = listOf(
+    Triple("Lcom/discord/chat/presentation/message/view/CtaButtonView;", "configureButton-CMNjcK4",
+        listOf("Lcom/discord/core/DCDButton;", "Lcom/discord/chat/bridge/ctabutton/CtaButton;", "J", "Ljava/lang/String;", "Lkotlin/jvm/functions/Function3;")),
+    Triple("Lcom/discord/chat/presentation/message/view/ForumPostActionBarView;", "<init>",
+        listOf("Landroid/content/Context;", "Landroid/util/AttributeSet;", "I")),
+    Triple("Lcom/discord/chat/presentation/message/view/voicemessages/AudioPlayerView;", "configureAudioProgressView",
+        listOf("Lcom/discord/chat/presentation/message/view/voicemessages/AudioPlayerViewState;")),
+    Triple("Lcom/discord/chat/presentation/message/view/voicemessages/AudioPlayerWipeAnimatorManager;", "<init>",
+        listOf("Landroid/content/Context;", "Lcom/discord/chat/databinding/AudioPlayerViewBinding;"))
+)
+
+/** Loads the saved native Material You colors once, right after Application.onCreate's super call. */
+internal fun readMaterialYouColors(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val first = method.implementation?.instructions?.firstOrNull()
+    val target = (first as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference?.toString()
+    if (first?.opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_SUPER || target != "Landroid/app/Application;->onCreate()V")
+        throw PatchException("MainApplication.onCreate no longer starts with super.onCreate()")
+    method.addInstructions(1, "invoke-static {p0}, $SYSTEM_COLORS->init(Landroid/content/Context;)V")
+}
+
 @Suppress("unused")
 val materialYou = bytecodePatch(
     name = "Material You colors",
-    description = "Colors Discord to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
+    description = "Colors all of Discord, chat included, to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -915,6 +987,20 @@ val materialYou = bytecodePatch(
             name = "getFileHash",
             returnType = "V",
             parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "D", PROMISE)
+        ).method)
+        materialYouNativeColors(Fingerprint(
+            definingClass = COLOR_UTILS,
+            name = "applySaturationFactor",
+            returnType = "I",
+            parameters = listOf("I")
+        ).method)
+        for ((owner, name, parameters) in MATERIAL_YOU_DIRECT_READS)
+            materialYouDirectColors(Fingerprint(definingClass = owner, name = name, parameters = parameters).method)
+        readMaterialYouColors(Fingerprint(
+            definingClass = "Lcom/discord/MainApplication;",
+            name = "onCreate",
+            returnType = "V",
+            parameters = listOf()
         ).method)
     }
 }

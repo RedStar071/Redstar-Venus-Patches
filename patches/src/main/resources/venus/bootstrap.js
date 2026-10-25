@@ -11210,6 +11210,7 @@
         const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1205, "default"));
         try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
         if (features.iconPacks && enabled("iconPacks")) iconPacksApply();
+        if (features.materialYou) myNativeSync(active);
         notify("customThemes");
     }
     function hookRawColorsModule(exports) {
@@ -11661,7 +11662,7 @@
     const MY_TINTS = ["subtle", "balanced", "vivid"];
     const MY_TINT_SCALE = {subtle:0.45, balanced:1, vivid:2.4};
     const MY_BRIDGE = "venus-monet-v1:";
-    const materialYou = {system:null, asked:false, asking:false, spec:null, specKey:"", appState:null};
+    const materialYou = {system:null, asked:false, asking:false, spec:null, specKey:"", appState:null, nativeSent:null};
     function myIsColor(value) { return value === "wallpaper" || MY_PRESETS.some(p => p[0] === value) || typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value); }
     function myRgb(hex) { const n = hexInt(hex); return n == null ? [88, 101, 242] : [n >> 16 & 255, n >> 8 & 255, n & 255]; }
     function myHex(rgb) { return "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join(""); }
@@ -11769,6 +11770,31 @@
             if (enabled("materialYou")) customThemesApply();
             notify("materialYou");
         });
+    }
+    // Discord's native views (the chat list, voice overlay, reactions, notifications) take their colors from Android
+    // resources that hold the same values as RawColors, so the native side swaps each Discord color for the one this
+    // palette gives it: "rrggbbRRGGBB" pairs sorted by Discord's color. It saves them, so the next launch is colored from
+    // the first frame. Grays are matched before translucent grays, so a shared value takes the solid gray's tone.
+    function myNativeTable(spec) {
+        const orig = customThemes.origRaw, pairs = new Map();
+        const names = Object.keys(spec.rawColors).sort((a, b) => (/^OPACITY_/.test(a) ? 1 : 0) - (/^OPACITY_/.test(b) ? 1 : 0) || (a < b ? -1 : a > b ? 1 : 0));
+        for (const name of names) {
+            const from = typeof orig[name] === "string" ? orig[name].slice(1, 7).toLowerCase() : "", to = spec.rawColors[name].slice(1, 7).toLowerCase();
+            if (/^[0-9a-f]{6}$/.test(from) && /^[0-9a-f]{6}$/.test(to) && from !== to && !pairs.has(from)) pairs.set(from, to);
+        }
+        return Array.from(pairs.keys()).sort((a, b) => parseInt(a, 16) - parseInt(b, 16)).map(k => k + pairs.get(k)).join("");
+    }
+    function myNativeSync(active) {
+        if (!files || typeof files.getFileHash !== "function") return;
+        let request;
+        if (active && active === materialYou.spec) request = "map:" + myNativeTable(active);
+        // Still waiting for the palette or Discord's colors: keep what the native side already shows.
+        else if (enabled("materialYou") && !active) return;
+        else request = "off";
+        if (request === "map:") request = "off";
+        if (request === materialYou.nativeSent) return;
+        materialYou.nativeSent = request;
+        Promise.resolve().then(() => files.getFileHash(MY_BRIDGE + request, "", 0)).catch(() => { materialYou.nativeSent = null; });
     }
     function myStart() {
         if (!features.materialYou) return;

@@ -379,6 +379,58 @@ fun main(args: Array<String>) {
         checkBranches(bridge, "getFileHash bridge")
         check(try { materialYouBridge(bridge); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second guard in getFileHash was accepted" }
     }
+    // Material You's native colors: one swap at the top of applySaturationFactor(I)I, the choke point of every theme
+    // color Discord's native views draw with. Only v0 is written besides the color parameter itself.
+    run {
+        val original = methods.single { it.definingClass == COLOR_UTILS && it.name == "applySaturationFactor" &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("I") && it.returnType == "I" }
+        check(original.accessFlags and 8 != 0) { "applySaturationFactor is no longer static" }
+        val guarded = MutableMethod(original)
+        materialYouNativeColors(guarded)
+        val code = guarded.implementation!!.instructions.toList()
+        val regs = guarded.implementation!!.registerCount
+        check(regs == original.implementation!!.registerCount) { "Native color guard changed the register count" }
+        check(code.size == original.implementation!!.instructions.count() + MATERIAL_YOU_NATIVE_SIZE) { "Native color guard is ${code.size - original.implementation!!.instructions.count()} instructions" }
+        check(code.drop(MATERIAL_YOU_NATIVE_SIZE).map { it.opcode } == original.implementation!!.instructions.map { it.opcode }) { "Discord's own saturation code changed" }
+        check(code.take(MATERIAL_YOU_NATIVE_SIZE).map { it.opcode } == listOf(Opcode.SGET_BOOLEAN, Opcode.IF_EQZ, Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT, Opcode.NOP)) { "Native color guard opcodes" }
+        check(((code[0] as ReferenceInstruction).reference as FieldReference).let { it.definingClass == SYSTEM_COLORS && it.name == "enabled" && it.type == "Z" })
+        check((code[0] as OneRegisterInstruction).registerA == 0 && (code[3] as OneRegisterInstruction).registerA == regs - 1) { "Native color guard writes the wrong registers" }
+        check((code[2] as FiveRegisterInstruction).let { it.registerCount == 1 && it.registerC == regs - 1 }) { "Native color guard must pass the color parameter" }
+        check(((code[2] as ReferenceInstruction).reference as MethodReference).let { it.definingClass == SYSTEM_COLORS && it.name == "remap" && it.returnType == "I" })
+        val units = code.take(MATERIAL_YOU_NATIVE_SIZE - 1).sumOf { it.codeUnits }
+        check(code[0].codeUnits + (code[1] as OffsetInstruction).codeOffset == units) { "Native color guard branch lands at the wrong place" }
+        checkBranches(guarded, "applySaturationFactor")
+        check(try { materialYouNativeColors(guarded); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second guard in applySaturationFactor was accepted" }
+        // The only callers are Discord's getColorCompat variants, so the swap covers exactly the theme colors.
+        val callers = methods.filter { m -> m.implementation?.instructions?.any { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.let { r ->
+            r.definingClass == COLOR_UTILS && r.name == "applySaturationFactor" } == true } == true }.map { it.name }.toSet()
+        check(callers == setOf("getColorCompat")) { "applySaturationFactor callers changed: $callers" }
+        // Direct brand color reads: each gets the swap right after its result, on the same register, nothing else moved.
+        for ((owner, name, parameters) in MATERIAL_YOU_DIRECT_READS) {
+            val source = methods.single { it.definingClass == owner && it.name == name && it.parameterTypes.map { p -> p.toString() } == parameters }
+            val method = MutableMethod(source)
+            val count = materialYouDirectColors(method)
+            val before = source.implementation!!.instructions.toList()
+            val after = method.implementation!!.instructions.toList()
+            check(count == 1 && after.size == before.size + 2) { "$owner->$name: $count direct color reads" }
+            val at = before.indexOfFirst { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.let { r -> r.name == "getColor" && r.definingClass == "Landroid/content/Context;" } == true }
+            val register = (before[at + 1] as OneRegisterInstruction).registerA
+            check(after.subList(0, at + 2).map { it.opcode } == before.subList(0, at + 2).map { it.opcode } &&
+                after.drop(at + 4).map { it.opcode } == before.drop(at + 2).map { it.opcode }) { "$owner->$name: Discord's code moved" }
+            check((after[at + 2] as FiveRegisterInstruction).let { it.registerCount == 1 && it.registerC == register } &&
+                ((after[at + 2] as ReferenceInstruction).reference as MethodReference).name == "remap" &&
+                (after[at + 3] as OneRegisterInstruction).registerA == register) { "$owner->$name: swap on the wrong register" }
+            checkBranches(method, "$owner->$name")
+        }
+        // Font, emoji and Material You all load right after super.onCreate(), with nothing else moved.
+        val all = MutableMethod(appCreate)
+        readSystemFontSetting(all); readSystemEmojiSetting(all); readMaterialYouColors(all)
+        val allCode = all.implementation!!.instructions.toList()
+        check(allCode.size == appCreate.implementation!!.instructions.count() + 3 && allCode[0].opcode == Opcode.INVOKE_SUPER &&
+            allCode.drop(4).map { it.opcode } == appCreate.implementation!!.instructions.drop(1).map { it.opcode } &&
+            allCode.subList(1, 4).map { ((it as ReferenceInstruction).reference as MethodReference).definingClass }.toSet() == setOf(SYSTEM_FONT, SYSTEM_EMOJI, SYSTEM_COLORS)) { "Setting reads must sit right after super.onCreate()" }
+        checkBranches(all, "MainApplication.onCreate with Material You")
+    }
     fun resolveHost(ref: MethodReference): Boolean = methods.any {
         it.definingClass == ref.definingClass && it.name == ref.name && it.returnType == ref.returnType &&
             it.parameterTypes.map { parameter -> parameter.toString() } == ref.parameterTypes.map { parameter -> parameter.toString() } && it.accessFlags and 1 != 0
