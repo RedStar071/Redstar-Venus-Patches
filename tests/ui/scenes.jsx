@@ -11,6 +11,8 @@
 //   scene=settings     Discord's main Settings screen, with the Venus section where Venus puts it
 //   scene=youBar       the profile bar at the bottom: Discord's bell, then Venus's Switch accounts and settings buttons
 //   scene=translateBar a chat in Spanish with the Translate pill at the top (translateMode manual)
+//   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
+//   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 import * as React from "react";
 import * as RN from "react-native-web";
@@ -35,7 +37,7 @@ const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213];
+export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -87,6 +89,10 @@ export function modules(store, me) {
     9675: { default: MessageMenu },
     // GuildActionSheetJoinRequestRow: the server sheet's last row, which Venus turns into its Reviews row.
     14213: { default: () => null },
+    // MessageActionCreators: sendMessage resolves the first part and rejects the second, the way Discord's does when a send
+    // fails (rate limit, AutoMod, no connection); editMessage just says it was called.
+    7174: { default: { sendMessage: (() => { let n = 0; return () => ++n === 2 ? Promise.reject(new Error("429")) : Promise.resolve({ ok: true }); })(),
+      editMessage: () => { console.log("TOAST edit reached Discord"); return Promise.resolve(); } } },
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
   };
 }
@@ -311,6 +317,12 @@ export function Scene({ name, defined, registry }) {
     if (name === "hiddenChannel") defined[1112].exports.transitionTo("/channels/" + guild.id + "/" + LOCKED);
     if (name === "messageMenu") host.show("MessageLongPressActionSheet", React.createElement(defined[9675].exports.default, { message: SPANISH[0], onClose() {} }));
     if (name === "serverSheet") host.show("guild", <GuildSheet defined={defined} />);
+    if (name === "longMessageFailed" || name === "longEdit") {
+      const actions = defined[7174].exports.default, line = "Here's everything from tonight's planning call, so nobody has to ask again. ";
+      global.__venusPatches.setSetting("splitMessages", true);
+      if (name === "longEdit") actions.editMessage("1", "2", { content: line.repeat(32) });
+      else actions.sendMessage("1", { content: line.repeat(70), invalidEmojis: [], validNonShortcutEmojis: [] }, false, {});
+    }
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
     // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
     if (name === "readAllHold") setTimeout(() => {
