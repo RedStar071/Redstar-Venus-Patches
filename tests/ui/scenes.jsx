@@ -320,8 +320,11 @@ export function Scene({ name, defined, registry }) {
     if (name === "longMessageFailed" || name === "longEdit") {
       const actions = defined[7174].exports.default, line = "Here's everything from tonight's planning call, so nobody has to ask again. ";
       global.__venusPatches.setSetting("splitMessages", true);
-      if (name === "longEdit") actions.editMessage("1", "2", { content: line.repeat(32) });
-      else actions.sendMessage("1", { content: line.repeat(70), invalidEmojis: [], validNonShortcutEmojis: [] }, false, {});
+      // After the language pack has loaded (lang=), as it has long before anyone sends in Discord.
+      setTimeout(() => {
+        if (name === "longEdit") actions.editMessage("1", "2", { content: line.repeat(32) });
+        else actions.sendMessage("1", { content: line.repeat(70), invalidEmojis: [], validNonShortcutEmojis: [] }, false, {});
+      }, 300);
     }
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
     // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
