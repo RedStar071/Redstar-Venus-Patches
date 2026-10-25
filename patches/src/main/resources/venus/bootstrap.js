@@ -3205,6 +3205,13 @@
         try { Object.setPrototypeOf(MessagesHandlers, Handlers); } catch (_) {}
         return replaceValue(exports, "MessagesHandlers", MessagesHandlers);
     }
+    // MessagesHandlers is built again for each chat you open, with that chat's ID in its params.
+    function gestureStillInChat(channel) {
+        try {
+            const params = gesture.handlers && gesture.handlers.params, selected = params && params.selectedChannelId;
+            return !selected || !channel || String(selected) === String(channel.id);
+        } catch (_) { return true; }
+    }
     function gestureAct(message, channel, chatInputRef) {
         if (!message || !channel) return;
         const own = gestureOwn(message);
@@ -3231,8 +3238,9 @@
         if (!settings.gestureTripleDelete || !gestureOwn(message) || message.state && message.state !== "SENT") { gestureAct(message, channel, ref); return; }
         gesture.pending = message; gesture.channel = channel; gesture.chatInputRef = ref; gesture.pendingAt = now;
         gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending, waitingChannel = gesture.channel, waitingRef = gesture.chatInputRef; gesture.pending = null; gesture.channel = null; gesture.chatInputRef = null;
-            // Switching gestures off while it waited used to still open the editor (or reply) a moment later.
-            if (waiting === message && enabled("gestures")) gestureAct(message, waitingChannel, waitingRef); }, GESTURE_TRIPLE_MS);
+            // Switching gestures off while it waited used to still open the editor (or reply) a moment later. So did leaving the
+            // chat: the editor opened on a message you could no longer see, in the box of the chat you'd left.
+            if (waiting === message && enabled("gestures") && gestureStillInChat(waitingChannel)) gestureAct(message, waitingChannel, waitingRef); }, GESTURE_TRIPLE_MS);
     }
     function hideWhenGestures(orig, self, args) {
         if (React) useSettings("gestures");
