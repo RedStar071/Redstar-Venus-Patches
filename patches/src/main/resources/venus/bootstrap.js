@@ -3221,11 +3221,14 @@
             return !selected || !channel || String(selected) === String(channel.id);
         } catch (_) { return true; }
     }
-    function gestureAct(message, channel, chatInputRef) {
+    // Where you can neither reply nor edit (an announcement channel you can't post in, a locked thread, a timeout), the
+    // double-tap used to do nothing at all: it now does what Discord's own does there, add your double-tap reaction.
+    function gestureAct(message, channel, chatInputRef, fallback) {
         if (!message || !channel) return;
         const own = gestureOwn(message);
         if (own && settings.gestureOwn === "edit" && gestureEdit(message, channel, chatInputRef)) return;
-        gestureReply(message, channel, chatInputRef);
+        if (gestureReply(message, channel, chatInputRef)) return;
+        if (fallback) try { fallback(); } catch (_) {}
     }
     // A message Keep deleted messages is keeping is already gone from Discord: a reply to it is refused ("Unknown message")
     // and an edit fails, and the triple-tap's delete only hides it, which a third tap shouldn't do by surprise.
@@ -3242,22 +3245,22 @@
         const message = args[0], channel = args[1], id = message && message.id;
         if (!id) return orig.apply(self, args);
         if (gestureKeptDeleted(message, channel)) { gestureCancel(); return; }
-        const now = Date.now(), ref = gestureChatInputRef(channel);
+        const now = Date.now(), ref = gestureChatInputRef(channel), react = () => orig.apply(self, args);
         // The taps that just deleted a message can land once more before it disappears: ignore them.
         if (gesture.deleted === id && now - gesture.deletedAt < GESTURE_DELETED_MS) { gestureCancel(); return; }
         if (gesture.pending && gesture.pending.id === id && now - gesture.pendingAt < GESTURE_PAIR_MS) {
             if (settings.gestureTripleDelete && gestureCanDelete(message)) { gesture.channel = channel; gestureDeletePending(now); return; }
-            gestureCancel(); gestureAct(message, channel, ref);
+            gestureCancel(); gestureAct(message, channel, ref, react);
             return;
         }
         gestureCancel();
         // Nothing waits for a third tap when it couldn't delete anything (including unsent messages).
-        if (!settings.gestureTripleDelete || !gestureCanDelete(message)) { gestureAct(message, channel, ref); return; }
+        if (!settings.gestureTripleDelete || !gestureCanDelete(message)) { gestureAct(message, channel, ref, react); return; }
         gesture.pending = message; gesture.channel = channel; gesture.chatInputRef = ref; gesture.pendingAt = now;
         gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending, waitingChannel = gesture.channel, waitingRef = gesture.chatInputRef; gesture.pending = null; gesture.channel = null; gesture.chatInputRef = null;
             // Switching gestures off while it waited used to still open the editor (or reply) a moment later. So did leaving the
             // chat: the editor opened on a message you could no longer see, in the box of the chat you'd left.
-            if (waiting === message && enabled("gestures") && gestureStillInChat(waitingChannel)) gestureAct(message, waitingChannel, waitingRef); }, GESTURE_TRIPLE_MS);
+            if (waiting === message && enabled("gestures") && gestureStillInChat(waitingChannel)) gestureAct(message, waitingChannel, waitingRef, react); }, GESTURE_TRIPLE_MS);
     }
     function hideWhenGestures(orig, self, args) {
         if (React) useSettings("gestures");
