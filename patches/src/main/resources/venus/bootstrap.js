@@ -11704,8 +11704,10 @@
     const MY_NEUTRAL_RAW = /^(NEUTRAL|PRIMARY|PLUM)_\d+$|^OPACITY_\d+$/, MY_ACCENT_RAW = /^(BLURPLE|BRAND)_\d+$|^OPACITY_BLURPLE_\d+$/;
     // Material 3 roles as [palette, tone] per Discord appearance: [dark, light, midnight, darker].
     const MY_ROLES = {
-        primary:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]], onPrimary:[["a1", 20], ["a1", 100], ["a1", 20], ["a1", 20]],
-        pressed:[["a1", 70], ["a1", 30], ["a1", 70], ["a1", 70]], brandText:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]],
+        // Filled controls stay deep enough for white: Discord draws white text and icons on brand fills in many places it
+        // doesn't theme (badges, pills, check marks), and white on Material's pastel dark primary would be 1.7:1.
+        primary:[["a1", 45], ["a1", 40], ["a1", 45], ["a1", 45]], onPrimary:[["a1", 100], ["a1", 100], ["a1", 100], ["a1", 100]],
+        pressed:[["a1", 35], ["a1", 30], ["a1", 35], ["a1", 35]], brandText:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]],
         mention:[["a1", 90], ["a1", 30], ["a1", 90], ["a1", 90]], secondary:[["a2", 40], ["a2", 88], ["a2", 30], ["a2", 36]]
     };
     const MY_SEMANTIC = {
