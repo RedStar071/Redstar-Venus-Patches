@@ -61,6 +61,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 4977 | `modules/main_tabs_v2/RootNavigationRef.native.tsx` | getRootNavigationRef | RootNavigationRef |
 | 5020 | `stores/GuildMemberCountStore.tsx` | default, getMemberCount, getOnlineCount | GuildMemberCountStore |
 | 5032 | `design/components/Icon/native/redesign/generated/UserPlusIcon.tsx` | UserPlusIcon | UserPlusIcon |
+| 5036 | `design/components/Icon/native/redesign/generated/UserMinusIcon.tsx` | UserMinusIcon | UserMinusIcon (Hide blocked or ignored messages) |
 | 5038 | `design/components/Icon/native/redesign/generated/LinkIcon.tsx` | LinkIcon | LinkIcon |
 | 5040 | `design/components/Icon/native/redesign/generated/SendMessageIcon.tsx` | SendMessageIcon | SendMessageIcon (preview message bar) |
 | 5042 | `design/components/Icon/native/redesign/generated/CopyIcon.tsx` | CopyIcon | CopyIcon |
@@ -142,6 +143,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 7094 | `modules/user_settings/core/native/openUserSettings.tsx` | openUserSettings | UserSettingsActionCreators |
 | 7174 | `actions/MessageActionCreators.tsx` | default | MessageActionCreators |
 | 7246 | `modules/guild_sidebar/ChannelListState.tsx` | CannotShow, DoNotShow, WouldShowIfUncollapsed | useGuildChannelsList |
+| 7308 | `modules/replies/ReferencedMessageStore.tsx` | default | ReferencedMessageStore (Hide blocked or ignored messages: replies) |
 | 7365 | `modules/messages/MessageParser.tsx` | default, parseAndRebuild, createParserState | MessageParser |
 | 7371 | `modules/chat/SlowmodeUtils.tsx` | canBypassSlowmode, canBypassSlowmodeHelper, useCanBypassSlowmode | SlowmodeUtils |
 | 7382 | `modules/quests/utils/QuestDataUtils.tsx` | THIRTY_DAYS_MS, earnedDecisionIsValid, findQuestOrReplacement | QuestDataUtils |
@@ -245,6 +247,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 11382 | `design/components/Icon/native/redesign/generated/UserIcon.tsx` | UserIcon | UserIcon |
 | 11540 | `design/components/Icon/native/redesign/generated/GiftIcon.tsx` | GiftIcon | GiftIcon |
 | 11587 | `design/components/Icon/native/redesign/generated/ImagesIcon.tsx` | ImagesIcon | ImagesIcon (Bring back Tenor GIFs) |
+| 11624 | `modules/messages/native/createChannelStream.tsx` | default | createChannelStream (Hide blocked or ignored messages) |
 | 11668 | `actions/TypingActionCreators.tsx` | default | TypingActionCreators |
 | 11828 | `design/components/Icon/native/redesign/generated/ShopIcon.tsx` | ShopIcon | ShopIcon (Hide extra buttons) |
 | 11841 | `design/components/Icon/native/redesign/generated/ArrowsUpDownIcon.tsx` | ArrowsUpDownIcon | ArrowsUpDownIcon |
@@ -332,6 +335,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16857 | `modules/main_tabs_v2/native/you_bar/YouBarButton.tsx` | default, YouBarButtonIcon, YouBarButtonContainer | YouBarButton |
 | 16858 | `modules/main_tabs_v2/native/you_bar/YouBarNotificationsButton.tsx` | default | YouBarButtons |
 | 16947 | `design/components/Icon/native/redesign/generated/PaintbrushThinIcon.tsx` | PaintbrushThinIcon | PaintbrushThinIcon |
+| 17072 | `design/components/Icon/native/redesign/generated/ChatShieldIcon.tsx` | ChatShieldIcon | ChatShieldIcon (Hide blocked or ignored messages) |
 | 17143 | `design/components/Icon/native/redesign/generated/SparklesIcon.tsx` | SparklesIcon | SparklesIcon (Unlock Nitro themes) |
 | 17697 | `modules/app_icons/native/AppIconsCoachmark.tsx` | default | AppIconsCoachmark |
 | 18051 | `modules/app_icons/native/AppIconPremiumManager.tsx` | default | AppIconPremiumManager |

@@ -48,6 +48,7 @@
     if (features.serverInfo) selectModules([1390, 16748]);
     if (features.fixEmbeds) selectModules([1390, 7174]);
     if (features.tenorGifs) selectModules([1295, 9733]);
+    if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     const revision = "1.18.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -69,7 +70,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -86,7 +87,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -486,6 +487,7 @@
         if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
         if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
+        if (features.hideBlocked && featureFor(key) === "hideBlocked") hideBlockedChanged();
         if (features.quests || features.badges || features.userNotif) backgroundSync();
         return true;
     }
@@ -561,6 +563,7 @@
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
             if (features.materialYou) { myStart(); if (enabled("materialYou")) customThemesApply(); }
             if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
+            if (features.hideBlocked && enabled("hideBlocked")) hideBlockedChanged();
             if (features.quests || features.badges || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
@@ -873,7 +876,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -908,7 +911,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -948,6 +951,7 @@
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
+        hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
@@ -1276,6 +1280,7 @@
         };
         // Messages
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
+        withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
         withOptions("messages", "gestures", "VENUS_GESTURES", "Double-tap to reply", "Double-tap to reply, or to edit your own message.", "Tap gestures", GestureSettings);
@@ -12875,6 +12880,167 @@
         ];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
+    // Hide blocked or ignored messages (#91, from Rain): filters hidden messages out of the stream createChannelStream
+    // (11624) walks, before Discord groups messages or builds BLOCKED_GROUP / IGNORED_GROUP rows. MessageStore itself is
+    // untouched, adjacent messages around a hidden one join into one group, and toggling an option redraws the open chat.
+    const hideBlocked = {relationships:null, references:null, version:0};
+    function hideBlockedAuthorBlocked(msg) {
+        if (!msg || typeof msg !== "object") return false;
+        if (msg.blocked === true) return true;
+        const rel = hideBlocked.relationships || (hideBlocked.relationships = inspectedExport(4760, "default"));
+        if (!rel) return false;
+        try {
+            if (typeof rel.isBlockedForMessage === "function") return !!rel.isBlockedForMessage(msg);
+            const authorId = msg.author && msg.author.id || msg.authorId;
+            if (authorId && typeof rel.isBlocked === "function") return !!rel.isBlocked(authorId);
+        } catch (_) {}
+        return false;
+    }
+    function hideBlockedAuthorIgnored(msg) {
+        if (!msg || typeof msg !== "object") return false;
+        if (msg.ignored === true) return true;
+        const rel = hideBlocked.relationships || (hideBlocked.relationships = inspectedExport(4760, "default"));
+        if (!rel) return false;
+        try {
+            if (typeof rel.isIgnoredForMessage === "function") return !!rel.isIgnoredForMessage(msg);
+            const authorId = msg.author && msg.author.id || msg.authorId;
+            if (authorId && typeof rel.isIgnored === "function") return !!rel.isIgnored(authorId);
+        } catch (_) {}
+        return false;
+    }
+    function hideBlockedReferencedMessage(msg) {
+        if (!msg || typeof msg !== "object") return null;
+        const direct = msg.referencedMessage || msg.referenced_message;
+        if (direct && typeof direct === "object") return direct.message && typeof direct.message === "object" ? direct.message : direct;
+        const ref = msg.messageReference || msg.message_reference;
+        if (!ref || typeof ref !== "object") return null;
+        const refId = ref.messageId || ref.message_id;
+        const refChannelId = ref.channelId || ref.channel_id || msg.channel_id || msg.channelId;
+        if (!refId) return null;
+        const store = hideBlocked.references || (hideBlocked.references = inspectedExport(7308, "default"));
+        if (store) {
+            try {
+                const entry = typeof store.getMessage === "function" && refChannelId ? store.getMessage(refChannelId, refId) :
+                    typeof store.getMessageByReference === "function" ? store.getMessageByReference(ref) : null;
+                if (entry && entry.message && typeof entry.message === "object") return entry.message;
+            } catch (_) {}
+        }
+        if (msgStore && typeof msgStore.getMessage === "function" && refChannelId) {
+            try {
+                const found = msgStore.getMessage(refChannelId, refId);
+                if (found && typeof found === "object") return found;
+            } catch (_) {}
+        }
+        return null;
+    }
+    function hideBlockedShouldHide(msg) {
+        if (!msg || typeof msg !== "object") return false;
+        if (settings.hideBlockedBlocked && hideBlockedAuthorBlocked(msg)) return true;
+        if (settings.hideBlockedIgnored && hideBlockedAuthorIgnored(msg)) return true;
+        if (settings.hideBlockedReplies) {
+            const replied = hideBlockedReferencedMessage(msg);
+            if (replied && (hideBlockedAuthorBlocked(replied) || hideBlockedAuthorIgnored(replied))) return true;
+        }
+        return false;
+    }
+    function hideBlockedChannelStream(orig, self, args) {
+        const params = args[0];
+        if (!params || typeof params !== "object") return orig.apply(self, args);
+        const active = enabled("hideBlocked") && (settings.hideBlockedBlocked || settings.hideBlockedIgnored || settings.hideBlockedReplies);
+        const ver = active ? hideBlocked.version + ":" + (settings.hideBlockedBlocked ? 1 : 0) + (settings.hideBlockedIgnored ? 1 : 0) + (settings.hideBlockedReplies ? 1 : 0) : "";
+        const mgr = params.chatManager;
+        let force = false;
+        if (mgr && typeof mgr === "object") {
+            if (mgr.__venusHideBlockedVer !== undefined && mgr.__venusHideBlockedVer !== ver) force = true;
+            mgr.__venusHideBlockedVer = ver;
+        }
+        const messages = params.messages;
+        if (!active || !messages || typeof messages.forEach !== "function") {
+            if (!force) return orig.apply(self, args);
+            const next = Array.from(args);
+            next[0] = Object.assign({}, params, {forceRender:true});
+            return orig.apply(self, next);
+        }
+        const wrapped = Object.create(messages);
+        wrapped.forEach = function (fn, thisArg) {
+            return messages.forEach(function (msg, index, collection) {
+                if (!hideBlockedShouldHide(msg)) fn.call(thisArg, msg, index, collection);
+            });
+        };
+        const next = Array.from(args);
+        next[0] = Object.assign({}, params, {messages:wrapped, forceRender:force || params.forceRender});
+        return orig.apply(self, next);
+    }
+    function hideBlockedChanged() {
+        hideBlocked.version++;
+        if (!msgStore) msgStore = inspectedExport(5432, "default");
+        try { if (msgStore && typeof msgStore.emitChange === "function") msgStore.emitChange(); } catch (_) {}
+    }
+    const HIDE_BLOCKED_DARK = {row:{flexDirection:"row", alignItems:"center", gap:12, marginHorizontal:12, marginVertical:4, paddingHorizontal:12, paddingVertical:10,
+        borderRadius:12, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff14"},
+        badge:{width:28, height:28, borderRadius:14, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"},
+        pill:{paddingHorizontal:10, paddingVertical:5, borderRadius:12, backgroundColor:"#4e505866"},
+        spine:{width:28, height:10, marginLeft:19, marginRight:4, marginTop:8, borderLeftWidth:2, borderTopWidth:2, borderTopLeftRadius:6, borderColor:"#4e5058"}};
+    function HideBlockedPreview(props) {
+        useSettings("hideBlocked");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on;
+        const b = useThemed("hideBlockedPreview", c => ({
+            row:Object.assign({}, HIDE_BLOCKED_DARK.row, {backgroundColor:c.BACKGROUND_MOD_SUBTLE || c.CARD_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE}),
+            badge:Object.assign({}, HIDE_BLOCKED_DARK.badge, {backgroundColor:c.BACKGROUND_MOD_NORMAL || c.BACKGROUND_BASE_LOW}),
+            pill:Object.assign({}, HIDE_BLOCKED_DARK.pill, {backgroundColor:c.CONTROL_SECONDARY_BACKGROUND_DEFAULT || c.BACKGROUND_MOD_STRONG}),
+            spine:Object.assign({}, HIDE_BLOCKED_DARK.spine, {borderColor:c.INTERACTIVE_MUTED || c.BORDER_STRONG})}), HIDE_BLOCKED_DARK);
+        const hideB = on && settings.hideBlockedBlocked, hideI = on && settings.hideBlockedIgnored, hideR = on && settings.hideBlockedReplies;
+        const Shield = venusIcon(17072, "ChatShieldIcon"), EyeSlash = venusIcon(6650, "EyeSlashIcon");
+        const collapsedRow = (key, Icon, label) => popIn(key, el(RN.View, {key, style:b.row},
+            el(RN.View, {style:b.badge}, el(Icon, {size:"xs", color:s.muted.color})),
+            el(RN.Text, {style:[s.muted, {flex:1, fontSize:13, fontWeight:"600"}], numberOfLines:1}, label),
+            el(RN.View, {style:b.pill}, el(RN.Text, {style:[s.text, {fontSize:12, fontWeight:"600"}]}, tr("Show")))));
+        const replyRow = popIn("reply", el(RN.View, {key:"reply", style:{paddingHorizontal:12, paddingVertical:6}},
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", marginBottom:4}},
+                el(RN.View, {style:b.spine}),
+                el(RN.View, {style:{width:16, height:16, borderRadius:8, backgroundColor:"#80848e", alignItems:"center", justifyContent:"center", marginRight:4}},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:9, fontWeight:"700"}}, "M")),
+                el(RN.Text, {style:[s.muted, {fontWeight:"600", marginRight:4}], numberOfLines:1}, "Max"),
+                el(RN.Text, {style:[s.muted, {flex:1, fontStyle:"italic"}], numberOfLines:1}, tr("Blocked message"))),
+            el(RN.View, {style:{flexDirection:"row", gap:12}},
+                el(RN.View, {style:{width:40, height:40, borderRadius:20, backgroundColor:"#eb459e", alignItems:"center", justifyContent:"center"}},
+                    el(RN.Text, {style:{color:"#ffffff", fontSize:16, fontWeight:"700"}}, "S")),
+                el(RN.View, {style:{flex:1}},
+                    el(RN.View, {style:{flexDirection:"row", alignItems:"baseline", marginBottom:2}},
+                        el(RN.Text, {style:s.name, numberOfLines:1}, "Sam"),
+                        el(RN.Text, {style:[s.muted, {marginLeft:8}]}, tr("Today at 4:03 PM"))),
+                    el(RN.Text, {style:s.text}, tr("Wait, what did they say?"))))));
+        const rows = [
+            previewMessage(s, "alex", "Alex", "#3ba55c", tr("Today at 4:01 PM"), el(RN.Text, {style:s.text}, tr("Are we still playing tonight?"))),
+            hideB ? null : collapsedRow("blocked", Shield, pl(2, "{n} blocked message", "{n} blocked messages")),
+            hideR ? null : replyRow,
+            hideI ? null : collapsedRow("ignored", EyeSlash, pl(1, "{n} ignored message", "{n} ignored messages")),
+            previewMessage(s, "jordan", "Jordan", "#5865f2", tr("Today at 4:05 PM"), el(RN.Text, {style:s.text}, tr("Count me in!")))
+        ];
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Blocked and ignored messages preview", [el(RN.View, {key:"chat"}, rows)],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})})}));
+    }
+    function HideBlockedSettings() {
+        useSettings("hideBlocked");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("hideBlocked"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const Icon = venusIcon(17072, "ChatShieldIcon");
+        const hasAny = !!(settings.hideBlockedBlocked || settings.hideBlockedIgnored || settings.hideBlockedReplies);
+        const groups = [
+            !on ? offCard("status", Icon, "hideBlocked") : !hasAny ? statusCard("status", "Turn on at least one option below.",
+                {title:tr("Nothing hidden"), IconComponent:Icon}) : null,
+            el(HideBlockedPreview, {key:"preview", on}),
+            el(Group, {key:"what", title:tr("Hide in chat")},
+                switchRow(Switch, "hideBlockedBlocked", "Blocked messages", "Hides the \"blocked messages\" row and the messages inside it.", rowIcon(5036, "UserMinusIcon")),
+                switchRow(Switch, "hideBlockedIgnored", "Ignored messages", "Hides the \"ignored messages\" row from people you've ignored.", rowIcon(6650, "EyeSlashIcon")),
+                switchRow(Switch, "hideBlockedReplies", "Replies to them", "Also hides messages that reply to someone you've blocked or ignored.", rowIcon(12838, "ArrowAngleLeftUpIcon"))),
+            footnote("note", "Changes show in chat right away, with no restart.")
+        ];
+        return settingsBody(ui, groups);
+    }
     function activatePlugins(id, exports) {
         switch (id) {
             case 2129:
@@ -12921,7 +13087,12 @@
             case 16387: return features.accountSwitcher ? hookRegisterForMultiAccount(exports) : exports;
             case 5938: return features.accountSwitcher ? hookTrackedHttpForSignUp(exports) : exports;
             case 12131: return features.accountSwitcher ? hookIsStaffForMultiAccount(exports) : exports;
-            case 4760: if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); } return exports;
+            case 4760:
+                if (features.hideBlocked && exports && exports.default) hideBlocked.relationships = exports.default;
+                if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
+                return exports;
+            case 7308: if (features.hideBlocked && exports && exports.default) hideBlocked.references = exports.default; return exports;
+            case 11624: return features.hideBlocked ? hookExport(exports, "default", hideBlockedChannelStream) : exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
             case 9699: if ((features.quests || features.badges || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
             case 13933: return (features.quests || features.badges || features.userNotif) ? hookGatewaySocket(exports) : exports;
@@ -13028,7 +13199,7 @@
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
             case 5432:
-                if (features.jumpToTop || features.messageHighlight || features.noDelete || features.translate) msgStore = exports.default;
+                if (features.jumpToTop || features.messageHighlight || features.noDelete || features.translate || features.hideBlocked) msgStore = exports.default;
                 if (features.noDelete) {
                     exports = replaceValue(exports, "default", hookExport(hookExport(msgStore, "getMessage", retainedMessage), "getMessages", retainedMessages));
                     restoreDeleted();

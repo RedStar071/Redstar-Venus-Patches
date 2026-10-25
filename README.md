@@ -25,6 +25,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | Group | Feature | What it does |
 | --- | --- | --- |
 | **Messages** | Keep deleted messages | Deleted messages stay in chat, outlined in red, and edits keep their history. Pick their color, brightness and how many to keep |
+| | Hide blocked or ignored messages | Removes the "blocked messages" and "ignored messages" rows from chat, and can hide replies to them too |
 | | Message highlights | Pick bar width, plus the color and brightness of replies and mentions |
 | | Translate messages | Messages in other languages show in yours, automatically or only when you ask: a whole chat from a bar that appears when it has messages in another language, or one message from its menu. Translate into Discord's language, your phone's, or any of 70 others |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
