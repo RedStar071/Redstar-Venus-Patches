@@ -11657,7 +11657,7 @@
     //   chosen channel and segmented pill in secondary container, links and brand text in primary.
     // Status colors (online, idle, Do Not Disturb, danger) stay Discord's, so they keep meaning what they mean.
     const MY_PRESETS = [["blue", "Blue", "#4a6fd8"], ["teal", "Teal", "#00877a"], ["green", "Green", "#4b7d2b"],
-        ["pink", "Pink", "#c2407e"], ["orange", "Orange", "#c0631f"]];
+        ["pink", "Pink", "#c2407e"], ["purple", "Purple", "#7b52c4"]];
     const MY_TINTS = ["subtle", "balanced", "rich"];
     const MY_TINT_SCALE = {subtle:0.45, balanced:1, rich:2.4};
     const MY_BRIDGE = "venus-monet-v1:";
