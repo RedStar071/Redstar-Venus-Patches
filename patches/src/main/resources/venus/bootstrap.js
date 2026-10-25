@@ -42,6 +42,7 @@
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
     if (features.nitroThemes) selectModules([584, 1390, 2046, 4769, 4937, 14299, 15566]);
     if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 11191, 10368]);
+    if (features.materialYou) selectModules([589, 590, 591, 1205, 4831, 11191]);
     if (features.iconPacks) selectModules([81, 84, 328, 1205, 4817, 4831, 11191]);
     if (features.messageHighlight) selectModules([584, 1390, 5432, 7742]);
     if (features.serverInfo) selectModules([1390, 16748]);
@@ -65,7 +66,7 @@
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
-        accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true,
+        accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
         fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", language:"auto" };
@@ -82,7 +83,7 @@
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
-            accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true,
+            accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
             fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", language: "auto"
@@ -352,6 +353,8 @@
         if (key === "badgesCycleMinutes") return badgeCycleMinutes(value);
         if (key === "badgesGamesAtOnce") return badgeAtOnce(value);
         if (key === "fixEmbedsSites") return fixSitesText(value);
+        if (key === "materialYouColor") return myIsColor(value) ? value.toLowerCase() : undefined;
+        if (key === "materialYouTint") return MY_TINTS.includes(value) ? value : undefined;
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
     }
     function setSetting(key, value) {
@@ -387,6 +390,14 @@
             if (clean === undefined) return false;
             if (settings.fixEmbedsSites === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.fixEmbedsSites = clean; dirty.add(key); save(); notify(key); return true;
+        }
+        if (key === "materialYouColor" || key === "materialYouTint") {
+            if (key === "materialYouColor" ? !myIsColor(value) : !MY_TINTS.includes(value)) return false;
+            const clean = key === "materialYouColor" ? value.toLowerCase() : value;
+            if (settings[key] === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings[key] = clean; dirty.add(key); save(); notify(key); notify("materialYou");
+            if (clean === "wallpaper") myReadSystem();
+            customThemesApply(); return true;
         }
         if (key === "noDeleteLimit") {
             const limit = deleteLimit(value);
@@ -470,6 +481,7 @@
         if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.customThemes && key === "customThemesBackground") customThemesApply();
         if (features.nitroThemes && key === "nitroThemes" && !value) nitroThemeTurnedOff();
+        if (features.materialYou && key === "materialYou") { if (value) myStart(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
         if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
@@ -542,6 +554,7 @@
             }
             if (features.accountSwitcher) accountSwitcherSync();
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
+            if (features.materialYou) { myStart(); if (enabled("materialYou")) customThemesApply(); }
             if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
             if (features.quests || features.badges || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
@@ -855,7 +868,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -890,7 +903,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1303,6 +1316,7 @@
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus next to the notifications bell.");
         toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon without Nitro.");
         toggle("appearance", "nitroThemes", "Unlock Nitro themes", "Use Discord's gradient themes without Nitro, on this phone.");
+        withOptions("appearance", "materialYou", "VENUS_MATERIALYOU", "Material You colors", "Colors Discord to match your wallpaper, in light and dark.", "Material You", MaterialYouSettings);
         withOptions("appearance", "customThemes", "VENUS_CUSTOMTHEMES", "Custom themes", "Install Revenge and Vendetta color themes from a link.", "Custom themes", CustomThemesSettings);
         withOptions("appearance", "iconPacks", "VENUS_ICONPACKS", "Icon packs", "Replace Discord's icons with community icon packs or a custom pack.", "Icon packs", IconPacksSettings);
         // Quests
@@ -11152,8 +11166,12 @@
             }
         });
     }
+    // The theme the color tables follow: an installed custom theme wins (you picked it on purpose), then Material You.
+    function colorThemeEntry() {
+        return customThemesActiveEntry() || (features.materialYou ? myThemeSpec() : null);
+    }
     function customThemesActiveEntry() {
-        if (!enabled("customThemes") || !customThemes.active) return null;
+        if (!features.customThemes || !enabled("customThemes") || !customThemes.active) return null;
         return customThemes.list.find(t => t && t.id === customThemes.active) || null;
     }
     function customThemesBumpFallbackContextKey() {
@@ -11174,8 +11192,9 @@
             if (!customThemes.expTable && mExp && mExp._private && mExp._private.SemanticColorExperiments) customThemes.expTable = mExp._private.SemanticColorExperiments;
         }
         if (!customThemes.rawTable || !customThemes.semTable) return;
-        const active = customThemesActiveEntry();
-        const nextKey = active ? active.id + ":" + customThemes.editCounter + ":" + (settings.customThemesBackground ? "1" : "0") : "";
+        snapshotColorTables();
+        const active = colorThemeEntry();
+        const nextKey = active ? active.id + ":" + customThemes.editCounter + ":" + (settings.customThemesBackground ? "1" : "0") + ":" + (active === materialYou.spec ? materialYou.specKey : "") : "";
         if (nextKey === customThemes.appliedKey && (nextKey !== "" || customThemes.origRaw)) return;
         customThemes.appliedKey = nextKey;
         compileThemeIntoTables(active);
@@ -11193,7 +11212,7 @@
         if (raw && typeof raw === "object") {
             customThemes.rawTable = raw;
             snapshotColorTables();
-            if (customThemes.semTable && enabled("customThemes")) customThemesApply();
+            if (customThemes.semTable && (enabled("customThemes") || enabled("materialYou"))) customThemesApply();
         }
         return exports;
     }
@@ -11202,7 +11221,7 @@
         if (sem && typeof sem === "object") {
             customThemes.semTable = sem;
             snapshotColorTables();
-            if (customThemes.rawTable && enabled("customThemes")) customThemesApply();
+            if (customThemes.rawTable && (enabled("customThemes") || enabled("materialYou"))) customThemesApply();
         }
         return exports;
     }
@@ -11212,7 +11231,7 @@
             customThemes.expTable = table;
             if (customThemes.rawTable && customThemes.semTable) {
                 snapshotColorTables();
-                if (enabled("customThemes")) { customThemes.appliedKey = null; customThemesApply(); }
+                if (enabled("customThemes") || enabled("materialYou")) { customThemes.appliedKey = null; customThemesApply(); }
             }
         }
         return exports;
@@ -11221,6 +11240,7 @@
     // so on, never on our revision. Re-keying the value they hand down makes createStyles and useToken read fresh.
     function rootThemeContextProvider(orig, self, args) {
         if (features.customThemes) useSettings("customThemes");
+        if (features.materialYou) useSettings("materialYou");
         if (features.iconPacks) useSettings("iconPacks");
         const tree = orig.apply(self, args);
         if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
@@ -11517,6 +11537,293 @@
                     !on, true)) : null,
             customThemes.list.length ? footnote("note", "Hold a theme to remove it.") : null];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
+    }
+    // HCT (hue, chroma, tone): the color space Material You builds its palettes in. A small port of Google's
+    // material-color-utilities (Apache-2.0): Cam16 for reading a color, HctSolver for making one at a given tone.
+    const HCT_WHITE = [95.047, 100.0, 108.883];
+    function hctLinear(c) { const n = c / 255; return (n <= 0.040449936 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4)) * 100; }
+    function hctDelinear(c) { const n = c / 100, d = n <= 0.0031308 ? n * 12.92 : 1.055 * Math.pow(n, 1 / 2.4) - 0.055; return Math.max(0, Math.min(255, Math.round(d * 255))); }
+    function hctLabF(t) { return t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116; }
+    function hctLabInv(ft) { const c = ft * ft * ft; return c > 216 / 24389 ? c : (116 * ft - 16) / (24389 / 27); }
+    function hctYFromTone(tone) { return 100 * hctLabInv((tone + 16) / 116); }
+    function hctToneOf(rgb) { return 116 * hctLabF((0.2126 * hctLinear(rgb[0]) + 0.7152 * hctLinear(rgb[1]) + 0.0722 * hctLinear(rgb[2])) / 100) - 16; }
+    const HCT_VC = (() => {
+        const w = HCT_WHITE, La = 200 / Math.PI * hctYFromTone(50) / 100, f = 1, c = 0.69;
+        const rW = w[0] * 0.401288 + w[1] * 0.650173 + w[2] * -0.051461, gW = w[0] * -0.250268 + w[1] * 1.204414 + w[2] * 0.045854,
+            bW = w[0] * -0.002079 + w[1] * 0.048952 + w[2] * 0.953127;
+        const d = Math.max(0, Math.min(1, f * (1 - 1 / 3.6 * Math.exp((-La - 42) / 92))));
+        const rgbD = [d * 100 / rW + 1 - d, d * 100 / gW + 1 - d, d * 100 / bW + 1 - d];
+        const k = 1 / (5 * La + 1), k4 = k * k * k * k, k4F = 1 - k4, fl = k4 * La + 0.1 * k4F * k4F * Math.cbrt(5 * La);
+        const n = hctYFromTone(50) / w[1], z = 1.48 + Math.sqrt(n), nbb = 0.725 / Math.pow(n, 0.2);
+        const af = [rW, gW, bW].map((v, i) => Math.pow(fl * rgbD[i] * v / 100, 0.42)), a = af.map(v => 400 * v / (v + 27.13));
+        return {n, aw:(2 * a[0] + a[1] + 0.05 * a[2]) * nbb, nbb, ncb:nbb, c, nc:f, rgbD, fl, z};
+    })();
+    // Hue (degrees), chroma and tone of an sRGB color.
+    function hctFromRgb(rgb) {
+        const V = HCT_VC, r = hctLinear(rgb[0]), g = hctLinear(rgb[1]), b = hctLinear(rgb[2]);
+        const x = 0.41233895 * r + 0.35762064 * g + 0.18051042 * b, y = 0.2126 * r + 0.7152 * g + 0.0722 * b, z = 0.01932141 * r + 0.11916382 * g + 0.95034478 * b;
+        const cone = [0.401288 * x + 0.650173 * y - 0.051461 * z, -0.250268 * x + 1.204414 * y + 0.045854 * z, -0.002079 * x + 0.048952 * y + 0.953127 * z];
+        const ad = cone.map((v, i) => { const d = V.rgbD[i] * v, p = Math.pow(V.fl * Math.abs(d) / 100, 0.42); return Math.sign(d) * 400 * p / (p + 27.13); });
+        const A = (11 * ad[0] - 12 * ad[1] + ad[2]) / 11, B = (ad[0] + ad[1] - 2 * ad[2]) / 9, u = (20 * ad[0] + 20 * ad[1] + 21 * ad[2]) / 20, p2 = (40 * ad[0] + 20 * ad[1] + ad[2]) / 20;
+        const hue = ((Math.atan2(B, A) * 180 / Math.PI) % 360 + 360) % 360;
+        const j = 100 * Math.pow(p2 * V.nbb / V.aw, V.c * V.z), huePrime = hue < 20.14 ? hue + 360 : hue;
+        const t = 50000 / 13 * 0.25 * (Math.cos(huePrime * Math.PI / 180 + 2) + 3.8) * V.nc * V.ncb * Math.sqrt(A * A + B * B) / (u + 0.305);
+        const chroma = Math.pow(t, 0.9) * Math.pow(1.64 - Math.pow(0.29, V.n), 0.73) * Math.sqrt(j / 100);
+        return {hue, chroma, tone:hctToneOf(rgb)};
+    }
+    const HCT_DISCOUNT = [[0.001200833568784504, 0.002389694492170889, 0.0002795742885861124], [0.0005891086651375999, 0.0029785502573438758, 0.0003270666104008398],
+        [0.00010146692491640572, 0.0005364214359186694, 0.0032979401770712076]];
+    const HCT_UNDISCOUNT = [[1373.2198709594231, -1100.4251190754821, -7.278681089101213], [-271.815969077903, 559.6580465940733, -32.46047482791194],
+        [1.9622899599665666, -57.173814538844006, 308.7233197812385]];
+    const HCT_Y = [0.2126, 0.7152, 0.0722];
+    function hctMul(row, m) { return [row[0] * m[0][0] + row[1] * m[0][1] + row[2] * m[0][2], row[0] * m[1][0] + row[1] * m[1][1] + row[2] * m[1][2], row[0] * m[2][0] + row[1] * m[2][1] + row[2] * m[2][2]]; }
+    function hctRgbFromLinear(l) { return [hctDelinear(l[0]), hctDelinear(l[1]), hctDelinear(l[2])]; }
+    function hctAdapt(c) { const a = Math.pow(Math.abs(c), 0.42); return Math.sign(c) * 400 * a / (a + 27.13); }
+    function hctHueOf(lin) { const s = hctMul(lin, HCT_DISCOUNT), r = hctAdapt(s[0]), g = hctAdapt(s[1]), b = hctAdapt(s[2]); return Math.atan2((r + g - 2 * b) / 9, (11 * r - 12 * g + b) / 11); }
+    function hctRad(a) { return (a + Math.PI * 8) % (Math.PI * 2); }
+    function hctCyclic(a, b, c) { return hctRad(b - a) < hctRad(c - a); }
+    function hctVertex(y, n) {
+        const A = n % 4 <= 1 ? 0 : 100, B = n % 2 === 0 ? 0 : 100, ok = v => v >= 0 && v <= 100;
+        if (n < 4) { const r = (y - A * HCT_Y[1] - B * HCT_Y[2]) / HCT_Y[0]; return ok(r) ? [r, A, B] : null; }
+        if (n < 8) { const g = (y - B * HCT_Y[0] - A * HCT_Y[2]) / HCT_Y[1]; return ok(g) ? [B, g, A] : null; }
+        const b = (y - A * HCT_Y[0] - B * HCT_Y[1]) / HCT_Y[2]; return ok(b) ? [A, B, b] : null;
+    }
+    function hctTrueDelinear(c) { const n = c / 100; return (n <= 0.0031308 ? n * 12.92 : 1.055 * Math.pow(n, 1 / 2.4) - 0.055) * 255; }
+    // The most colorful color of this hue at this lightness, when the asked-for chroma is out of the sRGB gamut.
+    function hctBisect(y, hue) {
+        let left = null, right = null, lh = 0, rh = 0, uncut = true;
+        for (let n = 0; n < 12; n++) {
+            const mid = hctVertex(y, n);
+            if (!mid) continue;
+            const mh = hctHueOf(mid);
+            if (!left) { left = right = mid; lh = rh = mh; continue; }
+            if (uncut || hctCyclic(lh, mh, rh)) {
+                uncut = false;
+                if (hctCyclic(lh, hue, mh)) { right = mid; rh = mh; } else { left = mid; lh = mh; }
+            }
+        }
+        lh = hctHueOf(left);
+        for (let axis = 0; axis < 3; axis++) {
+            if (left[axis] === right[axis]) continue;
+            let lp, rp;
+            if (left[axis] < right[axis]) { lp = Math.floor(hctTrueDelinear(left[axis]) - 0.5); rp = Math.ceil(hctTrueDelinear(right[axis]) - 0.5); }
+            else { lp = Math.ceil(hctTrueDelinear(left[axis]) - 0.5); rp = Math.floor(hctTrueDelinear(right[axis]) - 0.5); }
+            for (let i = 0; i < 8 && Math.abs(rp - lp) > 1; i++) {
+                const mp = Math.floor((lp + rp) / 2), coord = hctLinear(mp + 0.5), t = (coord - left[axis]) / (right[axis] - left[axis]);
+                const mid = [left[0] + (right[0] - left[0]) * t, left[1] + (right[1] - left[1]) * t, left[2] + (right[2] - left[2]) * t], mh = hctHueOf(mid);
+                if (hctCyclic(lh, hue, mh)) { right = mid; rp = mp; } else { left = mid; lh = mh; lp = mp; }
+            }
+        }
+        return [(left[0] + right[0]) / 2, (left[1] + right[1]) / 2, (left[2] + right[2]) / 2];
+    }
+    function hctInverseAdapt(a) { const abs = Math.abs(a), base = Math.max(0, 27.13 * abs / (400 - abs)); return Math.sign(a) * Math.pow(base, 1 / 0.42); }
+    function hctByJ(hue, chroma, y) {
+        const V = HCT_VC, tInner = 1 / Math.pow(1.64 - Math.pow(0.29, V.n), 0.73), p1 = 0.25 * (Math.cos(hue + 2) + 3.8) * (50000 / 13) * V.nc * V.ncb;
+        const hSin = Math.sin(hue), hCos = Math.cos(hue);
+        let j = Math.sqrt(y) * 11;
+        for (let round = 0; round < 5; round++) {
+            const jn = j / 100, alpha = chroma === 0 || j === 0 ? 0 : chroma / Math.sqrt(jn), t = Math.pow(alpha * tInner, 1 / 0.9);
+            const p2 = V.aw * Math.pow(jn, 1 / V.c / V.z) / V.nbb, gamma = 23 * (p2 + 0.305) * t / (23 * p1 + 11 * t * hCos + 108 * t * hSin);
+            const a = gamma * hCos, b = gamma * hSin;
+            const lin = hctMul([hctInverseAdapt((460 * p2 + 451 * a + 288 * b) / 1403), hctInverseAdapt((460 * p2 - 891 * a - 261 * b) / 1403),
+                hctInverseAdapt((460 * p2 - 220 * a - 6300 * b) / 1403)], HCT_UNDISCOUNT);
+            if (lin[0] < 0 || lin[1] < 0 || lin[2] < 0) return null;
+            const fnj = HCT_Y[0] * lin[0] + HCT_Y[1] * lin[1] + HCT_Y[2] * lin[2];
+            if (fnj <= 0) return null;
+            if (round === 4 || Math.abs(fnj - y) < 0.002) return lin[0] > 100.01 || lin[1] > 100.01 || lin[2] > 100.01 ? null : hctRgbFromLinear(lin);
+            j = j - (fnj - y) * j / (2 * fnj);
+        }
+        return null;
+    }
+    // An sRGB color with this hue and tone, as close to the chroma as the gamut allows.
+    function hctToRgb(hueDeg, chroma, tone) {
+        if (chroma < 0.0001 || tone < 0.0001 || tone > 99.9999) { const v = hctDelinear(hctYFromTone(tone)); return [v, v, v]; }
+        const hue = ((hueDeg % 360) + 360) % 360 / 180 * Math.PI, y = hctYFromTone(tone);
+        return hctByJ(hue, chroma, y) || hctRgbFromLinear(hctBisect(y, hue));
+    }
+    // Material You colors (#90): Discord in your phone's wallpaper palette, or in one color you pick, the way Android 12+
+    // colors its own apps. It builds Material 3 tonal palettes (HCT, above) and hands them to Custom themes' compiler, so
+    // a change is one table write and turning it off restores Discord exactly:
+    // - every gray ramp Discord draws with (NEUTRAL, PRIMARY, PLUM and the translucent grays) is redrawn in the neutral
+    //   palette at the same tone, so each of Discord's appearances keeps its contrast (Light stays light, Darker dark,
+    //   Midnight black) and only gains the tint;
+    // - Blurple becomes the accent palette at the same tone, so every brand-colored detail follows it;
+    // - controls get Material 3's pairs: buttons, switches and checkboxes in primary with on-primary text and icons, the
+    //   chosen channel and segmented pill in secondary container, links and brand text in primary.
+    // Status colors (online, idle, Do Not Disturb, danger) stay Discord's, so they keep meaning what they mean.
+    const MY_PRESETS = [["blue", "Blue", "#4a6fd8"], ["teal", "Teal", "#00877a"], ["green", "Green", "#4b7d2b"],
+        ["pink", "Pink", "#c2407e"], ["orange", "Orange", "#c0631f"]];
+    const MY_TINTS = ["subtle", "balanced", "rich"];
+    const MY_TINT_SCALE = {subtle:0.45, balanced:1, rich:2.4};
+    const MY_BRIDGE = "venus-monet-v1:";
+    const materialYou = {system:null, asked:false, asking:false, spec:null, specKey:"", appState:null};
+    function myIsColor(value) { return value === "wallpaper" || MY_PRESETS.some(p => p[0] === value) || typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value); }
+    function myRgb(hex) { const n = hexInt(hex); return n == null ? [88, 101, 242] : [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+    function myHex(rgb) { return "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join(""); }
+    // Android's own palettes (system_accent1..3 and system_neutral1..2), read by the Material You extension. Their
+    // 500 shade (index 6) carries each palette's hue and chroma, so every tone Discord needs comes out as Android's.
+    function mySystemSource() {
+        const sys = materialYou.system;
+        if (!sys || !sys.accent1) return null;
+        const pick = name => { const list = sys[name], hex = Array.isArray(list) ? list[6] : null; return /^#[0-9a-f]{6}$/i.test(hex || "") ? hctFromRgb(myRgb(hex)) : null; };
+        const a1 = pick("accent1"), a2 = pick("accent2"), a3 = pick("accent3"), n1 = pick("neutral1"), n2 = pick("neutral2");
+        if (!a1 || !a2 || !n1 || !n2) return null;
+        return {a1, a2, a3:a3 || a2, n1, n2};
+    }
+    // Material 3's tonal spot scheme from one color: the style Android itself uses by default.
+    function mySeedSource(hex) {
+        const seed = hctFromRgb(myRgb(hex));
+        return {a1:{hue:seed.hue, chroma:Math.max(seed.chroma, 36)}, a2:{hue:seed.hue, chroma:16}, a3:{hue:(seed.hue + 60) % 360, chroma:24},
+            n1:{hue:seed.hue, chroma:6}, n2:{hue:seed.hue, chroma:8}};
+    }
+    function myWallpaperReady() { return !!mySystemSource(); }
+    // What's used: the wallpaper while the phone shares it, else the color you picked, else Blue.
+    function mySource() {
+        const choice = settings.materialYouColor;
+        if (choice === "wallpaper") { const sys = mySystemSource(); if (sys) return {src:sys, key:"w:" + JSON.stringify(materialYou.system)}; }
+        const preset = MY_PRESETS.find(p => p[0] === choice);
+        const hex = preset ? preset[2] : /^#[0-9a-f]{6}$/i.test(choice || "") ? choice.toLowerCase() : MY_PRESETS[0][2];
+        return {src:mySeedSource(hex), key:"s:" + hex};
+    }
+    function myTone(p, tone) { return myHex(hctToRgb(p.hue, p.chroma, tone)); }
+    // Background tint scales how much color the grays take; accents stay as Android draws them.
+    function myScheme(src) {
+        const scale = MY_TINT_SCALE[settings.materialYouTint] || 1;
+        return {a1:src.a1, a2:src.a2, a3:src.a3, n1:{hue:src.n1.hue, chroma:Math.min(24, src.n1.chroma * scale)}, n2:{hue:src.n2.hue, chroma:Math.min(28, src.n2.chroma * scale)}};
+    }
+    const MY_NEUTRAL_RAW = /^(NEUTRAL|PRIMARY|PLUM)_\d+$|^OPACITY_\d+$/, MY_ACCENT_RAW = /^(BLURPLE|BRAND)_\d+$|^OPACITY_BLURPLE_\d+$/;
+    // Material 3 roles as [palette, tone] per Discord appearance: [dark, light, midnight, darker].
+    const MY_ROLES = {
+        primary:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]], onPrimary:[["a1", 20], ["a1", 100], ["a1", 20], ["a1", 20]],
+        pressed:[["a1", 70], ["a1", 30], ["a1", 70], ["a1", 70]], brandText:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]],
+        mention:[["a1", 90], ["a1", 30], ["a1", 90], ["a1", 90]], secondary:[["a2", 30], ["a2", 90], ["a2", 25], ["a2", 30]]
+    };
+    const MY_SEMANTIC = {
+        primary:["BACKGROUND_BRAND", "CONTROL_PRIMARY_BACKGROUND_DEFAULT", "SWITCH_BACKGROUND_SELECTED_DEFAULT", "CHECKBOX_BACKGROUND_SELECTED_DEFAULT",
+            "CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND", "INTERACTIVE_ACCENT_BACKGROUND_SELECTED", "PROGRESSBAR_INDICATOR_BACKGROUND", "INPUT_BORDER_ACTIVE",
+            "TOGGLEBUTTON_BORDER_SELECTED", "REACTION_BORDER_REACTED_DEFAULT", "BADGE_BACKGROUND_BRAND", "ACTIVITY_TIMEBAR_PROGRESS_BACKGROUND",
+            "REDESIGN_INPUT_CONTROL_SELECTED", "MOBILE_VOICE_MESSAGE_RECORDING_LOCK_BACKGROUND_ACTIVE", "BUTTON_OUTLINE_BRAND_BACKGROUND_HOVER",
+            "BUTTON_OUTLINE_BRAND_BORDER_ACTIVE", "POLLS_VOTED_FILL", "SWITCH_THUMB_ICON_ACTIVE"],
+        onPrimary:["CONTROL_PRIMARY_TEXT_DEFAULT", "CHAT_INPUT_SEND_BUTTON_ICON_ACTIVE_TINT", "CHECKBOX_ICON_ACTIVE", "BADGE_TEXT_BRAND"],
+        pressed:["CONTROL_PRIMARY_BACKGROUND_ACTIVE", "INTERACTIVE_ACCENT_BACKGROUND_ACTIVE"],
+        brandText:["TEXT_BRAND", "ICON_BRAND", "CONTROL_BRAND_FOREGROUND", "CONTROL_BRAND_FOREGROUND_NEW", "TEXT_LINK"],
+        mention:["MENTION_FOREGROUND", "REACTION_TEXT_REACTED_DEFAULT"],
+        secondary:["MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED", "MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND"]
+    };
+    // The theme Custom themes' compiler applies, built once per palette, color and tint.
+    function myThemeSpec() {
+        if (!enabled("materialYou") || !customThemes.origRaw) return null;
+        const source = mySource(), specKey = source.key + "|" + settings.materialYouTint;
+        if (materialYou.spec && materialYou.specKey === specKey) return materialYou.spec;
+        const p = myScheme(source.src), rawColors = {}, semanticColors = {}, orig = customThemes.origRaw;
+        for (const name in orig) {
+            if (!owns(orig, name)) continue;
+            const neutral = MY_NEUTRAL_RAW.test(name), accent = !neutral && MY_ACCENT_RAW.test(name);
+            const value = orig[name];
+            if (!neutral && !accent || typeof value !== "string" || !/^#[0-9a-f]{6}/i.test(value)) continue;
+            // Translucent grays draw muted text, borders and pressed states: the neutral variant palette, as in Material 3.
+            const palette = accent ? p.a1 : /^OPACITY_/.test(name) ? p.n2 : p.n1;
+            rawColors[name] = myTone(palette, hctToneOf(myRgb(value.slice(0, 7))));
+        }
+        for (const role in MY_SEMANTIC) {
+            const slots = MY_ROLES[role].map(pair => myTone(p[pair[0]], pair[1]));
+            MY_SEMANTIC[role].forEach(token => { semanticColors[token] = slots; });
+        }
+        materialYou.spec = {id:"venus:materialYou", name:"Material You", rawColors, semanticColors};
+        materialYou.specKey = specKey;
+        return materialYou.spec;
+    }
+    // A small palette for the preview tiles, as Discord's Light or Dark would look.
+    function myPalette(light) {
+        const p = myScheme(mySource().src);
+        return light ? {bg:myTone(p.n1, 98), card:myTone(p.n1, 92), accent:myTone(p.a1, 40), text:myTone(p.n2, 30), strong:myTone(p.n1, 10)} :
+            {bg:myTone(p.n1, 20), card:myTone(p.n1, 28), accent:myTone(p.a1, 80), text:myTone(p.n2, 80), strong:myTone(p.n1, 95)};
+    }
+    // Asks the extension for the phone's palettes: at start, on this page, and whenever Discord comes back to the front
+    // (the wallpaper may have changed meanwhile). Nothing is redrawn when they're the same.
+    function myReadSystem() {
+        if (!features.materialYou || !files || typeof files.getFileHash !== "function" || materialYou.asking) return;
+        materialYou.asking = true;
+        Promise.resolve().then(() => files.getFileHash(MY_BRIDGE + "colors", "", 0)).then(text => {
+            const parsed = typeof text === "string" && text ? JSON.parse(text) : null;
+            const next = parsed && Array.isArray(parsed.accent1) ? {accent1:parsed.accent1, accent2:parsed.accent2, accent3:parsed.accent3, neutral1:parsed.neutral1, neutral2:parsed.neutral2} : null;
+            const changed = JSON.stringify(next) !== JSON.stringify(materialYou.system);
+            materialYou.system = next;
+            if (changed && enabled("materialYou")) customThemesApply();
+        }).catch(() => {}).then(() => { materialYou.asking = false; materialYou.asked = true; notify("materialYou"); });
+    }
+    function myStart() {
+        if (!features.materialYou) return;
+        if (!materialYou.appState && RN && RN.AppState && typeof RN.AppState.addEventListener === "function")
+            try { materialYou.appState = RN.AppState.addEventListener("change", state => { if (state === "active" && enabled("materialYou")) myReadSystem(); }); } catch (_) {}
+        myReadSystem();
+    }
+    // Material You page: what Discord will look like (Light and Dark side by side in the palette), where the colors come
+    // from, and how strongly backgrounds take the tint.
+    function MaterialYouSettings() {
+        useSettings("materialYou");
+        if (features.customThemes) useSettings("customThemes");
+        React.useEffect(() => { if (features.materialYou) myReadSystem(); }, []);
+        if (!React || !RN) return null;
+        const ui = reviewUI(), s = useThemeTileStyles(), card = highlightCardStyle();
+        const sw = useThemed("myPicker", c => ({ring:{borderColor:c.TEXT_STRONG}, dashed:{borderColor:c.TEXT_MUTED}}), {ring:{borderColor:"#f2f3f5"}, dashed:{borderColor:"#949ba4"}});
+        const Text = inspectedExport(5088, "Text"), Press = RN.Pressable || RN.View, Check = venusIcon(6823, "CheckmarkSmallIcon"), Dropper = venusIcon(15652, "EyeDropperIcon");
+        const Wall = venusIcon(8210, "ImageIcon");
+        const on = enabled("materialYou"), choice = settings.materialYouColor, sys = mySystemSource();
+        const overridden = on && !!customThemesActiveEntry();
+        const text = (value, variant, color, fallback) => Text ? el(Text, {variant, color}, value) : el(RN.Text, {style:fallback}, value);
+        // The preview: Discord's Light and Dark looks side by side, in the colors you'd get.
+        const tile = (key, label, light) => el(RN.View, {key, style:s.tile, accessible:true, accessibilityLabel:tr(label)},
+            themeMiniChat(myPalette(light)),
+            el(RN.View, {style:{paddingHorizontal:8, paddingTop:8, paddingBottom:6}}, text(tr(label), "text-sm/semibold", "text-strong", {color:"#f2f3f5", fontSize:14, fontWeight:"600"})));
+        const preview = el(RN.View, {key:"preview", style:{gap:8}}, groupTitle("previewTitle", "Preview"),
+            el(RN.View, {style:{flexDirection:"row", justifyContent:"space-between", opacity:on ? 1 : 0.6}}, tile("light", "Light", true), tile("dark", "Dark", false)));
+        // Colors: your wallpaper first, five Material colors, then any color from Discord's own picker.
+        const pick = value => { if (on && value !== choice) { haptic("SELECTION"); setSetting("materialYouColor", value); } };
+        const pickAny = () => {
+            if (!on) return;
+            const current = /^#/.test(choice) ? choice : (MY_PRESETS.find(p => p[0] === choice) || MY_PRESETS[0])[2];
+            highlightPickColor(current, MY_PRESETS, hex => setSetting("materialYouColor", hex));
+        };
+        const tick = (key, hex) => popIn("tick:" + key, el(Check, {size:"sm", color:isLightHex(hex) ? "#000000" : "#ffffff"}));
+        const swatch = (key, label, fill, selected, onPress, disabled) => el(RN.View, {key, style:{flex:1, alignItems:"center"}},
+            el(Press, {accessible:true, accessibilityRole:"radio", accessibilityLabel:label, accessibilityState:{selected, disabled:!on || !!disabled}, disabled:!on || !!disabled, onPress,
+                hitSlop:{top:4, bottom:4, left:2, right:2},
+                style:[{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", borderWidth:2, borderColor:"transparent"}, selected ? sw.ring : null, {opacity:on && !disabled ? 1 : 0.4}]},
+                fill));
+        const dot = (hex, inner) => el(RN.View, {style:[{width:30, height:30, borderRadius:15, alignItems:"center", justifyContent:"center", backgroundColor:hex || "transparent"},
+            hex ? null : [{borderWidth:2, borderStyle:"dashed"}, sw.dashed]]}, inner);
+        // The wallpaper swatch is split like Android's own wallpaper colors: the accent on top, the two softer ones below.
+        const wallTop = sys ? myTone(sys.a1, 70) : null;
+        const wallFill = sys ? el(RN.View, {style:{width:30, height:30, borderRadius:15, overflow:"hidden"}},
+            el(RN.View, {style:{height:15, backgroundColor:wallTop}}),
+            el(RN.View, {style:{flexDirection:"row", height:15}}, el(RN.View, {style:{flex:1, backgroundColor:myTone(sys.a2, 80)}}), el(RN.View, {style:{flex:1, backgroundColor:myTone(sys.a3, 70)}})),
+            choice === "wallpaper" ? el(RN.View, {style:{position:"absolute", left:0, right:0, top:0, bottom:0, alignItems:"center", justifyContent:"center"}}, tick("wallpaper", wallTop)) : null) :
+            dot(null, el(Wall, {size:"xs"}));
+        const custom = /^#/.test(choice || "");
+        const swatches = [swatch("wallpaper", tr("Wallpaper"), wallFill, choice === "wallpaper", () => pick("wallpaper"), !sys)]
+            .concat(MY_PRESETS.map(([value, label, hex]) => swatch(value, tr(label), dot(hex, choice === value ? tick(value, hex) : null), choice === value, () => pick(value))))
+            .concat([swatch("custom", tr("Any color"), dot(custom ? choice : null, custom ? tick(choice, choice) : el(Dropper, {size:"xs"})), custom, pickAny)]);
+        const fallback = choice === "wallpaper" && !sys;
+        const named = fallback ? tr("Blue") : choice === "wallpaper" ? tr("Wallpaper") : custom ? choice.toUpperCase() : tr((MY_PRESETS.find(p => p[0] === choice) || MY_PRESETS[0])[1]);
+        const colors = el(RN.View, {key:"colors", style:{gap:8}}, groupTitle("colorsTitle", "Colors"),
+            el(RN.View, {style:card},
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:8}},
+                    el(RN.View, {style:{flex:1}}, text(tr("Based on"), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"})),
+                    text(named, "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:13})),
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center"}, accessibilityRole:"radiogroup"}, swatches),
+                fallback && materialYou.asked ? text(tr("Your phone doesn't share its wallpaper colors (that needs Android 12 or newer), so Blue is used."),
+                    "text-xs/medium", "text-muted", {color:"#949ba4", fontSize:12}) : null));
+        const tint = el(RN.View, {key:"tint", style:{gap:8}}, groupTitle("tintTitle", "Background tint"),
+            venusSegmented({key:"tintSeg", value:settings.materialYouTint, disabled:!on, onChange:value => setSetting("materialYouTint", value),
+                items:[{value:"subtle", label:tr("Subtle")}, {value:"balanced", label:tr("Balanced")}, {value:"rich", label:tr("Rich")}]}));
+        const groups = [
+            on ? null : offCard("status", venusIcon(15560, "PaintPaletteIcon"), "materialYou"),
+            overridden ? statusCard("override", "Your custom theme's colors show instead. Pick Discord's colors in Custom themes to see these.",
+                {title:tr("A custom theme is in use"), IconComponent:venusIcon(15652, "EyeDropperIcon")}) : null,
+            preview, colors, tint,
+            footnote("note", "Light, Dark and Midnight follow Discord's own Appearance setting.")];
+        return settingsBody(ui, groups);
     }
     // Icon packs (#61): replaces Discord's icons across the app with community icon packs (Themes+ / Rosiecord / MD3 /
     // Solar / Deco / Material Two Tone / Iconsax) or any custom icon pack URL, and applies per-icon tint overrides from
@@ -12553,12 +12860,12 @@
                 return exports;
             }
             case 15566: return features.nitroThemes ? hookComponent(exports, nitroThemePicker) : exports;
-            case 589: return features.customThemes ? hookSemanticColorsModule(exports) : exports;
-            case 591: return features.customThemes ? hookRawColorsModule(exports) : exports;
-            case 590: return features.customThemes ? hookExperimentColorsModule(exports) : exports;
-            case 11191: return (features.customThemes || features.iconPacks) ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
-            case 1205: if ((features.customThemes || features.iconPacks) && exports && exports.default) customThemes.themeStore = exports.default; return exports;
-            case 4831: return (features.customThemes || features.iconPacks) ? hookCreateThemedContext(exports) : exports;
+            case 589: return features.customThemes || features.materialYou ? hookSemanticColorsModule(exports) : exports;
+            case 591: return features.customThemes || features.materialYou ? hookRawColorsModule(exports) : exports;
+            case 590: return features.customThemes || features.materialYou ? hookExperimentColorsModule(exports) : exports;
+            case 11191: return (features.customThemes || features.materialYou || features.iconPacks) ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
+            case 1205: if ((features.customThemes || features.materialYou || features.iconPacks) && exports && exports.default) customThemes.themeStore = exports.default; return exports;
+            case 4831: return (features.customThemes || features.materialYou || features.iconPacks) ? hookCreateThemedContext(exports) : exports;
             case 10368:
                 // ChatViewWrapper {channelId, stickyHeader, children}: the theme background behind chat, and the translate bar (#82)
                 // in the sticky header slot above the messages, where Discord shows its own New messages bar.
