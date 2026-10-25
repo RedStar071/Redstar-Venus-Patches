@@ -13,6 +13,7 @@ import * as ReactDOM from "react-dom/client";
 import * as RNW from "react-native-web";
 import * as D from "./discord.jsx";
 import * as S from "./scenes.jsx";
+import colorsAll from "../../work/discord_colors.json";
 
 const q = new URLSearchParams(location.search);
 // Every feature patched in, like selecting every patch in Morphe.
@@ -64,13 +65,27 @@ global.__r = id => defined[id] ? defined[id].exports : id in modules ? modules[i
 global.__d = (factory, id) => { const module = { exports: {} }; defined[id] = module; factory(global, global.__r, null, null, module); };
 
 let registry = null;
+// A green wallpaper's Android 12 palettes, for Material You colors (monet=0 acts like a phone without them).
+const MONET = JSON.stringify({"accent1":["#ffffff","#f6ffef","#c9ffbe","#b8f1ad","#9cd593","#82b97a","#689e62","#4f834a","#376934","#1e511e","#023909","#002203","#000000"],"accent2":["#ffffff","#f6ffef","#e4f6dc","#d6e8ce","#baccb3","#9fb098","#85957f","#6b7c66","#53634f","#3b4b38","#253423","#111f0f","#000000"],"accent3":["#ffffff","#f4feff","#caf9fe","#bcebf0","#a0cfd4","#85b3b8","#6b989d","#527e83","#38656a","#1e4d52","#00363b","#002022","#000000"],"neutral1":["#ffffff","#fafdf4","#eff2e9","#e0e4da","#c4c8bf","#a9aca4","#8e928a","#747871","#5b6058","#444841","#2d322b","#191d17","#000000"],"neutral2":["#ffffff","#f8fef1","#edf3e6","#dee5d8","#c2c8bd","#a7ada2","#8c9388","#73796f","#5a6057","#424940","#2c322a","#171d16","#000000"]});
+files.getFileHash = uri => Promise.resolve(/^venus-monet-v1:/.test(uri) && q.get("monet") !== "0" ? MONET : "");
+let rerender = () => {};
+function colorTables() {
+  const d = colorsAll;
+  D.tables.raw = Object.assign({}, d.raw);
+  D.tables.sem = JSON.parse(JSON.stringify(d.sem));
+  modules[591] = { _private: { RawColors: D.tables.raw } };
+  modules[589] = { _private: { SemanticColors: D.tables.sem } };
+  modules[590] = { _private: { SemanticColorExperiments: JSON.parse(JSON.stringify(d.exp || {})) } };
+  modules[1205] = { default: store({ emitChange() { rerender(); } }) };
+}
 function boot() {
+  colorTables();
   modules[14839] = { SETTING_RENDERER_CONFIG: { ACCOUNT: { type: "route", IconComponent: D.makeIcon("UserCircleIcon") } } };
   modules[14971] = { SettingsList: D.makeSettingsList(() => registry) };
   modules[10664] = { createList: x => x };
   const define = (id, exports) => global.__d((g, r, i, a, module) => { module.exports = exports; }, id, []);
   define(120, { default: () => {} });
-  [17, 19, 1162, 6265, 6896, 14971, 10664, 14839].concat(S.hooked).forEach(id => define(id, modules[id]));
+  [17, 19, 1162, 6265, 6896, 14971, 10664, 14839, 591, 589, 590, 1205].concat(S.hooked).forEach(id => define(id, modules[id]));
   defined[120].exports.default();
   registry = defined[14839].exports.SETTING_RENDERER_CONFIG;
 }
@@ -82,6 +97,8 @@ window.__venusStart = function () {
   const Page = node && node.screen && node.screen.getComponent();
   if (q.get("search")) setTimeout(() => { const input = document.querySelector("input"); if (input) { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(input, q.get("search")); input.dispatchEvent(new Event("input", { bubbles: true })); } }, 300);
   function Frame() {
+    const [, bump] = React.useState(0);
+    rerender = () => bump(n => n + 1);
     const title = node && node.useTitle ? node.useTitle() : page;
     return <RNW.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
       <RNW.View style={{ height: 56, flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16 }}>

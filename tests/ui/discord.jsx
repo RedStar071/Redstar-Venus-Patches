@@ -8,7 +8,18 @@ import tokensAll from "../../work/ui/tokens.json";
 
 export const themeName = new URLSearchParams(location.search).get("theme") || "dark";
 export const T = tokensAll[themeName] || tokensAll.dark;
-export const tok = n => T[n] || "#ff00ff";
+// Discord's real color tables (work/discord_colors.json), handed to Venus as modules 589/590/591 so a theme it compiles
+// (Custom themes, Material You colors) shows on every stand-in. Read live: a theme rewrites them in place.
+export const tables = { raw: null, sem: null };
+const SLOT = { dark: "dark", light: "light", midnight: "midnight", darker: "darker" }[themeName] || "dark";
+function live(n) {
+  const entry = tables.sem && tables.sem[n] && tables.sem[n][SLOT];
+  const raw = entry && tables.raw[entry.raw];
+  if (typeof raw !== "string") return null;
+  const op = entry.opacity == null ? 1 : entry.opacity;
+  return op >= 0.999 ? raw.slice(0, 7) : raw.slice(0, 7) + Math.round(op * 255).toString(16).padStart(2, "0");
+}
+export const tok = n => live(n) || T[n] || "#ff00ff";
 
 const ICON_PX = { xxs: 12, xs: 16, sm: 18, md: 24, lg: 32, refresh_sm: 20 };
 const ICON_FILE = name => "icons/design_components_icon_native_redesign_generated_images_" + name.toLowerCase();

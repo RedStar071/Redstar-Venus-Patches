@@ -9,7 +9,7 @@ const ROOT = path.resolve(__dirname, "../.."), UI = path.join(ROOT, "work/ui");
 const PAGES = ["NODELETE:noDelete", "MESSAGEHIGHLIGHT:messageHighlight", "TRANSLATE:translate", "GESTURES:gestures", "FREENITRO:freeNitro",
   "TENORGIFS:tenorGifs", "FIXEMBEDS:fixEmbeds", "PASTELIZE:pastelize", "PLATFORMINDICATORS:platformIndicators", "REVIEWDB:reviewDB",
   "USERNOTIF:userNotif", "ACCOUNTSWITCHER:accountSwitcher", "READALL:readAll", "HIDDENCHANNELS:hiddenChannels", "SERVERINFO:serverInfo",
-  "HIDEBUTTONS:hideButtons", "CUSTOMTHEMES:customThemes", "ICONPACKS:iconPacks", "QUESTS:quests", "BADGES:badges"];
+  "HIDEBUTTONS:hideButtons", "MATERIALYOU:materialYou", "CUSTOMTHEMES:customThemes", "ICONPACKS:iconPacks", "QUESTS:quests", "BADGES:badges"];
 
 function build() {
   if (!fs.existsSync(path.join(UI, "tokens.json"))) throw new Error("Run sh tests/ui/setup.sh first");
