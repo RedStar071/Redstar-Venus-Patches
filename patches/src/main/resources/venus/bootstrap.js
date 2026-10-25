@@ -3227,6 +3227,13 @@
         if (own && settings.gestureOwn === "edit" && gestureEdit(message, channel, chatInputRef)) return;
         gestureReply(message, channel, chatInputRef);
     }
+    // A message Keep deleted messages is keeping is already gone from Discord: a reply to it is refused ("Unknown message")
+    // and an edit fails, and the triple-tap's delete only hides it, which a third tap shouldn't do by surprise.
+    function gestureKeptDeleted(message, channel) {
+        if (!features.noDelete || !deleted.size) return false;
+        const channelId = channel && channel.id || message.channel_id;
+        return deleted.has(deletedKey(channelId, message.id));
+    }
     function doubleTapMessage(orig, self, args) {
         // Only a real double-tap. TalkBack's "Add quick reaction" action (handleMessageAccessibilityAction, 10694) calls this
         // too: it used to reply or edit instead of reacting, and choosing it twice deleted your message. When the handlers
@@ -3234,6 +3241,7 @@
         if (!enabled("gestures") || gesture.handlers && !gesture.tapping) return orig.apply(self, args);
         const message = args[0], channel = args[1], id = message && message.id;
         if (!id) return orig.apply(self, args);
+        if (gestureKeptDeleted(message, channel)) { gestureCancel(); return; }
         const now = Date.now(), ref = gestureChatInputRef(channel);
         // The taps that just deleted a message can land once more before it disappears: ignore them.
         if (gesture.deleted === id && now - gesture.deletedAt < GESTURE_DELETED_MS) { gestureCancel(); return; }
