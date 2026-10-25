@@ -11751,7 +11751,7 @@
     function myPalette(light) {
         const p = myScheme((mySource() || {src:mySeedSource(MY_PRESETS[0][2])}).src);
         return light ? {bg:myTone(p.n1, 98), card:myTone(p.n1, 92), accent:myTone(p.a1, 40), text:myTone(p.n2, 30), strong:myTone(p.n1, 10)} :
-            {bg:myTone(p.n1, 20), card:myTone(p.n1, 28), accent:myTone(p.a1, 80), text:myTone(p.n2, 80), strong:myTone(p.n1, 95)};
+            {bg:myTone(p.n1, 20), card:myTone(p.n1, 28), accent:myTone(p.a1, 45), text:myTone(p.n2, 80), strong:myTone(p.n1, 95)};
     }
     // Asks the extension for the phone's palettes: at start, on this page, and whenever Discord comes back to the front
     // (the wallpaper may have changed meanwhile). Nothing is redrawn when they're the same.

@@ -295,6 +295,22 @@ These keep features working and the project consistent. They say nothing about h
   no errors, `notRestored`, `chainLeaks` or `falseSlotsChanged`, and install and switch times must not get worse. `WHO=KEY` lists the themes where KEY didn't land; `--each` shows
   every theme.
 
+**Material You colors** (#90)
+
+- A separate feature from Custom themes on purpose: it's a system look you turn on once, not a theme you install. It builds
+  a theme spec in memory (`myThemeSpec`) and hands it to the same compiler (`colorThemeEntry`), so it gets journaling,
+  restore and the RootThemeContextProvider re-key for free. An installed custom theme in use wins; the page says so.
+- Gray ramps (NEUTRAL, PRIMARY, PLUM, translucent OPACITY_n) are redrawn at the same HCT tone in the neutral palettes and
+  BLURPLE/BRAND in the accent, so every Discord appearance keeps its own contrast. Status colors are never touched.
+- Filled controls use accent tone 45/40, not Material's pastel 80: Discord draws plain white on brand fills in places no
+  token reaches. Keep any new filled role dark enough for white (at least 4.5:1).
+- The palettes come from `extensions/monet` through `FileModule.getFileHash` (`venus-monet-v1:colors`); Discord's JS
+  never calls it. They're re-read whenever Discord comes to the front and remembered in the settings file
+  (`materialYouSystem`), so a cold start colors Discord before the phone answers. In wallpaper mode nothing is applied
+  until the first answer, so it never flashes the fallback color.
+- `tests/ui` hands Discord's real color tables to the runtime (modules 589/590/591), so themed pages draw in the compiled
+  colors. `monet=0` acts like a phone without wallpaper colors.
+
 **Keeping everything in step**
 
 - The feature's name is **the same in Venus and in Morphe**: the Venus row title, the Morphe patch `name` in
