@@ -308,6 +308,7 @@
         else if (features.badges && badges.legacyGrant) extra.badgesGrant = badges.legacyGrant;
         if (backup.last) extra.lastBackup = backup.last;
         if (starter.done) extra.setupDone = true;
+        if (features.materialYou && materialYou.system) extra.materialYouSystem = materialYou.system;
         if (features.nitroThemes && nitroTheme.preset != null) extra.nitroTheme = {preset:nitroTheme.preset, theme:nitroTheme.theme};
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
     }
@@ -513,6 +514,10 @@
                 }
                 if (typeof loaded.lastBackup === "number" && Number.isFinite(loaded.lastBackup) && !backup.last) backup.last = loaded.lastBackup;
                 if (loaded.setupDone === true) starter.done = true;
+                const savedPalette = loaded.materialYouSystem;
+                if (features.materialYou && !materialYou.system && savedPalette && typeof savedPalette === "object" &&
+                    ["accent1", "accent2", "accent3", "neutral1", "neutral2"].every(k => Array.isArray(savedPalette[k]) && savedPalette[k].length === 13 && savedPalette[k].every(v => /^#[0-9a-f]{6}$/i.test(v))))
+                    materialYou.system = savedPalette;
                 const savedTheme = loaded.nitroTheme;
                 if (features.nitroThemes && nitroTheme.preset == null && savedTheme && typeof savedTheme === "object" && typeof savedTheme.preset === "number" &&
                     Number.isInteger(savedTheme.preset) && savedTheme.preset >= 0 && savedTheme.preset < 1000) {
@@ -11680,7 +11685,12 @@
     // What's used: the wallpaper while the phone shares it, else the color you picked, else Blue.
     function mySource() {
         const choice = settings.materialYouColor;
-        if (choice === "wallpaper") { const sys = mySystemSource(); if (sys) return {src:sys, key:"w:" + JSON.stringify(materialYou.system)}; }
+        if (choice === "wallpaper") {
+            const sys = mySystemSource();
+            if (sys) return {src:sys, key:"w:" + JSON.stringify(materialYou.system)};
+            // Until the phone has answered once, nothing changes, so a cold start never flashes Blue first.
+            if (!materialYou.asked) return null;
+        }
         const preset = MY_PRESETS.find(p => p[0] === choice);
         const hex = preset ? preset[2] : /^#[0-9a-f]{6}$/i.test(choice || "") ? choice.toLowerCase() : MY_PRESETS[0][2];
         return {src:mySeedSource(hex), key:"s:" + hex};
@@ -11696,7 +11706,7 @@
     const MY_ROLES = {
         primary:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]], onPrimary:[["a1", 20], ["a1", 100], ["a1", 20], ["a1", 20]],
         pressed:[["a1", 70], ["a1", 30], ["a1", 70], ["a1", 70]], brandText:[["a1", 80], ["a1", 40], ["a1", 80], ["a1", 80]],
-        mention:[["a1", 90], ["a1", 30], ["a1", 90], ["a1", 90]], secondary:[["a2", 30], ["a2", 90], ["a2", 25], ["a2", 30]]
+        mention:[["a1", 90], ["a1", 30], ["a1", 90], ["a1", 90]], secondary:[["a2", 40], ["a2", 88], ["a2", 30], ["a2", 36]]
     };
     const MY_SEMANTIC = {
         primary:["BACKGROUND_BRAND", "CONTROL_PRIMARY_BACKGROUND_DEFAULT", "SWITCH_BACKGROUND_SELECTED_DEFAULT", "CHECKBOX_BACKGROUND_SELECTED_DEFAULT",
@@ -11713,7 +11723,9 @@
     // The theme Custom themes' compiler applies, built once per palette, color and tint.
     function myThemeSpec() {
         if (!enabled("materialYou") || !customThemes.origRaw) return null;
-        const source = mySource(), specKey = source.key + "|" + settings.materialYouTint;
+        const source = mySource();
+        if (!source) return null;
+        const specKey = source.key + "|" + settings.materialYouTint;
         if (materialYou.spec && materialYou.specKey === specKey) return materialYou.spec;
         const p = myScheme(source.src), rawColors = {}, semanticColors = {}, orig = customThemes.origRaw;
         for (const name in orig) {
@@ -11735,7 +11747,7 @@
     }
     // A small palette for the preview tiles, as Discord's Light or Dark would look.
     function myPalette(light) {
-        const p = myScheme(mySource().src);
+        const p = myScheme((mySource() || {src:mySeedSource(MY_PRESETS[0][2])}).src);
         return light ? {bg:myTone(p.n1, 98), card:myTone(p.n1, 92), accent:myTone(p.a1, 40), text:myTone(p.n2, 30), strong:myTone(p.n1, 10)} :
             {bg:myTone(p.n1, 20), card:myTone(p.n1, 28), accent:myTone(p.a1, 80), text:myTone(p.n2, 80), strong:myTone(p.n1, 95)};
     }
@@ -11749,8 +11761,12 @@
             const next = parsed && Array.isArray(parsed.accent1) ? {accent1:parsed.accent1, accent2:parsed.accent2, accent3:parsed.accent3, neutral1:parsed.neutral1, neutral2:parsed.neutral2} : null;
             const changed = JSON.stringify(next) !== JSON.stringify(materialYou.system);
             materialYou.system = next;
-            if (changed && enabled("materialYou")) customThemesApply();
-        }).catch(() => {}).then(() => { materialYou.asking = false; materialYou.asked = true; notify("materialYou"); });
+            if (changed) save();
+        }).catch(() => {}).then(() => {
+            materialYou.asking = false; materialYou.asked = true;
+            if (enabled("materialYou")) customThemesApply();
+            notify("materialYou");
+        });
     }
     function myStart() {
         if (!features.materialYou) return;
