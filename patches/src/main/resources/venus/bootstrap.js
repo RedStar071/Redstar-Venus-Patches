@@ -1848,7 +1848,8 @@
         // ~ | # too: a sticker called ||surprise|| or ~~old~~ turned the link text into a spoiler or strikethrough.
         return settings.hyperlinks && name ? "[" + String(name).replace(/([\\\[\]()*_`<>@~|#])/g, "\\$1").replace(/[\r\n]/g, " ") + "](" + uri + ")" : uri;
     }
-    function emojiMessage(message, channelId) {
+    // anyLength: Send long messages splits the result, so the longer links may take it past the limit.
+    function emojiMessage(message, channelId, anyLength) {
         if (!enabled("emojis") || !message || typeof message.content !== "string" || !message.content.includes("<") || !emojiStore || !channelStore) return message;
         const user = currentUser(), channel = channelStore.getChannel(channelId);
         if (!user || !channel) return message;
@@ -1864,7 +1865,7 @@
             const uri = "https://cdn.discordapp.com/emojis/" + id + (animation || emoji.animated ? ".gif" : ".webp") + "?size=48&quality=lossless";
             return shareLink(name, uri);
         });
-        if (!converted.size || content.length > (user.premiumType === 2 ? 4000 : 2000)) return message;
+        if (!converted.size || !anyLength && content.length > (user.premiumType === 2 ? 4000 : 2000)) return message;
         const next = Object.assign({}, message, { content });
         // Keep unrelated invalid emoji diagnostics intact.
         for (const key of ["invalidEmojis", "validNonShortcutEmojis"]) if (Array.isArray(message[key]))
@@ -8989,13 +8990,23 @@
         return next;
     }
     function splitSend(orig, self, args) {
-        const channelId = args[0], message = args[1], waitForReady = args[2], options = args[3];
-        // Hot path: every send that fits goes straight through after one length check.
-        if (!message || typeof message.content !== "string" || message.content.length <= 2000 || !enabled("splitMessages")) return orig.apply(self, args);
+        const channelId = args[0], waitForReady = args[2], options = args[3];
+        let message = args[1];
+        // Hot path: every send that fits goes straight through after one length check (and, with Nitro links, one "<" check:
+        // a message just under the limit can grow past it once its Nitro emojis become links).
+        if (!message || typeof message.content !== "string" || message.content.length <= 2000 && (!features.freeNitro || message.content.indexOf("<") < 0) ||
+            !enabled("splitMessages")) return orig.apply(self, args);
         // Never split scheduled messages: createScheduledMessage (297457) schedules a single server payload.
         if (options && options.scheduledTimestamp != null) return orig.apply(self, args);
+        // Nitro emojis become links before splitting, so a part never grows past the limit after it's cut. Each part used to be
+        // converted on its own, and one the links made too long was sent as written: its Nitro emojis showed as :name: text.
+        if (features.freeNitro) message = emojiMessage(message, channelId, true);
         const limit = messageLimit();
-        if (message.content.length <= limit) return orig.apply(self, args);
+        if (message.content.length <= limit) {
+            if (message === args[1]) return orig.apply(self, args);
+            const next = Array.from(args); next[1] = message;
+            return orig.apply(self, next);
+        }
         const chunks = splitContent(message.content, limit);
         if (!chunks || chunks.length < 2) return orig.apply(self, args);
         const generation = split.generation, author = currentUser(), authorId = author && author.id;
