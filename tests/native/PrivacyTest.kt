@@ -357,6 +357,28 @@ fun main(args: Array<String>) {
         checkBranches(bridge, "readAsset bridge")
         check(try { languageBridge(bridge); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second guard in readAsset was accepted" }
     }
+    // The Material You bridge owns getFileHash(uri, algorithm, double, promise): URI p1, Promise p5. Discord's JS never calls it.
+    run {
+        val original = methods.single { it.definingClass == FILE_MODULE && it.name == "getFileHash" && it.returnType == "V" &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("Ljava/lang/String;", "Ljava/lang/String;", "D", PROMISE) }
+        val bridge = MutableMethod(original)
+        materialYouBridge(bridge)
+        val code = bridge.implementation!!.instructions.toList()
+        check(bridge.implementation!!.registerCount == original.implementation!!.registerCount) { "getFileHash bridge changed the register count" }
+        check(code.size == original.implementation!!.instructions.count() + MATERIAL_YOU_BRIDGE_SIZE) { "getFileHash bridge is ${code.size - original.implementation!!.instructions.count()} instructions" }
+        check(code.drop(MATERIAL_YOU_BRIDGE_SIZE).map { it.opcode } == original.implementation!!.instructions.map { it.opcode }) { "Discord's own getFileHash changed" }
+        check(code[MATERIAL_YOU_BRIDGE_SIZE - 2].opcode == Opcode.RETURN_VOID && code[MATERIAL_YOU_BRIDGE_SIZE - 1].opcode == Opcode.NOP)
+        check(((code[0] as ReferenceInstruction).reference as StringReference).string == "venus-monet-v1:")
+        val parameters = bridge.implementation!!.registerCount - 6
+        for (instruction in code.take(MATERIAL_YOU_BRIDGE_SIZE)) if (instruction is OneRegisterInstruction) check(instruction.registerA in 0..1) { "getFileHash bridge writes outside v0-v1" }
+        check(code.take(MATERIAL_YOU_BRIDGE_SIZE).filterIsInstance<FiveRegisterInstruction>().all { ins ->
+            listOf(ins.registerC, ins.registerD, ins.registerE).take(ins.registerCount).all { it == 0 || it >= parameters } }) { "getFileHash bridge reads a clobbered local" }
+        val dispatch = code.take(MATERIAL_YOU_BRIDGE_SIZE).filterIsInstance<FiveRegisterInstruction>().single { ins ->
+            ((ins as ReferenceInstruction).reference as MethodReference).definingClass == SYSTEM_COLORS }
+        check(dispatch.registerC == parameters + 1 && dispatch.registerE == parameters + 5) { "getFileHash bridge passes the wrong URI or Promise" }
+        checkBranches(bridge, "getFileHash bridge")
+        check(try { materialYouBridge(bridge); false } catch (_: app.morphe.patcher.patch.PatchException) { true }) { "A second guard in getFileHash was accepted" }
+    }
     fun resolveHost(ref: MethodReference): Boolean = methods.any {
         it.definingClass == ref.definingClass && it.name == ref.name && it.returnType == ref.returnType &&
             it.parameterTypes.map { parameter -> parameter.toString() } == ref.parameterTypes.map { parameter -> parameter.toString() } && it.accessFlags and 1 != 0
