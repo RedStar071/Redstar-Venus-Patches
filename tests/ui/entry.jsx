@@ -67,7 +67,12 @@ global.__d = (factory, id) => { const module = { exports: {} }; defined[id] = mo
 let registry = null;
 // A green wallpaper's Android 12 palettes, for Material You colors (monet=0 acts like a phone without them).
 const MONET = JSON.stringify({"accent1":["#ffffff","#f6ffef","#c9ffbe","#b8f1ad","#9cd593","#82b97a","#689e62","#4f834a","#376934","#1e511e","#023909","#002203","#000000"],"accent2":["#ffffff","#f6ffef","#e4f6dc","#d6e8ce","#baccb3","#9fb098","#85957f","#6b7c66","#53634f","#3b4b38","#253423","#111f0f","#000000"],"accent3":["#ffffff","#f4feff","#caf9fe","#bcebf0","#a0cfd4","#85b3b8","#6b989d","#527e83","#38656a","#1e4d52","#00363b","#002022","#000000"],"neutral1":["#ffffff","#fafdf4","#eff2e9","#e0e4da","#c4c8bf","#a9aca4","#8e928a","#747871","#5b6058","#444841","#2d322b","#191d17","#000000"],"neutral2":["#ffffff","#f8fef1","#edf3e6","#dee5d8","#c2c8bd","#a7ada2","#8c9388","#73796f","#5a6057","#424940","#2c322a","#171d16","#000000"]});
-files.getFileHash = uri => Promise.resolve(/^venus-monet-v1:/.test(uri) && q.get("monet") !== "0" ? MONET : "");
+// Native color tables Material You sends ("map:..." / "off") are kept for inspection in window.__monet.
+window.__monet = [];
+files.getFileHash = uri => {
+  if (/^venus-monet-v1:(map:|off)/.test(uri)) { window.__monet.push(uri.slice(15)); return Promise.resolve("on"); }
+  return Promise.resolve(/^venus-monet-v1:colors$/.test(uri) && q.get("monet") !== "0" ? MONET : "");
+};
 let rerender = () => {};
 function colorTables() {
   const d = colorsAll;

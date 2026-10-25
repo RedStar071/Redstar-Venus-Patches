@@ -59,6 +59,8 @@ function build() {
     await page.waitForTimeout(100);
     const out = path.join(UI, "shots", name + ".png");
     await page.screenshot({ path: out, fullPage: true });
+    // MONET=1 also saves the native color tables Material You sent, next to the screenshot.
+    if (process.env.MONET) fs.writeFileSync(out.replace(/\.png$/, ".monet.json"), JSON.stringify(await page.evaluate(() => window.__monet || [])));
     console.log(path.relative(ROOT, out) + (logs.length ? "\n  " + [...new Set(logs)].slice(0, 8).join("\n  ") : ""));
     await page.close();
   }
