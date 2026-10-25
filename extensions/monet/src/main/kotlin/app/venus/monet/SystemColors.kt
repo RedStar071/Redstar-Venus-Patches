@@ -30,15 +30,16 @@ object SystemColors {
         if (Build.VERSION.SDK_INT < 31 || context == null) return ""
         val res = context.resources
         val out = StringBuilder(1024).append('{')
-        for (p in palettes.indices) {
+        for (p in 0 until palettes.size) {
             if (p > 0) out.append(',')
             out.append('"').append(palettes[p]).append("\":[")
-            for (s in shades.indices) {
+            for (s in 0 until shades.size) {
                 val id = res.getIdentifier("system_" + palettes[p] + "_" + shades[s], "color", "android")
                 if (id == 0) return ""
                 val color = res.getColor(id, null) and 0xffffff
                 if (s > 0) out.append(',')
-                out.append("\"#").append(String.format("%06x", color)).append('"')
+                val hex = Integer.toHexString(color or 0x1000000).substring(1)
+                out.append("\"#").append(hex).append('"')
             }
             out.append(']')
         }

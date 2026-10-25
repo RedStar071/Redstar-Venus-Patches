@@ -73,7 +73,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -866,5 +866,55 @@ val badgeCompleter = bytecodePatch(
                 parameters = listOf("Lokhttp3/Interceptor\$Chain;")
             ).method)
         }
+    }
+}
+
+internal const val SYSTEM_COLORS = "Lapp/venus/monet/SystemColors;"
+/** Instructions [materialYouBridge] adds before Discord's own getFileHash code, counting the nop its label lands on. */
+internal const val MATERIAL_YOU_BRIDGE_SIZE = 11
+
+/**
+ * Lets Venus read the phone's wallpaper palettes. Discord's JS never calls getFileHash, so a request with the private
+ * prefix goes to Venus and anything else still runs Discord's code. No other Venus guard uses this method.
+ * getFileHash(uri, algorithm, double, promise): p1 = uri, p5 = Promise; 15 registers, 6 of them parameters.
+ */
+internal fun materialYouBridge(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;", "Ljava/lang/String;", "D", PROMISE) || method.returnType != "V" ||
+        (method.implementation?.registerCount ?: 0) - 6 < 2)
+        throw PatchException("FileModule.getFileHash ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        const-string v0, "venus-monet-v1:"
+        invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+        move-result v0
+        if-eqz v0, :venus_file_hash
+        invoke-virtual {p0}, Lcom/facebook/react/bridge/ReactContextBaseJavaModule;->getReactApplicationContext()Lcom/facebook/react/bridge/ReactApplicationContext;
+        move-result-object v0
+        invoke-static {p1, v0, p5}, $SYSTEM_COLORS->dispatch(Ljava/lang/String;Landroid/content/Context;$PROMISE)Z
+        move-result v1
+        if-eqz v1, :venus_file_hash
+        return-void
+        :venus_file_hash
+        nop
+    """)
+}
+
+@Suppress("unused")
+val materialYou = bytecodePatch(
+    name = "Material You colors",
+    description = "Colors Discord to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    extendWith("extensions/monet.mpe")
+    execute {
+        additionalSelections += "materialYou"
+        materialYouBridge(Fingerprint(
+            definingClass = FILE_MODULE,
+            name = "getFileHash",
+            returnType = "V",
+            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "D", PROMISE)
+        ).method)
     }
 }
