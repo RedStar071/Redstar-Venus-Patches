@@ -308,8 +308,22 @@ These keep features working and the project consistent. They say nothing about h
   never calls it. They're re-read whenever Discord comes to the front and remembered in the settings file
   (`materialYouSystem`), so a cold start colors Discord before the phone answers. In wallpaper mode nothing is applied
   until the first answer, so it never flashes the fallback color.
+- **Native views follow too.** The chat list, voice overlay, reactions, notifications and the window background are drawn by
+  Discord's Android code, and every theme color they use (672 per appearance) goes through
+  `ColorUtilsKt.applySaturationFactor(I)I` via `getColorCompat`. A 5-instruction guard there calls
+  `SystemColors.remap` while `SystemColors.enabled`; the four views that call `Context.getColor` directly
+  (`MATERIAL_YOU_DIRECT_READS`: CTA and forum buttons, voice message progress) get the same swap after each read.
+- The swap table is JS's own result: every RawColors value the spec changed, as `rrggbbRRGGBB` pairs sorted by Discord's
+  color (`myNativeTable`, solid grays before translucent ones), sent as `venus-monet-v1:map:...` or `venus-monet-v1:off`
+  whenever `customThemesApply` changes the palette. Android's color resources hold the same values as RawColors, so this
+  needs no second color engine. Alpha is kept; status colors aren't in the table, so they stay Discord's.
+- The native side saves the table (`venus-monet.txt`) and loads it right after `super.onCreate()` (only while the settings
+  file still says `"materialYou":true`), so the chat is colored from the first frame. On a change it rebuilds the cached
+  theme objects in `ThemeManager.themes` and copies their fresh lazy colors into the objects views already hold, reruns
+  `updateActivityTheming`, and rebinds every RecyclerView, so the open chat recolors without a restart.
 - `tests/ui` hands Discord's real color tables to the runtime (modules 589/590/591), so themed pages draw in the compiled
-  colors. `monet=0` acts like a phone without wallpaper colors.
+  colors. `monet=0` acts like a phone without wallpaper colors; `MONET=1 node tests/ui/shot.cjs ...` also saves the native
+  tables the page sent next to the screenshot.
 
 **Keeping everything in step**
 

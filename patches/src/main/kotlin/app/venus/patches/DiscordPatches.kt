@@ -974,7 +974,7 @@ internal fun readMaterialYouColors(method: app.morphe.patcher.util.proxy.mutable
 @Suppress("unused")
 val materialYou = bytecodePatch(
     name = "Material You colors",
-    description = "Colors all of Discord, chat included, to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
+    description = "Colors Discord to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
