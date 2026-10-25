@@ -19,7 +19,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 589 | `../discord_common/js/packages/tokens/colors/generated/native/generated-definitions.tsx` | _private, SemanticColors | SemanticColors |
 | 590 | `../discord_common/js/packages/tokens/colors/generated/native/experiment-definitions.tsx` | _private, SemanticColorExperiments | SemanticColorExperiments (Custom themes: experiment overrides win over SemanticColors) |
 | 591 | `../discord_common/js/packages/tokens/colors/generated/raw-color-definitions.tsx` | _private, RawColors | RawColors |
-| 1085 | - | A11Y_RUNTIME_VIOLATION, ACCOUNT_SCHEDULED_FOR_DELETION | Discord Constants |
+| 1085 | - | A11Y_RUNTIME_VIOLATION, ACCOUNT_SCHEDULED_FOR_DELETION, MessageTypesSets | Discord Constants |
 | 1095 | `modules/user_settings/UserSettingsConstants.tsx` | UserSettingsDelay | UserSettingsConstants (Unlock Nitro themes) |
 | 1096 | `../discord_common/js/shared/Constants.tsx` | PRIMARY_NORMAL, PRIMARY_NORMAL_ITALIC, PRIMARY_MEDIUM | Permissions constant |
 | 1111 | `../discord_common/js/shared/lib/TokenManager.tsx` | init, getAnalyticsToken, getToken | TokenManager |

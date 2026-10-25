@@ -3108,7 +3108,7 @@
     // the double-tap. A second double-tap (tap four) still counts too.
     const GESTURE_TRIPLE_MS = 650, GESTURE_PAIR_MS = 1500, GESTURE_DELETED_MS = 3000;
     const gesture = {timer:undefined, pending:null, channel:null, chatInputRef:null, pendingAt:0, deleted:null, deletedAt:0, handlers:null, tapping:0,
-        replyFn:null, editFn:null, canEditFn:null, canReplyFn:null};
+        replyFn:null, editFn:null, canEditFn:null, canReplyFn:null, typeSets:null};
     function gestureCancel() { if (gesture.timer !== undefined && global.clearTimeout) global.clearTimeout(gesture.timer); gesture.timer = undefined; gesture.pending = null; gesture.channel = null; gesture.chatInputRef = null; }
     function gestureOwn(message) {
         const user = userStore && userStore.getCurrentUser();
@@ -3158,8 +3158,17 @@
         const ref = chatInputRef !== undefined ? chatInputRef : gestureChatInputRef(channel);
         try { gestureHaptic(); edit(message, channel, ref, "message_swipe", true); return true; } catch (_) { return false; }
     }
+    // Only what Discord's own hold menu offers Delete for (LongPressMessageActionSheet, 9675): yours, and not a type Discord
+    // keeps (MessageTypesSets.UNDELETABLE: calls, group DM changes, a thread's starter message...). The third tap on one of
+    // those used to send a delete the server refused, after waiting and buzzing for it.
+    function gestureCanDelete(message) {
+        if (!message || message.state && message.state !== "SENT" || !gestureOwn(message)) return false;
+        const sets = gesture.typeSets || (gesture.typeSets = inspectedExport(1085, "MessageTypesSets"));
+        try { if (sets && sets.UNDELETABLE && typeof sets.UNDELETABLE.has === "function" && sets.UNDELETABLE.has(message.type)) return false; } catch (_) {}
+        return true;
+    }
     function gestureDelete(message, channel) {
-        if (message && message.state && message.state !== "SENT") return false;
+        if (!gestureCanDelete(message)) return false;
         const actions = msgActions || inspectedExport(7174, "default");
         if (!actions || typeof actions.deleteMessage !== "function") return false;
         // Discord's own delete, with QuickDelete and NoDelete still applying to it.
@@ -3229,13 +3238,13 @@
         // The taps that just deleted a message can land once more before it disappears: ignore them.
         if (gesture.deleted === id && now - gesture.deletedAt < GESTURE_DELETED_MS) { gestureCancel(); return; }
         if (gesture.pending && gesture.pending.id === id && now - gesture.pendingAt < GESTURE_PAIR_MS) {
-            if (settings.gestureTripleDelete && gestureOwn(message) && (!message.state || message.state === "SENT")) { gesture.channel = channel; gestureDeletePending(now); return; }
+            if (settings.gestureTripleDelete && gestureCanDelete(message)) { gesture.channel = channel; gestureDeletePending(now); return; }
             gestureCancel(); gestureAct(message, channel, ref);
             return;
         }
         gestureCancel();
         // Nothing waits for a third tap when it couldn't delete anything (including unsent messages).
-        if (!settings.gestureTripleDelete || !gestureOwn(message) || message.state && message.state !== "SENT") { gestureAct(message, channel, ref); return; }
+        if (!settings.gestureTripleDelete || !gestureCanDelete(message)) { gestureAct(message, channel, ref); return; }
         gesture.pending = message; gesture.channel = channel; gesture.chatInputRef = ref; gesture.pendingAt = now;
         gesture.timer = later(() => { gesture.timer = undefined; const waiting = gesture.pending, waitingChannel = gesture.channel, waitingRef = gesture.chatInputRef; gesture.pending = null; gesture.channel = null; gesture.chatInputRef = null;
             // Switching gestures off while it waited used to still open the editor (or reply) a moment later. So did leaving the
