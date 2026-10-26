@@ -12240,7 +12240,7 @@
             const name = names[i];
             if (!owns(origRaw, name)) continue;
             const from = hex6(origRaw[name]), to = hex6(raw[name]);
-            if (from && to && from !== to && !pairs.has(from)) pairs.set(from, to);
+            if (from && to && from !== to && from !== "ffffff" && from !== "000000" && !pairs.has(from)) pairs.set(from, to);
         }
         return Array.from(pairs.keys()).sort((a, b) => parseInt(a, 16) - parseInt(b, 16)).slice(0, 1024).map(k => k + pairs.get(k)).join("");
     }
