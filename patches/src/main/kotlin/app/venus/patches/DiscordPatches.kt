@@ -45,6 +45,7 @@ private var dashlessSelected = false
 private var favouriteAnythingSelected = false
 private var freeNitroSelected = false
 private var questAgentGuarded = false
+private var messageGutterGuarded = false
 private val additionalSelections = mutableSetOf<String>()
 internal val discordBundleGuard = rawResourcePatch {
     execute { HbcPrivacy.verifyOriginal(get("assets/index.android.bundle")) }
@@ -61,6 +62,7 @@ private val runtimeAssets = rawResourcePatch {
         favouriteAnythingSelected = false
         freeNitroSelected = false
         questAgentGuarded = false
+        messageGutterGuarded = false
     }
     finalize {
         val bootstrap = object {}.javaClass.getResourceAsStream("/venus/bootstrap.js")
@@ -73,7 +75,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -719,15 +721,17 @@ val iconPacks = bundledPlugin("iconPacks", "Icon packs",
 
 internal const val HIGHLIGHT_DRAWER = "Lcom/discord/chat/presentation/message/decorations/HighlightedMessageDrawer;"
 internal const val CHAT_R_DIMEN = "Lcom/discord/chat/R\$dimen;"
+internal const val BULK_DELETE_DRAWER = "Lapp/venus/chat/BulkDeleteDrawer;"
 /** Instructions [scaleMessageGutterWidth] adds before Discord's own drawHighlight code, counting the nop its label lands on. */
-internal const val MESSAGE_GUTTER_GUARD_SIZE = 25
+internal const val MESSAGE_GUTTER_GUARD_SIZE = 35
 
 /**
  * Discord's native HighlightedMessageDrawer sets gutterWidth once from R.dimen.message_gutter_width (2dp)
- * in its constructor, and paints the left bar with gutterPaintColor. When Message highlights encodes a width
- * multiplier (2x..8x) in gutterPaintColor's alpha byte (256 - multiplier = 254..248), this guard restores full
- * 0xFF alpha on gutterPaintColor and scales gutterWidth by that multiplier; normal 0xFF colors reset gutterWidth
- * to 1x so toggling or changing thickness updates every row live without restarting Discord (#60).
+ * in its constructor, and paints the left bar with gutterPaintColor.
+ * - Message highlights encodes a width multiplier (2x..8x) in gutterPaintColor's alpha byte (`code = 256 - alpha` in 2..8).
+ * - Bulk delete messages encodes a right-side selection circle in gutterPaintColor's alpha byte (`code = 256 - alpha` in 16..40,
+ *   where bit 5 is selected vs unselected and `code & 15` is the optional left-bar width multiplier 0..8).
+ * Normal 0xFF colors reset gutterWidth to 1x so toggling or changing thickness updates every row live without restarting Discord (#60, #94).
  * 12 registers, 5 of them parameters (p0..p4 = v7..v11): v0-v2 are free until Discord's first const-string.
  */
 internal fun scaleMessageGutterWidth(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
@@ -745,10 +749,22 @@ internal fun scaleMessageGutterWidth(method: app.morphe.patcher.util.proxy.mutab
         move-result v0
         ushr-int/lit8 v1, v0, 0x18
         rsub-int v1, v1, 0x100
+        const/16 v2, 0x10
+        if-lt v1, v2, :venus_gutter_check_mult
+        const/16 v2, 0x28
+        if-gt v1, v2, :venus_gutter_default
+        invoke-static {p1, p2, v1}, $BULK_DELETE_DRAWER->drawCircle(Landroid/graphics/Canvas;Landroid/view/View;I)I
+        move-result v1
+        if-nez v1, :venus_gutter_restore_color
+        const/4 v0, 0x0
+        iput-object v0, p0, $HIGHLIGHT_DRAWER->gutterPaintColor:Ljava/lang/Integer;
+        goto :venus_gutter_done
+        :venus_gutter_check_mult
         const/4 v2, 0x2
         if-lt v1, v2, :venus_gutter_default
         const/16 v2, 0x8
         if-gt v1, v2, :venus_gutter_default
+        :venus_gutter_restore_color
         const/high16 v2, -0x1000000
         or-int/2addr v0, v2
         invoke-static {v0}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
@@ -778,14 +794,18 @@ val messageHighlights = bytecodePatch(
     compatibleWith(discord)
     section(PLUGINS)
     dependsOn(venusSettings)
+    extendWith("extensions/chat.mpe")
     execute {
         additionalSelections += "messageHighlight"
-        scaleMessageGutterWidth(Fingerprint(
-            definingClass = HIGHLIGHT_DRAWER,
-            name = "drawHighlight",
-            returnType = "V",
-            parameters = listOf("Landroid/graphics/Canvas;", "Landroid/view/View;", "I", "I")
-        ).method)
+        if (!messageGutterGuarded) {
+            messageGutterGuarded = true
+            scaleMessageGutterWidth(Fingerprint(
+                definingClass = HIGHLIGHT_DRAWER,
+                name = "drawHighlight",
+                returnType = "V",
+                parameters = listOf("Landroid/graphics/Canvas;", "Landroid/view/View;", "I", "I")
+            ).method)
+        }
     }
 }
 
@@ -1008,3 +1028,26 @@ val materialYou = bytecodePatch(
 @Suppress("unused")
 val hideBlockedMessages = bundledPlugin("hideBlocked", "Hide blocked or ignored messages",
     "Removes the \"blocked messages\" and \"ignored messages\" rows from chat, and can hide replies to them too. From Rain.")
+
+@Suppress("unused")
+val bulkDelete = bytecodePatch(
+    name = "Bulk delete messages",
+    description = "Select multiple messages in chat and delete them all at once."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    extendWith("extensions/chat.mpe")
+    execute {
+        additionalSelections += "bulkDelete"
+        if (!messageGutterGuarded) {
+            messageGutterGuarded = true
+            scaleMessageGutterWidth(Fingerprint(
+                definingClass = HIGHLIGHT_DRAWER,
+                name = "drawHighlight",
+                returnType = "V",
+                parameters = listOf("Landroid/graphics/Canvas;", "Landroid/view/View;", "I", "I")
+            ).method)
+        }
+    }
+}

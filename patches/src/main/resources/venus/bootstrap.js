@@ -49,6 +49,7 @@
     if (features.fixEmbeds) selectModules([1390, 7174]);
     if (features.tenorGifs) selectModules([1295, 9733]);
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
+    if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     const revision = "1.18.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -70,7 +71,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -87,7 +88,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -488,6 +489,8 @@
         if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
         if (features.hideBlocked && featureFor(key) === "hideBlocked") hideBlockedChanged();
+        if (features.bulkDelete && key === "bulkDelete" && !value) bulkDeleteCancel();
+        if (features.bulkDelete && key === "bulkDeleteIncludeCached" && bulkDelete.active) bulkDeleteRedrawChannel(bulkDelete.channelId);
         if (features.quests || features.badges || features.userNotif) backgroundSync();
         return true;
     }
@@ -876,7 +879,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -911,7 +914,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -952,6 +955,7 @@
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
+        bulkDelete:["Select Messages", "Select all", "Delete", "Clear kept deleted messages", "Include kept deleted messages", "Ask before deleting"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
         let out = String(text || "").toLowerCase();
@@ -1280,6 +1284,7 @@
         };
         // Messages
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
+        withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
@@ -3223,14 +3228,22 @@
             const tap = handlers && handlers.handleTapMessage;
             if (typeof tap === "function") handlers.handleTapMessage = function (event) {
                 gesture.handlers = handlers;
+                try { if (features.bulkDelete && bulkDeleteInterceptTap(event)) return undefined; } catch (_) {}
                 try { if (gestureTap(event)) return undefined; } catch (_) {}
                 return tap.apply(this, arguments);
             };
             const dbl = handlers && handlers.handleDoubleTapMessage;
-            if (typeof dbl === "function") handlers.handleDoubleTapMessage = function () {
+            if (typeof dbl === "function") handlers.handleDoubleTapMessage = function (event) {
                 gesture.handlers = handlers;
+                try { if (features.bulkDelete && bulkDeleteInterceptTap(event)) return undefined; } catch (_) {}
                 gesture.tapping++;
                 try { return dbl.apply(this, arguments); } finally { gesture.tapping--; }
+            };
+            const hold = handlers && handlers.handleLongPressMessage;
+            if (typeof hold === "function") handlers.handleLongPressMessage = function (event) {
+                gesture.handlers = handlers;
+                try { if (features.bulkDelete && bulkDeleteInterceptTap(event)) return undefined; } catch (_) {}
+                return hold.apply(this, arguments);
             };
             return handlers;
         }
@@ -6156,7 +6169,7 @@
     messageRow.call1 = (orig, self, row) => messageRowResult(orig.call(self, row), row);
     function messageRowResult(result, row) {
         if (!result || !row || row.rowType !== 1 || !result.message) return result;
-        const pastelOn = enabled("pastelize"), translateOn = enabled("translate"), noDeleteOn = enabled("noDelete"), highlightOn = enabled("messageHighlight");
+        const pastelOn = enabled("pastelize"), translateOn = enabled("translate"), noDeleteOn = enabled("noDelete"), highlightOn = enabled("messageHighlight"), bulkOn = features.bulkDelete && bulkDelete.active;
         let message = result.message;
         if (pastelOn) message = pastelMessage(message,row.message);
         if (features.pastelize && message.referencedMessage && message.referencedMessage.message) {
@@ -6164,10 +6177,11 @@
             if (reply !== message.referencedMessage.message) message = Object.assign({},message,{referencedMessage:Object.assign({},message.referencedMessage,{message:reply})});
         }
         let next = message === result.message ? result : Object.assign({},result,{message});
-        if (!translateOn && !features.translate && !(noDeleteOn && (edits.size || deleted.size)) && !highlightOn && !features.messageHighlight) return next;
+        if (!translateOn && !features.translate && !(noDeleteOn && (edits.size || deleted.size)) && !highlightOn && !features.messageHighlight && !bulkOn && !features.bulkDelete) return next;
         const source = row.message || message;
         const channelId = source.channel_id || source.channelId || message.channelId;
         const id = source.id || message.id;
+        if (features.bulkDelete) bulkDeleteRemember(channelId, id, source);
         // Before edit history, so the crossed-out old versions above it stay as they were written.
         if (translateOn) {
             let shown = translateRow(next.message, source, channelId, id);
@@ -6195,11 +6209,23 @@
             const existing = next.backgroundHighlight;
             // A custom color or brightness repaints the row; Discord's own yellow at Normal keeps its own highlight.
             if (isMentionRow && (settings.messageHighlightPingColor !== "default" || settings.messageHighlightBrightness !== 50)) {
-                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f0b232", mult, highlightAlpha(settings.messageHighlightBrightness));
+                const custom = highlightCustomPair(settings.messageHighlightPingColor, "#f23f43" === settings.messageHighlightPingColor ? "#f23f43" : "#f0b232", mult, highlightAlpha(settings.messageHighlightBrightness));
                 if (custom) next = Object.assign({},next,{backgroundHighlight:custom});
             } else if (existing && typeof existing.gutterColor === "number" && mult > 1) {
                 next = Object.assign({},next,{backgroundHighlight:Object.assign({},existing,{gutterColor:highlightEncodeGutter(existing.gutterColor, mult)})});
             }
+        }
+        if (bulkOn && String(channelId) === String(bulkDelete.channelId) && RN && typeof RN.processColor === "function" &&
+            bulkDeleteCanSelect(source, channelId, isDeletedRow)) {
+            const isSelected = bulkDelete.selected.has(String(id));
+            const existing = next.backgroundHighlight;
+            const hasGutter = !!(existing && typeof existing.gutterColor === "number");
+            const code = (isSelected ? 32 : 16) + (hasGutter ? Math.max(1, Math.min(8, Math.floor(mult))) : 0);
+            const baseGutter = hasGutter ? existing.gutterColor : (highlightProcess("#5865f2") || 0xff5865f2);
+            const gutterColor = ((256 - code) << 24) | (baseGutter & 0x00ffffff);
+            const selBg = isSelected ? highlightProcess("#5865f224") : null;
+            const backgroundColor = isSelected && selBg != null ? selBg : (existing && existing.backgroundColor != null ? existing.backgroundColor : 0);
+            next = Object.assign({}, next, {backgroundHighlight:{backgroundColor, gutterColor}});
         }
         return next;
     }
@@ -13041,6 +13067,615 @@
         ];
         return settingsBody(ui, groups);
     }
+    // Bulk delete messages (#94): hold any message you can delete and tap Select Messages right under Delete Message.
+    // Every deletable message in the chat (your own messages, other people's messages in servers where you have Manage
+    // Messages, and cached deleted messages from Keep deleted messages) gets a native circle on its right side; tapping
+    // a message fills the circle in Blurple with a white checkmark and updates the floating bottom bar.
+    const bulkDelete = {
+        active:false,
+        channelId:null,
+        selected:new Set(),
+        deleting:false,
+        progress:0,
+        total:0,
+        deletedSession:0,
+        recent:new Map(),
+        managePermission:undefined,
+        subscribed:false
+    };
+    function bulkDeleteInit(flux) {
+        if (bulkDelete.subscribed || !flux || typeof flux.subscribe !== "function") return;
+        bulkDelete.subscribed = true;
+        try {
+            flux.subscribe("CHANNEL_SELECT", event => {
+                const nextId = event && (event.channelId || event.id);
+                if (bulkDelete.active && nextId && String(nextId) !== String(bulkDelete.channelId)) bulkDeleteCancel();
+            });
+            flux.subscribe("LOGOUT", () => { if (bulkDelete.active) bulkDeleteCancel(); });
+        } catch (_) {}
+    }
+    function bulkDeleteCanManage(channelId) {
+        if (!channelId) return false;
+        const channel = receivedChannel(channelId);
+        if (!channel || !channel.guild_id || channel.type === 1 || channel.type === 3) return false;
+        let perm = bulkDelete.managePermission;
+        if (perm === undefined) {
+            const p = inspectedExport(1085, "Permissions");
+            perm = bulkDelete.managePermission = p && p.MANAGE_MESSAGES != null ? p.MANAGE_MESSAGES : null;
+        }
+        if (perm == null) return false;
+        const store = permissions || (permissions = inspectedExport(4750, "default") || inspectedExport(4750));
+        if (!store || typeof store.can !== "function") return false;
+        try { return !!(permissionsCanOrig ? permissionsCanOrig(perm, channel) : store.can(perm, channel)); } catch (_) { return false; }
+    }
+    function bulkDeleteCanSelect(message, channelId, isCachedDeleted) {
+        if (!message || typeof message !== "object") return false;
+        const id = message.id;
+        if (!id) return false;
+        const chId = channelId || message.channel_id || message.channelId;
+        if (isCachedDeleted === undefined && chId && features.noDelete && enabled("noDelete") && deleted.size) {
+            const bucket = deletedByChannel.get(chId);
+            isCachedDeleted = !!(bucket && bucket.has(deletedKey(chId, id)));
+        }
+        if (isCachedDeleted) return !!settings.bulkDeleteIncludeCached;
+        if (message.state && message.state !== "SENT") return false;
+        if ((Number(message.flags) || 0) & 64) return false;
+        const sets = gesture.typeSets || (gesture.typeSets = inspectedExport(1085, "MessageTypesSets"));
+        try { if (sets && sets.UNDELETABLE && typeof sets.UNDELETABLE.has === "function" && sets.UNDELETABLE.has(message.type)) return false; } catch (_) {}
+        if (gestureOwn(message)) return true;
+        return bulkDeleteCanManage(chId);
+    }
+    function bulkDeleteRemember(channelId, id, source) {
+        if (!features.bulkDelete || typeof channelId !== "string" || !channelId || typeof id !== "string" || !id || !source) return;
+        const key = channelId + ":" + id;
+        const existing = bulkDelete.recent.get(key);
+        if (existing && existing.source === source) return;
+        if (existing) bulkDelete.recent.delete(key);
+        else if (bulkDelete.recent.size >= 250) bulkDelete.recent.delete(bulkDelete.recent.keys().next().value);
+        bulkDelete.recent.set(key, {
+            channelId,
+            id,
+            source,
+            content:typeof source.content === "string" ? source.content : "",
+            embeds:Array.isArray(source.embeds) ? source.embeds : null,
+            components:Array.isArray(source.components) ? source.components : null,
+            attachments:Array.isArray(source.attachments) ? source.attachments : null
+        });
+    }
+    function bulkDeleteRedrawIds(channelId, ids) {
+        if (!channelId || !ids || !ids.length) return;
+        let d = dispatcher;
+        if (!d) {
+            const mod = inspectedExport(584, "default");
+            if (mod && typeof mod.dispatch === "function") d = dispatcher = mod.dispatch.bind(mod);
+        }
+        if (typeof d !== "function") return;
+        const store = msgStore || (msgStore = inspectedExport(5432, "default"));
+        ids.forEach(rawId => {
+            const id = String(rawId);
+            const key = channelId + ":" + id;
+            const cached = bulkDelete.recent.get(key);
+            let live = null;
+            try { if (store && typeof store.getMessage === "function") live = store.getMessage(channelId, id); } catch (_) {}
+            const msg = live || cached && cached.source;
+            if (!msg) return;
+            const content = typeof msg.content === "string" ? msg.content : cached && cached.content || "";
+            const embeds = Array.isArray(msg.embeds) ? msg.embeds : cached && cached.embeds || [];
+            const components = Array.isArray(msg.components) ? msg.components : cached && cached.components || [];
+            const attachments = Array.isArray(msg.attachments) ? msg.attachments : cached && cached.attachments || [];
+            const base = {id, channel_id:channelId, content, embeds:embeds.slice(), components:components.slice(), attachments:attachments.slice()};
+            const temp = Object.assign({}, base, {content:content + "\u200b"});
+            try { d({type:"MESSAGE_UPDATE", message:temp}); } catch (_) {}
+            later(() => { try { d({type:"MESSAGE_UPDATE", message:base}); } catch (_) {} }, 35);
+        });
+    }
+    function bulkDeleteChannelSelectableIds(channelId) {
+        if (!channelId) return [];
+        const store = msgStore || (msgStore = inspectedExport(5432, "default"));
+        const out = [], seen = new Set();
+        const addIfSelectable = (msg, isCached) => {
+            if (!msg || !msg.id) return;
+            const id = String(msg.id);
+            if (seen.has(id)) return;
+            if (bulkDeleteCanSelect(msg, channelId, isCached)) {
+                seen.add(id);
+                out.push(id);
+            }
+        };
+        try {
+            const messages = store && typeof store.getMessages === "function" ? store.getMessages(channelId) : null;
+            const arr = messages && Array.isArray(messages._array) ? messages._array : null;
+            if (arr) for (let i = 0; i < arr.length; i++) addIfSelectable(arr[i], undefined);
+            else if (messages && typeof messages.forEach === "function") messages.forEach(m => addIfSelectable(m, undefined));
+        } catch (_) {}
+        if (features.noDelete && enabled("noDelete") && settings.bulkDeleteIncludeCached && deletedByChannel.has(channelId)) {
+            const bucket = deletedByChannel.get(channelId);
+            if (bucket) bucket.forEach(entry => addIfSelectable(entry && entry.message, true));
+        }
+        bulkDelete.recent.forEach(entry => {
+            if (entry.channelId === channelId) addIfSelectable(entry.source, undefined);
+        });
+        return out;
+    }
+    function bulkDeleteRedrawChannel(channelId) {
+        if (!channelId) return;
+        const ids = bulkDeleteChannelSelectableIds(channelId);
+        bulkDelete.selected.forEach(id => { if (!ids.includes(id)) ids.push(id); });
+        bulkDeleteRedrawIds(channelId, ids);
+    }
+    function bulkDeleteStart(channelId, message) {
+        if (!enabled("bulkDelete") || !channelId) return;
+        const chId = String(channelId);
+        if (bulkDelete.active && bulkDelete.channelId && bulkDelete.channelId !== chId) {
+            const prev = bulkDelete.channelId;
+            bulkDelete.active = false;
+            bulkDelete.selected.clear();
+            bulkDeleteRedrawChannel(prev);
+        }
+        haptic("IMPACT_MEDIUM");
+        animateLayout();
+        bulkDelete.active = true;
+        bulkDelete.deleting = false;
+        bulkDelete.progress = 0;
+        bulkDelete.total = 0;
+        bulkDelete.channelId = chId;
+        bulkDelete.selected.clear();
+        if (message && message.id && bulkDeleteCanSelect(message, chId, undefined)) {
+            bulkDelete.selected.add(String(message.id));
+        }
+        notify("bulkDelete");
+        bulkDeleteRedrawChannel(chId);
+    }
+    function bulkDeleteCancel() {
+        if (!bulkDelete.active) return;
+        const prevChannel = bulkDelete.channelId;
+        animateLayout();
+        bulkDelete.active = false;
+        bulkDelete.deleting = false;
+        bulkDelete.progress = 0;
+        bulkDelete.total = 0;
+        bulkDelete.channelId = null;
+        const prevSelected = Array.from(bulkDelete.selected);
+        bulkDelete.selected.clear();
+        notify("bulkDelete");
+        if (prevChannel) {
+            const all = bulkDeleteChannelSelectableIds(prevChannel);
+            prevSelected.forEach(id => { if (!all.includes(id)) all.push(id); });
+            bulkDeleteRedrawIds(prevChannel, all);
+        }
+    }
+    function bulkDeleteToggleMessage(channelId, messageId) {
+        if (!bulkDelete.active || bulkDelete.deleting) return false;
+        const chId = String(channelId || bulkDelete.channelId || "");
+        if (!chId || chId !== String(bulkDelete.channelId)) return false;
+        const id = String(messageId || "");
+        if (!id) return false;
+        const store = msgStore || (msgStore = inspectedExport(5432, "default"));
+        let msg = null;
+        try { if (store && typeof store.getMessage === "function") msg = store.getMessage(chId, id); } catch (_) {}
+        if (!msg) {
+            const cached = bulkDelete.recent.get(chId + ":" + id);
+            if (cached) msg = cached.source;
+        }
+        if (!bulkDeleteCanSelect(msg, chId, undefined)) return true;
+        haptic("SELECTION");
+        if (bulkDelete.selected.has(id)) bulkDelete.selected.delete(id);
+        else bulkDelete.selected.add(id);
+        notify("bulkDelete");
+        bulkDeleteRedrawIds(chId, [id]);
+        return true;
+    }
+    function bulkDeleteSelectAll() {
+        if (!bulkDelete.active || bulkDelete.deleting || !bulkDelete.channelId) return;
+        const chId = bulkDelete.channelId;
+        const selectable = bulkDeleteChannelSelectableIds(chId);
+        if (!selectable.length) return;
+        haptic("SELECTION");
+        const allSelected = selectable.every(id => bulkDelete.selected.has(id));
+        const changed = [];
+        if (allSelected) {
+            selectable.forEach(id => {
+                if (bulkDelete.selected.delete(id)) changed.push(id);
+            });
+        } else {
+            selectable.forEach(id => {
+                if (!bulkDelete.selected.has(id)) {
+                    bulkDelete.selected.add(id);
+                    changed.push(id);
+                }
+            });
+        }
+        notify("bulkDelete");
+        if (changed.length) bulkDeleteRedrawIds(chId, changed);
+    }
+    function bulkDeleteInterceptTap(event) {
+        if (!enabled("bulkDelete") || !bulkDelete.active) return false;
+        const data = event && event.nativeEvent;
+        const id = data && data.messageId;
+        const chId = data && data.channelId || bulkDelete.channelId;
+        if (!id) return true;
+        return bulkDeleteToggleMessage(chId, id);
+    }
+    function bulkDeleteConfirmAndRun() {
+        if (!bulkDelete.active || bulkDelete.deleting || !bulkDelete.selected.size || !bulkDelete.channelId) return;
+        const count = bulkDelete.selected.size;
+        if (!settings.bulkDeleteConfirm) {
+            bulkDeleteExecute();
+            return;
+        }
+        confirmAction(
+            pl(count, "Delete {n} message?", "Delete {n} messages?"),
+            pl(count, "Are you sure you want to delete {n} selected message? This can't be undone.",
+                "Are you sure you want to delete {n} selected messages? This can't be undone."),
+            "Delete",
+            bulkDeleteExecute
+        );
+    }
+    function bulkDeleteExecute() {
+        if (!bulkDelete.active || bulkDelete.deleting || !bulkDelete.selected.size || !bulkDelete.channelId) return;
+        const chId = bulkDelete.channelId;
+        const ids = Array.from(bulkDelete.selected);
+        // Sort newest-last or oldest-first so deletions proceed cleanly
+        ids.sort((a, b) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0));
+        const cachedEntries = [], liveIds = [];
+        const bucket = features.noDelete && deletedByChannel.get(chId);
+        ids.forEach(id => {
+            const key = deletedKey(chId, id);
+            const entry = bucket && bucket.get(key) || deleted.get(key);
+            if (entry) cachedEntries.push(entry);
+            else liveIds.push(id);
+        });
+        bulkDelete.deleting = true;
+        bulkDelete.total = ids.length;
+        bulkDelete.progress = 0;
+        notify("bulkDelete");
+        haptic("IMPACT_MEDIUM");
+
+        // Remove cached deleted messages locally right away in one batch
+        if (cachedEntries.length) {
+            cachedEntries.forEach(entry => dropDeleted(deletedKey(entry.channelId, entry.id)));
+            invalidateDeleted();
+            persistDeleted();
+            dispatchRemovals(cachedEntries);
+            bulkDelete.progress += cachedEntries.length;
+            bulkDelete.deletedSession += cachedEntries.length;
+            notify("bulkDelete");
+        }
+
+        if (!liveIds.length) {
+            bulkDeleteFinish(ids.length);
+            return;
+        }
+
+        const actions = msgActions || (msgActions = inspectedExport(7174, "default"));
+        let idx = 0;
+        function next() {
+            if (!bulkDelete.active || !bulkDelete.deleting || idx >= liveIds.length) {
+                if (bulkDelete.active) bulkDeleteFinish(bulkDelete.progress);
+                return;
+            }
+            const id = liveIds[idx++];
+            let p;
+            try {
+                if (actions && typeof actions.deleteMessage === "function") {
+                    p = actions.deleteMessage(chId, id, false);
+                }
+            } catch (_) {}
+            Promise.resolve(p).catch(() => {}).then(() => {
+                // If Keep deleted messages kept our own deletion, drop it from the cache so bulk delete truly removes it
+                const key = deletedKey(chId, id);
+                if (deleted.has(key)) {
+                    const dropped = dropDeleted(key);
+                    if (dropped) {
+                        invalidateDeleted();
+                        persistDeleted();
+                        dispatchRemovals([dropped]);
+                    }
+                }
+                bulkDelete.progress++;
+                bulkDelete.deletedSession++;
+                notify("bulkDelete");
+                if (idx < liveIds.length) later(next, 320, false);
+                else bulkDeleteFinish(bulkDelete.progress);
+            });
+        }
+        next();
+    }
+    function bulkDeleteFinish(count) {
+        const prevChannel = bulkDelete.channelId;
+        animateLayout();
+        bulkDelete.active = false;
+        bulkDelete.deleting = false;
+        bulkDelete.progress = 0;
+        bulkDelete.total = 0;
+        bulkDelete.channelId = null;
+        bulkDelete.selected.clear();
+        notify("bulkDelete");
+        if (prevChannel) bulkDeleteRedrawChannel(prevChannel);
+        if (count > 0) {
+            reviewToast(reviewUI(), pl(count, "Deleted {n} message", "Deleted {n} messages"), venusIcon(5049, "TrashIcon"));
+        }
+    }
+    function bulkDeleteSheet(orig, self, args) {
+        const tree = orig.apply(self, args);
+        if (!enabled("bulkDelete") || !React || !tree) return tree;
+        const found = translateSheetArgs(args[0], tree);
+        const message = found && found.message;
+        const channel = found && found.channel;
+        const channelId = channel && channel.id || message && (message.channel_id || message.channelId);
+        if (!message || !channelId || !bulkDeleteCanSelect(message, String(channelId), undefined)) return tree;
+        const Row = inspectedExport(6180, "TableRow") || reviewUI().TableRow;
+        if (!Row) return tree;
+        const Icon = venusIcon(6868, "CircleCheckIcon"), RowIcon = inspectedExport(6188, "TableRowIcon");
+        const onPress = () => {
+            const sheets = reviewUI().sheets;
+            try { if (sheets && typeof sheets.hideActionSheet === "function") sheets.hideActionSheet("MessageLongPressActionSheet"); } catch (_) {}
+            if (args[0] && typeof args[0].onClose === "function") try { args[0].onClose(); } catch (_) {}
+            later(() => bulkDeleteStart(String(channelId), message), 60, false);
+        };
+        const item = el(Row, {
+            key:"venus-bulk-delete",
+            label:tr("Select Messages"),
+            icon:RowIcon ? el(RowIcon, {IconComponent:Icon}) : el(Icon, {size:"md"}),
+            onPress
+        });
+        // Place right under Delete Message when present; otherwise place in the sheet's action group.
+        return insertBulkDeleteSheetRow(tree, Row, item);
+    }
+    function insertBulkDeleteSheetRow(root, Row, item) {
+        let deleteText = "";
+        try {
+            const loc = locale || (locale = inspectedExport(1126));
+            if (loc && loc.intl && loc.t && loc.t["AMvpS4"]) deleteText = String(loc.intl.string(loc.t["AMvpS4"]) || "");
+        } catch (_) {}
+        const isDeleteRow = child => {
+            if (!child || typeof child !== "object" || !child.props) return false;
+            const p = child.props;
+            if (p.variant === "danger" || p.color === "danger" || p.destructive === true || p.isDestructive === true) return true;
+            const label = typeof p.label === "string" ? p.label : "";
+            if (!label) return false;
+            return deleteText && label === deleteText || label === tr("Delete Message") || /delete message/i.test(label);
+        };
+        let inserted = false;
+        function walk(node, depth) {
+            if (!node || typeof node !== "object" || depth > 14 || inserted) return node;
+            if (Array.isArray(node)) {
+                for (let i = 0; i < node.length; i++) {
+                    if (isDeleteRow(node[i])) {
+                        const copy = node.slice();
+                        copy.splice(i + 1, 0, item);
+                        inserted = true;
+                        return copy;
+                    }
+                }
+                for (let i = 0; i < node.length; i++) {
+                    const next = walk(node[i], depth + 1);
+                    if (next !== node[i]) {
+                        const copy = node.slice();
+                        copy[i] = next;
+                        return copy;
+                    }
+                }
+                return node;
+            }
+            const children = node.props && node.props.children;
+            if (!children) return node;
+            const next = walk(children, depth + 1);
+            return next === children ? node : React.cloneElement(node, Object.assign({}, node.props, {children:next}));
+        }
+        const updated = walk(root, 0);
+        return inserted ? updated : insertSheetRow(root, Row, item, 0);
+    }
+    const BULK_BAR_DARK = {
+        wrap:{position:"absolute", left:12, right:12, bottom:14, zIndex:50, elevation:10},
+        bar:{flexDirection:"row", alignItems:"center", gap:10, paddingHorizontal:14, paddingVertical:10, borderRadius:22,
+            backgroundColor:"#2b2d31f5", borderWidth:1, borderColor:"#ffffff18"},
+        badge:{minWidth:26, height:26, borderRadius:13, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        badgeMuted:{minWidth:26, height:26, borderRadius:13, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505880"},
+        badgeText:{color:"#ffffff", fontSize:13, fontWeight:"700"},
+        title:{color:"#f2f3f5", fontSize:14, fontWeight:"600"},
+        sub:{color:"#b5bac1", fontSize:12, fontWeight:"500"},
+        pill:{height:34, paddingHorizontal:12, borderRadius:17, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505866"},
+        pillText:{color:"#dbdee1", fontSize:13, fontWeight:"600"},
+        del:{flexDirection:"row", alignItems:"center", gap:6, height:36, paddingHorizontal:14, borderRadius:18, backgroundColor:"#f23f43"},
+        delDisabled:{backgroundColor:"#f23f4355"},
+        delText:{color:"#ffffff", fontSize:13, fontWeight:"700"},
+        close:{width:34, height:34, borderRadius:17, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}
+    };
+    function useBulkBarStyles() {
+        return useThemed("bulkDeleteBar", c => ({
+            wrap:BULK_BAR_DARK.wrap,
+            bar:Object.assign({}, BULK_BAR_DARK.bar, {backgroundColor:c.BACKGROUND_FLOATING || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
+            badge:Object.assign({}, BULK_BAR_DARK.badge, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
+            badgeMuted:Object.assign({}, BULK_BAR_DARK.badgeMuted, {backgroundColor:c.BACKGROUND_MOD_STRONG || "#4e505880"}),
+            badgeText:BULK_BAR_DARK.badgeText,
+            title:Object.assign({}, BULK_BAR_DARK.title, {color:c.TEXT_STRONG}),
+            sub:Object.assign({}, BULK_BAR_DARK.sub, {color:c.TEXT_MUTED}),
+            pill:Object.assign({}, BULK_BAR_DARK.pill, {backgroundColor:c.BACKGROUND_MOD_SUBTLE || c.BACKGROUND_MOD_NORMAL}),
+            pillText:Object.assign({}, BULK_BAR_DARK.pillText, {color:c.TEXT_DEFAULT}),
+            del:Object.assign({}, BULK_BAR_DARK.del, {backgroundColor:c.STATUS_DANGER || "#f23f43"}),
+            delDisabled:BULK_BAR_DARK.delDisabled,
+            delText:BULK_BAR_DARK.delText,
+            close:Object.assign({}, BULK_BAR_DARK.close, {backgroundColor:c.BACKGROUND_MOD_SUBTLE})
+        }), BULK_BAR_DARK);
+    }
+    function BulkDeleteBar(props) {
+        useSettings("bulkDelete");
+        useLanguage();
+        if (!enabled("bulkDelete") || !bulkDelete.active || !React || !RN) return null;
+        if (props && props.channelId && String(props.channelId) !== String(bulkDelete.channelId)) return null;
+        const s = useBulkBarStyles(), Press = RN.Pressable || RN.View;
+        const count = bulkDelete.selected.size;
+        const deleting = bulkDelete.deleting;
+        const selectable = bulkDeleteChannelSelectableIds(bulkDelete.channelId);
+        const allSelected = selectable.length > 0 && selectable.every(id => bulkDelete.selected.has(id));
+        const Trash = venusIcon(5049, "TrashIcon"), Close = venusIcon(6296, "CircleXIcon");
+        const statusText = deleting ?
+            tr("Deleting {done} of {total}…", {done:Math.min(bulkDelete.progress + 1, bulkDelete.total), total:bulkDelete.total}) :
+            tr("{n} selected", {n:count});
+        return el(RN.View, {style:s.wrap, pointerEvents:"box-none"},
+            popIn("bulk-bar", el(RN.View, {style:s.bar, accessible:true, accessibilityRole:"toolbar"},
+                el(RN.View, {style:count > 0 ? s.badge : s.badgeMuted},
+                    el(RN.Text, {style:s.badgeText}, String(count))),
+                el(RN.View, {style:{flex:1, gap:1}},
+                    el(RN.Text, {style:s.title, numberOfLines:1}, statusText),
+                    !deleting && selectable.length > 0 ? el(Press, {
+                        onPress:bulkDeleteSelectAll,
+                        accessibilityRole:"button",
+                        accessibilityLabel:tr(allSelected ? "Deselect all" : "Select all"),
+                        hitSlop:6
+                    }, el(RN.Text, {style:[s.sub, {color:"#94a8ff", fontWeight:"600"}], numberOfLines:1},
+                        tr(allSelected ? "Deselect all" : "Select all"))) : null),
+                !deleting ? el(Press, {
+                    onPress:bulkDeleteConfirmAndRun,
+                    disabled:count === 0,
+                    accessibilityRole:"button",
+                    accessibilityLabel:tr("Delete"),
+                    style:[s.del, count === 0 ? s.delDisabled : null]
+                },
+                    el(Trash, {size:"xs", color:"#ffffff"}),
+                    el(RN.Text, {style:s.delText}, tr("Delete"))) : null,
+                el(Press, {
+                    onPress:bulkDeleteCancel,
+                    accessibilityRole:"button",
+                    accessibilityLabel:tr("Cancel"),
+                    hitSlop:6,
+                    style:s.close
+                }, el(Close, {size:"sm", color:s.pillText.color})))));
+    }
+    function bulkDeleteChatFooter(orig, self, args) {
+        const rendered = orig.apply(self, args);
+        if (!features.bulkDelete || !React || !RN || !rendered) return rendered;
+        const props = args[0];
+        const channelId = props && props.channelId;
+        return el(RN.View, {style:{flex:1}}, rendered, el(BulkDeleteBar, {key:"venus-bulk-bar", channelId}));
+    }
+    function BulkDeletePreview(props) {
+        useSettings("bulkDelete");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on;
+        const includeCached = !!settings.bulkDeleteIncludeCached;
+        const blank = {sheet:false, selecting:false, picked:["m1"], gone:false, pulse:null};
+        const [state, setState] = React.useState(blank);
+        const update = change => setState(st => Object.assign({}, st, typeof change === "function" ? change(st) : change));
+        const story = useStory(on, () => {
+            const steps = [
+                [0, () => setState(blank), tr("You sent a couple of messages you want to clean up")],
+                [900, () => update({pulse:{who:"m1", id:"hold"}}), tr("Hold a message to open its menu")],
+                [450, () => { animateLayout(); update({sheet:true, pulse:null}); }, tr("Tap Select Messages under Delete Message")],
+                [950, () => update({pulse:{who:"selectRow", id:"tapSelect"}})],
+                [450, () => { animateLayout(); haptic("IMPACT_LIGHT"); update({sheet:false, selecting:true, picked:["m1"], pulse:null}); },
+                    tr("A circle appears on the right of each message you can delete")],
+                [950, () => { haptic("SELECTION"); update({picked:["m1", "m2"], pulse:{who:"m2", id:"pick2"}}); },
+                    tr("Tap more messages to check them")]
+            ];
+            if (includeCached) {
+                steps.push([850, () => { haptic("SELECTION"); update({picked:["m1", "m2", "m3"], pulse:{who:"m3", id:"pick3"}}); },
+                    tr("Kept deleted messages can be selected too")]);
+            }
+            steps.push(
+                [950, () => update({pulse:{who:"delBtn", id:"del"}}), tr("Tap Delete on the bar to remove them all at once")],
+                [450, () => { animateLayout(); haptic("IMPACT_MEDIUM"); update({gone:true, selecting:false, pulse:null}); },
+                    tr("They're all gone at once")],
+                [1400, () => {}]
+            );
+            return steps;
+        }, [includeCached]);
+        const Check = venusIcon(6823, "CheckmarkSmallIcon"), Trash = venusIcon(5049, "TrashIcon"), CircleCheck = venusIcon(6868, "CircleCheckIcon");
+        const selecting = on ? state.selecting : true;
+        const picked = on ? state.picked : (includeCached ? ["m1", "m2", "m3"] : ["m1", "m2"]);
+        const gone = on ? state.gone : false;
+        const circle = isChecked => el(RN.View, {
+            style:{
+                width:22, height:22, borderRadius:11, alignItems:"center", justifyContent:"center",
+                backgroundColor:isChecked ? "#5865f2" : "#00000024",
+                borderWidth:isChecked ? 0 : 1.8,
+                borderColor:isChecked ? "transparent" : "#949ba499",
+                marginLeft:8, alignSelf:"center"
+            }
+        }, isChecked ? el(Check, {size:"xs", color:"#ffffff"}) : null);
+        const msgRow = (id, who, color, time, text, isCached) => {
+            const isChecked = selecting && picked.includes(id);
+            const delHex = isCached ? highlightColorHex(settings.noDeleteColor, "#f23f43") : null;
+            const bg = isChecked ? "#5865f224" : isCached ? delHex + "1a" : undefined;
+            return el(RN.View, {key:id, style:{backgroundColor:bg, position:"relative"}},
+                isCached ? el(RN.View, {style:{position:"absolute", left:0, top:0, bottom:0, width:4, backgroundColor:delHex}}) : null,
+                el(RN.View, {style:{flexDirection:"row", alignItems:"center", paddingRight:selecting ? 12 : 0}},
+                    el(RN.View, {style:{flex:1}},
+                        previewMessage(s, id, who, color, time, el(RN.Text, {style:s.text}, text))),
+                    selecting ? popIn("c:" + id + ":" + (isChecked ? "1" : "0"), circle(isChecked)) : null),
+                tapRipple(state.pulse, id));
+        };
+        const rows = [
+            previewMessage(s, "sam", "Sam", "#eb459e", tr("Today at 4:01 PM"), el(RN.Text, {style:s.text}, tr("Anyone up for a game later?"))),
+            gone ? null : msgRow("m1", tr("You"), "#5865f2", tr("Today at 4:02 PM"), tr("Wait, wrong link"), false),
+            gone ? null : msgRow("m2", tr("You"), "#5865f2", tr("Today at 4:03 PM"), tr("Let me clean these up"), false),
+            gone || !includeCached ? null : msgRow("m3", "Alex", "#3ba55c", tr("Today at 4:04 PM"), tr("Oops, wrong chat. Deleting this."), true)
+        ];
+        const sheet = on && state.sheet ? popIn("sheet", el(RN.View, {key:"sheet", style:[k.sheet, {borderTopLeftRadius:16, borderTopRightRadius:16, paddingTop:8, paddingBottom:10, paddingHorizontal:12, gap:4}]},
+            el(RN.View, {style:{alignSelf:"center", width:36, height:4, borderRadius:2, backgroundColor:"#80848e66", marginBottom:4}}),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:12, paddingVertical:8, paddingHorizontal:8, borderRadius:10}},
+                el(venusIcon(9720, "PencilIcon"), {size:"sm", color:k.icon.color}),
+                el(RN.Text, {style:[s.name, {fontSize:14}]}, tr("Edit Message"))),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:12, paddingVertical:8, paddingHorizontal:8, borderRadius:10}},
+                el(Trash, {size:"sm", color:"#f23f43"}),
+                el(RN.Text, {style:[s.name, {fontSize:14, color:"#f23f43"}]}, tr("Delete Message"))),
+            el(RN.View, {style:[{flexDirection:"row", alignItems:"center", gap:12, paddingVertical:8, paddingHorizontal:8, borderRadius:10}, k.selected]},
+                el(CircleCheck, {size:"sm", color:k.brandFg.color}),
+                el(RN.Text, {style:[s.name, {fontSize:14, flex:1}]}, tr("Select Messages")),
+                tapRipple(state.pulse, "selectRow")))) : null;
+        const bar = selecting ? popIn("bar", el(RN.View, {key:"bar", style:{marginHorizontal:10, marginBottom:8, paddingHorizontal:12, paddingVertical:8, borderRadius:18, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff18", flexDirection:"row", alignItems:"center", gap:8}},
+            el(RN.View, {style:{minWidth:22, height:22, borderRadius:11, paddingHorizontal:6, backgroundColor:"#5865f2", alignItems:"center", justifyContent:"center"}},
+                el(RN.Text, {style:{color:"#ffffff", fontSize:12, fontWeight:"700"}}, String(picked.length))),
+            el(RN.Text, {style:[s.name, {fontSize:13, flex:1}], numberOfLines:1}, tr("{n} selected", {n:picked.length})),
+            el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:5, paddingHorizontal:12, height:30, borderRadius:15, backgroundColor:"#f23f43"}},
+                el(Trash, {size:"xxs", color:"#ffffff"}),
+                el(RN.Text, {style:{color:"#ffffff", fontSize:12, fontWeight:"700"}}, tr("Delete")),
+                tapRipple(state.pulse, "delBtn")))) : null;
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Bulk delete preview", [
+                el(RN.View, {key:"chat", style:{minHeight:176}}, rows),
+                bar,
+                sheet
+            ], {
+                header:previewHeader(k, {title:"general"}),
+                footer:el(RN.View, {key:"foot"},
+                    !selecting && !sheet ? previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})}) : null,
+                    on ? storyStrip(k, s, story) : null)
+            }));
+    }
+    function BulkDeleteSettings() {
+        useSettings("bulkDelete");
+        useSettings("noDelete");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("bulkDelete"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const Icon = venusIcon(6868, "CircleCheckIcon");
+        const keptCount = deleted.size;
+        const clearCached = () => {
+            if (!keptCount) return;
+            clearDeleted(true);
+            reviewToast(ui, "Cleared kept deleted messages", venusIcon(5049, "TrashIcon"));
+            notify("bulkDelete");
+        };
+        const groups = [
+            !on ? offCard("status", Icon, "bulkDelete") :
+                bulkDelete.deletedSession > 0 ? statusCard("status",
+                    pl(bulkDelete.deletedSession, "Deleted {n} message in bulk since Discord opened.", "Deleted {n} messages in bulk since Discord opened."),
+                    {title:pl(bulkDelete.deletedSession, "{n} message deleted", "{n} messages deleted"), IconComponent:Icon, accent:true}) :
+                statusCard("status", "Hold any message you can delete and tap Select Messages under Delete Message.",
+                    {title:tr("Ready in chat"), IconComponent:Icon}),
+            el(BulkDeletePreview, {key:"preview", on}),
+            el(Group, {key:"options", title:tr("Selection")},
+                switchRow(Switch, "bulkDeleteConfirm", "Ask before deleting", "Shows a confirmation dialog before deleting the selected messages.", rowIcon(5046, "CircleInformationIcon")),
+                features.noDelete ? switchRow(Switch, "bulkDeleteIncludeCached", "Include kept deleted messages", "Lets you select and clear deleted messages kept by Keep deleted messages.", rowIcon(5049, "TrashIcon")) : null),
+            features.noDelete && keptCount > 0 ? el(Group, {key:"cached", title:tr("Kept deleted messages")},
+                actionRow(ui, "clearCached", "Clear kept deleted messages",
+                    pl(keptCount, "Removes {n} cached deleted message from chat and from this phone.", "Removes {n} cached deleted messages from chat and from this phone."),
+                    clearCached, !on, true)) : null,
+            footnote("note", "Your own messages can always be selected. In servers where you have Manage Messages, you can select other people's messages too.")
+        ];
+        return settingsBody(ui, groups);
+    }
     function activatePlugins(id, exports) {
         switch (id) {
             case 2129:
@@ -13080,6 +13715,7 @@
                 // ChatViewWrapper {channelId, stickyHeader, children}: the theme background behind chat, and the translate bar (#82)
                 // in the sticky header slot above the messages, where Discord shows its own New messages bar.
                 if (features.translate) exports = hookComponent(exports, translateBarHeader);
+                if (features.bulkDelete) exports = hookComponent(exports, bulkDeleteChatFooter);
                 return features.customThemes ? hookComponent(exports, chatViewWrapperThemeBackground) : exports;
             case 12129: return features.accountSwitcher ? hookMultiAccountStore(exports) : exports;
             case 6623: return features.accountSwitcher ? hookComponent(exports, addAccountLogin) : exports;
@@ -13099,14 +13735,16 @@
             case 13968: return (features.quests || features.badges || features.userNotif) ? hookPauseGateway(exports) : exports;
             case 5759: return features.badges ? hookSelfPresenceStore(exports) : exports;
             case 8312: if (features.badges && exports && exports.default) badgesAttachStore(exports.default); return exports;
-            case 9675: return features.translate ? hookComponent(exports, translateSheet) : exports;
+            case 9675:
+                if (features.translate) exports = hookComponent(exports, translateSheet);
+                return features.bulkDelete ? hookComponent(exports, bulkDeleteSheet) : exports;
             case 9255: return features.splitMessages ? maxLengthModule(exports) : exports;
             case 16858: return (features.youBarSettings || features.accountSwitcher) ? hookComponent(exports, youBarButtons) : exports;
             // MurmurHashV3 is CommonJS (module.exports=function), not an ES default export.
             case 1264: if (features.pastelize) pastelHash = typeof exports === "function" ? exports : exports.default; return exports;
             case 2125: if (features.pastelize) guildMembers = exports.default; return exports;
             case 7742:
-                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight) && exports.default && exports.default.prototype)
+                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight || features.bulkDelete) && exports.default && exports.default.prototype)
                     hookExport(exports.default.prototype, "generate", messageRow);
                 return exports;
             case 5108: if (features.platformIndicators || features.userNotif) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); } return exports;
@@ -13194,12 +13832,12 @@
             case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
             case 5432:
-                if (features.jumpToTop || features.messageHighlight || features.noDelete || features.translate || features.hideBlocked) msgStore = exports.default;
+                if (features.jumpToTop || features.messageHighlight || features.noDelete || features.translate || features.hideBlocked || features.bulkDelete) msgStore = exports.default;
                 if (features.noDelete) {
                     exports = replaceValue(exports, "default", hookExport(hookExport(msgStore, "getMessage", retainedMessage), "getMessages", retainedMessages));
                     restoreDeleted();
@@ -13213,7 +13851,8 @@
                 if (features.quests) questsInit(exports.default);
                 if (features.badges && exports && exports.default) badgesInit(exports.default);
                 if (features.nitroThemes && exports && exports.default) nitroThemeAttach(exports.default);
-                if (features.messageHighlight && exports && exports.default && !dispatcher)
+                if (features.bulkDelete && exports && exports.default) bulkDeleteInit(exports.default);
+                if ((features.messageHighlight || features.bulkDelete) && exports && exports.default && !dispatcher)
                     dispatcher = exports.default.dispatch.bind(exports.default);
                 if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
                     dispatcher = exports.default.dispatch.bind(exports.default);
@@ -13222,6 +13861,8 @@
                 return exports;
             case 1085: case 1096:
                 if (features.hiddenChannels && exports.Permissions) viewPermission = exports.Permissions.VIEW_CHANNEL;
+                if (features.bulkDelete && exports.Permissions && bulkDelete.managePermission === undefined)
+                    bulkDelete.managePermission = exports.Permissions.MANAGE_MESSAGES;
                 return exports;
             case 1112:
                 if (!features.hiddenChannels) return exports;
@@ -13229,13 +13870,13 @@
                 exports = hookExport(exports, "replaceWith", hiddenNavigation);
                 return hookExport(exports, "transitionToGuild", hiddenGuildNavigation);
             case 4750: {
+                const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
+                    exports && typeof exports.can === "function" ? exports : null;
+                if (candidate) permissions = candidate;
                 if (!features.hiddenChannels) return exports;
                 // Lioncat6 finds permissions via findByProps("getChannelPermissions","can");
                 // In 350.8 PermissionStore (4750) is the only module exporting both.
                 // Candidate may be default export or the exports object itself.
-                const candidate = exports && exports.default && typeof exports.default.can === "function" ? exports.default :
-                    exports && typeof exports.can === "function" ? exports : null;
-                if (candidate) permissions = candidate;
                 // Globally reveal VIEW_CHANNEL so Discord builds
                 // real channel records (names) instead of obfuscated "hidden" stubs.
                 // Message/voice access stays blocked via hiddenFetch/hiddenNavigation guards.
@@ -13266,7 +13907,7 @@
             case 12837: return features.gestures ? hookExport(exports, "DoubleTapEmojiEditNudge", hideWhenGestures) : exports;
             case 9434: return features.gestures ? hookExport(exports, "maybeShowDoubleTapReminderToast", (orig, self, args) => enabled("gestures") ? undefined : orig.apply(self, args)) : exports;
             case 11990: return features.gestures ? hookExport(exports, "DoubleTapToReactChatInputBanner", hideWhenGestures) : exports;
-            case 10694: return features.gestures ? hookTapHandlers(exports) : exports;
+            case 10694: return (features.gestures || features.bulkDelete) ? hookTapHandlers(exports) : exports;
             case 7174: {
                 let actions = exports.default;
                 if (!actions) return exports;

@@ -234,7 +234,7 @@ fun main(args: Array<String>) {
     for (field in replyGuard.mapNotNull { (it as? ReferenceInstruction)?.reference as? FieldReference })
         check(dexClasses.any { c -> c.type == field.definingClass && c.fields.any { it.name == field.name && it.type == field.type } }) { "Unresolved reply guard field $field" }
     checkBranches(reply, "Reply guard")
-    // Message highlights (#60): assembled on Discord's real HighlightedMessageDrawer.drawHighlight (a detached fixture).
+    // Message highlights (#60) and Bulk delete (#94): assembled on Discord's real HighlightedMessageDrawer.drawHighlight (a detached fixture).
     val gutterMethod = methods.single { it.definingClass == HIGHLIGHT_DRAWER && it.name == "drawHighlight" && it.parameterTypes.size == 4 }
     val gutterOriginal = gutterMethod.implementation!!.instructions.map { it.opcode }
     val gutter = MutableMethod(gutterMethod)
