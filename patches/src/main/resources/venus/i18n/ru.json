@@ -1285,6 +1285,8 @@
     "{on} of {total} turned on": "Включено: {on} из {total}",
     "{site} is off, so the link is sent as written": "{site} выключен, поэтому ссылка отправляется как есть",
     "{text} text, {voice} voice": "{text} текстовых, {voice} голосовых",
-    "{time} ago": "{time} назад"
+    "{time} ago": "{time} назад",
+    "Keep Bluetooth audio clear in calls": "Чистый звук Bluetooth в звонках",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Наушники остаются в музыкальном качестве во время звонков. Ваш голос записывает микрофон телефона."
   }
 }

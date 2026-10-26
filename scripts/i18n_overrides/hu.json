@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} funkcióból {on} bekapcsolva. Kapcsold be vagy ki őket a Funkciók között.",
   "{on} of {total} turned on": "{total} / {on} bekapcsolva",
   "{site} is off, so the link is sent as written": "A(z) {site} ki van kapcsolva, ezért a link változatlanul megy el",
-  "{text} text, {voice} voice": "{text} szöveges, {voice} hang"
+  "{text} text, {voice} voice": "{text} szöveges, {voice} hang",
+  "Keep Bluetooth audio clear in calls": "Tiszta Bluetooth-hang hívásokban",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "A fejhallgató hívás közben is zenei minőségben szól. A hangodat a telefon mikrofonja veszi fel."
 }

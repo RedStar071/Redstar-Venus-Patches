@@ -1176,5 +1176,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Włączone funkcje: {on} z {total}. Włączaj i wyłączaj je w Funkcjach.",
   "{on} of {total} turned on": "Włączono {on} z {total}",
   "{site} is off, so the link is sent as written": "{site} jest wyłączony, więc link zostaje wysłany bez zmian",
-  "{text} text, {voice} voice": "{text} tekstowych, {voice} głosowych"
+  "{text} text, {voice} voice": "{text} tekstowych, {voice} głosowych",
+  "Keep Bluetooth audio clear in calls": "Czysty dźwięk Bluetooth w rozmowach",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Słuchawki zachowują jakość muzyki podczas rozmów. Twój głos zbiera mikrofon telefonu."
 }

@@ -1099,6 +1099,8 @@
     "{on} of {total} turned on": "เปิดอยู่ {on} จาก {total}",
     "{site} is off, so the link is sent as written": "{site} ปิดอยู่ จึงส่งลิงก์ไปตามเดิม",
     "{text} text, {voice} voice": "ข้อความ {text} เสียง {voice}",
-    "{time} ago": "{time}ที่ผ่านมา"
+    "{time} ago": "{time}ที่ผ่านมา",
+    "Keep Bluetooth audio clear in calls": "เสียง Bluetooth ชัดระหว่างโทร",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "หูฟังยังคงคุณภาพเสียงระดับเพลงระหว่างโทร ไมค์ของโทรศัพท์จะรับเสียงคุณแทน"
   }
 }

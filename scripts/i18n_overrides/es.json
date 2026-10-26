@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} de {total} funciones activadas. Actívalas o desactívalas en «Funciones».",
   "{on} of {total} turned on": "{on} de {total} activadas",
   "{site} is off, so the link is sent as written": "{site} está desactivado, así que el enlace se envía tal cual",
-  "{text} text, {voice} voice": "{text} de texto, {voice} de voz"
+  "{text} text, {voice} voice": "{text} de texto, {voice} de voz",
+  "Keep Bluetooth audio clear in calls": "Audio Bluetooth nítido en llamadas",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Los auriculares mantienen la calidad de música en llamadas. El micrófono del teléfono capta tu voz."
 }

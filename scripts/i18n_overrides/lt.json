@@ -1176,5 +1176,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Įjungta funkcijų: {on} iš {total}. Įjunk arba išjunk jas skiltyje „Funkcijos“.",
   "{on} of {total} turned on": "Įjungta {on} iš {total}",
   "{site} is off, so the link is sent as written": "{site} išjungta, todėl nuoroda siunčiama nepakeista",
-  "{text} text, {voice} voice": "{text} tekstiniai, {voice} balso"
+  "{text} text, {voice} voice": "{text} tekstiniai, {voice} balso",
+  "Keep Bluetooth audio clear in calls": "Švarus Bluetooth garsas skambučiuose",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Ausinės skambučių metu išlaiko muzikos kokybę. Tavo balsą paima telefono mikrofonas."
 }

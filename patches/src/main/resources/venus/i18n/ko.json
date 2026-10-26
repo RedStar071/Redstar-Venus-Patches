@@ -1099,6 +1099,8 @@
     "{on} of {total} turned on": "{total}개 중 {on}개 켜짐",
     "{site} is off, so the link is sent as written": "{site}이(가) 꺼져 있어서 링크가 그대로 보내져요",
     "{text} text, {voice} voice": "텍스트 {text}개, 음성 {voice}개",
-    "{time} ago": "{time} 전"
+    "{time} ago": "{time} 전",
+    "Keep Bluetooth audio clear in calls": "통화 중 Bluetooth 음질 선명하게",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "통화 중에도 헤드폰이 음악 음질을 유지해요. 목소리는 휴대폰 마이크로 들어가요."
   }
 }

@@ -1238,6 +1238,8 @@
     "{on} of {total} turned on": "{on}/{total} käytössä",
     "{site} is off, so the link is sent as written": "{site} on pois päältä, joten linkki lähetetään sellaisenaan",
     "{text} text, {voice} voice": "{text} teksti, {voice} puhe",
-    "{time} ago": "{time} sitten"
+    "{time} ago": "{time} sitten",
+    "Keep Bluetooth audio clear in calls": "Selkeä Bluetooth-ääni puheluissa",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kuulokkeet pysyvät puheluissa musiikkilaadussa. Puhelimen mikrofoni poimii äänesi."
   }
 }

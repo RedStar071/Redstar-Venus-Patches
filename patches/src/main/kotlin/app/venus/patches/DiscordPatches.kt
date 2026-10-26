@@ -1117,7 +1117,7 @@ internal fun readHandsfreeContext(method: app.morphe.patcher.util.proxy.mutableT
 @Suppress("unused")
 val keepBluetoothAudioClear = bytecodePatch(
     name = "Keep Bluetooth audio clear in calls",
-    description = "Bluetooth headphones stay in music quality in calls, voice channels and Stages. Your phone's microphone picks up your voice."
+    description = "Headphones stay in music quality in calls. Your phone's mic picks up your voice."
 ) {
     compatibleWith(discord)
     section(PLUGINS)

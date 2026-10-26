@@ -1220,6 +1220,8 @@
     "{on} of {total} turned on": "Включени: {on} от {total}",
     "{site} is off, so the link is sent as written": "{site} е изключен, затова връзката се изпраща както е",
     "{text} text, {voice} voice": "{text} текстови, {voice} гласови",
-    "{time} ago": "преди {time}"
+    "{time} ago": "преди {time}",
+    "Keep Bluetooth audio clear in calls": "Чист Bluetooth звук в разговори",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Слушалките остават с музикално качество в разговори. Микрофонът на телефона улавя гласа ви."
   }
 }

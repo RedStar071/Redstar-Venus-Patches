@@ -1014,5 +1014,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Đang bật {on}/{total} tính năng. Bật hoặc tắt trong mục Tính năng.",
   "{on} of {total} turned on": "Đang bật {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} đang tắt nên liên kết được gửi nguyên văn",
-  "{text} text, {voice} voice": "{text} văn bản, {voice} thoại"
+  "{text} text, {voice} voice": "{text} văn bản, {voice} thoại",
+  "Keep Bluetooth audio clear in calls": "Giữ âm thanh Bluetooth rõ khi gọi",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Tai nghe giữ chất lượng nghe nhạc khi gọi. Micrô của điện thoại thu giọng bạn."
 }

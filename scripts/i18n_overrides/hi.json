@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} में से {on} फ़ीचर चालू हैं। इन्हें 'फ़ीचर' में जाकर चालू या बंद करें।",
   "{on} of {total} turned on": "{total} में से {on} चालू",
   "{site} is off, so the link is sent as written": "{site} बंद है, इसलिए लिंक वैसा ही भेजा जाता है",
-  "{text} text, {voice} voice": "{text} टेक्स्ट, {voice} वॉइस"
+  "{text} text, {voice} voice": "{text} टेक्स्ट, {voice} वॉइस",
+  "Keep Bluetooth audio clear in calls": "कॉल में Bluetooth आवाज़ साफ़ रखें",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "कॉल में हेडफ़ोन म्यूज़िक क्वालिटी में ही रहते हैं। आपकी आवाज़ फ़ोन का माइक लेता है।"
 }

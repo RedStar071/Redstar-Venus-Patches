@@ -1014,5 +1014,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "已开启 {on}/{total} 项功能。可在“功能”中开启或关闭。",
   "{on} of {total} turned on": "已开启 {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} 已关闭，所以链接会原样发送",
-  "{text} text, {voice} voice": "{text} 个文字，{voice} 个语音"
+  "{text} text, {voice} voice": "{text} 个文字，{voice} 个语音",
+  "Keep Bluetooth audio clear in calls": "通话时保持蓝牙音质清晰",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通话时耳机保持音乐级音质，由手机麦克风收录你的声音。"
 }

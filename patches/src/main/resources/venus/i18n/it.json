@@ -1220,6 +1220,8 @@
     "{on} of {total} turned on": "{on} su {total} attive",
     "{site} is off, so the link is sent as written": "{site} è disattivato, quindi il link viene inviato così com'è",
     "{text} text, {voice} voice": "{text} testuali, {voice} vocali",
-    "{time} ago": "{time} fa"
+    "{time} ago": "{time} fa",
+    "Keep Bluetooth audio clear in calls": "Audio Bluetooth nitido nelle chiamate",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Le cuffie restano in qualità musica durante le chiamate. Il microfono del telefono capta la tua voce."
   }
 }

@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} van {total} functies ingeschakeld. Zet ze aan of uit bij Functies.",
   "{on} of {total} turned on": "{on} van {total} ingeschakeld",
   "{site} is off, so the link is sent as written": "{site} staat uit, dus de link wordt verstuurd zoals hij is",
-  "{text} text, {voice} voice": "{text} tekst, {voice} spraak"
+  "{text} text, {voice} voice": "{text} tekst, {voice} spraak",
+  "Keep Bluetooth audio clear in calls": "Helder Bluetooth-geluid in gesprekken",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Koptelefoons blijven in muziekkwaliteit tijdens gesprekken. De microfoon van je telefoon vangt je stem op."
 }

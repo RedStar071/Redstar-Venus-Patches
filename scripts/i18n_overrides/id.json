@@ -1014,5 +1014,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} dari {total} fitur aktif. Aktifkan atau nonaktifkan di Fitur.",
   "{on} of {total} turned on": "{on} dari {total} aktif",
   "{site} is off, so the link is sent as written": "{site} nonaktif, jadi tautan dikirim apa adanya",
-  "{text} text, {voice} voice": "{text} teks, {voice} suara"
+  "{text} text, {voice} voice": "{text} teks, {voice} suara",
+  "Keep Bluetooth audio clear in calls": "Audio Bluetooth jernih saat panggilan",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Headphone tetap berkualitas musik saat panggilan. Mikrofon ponsel menangkap suaramu."
 }

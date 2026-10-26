@@ -1285,6 +1285,8 @@
     "{on} of {total} turned on": "{on} din {total} activate",
     "{site} is off, so the link is sent as written": "{site} e dezactivat, așa că linkul e trimis așa cum e",
     "{text} text, {voice} voice": "{text} text, {voice} voce",
-    "{time} ago": "acum {time}"
+    "{time} ago": "acum {time}",
+    "Keep Bluetooth audio clear in calls": "Sunet Bluetooth clar în apeluri",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Căștile rămân la calitate de muzică în apeluri. Microfonul telefonului îți preia vocea."
   }
 }

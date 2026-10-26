@@ -1220,6 +1220,8 @@
     "{on} of {total} turned on": "{on} van {total} ingeschakeld",
     "{site} is off, so the link is sent as written": "{site} staat uit, dus de link wordt verstuurd zoals hij is",
     "{text} text, {voice} voice": "{text} tekst, {voice} spraak",
-    "{time} ago": "{time} geleden"
+    "{time} ago": "{time} geleden",
+    "Keep Bluetooth audio clear in calls": "Helder Bluetooth-geluid in gesprekken",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Koptelefoons blijven in muziekkwaliteit tijdens gesprekken. De microfoon van je telefoon vangt je stem op."
   }
 }

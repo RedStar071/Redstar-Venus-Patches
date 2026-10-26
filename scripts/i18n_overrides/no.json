@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} av {total} funksjoner er på. Slå dem på eller av under Funksjoner.",
   "{on} of {total} turned on": "{on} av {total} slått på",
   "{site} is off, so the link is sent as written": "{site} er av, så lenken sendes som den er",
-  "{text} text, {voice} voice": "{text} tekst, {voice} tale"
+  "{text} text, {voice} voice": "{text} tekst, {voice} tale",
+  "Keep Bluetooth audio clear in calls": "Klar Bluetooth-lyd i samtaler",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Hodetelefonene holder musikkvalitet i samtaler. Telefonens mikrofon fanger opp stemmen din."
 }

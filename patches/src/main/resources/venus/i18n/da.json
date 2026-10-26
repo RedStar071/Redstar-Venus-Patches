@@ -1220,6 +1220,8 @@
     "{on} of {total} turned on": "{on} af {total} slået til",
     "{site} is off, so the link is sent as written": "{site} er slået fra, så linket sendes, som det er",
     "{text} text, {voice} voice": "{text} tekst, {voice} tale",
-    "{time} ago": "for {time} siden"
+    "{time} ago": "for {time} siden",
+    "Keep Bluetooth audio clear in calls": "Klar Bluetooth-lyd i opkald",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Høretelefoner bliver i musikkvalitet under opkald. Telefonens mikrofon opfanger din stemme."
   }
 }

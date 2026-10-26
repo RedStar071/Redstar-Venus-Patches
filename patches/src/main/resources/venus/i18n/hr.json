@@ -1285,6 +1285,8 @@
     "{on} of {total} turned on": "{on} od {total} uključeno",
     "{site} is off, so the link is sent as written": "{site} je isključen, pa se poveznica šalje kakva jest",
     "{text} text, {voice} voice": "{text} tekstnih, {voice} glasovnih",
-    "{time} ago": "prije {time}"
+    "{time} ago": "prije {time}",
+    "Keep Bluetooth audio clear in calls": "Čist Bluetooth zvuk u pozivima",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Slušalice u pozivima ostaju u glazbenoj kvaliteti. Vaš glas hvata mikrofon telefona."
   }
 }

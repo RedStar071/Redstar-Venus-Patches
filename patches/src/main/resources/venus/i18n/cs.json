@@ -1285,6 +1285,8 @@
     "{on} of {total} turned on": "{on} z {total} zapnuto",
     "{site} is off, so the link is sent as written": "{site} je vypnutý, takže se odkaz odešle beze změny",
     "{text} text, {voice} voice": "{text} textových, {voice} hlasových",
-    "{time} ago": "před {time}"
+    "{time} ago": "před {time}",
+    "Keep Bluetooth audio clear in calls": "Čistý zvuk Bluetooth při hovorech",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Sluchátka zůstanou při hovorech v hudební kvalitě. Váš hlas snímá mikrofon telefonu."
   }
 }

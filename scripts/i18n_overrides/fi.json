@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on}/{total} ominaisuutta käytössä. Ota niitä käyttöön tai poista käytöstä Ominaisuudet-kohdassa.",
   "{on} of {total} turned on": "{on}/{total} käytössä",
   "{site} is off, so the link is sent as written": "{site} on pois päältä, joten linkki lähetetään sellaisenaan",
-  "{text} text, {voice} voice": "{text} teksti, {voice} puhe"
+  "{text} text, {voice} voice": "{text} teksti, {voice} puhe",
+  "Keep Bluetooth audio clear in calls": "Selkeä Bluetooth-ääni puheluissa",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kuulokkeet pysyvät puheluissa musiikkilaadussa. Puhelimen mikrofoni poimii äänesi."
 }

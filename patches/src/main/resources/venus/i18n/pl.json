@@ -1285,6 +1285,8 @@
     "{on} of {total} turned on": "Włączono {on} z {total}",
     "{site} is off, so the link is sent as written": "{site} jest wyłączony, więc link zostaje wysłany bez zmian",
     "{text} text, {voice} voice": "{text} tekstowych, {voice} głosowych",
-    "{time} ago": "{time} temu"
+    "{time} ago": "{time} temu",
+    "Keep Bluetooth audio clear in calls": "Czysty dźwięk Bluetooth w rozmowach",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Słuchawki zachowują jakość muzyki podczas rozmów. Twój głos zbiera mikrofon telefonu."
   }
 }

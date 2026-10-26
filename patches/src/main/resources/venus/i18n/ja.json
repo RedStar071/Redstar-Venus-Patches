@@ -1099,6 +1099,8 @@
     "{on} of {total} turned on": "{total} 件中 {on} 件がオン",
     "{site} is off, so the link is sent as written": "{site} はオフなので、リンクはそのまま送信されます",
     "{text} text, {voice} voice": "テキスト {text}・ボイス {voice}",
-    "{time} ago": "{time}前"
+    "{time} ago": "{time}前",
+    "Keep Bluetooth audio clear in calls": "通話中も Bluetooth の音をクリアに",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話中もヘッドホンが音楽用の高音質のまま。声はスマホのマイクで拾います。"
   }
 }

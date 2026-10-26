@@ -1014,5 +1014,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} 件中 {on} 件の機能がオンです。「機能」でオン・オフを切り替えられます。",
   "{on} of {total} turned on": "{total} 件中 {on} 件がオン",
   "{site} is off, so the link is sent as written": "{site} はオフなので、リンクはそのまま送信されます",
-  "{text} text, {voice} voice": "テキスト {text}・ボイス {voice}"
+  "{text} text, {voice} voice": "テキスト {text}・ボイス {voice}",
+  "Keep Bluetooth audio clear in calls": "通話中も Bluetooth の音をクリアに",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話中もヘッドホンが音楽用の高音質のまま。声はスマホのマイクで拾います。"
 }

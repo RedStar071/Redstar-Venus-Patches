@@ -1238,6 +1238,8 @@
     "{on} of {total} turned on": "{on} sur {total} activées",
     "{site} is off, so the link is sent as written": "{site} est désactivé, donc le lien est envoyé tel quel",
     "{text} text, {voice} voice": "{text} écrits, {voice} vocaux",
-    "{time} ago": "il y a {time}"
+    "{time} ago": "il y a {time}",
+    "Keep Bluetooth audio clear in calls": "Son Bluetooth clair en appel",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Les écouteurs restent en qualité musique pendant les appels. Le micro du téléphone capte votre voix."
   }
 }

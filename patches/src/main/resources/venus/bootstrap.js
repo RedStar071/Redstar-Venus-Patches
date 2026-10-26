@@ -1345,7 +1345,7 @@
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
         // Advanced
         toggle("advanced", "experiments", "Unlock Discord experiments", "Adds Dev Tools to Settings, to try features Discord is still testing.");
-        toggle("advanced", "noHandsfree", "Keep Bluetooth audio clear in calls", "Headphones stay in music quality. Your phone's mic picks up your voice.");
+        toggle("advanced", "noHandsfree", "Keep Bluetooth audio clear in calls", "Headphones stay in music quality in calls. Your phone's mic picks up your voice.");
         withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Plays real PC games in the background for game time and unique games.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests], ["Advanced", groups.advanced]];

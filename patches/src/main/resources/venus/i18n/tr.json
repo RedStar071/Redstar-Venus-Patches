@@ -1220,6 +1220,8 @@
     "{on} of {total} turned on": "{on} / {total} açık",
     "{site} is off, so the link is sent as written": "{site} kapalı, bu yüzden bağlantı olduğu gibi gönderilir",
     "{text} text, {voice} voice": "{text} yazı, {voice} ses",
-    "{time} ago": "{time} önce"
+    "{time} ago": "{time} önce",
+    "Keep Bluetooth audio clear in calls": "Aramalarda net Bluetooth sesi",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kulaklık aramalarda müzik kalitesinde kalır. Sesini telefonun mikrofonu alır."
   }
 }

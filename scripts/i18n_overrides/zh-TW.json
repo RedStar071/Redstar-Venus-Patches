@@ -1014,5 +1014,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "已開啟 {on}/{total} 項功能。可在「功能」中開啟或關閉。",
   "{on} of {total} turned on": "已開啟 {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} 已關閉，所以連結會照原樣傳送",
-  "{text} text, {voice} voice": "{text} 個文字、{voice} 個語音"
+  "{text} text, {voice} voice": "{text} 個文字、{voice} 個語音",
+  "Keep Bluetooth audio clear in calls": "通話時保持藍牙音質清晰",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話時耳機維持音樂級音質，由手機麥克風收錄你的聲音。"
 }

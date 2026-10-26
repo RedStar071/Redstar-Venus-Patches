@@ -1135,5 +1135,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} özellikten {on} tanesi açık. Özellikler'den açıp kapatabilirsin.",
   "{on} of {total} turned on": "{on} / {total} açık",
   "{site} is off, so the link is sent as written": "{site} kapalı, bu yüzden bağlantı olduğu gibi gönderilir",
-  "{text} text, {voice} voice": "{text} yazı, {voice} ses"
+  "{text} text, {voice} voice": "{text} yazı, {voice} ses",
+  "Keep Bluetooth audio clear in calls": "Aramalarda net Bluetooth sesi",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kulaklık aramalarda müzik kalitesinde kalır. Sesini telefonun mikrofonu alır."
 }

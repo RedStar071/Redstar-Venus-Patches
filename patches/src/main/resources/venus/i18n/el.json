@@ -1220,6 +1220,8 @@
     "{on} of {total} turned on": "{on} από {total} ενεργές",
     "{site} is off, so the link is sent as written": "Το {site} είναι ανενεργό, οπότε ο σύνδεσμος στέλνεται όπως είναι",
     "{text} text, {voice} voice": "{text} κειμένου, {voice} φωνής",
-    "{time} ago": "πριν από {time}"
+    "{time} ago": "πριν από {time}",
+    "Keep Bluetooth audio clear in calls": "Καθαρός ήχος Bluetooth στις κλήσεις",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Τα ακουστικά μένουν σε ποιότητα μουσικής στις κλήσεις. Το μικρόφωνο του τηλεφώνου σου πιάνει τη φωνή σου."
   }
 }

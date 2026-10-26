@@ -1176,5 +1176,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Увімкнено функцій: {on} з {total}. Вмикайте й вимикайте їх у розділі «Функції».",
   "{on} of {total} turned on": "Увімкнено: {on} з {total}",
   "{site} is off, so the link is sent as written": "{site} вимкнено, тож посилання надсилається як є",
-  "{text} text, {voice} voice": "{text} текстових, {voice} голосових"
+  "{text} text, {voice} voice": "{text} текстових, {voice} голосових",
+  "Keep Bluetooth audio clear in calls": "Чистий звук Bluetooth у дзвінках",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Навушники зберігають музичну якість під час дзвінків. Ваш голос записує мікрофон телефона."
 }

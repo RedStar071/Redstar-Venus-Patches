@@ -1099,6 +1099,8 @@
     "{on} of {total} turned on": "{on} dari {total} aktif",
     "{site} is off, so the link is sent as written": "{site} nonaktif, jadi tautan dikirim apa adanya",
     "{text} text, {voice} voice": "{text} teks, {voice} suara",
-    "{time} ago": "{time} yang lalu"
+    "{time} ago": "{time} yang lalu",
+    "Keep Bluetooth audio clear in calls": "Audio Bluetooth jernih saat panggilan",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Headphone tetap berkualitas musik saat panggilan. Mikrofon ponsel menangkap suaramu."
   }
 }

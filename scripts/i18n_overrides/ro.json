@@ -1176,5 +1176,7 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} din {total} funcții activate. Activează-le sau dezactivează-le din Funcții.",
   "{on} of {total} turned on": "{on} din {total} activate",
   "{site} is off, so the link is sent as written": "{site} e dezactivat, așa că linkul e trimis așa cum e",
-  "{text} text, {voice} voice": "{text} text, {voice} voce"
+  "{text} text, {voice} voice": "{text} text, {voice} voce",
+  "Keep Bluetooth audio clear in calls": "Sunet Bluetooth clar în apeluri",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Căștile rămân la calitate de muzică în apeluri. Microfonul telefonului îți preia vocea."
 }
