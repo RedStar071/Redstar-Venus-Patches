@@ -50,6 +50,7 @@
     if (features.tenorGifs) selectModules([1295, 9733]);
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
+    if (features.experiments) selectModules([584, 1390, 1401]);
     const revision = "1.18.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -71,7 +72,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -88,7 +89,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -491,6 +492,7 @@
         if (features.hideBlocked && featureFor(key) === "hideBlocked") hideBlockedChanged();
         if (features.bulkDelete && key === "bulkDelete" && !value) bulkDeleteCancel();
         if (features.bulkDelete && key === "bulkDeleteIncludeCached" && bulkDelete.active) bulkDeleteRedrawChannel(bulkDelete.channelId);
+        if (features.experiments && key === "experiments") { if (value) experimentsEnable(); else if (experiments.unlocked && !backup.restoring) later(experimentsAskReopen, 0); }
         if (features.quests || features.badges || features.userNotif) backgroundSync();
         return true;
     }
@@ -567,6 +569,7 @@
             if (features.materialYou) { myStart(); if (enabled("materialYou")) customThemesApply(); }
             if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
             if (features.hideBlocked && enabled("hideBlocked")) hideBlockedChanged();
+            if (features.experiments && enabled("experiments")) experimentsEnable();
             if (features.quests || features.badges || features.userNotif) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
@@ -914,7 +917,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -955,6 +958,7 @@
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
+        experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         bulkDelete:["Select Messages", "Select all", "Delete", "Clear kept deleted messages", "Include kept deleted messages", "Ask before deleting"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
@@ -1231,9 +1235,9 @@
         next.VENUS_GENERAL.screen.getComponent = () => AboutSettings;
         // The features list: each row says what it does, grouped by where you'll notice it.
         const P = "VENUS_PLUGINS";
-        const groups = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
+        const groups = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[], advanced:[]};
         const iconFor = key => { const found = FEATURE_ICONS[key]; return found ? venusIcon(found[0], found[1], icon) : icon; };
-        featureGroups = groups.keys = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[]};
+        featureGroups = groups.keys = {messages:[], sending:[], people:[], servers:[], appearance:[], quests:[], advanced:[]};
         featureSearch.rows = []; featureSearch.cache = null;
         const groupLabel = group => (FEATURE_GROUPS.find(entry => entry[0] === group) || [])[1];
         function toggle(group, key, title, hint) {
@@ -1337,9 +1341,11 @@
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
+        // Advanced
+        toggle("advanced", "experiments", "Unlock Discord experiments", "Adds Dev Tools to Settings, to try features Discord is still testing.");
         withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Plays real PC games in the background for game time and unique games.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
-            ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests]];
+            ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests], ["Advanced", groups.advanced]];
         const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);
         route(P, "Features", sections, undefined, venusIcon(15241, "PuzzlePieceIcon", icon));
         // The nodes above stay for Discord's settings search; the page itself adds the Features search bar.
@@ -1365,7 +1371,8 @@
     // Which patched features sit in which group of the Features list, for the About page.
     let featureGroups = null;
     const FEATURE_GROUPS = [["messages", "Messages", 8194, "ChatIcon"], ["sending", "Sending", 5040, "SendMessageIcon"], ["people", "People", 4815, "FriendsIcon"],
-        ["servers", "Servers", 9239, "ServerIcon"], ["appearance", "Appearance", 15560, "PaintPaletteIcon"], ["quests", "Quests", 13012, "QuestsIcon"]];
+        ["servers", "Servers", 9239, "ServerIcon"], ["appearance", "Appearance", 15560, "PaintPaletteIcon"], ["quests", "Quests", 13012, "QuestsIcon"],
+        ["advanced", "Advanced", 15869, "WrenchIcon"]];
     // Is Venus working? One word and a colored dot, the way Discord shows a status.
     function aboutHealth() {
         const storage = status.storage;
@@ -12906,6 +12913,62 @@
         ];
         return settingsBody(ui, groups, {keyboardShouldPersistTaps:"handled"});
     }
+    // Unlock Discord experiments (#96, from Experiments by maisy): Discord shows Dev Tools (and its Experiments screen)
+    // to staff. While on, isStaffEnv (1401) says yes for the signed-in account, so DeveloperExperimentStore (7404)
+    // turns isDeveloper on, and ExperimentStore (5016) gets its OVERLAY_INITIALIZE handler again with a copy of you
+    // carrying the STAFF flag, which is when it starts honoring overrides. Your real user object is never changed, and
+    // nothing leaves the phone. Discord keeps both stores unlocked until it reopens, so turning it off offers that.
+    const experiments = {dispatcher:null, unlocked:false};
+    const EXPERIMENT_STORES = new Set(["ExperimentStore", "DeveloperExperimentStore"]);
+    function experimentsMe() {
+        const store = userStore || inspectedExport(1390, "default");
+        try { return store && typeof store.getCurrentUser === "function" ? store.getCurrentUser() : null; } catch (_) { return null; }
+    }
+    function hookStaffEnv(exports) {
+        return hookExport(exports, "isStaffEnv", function (orig, self, args) {
+            const real = orig.apply(self, args);
+            if (real || !enabled("experiments")) return real;
+            const user = args[0], me = experimentsMe();
+            return !!(user && me && user.id === me.id);
+        });
+    }
+    function experimentsInit(dispatcher) {
+        if (experiments.dispatcher || !dispatcher || typeof dispatcher.subscribe !== "function") return;
+        experiments.dispatcher = dispatcher;
+        dispatcher.subscribe("CONNECTION_OPEN", () => { if (enabled("experiments")) experimentsEnable(); });
+    }
+    function experimentsEnable() {
+        const d = experiments.dispatcher || inspectedExport(584, "default"), me = experimentsMe();
+        const store = inspectedExport(5016, "default"), flags = inspectedExport(1085, "UserFlags");
+        if (!d || !me || !store || typeof store.getSerializedState !== "function" || !flags || typeof flags.STAFF !== "number") return false;
+        let handlers = null;
+        try { handlers = d._actionHandlers.getOrderedActionHandlers({type:"OVERLAY_INITIALIZE"}); } catch (_) { return false; }
+        if (!handlers || typeof handlers.forEach !== "function") return false;
+        const action = {type:"OVERLAY_INITIALIZE", serializedExperimentStore:store.getSerializedState(), user:Object.assign({}, me, {flags:(me.flags | 0) | flags.STAFF})};
+        handlers.forEach(entry => {
+            if (!entry || !EXPERIMENT_STORES.has(entry.name) || typeof entry.actionHandler !== "function") return;
+            try { entry.actionHandler(action); experiments.unlocked = true; } catch (_) {}
+        });
+        [store, inspectedExport(7404, "default")].forEach(changed => { try { if (changed && typeof changed.emitChange === "function") changed.emitChange(); } catch (_) {} });
+        return experiments.unlocked;
+    }
+    function experimentsAskReopen() {
+        if (!RN || settings.experiments) return;
+        const title = tr("Unlock Discord experiments"), body = tr("Discord needs to reopen to hide Dev Tools and experiments again.");
+        const native = RN.NativeModules && RN.NativeModules.BundleUpdaterManager;
+        if (!native || typeof native.reload !== "function") return;
+        const reopen = () => {
+            if (!files) { native.reload(); return; }
+            Promise.resolve().then(() => files.writeFile("documents", PREFS, settingsSnapshot(), "utf8")).then(() => native.reload(),
+                () => { status.storage = "save failed (session only)"; notify();
+                    showProblem("Couldn't save the setting", tr("Discord didn't reopen, so nothing changed. Try again in a moment.")); });
+        };
+        const ui = reviewUI();
+        if (ui.alerts && typeof ui.alerts.show === "function") try {
+            ui.alerts.show({title, body, confirmText:tr("Reopen now"), cancelText:tr("Later"), onConfirm:reopen}); return;
+        } catch (_) {}
+        if (RN.Alert) RN.Alert.alert(title, body, [{text:tr("Later"), style:"cancel"}, {text:tr("Reopen now"), onPress:reopen}]);
+    }
     // Hide blocked or ignored messages (#91, from Rain): filters hidden messages out of the stream createChannelStream
     // (11624) walks, before Discord groups messages or builds BLOCKED_GROUP / IGNORED_GROUP rows. MessageStore itself is
     // untouched, adjacent messages around a hidden one join into one group, and toggling an option redraws the open chat.
@@ -13767,6 +13830,7 @@
                 if (features.hideBlocked && exports && exports.default) hideBlocked.relationships = exports.default;
                 if (features.userNotif && exports && exports.default) { userNotif.relationships = exports.default; userNotifSeedStatuses(); }
                 return exports;
+            case 1401: return features.experiments ? hookStaffEnv(exports) : exports;
             case 7308: if (features.hideBlocked && exports && exports.default) hideBlocked.references = exports.default; return exports;
             case 11624: return features.hideBlocked ? hookExport(exports, "default", hideBlockedChannelStream) : exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
@@ -13872,7 +13936,7 @@
             case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete || features.experiments))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
@@ -13892,6 +13956,7 @@
                 if (features.badges && exports && exports.default) badgesInit(exports.default);
                 if (features.nitroThemes && exports && exports.default) nitroThemeAttach(exports.default);
                 if (features.bulkDelete && exports && exports.default) bulkDeleteInit(exports.default);
+                if (features.experiments && exports && exports.default) experimentsInit(exports.default);
                 if ((features.messageHighlight || features.bulkDelete) && exports && exports.default && !dispatcher)
                     dispatcher = exports.default.dispatch.bind(exports.default);
                 if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {
