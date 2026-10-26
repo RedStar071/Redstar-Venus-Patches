@@ -1347,7 +1347,7 @@
         withOptions("servers", "serverInfo", "VENUS_SERVERINFO", "Server info", "Hold a server's icon to see its details, boosts and friends there.", "Server info", ServerInfoSettings);
         toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\".");
         // Appearance
-        withOptions("appearance", "systemFont", "VENUS_SYSTEMFONT", "Use your phone's font", "Replaces Discord's font everywhere, or use a font file you import.", "Font", SystemFontSettings);
+        withOptions("appearance", "systemFont", "VENUS_SYSTEMFONT", "Use your phone's font", "Replaces Discord's font everywhere with your phone's or one you import. Android 9 or newer.", "Font", SystemFontSettings);
         withOptions("appearance", "systemEmoji", "VENUS_SYSTEMEMOJI", "Use your phone's emojis", "In chat, reactions and the emoji picker, or from an emoji font you import.", "Emojis", SystemEmojiSettings);
         toggle("appearance", "hideGift", "Hide the gift button", "Removes the gift button from the message bar.");
         toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles.");

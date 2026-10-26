@@ -528,7 +528,7 @@ internal fun systemFontBridge(method: app.morphe.patcher.util.proxy.mutableTypes
 @Suppress("unused")
 val forceSystemFont = bytecodePatch(
     name = "Use your phone's font",
-    description = "Replaces Discord's font everywhere, or use a font file you import. Android 9 or newer."
+    description = "Replaces Discord's font everywhere with your phone's or one you import. Android 9 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
