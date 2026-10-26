@@ -3204,14 +3204,17 @@
     // show that: it reads an option's `icon` as an image source and has no subtitle, so both were dropped. Its own
     // parts (ActionSheet, TableRow with subLabel) draw the same sheet with them.
     const READ_ALL_SHEET = "VenusReadAll";
-    const READ_ALL_CHOICES = [["guilds","Mark servers as read",9239,"ServerIcon"],["dms","Mark DMs as read",6770,"EnvelopeIcon"],
-        ["both","Mark servers and DMs as read",15928,"DoubleCheckmarkIcon"]];
+    // Labels go through tr() here, not where they're drawn, so scripts/i18n_strings.cjs sees them as used.
+    function readAllChoices() {
+        return [["guilds",tr("Mark servers as read"),9239,"ServerIcon"],["dms",tr("Mark DMs as read"),6770,"EnvelopeIcon"],
+            ["both",tr("Mark servers and DMs as read"),15928,"DoubleCheckmarkIcon"]];
+    }
     function readAllPick(ui, mode) { hideReviewSheet(ui,READ_ALL_SHEET); readAll(mode); }
     function ReadAllSheet() {
         const ui=reviewUI(), Group=ui.TableRowGroup || RN.View;
         return el(ui.ActionSheet,{header:ui.Header ? el(ui.Header,{title:tr("Read all"),
                 trailing:ui.Close ? el(ui.Close,{onPress:() => hideReviewSheet(ui,READ_ALL_SHEET)}) : undefined}) : undefined},
-            el(Group,null,READ_ALL_CHOICES.map(([mode,label,id,name]) => el(ui.TableRow,{key:mode,label:tr(label),
+            el(Group,null,readAllChoices().map(([mode,label,id,name]) => el(ui.TableRow,{key:mode,label,
                 subLabel:mode===settings.readAllMode ? tr("What a tap does") : undefined,icon:rowIcon(id,name),onPress:() => readAllPick(ui,mode)}))));
     }
     function readAllChooser() {
@@ -3220,7 +3223,7 @@
         if (ui.ActionSheet && ui.TableRow && typeof ui.showSheet==="function") try {
             ui.showSheet({key:READ_ALL_SHEET,content:el(ReadAllSheet,null),stackingBehavior:"stack"}); return;
         } catch (_) {}
-        const options=READ_ALL_CHOICES.map(([mode,label,id,name]) => ({label:tr(label),IconComponent:venusIcon(id,name),onPress:() => readAll(mode)}));
+        const options=readAllChoices().map(([mode,label,id,name]) => ({label,IconComponent:venusIcon(id,name),onPress:() => readAll(mode)}));
         if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:READ_ALL_SHEET,header:{title:tr("Read all")},options}); return; } catch (_) {}
         if (RN && RN.Alert) RN.Alert.alert(tr("Read all"),undefined,options.map(option => ({text:option.label,onPress:option.onPress})).concat([{text:tr("Cancel"),style:"cancel"}]));
     }
