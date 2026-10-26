@@ -11039,6 +11039,36 @@
     // Where each slot (THEME_SLOTS order) looks for a legacy raw: its own list, then the other dark slots'. Light only
     // reads its own: a dark palette there would turn it dark.
     const LEGACY_SLOT_ORDER = [[0, 2, 3], [1], [2, 0, 3], [3, 2, 0]];
+    const LEGACY_RAW_OTHER_NAME = {WHITE:"WHITE_500", BLACK:"BLACK_500"};
+    // LEGACY_TOKEN_RAWS turned per token, once: for each slot, the raws to try in LEGACY_SLOT_ORDER as flat
+    // [name, other name, opacity] triples, and the slot's synthetic raw key, so compiling a theme only looks things up.
+    let legacyTokenRowsBuilt = null;
+    function legacyTokenRows() {
+        if (legacyTokenRowsBuilt) return legacyTokenRowsBuilt;
+        const byToken = new Map();
+        for (const raw in LEGACY_TOKEN_RAWS) {
+            if (!owns(LEGACY_TOKEN_RAWS, raw)) continue;
+            const items = LEGACY_TOKEN_RAWS[raw].split(" ");
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i], dot = item.indexOf("."), at = item.indexOf("@", dot), token = item.slice(0, dot);
+                let own = byToken.get(token);
+                if (!own) byToken.set(token, own = [null, null, null, null]);
+                own[item.charCodeAt(dot + 1) - 48] = [raw, LEGACY_RAW_OTHER_NAME[raw] || null, at < 0 ? 1 : +item.slice(at + 1)];
+            }
+        }
+        const rows = [];
+        byToken.forEach((own, token) => {
+            const cands = [null, null, null, null], keys = [];
+            for (let j = 0; j < 4; j++) {
+                keys.push("__VENUS_" + token + "_" + THEME_SLOTS[j]);
+                const order = LEGACY_SLOT_ORDER[j], flat = [];
+                for (let o = 0; o < order.length; o++) if (own[order[o]]) flat.push(own[order[o]][0], own[order[o]][1], own[order[o]][2]);
+                if (flat.length) cands[j] = flat;
+            }
+            rows.push({token, cands, keys});
+        });
+        return legacyTokenRowsBuilt = rows;
+    }
     const LEGACY_RAW_BRIDGES = [
         ["NEUTRAL_100", ["PLUM_24", "PLUM_23", "PRIMARY_830", "PRIMARY_800", "BLACK"]],
         ["NEUTRAL_96", ["PLUM_23", "PLUM_22", "PRIMARY_800", "PRIMARY_730"]],
@@ -11432,35 +11462,29 @@
         // unless the theme set the token's current raw itself (then it was made for this Discord). A slot with no
         // legacy raw of its own in the theme borrows the other dark slots' (LEGACY_SLOT_ORDER), so a theme that only
         // recolored PLUM (the old Dark/Midnight ramp) colors Ash the same way. Semantic keys below still win.
-        let legacyPicks = null;
-        for (const key in rawIn) {
-            if (!owns(rawIn, key)) continue;
-            const list = LEGACY_TOKEN_RAWS[key] || LEGACY_TOKEN_RAWS[LEGACY_RAW_ALIAS[key]];
-            if (!list) continue;
-            const parsed = parseThemeColor(rawIn[key]);
-            if (!parsed) continue;
-            if (!legacyPicks) legacyPicks = new Map();
-            const items = list.split(" ");
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i], dot = item.indexOf("."), at = item.indexOf("@", dot);
-                const token = item.slice(0, dot), from = item.charCodeAt(dot + 1) - 48, op = at < 0 ? 1 : +item.slice(at + 1);
+        let anyLegacy = false;
+        for (const key in rawIn) if (owns(LEGACY_TOKEN_RAWS, key) || owns(LEGACY_RAW_ALIAS, key)) { anyLegacy = true; break; }
+        if (anyLegacy) {
+            const rows = legacyTokenRows();
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i], entry = sem[row.token];
+                if (!entry) continue;
                 for (let j = 0; j < 4; j++) {
-                    const rank = LEGACY_SLOT_ORDER[j].indexOf(from);
-                    if (rank < 0) continue;
-                    const pickKey = token + "/" + j, was = legacyPicks.get(pickKey);
-                    if (!was || rank < was.rank) legacyPicks.set(pickKey, {rank, token, slot:j, parsed, op});
+                    const cands = row.cands[j], now = cands && entry[THEME_SLOTS[j]];
+                    if (!now || typeof now !== "object" || rawIn[now.raw]) continue;
+                    for (let k = 0; k < cands.length; k += 3) {
+                        const value = rawIn[cands[k]] || (cands[k + 1] && rawIn[cands[k + 1]]);
+                        const parsed = value && parseThemeColor(value);
+                        if (!parsed) continue;
+                        setRaw(row.keys[j], parsed.hex);
+                        touchedSem.add(row.token);
+                        now.raw = row.keys[j];
+                        now.opacity = cands[k + 2] === 1 ? parsed.opacity : Math.round(parsed.opacity * cands[k + 2] * 10000) / 10000;
+                        break;
+                    }
                 }
             }
         }
-        if (legacyPicks) legacyPicks.forEach(pick => {
-            const slot = THEME_SLOTS[pick.slot], entry = sem[pick.token], now = entry && entry[slot];
-            if (!now || typeof now !== "object" || rawIn[now.raw]) return;
-            const syntheticKey = "__VENUS_" + pick.token + "_" + slot;
-            setRaw(syntheticKey, pick.parsed.hex);
-            touchedSem.add(pick.token);
-            now.raw = syntheticKey;
-            now.opacity = Math.round(pick.parsed.opacity * pick.op * 10000) / 10000;
-        });
         // 3. Apply semanticColors onto Discord's SemanticColors table.
         // Helper that writes a parsed color into a SemanticColors[targetKey] entry across all 4 theme slots.
         // Revenge semanticColors arrays are [dark, light, amoled/midnight]:
