@@ -28,6 +28,11 @@ for (const [name, id] of Object.entries(ID)) if (!id) throw new Error(`theme_com
 const ALIASES = (0, eval)('(' + /const LEGACY_SEMANTIC_ALIASES = (\{[\s\S]*?\n    \});/.exec(src)[1] + ')');
 // Keys Discord no longer reads (CHAT_BACKGROUND, *_MOBILE_*, BG_BASE_*) only fill in for their plain key, so when the
 // theme sets that plain key too, a variant's color losing to it is the rule working, not a miss.
+// Desktop-only keys mobile Discord never draws (Android has no themed scrollbars), and native-only tokens that reach
+// Discord's Android views through the native color table instead of the JS tables: neither can be checked here.
+const NOT_IN_JS_TABLES = new Set(['SCROLLBAR_THIN_THUMB', 'SCROLLBAR_THIN_TRACK', 'SCROLLBAR_AUTO_THUMB', 'SCROLLBAR_AUTO_TRACK',
+    'SCROLLBAR_AUTO_SCROLLBAR_COLOR_THUMB', 'SCROLLBAR_AUTO_SCROLLBAR_COLOR_TRACK']
+    .concat(Object.keys((0, eval)('(' + (/const NATIVE_ONLY_TOKENS = (\{[\s\S]*?\n    \});/.exec(src) || [0, '{}'])[1] + ')'))));
 const VARIANTS = (0, eval)('(' + (/const LEGACY_ALIAS_VARIANT = (\{[^}]*\});/.exec(src) || [0, '{}'])[1] + ')');
 const clone = o => JSON.parse(JSON.stringify(o));
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -112,7 +117,7 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
         const drawn = new Set(Object.keys(after).filter(k => k.endsWith(':' + SLOTS[0])).map(k => String(after[k]).split('@')[0].toLowerCase().slice(0, 7)));
         const targetsOf = k => (k in TABLES.sem ? [k] : []).concat(ALIASES[k] || []);
         const unlanded = Object.entries(declaredKeys).filter(([k, v]) => {
-            const h = hexOf(v); if (!h) return false;
+            const h = hexOf(v); if (!h || NOT_IN_JS_TABLES.has(k)) return false;
             const all = targetsOf(k), own = all.filter(token => token === k || !(token in declaredKeys));
             if (all.length && !own.length) return false;
             if (VARIANTS[k] && Object.keys(declaredKeys).some(other => other !== k && !VARIANTS[other] && (ALIASES[other] || []).some(t => all.includes(t)))) return false;
