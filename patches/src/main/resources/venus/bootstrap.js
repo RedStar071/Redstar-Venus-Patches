@@ -12188,6 +12188,21 @@
         "INTERACTIVE_BACKGROUND_SELECTED", "CONTROL_SECONDARY_BORDER_DEFAULT", "BORDER_NORMAL", "BORDER_STRONG", "BACKGROUND_CODE",
         "TEXT_CODE", "MOBILE_THREAD_EMBED_BACKGROUND", "MESSAGE_HIGHLIGHT_BACKGROUND_DEFAULT", "INTERACTIVE_ICON_DEFAULT",
         "INPUT_BORDER_DEFAULT", "INPUT_BACKGROUND_DEFAULT", "ICON_DEFAULT", "ICON_MUTED", "MOBILE_ANDROID_BUTTON_BACKGROUND_RIPPLE"];
+    // Tokens only Discord's Android views have (no SemanticColors entry, so no JS table to write): the raw color each
+    // appearance draws them with, [dark, light, darker, midnight] as THEME_SLOTS orders them. A theme naming one of these
+    // gets it through the native swap table. Code-block colors are the syntax highlighting in messages.
+    const NATIVE_ONLY_TOKENS = {
+        CHAT_SWIPE_TO_REPLY_BACKGROUND: ["PRIMARY_660", "PRIMARY_160", "PLUM_22", "PLUM_22"],
+        TEXT_CODE_ADDITION: ["GREEN_NEW_14", "GREEN_NEW_65", "GREEN_NEW_23", "GREEN_NEW_32"],
+        TEXT_CODE_BUILTIN: ["YELLOW_NEW_29", "YELLOW_NEW_75", "YELLOW_NEW_51", "YELLOW_NEW_56"],
+        TEXT_CODE_COMMENT: ["NEUTRAL_21", "NEUTRAL_42", "NEUTRAL_28", "NEUTRAL_33"],
+        TEXT_CODE_DELETION: ["RED_NEW_10", "RED_NEW_63", "RED_NEW_21", "RED_NEW_30"],
+        TEXT_CODE_KEYWORD: ["RED_NEW_10", "RED_NEW_60", "RED_NEW_21", "RED_NEW_30"],
+        TEXT_CODE_PROPERTY: ["TEAL_NEW_15", "TEAL_NEW_63", "TEAL_NEW_25", "TEAL_NEW_34"],
+        TEXT_CODE_STRING: ["GREEN_NEW_15", "GREEN_NEW_62", "GREEN_NEW_25", "GREEN_NEW_33"],
+        TEXT_CODE_TITLE: ["BLURPLE_13", "BLURPLE_62", "BLURPLE_23", "BLURPLE_33"],
+        TEXT_CODE_TYPE: ["PINK_13", "PINK_70", "PINK_29", "PINK_46"]
+    };
     // Which appearance Discord shows: ThemeStore's theme is the slot key the color tables use.
     function nativeThemeSlot() {
         const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1205, "default"));
@@ -12199,6 +12214,16 @@
         const raw = customThemes.rawTable, sem = customThemes.semTable, origRaw = customThemes.origRaw, origSem = customThemes.origSem, pairs = new Map();
         if (!raw || !sem || !origRaw || !origSem) return "";
         const hex6 = v => typeof v === "string" && /^#[0-9a-f]{6}/i.test(v) ? v.slice(1, 7).toLowerCase() : "";
+        // Native-only keys the theme names itself come first: nothing else can reach them.
+        const active = customThemesActiveEntry(), semIn = active && active.semanticColors || {}, slotIndex = THEME_SLOTS.indexOf(slot);
+        const arrIndex = slot === "light" ? 1 : slot === "midnight" ? 2 : slot === "darker" ? 3 : 0;
+        for (const token in NATIVE_ONLY_TOKENS) {
+            const arr = semIn[token];
+            if (!Array.isArray(arr) || !arr.length) continue;
+            const value = arrIndex < arr.length ? arr[arrIndex] : arr[0], parsed = parseThemeColor(value);
+            const from = hex6(origRaw[NATIVE_ONLY_TOKENS[token][slotIndex]]);
+            if (parsed && from && !pairs.has(from)) pairs.set(from, parsed.hex.slice(1));
+        }
         for (let i = 0; i < NATIVE_THEME_TOKENS.length; i++) {
             const token = NATIVE_THEME_TOKENS[i], was = origSem[token] && origSem[token][slot], now = sem[token] && sem[token][slot];
             if (!was || !now) continue;
