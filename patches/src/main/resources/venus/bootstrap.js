@@ -13397,32 +13397,10 @@
         }
     }
     function bulkDeleteSheet(orig, self, args) {
-        const tree = orig.apply(self, args);
-        if (!enabled("bulkDelete") || !React || !tree) return tree;
-        const found = translateSheetArgs(args[0], tree);
-        const message = found && found.message;
-        const channel = found && found.channel;
-        const channelId = channel && channel.id || message && (message.channel_id || message.channelId);
-        if (!message || !channelId || !bulkDeleteCanSelect(message, String(channelId), undefined)) return tree;
-        const Row = inspectedExport(6180, "TableRow") || reviewUI().TableRow;
-        if (!Row) return tree;
-        const Icon = venusIcon(6868, "CircleCheckIcon"), RowIcon = inspectedExport(6188, "TableRowIcon");
-        const onPress = () => {
-            const sheets = reviewUI().sheets;
-            try { if (sheets && typeof sheets.hideActionSheet === "function") sheets.hideActionSheet("MessageLongPressActionSheet"); } catch (_) {}
-            if (args[0] && typeof args[0].onClose === "function") try { args[0].onClose(); } catch (_) {}
-            later(() => bulkDeleteStart(String(channelId), message), 60, false);
-        };
-        const item = el(Row, {
-            key:"venus-bulk-delete",
-            label:tr("Select Messages"),
-            icon:RowIcon ? el(RowIcon, {IconComponent:Icon}) : el(Icon, {size:"md"}),
-            onPress
-        });
-        // Place right under Delete Message when present; otherwise place in the sheet's action group.
-        return insertBulkDeleteSheetRow(tree, Row, item);
-    }
-    function insertBulkDeleteSheetRow(root, Row, item) {
+        const tree = orig.apply(self, args), props = args[0], message = props && props.message, channel = props && props.channel;
+        if (!enabled("bulkDelete") || !React || !tree || !message || !message.id) return tree;
+        const channelId = channel && channel.id || message.channel_id || message.channelId;
+        if (!channelId || !bulkDeleteCanSelect(message, String(channelId), undefined)) return tree;
         let deleteText = "";
         try {
             const loc = locale || (locale = inspectedExport(1126));
@@ -13433,38 +13411,62 @@
             const p = child.props;
             if (p.variant === "danger" || p.color === "danger" || p.destructive === true || p.isDestructive === true) return true;
             const label = typeof p.label === "string" ? p.label : "";
-            if (!label) return false;
-            return deleteText && label === deleteText || label === tr("Delete Message") || /delete message/i.test(label);
+            return !!(label && (deleteText && label === deleteText || label === tr("Delete Message") || /delete message/i.test(label)));
         };
-        let inserted = false;
-        function walk(node, depth) {
-            if (!node || typeof node !== "object" || depth > 14 || inserted) return node;
-            if (Array.isArray(node)) {
-                for (let i = 0; i < node.length; i++) {
-                    if (isDeleteRow(node[i])) {
-                        const copy = node.slice();
-                        copy.splice(i + 1, 0, item);
-                        inserted = true;
-                        return copy;
-                    }
-                }
-                for (let i = 0; i < node.length; i++) {
-                    const next = walk(node[i], depth + 1);
-                    if (next !== node[i]) {
-                        const copy = node.slice();
-                        copy[i] = next;
-                        return copy;
-                    }
-                }
-                return node;
-            }
-            const children = node.props && node.props.children;
-            if (!children) return node;
-            const next = walk(children, depth + 1);
-            return next === children ? node : React.cloneElement(node, Object.assign({}, node.props, {children:next}));
-        }
-        const updated = walk(root, 0);
-        return inserted ? updated : insertSheetRow(root, Row, item, 0);
+        let added = false;
+        const Icon = venusIcon(6868, "CircleCheckIcon");
+        const onPress = function () {
+            const sheets = reviewUI().sheets;
+            try { if (sheets && typeof sheets.hideActionSheet === "function") sheets.hideActionSheet("MessageLongPressActionSheet"); } catch (_) {}
+            if (props && typeof props.onClose === "function") try { props.onClose(); } catch (_) {}
+            later(() => bulkDeleteStart(String(channelId), message), 60, false);
+        };
+        // First pass: place right under Delete Message when Delete Message is in the sheet.
+        const withUnderDelete = cloneTree(tree, function (node, nodeProps) {
+            if (added || !Array.isArray(nodeProps.children)) return nodeProps;
+            if (nodeProps.children.some(child => child && child.key === "venus-bulk-delete")) { added = true; return nodeProps; }
+            const delIndex = nodeProps.children.findIndex(isDeleteRow);
+            if (delIndex < 0) return nodeProps;
+            const template = nodeProps.children[delIndex], icon = template.props.icon;
+            const row = React.cloneElement(template, {
+                key:"venus-bulk-delete",
+                label:tr("Select Messages"),
+                arrow:false,
+                variant:undefined,
+                color:undefined,
+                destructive:undefined,
+                isDestructive:undefined,
+                disabled:false,
+                icon:icon && icon.props && "IconComponent" in icon.props ? React.cloneElement(icon, {IconComponent:Icon}) : icon,
+                onPress
+            });
+            added = true;
+            const index = delIndex + 1;
+            return Object.assign({}, nodeProps, {children:nodeProps.children.slice(0, index).concat([row], nodeProps.children.slice(index))});
+        }, 0, () => added);
+        if (added) return withUnderDelete;
+        // Fallback (e.g. a cached deleted message whose sheet has no Delete Message row): place at the end of the sheet's action rows, like Translate.
+        return cloneTree(tree, function (node, nodeProps) {
+            if (added || !Array.isArray(nodeProps.children)) return nodeProps;
+            const rows = nodeProps.children.filter(child => child && child.props && typeof child.props.label === "string" && typeof child.props.onPress === "function");
+            if (!rows.length || nodeProps.children.some(child => child && child.key === "venus-bulk-delete")) return nodeProps;
+            added = true;
+            const template = rows[rows.length - 1], icon = template.props.icon;
+            const row = React.cloneElement(template, {
+                key:"venus-bulk-delete",
+                label:tr("Select Messages"),
+                arrow:false,
+                variant:undefined,
+                color:undefined,
+                destructive:undefined,
+                isDestructive:undefined,
+                disabled:false,
+                icon:icon && icon.props && "IconComponent" in icon.props ? React.cloneElement(icon, {IconComponent:Icon}) : icon,
+                onPress
+            });
+            const index = nodeProps.children.indexOf(template) + 1;
+            return Object.assign({}, nodeProps, {children:nodeProps.children.slice(0, index).concat([row], nodeProps.children.slice(index))});
+        }, 0, () => added);
     }
     const BULK_BAR_DARK = {
         wrap:{position:"absolute", left:12, right:12, bottom:14, zIndex:50, elevation:10},
