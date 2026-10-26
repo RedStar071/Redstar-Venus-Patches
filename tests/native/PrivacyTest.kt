@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
     val groups = listOf(HbcPrivacy.analytics, HbcPrivacy.telemetry, HbcPrivacy.crash)
     val natives = NativePrivacy.crash + NativePrivacy.telemetry + NativePrivacy.attribution + NativePrivacy.advertising
     check(natives.size == 137 && natives.distinct().size == natives.size)
-    check(groups.flatten().size == 105 && groups.flatten().map { it.offset }.distinct().size == 105)
+    check(groups.flatten().size == 102 && groups.flatten().map { it.offset }.distinct().size == 102)
     check(HbcPrivacy.resolvedPromise.last() == 6.toByte())
     // Cross-check every opcode constant against scripts/hbc/ops.txt (Hermes 250829098 BytecodeList.def)
     // so an opcode number typo like LoadParam=52 (DivN) instead of 137 can never pass build validation.
@@ -572,7 +572,7 @@ fun main(args: Array<String>) {
             check(calls.single().definingClass == "Ljava/lang/Throwable;" && calls.single().name == "toString")
         } else check(calls.isEmpty())
     }
-    println("PASS: 104 pinned HBC targets, all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 137 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge (getSize, fileExists, readAsset); no APK patched")
+    println("PASS: 102 pinned HBC targets (none sharing a body with another function), all 7 HBC selection combinations, valid footers, unchanged unrelated bytes, rejection of changed inputs, 137 exact native ABIs and assembled register-safe early-return/Promise/callback guards, native result shapes, 64 dependency selections, cached-bundle pinning, corrupt-header/footer rejection combined prelude compatibility the Quest Completer desktop User-Agent guard, the Force system font guards, the passkey error hint and one branch-safe guard per FileModule bridge (getSize, fileExists, readAsset); no APK patched")
 }
 
 
@@ -596,6 +596,17 @@ private fun checkHermesSelections(original: ByteArray, groups: List<List<HbcPriv
         check(header.getInt(large + 28) >= if (target.name == "send") 10 else if (target.promise) 9 else if (target.name == "timeRequire") 8 else lowestUsedRegister + 1)
         if (target.promise) check(original[large + 32].toInt() and 255 >= 2)
     }
+    // Hermes deduplicates identical bytecode, so one body can belong to several functions. A stub on a shared
+    // body also replaces the others: trackAppUIViewed2 shared createThread_'s and forum posts stopped (#93).
+    val owners = HashMap<Int, Int>()
+    for (id in 0 until header.getInt(40)) {
+        val small = 128 + id * 12
+        val offset = if (original[small + 11].toInt() and 32 != 0)
+            header.getInt((((header.getInt(small + 4) ushr 14) and 255) shl 24) or (header.getInt(small) and 0x1ffffff))
+        else header.getInt(small) and 0x1ffffff
+        owners.merge(offset, 1, Int::plus)
+    }
+    for (target in groups.flatten()) check(owners[target.offset] == 1) { "Shared HBC body: ${target.name} #${target.id}" }
     for (selection in 1..7) {
         var changed = original
         val targets = groups.filterIndexed { i, _ -> selection and (1 shl i) != 0 }.flatten()
