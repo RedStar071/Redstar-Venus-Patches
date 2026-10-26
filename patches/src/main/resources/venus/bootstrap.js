@@ -13213,6 +13213,8 @@
             bulkDeleteRedrawChannel(prev);
         }
         haptic("IMPACT_MEDIUM");
+        // The bar takes the composer's place, so an open keyboard would only hide the messages you're picking.
+        try { if (RN && RN.Keyboard && typeof RN.Keyboard.dismiss === "function") RN.Keyboard.dismiss(); } catch (_) {}
         animateLayout();
         bulkDelete.active = true;
         bulkDelete.deleting = false;
@@ -13468,33 +13470,34 @@
             return Object.assign({}, nodeProps, {children:nodeProps.children.slice(0, index).concat([row], nodeProps.children.slice(index))});
         }, 0, () => added);
     }
+    // The selection bar takes the composer's own slot while you select (like Telegram or Discord on desktop): typing is
+    // pointless then, and the message list already keeps that space clear for the composer, so no message is ever
+    // covered (#94). The top of the chat stays free for the Translate pill.
     const BULK_BAR_DARK = {
-        wrap:{position:"absolute", left:12, right:12, bottom:76, zIndex:100, elevation:10},
-        bar:{flexDirection:"row", alignItems:"center", gap:10, paddingHorizontal:14, paddingVertical:10, borderRadius:22,
-            backgroundColor:"#2b2d31f5", borderWidth:1, borderColor:"#ffffff18",
-            shadowColor:"#000000", shadowOpacity:0.28, shadowRadius:10, shadowOffset:{width:0, height:4}, elevation:10},
-        badge:{minWidth:26, height:26, borderRadius:13, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
-        badgeMuted:{minWidth:26, height:26, borderRadius:13, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505880"},
+        wrap:{position:"absolute", left:0, right:0, bottom:0, zIndex:100, elevation:12, justifyContent:"center", paddingHorizontal:10,
+            backgroundColor:"#1a1a1e"},
+        bar:{flexDirection:"row", alignItems:"center", gap:10, paddingLeft:8, paddingRight:6, paddingVertical:6, borderRadius:24,
+            backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff18"},
+        badge:{minWidth:28, height:28, borderRadius:14, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
+        badgeMuted:{minWidth:28, height:28, borderRadius:14, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505880"},
         badgeText:{color:"#ffffff", fontSize:13, fontWeight:"700"},
         title:{color:"#f2f3f5", fontSize:14, fontWeight:"600"},
-        sub:{color:"#b5bac1", fontSize:12, fontWeight:"500"},
-        pill:{height:34, paddingHorizontal:12, borderRadius:17, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505866"},
+        link:{color:"#00a8fc", fontSize:12, fontWeight:"600"},
         pillText:{color:"#dbdee1", fontSize:13, fontWeight:"600"},
         del:{flexDirection:"row", alignItems:"center", gap:6, height:36, paddingHorizontal:14, borderRadius:18, backgroundColor:"#f23f43"},
-        delDisabled:{backgroundColor:"#f23f4355"},
+        delDisabled:{opacity:0.4},
         delText:{color:"#ffffff", fontSize:13, fontWeight:"700"},
-        close:{width:34, height:34, borderRadius:17, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}
+        close:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#4e50584d"}
     };
     function useBulkBarStyles() {
         return useThemed("bulkDeleteBar", c => ({
-            wrap:BULK_BAR_DARK.wrap,
+            wrap:Object.assign({}, BULK_BAR_DARK.wrap, {backgroundColor:c.CHANNEL_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOWER}),
             bar:Object.assign({}, BULK_BAR_DARK.bar, {backgroundColor:c.BACKGROUND_SURFACE_HIGHEST || c.BACKGROUND_FLOATING || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
             badge:Object.assign({}, BULK_BAR_DARK.badge, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
             badgeMuted:Object.assign({}, BULK_BAR_DARK.badgeMuted, {backgroundColor:c.BACKGROUND_MOD_STRONG || "#4e505880"}),
             badgeText:BULK_BAR_DARK.badgeText,
             title:Object.assign({}, BULK_BAR_DARK.title, {color:c.TEXT_STRONG}),
-            sub:Object.assign({}, BULK_BAR_DARK.sub, {color:c.TEXT_MUTED}),
-            pill:Object.assign({}, BULK_BAR_DARK.pill, {backgroundColor:c.BACKGROUND_MOD_SUBTLE || c.BACKGROUND_MOD_NORMAL}),
+            link:Object.assign({}, BULK_BAR_DARK.link, {color:c.TEXT_LINK || "#00a8fc"}),
             pillText:Object.assign({}, BULK_BAR_DARK.pillText, {color:c.TEXT_DEFAULT}),
             del:Object.assign({}, BULK_BAR_DARK.del, {backgroundColor:c.STATUS_DANGER || "#f23f43"}),
             delDisabled:BULK_BAR_DARK.delDisabled,
@@ -13505,41 +13508,46 @@
     function BulkDeleteBar(props) {
         useSettings("bulkDelete");
         useLanguage();
-        // Same native composer height hook as JumpToPresentButton so the bar always sits above ChatInput and never overlaps it.
+        // Every hook runs before the early return, so starting or ending a selection never changes the hook order.
+        const s = useBulkBarStyles();
+        // The composer's measured height (the same store JumpToPresentButton reads): the bar fills exactly that slot.
         const heightMod = chatHeight || (chatHeight = inspectedExport(9379));
-        let inputHeight = 64, suggestionHeight = 0;
+        let inputHeight = 0;
         try {
             if (heightMod && typeof heightMod.useBestActiveChatInputContainerHeight === "function")
                 inputHeight = heightMod.useBestActiveChatInputContainerHeight();
             else if (heightMod && typeof heightMod.useChatInputContainerHeight === "function")
                 inputHeight = heightMod.useChatInputContainerHeight(0);
-            if (heightMod && typeof heightMod.useSmallSuggestionBarHeight === "function")
-                suggestionHeight = heightMod.useSmallSuggestionBarHeight(0);
         } catch (_) {}
-        if (!enabled("bulkDelete") || !bulkDelete.active || !React || !RN) return null;
-        if (props && props.channelId && String(props.channelId) !== String(bulkDelete.channelId)) return null;
-        const s = useBulkBarStyles();
+        const shown = enabled("bulkDelete") && bulkDelete.active && !!React && !!RN &&
+            !(props && props.channelId && String(props.channelId) !== String(bulkDelete.channelId));
+        // Android's Back leaves selection first, like every other selection mode, instead of leaving the chat.
+        React.useEffect(() => {
+            const back = shown && RN.BackHandler;
+            if (!back || typeof back.addEventListener !== "function") return undefined;
+            const sub = back.addEventListener("hardwareBackPress", () => {
+                if (!bulkDelete.active) return false;
+                if (!bulkDelete.deleting) bulkDeleteCancel();
+                return true;
+            });
+            return () => { try { sub && typeof sub.remove === "function" && sub.remove(); } catch (_) {} };
+        }, [shown]);
+        if (!shown) return null;
         const Press = inspectedExport(6185, "PressableOpacity") || RN.TouchableOpacity || RN.Pressable || RN.View;
         const count = bulkDelete.selected.size;
         const deleting = bulkDelete.deleting;
-        const selectable = bulkDeleteChannelSelectableIds(bulkDelete.channelId);
+        const selectable = deleting ? [] : bulkDeleteChannelSelectableIds(bulkDelete.channelId);
         const allSelected = selectable.length > 0 && selectable.every(id => bulkDelete.selected.has(id));
         const Trash = venusIcon(5049, "TrashIcon"), Close = venusIcon(6296, "CircleXIcon");
         const statusText = deleting ?
             tr("Deleting {done} of {total}…", {done:Math.min(bulkDelete.progress + 1, bulkDelete.total), total:bulkDelete.total}) :
             tr("{n} selected", {n:count});
-        const bottom = Math.max(56, Number.isFinite(inputHeight) && inputHeight > 0 ? inputHeight : 64) + Math.max(0, Number(suggestionHeight) || 0) + 12;
-        // A plain view placed with layout (bottom), never a native-driven transform or popIn wrapper: on Android those draw
-        // the bar where it belongs but leave its touch area behind (#82). Appended inside ChatViewWrapper's children so it
-        // sits above DCDChatList's native GestureDetector and receives touches directly without falling through to chat.
-        return el(RN.View, {pointerEvents:"box-none", collapsable:false, style:[s.wrap, {bottom}]},
-            el(RN.View, {
-                style:s.bar,
-                collapsable:false,
-                accessible:true,
-                accessibilityRole:"toolbar",
-                onStartShouldSetResponder:() => true
-            },
+        const height = Math.max(56, Number.isFinite(inputHeight) && inputHeight > 0 ? inputHeight : 0);
+        // A plain view placed with layout, never a native-driven transform or popIn wrapper: on Android those draw the bar
+        // where it belongs but leave its touch area behind (#82). The slot takes every touch, so the hidden composer
+        // underneath can't be tapped by accident.
+        return el(RN.View, {collapsable:false, onStartShouldSetResponder:() => true, style:[s.wrap, {height}]},
+            el(RN.View, {style:s.bar, collapsable:false, accessible:false, accessibilityRole:"toolbar"},
                 el(RN.View, {style:count > 0 ? s.badge : s.badgeMuted},
                     el(RN.Text, {style:s.badgeText}, String(count))),
                 el(RN.View, {style:{flex:1, gap:1}},
@@ -13548,14 +13556,15 @@
                         onPress:bulkDeleteSelectAll,
                         accessibilityRole:"button",
                         accessibilityLabel:tr(allSelected ? "Deselect all" : "Select all"),
-                        hitSlop:{top:8, bottom:8, left:8, right:8}
-                    }, el(RN.Text, {style:[s.sub, {color:"#94a8ff", fontWeight:"600"}], numberOfLines:1},
-                        tr(allSelected ? "Deselect all" : "Select all"))) : null),
+                        hitSlop:{top:8, bottom:8, left:8, right:8},
+                        style:{alignSelf:"flex-start"}
+                    }, el(RN.Text, {style:s.link, numberOfLines:1}, tr(allSelected ? "Deselect all" : "Select all"))) : null),
                 !deleting ? el(Press, {
                     onPress:count > 0 ? bulkDeleteConfirmAndRun : undefined,
                     disabled:count === 0,
                     accessibilityRole:"button",
                     accessibilityLabel:tr("Delete"),
+                    accessibilityState:{disabled:count === 0},
                     hitSlop:{top:8, bottom:8, left:4, right:4},
                     style:[s.del, count === 0 ? s.delDisabled : null]
                 },
