@@ -10800,7 +10800,7 @@
         BACKGROUND_PRIMARY: ["BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND", "PANEL_BG", "MOBILE_KEYBOARD_GAP_BACKGROUND", "MOBILE_TYPING_INDICATOR_BACKGROUND_DEFAULT"],
         BACKGROUND_MOBILE_PRIMARY: ["BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND", "PANEL_BG"],
         BG_BASE_PRIMARY: ["BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND", "PANEL_BG"],
-        CHAT_BACKGROUND: ["CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND", "BACKGROUND_BASE_LOWER"],
+        CHAT_BACKGROUND: ["BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "STANDALONE_CHANNEL_CONTENT_BACKGROUND"],
         HOME_BACKGROUND: ["BACKGROUND_BASE_LOWER", "BACKGROUND_BASE_LOW"],
         BACKGROUND_SECONDARY: ["BACKGROUND_BASE_LOW", "BACKGROUND_SURFACE_HIGH", "CARD_BACKGROUND_DEFAULT", "TAB_BAR_BACKGROUND", "MOBILE_FLOATINGBAR_BACKGROUND", "MOBILE_COMMAND_BAR_BACKGROUND"],
         BACKGROUND_MOBILE_SECONDARY: ["BACKGROUND_BASE_LOW", "BACKGROUND_SURFACE_HIGH", "CARD_BACKGROUND_DEFAULT", "TAB_BAR_BACKGROUND"],
@@ -10901,10 +10901,11 @@
         REDESIGN_BUTTON_SECONDARY_OVERLAY_TEXT: ["CONTROL_OVERLAY_SECONDARY_TEXT_DEFAULT"],
         POLLS_NORMAL_FILL_HOVER: ["POLLS_VOTED_FILL"]
     };
-    // When two legacy keys name a token equally exactly, the plain one wins over its mobile or BG_ variant: a theme that
-    // sets both BACKGROUND_SECONDARY and BACKGROUND_MOBILE_SECONDARY draws Discord's screens in the first. The variants
-    // mostly repeat it, and where they don't (Pyontheme's near-black #0f0e18) the theme's own previews never show them.
-    const LEGACY_ALIAS_VARIANT = {BACKGROUND_MOBILE_PRIMARY:1, BACKGROUND_MOBILE_SECONDARY:1, BG_BASE_PRIMARY:1, BG_BASE_SECONDARY:1, BG_BASE_TERTIARY:1, HOME_BACKGROUND:1};
+    // Keys mobile Discord stopped reading long before themes were written for it: the plain key always wins over them, and
+    // they only fill in when a theme doesn't set it. A theme that sets both BACKGROUND_PRIMARY and CHAT_BACKGROUND or
+    // BACKGROUND_MOBILE_SECONDARY looked like the plain key in Revenge, which colors by exact name; the variants mostly
+    // repeat it, and where they don't (Pyontheme's near-black #0f0e18 and #161621) its own screenshots never show them.
+    const LEGACY_ALIAS_VARIANT = {BACKGROUND_MOBILE_PRIMARY:1, BACKGROUND_MOBILE_SECONDARY:1, BG_BASE_PRIMARY:1, BG_BASE_SECONDARY:1, BG_BASE_TERTIARY:1, HOME_BACKGROUND:1, CHAT_BACKGROUND:1};
     // Chat surface tokens that take a theme's background.color.
     const CHAT_SURFACE_TOKENS = [
         "CHANNEL_BACKGROUND_DEFAULT",
@@ -11377,7 +11378,7 @@
             const variant = LEGACY_ALIAS_VARIANT[key] || 0;
             for (let i = 0; i < targets.length; i++) {
                 const was = aliasRank.get(targets[i]);
-                if (!was || i < was.rank || i === was.rank && (variant < was.variant || variant === was.variant && targets.length < was.width))
+                if (!was || variant < was.variant || variant === was.variant && (i < was.rank || i === was.rank && targets.length < was.width))
                     aliasRank.set(targets[i], {rank:i, variant, width:targets.length, arr});
             }
         }
