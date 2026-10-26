@@ -51,6 +51,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Show hidden channels | Channels you can't open appear with a lock. Only a tap opens their details menu, which you can turn off |
 | | Server info | Hold a server's icon to see live details: who's online, channels, roles, emojis, boost progress, the owner, your friends there, when it was made and when you joined |
 | | Spaces in channel names | "general chat" instead of "general-chat" |
+| | Clean channel names | Removes emoji, dividers and symbols (🎫┃, ✦, 「」) and fancy fonts (𝐂𝐎𝐌𝐌𝐔𝐍𝐈𝐓𝐘) from channel and category names, each with its own switch. Only how names look changes: links, mentions and search still use the real name, and a name made only of emoji stays as it is |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
 | | Use your phone's emojis | Your phone's emojis instead of Discord's, or the emojis from a color emoji font you import (like Twemoji or Noto Color Emoji) |
 | | Hide the gift button | Removes the Nitro gift button from the message bar |

@@ -256,6 +256,7 @@ BOOTSTRAP_MODULES = [
     (12274, 'design/components/Icon/native/redesign/generated/StickerIcon.tsx', ['StickerIcon'], 'StickerIcon'),
     (12325, 'design/components/Icon/native/redesign/generated/BoostTier1Icon.tsx', ['BoostTier1Icon'], 'BoostTier1Icon'),
     (12595, 'design/components/Icon/native/redesign/generated/WaveformIcon.tsx', ['WaveformIcon'], 'WaveformIcon'),
+    (10621, 'design/components/Icon/native/redesign/generated/SlashBoxIcon.tsx', ['SlashBoxIcon'], 'SlashBoxIcon (Clean channel names)'),
     (12605, 'design/components/Icon/native/redesign/generated/MagicWandIcon.tsx', ['MagicWandIcon'], 'MagicWandIcon'),
     (13066, 'modules/media_viewer/native/components/overlay/MediaViewerOverlayButtonFavoriteGIF.tsx', ['default'], 'MediaViewerHeader'),
     (13156, 'modules/user_profile/native/UserProfileActivityVoiceChannelUsers.tsx', ['default'], 'UserProfileActivityVoiceChannelUsers'),
