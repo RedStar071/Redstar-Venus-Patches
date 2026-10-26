@@ -72,7 +72,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -89,7 +89,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -918,7 +918,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], noHandsfree:[12271, "HeadphonesIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -960,6 +960,7 @@
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
+        noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
         bulkDelete:["Select Messages", "Select all", "Delete", "Clear kept deleted messages", "Include kept deleted messages", "Ask before deleting"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
@@ -1344,6 +1345,7 @@
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
         // Advanced
         toggle("advanced", "experiments", "Unlock Discord experiments", "Adds Dev Tools to Settings, to try features Discord is still testing.");
+        toggle("advanced", "noHandsfree", "Keep Bluetooth audio clear in calls", "Headphones stay in music quality. Your phone's mic picks up your voice.");
         withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Plays real PC games in the background for game time and unique games.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests], ["Advanced", groups.advanced]];
