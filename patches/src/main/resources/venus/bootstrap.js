@@ -52,7 +52,7 @@
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    const revision = "1.18.0";
+    const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
     // Module 120 owns setUpDefaltReactNativeEnvironment in this exact asset.
