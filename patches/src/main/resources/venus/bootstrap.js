@@ -5701,14 +5701,14 @@
         const on = enabled(owner), info = fontFiles[kind], busy = fontFiles.busy === kind, Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
         const canPick = !!files && typeof inspectedExport(12803, "pick") === "function" && typeof inspectedExport(12803, "keepLocalCopy") === "function";
         const fileLabel = info ? (info.name || tr(font ? "Imported font" : "Imported emoji font")) + " \u00b7 " + formatSize(info.size) : "";
-        const choices = [["phone", font ? "Your phone's font" : "Your phone's emojis",
-            font ? "The font your phone uses everywhere else." : "The emojis your phone's keyboard shows.", rowIcon(6642, "MobilePhoneIcon")]];
-        if (info || settings[k.source] === "file") choices.push(["file", font ? "Imported font" : "Imported emoji font",
+        const choices = [["phone", font ? tr("Your phone's font") : tr("Your phone's emojis"),
+            font ? tr("The font your phone uses everywhere else.") : tr("The emojis your phone's keyboard shows."), rowIcon(6642, "MobilePhoneIcon")]];
+        if (info || settings[k.source] === "file") choices.push(["file", font ? tr("Imported font") : tr("Imported emoji font"),
             info ? fileLabel : tr("The file is missing. Import it again."), rowIcon(9337, "PaperIcon")]);
         const groups = [
             on ? null : offCard("status", venusIcon(font ? 15974 : 12901, font ? "LettersIcon" : "ChatSmileIcon"), owner),
             // Only a choice once there's a file to choose; before that the phone's look is simply what's used.
-            info || settings[k.source] === "file" ? radioGroup(ui, "source", "Use", k.source, on, choices.map(([value, label, sub, icon]) => [value, tr(label), value === "file" ? sub : tr(sub), icon]), true) : null,
+            info || settings[k.source] === "file" ? radioGroup(ui, "source", font ? "Font to use" : "Emojis to use", k.source, on, choices, true) : null,
             canPick && Row ? el(Group, {key:"file", title:tr(font ? "Font file" : "Emoji font")},
                 el(Row, {key:"import", label:tr(busy ? "Importing\u2026" : info ? (font ? "Replace the font" : "Replace the emoji font") : (font ? "Import a font" : "Import an emoji font")),
                     subLabel:tr(font ? "A TTF, OTF or TTC file, up to 32 MB." : "A color emoji TTF, like Twemoji or Noto Color Emoji, up to 64 MB."),
