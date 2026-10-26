@@ -716,6 +716,38 @@ val unlockAppIcons = bundledPlugin("appIcons", "Unlock app icons",
 val unlockNitroThemes = bundledPlugin("nitroThemes", "Unlock Nitro themes",
     "Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them.")
 
+/**
+ * The native color swap both Material You colors and Custom themes use: Discord's Android views (the chat list, embeds,
+ * the voice overlay, the window) draw with built-in theme colors JS can't reach, so JS sends a Discord color -> new color
+ * table through getFileHash and every native color read goes through it. Installed once, whichever patches are selected.
+ */
+private val nativeThemeColors = bytecodePatch {
+    dependsOn(venusSettings)
+    extendWith("extensions/monet.mpe")
+    execute {
+        materialYouBridge(Fingerprint(
+            definingClass = FILE_MODULE,
+            name = "getFileHash",
+            returnType = "V",
+            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "D", PROMISE)
+        ).method)
+        materialYouNativeColors(Fingerprint(
+            definingClass = COLOR_UTILS,
+            name = "applySaturationFactor",
+            returnType = "I",
+            parameters = listOf("I")
+        ).method)
+        for ((owner, name, parameters) in MATERIAL_YOU_DIRECT_READS)
+            materialYouDirectColors(Fingerprint(definingClass = owner, name = name, parameters = parameters).method)
+        readMaterialYouColors(Fingerprint(
+            definingClass = "Lcom/discord/MainApplication;",
+            name = "onCreate",
+            returnType = "V",
+            parameters = listOf()
+        ).method)
+    }
+}
+
 @Suppress("unused")
 val customThemes = bytecodePatch(
     name = "Custom themes",
@@ -1002,38 +1034,6 @@ internal fun readMaterialYouColors(method: app.morphe.patcher.util.proxy.mutable
     if (first?.opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_SUPER || target != "Landroid/app/Application;->onCreate()V")
         throw PatchException("MainApplication.onCreate no longer starts with super.onCreate()")
     method.addInstructions(1, "invoke-static {p0}, $SYSTEM_COLORS->init(Landroid/content/Context;)V")
-}
-
-/**
- * The native color swap both Material You colors and Custom themes use: Discord's Android views (the chat list, embeds,
- * the voice overlay, the window) draw with built-in theme colors JS can't reach, so JS sends a Discord color -> new color
- * table through getFileHash and every native color read goes through it. Installed once, whichever patches are selected.
- */
-private val nativeThemeColors = bytecodePatch {
-    dependsOn(venusSettings)
-    extendWith("extensions/monet.mpe")
-    execute {
-        materialYouBridge(Fingerprint(
-            definingClass = FILE_MODULE,
-            name = "getFileHash",
-            returnType = "V",
-            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "D", PROMISE)
-        ).method)
-        materialYouNativeColors(Fingerprint(
-            definingClass = COLOR_UTILS,
-            name = "applySaturationFactor",
-            returnType = "I",
-            parameters = listOf("I")
-        ).method)
-        for ((owner, name, parameters) in MATERIAL_YOU_DIRECT_READS)
-            materialYouDirectColors(Fingerprint(definingClass = owner, name = name, parameters = parameters).method)
-        readMaterialYouColors(Fingerprint(
-            definingClass = "Lcom/discord/MainApplication;",
-            name = "onCreate",
-            returnType = "V",
-            parameters = listOf()
-        ).method)
-    }
 }
 
 @Suppress("unused")
