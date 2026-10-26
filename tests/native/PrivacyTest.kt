@@ -431,6 +431,45 @@ fun main(args: Array<String>) {
             allCode.subList(1, 4).map { ((it as ReferenceInstruction).reference as MethodReference).definingClass }.toSet() == setOf(SYSTEM_FONT, SYSTEM_EMOJI, SYSTEM_COLORS)) { "Setting reads must sit right after super.onCreate()" }
         checkBranches(all, "MainApplication.onCreate with Material You")
     }
+    // Keep Bluetooth audio clear in calls: each hands-free AudioManager call in com.discord.audio becomes a static call to
+    // Handsfree with the same registers. Nothing else in the method moves, and no hands-free call is left behind.
+    run {
+        val handsfreeNames = HANDSFREE_CALLS.keys.map { it.substringBefore('(') }.toSet()
+        for (site in HANDSFREE_SITES) {
+            val source = methods.single { it.definingClass == site.owner && it.name == site.name && it.parameterTypes.map { p -> p.toString() } == site.parameters }
+            val method = MutableMethod(source)
+            val count = keepBluetoothA2dp(method)
+            check(count == site.calls) { "${site.owner}->${site.name}: $count hands-free calls, expected ${site.calls}" }
+            val before = source.implementation!!.instructions.toList()
+            val after = method.implementation!!.instructions.toList()
+            check(method.implementation!!.registerCount == source.implementation!!.registerCount && after.size == before.size) { "${site.name}: code size or registers changed" }
+            var swapped = 0
+            for (i in before.indices) {
+                val old = (before[i] as? ReferenceInstruction)?.reference as? MethodReference
+                if (old != null && old.definingClass == AUDIO_MANAGER && old.name in handsfreeNames && before[i].opcode == Opcode.INVOKE_VIRTUAL) {
+                    val new = after[i]
+                    val ref = (new as ReferenceInstruction).reference as MethodReference
+                    check(new.opcode == Opcode.INVOKE_STATIC && ref.definingClass == HANDSFREE && ref.name == old.name &&
+                        ref.parameterTypes.map { it.toString() } == listOf(AUDIO_MANAGER) + old.parameterTypes.map { it.toString() } && ref.returnType == old.returnType) { "${site.name}: bad swap $ref" }
+                    val a = before[i] as FiveRegisterInstruction; val b = new as FiveRegisterInstruction
+                    check(listOf(a.registerCount, a.registerC, a.registerD, a.registerE) == listOf(b.registerCount, b.registerC, b.registerD, b.registerE)) { "${site.name}: swap changed registers" }
+                    swapped++
+                } else check(after[i].opcode == before[i].opcode && after[i].codeUnits == before[i].codeUnits) { "${site.name}: Discord's code moved at $i" }
+            }
+            check(swapped == site.calls)
+            checkBranches(method, "${site.owner}->${site.name}")
+        }
+        // Every hands-free call Discord's audio code makes is covered, so none still reaches Android directly.
+        val all = methods.filter { it.definingClass.startsWith("Lcom/discord/audio/") }.flatMap { m -> (m.implementation?.instructions ?: emptyList()).mapNotNull {
+            ((it as? ReferenceInstruction)?.reference as? MethodReference)?.takeIf { r -> r.definingClass == AUDIO_MANAGER && r.name in handsfreeNames }?.let { m } } }
+        check(all.size == HANDSFREE_SITES.sumOf { it.calls }) { "Discord makes ${all.size} hands-free calls; Venus covers ${HANDSFREE_SITES.sumOf { it.calls }}" }
+        val created = MutableMethod(appCreate)
+        readHandsfreeContext(created)
+        val code = created.implementation!!.instructions.toList()
+        check(code.size == appCreate.implementation!!.instructions.count() + 1 && code[0].opcode == Opcode.INVOKE_SUPER &&
+            ((code[1] as ReferenceInstruction).reference as MethodReference).definingClass == HANDSFREE) { "Handsfree.init must sit right after super.onCreate()" }
+        checkBranches(created, "MainApplication.onCreate with Handsfree")
+    }
     fun resolveHost(ref: MethodReference): Boolean = methods.any {
         it.definingClass == ref.definingClass && it.name == ref.name && it.returnType == ref.returnType &&
             it.parameterTypes.map { parameter -> parameter.toString() } == ref.parameterTypes.map { parameter -> parameter.toString() } && it.accessFlags and 1 != 0
