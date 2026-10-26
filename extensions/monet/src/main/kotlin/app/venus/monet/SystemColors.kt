@@ -211,7 +211,10 @@ object SystemColors {
                         type = type.superclass
                     }
                     themes.put(key, old)
-                } catch (_: Throwable) { }
+                } catch (_: Throwable) {
+                    // Chat rows still hold the old object: keep it in the map, or the next lookup builds a third one.
+                    themes.put(key, old)
+                }
             }
         } catch (_: Throwable) { }
     }
@@ -231,19 +234,24 @@ object SystemColors {
         try { sweep(activity.window.decorView, 0) } catch (_: Throwable) { }
     }
 
-    private fun isList(type: Class<*>?): Boolean {
-        var at = type
-        while (at != null) {
-            if (at.name == "androidx.recyclerview.widget.RecyclerView") return true
-            at = at.superclass
-        }
-        return false
+    /** RecyclerView, looked up once through Discord's class loader: a sweep visits every view on screen. */
+    @Volatile
+    private var listClass: Class<*>? = null
+    private fun listClassFor(view: View): Class<*>? {
+        val known = listClass
+        if (known != null) return known
+        return try {
+            val found = Class.forName("androidx.recyclerview.widget.RecyclerView", false, view.javaClass.classLoader)
+            listClass = found
+            found
+        } catch (_: Throwable) { null }
     }
 
     /** Rebinds native lists (chat rows read their colors when bound) and redraws everything else. */
     private fun sweep(view: View, depth: Int) {
         if (depth > 64) return
-        if (isList(view.javaClass)) {
+        val list = listClassFor(view)
+        if (list != null && list.isInstance(view)) {
             try {
                 val adapter = view.javaClass.getMethod("getAdapter").invoke(view)
                 adapter?.javaClass?.getMethod("notifyDataSetChanged")?.invoke(adapter)
