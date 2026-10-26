@@ -294,6 +294,13 @@ These keep features working and the project consistent. They say nothing about h
 - **Legacy keys mobile no longer reads** (`LEGACY_ALIAS_VARIANT`: `CHAT_BACKGROUND`, `*_MOBILE_*`, `BG_BASE_*`, `INFO_*_TEXT`,
   pressed/hover states) only fill in when the theme doesn't set the plain key that feeds the same token. Revenge colored
   by exact name, so those variants never showed there; letting them win painted Pyontheme's chat and panels near-black.
+- **Legacy raw colors** (`PRIMARY_*`, `PLUM_*`, `BRAND_*`, `WHITE`, `BLACK`) reach the tokens Discord has since moved to
+  NEUTRAL / OPACITY / BLURPLE through `LEGACY_TOKEN_RAWS`: each token's last legacy raw (and opacity) per slot, from
+  Discord's own tables over time (nexpid/Themelings). A theme's `PRIMARY_600` then colors what `PRIMARY_600` used to
+  color, so cards stay lighter than the page under them; mapping it to a NEUTRAL shade instead made rainForest's cards
+  darker than their page. A dark slot without its own raw borrows the other dark slots' (`LEGACY_SLOT_ORDER`). A
+  token the theme recolors by its current raw is left alone. Regenerate with `python3 scripts/hbc/legacy_colors.py`
+  when porting; keep the table a plain literal (parsing it at boot cost ~1 ms per theme compile).
 - Revenge rules Venus follows: arrays are `[dark, light, midnight, darker]`; a slot the array doesn't reach borrows
   index 0, but a slot written as `false` keeps Discord's own color, even if a legacy alias reached it first. When two
   legacy keys feed one token, the key that lists it earlier (then the shorter list) wins. Values tolerate
