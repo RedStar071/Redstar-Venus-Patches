@@ -155,13 +155,28 @@ object SystemEmoji {
         return tag == 0x00010000 || tag == 0x4F54544F || tag == 0x74746366 || tag == 0x74727565
     }
 
-    /** Whether the font draws a common emoji as a picture of its own, not the phone's fallback: a font with no emojis is refused. */
+    /**
+     * Whether the font draws emojis itself. Android falls back to the phone's emoji font for anything a font lacks, so
+     * hasGlyph says yes for any font: instead, a few common emojis are drawn with it and with the phone's font, and a font
+     * that draws every one exactly like the phone does has no emojis of its own.
+     */
     private fun drawsEmojis(typeface: Typeface): Boolean {
-        val paint = Paint()
+        // Grinning face, red heart, thumbs up: in every emoji font, from the oldest to the newest.
+        for (sample in arrayOf("\uD83D\uDE00", "\u2764\uFE0F", "\uD83D\uDC4D")) {
+            val mine = picture(sample, typeface)
+            val phone = picture(sample, Typeface.DEFAULT)
+            try { if (!mine.sameAs(phone)) return true } finally { mine.recycle(); phone.recycle() }
+        }
+        return false
+    }
+
+    private fun picture(text: String, typeface: Typeface): Bitmap {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.typeface = typeface
-        paint.textSize = 32f
-        // U+1F600 (grinning face) and U+2764 (red heart): in every emoji font, from the oldest to the newest.
-        return paint.hasGlyph("\uD83D\uDE00") || paint.hasGlyph("\u2764\uFE0F")
+        paint.textSize = 40f
+        val bitmap = Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).drawText(text, 4f, 40f, paint)
+        return bitmap
     }
 
     /**
