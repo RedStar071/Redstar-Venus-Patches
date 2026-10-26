@@ -1009,7 +1009,7 @@ internal fun readMaterialYouColors(method: app.morphe.patcher.util.proxy.mutable
  * the voice overlay, the window) draw with built-in theme colors JS can't reach, so JS sends a Discord color -> new color
  * table through getFileHash and every native color read goes through it. Installed once, whichever patches are selected.
  */
-internal val nativeThemeColors = bytecodePatch {
+private val nativeThemeColors = bytecodePatch {
     dependsOn(venusSettings)
     extendWith("extensions/monet.mpe")
     execute {
