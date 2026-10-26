@@ -266,6 +266,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 12133 | `modules/multi_account/MultiAccountActionCreators.tsx` | validateMultiAccountTokens, switchAccount, moveAccount | MultiAccountActionCreators |
 | 12146 | `modules/chat_input/native/action_buttons/ChatInputRightActions.tsx` | displayName, default | ChatInputGiftButton |
 | 12178 | `design/components/Icon/native/redesign/generated/ChatWarningIcon.tsx` | ChatWarningIcon | ChatWarningIcon |
+| 12271 | `design/components/Icon/native/redesign/generated/HeadphonesIcon.tsx` | HeadphonesIcon | HeadphonesIcon (Keep Bluetooth audio clear in calls) |
 | 12274 | `design/components/Icon/native/redesign/generated/StickerIcon.tsx` | StickerIcon | StickerIcon |
 | 12325 | `design/components/Icon/native/redesign/generated/BoostTier1Icon.tsx` | BoostTier1Icon | BoostTier1Icon |
 | 12595 | `design/components/Icon/native/redesign/generated/WaveformIcon.tsx` | WaveformIcon | WaveformIcon |
