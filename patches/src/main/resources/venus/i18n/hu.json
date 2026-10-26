@@ -330,6 +330,7 @@
     "Green": "Zöld",
     "Gujarati": "gudzsaráti",
     "Has anyone tried the new update?": "Próbálta már valaki az új frissítést?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "A fejhallgató hívás közben is zenei minőségben szól. A hangodat a telefon mikrofonja veszi fel.",
     "Hebrew": "héber",
     "Hex color": "Hex színkód",
     "Hi everyone! Who's coming tonight?": "Sziasztok! Ki jön ma este?",
@@ -412,6 +413,7 @@
     "Jump to top": "Ugrás az elejére",
     "Just beat the final boss on my first try!": "Elsőre legyőztem a főellenséget!",
     "Kazakh": "kazah",
+    "Keep Bluetooth audio clear in calls": "Tiszta Bluetooth-hang hívásokban",
     "Keep after restarting": "Megőrzés újraindítás után",
     "Keep deleted messages": "Törölt üzenetek megőrzése",
     "Keep up to": "Megőrzési korlát",
@@ -1238,8 +1240,6 @@
     "{on} of {total} turned on": "{total} / {on} bekapcsolva",
     "{site} is off, so the link is sent as written": "A(z) {site} ki van kapcsolva, ezért a link változatlanul megy el",
     "{text} text, {voice} voice": "{text} szöveges, {voice} hang",
-    "{time} ago": "{time} ezelőtt",
-    "Keep Bluetooth audio clear in calls": "Tiszta Bluetooth-hang hívásokban",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "A fejhallgató hívás közben is zenei minőségben szól. A hangodat a telefon mikrofonja veszi fel."
+    "{time} ago": "{time} ezelőtt"
   }
 }

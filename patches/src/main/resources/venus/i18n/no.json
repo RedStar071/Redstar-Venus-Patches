@@ -330,6 +330,7 @@
     "Green": "Grønn",
     "Gujarati": "gujarati",
     "Has anyone tried the new update?": "Har noen prøvd den nye oppdateringen?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Hodetelefonene holder musikkvalitet i samtaler. Telefonens mikrofon fanger opp stemmen din.",
     "Hebrew": "hebraisk",
     "Hex color": "Hex-farge",
     "Hi everyone! Who's coming tonight?": "Hei alle sammen! Hvem blir med i kveld?",
@@ -412,6 +413,7 @@
     "Jump to top": "Hopp til toppen",
     "Just beat the final boss on my first try!": "Slo sluttbossen på første forsøk!",
     "Kazakh": "kasakhisk",
+    "Keep Bluetooth audio clear in calls": "Klar Bluetooth-lyd i samtaler",
     "Keep after restarting": "Behold etter omstart",
     "Keep deleted messages": "Behold slettede meldinger",
     "Keep up to": "Behold opptil",
@@ -1220,8 +1222,6 @@
     "{on} of {total} turned on": "{on} av {total} slått på",
     "{site} is off, so the link is sent as written": "{site} er av, så lenken sendes som den er",
     "{text} text, {voice} voice": "{text} tekst, {voice} tale",
-    "{time} ago": "for {time} siden",
-    "Keep Bluetooth audio clear in calls": "Klar Bluetooth-lyd i samtaler",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Hodetelefonene holder musikkvalitet i samtaler. Telefonens mikrofon fanger opp stemmen din."
+    "{time} ago": "for {time} siden"
   }
 }

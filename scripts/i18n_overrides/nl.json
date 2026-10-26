@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Top, het begint om 6 uur!",
   "Green": "Groen",
   "Has anyone tried the new update?": "Heeft iemand de nieuwe update al geprobeerd?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Koptelefoons blijven in muziekkwaliteit tijdens gesprekken. De microfoon van je telefoon vangt je stem op.",
   "Hex color": "Hex-kleurcode",
   "Hi everyone! Who's coming tonight?": "Hoi allemaal! Wie doet er vanavond mee?",
   "Hidden category": "Verborgen categorie",
@@ -375,6 +376,7 @@
   "Jump to first message": "Naar eerste bericht springen",
   "Jump to top": "Naar het begin springen",
   "Just beat the final boss on my first try!": "Eindbaas in één keer verslagen!",
+  "Keep Bluetooth audio clear in calls": "Helder Bluetooth-geluid in gesprekken",
   "Keep after restarting": "Bewaren na herstart",
   "Keep deleted messages": "Verwijderde berichten bewaren",
   "Keep up to": "Maximaal bewaren",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} van {total} functies ingeschakeld. Zet ze aan of uit bij Functies.",
   "{on} of {total} turned on": "{on} van {total} ingeschakeld",
   "{site} is off, so the link is sent as written": "{site} staat uit, dus de link wordt verstuurd zoals hij is",
-  "{text} text, {voice} voice": "{text} tekst, {voice} spraak",
-  "Keep Bluetooth audio clear in calls": "Helder Bluetooth-geluid in gesprekken",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Koptelefoons blijven in muziekkwaliteit tijdens gesprekken. De microfoon van je telefoon vangt je stem op."
+  "{text} text, {voice} voice": "{text} tekst, {voice} spraak"
 }

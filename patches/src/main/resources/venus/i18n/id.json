@@ -315,6 +315,7 @@
     "Green": "Hijau",
     "Gujarati": "Gujarat",
     "Has anyone tried the new update?": "Sudah ada yang coba pembaruan baru?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Headphone tetap berkualitas musik saat panggilan. Mikrofon ponsel menangkap suaramu.",
     "Hebrew": "Ibrani",
     "Hex color": "Warna hex",
     "Hi everyone! Who's coming tonight?": "Halo semuanya! Siapa saja yang ikut malam ini?",
@@ -397,6 +398,7 @@
     "Jump to top": "Lompat ke atas",
     "Just beat the final boss on my first try!": "Berhasil kalahkan bos terakhir di percobaan pertama!",
     "Kazakh": "Kazakh",
+    "Keep Bluetooth audio clear in calls": "Audio Bluetooth jernih saat panggilan",
     "Keep after restarting": "Simpan setelah dimulai ulang",
     "Keep deleted messages": "Simpan pesan yang dihapus",
     "Keep up to": "Simpan hingga",
@@ -1099,8 +1101,6 @@
     "{on} of {total} turned on": "{on} dari {total} aktif",
     "{site} is off, so the link is sent as written": "{site} nonaktif, jadi tautan dikirim apa adanya",
     "{text} text, {voice} voice": "{text} teks, {voice} suara",
-    "{time} ago": "{time} yang lalu",
-    "Keep Bluetooth audio clear in calls": "Audio Bluetooth jernih saat panggilan",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Headphone tetap berkualitas musik saat panggilan. Mikrofon ponsel menangkap suaramu."
+    "{time} ago": "{time} yang lalu"
   }
 }

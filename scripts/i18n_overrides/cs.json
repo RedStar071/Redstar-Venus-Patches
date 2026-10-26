@@ -308,6 +308,7 @@
   "Great, it starts at 6 AM!": "Super, začíná to v 6:00!",
   "Green": "Zelená",
   "Has anyone tried the new update?": "Zkoušel už někdo novou aktualizaci?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Sluchátka zůstanou při hovorech v hudební kvalitě. Váš hlas snímá mikrofon telefonu.",
   "Hex color": "HEX kód barvy",
   "Hi everyone! Who's coming tonight?": "Ahoj všichni! Kdo dnes večer dorazí?",
   "Hidden category": "Skrytá kategorie",
@@ -380,6 +381,7 @@
   "Jump to first message": "Přejít na první zprávu",
   "Jump to top": "Přejít nahoru",
   "Just beat the final boss on my first try!": "Porazil jsem posledního bosse na první pokus!",
+  "Keep Bluetooth audio clear in calls": "Čistý zvuk Bluetooth při hovorech",
   "Keep after restarting": "Zachovat i po restartu",
   "Keep deleted messages": "Uchovávat smazané zprávy",
   "Keep up to": "Uchovat nejvýše",
@@ -1176,7 +1178,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Zapnuto {on} z {total} funkcí. Zapněte nebo vypněte je ve Funkcích.",
   "{on} of {total} turned on": "{on} z {total} zapnuto",
   "{site} is off, so the link is sent as written": "{site} je vypnutý, takže se odkaz odešle beze změny",
-  "{text} text, {voice} voice": "{text} textových, {voice} hlasových",
-  "Keep Bluetooth audio clear in calls": "Čistý zvuk Bluetooth při hovorech",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Sluchátka zůstanou při hovorech v hudební kvalitě. Váš hlas snímá mikrofon telefonu."
+  "{text} text, {voice} voice": "{text} textových, {voice} hlasových"
 }

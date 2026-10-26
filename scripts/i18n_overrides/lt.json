@@ -308,6 +308,7 @@
   "Great, it starts at 6 AM!": "Puiku, pradžia 6 val. ryto!",
   "Green": "Žalia",
   "Has anyone tried the new update?": "Ar kas nors jau išbandėte naują atnaujinimą?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Ausinės skambučių metu išlaiko muzikos kokybę. Tavo balsą paima telefono mikrofonas.",
   "Hex color": "Šešioliktainis spalvos kodas (Hex)",
   "Hi everyone! Who's coming tonight?": "Sveiki visi! Kas prisijungs šįvakar?",
   "Hidden category": "Paslėpta kategorija",
@@ -380,6 +381,7 @@
   "Jump to first message": "Pereiti prie pirmos žinutės",
   "Jump to top": "Pereiti į pradžią",
   "Just beat the final boss on my first try!": "Įveikiau paskutinį bosą iš pirmo karto!",
+  "Keep Bluetooth audio clear in calls": "Švarus Bluetooth garsas skambučiuose",
   "Keep after restarting": "Išsaugoti po paleidimo iš naujo",
   "Keep deleted messages": "Išsaugoti ištrintas žinutes",
   "Keep up to": "Saugoti iki",
@@ -1176,7 +1178,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Įjungta funkcijų: {on} iš {total}. Įjunk arba išjunk jas skiltyje „Funkcijos“.",
   "{on} of {total} turned on": "Įjungta {on} iš {total}",
   "{site} is off, so the link is sent as written": "{site} išjungta, todėl nuoroda siunčiama nepakeista",
-  "{text} text, {voice} voice": "{text} tekstiniai, {voice} balso",
-  "Keep Bluetooth audio clear in calls": "Švarus Bluetooth garsas skambučiuose",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Ausinės skambučių metu išlaiko muzikos kokybę. Tavo balsą paima telefono mikrofonas."
+  "{text} text, {voice} voice": "{text} tekstiniai, {voice} balso"
 }

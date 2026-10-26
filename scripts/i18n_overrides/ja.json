@@ -288,6 +288,7 @@
   "Great, it starts at 6 AM!": "いいね、朝 6 時スタートだよ！",
   "Green": "緑",
   "Has anyone tried the new update?": "誰か新しいアップデート試した？",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話中もヘッドホンが音楽用の高音質のまま。声はスマホのマイクで拾います。",
   "Hex color": "カラーコード (Hex)",
   "Hi everyone! Who's coming tonight?": "みんなお疲れ！今夜参加する人いる？",
   "Hidden category": "非表示のカテゴリー",
@@ -360,6 +361,7 @@
   "Jump to first message": "最初のメッセージへ移動",
   "Jump to top": "最初へ移動",
   "Just beat the final boss on my first try!": "ラスボスを一発で倒した！",
+  "Keep Bluetooth audio clear in calls": "通話中も Bluetooth の音をクリアに",
   "Keep after restarting": "再起動後も保持",
   "Keep deleted messages": "削除されたメッセージを保持",
   "Keep up to": "最大保存件数",
@@ -1014,7 +1016,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} 件中 {on} 件の機能がオンです。「機能」でオン・オフを切り替えられます。",
   "{on} of {total} turned on": "{total} 件中 {on} 件がオン",
   "{site} is off, so the link is sent as written": "{site} はオフなので、リンクはそのまま送信されます",
-  "{text} text, {voice} voice": "テキスト {text}・ボイス {voice}",
-  "Keep Bluetooth audio clear in calls": "通話中も Bluetooth の音をクリアに",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話中もヘッドホンが音楽用の高音質のまま。声はスマホのマイクで拾います。"
+  "{text} text, {voice} voice": "テキスト {text}・ボイス {voice}"
 }

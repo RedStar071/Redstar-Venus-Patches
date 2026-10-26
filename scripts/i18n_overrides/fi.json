@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Mahtavaa, se alkaa klo 6!",
   "Green": "Vihreä",
   "Has anyone tried the new update?": "Onko kukaan kokeillut uutta päivitystä?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kuulokkeet pysyvät puheluissa musiikkilaadussa. Puhelimen mikrofoni poimii äänesi.",
   "Hex color": "Heksaväri",
   "Hi everyone! Who's coming tonight?": "Moi kaikki! Kuka on tulossa tänä iltana?",
   "Hidden category": "Piilotettu kategoria",
@@ -375,6 +376,7 @@
   "Jump to first message": "Siirry ensimmäiseen viestiin",
   "Jump to top": "Siirry alkuun",
   "Just beat the final boss on my first try!": "Voitin loppupomon ensimmäisellä yrityksellä!",
+  "Keep Bluetooth audio clear in calls": "Selkeä Bluetooth-ääni puheluissa",
   "Keep after restarting": "Säilytä uudelleenkäynnistyksen jälkeen",
   "Keep deleted messages": "Säilytä poistetut viestit",
   "Keep up to": "Säilytysraja",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on}/{total} ominaisuutta käytössä. Ota niitä käyttöön tai poista käytöstä Ominaisuudet-kohdassa.",
   "{on} of {total} turned on": "{on}/{total} käytössä",
   "{site} is off, so the link is sent as written": "{site} on pois päältä, joten linkki lähetetään sellaisenaan",
-  "{text} text, {voice} voice": "{text} teksti, {voice} puhe",
-  "Keep Bluetooth audio clear in calls": "Selkeä Bluetooth-ääni puheluissa",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kuulokkeet pysyvät puheluissa musiikkilaadussa. Puhelimen mikrofoni poimii äänesi."
+  "{text} text, {voice} voice": "{text} teksti, {voice} puhe"
 }

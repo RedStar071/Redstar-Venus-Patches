@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "बढ़िया, यह सुबह 6 बजे शुरू होगा!",
   "Green": "हरा",
   "Has anyone tried the new update?": "क्या किसी ने नया अपडेट ट्राई किया?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "कॉल में हेडफ़ोन म्यूज़िक क्वालिटी में ही रहते हैं। आपकी आवाज़ फ़ोन का माइक लेता है।",
   "Hex color": "हेक्स रंग",
   "Hi everyone! Who's coming tonight?": "हाय दोस्तों! आज रात कौन-कौन आ रहा है?",
   "Hidden category": "छिपी हुई कैटेगरी",
@@ -375,6 +376,7 @@
   "Jump to first message": "पहले मैसेज पर जाएँ",
   "Jump to top": "सबसे ऊपर जाएँ",
   "Just beat the final boss on my first try!": "पहली ही कोशिश में फ़ाइनल बॉस को हरा दिया!",
+  "Keep Bluetooth audio clear in calls": "कॉल में Bluetooth आवाज़ साफ़ रखें",
   "Keep after restarting": "रीस्टार्ट के बाद भी रखें",
   "Keep deleted messages": "हटाए गए मैसेज बचाकर रखें",
   "Keep up to": "अधिकतम सीमा",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} में से {on} फ़ीचर चालू हैं। इन्हें 'फ़ीचर' में जाकर चालू या बंद करें।",
   "{on} of {total} turned on": "{total} में से {on} चालू",
   "{site} is off, so the link is sent as written": "{site} बंद है, इसलिए लिंक वैसा ही भेजा जाता है",
-  "{text} text, {voice} voice": "{text} टेक्स्ट, {voice} वॉइस",
-  "Keep Bluetooth audio clear in calls": "कॉल में Bluetooth आवाज़ साफ़ रखें",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "कॉल में हेडफ़ोन म्यूज़िक क्वालिटी में ही रहते हैं। आपकी आवाज़ फ़ोन का माइक लेता है।"
+  "{text} text, {voice} voice": "{text} टेक्स्ट, {voice} वॉइस"
 }

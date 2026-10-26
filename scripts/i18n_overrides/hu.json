@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Szuper, reggel 6-kor kezdődik!",
   "Green": "Zöld",
   "Has anyone tried the new update?": "Próbálta már valaki az új frissítést?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "A fejhallgató hívás közben is zenei minőségben szól. A hangodat a telefon mikrofonja veszi fel.",
   "Hex color": "Hex színkód",
   "Hi everyone! Who's coming tonight?": "Sziasztok! Ki jön ma este?",
   "Hidden category": "Rejtett kategória",
@@ -375,6 +376,7 @@
   "Jump to first message": "Ugrás az első üzenetre",
   "Jump to top": "Ugrás az elejére",
   "Just beat the final boss on my first try!": "Elsőre legyőztem a főellenséget!",
+  "Keep Bluetooth audio clear in calls": "Tiszta Bluetooth-hang hívásokban",
   "Keep after restarting": "Megőrzés újraindítás után",
   "Keep deleted messages": "Törölt üzenetek megőrzése",
   "Keep up to": "Megőrzési korlát",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} funkcióból {on} bekapcsolva. Kapcsold be vagy ki őket a Funkciók között.",
   "{on} of {total} turned on": "{total} / {on} bekapcsolva",
   "{site} is off, so the link is sent as written": "A(z) {site} ki van kapcsolva, ezért a link változatlanul megy el",
-  "{text} text, {voice} voice": "{text} szöveges, {voice} hang",
-  "Keep Bluetooth audio clear in calls": "Tiszta Bluetooth-hang hívásokban",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "A fejhallgató hívás közben is zenei minőségben szól. A hangodat a telefon mikrofonja veszi fel."
+  "{text} text, {voice} voice": "{text} szöveges, {voice} hang"
 }

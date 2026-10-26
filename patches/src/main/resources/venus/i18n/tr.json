@@ -330,6 +330,7 @@
     "Green": "Yeşil",
     "Gujarati": "Güceratça",
     "Has anyone tried the new update?": "Yeni güncellemeyi deneyen oldu mu?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kulaklık aramalarda müzik kalitesinde kalır. Sesini telefonun mikrofonu alır.",
     "Hebrew": "İbranice",
     "Hex color": "Hex renk kodu",
     "Hi everyone! Who's coming tonight?": "Herkese selam! Bu akşam kimler geliyor?",
@@ -412,6 +413,7 @@
     "Jump to top": "En üste çık",
     "Just beat the final boss on my first try!": "Son boss'u ilk denemede yendim!",
     "Kazakh": "Kazakça",
+    "Keep Bluetooth audio clear in calls": "Aramalarda net Bluetooth sesi",
     "Keep after restarting": "Yeniden başlatınca da sakla",
     "Keep deleted messages": "Silinen mesajları sakla",
     "Keep up to": "En fazla saklanacak",
@@ -1220,8 +1222,6 @@
     "{on} of {total} turned on": "{on} / {total} açık",
     "{site} is off, so the link is sent as written": "{site} kapalı, bu yüzden bağlantı olduğu gibi gönderilir",
     "{text} text, {voice} voice": "{text} yazı, {voice} ses",
-    "{time} ago": "{time} önce",
-    "Keep Bluetooth audio clear in calls": "Aramalarda net Bluetooth sesi",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kulaklık aramalarda müzik kalitesinde kalır. Sesini telefonun mikrofonu alır."
+    "{time} ago": "{time} önce"
   }
 }

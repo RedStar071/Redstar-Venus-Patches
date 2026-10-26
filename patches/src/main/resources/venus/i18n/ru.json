@@ -335,6 +335,7 @@
     "Green": "Зелёный",
     "Gujarati": "гуджарати",
     "Has anyone tried the new update?": "Кто-нибудь уже пробовал новое обновление?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Наушники остаются в музыкальном качестве во время звонков. Ваш голос записывает микрофон телефона.",
     "Hebrew": "иврит",
     "Hex color": "HEX-код цвета",
     "Hi everyone! Who's coming tonight?": "Всем привет! Кто сегодня придёт?",
@@ -417,6 +418,7 @@
     "Jump to top": "В начало",
     "Just beat the final boss on my first try!": "Прошёл финального босса с первой попытки!",
     "Kazakh": "казахский",
+    "Keep Bluetooth audio clear in calls": "Чистый звук Bluetooth в звонках",
     "Keep after restarting": "Сохранять после перезапуска",
     "Keep deleted messages": "Сохранять удалённые сообщения",
     "Keep up to": "Хранить до",
@@ -1285,8 +1287,6 @@
     "{on} of {total} turned on": "Включено: {on} из {total}",
     "{site} is off, so the link is sent as written": "{site} выключен, поэтому ссылка отправляется как есть",
     "{text} text, {voice} voice": "{text} текстовых, {voice} голосовых",
-    "{time} ago": "{time} назад",
-    "Keep Bluetooth audio clear in calls": "Чистый звук Bluetooth в звонках",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Наушники остаются в музыкальном качестве во время звонков. Ваш голос записывает микрофон телефона."
+    "{time} ago": "{time} назад"
   }
 }

@@ -330,6 +330,7 @@
     "Green": "Vihreä",
     "Gujarati": "gudžarati",
     "Has anyone tried the new update?": "Onko kukaan kokeillut uutta päivitystä?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kuulokkeet pysyvät puheluissa musiikkilaadussa. Puhelimen mikrofoni poimii äänesi.",
     "Hebrew": "heprea",
     "Hex color": "Heksaväri",
     "Hi everyone! Who's coming tonight?": "Moi kaikki! Kuka on tulossa tänä iltana?",
@@ -412,6 +413,7 @@
     "Jump to top": "Siirry alkuun",
     "Just beat the final boss on my first try!": "Voitin loppupomon ensimmäisellä yrityksellä!",
     "Kazakh": "kazakki",
+    "Keep Bluetooth audio clear in calls": "Selkeä Bluetooth-ääni puheluissa",
     "Keep after restarting": "Säilytä uudelleenkäynnistyksen jälkeen",
     "Keep deleted messages": "Säilytä poistetut viestit",
     "Keep up to": "Säilytysraja",
@@ -1238,8 +1240,6 @@
     "{on} of {total} turned on": "{on}/{total} käytössä",
     "{site} is off, so the link is sent as written": "{site} on pois päältä, joten linkki lähetetään sellaisenaan",
     "{text} text, {voice} voice": "{text} teksti, {voice} puhe",
-    "{time} ago": "{time} sitten",
-    "Keep Bluetooth audio clear in calls": "Selkeä Bluetooth-ääni puheluissa",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kuulokkeet pysyvät puheluissa musiikkilaadussa. Puhelimen mikrofoni poimii äänesi."
+    "{time} ago": "{time} sitten"
   }
 }

@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Harika, akşam 6'da başlıyor!",
   "Green": "Yeşil",
   "Has anyone tried the new update?": "Yeni güncellemeyi deneyen oldu mu?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kulaklık aramalarda müzik kalitesinde kalır. Sesini telefonun mikrofonu alır.",
   "Hex color": "Hex renk kodu",
   "Hi everyone! Who's coming tonight?": "Herkese selam! Bu akşam kimler geliyor?",
   "Hidden category": "Gizli kategori",
@@ -375,6 +376,7 @@
   "Jump to first message": "İlk mesaja git",
   "Jump to top": "En üste çık",
   "Just beat the final boss on my first try!": "Son boss'u ilk denemede yendim!",
+  "Keep Bluetooth audio clear in calls": "Aramalarda net Bluetooth sesi",
   "Keep after restarting": "Yeniden başlatınca da sakla",
   "Keep deleted messages": "Silinen mesajları sakla",
   "Keep up to": "En fazla saklanacak",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{total} özellikten {on} tanesi açık. Özellikler'den açıp kapatabilirsin.",
   "{on} of {total} turned on": "{on} / {total} açık",
   "{site} is off, so the link is sent as written": "{site} kapalı, bu yüzden bağlantı olduğu gibi gönderilir",
-  "{text} text, {voice} voice": "{text} yazı, {voice} ses",
-  "Keep Bluetooth audio clear in calls": "Aramalarda net Bluetooth sesi",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Kulaklık aramalarda müzik kalitesinde kalır. Sesini telefonun mikrofonu alır."
+  "{text} text, {voice} voice": "{text} yazı, {voice} ses"
 }

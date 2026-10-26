@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Perfetto, si inizia alle 6:00!",
   "Green": "Verde",
   "Has anyone tried the new update?": "Qualcuno ha provato il nuovo aggiornamento?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Le cuffie restano in qualità musica durante le chiamate. Il microfono del telefono capta la tua voce.",
   "Hex color": "Colore esadecimale",
   "Hi everyone! Who's coming tonight?": "Ciao a tutti! Chi c'è stasera?",
   "Hidden category": "Categoria nascosta",
@@ -375,6 +376,7 @@
   "Jump to first message": "Vai al primo messaggio",
   "Jump to top": "Torna all'inizio",
   "Just beat the final boss on my first try!": "Ho battuto il boss finale al primo tentativo!",
+  "Keep Bluetooth audio clear in calls": "Audio Bluetooth nitido nelle chiamate",
   "Keep after restarting": "Conserva dopo il riavvio",
   "Keep deleted messages": "Conserva i messaggi eliminati",
   "Keep up to": "Conserva fino a",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} funzionalità attive su {total}. Attivale o disattivale in Funzionalità.",
   "{on} of {total} turned on": "{on} su {total} attive",
   "{site} is off, so the link is sent as written": "{site} è disattivato, quindi il link viene inviato così com'è",
-  "{text} text, {voice} voice": "{text} testuali, {voice} vocali",
-  "Keep Bluetooth audio clear in calls": "Audio Bluetooth nitido nelle chiamate",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Le cuffie restano in qualità musica durante le chiamate. Il microfono del telefono capta la tua voce."
+  "{text} text, {voice} voice": "{text} testuali, {voice} vocali"
 }

@@ -315,6 +315,7 @@
     "Green": "Xanh lá",
     "Gujarati": "Tiếng Gujarati",
     "Has anyone tried the new update?": "Có ai thử bản cập nhật mới chưa?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Tai nghe giữ chất lượng nghe nhạc khi gọi. Micrô của điện thoại thu giọng bạn.",
     "Hebrew": "Tiếng Do Thái",
     "Hex color": "Mã màu Hex",
     "Hi everyone! Who's coming tonight?": "Chào mọi người! Tối nay có ai tham gia không?",
@@ -397,6 +398,7 @@
     "Jump to top": "Lên đầu cuộc trò chuyện",
     "Just beat the final boss on my first try!": "Hạ trùm cuối ngay lần đầu luôn!",
     "Kazakh": "Tiếng Kazakh",
+    "Keep Bluetooth audio clear in calls": "Giữ âm thanh Bluetooth rõ khi gọi",
     "Keep after restarting": "Giữ lại sau khi khởi động lại",
     "Keep deleted messages": "Giữ lại tin nhắn đã xóa",
     "Keep up to": "Giữ tối đa",
@@ -1099,8 +1101,6 @@
     "{on} of {total} turned on": "Đang bật {on}/{total}",
     "{site} is off, so the link is sent as written": "{site} đang tắt nên liên kết được gửi nguyên văn",
     "{text} text, {voice} voice": "{text} văn bản, {voice} thoại",
-    "{time} ago": "{time} trước",
-    "Keep Bluetooth audio clear in calls": "Giữ âm thanh Bluetooth rõ khi gọi",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Tai nghe giữ chất lượng nghe nhạc khi gọi. Micrô của điện thoại thu giọng bạn."
+    "{time} ago": "{time} trước"
   }
 }

@@ -330,6 +330,7 @@
     "Green": "Зелено",
     "Gujarati": "гуджарати",
     "Has anyone tried the new update?": "Някой пробвал ли е новото обновление?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Слушалките остават с музикално качество в разговори. Микрофонът на телефона улавя гласа ви.",
     "Hebrew": "иврит",
     "Hex color": "Шестнадесетичен цвят",
     "Hi everyone! Who's coming tonight?": "Здравейте всички! Кой идва довечера?",
@@ -412,6 +413,7 @@
     "Jump to top": "Към началото",
     "Just beat the final boss on my first try!": "Победих финалния бос от първия опит!",
     "Kazakh": "казахски",
+    "Keep Bluetooth audio clear in calls": "Чист Bluetooth звук в разговори",
     "Keep after restarting": "Запазване след рестарт",
     "Keep deleted messages": "Запазване на изтритите съобщения",
     "Keep up to": "Запазване до",
@@ -1220,8 +1222,6 @@
     "{on} of {total} turned on": "Включени: {on} от {total}",
     "{site} is off, so the link is sent as written": "{site} е изключен, затова връзката се изпраща както е",
     "{text} text, {voice} voice": "{text} текстови, {voice} гласови",
-    "{time} ago": "преди {time}",
-    "Keep Bluetooth audio clear in calls": "Чист Bluetooth звук в разговори",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Слушалките остават с музикално качество в разговори. Микрофонът на телефона улавя гласа ви."
+    "{time} ago": "преди {time}"
   }
 }

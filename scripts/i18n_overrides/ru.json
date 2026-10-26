@@ -308,6 +308,7 @@
   "Great, it starts at 6 AM!": "Отлично, начинаем в 6 вечера!",
   "Green": "Зелёный",
   "Has anyone tried the new update?": "Кто-нибудь уже пробовал новое обновление?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Наушники остаются в музыкальном качестве во время звонков. Ваш голос записывает микрофон телефона.",
   "Hex color": "HEX-код цвета",
   "Hi everyone! Who's coming tonight?": "Всем привет! Кто сегодня придёт?",
   "Hidden category": "Скрытая категория",
@@ -380,6 +381,7 @@
   "Jump to first message": "Переход к первому сообщению",
   "Jump to top": "В начало",
   "Just beat the final boss on my first try!": "Прошёл финального босса с первой попытки!",
+  "Keep Bluetooth audio clear in calls": "Чистый звук Bluetooth в звонках",
   "Keep after restarting": "Сохранять после перезапуска",
   "Keep deleted messages": "Сохранять удалённые сообщения",
   "Keep up to": "Хранить до",
@@ -1176,7 +1178,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Включено функций: {on} из {total}. Включайте и выключайте их в разделе «Функции».",
   "{on} of {total} turned on": "Включено: {on} из {total}",
   "{site} is off, so the link is sent as written": "{site} выключен, поэтому ссылка отправляется как есть",
-  "{text} text, {voice} voice": "{text} текстовых, {voice} голосовых",
-  "Keep Bluetooth audio clear in calls": "Чистый звук Bluetooth в звонках",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Наушники остаются в музыкальном качестве во время звонков. Ваш голос записывает микрофон телефона."
+  "{text} text, {voice} voice": "{text} текстовых, {voice} голосовых"
 }

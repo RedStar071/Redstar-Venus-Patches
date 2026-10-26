@@ -288,6 +288,7 @@
   "Great, it starts at 6 AM!": "太好了，晚上 6 点开始！",
   "Green": "绿色",
   "Has anyone tried the new update?": "有人试过这次的新更新吗？",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通话时耳机保持音乐级音质，由手机麦克风收录你的声音。",
   "Hex color": "十六进制颜色代码",
   "Hi everyone! Who's coming tonight?": "大家好呀！今晚谁来一起玩？",
   "Hidden category": "隐藏分类",
@@ -360,6 +361,7 @@
   "Jump to first message": "跳到第一条消息",
   "Jump to top": "跳到顶部",
   "Just beat the final boss on my first try!": "第一次就打败了最终 Boss！",
+  "Keep Bluetooth audio clear in calls": "通话时保持蓝牙音质清晰",
   "Keep after restarting": "重启后保留",
   "Keep deleted messages": "保留已删除的消息",
   "Keep up to": "保留上限",
@@ -1014,7 +1016,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "已开启 {on}/{total} 项功能。可在“功能”中开启或关闭。",
   "{on} of {total} turned on": "已开启 {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} 已关闭，所以链接会原样发送",
-  "{text} text, {voice} voice": "{text} 个文字，{voice} 个语音",
-  "Keep Bluetooth audio clear in calls": "通话时保持蓝牙音质清晰",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通话时耳机保持音乐级音质，由手机麦克风收录你的声音。"
+  "{text} text, {voice} voice": "{text} 个文字，{voice} 个语音"
 }

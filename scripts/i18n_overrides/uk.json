@@ -308,6 +308,7 @@
   "Great, it starts at 6 AM!": "Чудово, починаємо о 6 вечора!",
   "Green": "Зелений",
   "Has anyone tried the new update?": "Хтось уже пробував нове оновлення?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Навушники зберігають музичну якість під час дзвінків. Ваш голос записує мікрофон телефона.",
   "Hex color": "HEX-код кольору",
   "Hi everyone! Who's coming tonight?": "Усім привіт! Хто сьогодні прийде?",
   "Hidden category": "Прихована категорія",
@@ -380,6 +381,7 @@
   "Jump to first message": "Перехід до першого повідомлення",
   "Jump to top": "На початок",
   "Just beat the final boss on my first try!": "Пройшов фінального боса з першої спроби!",
+  "Keep Bluetooth audio clear in calls": "Чистий звук Bluetooth у дзвінках",
   "Keep after restarting": "Зберігати після перезапуску",
   "Keep deleted messages": "Зберігати видалені повідомлення",
   "Keep up to": "Зберігати до",
@@ -1176,7 +1178,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Увімкнено функцій: {on} з {total}. Вмикайте й вимикайте їх у розділі «Функції».",
   "{on} of {total} turned on": "Увімкнено: {on} з {total}",
   "{site} is off, so the link is sent as written": "{site} вимкнено, тож посилання надсилається як є",
-  "{text} text, {voice} voice": "{text} текстових, {voice} голосових",
-  "Keep Bluetooth audio clear in calls": "Чистий звук Bluetooth у дзвінках",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Навушники зберігають музичну якість під час дзвінків. Ваш голос записує мікрофон телефона."
+  "{text} text, {voice} voice": "{text} текстових, {voice} голосових"
 }

@@ -288,6 +288,7 @@
   "Great, it starts at 6 AM!": "Tuyệt luôn, bắt đầu lúc 6 giờ tối nhé!",
   "Green": "Xanh lá",
   "Has anyone tried the new update?": "Có ai thử bản cập nhật mới chưa?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Tai nghe giữ chất lượng nghe nhạc khi gọi. Micrô của điện thoại thu giọng bạn.",
   "Hex color": "Mã màu Hex",
   "Hi everyone! Who's coming tonight?": "Chào mọi người! Tối nay có ai tham gia không?",
   "Hidden category": "Danh mục ẩn",
@@ -360,6 +361,7 @@
   "Jump to first message": "Chuyển đến tin nhắn đầu tiên",
   "Jump to top": "Lên đầu cuộc trò chuyện",
   "Just beat the final boss on my first try!": "Hạ trùm cuối ngay lần đầu luôn!",
+  "Keep Bluetooth audio clear in calls": "Giữ âm thanh Bluetooth rõ khi gọi",
   "Keep after restarting": "Giữ lại sau khi khởi động lại",
   "Keep deleted messages": "Giữ lại tin nhắn đã xóa",
   "Keep up to": "Giữ tối đa",
@@ -1014,7 +1016,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "Đang bật {on}/{total} tính năng. Bật hoặc tắt trong mục Tính năng.",
   "{on} of {total} turned on": "Đang bật {on}/{total}",
   "{site} is off, so the link is sent as written": "{site} đang tắt nên liên kết được gửi nguyên văn",
-  "{text} text, {voice} voice": "{text} văn bản, {voice} thoại",
-  "Keep Bluetooth audio clear in calls": "Giữ âm thanh Bluetooth rõ khi gọi",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Tai nghe giữ chất lượng nghe nhạc khi gọi. Micrô của điện thoại thu giọng bạn."
+  "{text} text, {voice} voice": "{text} văn bản, {voice} thoại"
 }

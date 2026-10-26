@@ -335,6 +335,7 @@
     "Green": "Zelena",
     "Gujarati": "gudžaratski",
     "Has anyone tried the new update?": "Je li netko isprobao novo ažuriranje?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Slušalice u pozivima ostaju u glazbenoj kvaliteti. Vaš glas hvata mikrofon telefona.",
     "Hebrew": "hebrejski",
     "Hex color": "Heksadecimalna boja",
     "Hi everyone! Who's coming tonight?": "Pozdrav svima! Tko dolazi večeras?",
@@ -417,6 +418,7 @@
     "Jump to top": "Skoči na vrh",
     "Just beat the final boss on my first try!": "Pobijedio sam završnog bossa iz prvog pokušaja!",
     "Kazakh": "kazaški",
+    "Keep Bluetooth audio clear in calls": "Čist Bluetooth zvuk u pozivima",
     "Keep after restarting": "Zadrži nakon ponovnog pokretanja",
     "Keep deleted messages": "Čuvaj izbrisane poruke",
     "Keep up to": "Čuvaj najviše",
@@ -1285,8 +1287,6 @@
     "{on} of {total} turned on": "{on} od {total} uključeno",
     "{site} is off, so the link is sent as written": "{site} je isključen, pa se poveznica šalje kakva jest",
     "{text} text, {voice} voice": "{text} tekstnih, {voice} glasovnih",
-    "{time} ago": "prije {time}",
-    "Keep Bluetooth audio clear in calls": "Čist Bluetooth zvuk u pozivima",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Slušalice u pozivima ostaju u glazbenoj kvaliteti. Vaš glas hvata mikrofon telefona."
+    "{time} ago": "prije {time}"
   }
 }

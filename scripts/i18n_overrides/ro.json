@@ -308,6 +308,7 @@
   "Great, it starts at 6 AM!": "Super, începe la 6 dimineața!",
   "Green": "Verde",
   "Has anyone tried the new update?": "A încercat cineva noua actualizare?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Căștile rămân la calitate de muzică în apeluri. Microfonul telefonului îți preia vocea.",
   "Hex color": "Cod de culoare Hex",
   "Hi everyone! Who's coming tonight?": "Salutare tuturor! Cine vine diseară?",
   "Hidden category": "Categorie ascunsă",
@@ -380,6 +381,7 @@
   "Jump to first message": "Mergi la primul mesaj",
   "Jump to top": "Mergi la început",
   "Just beat the final boss on my first try!": "Am bătut boss-ul final din prima încercare!",
+  "Keep Bluetooth audio clear in calls": "Sunet Bluetooth clar în apeluri",
   "Keep after restarting": "Păstrează după repornire",
   "Keep deleted messages": "Păstrează mesajele șterse",
   "Keep up to": "Păstrează până la",
@@ -1176,7 +1178,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} din {total} funcții activate. Activează-le sau dezactivează-le din Funcții.",
   "{on} of {total} turned on": "{on} din {total} activate",
   "{site} is off, so the link is sent as written": "{site} e dezactivat, așa că linkul e trimis așa cum e",
-  "{text} text, {voice} voice": "{text} text, {voice} voce",
-  "Keep Bluetooth audio clear in calls": "Sunet Bluetooth clar în apeluri",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Căștile rămân la calitate de muzică în apeluri. Microfonul telefonului îți preia vocea."
+  "{text} text, {voice} voice": "{text} text, {voice} voce"
 }

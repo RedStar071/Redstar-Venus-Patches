@@ -288,6 +288,7 @@
   "Great, it starts at 6 AM!": "เยี่ยมเลย เริ่มตอน 6 โมงเย็นนะ!",
   "Green": "สีเขียว",
   "Has anyone tried the new update?": "มีใครได้ลองอัปเดตใหม่หรือยัง?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "หูฟังยังคงคุณภาพเสียงระดับเพลงระหว่างโทร ไมค์ของโทรศัพท์จะรับเสียงคุณแทน",
   "Hex color": "รหัสสี Hex",
   "Hi everyone! Who's coming tonight?": "สวัสดีทุกคน! คืนนี้ใครมาบ้าง?",
   "Hidden category": "หมวดหมู่ที่ซ่อนอยู่",
@@ -360,6 +361,7 @@
   "Jump to first message": "ไปที่ข้อความแรกสุด",
   "Jump to top": "ไปที่ด้านบนสุด",
   "Just beat the final boss on my first try!": "ล้มบอสสุดท้ายได้ตั้งแต่ครั้งแรกเลย!",
+  "Keep Bluetooth audio clear in calls": "เสียง Bluetooth ชัดระหว่างโทร",
   "Keep after restarting": "เก็บไว้หลังรีสตาร์ท",
   "Keep deleted messages": "เก็บข้อความที่ถูกลบ",
   "Keep up to": "เก็บไว้สูงสุด",
@@ -1014,7 +1016,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "เปิดใช้งานอยู่ {on} จาก {total} ฟีเจอร์ เปิดหรือปิดได้ในเมนูฟีเจอร์",
   "{on} of {total} turned on": "เปิดอยู่ {on} จาก {total}",
   "{site} is off, so the link is sent as written": "{site} ปิดอยู่ จึงส่งลิงก์ไปตามเดิม",
-  "{text} text, {voice} voice": "ข้อความ {text} เสียง {voice}",
-  "Keep Bluetooth audio clear in calls": "เสียง Bluetooth ชัดระหว่างโทร",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "หูฟังยังคงคุณภาพเสียงระดับเพลงระหว่างโทร ไมค์ของโทรศัพท์จะรับเสียงคุณแทน"
+  "{text} text, {voice} voice": "ข้อความ {text} เสียง {voice}"
 }

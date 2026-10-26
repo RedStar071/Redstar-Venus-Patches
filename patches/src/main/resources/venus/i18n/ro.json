@@ -335,6 +335,7 @@
     "Green": "Verde",
     "Gujarati": "gujarati",
     "Has anyone tried the new update?": "A încercat cineva noua actualizare?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Căștile rămân la calitate de muzică în apeluri. Microfonul telefonului îți preia vocea.",
     "Hebrew": "ebraică",
     "Hex color": "Cod de culoare Hex",
     "Hi everyone! Who's coming tonight?": "Salutare tuturor! Cine vine diseară?",
@@ -417,6 +418,7 @@
     "Jump to top": "Mergi la început",
     "Just beat the final boss on my first try!": "Am bătut boss-ul final din prima încercare!",
     "Kazakh": "kazahă",
+    "Keep Bluetooth audio clear in calls": "Sunet Bluetooth clar în apeluri",
     "Keep after restarting": "Păstrează după repornire",
     "Keep deleted messages": "Păstrează mesajele șterse",
     "Keep up to": "Păstrează până la",
@@ -1285,8 +1287,6 @@
     "{on} of {total} turned on": "{on} din {total} activate",
     "{site} is off, so the link is sent as written": "{site} e dezactivat, așa că linkul e trimis așa cum e",
     "{text} text, {voice} voice": "{text} text, {voice} voce",
-    "{time} ago": "acum {time}",
-    "Keep Bluetooth audio clear in calls": "Sunet Bluetooth clar în apeluri",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Căștile rămân la calitate de muzică în apeluri. Microfonul telefonului îți preia vocea."
+    "{time} ago": "acum {time}"
   }
 }

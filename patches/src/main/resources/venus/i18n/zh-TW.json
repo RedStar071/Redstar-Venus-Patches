@@ -315,6 +315,7 @@
     "Green": "綠色",
     "Gujarati": "古吉拉特文",
     "Has anyone tried the new update?": "有人試過這次的新更新嗎？",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話時耳機維持音樂級音質，由手機麥克風收錄你的聲音。",
     "Hebrew": "希伯來文",
     "Hex color": "十六進位色碼",
     "Hi everyone! Who's coming tonight?": "大家好呀！今晚誰來一起玩？",
@@ -397,6 +398,7 @@
     "Jump to top": "跳到頂部",
     "Just beat the final boss on my first try!": "第一次就打倒最終 Boss 了！",
     "Kazakh": "哈薩克文",
+    "Keep Bluetooth audio clear in calls": "通話時保持藍牙音質清晰",
     "Keep after restarting": "重新啟動後保留",
     "Keep deleted messages": "保留已刪除的訊息",
     "Keep up to": "保留上限",
@@ -1099,8 +1101,6 @@
     "{on} of {total} turned on": "已開啟 {on}/{total}",
     "{site} is off, so the link is sent as written": "{site} 已關閉，所以連結會照原樣傳送",
     "{text} text, {voice} voice": "{text} 個文字、{voice} 個語音",
-    "{time} ago": "{time}前",
-    "Keep Bluetooth audio clear in calls": "通話時保持藍牙音質清晰",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "通話時耳機維持音樂級音質，由手機麥克風收錄你的聲音。"
+    "{time} ago": "{time}前"
   }
 }

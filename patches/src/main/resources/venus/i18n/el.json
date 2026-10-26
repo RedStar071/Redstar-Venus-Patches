@@ -330,6 +330,7 @@
     "Green": "Πράσινο",
     "Gujarati": "Γκουτζαρατικά",
     "Has anyone tried the new update?": "Έχει δοκιμάσει κανείς τη νέα ενημέρωση;",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Τα ακουστικά μένουν σε ποιότητα μουσικής στις κλήσεις. Το μικρόφωνο του τηλεφώνου σου πιάνει τη φωνή σου.",
     "Hebrew": "Εβραϊκά",
     "Hex color": "Δεκαεξαδικό χρώμα (HEX)",
     "Hi everyone! Who's coming tonight?": "Γεια σε όλους! Ποιος θα έρθει απόψε;",
@@ -412,6 +413,7 @@
     "Jump to top": "Μετάβαση στην αρχή",
     "Just beat the final boss on my first try!": "Νίκησα το τελικό αφεντικό με την πρώτη!",
     "Kazakh": "Καζακικά",
+    "Keep Bluetooth audio clear in calls": "Καθαρός ήχος Bluetooth στις κλήσεις",
     "Keep after restarting": "Διατήρηση μετά την επανεκκίνηση",
     "Keep deleted messages": "Διατήρηση διαγραμμένων μηνυμάτων",
     "Keep up to": "Διατήρηση έως",
@@ -1220,8 +1222,6 @@
     "{on} of {total} turned on": "{on} από {total} ενεργές",
     "{site} is off, so the link is sent as written": "Το {site} είναι ανενεργό, οπότε ο σύνδεσμος στέλνεται όπως είναι",
     "{text} text, {voice} voice": "{text} κειμένου, {voice} φωνής",
-    "{time} ago": "πριν από {time}",
-    "Keep Bluetooth audio clear in calls": "Καθαρός ήχος Bluetooth στις κλήσεις",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Τα ακουστικά μένουν σε ποιότητα μουσικής στις κλήσεις. Το μικρόφωνο του τηλεφώνου σου πιάνει τη φωνή σου."
+    "{time} ago": "πριν από {time}"
   }
 }

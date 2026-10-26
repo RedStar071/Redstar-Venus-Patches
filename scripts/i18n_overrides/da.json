@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Fedt, det starter kl. 6:00!",
   "Green": "Grøn",
   "Has anyone tried the new update?": "Har nogen prøvet den nye opdatering?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Høretelefoner bliver i musikkvalitet under opkald. Telefonens mikrofon opfanger din stemme.",
   "Hex color": "HEX-farve",
   "Hi everyone! Who's coming tonight?": "Hej alle sammen! Hvem kommer i aften?",
   "Hidden category": "Skjult kategori",
@@ -375,6 +376,7 @@
   "Jump to first message": "Gå til første besked",
   "Jump to top": "Gå til toppen",
   "Just beat the final boss on my first try!": "Slog slutbossen i første forsøg!",
+  "Keep Bluetooth audio clear in calls": "Klar Bluetooth-lyd i opkald",
   "Keep after restarting": "Bevar efter genstart",
   "Keep deleted messages": "Behold slettede beskeder",
   "Keep up to": "Behold op til",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} af {total} funktioner slået til. Slå dem til eller fra under Funktioner.",
   "{on} of {total} turned on": "{on} af {total} slået til",
   "{site} is off, so the link is sent as written": "{site} er slået fra, så linket sendes, som det er",
-  "{text} text, {voice} voice": "{text} tekst, {voice} tale",
-  "Keep Bluetooth audio clear in calls": "Klar Bluetooth-lyd i opkald",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Høretelefoner bliver i musikkvalitet under opkald. Telefonens mikrofon opfanger din stemme."
+  "{text} text, {voice} voice": "{text} tekst, {voice} tale"
 }

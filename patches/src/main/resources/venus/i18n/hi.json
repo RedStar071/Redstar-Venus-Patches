@@ -330,6 +330,7 @@
     "Green": "हरा",
     "Gujarati": "गुजराती",
     "Has anyone tried the new update?": "क्या किसी ने नया अपडेट ट्राई किया?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "कॉल में हेडफ़ोन म्यूज़िक क्वालिटी में ही रहते हैं। आपकी आवाज़ फ़ोन का माइक लेता है।",
     "Hebrew": "हिब्रू",
     "Hex color": "हेक्स रंग",
     "Hi everyone! Who's coming tonight?": "हाय दोस्तों! आज रात कौन-कौन आ रहा है?",
@@ -412,6 +413,7 @@
     "Jump to top": "सबसे ऊपर जाएँ",
     "Just beat the final boss on my first try!": "पहली ही कोशिश में फ़ाइनल बॉस को हरा दिया!",
     "Kazakh": "कज़ाख़",
+    "Keep Bluetooth audio clear in calls": "कॉल में Bluetooth आवाज़ साफ़ रखें",
     "Keep after restarting": "रीस्टार्ट के बाद भी रखें",
     "Keep deleted messages": "हटाए गए मैसेज बचाकर रखें",
     "Keep up to": "अधिकतम सीमा",
@@ -1238,8 +1240,6 @@
     "{on} of {total} turned on": "{total} में से {on} चालू",
     "{site} is off, so the link is sent as written": "{site} बंद है, इसलिए लिंक वैसा ही भेजा जाता है",
     "{text} text, {voice} voice": "{text} टेक्स्ट, {voice} वॉइस",
-    "{time} ago": "{time} पहले",
-    "Keep Bluetooth audio clear in calls": "कॉल में Bluetooth आवाज़ साफ़ रखें",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "कॉल में हेडफ़ोन म्यूज़िक क्वालिटी में ही रहते हैं। आपकी आवाज़ फ़ोन का माइक लेता है।"
+    "{time} ago": "{time} पहले"
   }
 }

@@ -303,6 +303,7 @@
   "Great, it starts at 6 AM!": "Toppen, det börjar kl. 18!",
   "Green": "Grön",
   "Has anyone tried the new update?": "Har någon testat den nya uppdateringen?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Hörlurarna behåller musikkvalitet i samtal. Telefonens mikrofon fångar upp din röst.",
   "Hex color": "Hex-färg",
   "Hi everyone! Who's coming tonight?": "Hej allihopa! Vilka är med ikväll?",
   "Hidden category": "Dold kategori",
@@ -375,6 +376,7 @@
   "Jump to first message": "Gå till första meddelandet",
   "Jump to top": "Gå till början",
   "Just beat the final boss on my first try!": "Klarade slutbossen på första försöket!",
+  "Keep Bluetooth audio clear in calls": "Klart Bluetooth-ljud i samtal",
   "Keep after restarting": "Behåll efter omstart",
   "Keep deleted messages": "Behåll borttagna meddelanden",
   "Keep up to": "Behåll upp till",
@@ -1135,7 +1137,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "{on} av {total} funktioner är på. Slå på eller av dem under Funktioner.",
   "{on} of {total} turned on": "{on} av {total} påslagna",
   "{site} is off, so the link is sent as written": "{site} är av, så länken skickas som den är",
-  "{text} text, {voice} voice": "{text} text, {voice} röst",
-  "Keep Bluetooth audio clear in calls": "Klart Bluetooth-ljud i samtal",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Hörlurarna behåller musikkvalitet i samtal. Telefonens mikrofon fångar upp din röst."
+  "{text} text, {voice} voice": "{text} text, {voice} röst"
 }

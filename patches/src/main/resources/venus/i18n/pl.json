@@ -335,6 +335,7 @@
     "Green": "Zielony",
     "Gujarati": "gudżarati",
     "Has anyone tried the new update?": "Ktoś testował już nową aktualizację?",
+    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Słuchawki zachowują jakość muzyki podczas rozmów. Twój głos zbiera mikrofon telefonu.",
     "Hebrew": "hebrajski",
     "Hex color": "Kolor szesnastkowy (Hex)",
     "Hi everyone! Who's coming tonight?": "Cześć wszystkim! Kto wpada dziś wieczorem?",
@@ -417,6 +418,7 @@
     "Jump to top": "Przejdź na początek",
     "Just beat the final boss on my first try!": "Pokonałem ostatniego bossa za pierwszym razem!",
     "Kazakh": "kazachski",
+    "Keep Bluetooth audio clear in calls": "Czysty dźwięk Bluetooth w rozmowach",
     "Keep after restarting": "Zachowaj po ponownym uruchomieniu",
     "Keep deleted messages": "Zachowuj usunięte wiadomości",
     "Keep up to": "Zachowuj maksymalnie",
@@ -1285,8 +1287,6 @@
     "{on} of {total} turned on": "Włączono {on} z {total}",
     "{site} is off, so the link is sent as written": "{site} jest wyłączony, więc link zostaje wysłany bez zmian",
     "{text} text, {voice} voice": "{text} tekstowych, {voice} głosowych",
-    "{time} ago": "{time} temu",
-    "Keep Bluetooth audio clear in calls": "Czysty dźwięk Bluetooth w rozmowach",
-    "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "Słuchawki zachowują jakość muzyki podczas rozmów. Twój głos zbiera mikrofon telefonu."
+    "{time} ago": "{time} temu"
   }
 }

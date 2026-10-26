@@ -288,6 +288,7 @@
   "Great, it starts at 6 AM!": "좋아, 오전 6시에 시작해!",
   "Green": "초록색",
   "Has anyone tried the new update?": "새로 나온 업데이트 써본 사람 있어?",
+  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "통화 중에도 헤드폰이 음악 음질을 유지해요. 목소리는 휴대폰 마이크로 들어가요.",
   "Hex color": "원하는 색상 (Hex)",
   "Hi everyone! Who's coming tonight?": "다들 안녕! 오늘 밤에 누가 와?",
   "Hidden category": "숨겨진 카테고리",
@@ -360,6 +361,7 @@
   "Jump to first message": "첫 메시지로 이동",
   "Jump to top": "맨 위로 이동",
   "Just beat the final boss on my first try!": "첫 시도에 최종 보스 깼다!",
+  "Keep Bluetooth audio clear in calls": "통화 중 Bluetooth 음질 선명하게",
   "Keep after restarting": "다시 시작해도 유지",
   "Keep deleted messages": "삭제된 메시지 보관",
   "Keep up to": "최대 보관 개수",
@@ -1014,7 +1016,5 @@
   "{on} of {total} features on. Turn them on or off in Features.": "기능 {total}개 중 {on}개 켜짐. 기능에서 켜거나 끌 수 있습니다.",
   "{on} of {total} turned on": "{total}개 중 {on}개 켜짐",
   "{site} is off, so the link is sent as written": "{site}이(가) 꺼져 있어서 링크가 그대로 보내져요",
-  "{text} text, {voice} voice": "텍스트 {text}개, 음성 {voice}개",
-  "Keep Bluetooth audio clear in calls": "통화 중 Bluetooth 음질 선명하게",
-  "Headphones stay in music quality in calls. Your phone's mic picks up your voice.": "통화 중에도 헤드폰이 음악 음질을 유지해요. 목소리는 휴대폰 마이크로 들어가요."
+  "{text} text, {voice} voice": "텍스트 {text}개, 음성 {voice}개"
 }
