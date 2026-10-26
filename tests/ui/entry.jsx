@@ -32,9 +32,15 @@ const RN = Object.assign({}, RNW, { Animated, Modal: RNW.Modal || (() => null),
 const on = (q.get("on") || "").split(",").filter(Boolean);
 const saved = Object.assign({ language: q.get("lang") || "en", setupDone: true }, Object.fromEntries(on.map(k => [k, true])), JSON.parse(q.get("set") || "{}"));
 const settingsText = q.get("fresh") === "1" ? null : JSON.stringify(saved);
+// installed=<file in work/themes>[,<file>...]: those published themes are installed (the first one in use), as if added
+// from their links, so every page and scene draws in that theme's compiled colors (and wallpaper).
+const installed = (q.get("installed") || "").split(",").filter(Boolean);
+const themesText = installed.length ? Promise.all(installed.map(f => fetch("themes/" + f).then(r => r.text()).then(t => {
+  const spec = JSON.parse(t.replace(/^\uFEFF/, "")); spec.url = spec.id = "https://example.com/" + f; return spec; })))
+  .then(list => JSON.stringify({ version: 1, active: list[0].id, themes: list })) : null;
 const files = { getConstants: () => ({ DocumentsDirPath: "/docs", CacheDirPath: "/cache" }), getSize() {},
-  fileExists: path => Promise.resolve(/venus-patches\.json$/.test(path) && !!settingsText),
-  readFile: path => /venus-patches\.json$/.test(path) ? Promise.resolve(settingsText) : Promise.reject(new Error("none")),
+  fileExists: path => Promise.resolve(/venus-patches\.json$/.test(path) ? !!settingsText : /venus-themes\.json$/.test(path) && !!themesText),
+  readFile: path => /venus-patches\.json$/.test(path) ? Promise.resolve(settingsText) : /venus-themes\.json$/.test(path) && themesText ? themesText : Promise.reject(new Error("none")),
   writeFile: () => Promise.resolve(), getVideoDimensions: () => Promise.resolve(),
   readAsset: name => fetch("i18n/" + name.split(":").pop() + ".json").then(r => r.text()) };
 

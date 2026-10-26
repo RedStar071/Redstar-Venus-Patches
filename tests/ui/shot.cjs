@@ -16,6 +16,8 @@ function build() {
   fs.mkdirSync(path.join(UI, "i18n"), { recursive: true });
   for (const f of fs.readdirSync(path.join(ROOT, "patches/src/main/resources/venus/i18n"))) if (f.endsWith(".json"))
     fs.copyFileSync(path.join(ROOT, "patches/src/main/resources/venus/i18n", f), path.join(UI, "i18n", f));
+  // installed= reads published themes from work/themes (python3 tests/themes_fetch.py).
+  try { fs.rmSync(path.join(UI, "themes"), { force: true, recursive: true }); fs.symlinkSync(path.join(ROOT, "work/themes"), path.join(UI, "themes")); } catch (_) {}
   fs.writeFileSync(path.join(UI, "bootstrap.gen.js"), fs.readFileSync(path.join(ROOT, "patches/src/main/resources/venus/bootstrap.js"), "utf8")
     .replace("/*__FEATURES__*/", "window.__FEATURES"));
   // Two-layer icons (XIconPrimary + XIconSecondary) are drawn as one.
