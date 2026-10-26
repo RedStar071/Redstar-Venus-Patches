@@ -1300,16 +1300,10 @@
     },
     "{n} selected": "Zaznaczono: {n}",
     "{n} server": "{n} serwer",
-    "{n} server was marked as read": "{n} serwer został oznaczony jako przeczytany",
     "{n} servers": {
       "one": "{n} serwer",
       "few": "{n} serwery",
       "many": "{n} serwerów"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} serwer został oznaczony jako przeczytany",
-      "few": "{n} serwery zostały oznaczone jako przeczytane",
-      "many": "{n} serwerów zostało oznaczonych jako przeczytane"
     },
     "{n} theme": "{n} motyw",
     "{n} themes": {

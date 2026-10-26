@@ -1198,16 +1198,10 @@
   "{n} person watched": "{n} praćena osoba",
   "{n} selected": "Odabrano: {n}",
   "{n} server": "{n} server",
-  "{n} server was marked as read": "{n} server označen je pročitanim",
   "{n} servers": {
     "few": "{n} servera",
     "one": "{n} server",
     "other": "{n} servera"
-  },
-  "{n} servers were marked as read": {
-    "few": "{n} servera označena su pročitanima",
-    "one": "{n} server označen je pročitanim",
-    "other": "{n} servera označeno je pročitanima"
   },
   "{n} theme": "{n} tema",
   "{n} themes": {

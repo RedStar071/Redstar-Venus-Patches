@@ -1258,14 +1258,9 @@
     },
     "{n} selected": "{n} चयनित",
     "{n} server": "{n} सर्वर",
-    "{n} server was marked as read": "{n} सर्वर पढ़ा हुआ मार्क किया गया",
     "{n} servers": {
       "one": "{n} सर्वर",
       "other": "{n} सर्वर"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} सर्वर पढ़ा हुआ मार्क किया गया",
-      "other": "{n} सर्वर पढ़े हुए मार्क किए गए"
     },
     "{n} theme": "{n} थीम",
     "{n} themes": {

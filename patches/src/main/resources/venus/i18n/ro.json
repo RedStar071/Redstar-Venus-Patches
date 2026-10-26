@@ -1300,16 +1300,10 @@
     },
     "{n} selected": "{n} selectate",
     "{n} server": "{n} server",
-    "{n} server was marked as read": "{n} server a fost marcat ca citit",
     "{n} servers": {
       "one": "{n} server",
       "few": "{n} servere",
       "other": "{n} de servere"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} server a fost marcat ca citit",
-      "few": "{n} servere au fost marcate ca citite",
-      "other": "{n} de servere au fost marcate ca citite"
     },
     "{n} theme": "{n} temă",
     "{n} themes": {

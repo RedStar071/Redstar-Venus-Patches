@@ -1198,16 +1198,10 @@
   "{n} person watched": "Stebimas {n} žmogus",
   "{n} selected": "Pasirinkta: {n}",
   "{n} server": "{n} serveris",
-  "{n} server was marked as read": "{n} serveris pažymėtas kaip perskaitytas",
   "{n} servers": {
     "few": "{n} serveriai",
     "one": "{n} serveris",
     "other": "{n} serverių"
-  },
-  "{n} servers were marked as read": {
-    "few": "{n} serveriai pažymėti kaip perskaityti",
-    "one": "{n} serveris pažymėtas kaip perskaitytas",
-    "other": "{n} serverių pažymėta kaip perskaityta"
   },
   "{n} theme": "{n} tema",
   "{n} themes": {

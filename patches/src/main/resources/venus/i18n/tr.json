@@ -1243,14 +1243,9 @@
     "{n} seconds ago": "{n} saniye önce",
     "{n} selected": "{n} seçildi",
     "{n} server": "{n} sunucu",
-    "{n} server was marked as read": "{n} sunucu okundu olarak işaretlendi",
     "{n} servers": {
       "one": "{n} sunucu",
       "other": "{n} sunucu"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} sunucu okundu olarak işaretlendi",
-      "other": "{n} sunucu okundu olarak işaretlendi"
     },
     "{n} theme": "{n} tema",
     "{n} themes": {

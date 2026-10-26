@@ -1161,14 +1161,9 @@
   "{n} person watched": "{n} persona vigilada",
   "{n} selected": "{n} seleccionados",
   "{n} server": "{n} servidor",
-  "{n} server was marked as read": "{n} servidor marcado como leído",
   "{n} servers": {
     "one": "{n} servidor",
     "other": "{n} servidores"
-  },
-  "{n} servers were marked as read": {
-    "one": "{n} servidor marcado como leído",
-    "other": "{n} servidores marcados como leídos"
   },
   "{n} theme": "{n} tema",
   "{n} themes": {

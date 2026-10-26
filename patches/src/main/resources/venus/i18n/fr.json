@@ -1258,14 +1258,9 @@
     },
     "{n} selected": "{n} sélectionné(s)",
     "{n} server": "{n} serveur",
-    "{n} server was marked as read": "{n} serveur a été marqué comme lu",
     "{n} servers": {
       "one": "{n} serveur",
       "other": "{n} serveurs"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} serveur a été marqué comme lu",
-      "other": "{n} serveurs ont été marqués comme lus"
     },
     "{n} theme": "{n} thème",
     "{n} themes": {

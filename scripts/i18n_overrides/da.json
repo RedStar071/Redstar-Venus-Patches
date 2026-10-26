@@ -1161,14 +1161,9 @@
   "{n} person watched": "{n} person overvåget",
   "{n} selected": "{n} valgt",
   "{n} server": "{n} server",
-  "{n} server was marked as read": "{n} server blev markeret som læst",
   "{n} servers": {
     "one": "{n} server",
     "other": "{n} servere"
-  },
-  "{n} servers were marked as read": {
-    "one": "{n} server blev markeret som læst",
-    "other": "{n} servere blev markeret som læst"
   },
   "{n} theme": "{n} tema",
   "{n} themes": {

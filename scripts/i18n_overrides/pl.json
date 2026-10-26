@@ -1198,16 +1198,10 @@
   "{n} person watched": "Obserwowana {n} osoba",
   "{n} selected": "Zaznaczono: {n}",
   "{n} server": "{n} serwer",
-  "{n} server was marked as read": "{n} serwer został oznaczony jako przeczytany",
   "{n} servers": {
     "few": "{n} serwery",
     "many": "{n} serwerów",
     "one": "{n} serwer"
-  },
-  "{n} servers were marked as read": {
-    "few": "{n} serwery zostały oznaczone jako przeczytane",
-    "many": "{n} serwerów zostało oznaczonych jako przeczytane",
-    "one": "{n} serwer został oznaczony jako przeczytany"
   },
   "{n} theme": "{n} motyw",
   "{n} themes": {

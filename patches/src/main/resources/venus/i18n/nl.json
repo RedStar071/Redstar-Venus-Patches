@@ -1243,14 +1243,9 @@
     "{n} seconds ago": "{n} seconden geleden",
     "{n} selected": "{n} geselecteerd",
     "{n} server": "{n} server",
-    "{n} server was marked as read": "{n} server is als gelezen gemarkeerd",
     "{n} servers": {
       "one": "{n} server",
       "other": "{n} servers"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} server is als gelezen gemarkeerd",
-      "other": "{n} servers zijn als gelezen gemarkeerd"
     },
     "{n} theme": "{n} thema",
     "{n} themes": {

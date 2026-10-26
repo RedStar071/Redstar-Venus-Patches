@@ -3159,44 +3159,44 @@
     function readAll(mode) {
         if (!enabled("readAll") || !READ_ALL_MODES.includes(mode)) return;
         const api=readAllExports(), ui=reviewUI();
-        let guilds=0, dms=0;
+        let guilds=0, dms=0, problem=null;
         // Unread servers or DMs with no way to clear them used to say "Nothing unread".
         const unavailable=() => { throw new Error(tr("Discord's read states haven't loaded yet. Try again in a moment.")); };
-        try {
-            if (mode!=="dms") {
-                if (!api.guildReads || !(api.sorted || api.guildStore)) unavailable();
-                const ids=unreadGuildIds(api);
-                if (ids.length && typeof api.markGuilds!=="function") unavailable();
-                if (ids.length) { api.markGuilds(ids, api.sections && api.sections.GUILD_LIST); guilds=ids.length; }
-            }
-            if (mode!=="guilds") {
-                if (!api.privateReads && !api.privateSort) unavailable();
-                const ids=unreadDmIds(api);
-                if (ids.length && !(api.readActions && typeof api.readActions.bulkAck==="function" && api.reads)) unavailable();
-                if (ids.length) {
-                    const type=api.readTypes && api.readTypes.CHANNEL != null ? api.readTypes.CHANNEL : 0;
-                    // A DM without a known last message can't be acknowledged; sending it anyway
-                    // made the whole request fail. One BULK_ACK, like markGuildsAsRead: ReadStateStore's own
-                    // queue already sends /read-states/ack-bulk 100 at a time, and every extra dispatch made
-                    // the read-state stores recount and the server bar redraw again.
-                    const acks=[];
-                    for (let i=0;i<ids.length;i++) {
-                        const channelId=ids[i], messageId=api.reads.lastMessageId(channelId);
-                        if (messageId) acks.push({channelId, readStateType:type, messageId});
-                    }
-                    if (acks.length) api.readActions.bulkAck(acks);
-                    dms=acks.length;
+        // Servers and DMs are cleared on their own: a failure on one side used to leave the other unread too.
+        if (mode!=="dms") try {
+            if (!api.guildReads || !(api.sorted || api.guildStore)) unavailable();
+            const ids=unreadGuildIds(api);
+            if (ids.length && typeof api.markGuilds!=="function") unavailable();
+            if (ids.length) { api.markGuilds(ids, api.sections && api.sections.GUILD_LIST); guilds=ids.length; }
+        } catch (error) { problem=error; }
+        if (mode!=="guilds") try {
+            if (!api.privateReads && !api.privateSort) unavailable();
+            const ids=unreadDmIds(api);
+            if (ids.length && !(api.readActions && typeof api.readActions.bulkAck==="function" && api.reads)) unavailable();
+            if (ids.length) {
+                const type=api.readTypes && api.readTypes.CHANNEL != null ? api.readTypes.CHANNEL : 0;
+                // A DM without a known last message can't be acknowledged; sending it anyway
+                // made the whole request fail. One BULK_ACK, like markGuildsAsRead: ReadStateStore's own
+                // queue already sends /read-states/ack-bulk 100 at a time, and every extra dispatch made
+                // the read-state stores recount and the server bar redraw again.
+                const acks=[];
+                for (let i=0;i<ids.length;i++) {
+                    const channelId=ids[i], messageId=api.reads.lastMessageId(channelId);
+                    if (messageId) acks.push({channelId, readStateType:type, messageId});
                 }
+                if (acks.length) api.readActions.bulkAck(acks);
+                dms=acks.length;
             }
-        } catch (error) {
-            // What was already cleared stays cleared; say so instead of only the error.
-            const done=guilds ? " ("+pl(guilds,"{n} server was marked as read","{n} servers were marked as read")+")" : "";
-            reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(error && error.message || error)})+done,venusIcon(6296,"CircleXIcon")); return;
-        }
-        if (guilds || dms) readAllDone();
+        } catch (error) { if (!problem) problem=error; }
         const parts=[];
         if (guilds) parts.push(pl(guilds,"{n} server","{n} servers"));
         if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
+        if (guilds || dms) readAllDone();
+        if (problem) {
+            // What was already cleared stays cleared; say so instead of only the error.
+            const done=parts.length ? " ("+tr("Marked {what} as read",{what:joinAnd(parts)})+")" : "";
+            reviewToast(ui,tr("Couldn't mark as read: {problem}",{problem:String(problem && problem.message || problem)})+done,venusIcon(6296,"CircleXIcon")); return;
+        }
         reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread",venusIcon(15928,"DoubleCheckmarkIcon"));
     }
     // Holding the button: an action sheet with the three one-time choices, each with the icon its choice has in

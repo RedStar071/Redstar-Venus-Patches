@@ -1161,14 +1161,9 @@
   "{n} person watched": "{n} person bevakas",
   "{n} selected": "{n} valda",
   "{n} server": "{n} server",
-  "{n} server was marked as read": "{n} server markerades som läst",
   "{n} servers": {
     "one": "{n} server",
     "other": "{n} servrar"
-  },
-  "{n} servers were marked as read": {
-    "one": "{n} server markerades som läst",
-    "other": "{n} servrar markerades som lästa"
   },
   "{n} theme": "{n} tema",
   "{n} themes": {

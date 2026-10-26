@@ -1161,14 +1161,9 @@
   "{n} person watched": "{n} наблюдаван човек",
   "{n} selected": "{n} избрани",
   "{n} server": "{n} сървър",
-  "{n} server was marked as read": "{n} сървър е отбелязан като прочетен",
   "{n} servers": {
     "one": "{n} сървър",
     "other": "{n} сървъра"
-  },
-  "{n} servers were marked as read": {
-    "one": "{n} сървър е отбелязан като прочетен",
-    "other": "{n} сървъра са отбелязани като прочетени"
   },
   "{n} theme": "{n} тема",
   "{n} themes": {

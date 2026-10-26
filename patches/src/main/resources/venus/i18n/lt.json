@@ -1300,16 +1300,10 @@
     },
     "{n} selected": "Pasirinkta: {n}",
     "{n} server": "{n} serveris",
-    "{n} server was marked as read": "{n} serveris pažymėtas kaip perskaitytas",
     "{n} servers": {
       "one": "{n} serveris",
       "few": "{n} serveriai",
       "other": "{n} serverių"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} serveris pažymėtas kaip perskaitytas",
-      "few": "{n} serveriai pažymėti kaip perskaityti",
-      "other": "{n} serverių pažymėta kaip perskaityta"
     },
     "{n} theme": "{n} tema",
     "{n} themes": {

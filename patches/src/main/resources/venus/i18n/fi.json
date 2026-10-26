@@ -1258,14 +1258,9 @@
     },
     "{n} selected": "{n} valittu",
     "{n} server": "{n} palvelin",
-    "{n} server was marked as read": "{n} palvelin merkittiin luetuksi",
     "{n} servers": {
       "one": "{n} palvelin",
       "other": "{n} palvelinta"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} palvelin merkittiin luetuksi",
-      "other": "{n} palvelinta merkittiin luetuiksi"
     },
     "{n} theme": "{n} teema",
     "{n} themes": {

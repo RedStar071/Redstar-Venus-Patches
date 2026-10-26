@@ -1198,16 +1198,10 @@
   "{n} person watched": "{n} sledovaná osoba",
   "{n} selected": "Vybráno: {n}",
   "{n} server": "{n} server",
-  "{n} server was marked as read": "{n} server byl označen jako přečtený",
   "{n} servers": {
     "few": "{n} servery",
     "one": "{n} server",
     "other": "{n} serverů"
-  },
-  "{n} servers were marked as read": {
-    "few": "{n} servery byly označeny jako přečtené",
-    "one": "{n} server byl označen jako přečtený",
-    "other": "{n} serverů bylo označeno jako přečtené"
   },
   "{n} theme": "{n} motiv",
   "{n} themes": {

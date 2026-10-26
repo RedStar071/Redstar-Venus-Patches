@@ -1161,14 +1161,9 @@
   "{n} person watched": "{n} követett személy",
   "{n} selected": "{n} kijelölve",
   "{n} server": "{n} szerver",
-  "{n} server was marked as read": "{n} szerver olvasottnak jelölve",
   "{n} servers": {
     "one": "{n} szerver",
     "other": "{n} szerver"
-  },
-  "{n} servers were marked as read": {
-    "one": "{n} szerver olvasottnak jelölve",
-    "other": "{n} szerver olvasottnak jelölve"
   },
   "{n} theme": "{n} téma",
   "{n} themes": {

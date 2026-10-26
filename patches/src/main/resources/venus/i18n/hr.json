@@ -1300,16 +1300,10 @@
     },
     "{n} selected": "Odabrano: {n}",
     "{n} server": "{n} server",
-    "{n} server was marked as read": "{n} server označen je pročitanim",
     "{n} servers": {
       "one": "{n} server",
       "few": "{n} servera",
       "other": "{n} servera"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} server označen je pročitanim",
-      "few": "{n} servera označena su pročitanima",
-      "other": "{n} servera označeno je pročitanima"
     },
     "{n} theme": "{n} tema",
     "{n} themes": {

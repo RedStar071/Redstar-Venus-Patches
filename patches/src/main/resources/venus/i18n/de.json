@@ -1243,14 +1243,9 @@
     "{n} seconds ago": "vor {n} Sekunden",
     "{n} selected": "{n} ausgewählt",
     "{n} server": "{n} Server",
-    "{n} server was marked as read": "{n} Server wurde als gelesen markiert",
     "{n} servers": {
       "one": "{n} Server",
       "other": "{n} Server"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} Server wurde als gelesen markiert",
-      "other": "{n} Server wurden als gelesen markiert"
     },
     "{n} theme": "{n} Theme",
     "{n} themes": {

@@ -1243,14 +1243,9 @@
     "{n} seconds ago": "for {n} sekunder siden",
     "{n} selected": "{n} valgt",
     "{n} server": "{n} server",
-    "{n} server was marked as read": "{n} server ble markert som lest",
     "{n} servers": {
       "one": "{n} server",
       "other": "{n} servere"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} server ble markert som lest",
-      "other": "{n} servere ble markert som lest"
     },
     "{n} theme": "{n} tema",
     "{n} themes": {

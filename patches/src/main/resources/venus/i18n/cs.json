@@ -1300,16 +1300,10 @@
     },
     "{n} selected": "Vybráno: {n}",
     "{n} server": "{n} server",
-    "{n} server was marked as read": "{n} server byl označen jako přečtený",
     "{n} servers": {
       "one": "{n} server",
       "few": "{n} servery",
       "other": "{n} serverů"
-    },
-    "{n} servers were marked as read": {
-      "one": "{n} server byl označen jako přečtený",
-      "few": "{n} servery byly označeny jako přečtené",
-      "other": "{n} serverů bylo označeno jako přečtené"
     },
     "{n} theme": "{n} motiv",
     "{n} themes": {

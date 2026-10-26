@@ -1198,16 +1198,10 @@
   "{n} person watched": "{n} persoană urmărită",
   "{n} selected": "{n} selectate",
   "{n} server": "{n} server",
-  "{n} server was marked as read": "{n} server a fost marcat ca citit",
   "{n} servers": {
     "few": "{n} servere",
     "one": "{n} server",
     "other": "{n} de servere"
-  },
-  "{n} servers were marked as read": {
-    "few": "{n} servere au fost marcate ca citite",
-    "one": "{n} server a fost marcat ca citit",
-    "other": "{n} de servere au fost marcate ca citite"
   },
   "{n} theme": "{n} temă",
   "{n} themes": {
