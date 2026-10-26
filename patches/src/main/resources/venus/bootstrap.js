@@ -11709,7 +11709,21 @@
     function mySystemSource() {
         const sys = materialYou.system;
         if (!sys || !sys.accent1) return null;
-        const pick = name => { const list = sys[name], hex = Array.isArray(list) ? list[6] : null; return /^#[0-9a-f]{6}$/i.test(hex || "") ? hctFromRgb(myRgb(hex)) : null; };
+        // A tonal palette's chroma is a request the gamut clips at the extremes and often at 500 too (a vivid cyan at tone
+        // 50 holds less chroma than at tone 80), so the most colorful shade from 50 to 800 carries it best: tones then land
+        // within 3 of 255 of Android's own shades, where the 500 shade alone missed light tones by up to 144.
+        const pick = name => {
+            const list = sys[name];
+            if (!Array.isArray(list)) return null;
+            let best = null;
+            for (let i = 2; i <= 10; i++) {
+                const hex = list[i];
+                if (typeof hex !== "string" || !/^#[0-9a-f]{6}$/i.test(hex)) return null;
+                const hct = hctFromRgb(myRgb(hex));
+                if (!best || hct.chroma > best.chroma) best = hct;
+            }
+            return best;
+        };
         const a1 = pick("accent1"), a2 = pick("accent2"), a3 = pick("accent3"), n1 = pick("neutral1"), n2 = pick("neutral2");
         if (!a1 || !a2 || !n1 || !n2) return null;
         return {a1, a2, a3:a3 || a2, n1, n2};
@@ -11761,9 +11775,15 @@
         mention:["MENTION_FOREGROUND", "REACTION_TEXT_REACTED_DEFAULT"],
         secondary:["MOBILE_CHANNEL_ITEM_BACKGROUND_SELECTED", "MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND"]
     };
+    // MY_ROLES' array order, as Discord's slot names.
+    const MY_SLOT_ORDER = ["dark", "light", "midnight", "darker"];
+    function myWithAlpha(hex, slot) {
+        const a = slot && Number.isFinite(slot.opacity) ? slot.opacity : 1;
+        return a >= 1 ? hex : hex + Math.max(0, Math.round(a * 255)).toString(16).padStart(2, "0");
+    }
     // The theme Custom themes' compiler applies, built once per palette, color and tint.
     function myThemeSpec() {
-        if (!enabled("materialYou") || !customThemes.origRaw) return null;
+        if (!enabled("materialYou") || !customThemes.origRaw || !customThemes.origSem) return null;
         const source = mySource();
         if (!source) return null;
         const specKey = source.key + "|" + settings.materialYouTint;
@@ -11778,9 +11798,16 @@
             const palette = accent ? p.a1 : /^OPACITY_/.test(name) ? p.n2 : p.n1;
             rawColors[name] = myTone(palette, hctToneOf(myRgb(value.slice(0, 7))));
         }
+        // A token Discord draws translucent (the voted bar of a poll is Blurple at 20% under the answer's text) keeps its
+        // own opacity, or a solid fill buries that text (2.1:1 in Light). Only secondary containers turn solid, as
+        // Material 3 draws them.
+        const origSem = customThemes.origSem;
         for (const role in MY_SEMANTIC) {
             const slots = MY_ROLES[role].map(pair => myTone(p[pair[0]], pair[1]));
-            MY_SEMANTIC[role].forEach(token => { semanticColors[token] = slots; });
+            MY_SEMANTIC[role].forEach(token => {
+                const was = role === "secondary" ? null : origSem[token];
+                semanticColors[token] = was ? slots.map((hex, i) => myWithAlpha(hex, was[MY_SLOT_ORDER[i]])) : slots;
+            });
         }
         materialYou.spec = {id:"venus:materialYou", name:"Material You", rawColors, semanticColors};
         materialYou.specKey = specKey;
