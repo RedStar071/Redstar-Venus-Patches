@@ -26,6 +26,9 @@ const ID = {RawColors:caseId('hookRawColorsModule'), SemanticColors:caseId('hook
 for (const [name, id] of Object.entries(ID)) if (!id) throw new Error(`theme_compat: can't find ${name}'s module ID in bootstrap.js`);
 // Venus's own alias table, read from bootstrap.js so the report follows the code.
 const ALIASES = (0, eval)('(' + /const LEGACY_SEMANTIC_ALIASES = (\{[\s\S]*?\n    \});/.exec(src)[1] + ')');
+// Keys Discord no longer reads (CHAT_BACKGROUND, *_MOBILE_*, BG_BASE_*) only fill in for their plain key, so when the
+// theme sets that plain key too, a variant's color losing to it is the rule working, not a miss.
+const VARIANTS = (0, eval)('(' + (/const LEGACY_ALIAS_VARIANT = (\{[^}]*\});/.exec(src) || [0, '{}'])[1] + ')');
 const clone = o => JSON.parse(JSON.stringify(o));
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
@@ -112,6 +115,7 @@ const hexOf = v => { const c = Array.isArray(v) ? v[0] : v; if (typeof c !== 'st
             const h = hexOf(v); if (!h) return false;
             const all = targetsOf(k), own = all.filter(token => token === k || !(token in declaredKeys));
             if (all.length && !own.length) return false;
+            if (VARIANTS[k] && Object.keys(declaredKeys).some(other => other !== k && !VARIANTS[other] && (ALIASES[other] || []).some(t => all.includes(t)))) return false;
             if (own.length) return !own.some(token => String(after[token + ':' + SLOTS[0]]).split('@')[0].toLowerCase().slice(0, 7) === h);
             return !drawn.has(h);
         }).map(([k]) => k);
