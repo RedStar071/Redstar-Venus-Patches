@@ -15,12 +15,12 @@ const TABLES = JSON.parse(fs.readFileSync(path.join(ROOT, 'work/discord_colors.j
 const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'work/themes/index.json'), 'utf8'));
 const SLOTS = Object.values(TABLES.themes);
 // Module IDs as bootstrap.js uses them, so this harness follows every Discord port by itself.
-const caseId = hook => +(new RegExp('case (\\d+): return features\\.customThemes \\? ' + hook).exec(src) || [])[1];
+const caseId = hook => +(new RegExp('case (\\d+): return features\\.customThemes(?: \\|\\| features\\.materialYou)? \\? ' + hook).exec(src) || [])[1];
 const partId = name => +(new RegExp('\\b' + name + ':(?:\\w+ \\|\\| )?x\\((\\d+),').exec(src) || [])[1];
 const ID = {RawColors:caseId('hookRawColorsModule'), SemanticColors:caseId('hookSemanticColorsModule'),
     SemanticColorExperiments:caseId('hookExperimentColorsModule'),
     ThemeStore:+(/case (\d+): if \(\(features\.customThemes[^\n]*themeStore =/.exec(src) || [])[1],
-    ThemeContext:+(/case (\d+): return \(features\.customThemes \|\| features\.iconPacks\) \? hookCreateThemedContext/.exec(src) || [])[1],
+    ThemeContext:+(/case (\d+): return \(features\.customThemes (?:\|\| features\.materialYou )?\|\| features\.iconPacks\) \? hookCreateThemedContext/.exec(src) || [])[1],
     SettingsRegistry:+(/case (\d+): exports\.SETTING_RENDERER_CONFIG = nativeRegistry/.exec(src) || [])[1],
     toasts:partId('toasts'), TableRow:partId('TableRow'), TableRowGroup:partId('TableRowGroup'), TextInput:partId('TextInput')};
 for (const [name, id] of Object.entries(ID)) if (!id) throw new Error(`theme_compat: can't find ${name}'s module ID in bootstrap.js`);
