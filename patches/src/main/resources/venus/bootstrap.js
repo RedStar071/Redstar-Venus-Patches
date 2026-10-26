@@ -13511,7 +13511,9 @@
         // Every hook runs before the early return, so starting or ending a selection never changes the hook order.
         const s = useBulkBarStyles();
         // The composer's measured height (the same store JumpToPresentButton reads): the bar fills exactly that slot.
-        const heightMod = chatHeight || (chatHeight = inspectedExport(9379));
+        // (inspectedExport needs a key; this reads the whole module, in case it loaded before Venus could keep it.)
+        if (!chatHeight && typeof global.__r === "function") try { chatHeight = global.__r(9379) || null; } catch (_) {}
+        const heightMod = chatHeight;
         let inputHeight = 0;
         try {
             if (heightMod && typeof heightMod.useBestActiveChatInputContainerHeight === "function")

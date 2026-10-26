@@ -11,6 +11,8 @@
 //   scene=settings     Discord's main Settings screen, with the Venus section where Venus puts it
 //   scene=youBar       the profile bar at the bottom: Discord's bell, then Venus's Switch accounts and settings buttons
 //   scene=translateBar a chat in Spanish with the Translate pill at the top (translateMode manual)
+//   scene=bulkDelete   Bulk delete messages: Select Messages tapped in your message's hold menu, so the chat shows the
+//                      selection bar in the message bar's place (add on=translate&set={"translateMode":"manual"} for both bars)
 //   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
@@ -37,7 +39,7 @@ const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174];
+export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -84,7 +86,9 @@ export function modules(store, me) {
     16858: { default: () => <YouBarButton badge={15} icon={React.createElement(D.makeIcon("BellIcon"), { size: "custom", style: { width: 20, height: 20 } })} accessibilityLabel="Notifications" /> },
     // A chat: ChatViewWrapper with Discord's messages, and the message store the Translate pill reads.
     10368: { default: p => <RN.View style={{ flex: 1, position: "relative" }}>{p.children}</RN.View> },
-    5432: { default: store({ getMessages: () => ({ _array: SPANISH }) }) },
+    5432: { default: store({ getMessages: () => ({ _array: SPANISH }), getMessage: (c, id) => SPANISH.find(m => m.id === id) || null }) },
+    // useChatBottomManagerUIStore: the message bar's measured height, which the selection bar fills.
+    9379: { useBestActiveChatInputContainerHeight: () => COMPOSER, useChatInputContainerHeight: () => COMPOSER, useSmallSuggestionBarHeight: () => 0 },
     // LongPressMessageActionSheet: a message's hold menu, Discord's rows that Venus adds Translate after.
     9675: { default: MessageMenu },
     // GuildActionSheetJoinRequestRow: the server sheet's last row, which Venus turns into its Reviews row.
@@ -131,20 +135,28 @@ function YouBar({ defined }) {
     </RN.View>
   </RN.View>;
 }
-const CHAT = "1400000000000000001";
+const CHAT = "1400000000000000001", COMPOSER = 64;
 const SPANISH = [{ id: "1", channel_id: CHAT, content: "¡Hola a todos! ¿Quién viene esta noche?", author: { id: allPeople[0].id, username: "lucia" } },
-  { id: "2", channel_id: CHAT, content: "Yo llego a las ocho, guárdenme un sitio.", author: { id: allPeople[1].id, username: "sam_" } }];
+  { id: "2", channel_id: CHAT, content: "Yo llego a las ocho, guárdenme un sitio.", author: { id: allPeople[1].id, username: "sam_" } },
+  { id: "3", channel_id: CHAT, content: "Wait, wrong link", author: { id: "123456789012345678", username: "venus" }, state: "SENT", type: 0 },
+  { id: "4", channel_id: CHAT, content: "Let me clean these up", author: { id: "123456789012345678", username: "venus" }, state: "SENT", type: 0 }];
 function Chat({ defined }) {
   const Wrapper = defined[10368].exports.default;
   return <RN.View style={{ width: 412, height: 520, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
     <RN.View style={{ height: 52, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderColor: D.tok("BORDER_SUBTLE") }}>
       {React.createElement(D.makeIcon("HashmarkIcon"), { size: "sm", color: D.tok("CHANNEL_ICON") })}<D.Text variant="text-md/bold" color="text-strong">general</D.Text></RN.View>
     <Wrapper channelId={CHAT}>
-      <RN.View style={{ flex: 1, justifyContent: "flex-end", padding: 16, gap: 14 }}>
+      <RN.View style={{ flex: 1, justifyContent: "flex-end", padding: 16, gap: 14, paddingBottom: 16 + COMPOSER }}>
         {SPANISH.map(m => <RN.View key={m.id} style={{ flexDirection: "row", gap: 12 }}>
-          <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: m.id === "1" ? "#f0b232" : "#eb459e" }} />
+          <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: m.id === "1" ? "#f0b232" : m.id === "2" ? "#eb459e" : "#5865f2" }} />
           <RN.View style={{ flex: 1 }}><D.Text variant="text-md/semibold" color="text-strong">{m.author.username}</D.Text><D.Text variant="text-md/normal" color="text-default">{m.content}</D.Text></RN.View>
         </RN.View>)}
+      </RN.View>
+      {/* Discord's message bar: the list keeps its height clear at the bottom, as DCDChatList does. */}
+      <RN.View style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: COMPOSER, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12 }}>
+        <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }} />
+        <RN.View style={{ flex: 1, height: 40, borderRadius: 20, justifyContent: "center", paddingHorizontal: 16, backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>
+          <D.Text variant="text-md/medium" color="text-muted">Message #general</D.Text></RN.View>
       </RN.View>
     </Wrapper>
   </RN.View>;
@@ -315,6 +327,7 @@ export function Scene({ name, defined, registry }) {
   host = { show: (key, content) => setSheets(list => list.filter(s => s.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(s => s.key !== key)) };
   React.useEffect(() => {
     if (name === "hiddenChannel") defined[1112].exports.transitionTo("/channels/" + guild.id + "/" + LOCKED);
+    if (name === "bulkDelete") host.show("MessageLongPressActionSheet", React.createElement(defined[9675].exports.default, { message: SPANISH[3], channel: { id: CHAT }, onClose() {} }));
     if (name === "messageMenu") host.show("MessageLongPressActionSheet", React.createElement(defined[9675].exports.default, { message: SPANISH[0], onClose() {} }));
     if (name === "serverSheet") host.show("guild", <GuildSheet defined={defined} />);
     if (name === "longMessageFailed" || name === "longEdit") {
@@ -337,7 +350,7 @@ export function Scene({ name, defined, registry }) {
   }, []);
   if (name === "reviews") return <Profile defined={defined} />;
   if (name === "youBar") return <YouBar defined={defined} />;
-  if (name === "translateBar") return <Chat defined={defined} />;
+  if (name === "translateBar" || name === "bulkDelete" && !sheets.length) return <Chat defined={defined} />;
   if (name === "settings") return <SettingsScreen defined={defined} registry={registry} />;
   const top = sheets[sheets.length - 1];
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
