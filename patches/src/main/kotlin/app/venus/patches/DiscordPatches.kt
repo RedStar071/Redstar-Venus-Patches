@@ -2,6 +2,7 @@ package app.venus.patches
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
@@ -75,7 +76,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "noHandsfree")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -1053,5 +1054,87 @@ val bulkDelete = bytecodePatch(
                 parameters = listOf("Landroid/graphics/Canvas;", "Landroid/view/View;", "I", "I")
             ).method)
         }
+    }
+}
+
+internal const val HANDSFREE = "Lapp/venus/audio/Handsfree;"
+internal const val AUDIO_MANAGER = "Landroid/media/AudioManager;"
+
+/** The AudioManager calls Discord makes to put Bluetooth headphones in hands-free mode, and Venus's replacement for each. */
+internal val HANDSFREE_CALLS = mapOf(
+    "setMode(I)V" to "setMode($AUDIO_MANAGER" + "I)V",
+    "startBluetoothSco()V" to "startBluetoothSco($AUDIO_MANAGER)V",
+    "setCommunicationDevice(Landroid/media/AudioDeviceInfo;)Z" to "setCommunicationDevice(${AUDIO_MANAGER}Landroid/media/AudioDeviceInfo;)Z"
+)
+
+/**
+ * Every place Discord calls one of [HANDSFREE_CALLS]: class, method name, parameter types, and how many calls it makes.
+ * DiscordAudioManager runs below Android 13 (SCO), DiscordAudioManager2 on Android 13 and newer (communication device).
+ */
+internal val HANDSFREE_SITES = listOf(
+    Quad4("Lcom/discord/audio/DiscordAudioManager;", "setCommunicationModeOn", listOf("Z"), 3),
+    Quad4("Lcom/discord/audio/DiscordAudioManager;", "setActiveAudioDevice", listOf("Lcom/discord/audio/SimpleDeviceType;"), 1),
+    Quad4("Lcom/discord/audio/DiscordAudioManager\$setupAudioDeviceCallback\$1;", "onAudioDevicesAdded", listOf("[Landroid/media/AudioDeviceInfo;"), 1),
+    Quad4("Lcom/discord/audio/DiscordAudioManager\$audioManagerBroadcastReceiver\$1;", "onReceive", listOf("Landroid/content/Context;", "Landroid/content/Intent;"), 1),
+    Quad4("Lcom/discord/audio/DiscordAudioManager2;", "setCommunicationModeOn", listOf("Z"), 2),
+    Quad4("Lcom/discord/audio/DiscordAudioManager2;", "setActiveAudioDevice", listOf("Landroid/media/AudioDeviceInfo;"), 1),
+    Quad4("Lcom/discord/audio/DiscordAudioManager2\$setupAudioDeviceCallback\$1;", "onAudioDevicesAdded", listOf("[Landroid/media/AudioDeviceInfo;"), 2)
+)
+
+internal data class Quad4(val owner: String, val name: String, val parameters: List<String>, val calls: Int)
+
+/**
+ * Turns each of Discord's [HANDSFREE_CALLS] in [method] into a static call to [HANDSFREE] with the same registers, the
+ * AudioManager first. Nothing else moves: same instruction count, same registers, same branches. Returns how many.
+ */
+internal fun keepBluetoothA2dp(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod): Int {
+    val code = method.implementation?.instructions?.toList() ?: throw PatchException("${method.name} has no code")
+    var count = 0
+    for ((i, instruction) in code.withIndex()) {
+        if (instruction.opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_VIRTUAL) continue
+        val ref = (instruction as com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction).reference
+            as com.android.tools.smali.dexlib2.iface.reference.MethodReference
+        if (ref.definingClass != AUDIO_MANAGER) continue
+        val replacement = HANDSFREE_CALLS["${ref.name}(${ref.parameterTypes.joinToString("")})${ref.returnType}"] ?: continue
+        val five = instruction as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+        val registers = listOf(five.registerC, five.registerD, five.registerE).take(five.registerCount)
+        if (registers.any { it > 15 }) throw PatchException("${method.name}: AudioManager call uses a high register")
+        method.replaceInstruction(i, "invoke-static {${registers.joinToString(", ") { "v$it" }}}, $HANDSFREE->$replacement")
+        count++
+    }
+    return count
+}
+
+/** Lets the hands-free guard find Venus's settings file, right after Application.onCreate's super call. */
+internal fun readHandsfreeContext(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val first = method.implementation?.instructions?.firstOrNull()
+    val target = (first as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference?.toString()
+    if (first?.opcode != com.android.tools.smali.dexlib2.Opcode.INVOKE_SUPER || target != "Landroid/app/Application;->onCreate()V")
+        throw PatchException("MainApplication.onCreate no longer starts with super.onCreate()")
+    method.addInstructions(1, "invoke-static {p0}, $HANDSFREE->init(Landroid/content/Context;)V")
+}
+
+@Suppress("unused")
+val keepBluetoothAudioClear = bytecodePatch(
+    name = "Keep Bluetooth audio clear in calls",
+    description = "Bluetooth headphones stay in music quality in calls, voice channels and Stages. Your phone's microphone picks up your voice."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    extendWith("extensions/audio.mpe")
+    execute {
+        additionalSelections += "noHandsfree"
+        for (site in HANDSFREE_SITES) {
+            val method = Fingerprint(definingClass = site.owner, name = site.name, parameters = site.parameters).method
+            val count = keepBluetoothA2dp(method)
+            if (count != site.calls) throw PatchException("${site.owner}->${site.name}: $count hands-free calls, expected ${site.calls}")
+        }
+        readHandsfreeContext(Fingerprint(
+            definingClass = "Lcom/discord/MainApplication;",
+            name = "onCreate",
+            returnType = "V",
+            parameters = listOf()
+        ).method)
     }
 }
