@@ -341,12 +341,17 @@ export function Scene({ name, defined, registry }) {
     }
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
     // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
-    if (name === "readAllHold") setTimeout(() => {
-      const pill = document.querySelector('[aria-label="Read all"]'), key = pill && Object.keys(pill).find(k => k.startsWith("__reactFiber"));
-      let fiber = key && pill[key];
-      while (fiber && !(fiber.memoizedProps && fiber.memoizedProps.onLongPress)) fiber = fiber.return;
-      if (fiber) fiber.memoizedProps.onLongPress({}); else console.warn("No Read all hold");
-    }, 50);
+    // Retried until the pill is drawn: with lang= it waits for the language pack, and its label isn't English.
+    if (name === "readAllHold") { let tries = 0; const hold = () => {
+      let fiber = null;
+      for (const e of document.querySelectorAll("[role=button]")) {
+        const key = Object.keys(e).find(k => k.startsWith("__reactFiber"));
+        let f = key && e[key];
+        while (f && !(f.memoizedProps && f.memoizedProps.onLongPress)) f = f.return;
+        if (f) { fiber = f; break; }
+      }
+      if (fiber) fiber.memoizedProps.onLongPress({}); else if (++tries < 20) setTimeout(hold, 50); else console.warn("No Read all hold");
+    }; setTimeout(hold, 50); }
   }, []);
   if (name === "reviews") return <Profile defined={defined} />;
   if (name === "youBar") return <YouBar defined={defined} />;
