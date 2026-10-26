@@ -13459,8 +13459,7 @@
         return settingsBody(ui, groups);
     }
     // Clean channel names: the preview is a server's channel list with names decorated the way real servers do it.
-    // While on, each name is cleaned with the options below (and Spaces in channel names, if that's on too) and glides in,
-    // with a small dot on the ones that changed.
+    // While on, each name is cleaned with the options below (and Spaces in channel names, if that's on too) and glides in.
     const CLEAN_SAMPLE = [["cat", "\ud83d\udee0\ufe0f | SUPPORT & RESOURCE | \ud83d\udee0\ufe0f"], ["text", "\ud83c\udfab\uff5cquick-help"], ["text", "\ud83d\udd0d\u2503mchose-support-center"],
         ["cat", "\u2726 \ud835\udc02\ud835\udc0e\ud835\udc0c\ud835\udc0c\ud835\udc14\ud835\udc0d\ud835\udc08\ud835\udc13\ud835\udc18 \u2726"], ["text", "\u300c\ud83d\udce6\u300dunbox-reviews"], ["text", "\ud835\udcf0\ud835\udcee\ud835\udcf7\ud835\udcee\ud835\udcfb\ud835\udcea\ud835\udcf5-\ud835\udcec\ud835\udcf1\ud835\udcea\ud835\udcfd"], ["voice", "\ud83d\udd0a \u30fb Lounge"]];
     function CleanChannelsPreview(props) {
@@ -13475,7 +13474,7 @@
             return features.dashless && enabled("dashless") && type === "text" ? cleaned.replace(/-/g, " ") : cleaned;
         };
         const rows = CLEAN_SAMPLE.map((entry, i) => {
-            const name = show(entry), changed = name !== entry[1];
+            const name = show(entry);
             if (entry[0] === "cat") return el(RN.View, {key:"c" + i, style:{flexDirection:"row", alignItems:"center", gap:4, paddingHorizontal:16, paddingTop:i ? 14 : 6, paddingBottom:4}},
                 el(Down, {size:"xxs", color:k.category.color}),
                 popIn("n" + i + name, el(RN.Text, {style:[k.category, {flex:1}], numberOfLines:1}, name.toUpperCase())));
@@ -13483,8 +13482,7 @@
             return el(RN.View, {key:"r" + i, style:[{flexDirection:"row", alignItems:"center", gap:8, paddingHorizontal:8, paddingVertical:7, marginHorizontal:8, borderRadius:8},
                 selected ? k.selected : null]},
                 el(Icon, {size:"sm", color:selected ? s.name.color : k.channel.color}),
-                popIn("n" + i + name, el(RN.Text, {style:[s.text, {flex:1, color:selected ? s.name.color : k.channel.color, fontWeight:selected ? "600" : "500"}], numberOfLines:1}, name)),
-                changed ? el(RN.View, {style:{width:6, height:6, borderRadius:3, backgroundColor:k.brandFg.color, opacity:0.8}}) : null);
+                popIn("n" + i + name, el(RN.Text, {style:[s.text, {flex:1, color:selected ? s.name.color : k.channel.color, fontWeight:selected ? "600" : "500"}], numberOfLines:1}, name)));
         });
         const Chevron = venusIcon(6906, "ChevronSmallRightIcon"), Search = venusIcon(6740, "MagnifyingGlassIcon");
         const server = el(RN.View, {key:"server", style:[k.header, {height:52, paddingHorizontal:16}]},
