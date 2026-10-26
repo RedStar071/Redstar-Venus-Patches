@@ -26,7 +26,9 @@ function build() {
     `import(${JSON.stringify(path.join(__dirname, "entry.jsx"))}).then(() => import("./bootstrap.gen.js")).then(() => window.__venusStart());\n`);
   execFileSync(path.join(UI, "node_modules/.bin/esbuild"), ["main.jsx", "--bundle", "--outfile=out.js", "--loader:.js=jsx", "--define:global=window",
     "--define:process.env.NODE_ENV=\"development\"", "--log-level=error", "--format=iife"], { cwd: UI, stdio: "inherit", env: Object.assign({}, process.env, { NODE_PATH: path.join(UI, "node_modules") }) });
-  const face = (w, f) => `@font-face{font-family:ggsans;font-weight:${w};src:url(fonts/ggsans-${f}.ttf)}`;
+  // Also under the names Discord's Fonts constants (1096) use, e.g. fontFamily "ggsans-Bold, NotoSans-Bold".
+  const face = (w, f) => `@font-face{font-family:ggsans;font-weight:${w};src:url(fonts/ggsans-${f}.ttf)}` +
+    `@font-face{font-family:"ggsans-${f}";src:url(fonts/ggsans-${f}.ttf)}`;
   fs.writeFileSync(path.join(UI, "index.html"), `<!doctype html><html><head><meta charset="utf-8"><style>${face(400, "Normal")}${face(500, "Medium")}` +
     `${face(600, "Semibold")}${face(700, "Bold")}${face(800, "ExtraBold")}body{margin:0;background:#000}*{font-family:ggsans,"Noto Color Emoji",sans-serif}` +
     `</style></head><body><div id="root"></div><script src="out.js"></script></body></html>`);

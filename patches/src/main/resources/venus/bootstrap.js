@@ -3230,7 +3230,9 @@
     // pill now stays inside the bar, wraps to two lines and only then shrinks the text.
     const READ_ALL_PILL_BASE = {minHeight:26,minWidth:48,maxWidth:68,paddingHorizontal:5,paddingVertical:3,borderRadius:13,alignItems:"center",justifyContent:"center"};
     const READ_ALL_PRESSED_SCALE = {transform:[{scale:0.96}]};
-    const READ_ALL_TEXT_BASE = {fontSize:11,lineHeight:13,fontWeight:"700",textAlign:"center",includeFontPadding:false};
+    // Discord's own bold face (Constants 1096), as its Text draws it: a plain RN.Text fell back to Roboto, and to
+    // Arial in the UI preview, so the label measured and looked unlike everything around it.
+    const READ_ALL_TEXT_BASE = {fontFamily:"ggsans-Bold, NotoSans-Bold",fontSize:11,lineHeight:13,textAlign:"center",includeFontPadding:false};
     const READ_ALL_FALLBACK_STYLES = {pill:{backgroundColor:"#4e505899"},pressed:{backgroundColor:"#4e5058"},text:{color:"#dbdee1"}};
     function readAllPress() { readAll(settings.readAllMode); }
     // For a moment after it clears something, the pill shows a check instead of its label, then goes back.
