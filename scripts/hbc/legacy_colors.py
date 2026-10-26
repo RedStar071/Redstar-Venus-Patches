@@ -61,7 +61,9 @@ def main():
             now = current[token].get(slot)
             # Still on a legacy raw: the theme's raw already reaches it.
             if not now or LEGACY.match(now["raw"]): parts.append(""); continue
-            parts.append(",".join(r + ("" if op == 1 else "@" + ("%g" % op)) for r, op in seen.get((token, slot), [])))
+            # Only the newest: older builds sometimes used a token for something else (a border that once read
+            # BRAND_500), and that would recolor it wrongly today.
+            parts.append("".join(r + ("" if op == 1 else "@" + ("%g" % op)) for r, op in seen.get((token, slot), [])[:1]))
         if any(parts): rows.append(token + ":" + "/".join(parts))
     text = ";".join(rows)
     src = open(BOOTSTRAP).read()
