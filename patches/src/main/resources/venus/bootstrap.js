@@ -10988,6 +10988,9 @@
     }
     // Old theme files write WHITE and BLACK under either name.
     const LEGACY_RAW_RE = /^(PRIMARY|PLUM|BRAND)_\d+$|^(WHITE|BLACK)(_500)?$/;
+    // Where each slot (THEME_SLOTS order) looks for a legacy raw: its own list, then the other dark slots'. Light only
+    // reads its own: a dark palette there would turn it dark.
+    const LEGACY_SLOT_ORDER = [[0, 2, 3], [1], [2, 0, 3], [3, 2, 0]];
     const LEGACY_RAW_SYNONYM = {WHITE:"WHITE_500", BLACK:"BLACK_500"};
     const LEGACY_RAW_BRIDGES = [
         ["NEUTRAL_100", ["PLUM_24", "PLUM_23", "PRIMARY_830", "PRIMARY_800", "BLACK"]],
@@ -11389,18 +11392,25 @@
                 const token = table[i][0], perSlot = table[i][1], entry = sem[token];
                 if (!entry || typeof entry !== "object") continue;
                 for (let j = 0; j < 4; j++) {
-                    const options = perSlot[j], slot = THEME_SLOTS[j], now = entry[slot];
-                    if (!options || !now || typeof now !== "object" || rawIn[now.raw]) continue;
-                    for (let k = 0; k < options.length; k++) {
-                        const name = options[k][0], value = rawIn[name] || rawIn[LEGACY_RAW_SYNONYM[name]];
-                        const parsed = value && parseThemeColor(value);
-                        if (!parsed) continue;
-                        const syntheticKey = "__VENUS_" + token + "_" + slot;
-                        setRaw(syntheticKey, parsed.hex);
-                        touchedSem.add(token);
-                        now.raw = syntheticKey;
-                        now.opacity = Math.round(parsed.opacity * options[k][1] * 10000) / 10000;
-                        break;
+                    const slot = THEME_SLOTS[j], now = entry[slot];
+                    if (!now || typeof now !== "object" || rawIn[now.raw]) continue;
+                    // A theme that only recolored PLUM (the old Dark/Midnight ramp) still colors Ash the same way,
+                    // instead of leaving Ash's cards on a mix of bridged shades.
+                    const order = LEGACY_SLOT_ORDER[j];
+                    found: for (let o = 0; o < order.length; o++) {
+                        const options = perSlot[order[o]];
+                        if (!options) continue;
+                        for (let k = 0; k < options.length; k++) {
+                            const name = options[k][0], value = rawIn[name] || rawIn[LEGACY_RAW_SYNONYM[name]];
+                            const parsed = value && parseThemeColor(value);
+                            if (!parsed) continue;
+                            const syntheticKey = "__VENUS_" + token + "_" + slot;
+                            setRaw(syntheticKey, parsed.hex);
+                            touchedSem.add(token);
+                            now.raw = syntheticKey;
+                            now.opacity = Math.round(parsed.opacity * options[k][1] * 10000) / 10000;
+                            break found;
+                        }
                     }
                 }
             }
