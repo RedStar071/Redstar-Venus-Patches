@@ -54,23 +54,27 @@ def main():
                 if not LEGACY.match(raw): continue
                 found = seen.setdefault((token, slot), [])
                 if all(r != raw for r, _ in found): found.append((raw, round(float(e.get("opacity", 1)), 3)))
-    rows = []
+    # Inverted: legacy raw -> "TOKEN.slot[@opacity] ..." (slot = index in SLOTS), so a theme only reads the raws it sets.
+    by_raw = {}
     for token in sorted(current):
-        parts = []
-        for slot in SLOTS:
+        for i, slot in enumerate(SLOTS):
             now = current[token].get(slot)
             # Still on a legacy raw: the theme's raw already reaches it.
-            if not now or LEGACY.match(now["raw"]): parts.append(""); continue
+            if not now or LEGACY.match(now["raw"]): continue
+            found = seen.get((token, slot))
             # Only the newest: older builds sometimes used a token for something else (a border that once read
             # BRAND_500), and that would recolor it wrongly today.
-            parts.append("".join(r + ("" if op == 1 else "@" + ("%g" % op)) for r, op in seen.get((token, slot), [])[:1]))
-        if any(parts): rows.append(token + ":" + "/".join(parts))
-    text = ";".join(rows)
+            if not found: continue
+            raw, op = found[0]
+            by_raw.setdefault(raw, []).append("%s.%d%s" % (token, i, "" if op == 1 else "@%g" % op))
+    body = ",\n".join("        %s:%s" % (raw, json.dumps(" ".join(items))) for raw, items in sorted(by_raw.items()))
+    text = "{\n" + body + "\n    }"
+    count = sum(len(v) for v in by_raw.values())
     src = open(BOOTSTRAP).read()
-    new, n = re.subn(r'(const LEGACY_TOKEN_RAWS = )"[^"]*";', lambda m: m.group(1) + json.dumps(text) + ";", src)
+    new, n = re.subn(r'(const LEGACY_TOKEN_RAWS = )(?:"[^"]*"|\{[^}]*\});', lambda m: m.group(1) + text + ";", src)
     if n != 1: sys.exit("legacy_colors: LEGACY_TOKEN_RAWS not found in bootstrap.js")
     open(BOOTSTRAP, "w").write(new)
-    print("LEGACY_TOKEN_RAWS: %d tokens, %d chars" % (len(rows), len(text)))
+    print("LEGACY_TOKEN_RAWS: %d legacy raws, %d token slots" % (len(by_raw), count))
 
 
 if __name__ == "__main__":
