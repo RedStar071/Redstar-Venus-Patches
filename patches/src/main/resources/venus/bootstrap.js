@@ -5703,10 +5703,12 @@
         const fileLabel = info ? (info.name || tr(font ? "Imported font" : "Imported emoji font")) + " \u00b7 " + formatSize(info.size) : "";
         const choices = [["phone", font ? "Your phone's font" : "Your phone's emojis",
             font ? "The font your phone uses everywhere else." : "The emojis your phone's keyboard shows.", rowIcon(6642, "MobilePhoneIcon")]];
-        if (info) choices.push(["file", font ? "Imported font" : "Imported emoji font", fileLabel, rowIcon(9337, "PaperIcon")]);
+        if (info || settings[k.source] === "file") choices.push(["file", font ? "Imported font" : "Imported emoji font",
+            info ? fileLabel : tr("The file is missing. Import it again."), rowIcon(9337, "PaperIcon")]);
         const groups = [
             on ? null : offCard("status", venusIcon(font ? 15974 : 12901, font ? "LettersIcon" : "ChatSmileIcon"), owner),
-            radioGroup(ui, "source", "Use", k.source, on, choices.map(([value, label, sub, icon]) => [value, tr(label), value === "file" ? sub : tr(sub), icon]), true),
+            // Only a choice once there's a file to choose; before that the phone's look is simply what's used.
+            info || settings[k.source] === "file" ? radioGroup(ui, "source", "Use", k.source, on, choices.map(([value, label, sub, icon]) => [value, tr(label), value === "file" ? sub : tr(sub), icon]), true) : null,
             canPick && Row ? el(Group, {key:"file", title:tr(font ? "Font file" : "Emoji font")},
                 el(Row, {key:"import", label:tr(busy ? "Importing\u2026" : info ? (font ? "Replace the font" : "Replace the emoji font") : (font ? "Import a font" : "Import an emoji font")),
                     subLabel:tr(font ? "A TTF, OTF or TTC file, up to 32 MB." : "A color emoji TTF, like Twemoji or Noto Color Emoji, up to 64 MB."),

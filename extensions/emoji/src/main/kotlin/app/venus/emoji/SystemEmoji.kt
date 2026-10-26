@@ -236,7 +236,10 @@ object SystemEmoji {
                 if (!temporary.renameTo(File(folder, FONT_FILE))) { temporary.delete(); promise.reject("VENUS_EMOJI", "unreadable"); return@Thread }
                 var name = request.optString("name", "")
                 if (name.length > 120) name = name.substring(0, 120)
-                java.nio.file.Files.write(File(folder, NAME_FILE).toPath(), name.toByteArray(java.nio.charset.StandardCharsets.UTF_8))
+                // java.lang.String.getBytes: the host has no usable Kotlin text helpers.
+                @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "CAST_NEVER_SUCCEEDS")
+                val bytes = (name as java.lang.String).getBytes(java.nio.charset.StandardCharsets.UTF_8)
+                java.nio.file.Files.write(File(folder, NAME_FILE).toPath(), bytes)
                 promise.resolve(info())
             } catch (_: Throwable) {
                 promise.reject("VENUS_EMOJI", "unreadable")
