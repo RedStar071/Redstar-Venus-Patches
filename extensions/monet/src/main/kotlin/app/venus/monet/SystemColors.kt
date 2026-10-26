@@ -11,7 +11,7 @@ import com.facebook.react.bridge.Promise
 import java.io.File
 
 /**
- * Material You colors, native side.
+ * Material You colors and Custom themes, native side.
  *
  * 1. Hands Venus the phone's wallpaper palettes (Android 12+ system_accent1..3 and system_neutral1..2, 13 shades each)
  *    as JSON. Venus builds Discord's colors from them in JavaScript.
@@ -59,16 +59,17 @@ object SystemColors {
     }
 
     /**
-     * Whether Venus' saved settings still have Material You on, so turning it off and leaving Discord before the native
-     * side heard about it never brings the colors back. Venus writes them with JSON.stringify.
+     * Whether Venus' saved settings still have Material You or Custom themes on, so turning them off and leaving Discord
+     * before the native side heard about it never brings the colors back. Venus writes them with JSON.stringify.
      */
     private fun savedOn(file: File): Boolean {
         if (!file.isFile || file.length() > MAX_PREFS) return false
         val text = String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8)
         @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "CAST_NEVER_SUCCEEDS")
         val raw = text as java.lang.String
-        if (raw.indexOf("\"materialYou\":") < 0) return false
-        return org.json.JSONObject(text).optBoolean("materialYou", false)
+        if (raw.indexOf("\"materialYou\":") < 0 && raw.indexOf("\"customThemes\":") < 0) return false
+        val json = org.json.JSONObject(text)
+        return json.optBoolean("materialYou", false) || json.optBoolean("customThemes", false)
     }
 
     /** Discord's color in Material You, keeping its alpha; anything not in the table is returned as it was. */

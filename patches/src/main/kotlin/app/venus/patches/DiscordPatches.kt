@@ -717,8 +717,16 @@ val unlockNitroThemes = bundledPlugin("nitroThemes", "Unlock Nitro themes",
     "Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them.")
 
 @Suppress("unused")
-val customThemes = bundledPlugin("customThemes", "Custom themes",
-    "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes.")
+val customThemes = bytecodePatch(
+    name = "Custom themes",
+    description = "Install color themes from a link and switch between them. Works with Revenge and Vendetta themes."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    // Themes recolor Discord's native chat list and embeds too, through the same color swap as Material You colors.
+    dependsOn(venusSettings, nativeThemeColors)
+    execute { additionalSelections += "customThemes" }
+}
 
 @Suppress("unused")
 val iconPacks = bundledPlugin("iconPacks", "Icon packs",
@@ -996,17 +1004,15 @@ internal fun readMaterialYouColors(method: app.morphe.patcher.util.proxy.mutable
     method.addInstructions(1, "invoke-static {p0}, $SYSTEM_COLORS->init(Landroid/content/Context;)V")
 }
 
-@Suppress("unused")
-val materialYou = bytecodePatch(
-    name = "Material You colors",
-    description = "Colors Discord to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
-) {
-    compatibleWith(discord)
-    section(PLUGINS)
+/**
+ * The native color swap both Material You colors and Custom themes use: Discord's Android views (the chat list, embeds,
+ * the voice overlay, the window) draw with built-in theme colors JS can't reach, so JS sends a Discord color -> new color
+ * table through getFileHash and every native color read goes through it. Installed once, whichever patches are selected.
+ */
+internal val nativeThemeColors = bytecodePatch {
     dependsOn(venusSettings)
     extendWith("extensions/monet.mpe")
     execute {
-        additionalSelections += "materialYou"
         materialYouBridge(Fingerprint(
             definingClass = FILE_MODULE,
             name = "getFileHash",
@@ -1028,6 +1034,17 @@ val materialYou = bytecodePatch(
             parameters = listOf()
         ).method)
     }
+}
+
+@Suppress("unused")
+val materialYou = bytecodePatch(
+    name = "Material You colors",
+    description = "Colors Discord to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings, nativeThemeColors)
+    execute { additionalSelections += "materialYou" }
 }
 
 @Suppress("unused")
