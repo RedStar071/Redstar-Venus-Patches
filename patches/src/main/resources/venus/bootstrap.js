@@ -11317,6 +11317,47 @@
             return ctx;
         });
     }
+    // Most theme wallpapers that "don't load" are Discord attachment links: Discord's CDN now only serves them with a
+    // fresh signature, so the bare links in older themes answer 404. Discord signs them again the way it does for old
+    // links in chat (POST /attachments/refresh-urls), and the signed link is reused until it expires.
+    const THEME_WALLPAPER_CDN_RE = /^https:\/\/(?:cdn\.discordapp\.com|media\.discordapp\.net)\/attachments\/\d+\/\d+\/[^?#\s]+/i;
+    const themeWallpapers = new Map();
+    function themeWallpaperUri(url) {
+        if (typeof url !== "string" || !THEME_WALLPAPER_CDN_RE.test(url)) return url;
+        const hit = themeWallpapers.get(url);
+        if (hit && (hit.pending || hit.expires > Date.now() + 60000)) return hit.uri;
+        // Until it's signed, draw no image rather than a broken one; the theme's own background color still shows.
+        const entry = {uri:hit && hit.uri || "", pending:true, expires:0};
+        themeWallpapers.set(url, entry);
+        const http = inspectedExport(1295, "HTTP");
+        const sent = http && typeof http.post === "function" ? Promise.resolve().then(() => http.post({url:"/attachments/refresh-urls",
+            body:{attachment_urls:[url]}, interceptResponse:questIntercept})) : Promise.reject(new Error("no client"));
+        sent.then(response => {
+            const list = response && response.body && response.body.refreshed_urls;
+            const fresh = Array.isArray(list) && list[0] && typeof list[0].refreshed === "string" ? list[0].refreshed : "";
+            // ex= is the expiry in hex seconds; without one, ask again in an hour.
+            const ex = /[?&]ex=([0-9a-f]+)/i.exec(fresh);
+            entry.uri = /^https:\/\//i.test(fresh) ? fresh : url;
+            entry.expires = ex ? parseInt(ex[1], 16) * 1000 : Date.now() + 3600000;
+        }, () => { entry.uri = url; entry.expires = Date.now() + 600000; }).then(() => {
+            entry.pending = false;
+            notify("customThemes");
+        });
+        return entry.uri;
+    }
+    // Some image hosts refuse okhttp's default agent, which is what React Native's image loader sends.
+    const THEME_WALLPAPER_HEADERS = {"User-Agent":"Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36"};
+    const themeWallpaperSources = new Map();
+    // One frozen source object per link, so Image never sees a new source on re-render and never reloads.
+    function themeWallpaperSource(uri) {
+        let source = themeWallpaperSources.get(uri);
+        if (!source) {
+            if (themeWallpaperSources.size > 16) themeWallpaperSources.clear();
+            source = Object.freeze({uri, headers:THEME_WALLPAPER_HEADERS});
+            themeWallpaperSources.set(uri, source);
+        }
+        return source;
+    }
     function chatViewWrapperThemeBackground(orig, self, args) {
         useSettings("customThemes");
         const tree = orig.apply(self, args);
@@ -11324,12 +11365,15 @@
         const active = customThemesActiveEntry();
         const bg = active && active.background;
         if (!bg || !bg.url) return tree;
-        const blur = Number.isFinite(bg.blur) && bg.blur > 0 ? Math.round(bg.blur * 25) : 0;
+        const uri = themeWallpaperUri(bg.url);
+        if (!uri) return tree;
+        // blurRadius in pixels, as Revenge passes it, so a theme looks the same as it did there.
+        const blur = Number.isFinite(bg.blur) && bg.blur > 0 ? bg.blur : 0;
         const bgColor = bg.color ? (parseThemeColor(bg.color) || {}).hex : undefined;
         return el(RN.View, {style:bgColor ? [THEME_BG_WRAP_STYLE, {backgroundColor:bgColor}] : THEME_BG_WRAP_STYLE},
             el(RN.Image, {
                 pointerEvents:"none",
-                source:{uri:bg.url},
+                source:themeWallpaperSource(uri),
                 resizeMode:"cover",
                 blurRadius:blur,
                 fadeDuration:0,
