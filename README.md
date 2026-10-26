@@ -52,7 +52,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Server info | Hold a server's icon to see live details: who's online, channels, roles, emojis, boost progress, the owner, your friends there, when it was made and when you joined |
 | | Spaces in channel names | "general chat" instead of "general-chat" |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
-| | Use your phone's emojis | Your phone's emojis instead of Discord's |
+| | Use your phone's emojis | Your phone's emojis instead of Discord's, or the emojis from a color emoji font you import (like Twemoji or Noto Color Emoji) |
 | | Hide the gift button | Removes the Nitro gift button from the message bar |
 | | Hide the call button | Removes Call from people's profiles |
 | | Hide extra buttons | Removes the Quests, Shop and Nitro buttons from your profile and Apps from the attach menu; you can also pick Polls and Photos. The rest close up, so the pill and the menu shrink with no gaps |

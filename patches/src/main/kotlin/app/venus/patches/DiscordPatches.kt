@@ -528,7 +528,7 @@ internal fun systemFontBridge(method: app.morphe.patcher.util.proxy.mutableTypes
 @Suppress("unused")
 val forceSystemFont = bytecodePatch(
     name = "Use your phone's font",
-    description = "Replaces Discord's font (gg sans) with your phone's, everywhere. Android 9 or newer."
+    description = "Replaces Discord's font everywhere, or use a font file you import. Android 9 or newer."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
@@ -623,7 +623,7 @@ internal fun readSystemEmojiSetting(method: app.morphe.patcher.util.proxy.mutabl
 @Suppress("unused")
 val forceSystemEmojis = bytecodePatch(
     name = "Use your phone's emojis",
-    description = "Your phone's emojis instead of Discord's, in chat, reactions and the emoji picker."
+    description = "In chat, reactions and the emoji picker, or from an emoji font you import."
 ) {
     compatibleWith(discord)
     section(PLUGINS)
