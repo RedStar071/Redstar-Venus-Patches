@@ -233,6 +233,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 10533 | `modules/user_profile/native/UserProfilePrimaryInfo.tsx` | default, DisplayName, UserTagAndPronouns | UserProfileHeaderName |
 | 10534 | `design/components/Icon/native/redesign/generated/ChevronSmallDownIcon.tsx` | ChevronSmallDownIcon | ChevronSmallDownIcon (preview channel category) |
 | 10615 | `modules/profile_customization/native/BioText.tsx` | default | UserProfileBio |
+| 10621 | `design/components/Icon/native/redesign/generated/SlashBoxIcon.tsx` | SlashBoxIcon | SlashBoxIcon (Clean channel names) |
 | 10649 | `stores/LocalActivityStore.tsx` | default | LocalActivityStore (Badge Completer) |
 | 10664 | `modules/settings/native/renderer/SettingBuilders.tsx` | createToggle, createStatic, createRoute | createSettingsList |
 | 10694 | `modules/messages/native/MessagesHandlers.tsx` | MessagesHandlers | MessagesHandlers |
