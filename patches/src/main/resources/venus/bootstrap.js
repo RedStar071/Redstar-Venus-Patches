@@ -13469,9 +13469,10 @@
         }, 0, () => added);
     }
     const BULK_BAR_DARK = {
-        wrap:{position:"absolute", left:12, right:12, bottom:14, zIndex:50, elevation:10},
+        wrap:{position:"absolute", left:12, right:12, bottom:76, zIndex:100, elevation:10},
         bar:{flexDirection:"row", alignItems:"center", gap:10, paddingHorizontal:14, paddingVertical:10, borderRadius:22,
-            backgroundColor:"#2b2d31f5", borderWidth:1, borderColor:"#ffffff18"},
+            backgroundColor:"#2b2d31f5", borderWidth:1, borderColor:"#ffffff18",
+            shadowColor:"#000000", shadowOpacity:0.28, shadowRadius:10, shadowOffset:{width:0, height:4}, elevation:10},
         badge:{minWidth:26, height:26, borderRadius:13, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f2"},
         badgeMuted:{minWidth:26, height:26, borderRadius:13, paddingHorizontal:8, alignItems:"center", justifyContent:"center", backgroundColor:"#4e505880"},
         badgeText:{color:"#ffffff", fontSize:13, fontWeight:"700"},
@@ -13487,7 +13488,7 @@
     function useBulkBarStyles() {
         return useThemed("bulkDeleteBar", c => ({
             wrap:BULK_BAR_DARK.wrap,
-            bar:Object.assign({}, BULK_BAR_DARK.bar, {backgroundColor:c.BACKGROUND_FLOATING || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
+            bar:Object.assign({}, BULK_BAR_DARK.bar, {backgroundColor:c.BACKGROUND_SURFACE_HIGHEST || c.BACKGROUND_FLOATING || c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_BASE_LOW, borderColor:c.BORDER_SUBTLE}),
             badge:Object.assign({}, BULK_BAR_DARK.badge, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
             badgeMuted:Object.assign({}, BULK_BAR_DARK.badgeMuted, {backgroundColor:c.BACKGROUND_MOD_STRONG || "#4e505880"}),
             badgeText:BULK_BAR_DARK.badgeText,
@@ -13504,9 +13505,21 @@
     function BulkDeleteBar(props) {
         useSettings("bulkDelete");
         useLanguage();
+        // Same native composer height hook as JumpToPresentButton so the bar always sits above ChatInput and never overlaps it.
+        const heightMod = chatHeight || (chatHeight = inspectedExport(9379));
+        let inputHeight = 64, suggestionHeight = 0;
+        try {
+            if (heightMod && typeof heightMod.useBestActiveChatInputContainerHeight === "function")
+                inputHeight = heightMod.useBestActiveChatInputContainerHeight();
+            else if (heightMod && typeof heightMod.useChatInputContainerHeight === "function")
+                inputHeight = heightMod.useChatInputContainerHeight(0);
+            if (heightMod && typeof heightMod.useSmallSuggestionBarHeight === "function")
+                suggestionHeight = heightMod.useSmallSuggestionBarHeight(0);
+        } catch (_) {}
         if (!enabled("bulkDelete") || !bulkDelete.active || !React || !RN) return null;
         if (props && props.channelId && String(props.channelId) !== String(bulkDelete.channelId)) return null;
-        const s = useBulkBarStyles(), Press = RN.Pressable || RN.View;
+        const s = useBulkBarStyles();
+        const Press = inspectedExport(6185, "PressableOpacity") || RN.TouchableOpacity || RN.Pressable || RN.View;
         const count = bulkDelete.selected.size;
         const deleting = bulkDelete.deleting;
         const selectable = bulkDeleteChannelSelectableIds(bulkDelete.channelId);
@@ -13515,8 +13528,18 @@
         const statusText = deleting ?
             tr("Deleting {done} of {total}…", {done:Math.min(bulkDelete.progress + 1, bulkDelete.total), total:bulkDelete.total}) :
             tr("{n} selected", {n:count});
-        return el(RN.View, {style:s.wrap, pointerEvents:"box-none"},
-            popIn("bulk-bar", el(RN.View, {style:s.bar, accessible:true, accessibilityRole:"toolbar"},
+        const bottom = Math.max(56, Number.isFinite(inputHeight) && inputHeight > 0 ? inputHeight : 64) + Math.max(0, Number(suggestionHeight) || 0) + 12;
+        // A plain view placed with layout (bottom), never a native-driven transform or popIn wrapper: on Android those draw
+        // the bar where it belongs but leave its touch area behind (#82). Appended inside ChatViewWrapper's children so it
+        // sits above DCDChatList's native GestureDetector and receives touches directly without falling through to chat.
+        return el(RN.View, {pointerEvents:"box-none", collapsable:false, style:[s.wrap, {bottom}]},
+            el(RN.View, {
+                style:s.bar,
+                collapsable:false,
+                accessible:true,
+                accessibilityRole:"toolbar",
+                onStartShouldSetResponder:() => true
+            },
                 el(RN.View, {style:count > 0 ? s.badge : s.badgeMuted},
                     el(RN.Text, {style:s.badgeText}, String(count))),
                 el(RN.View, {style:{flex:1, gap:1}},
@@ -13525,14 +13548,15 @@
                         onPress:bulkDeleteSelectAll,
                         accessibilityRole:"button",
                         accessibilityLabel:tr(allSelected ? "Deselect all" : "Select all"),
-                        hitSlop:6
+                        hitSlop:{top:8, bottom:8, left:8, right:8}
                     }, el(RN.Text, {style:[s.sub, {color:"#94a8ff", fontWeight:"600"}], numberOfLines:1},
                         tr(allSelected ? "Deselect all" : "Select all"))) : null),
                 !deleting ? el(Press, {
-                    onPress:bulkDeleteConfirmAndRun,
+                    onPress:count > 0 ? bulkDeleteConfirmAndRun : undefined,
                     disabled:count === 0,
                     accessibilityRole:"button",
                     accessibilityLabel:tr("Delete"),
+                    hitSlop:{top:8, bottom:8, left:4, right:4},
                     style:[s.del, count === 0 ? s.delDisabled : null]
                 },
                     el(Trash, {size:"xs", color:"#ffffff"}),
@@ -13541,16 +13565,19 @@
                     onPress:bulkDeleteCancel,
                     accessibilityRole:"button",
                     accessibilityLabel:tr("Cancel"),
-                    hitSlop:6,
+                    hitSlop:{top:8, bottom:8, left:6, right:8},
                     style:s.close
-                }, el(Close, {size:"sm", color:s.pillText.color})))));
+                }, el(Close, {size:"sm", color:s.pillText.color}))));
     }
     function bulkDeleteChatFooter(orig, self, args) {
-        const rendered = orig.apply(self, args);
-        if (!features.bulkDelete || !React || !RN || !rendered) return rendered;
         const props = args[0];
-        const channelId = props && props.channelId;
-        return el(RN.View, {style:{flex:1}}, rendered, el(BulkDeleteBar, {key:"venus-bulk-bar", channelId}));
+        // Appended after ChatViewWrapper's children (like TranslateBar and JumpToPresentButton) so it sits above
+        // DCDChatList's native GestureDetector on Android and receives touches directly instead of passing through to chat.
+        if (!features.bulkDelete || !props || !props.channelId || !React || !RN) return orig.apply(self, args);
+        const bar = el(BulkDeleteBar, {key:"venus-bulk-bar", channelId:props.channelId});
+        const children = Array.isArray(props.children) ? props.children.concat([bar]) : [props.children, bar];
+        const next = Object.assign({}, props, {children});
+        return args.length === 1 ? orig.call(self, next) : orig.apply(self, [next].concat(Array.prototype.slice.call(args, 1)));
     }
     function BulkDeletePreview(props) {
         useSettings("bulkDelete");
@@ -13899,7 +13926,7 @@
                 return replaceValue(exports, "default", store);
             }
             case 2116: return features.hiddenChannels && exports && exports.default ? replaceValue(exports, "default", hookExport(exports.default, "getChannelId", hiddenSelectedChannel)) : exports;
-            case 9379: if (features.jumpToTop) chatHeight = exports; return exports;
+            case 9379: if (features.jumpToTop || features.bulkDelete) chatHeight = exports; return exports;
             case 11969: if (features.jumpToTop) jumpPill = exports.default; return exports;
             // 350.8's arrow is a registered image asset: Metro exports the asset id itself, not a default.
             case 11970: if (features.jumpToTop) jumpIcon = exports && typeof exports === "object" && "default" in exports ? exports.default : exports; return exports;
