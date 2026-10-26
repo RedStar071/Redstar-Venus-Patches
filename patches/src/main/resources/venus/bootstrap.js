@@ -399,8 +399,9 @@
             if (key === "materialYouColor" ? !myIsColor(value) : !MY_TINTS.includes(value)) return false;
             const clean = key === "materialYouColor" ? value.toLowerCase() : value;
             if (settings[key] === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
-            settings[key] = clean; dirty.add(key); save(); notify(key); notify("materialYou");
-            if (clean === "wallpaper") myReadSystem();
+            // notify(key) already wakes everything listening to materialYou (featureFor), so the page draws once.
+            settings[key] = clean; dirty.add(key); save(); notify(key);
+            if (clean === "wallpaper" && enabled("materialYou")) myReadSystem();
             customThemesApply(); return true;
         }
         if (key === "noDeleteLimit") {
@@ -566,7 +567,7 @@
             }
             if (features.accountSwitcher) accountSwitcherSync();
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
-            if (features.materialYou) { myStart(); if (enabled("materialYou")) customThemesApply(); }
+            if (features.materialYou && enabled("materialYou")) { myStart(); customThemesApply(); }
             if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
             if (features.hideBlocked && enabled("hideBlocked")) hideBlockedChanged();
             if (features.experiments && enabled("experiments")) experimentsEnable();
@@ -11283,8 +11284,9 @@
     // Discord's root providers (11191) build the theme context once and keep it in a memo keyed on theme, flags and
     // so on, never on our revision. Re-keying the value they hand down makes createStyles and useToken read fresh.
     function rootThemeContextProvider(orig, self, args) {
-        if (features.customThemes) useSettings("customThemes");
-        if (features.materialYou) useSettings("materialYou");
+        // customThemesApply ends with notify("customThemes") whenever the tables change, Material You's included, so the
+        // whole app re-renders once per real change, never for a Material You option that leaves the colors as they are.
+        if (features.customThemes || features.materialYou) useSettings("customThemes");
         if (features.iconPacks) useSettings("iconPacks");
         const tree = orig.apply(self, args);
         if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
@@ -11700,7 +11702,7 @@
     const MY_TINTS = ["subtle", "balanced", "vivid"];
     const MY_TINT_SCALE = {subtle:0.45, balanced:1, vivid:2.4};
     const MY_BRIDGE = "venus-monet-v1:";
-    const materialYou = {system:null, asked:false, asking:false, spec:null, specKey:"", appState:null, nativeSent:null};
+    const materialYou = {system:null, asked:false, asking:false, spec:null, specKey:"", appState:null, nativeSent:null, source:null, sourceFor:null, sourceKey:""};
     function myIsColor(value) { return value === "wallpaper" || MY_PRESETS.some(p => p[0] === value) || typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value); }
     function myRgb(hex) { const n = hexInt(hex); return n == null ? [88, 101, 242] : [n >> 16 & 255, n >> 8 & 255, n & 255]; }
     function myHex(rgb) { return "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join(""); }
@@ -11709,6 +11711,13 @@
     function mySystemSource() {
         const sys = materialYou.system;
         if (!sys || !sys.accent1) return null;
+        // Read on every page render and every apply: the palette object only changes when the phone sends a new one.
+        if (materialYou.sourceFor === sys) return materialYou.source;
+        materialYou.sourceFor = sys;
+        materialYou.sourceKey = "w:" + JSON.stringify(sys);
+        return materialYou.source = mySystemSourceOf(sys);
+    }
+    function mySystemSourceOf(sys) {
         // A tonal palette's chroma is a request the gamut clips at the extremes and often at 500 too (a vivid cyan at tone
         // 50 holds less chroma than at tone 80), so the most colorful shade from 50 to 800 carries it best: tones then land
         // within 3 of 255 of Android's own shades, where the 500 shade alone missed light tones by up to 144.
@@ -11740,7 +11749,7 @@
         const choice = settings.materialYouColor;
         if (choice === "wallpaper") {
             const sys = mySystemSource();
-            if (sys) return {src:sys, key:"w:" + JSON.stringify(materialYou.system)};
+            if (sys) return {src:sys, key:materialYou.sourceKey};
             // Until the phone has answered once, nothing changes, so a cold start never flashes Blue first.
             if (!materialYou.asked) return null;
         }
@@ -11827,11 +11836,15 @@
         Promise.resolve().then(() => files.getFileHash(MY_BRIDGE + "colors", "", 0)).then(text => {
             const parsed = typeof text === "string" && text ? JSON.parse(text) : null;
             const next = parsed && Array.isArray(parsed.accent1) ? {accent1:parsed.accent1, accent2:parsed.accent2, accent3:parsed.accent3, neutral1:parsed.neutral1, neutral2:parsed.neutral2} : null;
-            const changed = JSON.stringify(next) !== JSON.stringify(materialYou.system);
+            // Coming back to Discord asks again; an unchanged answer keeps the same object, so nothing is rebuilt or saved.
+            if (JSON.stringify(next) === JSON.stringify(materialYou.system)) return false;
             materialYou.system = next;
-            if (changed) save();
-        }).catch(() => {}).then(() => {
+            save();
+            return true;
+        }).catch(() => false).then(changed => {
+            const first = !materialYou.asked;
             materialYou.asking = false; materialYou.asked = true;
+            if (!changed && !first) return;
             if (enabled("materialYou")) customThemesApply();
             notify("materialYou");
         });
