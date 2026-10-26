@@ -5624,6 +5624,99 @@
             footnote("note", "Everything else comes from what Discord has already loaded, and updates while the sheet is open.")];
         return settingsBody(ui, groups);
     }
+    // Imported font and emoji files: Android's file picker, a private copy in Discord's cache (keepLocalCopy), then the native
+    // side checks Android can draw it and keeps it in Discord's files. Each kind talks through its own native method, the one
+    // that already reopens Discord for it (font: fileExists, emojis: getVideoDimensions), so no method carries two guards.
+    const fontFiles = {font:undefined, emoji:undefined, busy:""};
+    const FONT_FILE_KINDS = {
+        font:{max:32 * 1024 * 1024, prefix:"venus-font-v1:", source:"systemFontSource", copy:"venus-font-import"},
+        emoji:{max:64 * 1024 * 1024, prefix:"venus-emoji-v1:", source:"systemEmojiSource", copy:"venus-emoji-import"}};
+    function fontFileCall(kind, request) {
+        const k = FONT_FILE_KINDS[kind];
+        return Promise.resolve().then(() => kind === "font" ? files.fileExists(k.prefix + request) : files.getVideoDimensions(k.prefix + request));
+    }
+    function fontFileInfo(text) {
+        try { const info = JSON.parse(String(text || "{}")); return info && typeof info.size === "number" ? info : null; } catch (_) { return null; }
+    }
+    // What's imported right now, read once when a page first opens.
+    function fontFileRefresh(kind) {
+        if (!files || fontFiles[kind] !== undefined) return;
+        fontFiles[kind] = null;
+        fontFileCall(kind, "info").then(text => { fontFiles[kind] = fontFileInfo(text); notify(kind === "font" ? "systemFont" : "systemEmoji"); }, () => {});
+    }
+    function fontFileProblem(kind, code) {
+        const font = kind === "font";
+        return tr(code === "too-large" ? (font ? "That font is too large. Pick one under 32 MB." : "That emoji font is too large. Pick one under 64 MB.") :
+            code === "no-emojis" ? "That font has no emojis of its own. Pick an emoji font, like a Twemoji or Noto Color Emoji TTF." :
+            code === "not-a-font" ? "That file isn't a font Android can use. Pick a TTF, OTF or TTC file." : "That file couldn't be opened.");
+    }
+    function fontFileImport(kind) {
+        const k = FONT_FILE_KINDS[kind], owner = kind === "font" ? "systemFont" : "systemEmoji";
+        const pick = inspectedExport(12803, "pick"), keep = inspectedExport(12803, "keepLocalCopy"), types = inspectedExport(12803, "types");
+        if (!files || typeof pick !== "function" || typeof keep !== "function" || fontFiles.busy) return;
+        const fail = code => { fontFiles.busy = ""; notify(owner); showProblem("Couldn't import", fontFileProblem(kind, code)); };
+        fontFiles.busy = kind; notify(owner);
+        Promise.resolve().then(() => pick({type:[types && types.allFiles || "*/*"], allowMultiSelection:false, mode:"import"})).then(picked => {
+            const file = Array.isArray(picked) ? picked[0] : picked;
+            if (!file || typeof file.uri !== "string") throw new Error("cancel");
+            const name = typeof file.name === "string" ? file.name : "";
+            if (name && !/\.(ttf|otf|ttc)$/i.test(name)) throw new Error("not-a-font");
+            if (typeof file.size === "number" && file.size > k.max) throw new Error("too-large");
+            const ext = (/\.(ttf|otf|ttc)$/i.exec(name) || [".ttf"])[0].toLowerCase();
+            return Promise.resolve(keep({files:[{uri:file.uri, fileName:k.copy + ext}], destination:"cachesDirectory"})).then(copies => {
+                const copy = Array.isArray(copies) ? copies[0] : copies;
+                if (!copy || copy.status !== "success" || typeof copy.localUri !== "string") throw new Error("unreadable");
+                const path = decodeURIComponent(copy.localUri.replace(/^file:\/\//, ""));
+                return fontFileCall(kind, "import:" + JSON.stringify({path, name:name.replace(/\.(ttf|otf|ttc)$/i, "").slice(0, 120)}));
+            });
+        }).then(text => {
+            fontFiles[kind] = fontFileInfo(text); fontFiles.busy = "";
+            animateLayout(); notify(owner);
+            reviewToast(reviewUI(), kind === "font" ? "Font imported" : "Emoji font imported", venusIcon(6868, "CircleCheckIcon"));
+            // A new file applies from the next start, even when the file was already the source.
+            if (settings[k.source] !== "file") setSetting(k.source, "file");
+            else if (enabled(owner)) later(() => askRestart(kind), 0);
+        }).catch(error => {
+            if (pickerCancelled(error) || error && error.message === "cancel") { fontFiles.busy = ""; notify(owner); return; }
+            fail(error && error.message);
+        });
+    }
+    function fontFileRemove(kind) {
+        const k = FONT_FILE_KINDS[kind], owner = kind === "font" ? "systemFont" : "systemEmoji";
+        confirmAction(kind === "font" ? "Remove the font?" : "Remove the emoji font?",
+            kind === "font" ? "Venus goes back to your phone's font." : "Venus goes back to your phone's emojis.", "Remove", () => {
+            fontFileCall(kind, "remove").then(() => {
+                fontFiles[kind] = null; animateLayout(); notify(owner);
+                if (settings[k.source] === "file") setSetting(k.source, "phone");
+            }, () => showProblem("Couldn't remove", tr("Try again in a moment.")));
+        });
+    }
+    // One page for both: where the look comes from, then the imported file.
+    function fontFilePage(kind) {
+        const font = kind === "font", owner = font ? "systemFont" : "systemEmoji", k = FONT_FILE_KINDS[kind];
+        useSettings(owner);
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        React.useEffect(() => { fontFileRefresh(kind); }, []);
+        const on = enabled(owner), info = fontFiles[kind], busy = fontFiles.busy === kind, Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
+        const canPick = !!files && typeof inspectedExport(12803, "pick") === "function" && typeof inspectedExport(12803, "keepLocalCopy") === "function";
+        const fileLabel = info ? (info.name || tr(font ? "Imported font" : "Imported emoji font")) + " \u00b7 " + formatSize(info.size) : "";
+        const choices = [["phone", font ? "Your phone's font" : "Your phone's emojis",
+            font ? "The font your phone uses everywhere else." : "The emojis your phone's keyboard shows.", rowIcon(6642, "MobilePhoneIcon")]];
+        if (info) choices.push(["file", font ? "Imported font" : "Imported emoji font", fileLabel, rowIcon(9337, "PaperIcon")]);
+        const groups = [
+            on ? null : offCard("status", venusIcon(font ? 15974 : 12901, font ? "LettersIcon" : "ChatSmileIcon"), owner),
+            radioGroup(ui, "source", "Use", k.source, on, choices.map(([value, label, sub, icon]) => [value, tr(label), value === "file" ? sub : tr(sub), icon]), true),
+            canPick && Row ? el(Group, {key:"file", title:tr(font ? "Font file" : "Emoji font")},
+                el(Row, {key:"import", label:tr(busy ? "Importing\u2026" : info ? (font ? "Replace the font" : "Replace the emoji font") : (font ? "Import a font" : "Import an emoji font")),
+                    subLabel:tr(font ? "A TTF, OTF or TTC file, up to 32 MB." : "A color emoji TTF, like Twemoji or Noto Color Emoji, up to 64 MB."),
+                    icon:rowIcon(9401, "UploadIcon"), arrow:true, disabled:!!fontFiles.busy, onPress:() => fontFileImport(kind)}),
+                info ? actionRow(ui, "remove", font ? "Remove the font" : "Remove the emoji font", null, () => fontFileRemove(kind), !!fontFiles.busy, true) : null) : null,
+            footnote("note", font ? "Code blocks keep a monospace font. A new font shows once Discord reopens." : "Emojis the font doesn't have keep your phone's. A new emoji font shows once Discord reopens.")];
+        return settingsBody(ui, groups);
+    }
+    function SystemFontSettings() { return fontFilePage("font"); }
+    function SystemEmojiSettings() { return fontFilePage("emoji"); }
     function ReadAllSettings() {
         useSettings("readAll");
         const ui=reviewUI();
@@ -7660,7 +7753,7 @@
         const src = props.src, uri = src && typeof src === "object" ? src.uri : src;
         if (uri != null && !(typeof uri === "string" && /^asset:/.test(uri))) return props;
         // An imported emoji font is registered natively as the VenusEmoji family; asking for it draws React Native emojis with it too.
-        if (emojiSourceInUse === "file" && fontFiles.emojiActive) return Object.assign({}, props, {forceTextEmoji:true,
+        if (emojiSourceInUse === "file") return Object.assign({}, props, {forceTextEmoji:true,
             textEmojiStyle:[props.textEmojiStyle, {fontFamily:"VenusEmoji"}]});
         return Object.assign({}, props, {forceTextEmoji:true});
     }
