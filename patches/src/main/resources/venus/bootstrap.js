@@ -11442,7 +11442,7 @@
             if (!legacyPicks) legacyPicks = new Map();
             const items = list.split(" ");
             for (let i = 0; i < items.length; i++) {
-                const item = items[i], dot = item.lastIndexOf("."), at = item.indexOf("@", dot);
+                const item = items[i], dot = item.indexOf("."), at = item.indexOf("@", dot);
                 const token = item.slice(0, dot), from = item.charCodeAt(dot + 1) - 48, op = at < 0 ? 1 : +item.slice(at + 1);
                 for (let j = 0; j < 4; j++) {
                     const rank = LEGACY_SLOT_ORDER[j].indexOf(from);
