@@ -279,6 +279,11 @@ These keep features working and the project consistent. They say nothing about h
   slot keys from Themes (ASH=`dark`, LIGHT=`light`, DARK=`darker`, ONYX=`midnight`). An experiment override wins over
   SemanticColors while the experiment is on, so every themed token's overrides follow it. Changes reach the screen
   through ThemeStore, the ThemeContext key and the memoized RootThemeContextProvider (module IDs in `port_check.py`).
+- **Wallpapers** (`background`) follow Revenge: the image sits behind `ChatViewWrapper` (10368), and `alpha` is how much of
+  it shows (1 or missing = all, above 1 = 1), so chat keeps `1 - alpha` of its color. Only `CHAT_WALLPAPER_TOKENS` go
+  see-through (`CHANNEL_BACKGROUND_DEFAULT` is the message list's own background in ChatView 10364); never fade
+  `BACKGROUND_BASE_LOWER` or `PANEL_BG`, which sheets and settings use too. `blur` is `blurRadius` in pixels. Discord
+  attachment links are signed again through `/attachments/refresh-urls` (`themeWallpaperUri`), since bare ones answer 404.
 - Parts of the chat list are drawn by Discord's native Android code with built-in theme colors (`ThemeModule`
   accepts only a theme name), so a JS theme can't recolor everything there.
 - Revenge rules Venus follows: arrays are `[dark, light, midnight, darker]`; a slot the array doesn't reach borrows
