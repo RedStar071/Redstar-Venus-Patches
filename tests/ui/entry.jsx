@@ -103,7 +103,11 @@ function boot() {
 
 window.__venusStart = function () {
   boot();
-  if (q.get("scene")) { ReactDOM.createRoot(document.getElementById("root")).render(<S.Scene name={q.get("scene")} defined={defined} registry={registry} />); return; }
+  if (q.get("scene")) {
+    // Redrawn whenever a theme recompiles the color tables (ThemeStore.emitChange), like Discord's screens.
+    function SceneFrame() { const [n, bump] = React.useState(0); rerender = () => bump(x => x + 1); return <S.Scene key={n} name={q.get("scene")} defined={defined} registry={registry} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<SceneFrame />); return;
+  }
   const page = q.get("page") || "VENUS_PLUGINS", node = registry[page];
   const Page = node && node.screen && node.screen.getComponent();
   if (q.get("search")) setTimeout(() => { const input = document.querySelector("input"); if (input) { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(input, q.get("search")); input.dispatchEvent(new Event("input", { bubbles: true })); } }, 300);
