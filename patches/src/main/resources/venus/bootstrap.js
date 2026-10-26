@@ -64,8 +64,8 @@
         noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true,
-        badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:15, badgesGamesAtOnce:2, systemFont:false,
-        hideGift:false, hideQuestDock:false, hideButtons:false, hideButtonsQuests:true, hideButtonsShop:true, hideButtonsNitro:true, hideButtonsApps:true, hideButtonsPolls:false, hideButtonsPhotos:false, systemEmoji:false, gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
+        badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:15, badgesGamesAtOnce:2, systemFont:false, systemFontSource:"phone",
+        hideGift:false, hideQuestDock:false, hideButtons:false, hideButtonsQuests:true, hideButtonsShop:true, hideButtonsNitro:true, hideButtonsApps:true, hideButtonsPolls:false, hideButtonsPhotos:false, systemEmoji:false, systemEmojiSource:"phone", gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
@@ -81,8 +81,8 @@
             noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true,
-            badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 15, badgesGamesAtOnce: 2, systemFont: false,
-            hideGift: false, hideQuestDock: false, hideButtons: false, hideButtonsQuests: true, hideButtonsShop: true, hideButtonsNitro: true, hideButtonsApps: true, hideButtonsPolls: false, hideButtonsPhotos: false, systemEmoji: false, gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
+            badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 15, badgesGamesAtOnce: 2, systemFont: false, systemFontSource: "phone",
+            hideGift: false, hideQuestDock: false, hideButtons: false, hideButtonsQuests: true, hideButtonsShop: true, hideButtonsNitro: true, hideButtonsApps: true, hideButtonsPolls: false, hideButtonsPhotos: false, systemEmoji: false, systemEmojiSource: "phone", gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
@@ -153,6 +153,8 @@
     const TRANSLATE_ASKS = ["both", "bar", "menu"];
     // Where the GIF picker's GIFs come from with Bring back Tenor GIFs on: Tenor first with Discord's own mixed in, or only Tenor.
     const TENOR_SOURCES = ["both", "tenor"];
+    // Where Use your phone's font / emojis get their look: the phone's own, or a font file you imported.
+    const FONT_SOURCES = ["phone", "file"];
     // Left bar thickness multiplier (1x = 2dp default, 2x = 4dp, 3x = 6dp, 4x = 8dp) and highlight color presets (#60).
     const HIGHLIGHT_THICKNESSES = [1, 2, 3, 4];
     // How strongly a highlighted row is tinted behind its text, 0 to 100 %. 50 is Discord's own tint (alpha 1a, about
@@ -301,6 +303,8 @@
     let fontInUse = false;
     // Emojis are the same: the native side reads the saved setting once at launch, and so does this.
     let emojiInUse = false;
+    // Which look each one started with: the phone's, or the imported file (the native side reads the same settings).
+    let fontSourceInUse = "phone", emojiSourceInUse = "phone";
     function settingsSnapshot() {
         const extra = {};
         if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
@@ -350,6 +354,7 @@
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
             key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) || key === "tenorGifsSource" && !TENOR_SOURCES.includes(value) ||
+            (key === "systemFontSource" || key === "systemEmojiSource") && !FONT_SOURCES.includes(value) ||
             key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
@@ -383,6 +388,16 @@
             if (!(key === "translateMode" ? TRANSLATE_MODES : key === "translateLanguage" ? TRANSLATE_LANGUAGES : key === "translateAsk" ? TRANSLATE_ASKS : TRANSLATE_TARGETS).includes(value)) return false;
             if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings[key] = value; dirty.add(key); save(); notify(key); translateChanged(); return true;
+        }
+        if (key === "systemFontSource" || key === "systemEmojiSource") {
+            if (!FONT_SOURCES.includes(value)) return false;
+            if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings[key] = value; dirty.add(key); save(); notify(key);
+            // Like the main switch, a new source applies from the next start: ask to reopen when it differs from what's drawn.
+            const font = key === "systemFontSource";
+            if (features[font ? "systemFont" : "systemEmoji"] && settings[font ? "systemFont" : "systemEmoji"] && !backup.restoring &&
+                status.storage !== "loading" && status.storage !== "waiting" && value !== (font ? fontSourceInUse : emojiSourceInUse)) later(() => askRestart(font ? "font" : "emoji"), 0);
+            return true;
         }
         if (key === "tenorGifsSource") {
             if (!TENOR_SOURCES.includes(value)) return false;
@@ -554,6 +569,7 @@
             if (features.nitroThemes && nitroTheme.preset != null) later(nitroThemeReapply, 0);
             if (!starter.done && Object.keys(FEATURE_ICONS).some(key => features[key] && settings[key])) starter.done = true;
             fontInUse = settings.systemFont;
+            fontSourceInUse = settings.systemFontSource; emojiSourceInUse = settings.systemEmojiSource;
             emojiInUse = settings.systemEmoji;
             if (!enabled("picker")) clearSizes();
             // Persist edits made while the asynchronous restore was in flight.
@@ -883,7 +899,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -950,7 +966,7 @@
     }
     // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
     // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
-    const FEATURE_KEYWORDS = {hideButtons:["Quests", "Shop", "Nitro", "Apps", "Polls", "Photos"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
+    const FEATURE_KEYWORDS = {systemFont:["Import a font", "Font file"], systemEmoji:["Import an emoji font", "Emoji font"], hideButtons:["Quests", "Shop", "Nitro", "Apps", "Polls", "Photos"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account"],
@@ -1118,7 +1134,9 @@
         const font = kind === "font";
         if (!features[font ? "systemFont" : "systemEmoji"] || !RN) return;
         const on = settings[font ? "systemFont" : "systemEmoji"];
-        const title = tr(font ? (on ? "Use your phone's font" : "Use Discord's font") : (on ? "Use your phone's emojis" : "Use Discord's emojis"));
+        const fromFile = on && settings[font ? "systemFontSource" : "systemEmojiSource"] === "file";
+        const title = tr(font ? (fromFile ? "Use your imported font" : on ? "Use your phone's font" : "Use Discord's font") :
+            (fromFile ? "Use your imported emojis" : on ? "Use your phone's emojis" : "Use Discord's emojis"));
         const body = tr(font ? "Discord needs to reopen to change the font everywhere." : "Discord needs to reopen to change the emojis everywhere.");
         const reopen = () => {
             // Write the setting first, so the reopened Discord starts with it. If it can't be saved, Discord used to
@@ -1329,8 +1347,8 @@
         withOptions("servers", "serverInfo", "VENUS_SERVERINFO", "Server info", "Hold a server's icon to see its details, boosts and friends there.", "Server info", ServerInfoSettings);
         toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\".");
         // Appearance
-        toggle("appearance", "systemFont", "Use your phone's font", "Replaces Discord's font everywhere. Android 9 or newer.");
-        toggle("appearance", "systemEmoji", "Use your phone's emojis", "In chat, reactions and the emoji picker.");
+        withOptions("appearance", "systemFont", "VENUS_SYSTEMFONT", "Use your phone's font", "Replaces Discord's font everywhere, or use a font file you import.", "Font", SystemFontSettings);
+        withOptions("appearance", "systemEmoji", "VENUS_SYSTEMEMOJI", "Use your phone's emojis", "In chat, reactions and the emoji picker, or from an emoji font you import.", "Emojis", SystemEmojiSettings);
         toggle("appearance", "hideGift", "Hide the gift button", "Removes the gift button from the message bar.");
         toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles.");
         withOptions("appearance", "hideButtons", "VENUS_HIDEBUTTONS", "Hide extra buttons", "Removes the Quests, Shop, Nitro and Apps buttons you don't use.", "Extra buttons", HideButtonsSettings);
@@ -1528,7 +1546,7 @@
     // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
     // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
     function backupApply(parsed, reset) {
-        const fontWas = fontInUse, emojiWas = emojiInUse, defaults = defaultSettings();
+        const fontWas = fontInUse, emojiWas = emojiInUse, fontSourceWas = fontSourceInUse, emojiSourceWas = emojiSourceInUse, defaults = defaultSettings();
         backup.restoring = true;
         try {
             animateLayout();
@@ -1552,8 +1570,8 @@
         notify("*");
         reviewToast(reviewUI(), reset ? "Settings reset to defaults" : "Settings restored", venusIcon(6868, "CircleCheckIcon"));
         // One question to reopen, only when the font or emojis actually changed.
-        if (features.systemFont && settings.systemFont !== fontWas) later(() => askRestart("font"), 0);
-        else if (features.systemEmoji && settings.systemEmoji !== emojiWas) later(() => askRestart("emoji"), 0);
+        if (features.systemFont && (settings.systemFont !== fontWas || settings.systemFont && settings.systemFontSource !== fontSourceWas)) later(() => askRestart("font"), 0);
+        else if (features.systemEmoji && (settings.systemEmoji !== emojiWas || settings.systemEmoji && settings.systemEmojiSource !== emojiSourceWas)) later(() => askRestart("emoji"), 0);
     }
     function backupConfirm(text) {
         let parsed;
@@ -7641,6 +7659,9 @@
             /[A-Za-z_:]/.test(props.name) || /[0-9#*]/.test(props.name) && !/^[0-9#*]\uFE0F?\u20E3$/.test(props.name)) return props;
         const src = props.src, uri = src && typeof src === "object" ? src.uri : src;
         if (uri != null && !(typeof uri === "string" && /^asset:/.test(uri))) return props;
+        // An imported emoji font is registered natively as the VenusEmoji family; asking for it draws React Native emojis with it too.
+        if (emojiSourceInUse === "file" && fontFiles.emojiActive) return Object.assign({}, props, {forceTextEmoji:true,
+            textEmojiStyle:[props.textEmojiStyle, {fontFamily:"VenusEmoji"}]});
         return Object.assign({}, props, {forceTextEmoji:true});
     }
     function cloneWith(object, key, value) {
