@@ -284,8 +284,16 @@ These keep features working and the project consistent. They say nothing about h
   see-through (`CHANNEL_BACKGROUND_DEFAULT` is the message list's own background in ChatView 10364); never fade
   `BACKGROUND_BASE_LOWER` or `PANEL_BG`, which sheets and settings use too. `blur` is `blurRadius` in pixels. Discord
   attachment links are signed again through `/attachments/refresh-urls` (`themeWallpaperUri`), since bare ones answer 404.
-- Parts of the chat list are drawn by Discord's native Android code with built-in theme colors (`ThemeModule`
-  accepts only a theme name), so a JS theme can't recolor everything there.
+- **Native views follow too.** The chat list, embeds and code blocks are drawn by Discord's Android code with built-in
+  theme colors, so Custom themes uses Material You's native color swap (`nativeThemeColors` in `DiscordPatches.kt`, the
+  `venus-monet-v1:map:` table). `customNativeTable` pairs each `NATIVE_THEME_TOKENS` token's Discord color in the
+  appearance in use with the theme's, then every raw color the theme changed; pure white and black are never remapped.
+  `NATIVE_ONLY_TOKENS` are keys only the Android side has (swipe to reply, `TEXT_CODE_*`), reached only this way. The table
+  follows the appearance (`nativeThemeSlot`, rechecked in `rootThemeContextProvider`), is kept on a cold start until the
+  saved themes are read, and the native side loads it while `materialYou` or `customThemes` is on.
+- **Legacy keys mobile no longer reads** (`LEGACY_ALIAS_VARIANT`: `CHAT_BACKGROUND`, `*_MOBILE_*`, `BG_BASE_*`, `INFO_*_TEXT`,
+  pressed/hover states) only fill in when the theme doesn't set the plain key that feeds the same token. Revenge colored
+  by exact name, so those variants never showed there; letting them win painted Pyontheme's chat and panels near-black.
 - Revenge rules Venus follows: arrays are `[dark, light, midnight, darker]`; a slot the array doesn't reach borrows
   index 0, but a slot written as `false` keeps Discord's own color, even if a legacy alias reached it first. When two
   legacy keys feed one token, the key that lists it earlier (then the shorter list) wins. Values tolerate
@@ -297,7 +305,7 @@ These keep features working and the project consistent. They say nothing about h
 - Test any theme change against Discord's real tables and the published themes:
   `python3 scripts/hbc/color_tables.py` (decodes the color tables to `work/discord_colors.json`), `python3
   tests/themes_fetch.py` (downloads every theme to `work/themes/`), then `node tests/theme_compat.cjs`. It must show
-  no errors, `notRestored`, `chainLeaks` or `falseSlotsChanged`, and install and switch times must not get worse. `WHO=KEY` lists the themes where KEY didn't land; `--each` shows
+  no errors, `notRestored`, `chainLeaks` or `falseSlotsChanged`, every declared key placed (100%), and install and switch times must not get worse. `WHO=KEY` lists the themes where KEY didn't land; `--each` shows
   every theme.
 
 **Material You colors** (#90)
