@@ -11499,7 +11499,7 @@
         const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1205, "default"));
         try { if (store && typeof store.emitChange === "function") store.emitChange(); } catch (_) {}
         if (features.iconPacks && enabled("iconPacks")) iconPacksApply();
-        if (features.materialYou) myNativeSync(active);
+        if (features.materialYou || features.customThemes) myNativeSync(active);
         notify("customThemes");
     }
     function hookRawColorsModule(exports) {
@@ -11538,6 +11538,8 @@
         // whole app re-renders once per real change, never for a Material You option that leaves the colors as they are.
         if (features.customThemes || features.materialYou) useSettings("customThemes");
         if (features.iconPacks) useSettings("iconPacks");
+        // Switching Light, Ash, Dark or Onyx re-renders this provider: the native table follows the new appearance.
+        if (features.customThemes && materialYou.nativeSlot && customThemesActiveEntry() && nativeThemeSlot() !== materialYou.nativeSlot) myNativeSync(customThemesActiveEntry());
         const tree = orig.apply(self, args);
         if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
         const value = tree.props.value, key = value.key.split("#v")[0] + "#v" + customThemes.revision;
@@ -12156,10 +12158,52 @@
         }
         return Array.from(pairs.keys()).sort((a, b) => parseInt(a, 16) - parseInt(b, 16)).map(k => k + pairs.get(k)).join("");
     }
+    // The semantic tokens Discord's native views read (DiscordThemeObject getters, most used first). A custom theme
+    // recolors them by token rather than by raw color, so the native side gets each one's color in the appearance in
+    // use: TEXT_DEFAULT's Discord color becomes the theme's TEXT_NORMAL, and so on. Pure white and black are left out,
+    // because Discord draws icons and text on brand fills with them too.
+    const NATIVE_THEME_TOKENS = ["TEXT_DEFAULT", "INTERACTIVE_TEXT_DEFAULT", "TEXT_MUTED", "MOBILE_TEXT_HEADING_PRIMARY", "BACKGROUND_SURFACE_HIGH",
+        "TEXT_SUBTLE", "BACKGROUND_BASE_LOWEST", "TEXT_LINK", "BACKGROUND_MOD_NORMAL", "BORDER_SUBTLE", "SPOILER_HIDDEN_BACKGROUND",
+        "INTERACTIVE_TEXT_ACTIVE", "BACKGROUND_MOD_MUTED", "ICON_FEEDBACK_CRITICAL", "BACKGROUND_MOD_STRONG", "TEXT_BRAND",
+        "MOBILE_LEGACY_BUTTON_SECONDARY_BACKGROUND_DEFAULT", "CONTROL_PRIMARY_BACKGROUND_DEFAULT", "TEXT_FEEDBACK_CRITICAL",
+        "CONTROL_SECONDARY_TEXT_DEFAULT", "BACKGROUND_BASE_LOW", "EMBED_BACKGROUND", "CONTROL_SECONDARY_BACKGROUND_DEFAULT",
+        "BACKGROUND_SURFACE_HIGHEST", "BACKGROUND_BASE_LOWER", "CHANNEL_BACKGROUND_DEFAULT", "TEXT_STRONG", "SPINE_DEFAULT",
+        "INTERACTIVE_BACKGROUND_SELECTED", "CONTROL_SECONDARY_BORDER_DEFAULT", "BORDER_NORMAL", "BORDER_STRONG", "BACKGROUND_CODE",
+        "TEXT_CODE", "MOBILE_THREAD_EMBED_BACKGROUND", "MESSAGE_HIGHLIGHT_BACKGROUND_DEFAULT", "INTERACTIVE_ICON_DEFAULT",
+        "INPUT_BORDER_DEFAULT", "INPUT_BACKGROUND_DEFAULT", "ICON_DEFAULT", "ICON_MUTED", "MOBILE_ANDROID_BUTTON_BACKGROUND_RIPPLE"];
+    // Which appearance Discord shows: ThemeStore's theme is the slot key the color tables use.
+    function nativeThemeSlot() {
+        const store = customThemes.themeStore || (customThemes.themeStore = inspectedExport(1205, "default"));
+        let theme = "";
+        try { theme = store && typeof store.theme === "string" ? store.theme : ""; } catch (_) {}
+        return THEME_SLOTS.indexOf(theme) >= 0 ? theme : "dark";
+    }
+    function customNativeTable(slot) {
+        const raw = customThemes.rawTable, sem = customThemes.semTable, origRaw = customThemes.origRaw, origSem = customThemes.origSem, pairs = new Map();
+        if (!raw || !sem || !origRaw || !origSem) return "";
+        const hex6 = v => typeof v === "string" && /^#[0-9a-f]{6}/i.test(v) ? v.slice(1, 7).toLowerCase() : "";
+        for (let i = 0; i < NATIVE_THEME_TOKENS.length; i++) {
+            const token = NATIVE_THEME_TOKENS[i], was = origSem[token] && origSem[token][slot], now = sem[token] && sem[token][slot];
+            if (!was || !now) continue;
+            const from = hex6(origRaw[was.raw]), to = hex6(raw[now.raw]);
+            if (from && to && from !== to && from !== "ffffff" && from !== "000000" && !pairs.has(from)) pairs.set(from, to);
+        }
+        // Then every raw color the theme changed (PRIMARY_*, BRAND_*, the NEUTRAL bridges), as Material You does.
+        const journal = customThemes.journal, names = journal ? Array.from(journal.raw) : Object.keys(raw);
+        names.sort((a, b) => (/^OPACITY_/.test(a) ? 1 : 0) - (/^OPACITY_/.test(b) ? 1 : 0) || (a < b ? -1 : a > b ? 1 : 0));
+        for (let i = 0; i < names.length; i++) {
+            const name = names[i];
+            if (!owns(origRaw, name)) continue;
+            const from = hex6(origRaw[name]), to = hex6(raw[name]);
+            if (from && to && from !== to && !pairs.has(from)) pairs.set(from, to);
+        }
+        return Array.from(pairs.keys()).sort((a, b) => parseInt(a, 16) - parseInt(b, 16)).slice(0, 1024).map(k => k + pairs.get(k)).join("");
+    }
     function myNativeSync(active) {
         if (!files || typeof files.getFileHash !== "function") return;
         let request;
         if (active && active === materialYou.spec) request = "map:" + myNativeTable(active);
+        else if (active) request = "map:" + customNativeTable(materialYou.nativeSlot = nativeThemeSlot());
         // Still waiting for the palette or Discord's colors: keep what the native side already shows.
         else if (enabled("materialYou") && !active) return;
         else request = "off";
