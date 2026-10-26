@@ -12206,6 +12206,8 @@
         else if (active) request = "map:" + customNativeTable(materialYou.nativeSlot = nativeThemeSlot());
         // Still waiting for the palette or Discord's colors: keep what the native side already shows.
         else if (enabled("materialYou") && !active) return;
+        // Same before the saved themes have been read: a cold start must not drop the colors saved for the theme in use.
+        else if (enabled("customThemes") && !customThemes.loaded) return;
         else request = "off";
         if (request === "map:") request = "off";
         if (request === materialYou.nativeSent) return;
