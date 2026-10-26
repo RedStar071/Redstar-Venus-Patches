@@ -34,6 +34,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 1295 | `../discord_common/js/packages/http-utils/HTTPUtils.tsx` | INVALID_FORM_BODY_ERROR_CODE, convertSkemaError, stringifyErrors | HTTPUtils |
 | 1360 | `../discord_common/js/packages/analytics-utils/getSuperProperties.tsx` | browser_user_agent, browser_version, os_sdk_version | SuperProperties |
 | 1390 | `stores/UserStore.tsx` | default, users, ASSISTANT_WUMPUS_VOICE_USER | UserStore |
+| 1401 | `modules/user/UserStoreUtils.tsx` | isStaffEnv, isStaffEnvRawData, getEnv | UserStoreUtils.isStaffEnv (Unlock Discord experiments) |
 | 1415 | `utils/AvatarUtils.tsx` | default | AvatarUtils |
 | 1503 | `design/components/Navigator/native/useNavigation.native.tsx` | useNavigation, useNativeStackNavigation, useStackNavigation | useStackNavigation |
 | 1999 | `stores/native/AppStateStore.tsx` | default | AppStateStore |
@@ -59,6 +60,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 4937 | `modules/client_themes/ClientThemesBackgroundStore.tsx` | default | ClientThemesBackgroundStore (Unlock Nitro themes) |
 | 4976 | `modules/main_tabs_v2/helpers/NavigationRouteUtils.native.tsx` | navigateToChannel, navigateToRootTab, pushModal, popModal | ModalAPI |
 | 4977 | `modules/main_tabs_v2/RootNavigationRef.native.tsx` | getRootNavigationRef | RootNavigationRef |
+| 5016 | `modules/experiments/ExperimentStore.tsx` | default, registerExperiment | ExperimentStore (Unlock Discord experiments) |
 | 5020 | `stores/GuildMemberCountStore.tsx` | default, getMemberCount, getOnlineCount | GuildMemberCountStore |
 | 5032 | `design/components/Icon/native/redesign/generated/UserPlusIcon.tsx` | UserPlusIcon | UserPlusIcon |
 | 5036 | `design/components/Icon/native/redesign/generated/UserMinusIcon.tsx` | UserMinusIcon | UserMinusIcon (Hide blocked or ignored messages) |
@@ -149,6 +151,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 7382 | `modules/quests/utils/QuestDataUtils.tsx` | THIRTY_DAYS_MS, earnedDecisionIsValid, findQuestOrReplacement | QuestDataUtils |
 | 7386 | `modules/quests/QuestStore.tsx` | default | QuestStore |
 | 7394 | `modules/quests/utils/QuestServerUtils.tsx` | isQuestWithKnownConfigVersion, questConfigFromServer, questUserStatusFromServer | questUserStatusFromServer |
+| 7404 | `stores/DeveloperExperimentStore.tsx` | default | DeveloperExperimentStore (Unlock Discord experiments) |
 | 7567 | `design/components/Icon/native/redesign/generated/WarningIcon.tsx` | WarningIcon | WarningIcon (Risky chip) |
 | 7701 | `design/components/Icon/native/redesign/generated/LinkExternalSmallIcon.tsx` | LinkExternalSmallIcon | LinkExternalSmallIcon |
 | 7742 | `modules/messages/native/renderer/RowGenerator.tsx` | default | RowGenerator |
@@ -311,6 +314,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15723 | `design/components/Icon/native/redesign/generated/LanguageIcon.tsx` | LanguageIcon | LanguageIcon |
 | 15831 | `modules/user_settings/app_icon/native/UserSettingsAppIcons.tsx` | default | UserSettingsAppIcons |
 | 15832 | `modules/app_icons/native/AppIconRows.tsx` | default | AppIconRows |
+| 15869 | `design/components/Icon/native/redesign/generated/WrenchIcon.tsx` | WrenchIcon | WrenchIcon (Advanced group) |
 | 15892 | `design/components/Icon/native/redesign/generated/HashmarkIcon.tsx` | HashmarkIcon | HashmarkIcon |
 | 15894 | `design/components/Icon/native/redesign/generated/BeakerIcon.tsx` | BeakerIcon | BeakerIcon (Experimental chip) |
 | 15928 | `design/components/Icon/native/redesign/generated/DoubleCheckmarkIcon.tsx` | DoubleCheckmarkIcon | DoubleCheckmarkIcon |
