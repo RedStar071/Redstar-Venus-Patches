@@ -10669,7 +10669,7 @@
         REDESIGN_BUTTON_SECONDARY_OVERLAY_TEXT: ["CONTROL_OVERLAY_SECONDARY_TEXT_DEFAULT"],
         POLLS_NORMAL_FILL_HOVER: ["POLLS_VOTED_FILL"]
     };
-    // Chat surface tokens whose opacity is multiplied by background.alpha when a theme wallpaper is displayed.
+    // Chat surface tokens that take a theme's background.color.
     const CHAT_SURFACE_TOKENS = [
         "CHANNEL_BACKGROUND_DEFAULT",
         "STANDALONE_CHANNEL_CONTENT_BACKGROUND",
@@ -10678,6 +10678,12 @@
         "MOBILE_TYPING_INDICATOR_BACKGROUND_DEFAULT",
         "MOBILE_KEYBOARD_GAP_BACKGROUND"
     ];
+    // What sits between a theme's wallpaper and the messages: ChatView (10364) hands its "chat" style
+    // ({backgroundColor:CHANNEL_BACKGROUND_DEFAULT}) to the native message list, the view Revenge finds by
+    // HACK_fixModalInteraction. Nothing else in 350.8 reads that token (the other two exist only in the table), so
+    // making it see-through shows the wallpaper without turning sheets, modals and settings (BACKGROUND_BASE_LOWER,
+    // PANEL_BG) see-through too.
+    const CHAT_WALLPAPER_TOKENS = ["CHANNEL_BACKGROUND_DEFAULT", "MOBILE_TYPING_INDICATOR_BACKGROUND_DEFAULT", "MOBILE_KEYBOARD_GAP_BACKGROUND"];
     // Maps Vendetta Theme Plus (plus.icons) status keys to Discord's RawColors (591) and SemanticColors (589) tokens.
     const PLUS_STATUS_ICON_MAP = {
         StatusOnline: {raw:["GREEN_360"], sem:["STATUS_ONLINE", "ICON_STATUS_ONLINE", "TEXT_STATUS_ONLINE"]},
@@ -10831,14 +10837,18 @@
     }
     function sanitizeThemeBackground(bgIn) {
         if (!bgIn || typeof bgIn !== "object" || Array.isArray(bgIn)) return null;
-        const url = typeof bgIn.url === "string" && /^https?:\/\/\S+/i.test(bgIn.url.trim()) ? bgIn.url.trim().slice(0, 1024) : "";
+        // github.com/.../blob/... pages become raw.githubusercontent.com, so the image loads without a redirect.
+        const url = typeof bgIn.url === "string" && /^https?:\/\/\S+$/i.test(bgIn.url.trim()) ? normalizeThemeUrl(bgIn.url.trim()).slice(0, 1024) : "";
         const colorParsed = parseThemeColor(bgIn.color);
         const color = colorParsed ? formatThemeColor(colorParsed) : "";
         if (!url && !color) return null;
-        const rawAlpha = Number(bgIn.alpha);
-        const alpha = Number.isFinite(rawAlpha) ? Math.max(0, Math.min(1, Number(rawAlpha.toFixed(4)))) : 1;
+        // Revenge / Vendetta: alpha is how much of the wallpaper shows through chat (1 or missing = all of it), and
+        // anything above 1 counts as 1. "50%" and "0.5" both read as half.
+        const parsedAlpha = typeof bgIn.alpha === "string" || typeof bgIn.alpha === "number" ? parseAlphaValue(bgIn.alpha) : 1;
+        const alpha = parsedAlpha === null ? 1 : Number(parsedAlpha.toFixed(4));
+        // blur is Image's blurRadius in pixels, as Revenge passes it. Past 25 nothing is recognizable anyway.
         const rawBlur = Number(bgIn.blur);
-        const blur = Number.isFinite(rawBlur) ? Math.max(0, Math.min(1, Number(rawBlur.toFixed(4)))) : 0;
+        const blur = Number.isFinite(rawBlur) ? Math.max(0, Math.min(25, Number(rawBlur.toFixed(4)))) : 0;
         const out = {url, alpha, blur};
         if (color) out.color = color;
         return out;
@@ -11174,17 +11184,18 @@
             if (bg.color && !semIn.CHAT_BACKGROUND && !semIn.CHANNEL_BACKGROUND_DEFAULT && !semIn.BACKGROUND_PRIMARY && !semIn.BACKGROUND_MOBILE_PRIMARY && !semIn.BG_BASE_PRIMARY) {
                 for (let i = 0; i < CHAT_SURFACE_TOKENS.length; i++) writeSemanticTarget(CHAT_SURFACE_TOKENS[i], [bg.color], false);
             }
-            if (showBg && bg.url && Number.isFinite(bg.alpha) && bg.alpha < 1) {
-                const alpha = Math.max(0, Math.min(1, bg.alpha));
-                for (let i = 0; i < CHAT_SURFACE_TOKENS.length; i++) {
-                    const entry = sem[CHAT_SURFACE_TOKENS[i]];
+            // Like Revenge and Vendetta, chat keeps (1 - alpha) of its color over the wallpaper: alpha 1 shows all of it.
+            const keep = showBg && bg.url ? 1 - Math.max(0, Math.min(1, Number.isFinite(bg.alpha) ? bg.alpha : 1)) : 1;
+            if (keep < 1) {
+                for (let i = 0; i < CHAT_WALLPAPER_TOKENS.length; i++) {
+                    const entry = sem[CHAT_WALLPAPER_TOKENS[i]];
                     if (!entry || typeof entry !== "object") continue;
-                    touchedSem.add(CHAT_SURFACE_TOKENS[i]);
+                    touchedSem.add(CHAT_WALLPAPER_TOKENS[i]);
                     for (let j = 0; j < THEME_SLOTS.length; j++) {
                         const s = entry[THEME_SLOTS[j]];
                         if (s && typeof s === "object") {
                             const cur = Number.isFinite(s.opacity) ? s.opacity : 1;
-                            s.opacity = Math.round(cur * alpha * 10000) / 10000;
+                            s.opacity = Math.round(cur * keep * 10000) / 10000;
                         }
                     }
                 }
