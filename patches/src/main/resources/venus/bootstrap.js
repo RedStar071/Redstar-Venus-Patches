@@ -3101,7 +3101,8 @@
     // useGuildsBarProps 16754). The button lives in the SEPARATOR row, below the DM button and
     // unread DMs and above the line, so the native FastList's sections, anchors and recycler
     // keys stay stock. Only that row's height grows, through the list's own itemSize.
-    const READ_ALL_HEIGHT = 36;
+    // Tall enough for a two-line label: "Oznacz jako przeczytane" or "Прочитане на всичко" can't fit on one line.
+    const READ_ALL_HEIGHT = 40;
     const readAllViews = new WeakMap(), readAllData = new WeakMap();
     const readAllCache = {api:null};
     // ReadStateActionCreators (6800) exports ack/bulkAck by name, with no default object.
@@ -3175,13 +3176,15 @@
                 if (ids.length) {
                     const type=api.readTypes && api.readTypes.CHANNEL != null ? api.readTypes.CHANNEL : 0;
                     // A DM without a known last message can't be acknowledged; sending it anyway
-                    // made the whole request fail. Discord's own /read-states/ack-bulk takes 100 at a time.
+                    // made the whole request fail. One BULK_ACK, like markGuildsAsRead: ReadStateStore's own
+                    // queue already sends /read-states/ack-bulk 100 at a time, and every extra dispatch made
+                    // the read-state stores recount and the server bar redraw again.
                     const acks=[];
                     for (let i=0;i<ids.length;i++) {
                         const channelId=ids[i], messageId=api.reads.lastMessageId(channelId);
                         if (messageId) acks.push({channelId, readStateType:type, messageId});
                     }
-                    for (let i=0;i<acks.length;i+=100) api.readActions.bulkAck(acks.slice(i,i+100));
+                    if (acks.length) api.readActions.bulkAck(acks);
                     dms=acks.length;
                 }
             }
@@ -3196,20 +3199,39 @@
         if (dms) parts.push(pl(dms,"{n} DM","{n} DMs"));
         reviewToast(ui, parts.length ? tr("Marked {what} as read",{what:joinAnd(parts)}) : "Nothing unread",venusIcon(15928,"DoubleCheckmarkIcon"));
     }
-    // Holding the button: Discord's own action sheet with the three one-time choices.
+    // Holding the button: an action sheet with the three one-time choices, each with the icon its choice has in
+    // Read all's settings, and the one a plain tap does marked as such. Discord's SimpleActionSheet (6893) can't
+    // show that: it reads an option's `icon` as an image source and has no subtitle, so both were dropped. Its own
+    // parts (ActionSheet, TableRow with subLabel) draw the same sheet with them.
+    const READ_ALL_SHEET = "VenusReadAll";
+    const READ_ALL_CHOICES = [["guilds","Mark servers as read",9239,"ServerIcon"],["dms","Mark DMs as read",6770,"EnvelopeIcon"],
+        ["both","Mark servers and DMs as read",15928,"DoubleCheckmarkIcon"]];
+    function readAllPick(ui, mode) { hideReviewSheet(ui,READ_ALL_SHEET); readAll(mode); }
+    function ReadAllSheet() {
+        const ui=reviewUI(), Group=ui.TableRowGroup || RN.View;
+        return el(ui.ActionSheet,{header:ui.Header ? el(ui.Header,{title:tr("Read all"),
+                trailing:ui.Close ? el(ui.Close,{onPress:() => hideReviewSheet(ui,READ_ALL_SHEET)}) : undefined}) : undefined},
+            el(Group,null,READ_ALL_CHOICES.map(([mode,label,id,name]) => el(ui.TableRow,{key:mode,label:tr(label),
+                subLabel:mode===settings.readAllMode ? tr("What a tap does") : undefined,icon:rowIcon(id,name),onPress:() => readAllPick(ui,mode)}))));
+    }
     function readAllChooser() {
+        if (!enabled("readAll")) return;
         const ui=reviewUI();
-        // Each with the icon its choice has in Read all's settings, and the one a plain tap does marked as such.
-        const options=[["guilds",tr("Mark servers as read"),venusIcon(9239,"ServerIcon")],["dms",tr("Mark DMs as read"),venusIcon(6770,"EnvelopeIcon")],
-            ["both",tr("Mark servers and DMs as read"),venusIcon(15928,"DoubleCheckmarkIcon")]]
-            .map(([mode,label,icon]) => ({label, icon, subtitle:mode===settings.readAllMode ? tr("What a tap does") : undefined, onPress:() => readAll(mode)}));
-        if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:"VenusReadAll",header:{title:tr("Read all")},options}); return; } catch (_) {}
+        if (ui.ActionSheet && ui.TableRow && typeof ui.showSheet==="function") try {
+            ui.showSheet({key:READ_ALL_SHEET,content:el(ReadAllSheet,null),stackingBehavior:"stack"}); return;
+        } catch (_) {}
+        const options=READ_ALL_CHOICES.map(([mode,label,id,name]) => ({label:tr(label),IconComponent:venusIcon(id,name),onPress:() => readAll(mode)}));
+        if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:READ_ALL_SHEET,header:{title:tr("Read all")},options}); return; } catch (_) {}
         if (RN && RN.Alert) RN.Alert.alert(tr("Read all"),undefined,options.map(option => ({text:option.label,onPress:option.onPress})).concat([{text:tr("Cancel"),style:"cancel"}]));
     }
     let readAllStyleHook, readAllStylesTried=false;
     const READ_ALL_WRAP_STYLE = {width:"100%"}, READ_ALL_OUTER_STYLE = {height:READ_ALL_HEIGHT,alignItems:"center",justifyContent:"center"};
-    const READ_ALL_PILL_BASE = {height:26,minWidth:48,paddingHorizontal:8,borderRadius:13,alignItems:"center",justifyContent:"center"};
-    const READ_ALL_PRESSED_SCALE = {transform:[{scale:0.96}]}, READ_ALL_TEXT_BASE = {fontSize:11,fontWeight:"700",includeFontPadding:false};
+    // The server bar is 72 dp wide (GUILD_LIST_WIDTH, 16744). One line and no width limit cut long labels off or ran
+    // them past the bar's edges in Polish, Swedish, Italian, Bulgarian, Russian, Ukrainian, Lithuanian and Greek: the
+    // pill now stays inside the bar, wraps to two lines and only then shrinks the text.
+    const READ_ALL_PILL_BASE = {minHeight:26,minWidth:48,maxWidth:68,paddingHorizontal:5,paddingVertical:3,borderRadius:13,alignItems:"center",justifyContent:"center"};
+    const READ_ALL_PRESSED_SCALE = {transform:[{scale:0.96}]};
+    const READ_ALL_TEXT_BASE = {fontSize:11,lineHeight:13,fontWeight:"700",textAlign:"center",includeFontPadding:false};
     const READ_ALL_FALLBACK_STYLES = {pill:{backgroundColor:"#4e505899"},pressed:{backgroundColor:"#4e5058"},text:{color:"#dbdee1"}};
     function readAllPress() { readAll(settings.readAllMode); }
     // For a moment after it clears something, the pill shows a check instead of its label, then goes back.
@@ -3241,7 +3263,7 @@
                 style:({pressed}) => [READ_ALL_PILL_BASE,styles.pill,
                     pressed ? styles.pressed : null,pressed ? READ_ALL_PRESSED_SCALE : null]},
                 done ? popIn("done",el(venusIcon(6823,"CheckmarkSmallIcon"),{size:"xs",color:styles.text && styles.text.color})) :
-                    el(RN.Text,{numberOfLines:1,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
+                    el(RN.Text,{numberOfLines:2,adjustsFontSizeToFit:true,minimumFontScale:0.75,allowFontScaling:false,style:[READ_ALL_TEXT_BASE,styles.text]},tr("Read all"))));
     }
     function readAllBarProps(orig, self, args) {
         const result=orig.apply(self,args);
