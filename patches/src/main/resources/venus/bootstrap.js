@@ -3224,7 +3224,6 @@
         if (typeof ui.simpleSheet==="function") try { ui.simpleSheet({key:READ_ALL_SHEET,header:{title:tr("Read all")},options}); return; } catch (_) {}
         if (RN && RN.Alert) RN.Alert.alert(tr("Read all"),undefined,options.map(option => ({text:option.label,onPress:option.onPress})).concat([{text:tr("Cancel"),style:"cancel"}]));
     }
-    let readAllStyleHook, readAllStylesTried=false;
     const READ_ALL_WRAP_STYLE = {width:"100%"}, READ_ALL_OUTER_STYLE = {height:READ_ALL_HEIGHT,alignItems:"center",justifyContent:"center"};
     // The server bar is 72 dp wide (GUILD_LIST_WIDTH, 16744). One line and no width limit cut long labels off or ran
     // them past the bar's edges in Polish, Swedish, Italian, Bulgarian, Russian, Ukrainian, Lithuanian and Greek: the
@@ -3235,28 +3234,21 @@
     const READ_ALL_FALLBACK_STYLES = {pill:{backgroundColor:"#4e505899"},pressed:{backgroundColor:"#4e5058"},text:{color:"#dbdee1"}};
     function readAllPress() { readAll(settings.readAllMode); }
     // For a moment after it clears something, the pill shows a check instead of its label, then goes back.
+    // Only the pill listens to READ_ALL_FLASH: notifying "readAll" redrew the whole server bar (readAllBarProps
+    // subscribes to it inside useGuildsBarProps) and Read all's settings page twice per tap.
+    const READ_ALL_FLASH = "readAllFlash";
     let readAllDoneUntil=0, readAllDoneTimer;
     function readAllDone() {
-        readAllDoneUntil=Date.now()+1400; notify("readAll");
+        readAllDoneUntil=Date.now()+1400; notify(READ_ALL_FLASH);
         if (readAllDoneTimer!==undefined && global.clearTimeout) global.clearTimeout(readAllDoneTimer);
-        readAllDoneTimer=later(() => { readAllDoneTimer=undefined; readAllDoneUntil=0; notify("readAll"); },1450,false);
+        readAllDoneTimer=later(() => { readAllDoneTimer=undefined; readAllDoneUntil=0; notify(READ_ALL_FLASH); },1450,false);
     }
     function ReadAllButton() {
-        useSettings("readAll");
-        const ui=reviewUI(), done=readAllDoneUntil>Date.now();
+        useSettings(READ_ALL_FLASH);
+        const done=readAllDoneUntil>Date.now();
         // Discord's semantic tokens, so the pill follows light, dark and custom themes.
-        if (!readAllStylesTried) {
-            const c=ui.colors;
-            if (typeof ui.createStyles==="function" && c) {
-                readAllStylesTried=true;
-                try {
-                    readAllStyleHook=ui.createStyles({pill:{backgroundColor:c.BACKGROUND_MOD_NORMAL},pressed:{backgroundColor:c.BACKGROUND_MOD_STRONG},text:{color:c.TEXT_DEFAULT}});
-                } catch (_) { readAllStyleHook=null; }
-            }
-        }
-        let styles=null;
-        if (readAllStyleHook) try { styles=readAllStyleHook(); } catch (_) {}
-        styles=styles || READ_ALL_FALLBACK_STYLES;
+        const styles=useThemed("readAllPill", c => ({pill:{backgroundColor:c.BACKGROUND_MOD_NORMAL},pressed:{backgroundColor:c.BACKGROUND_MOD_STRONG},
+            text:{color:c.TEXT_DEFAULT}}), READ_ALL_FALLBACK_STYLES);
         return el(RN.View,{style:READ_ALL_OUTER_STYLE},
             el(RN.Pressable,{accessibilityRole:"button",accessibilityLabel:tr("Read all"),accessibilityHint:tr("Hold to choose"),
                 hitSlop:6,onPress:readAllPress,onLongPress:readAllChooser,delayLongPress:350,
