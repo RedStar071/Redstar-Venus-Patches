@@ -1073,8 +1073,8 @@
             "Post style", "Translate posts", "Full post", "Media", "Text", "File", "Translate", "Gallery"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         anonFiles:["File names", "Random name", "Privacy", "Rename"],
-        staffTag:["Owner", "Admin", "Manager", "Mod", "Crown", "Staff", "Moderator", "Tags"],
-        removedAlerts:["Removed", "Unfriend", "Friend", "Kicked", "Banned", "Server", "Left", "Alert", "Notifier", "Relationship", "Connection"],
+        staffTag:["Owner", "Admin", "Manager", "Mod", "Crown", "Staff", "Moderator", "Tags", "Staff tags", "StaffTag", "Label", "Badge"],
+        removedAlerts:["Removed", "Unfriend", "Friend", "Kicked", "Banned", "Server", "Left", "Alert", "Notifier", "Relationship", "Connection", "Removed connection alerts", "Relationship notifier", "Notify"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
@@ -1515,8 +1515,8 @@
         // Messages
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
         withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
-        withOptions("people", "staffTag", "VENUS_STAFFTAG", "Staff tags", "Tags server owners, admins and moderators next to their names in chat.", "Staff tags", StaffTagSettings);
-        withOptions("people", "removedAlerts", "VENUS_REMOVEDALERTS", "Removed connection alerts", "Get notified when a friend removes you or a server drops you.", "Removed connection alerts", RemovedAlertsSettings);
+        withOptions("people", "staffTag", "VENUS_STAFFTAG", "Label server owners and mods", "Adds a label next to server owners, admins and moderators in chat.", "Label server owners and mods", StaffTagSettings);
+        withOptions("people", "removedAlerts", "VENUS_REMOVEDALERTS", "Alert when a friend or server removes you", "Get notified when a friend removes you or a server drops you.", "Alert when a friend or server removes you", RemovedAlertsSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
@@ -14439,7 +14439,7 @@
             return previewMessage(s, kind || "none", who, color, time, el(RN.Text, {style:s.text}, text), {badges:chip});
         });
         return el(RN.View, {key:"preview"},
-            previewScreen(s, "preview", "Staff tags preview", [el(RN.View, {key:"chat"}, rows)],
+            previewScreen(s, "preview", "Owner and mod labels preview", [el(RN.View, {key:"chat"}, rows)],
                 {header:previewHeader(k, {title:"general"}),
                  footer:previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})})}));
     }
@@ -14754,7 +14754,7 @@
         useSettings("removedAlerts");
         const s = useChatPreviewStyles(), on = !!props.on;
         return el(RN.View, {key:"preview"},
-            previewScreen(s, "preview", "Removed connection alerts preview", [
+            previewScreen(s, "preview", "Removal alerts preview", [
                 removedBanner(s, "friend", removedLabel({k:"friend", n:"Alex"}), on && settings.removedAlertsFriends),
                 removedBanner(s, "guild", removedLabel({k:"guild", n:"Pixel Garden"}), on && settings.removedAlertsServers)]));
     }
