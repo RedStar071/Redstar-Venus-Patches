@@ -13,7 +13,6 @@
     if (features.picker) targetModules[414] = 1;
     if (features.voice) selectModules([1295, 7752, 7755]);
     if (features.anonFiles) selectModules([7755, 7784]);
-    if (features.whoReacted) selectModules([584, 1390, 7742, 7894]);
     if (features.copyBios) targetModules[10615] = 1;
     if (features.cleanChannels) selectModules([2065, 5421, 5412, 7365]);
     if (features.favouriteAnything) selectModules([13066, 9732, 9735]);
@@ -74,7 +73,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, anonFilesLength:10, anonFilesStyle:"letters", anonFilesKeepSpoiler:true, whoReacted:false, whoReactedMax:10, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, anonFilesLength:10, anonFilesStyle:"letters", anonFilesKeepSpoiler:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -91,7 +90,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, anonFilesLength: 10, anonFilesStyle: "letters", anonFilesKeepSpoiler: true, whoReacted: false, whoReactedMax: 10, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, anonFilesLength: 10, anonFilesStyle: "letters", anonFilesKeepSpoiler: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -381,7 +380,6 @@
         if (key === "materialYouTint") return MY_TINTS.includes(value) ? value : undefined;
         if (key === "anonFilesStyle") return ANON_STYLES.includes(value) ? value : undefined;
         if (key === "anonFilesLength") return anonLength(value);
-        if (key === "whoReactedMax") return whoMax(value);
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
     }
     function setSetting(key, value) {
@@ -441,11 +439,6 @@
             settings[key] = clean; dirty.add(key); save(); notify(key);
             if (clean === "wallpaper" && enabled("materialYou")) myReadSystem();
             customThemesApply(); return true;
-        }
-        if (key === "whoReactedMax") {
-            const n = whoMax(value);
-            if (settings.whoReactedMax === n && status.storage !== "loading" && status.storage !== "waiting") return true;
-            settings.whoReactedMax = n; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "anonFilesStyle" || key === "anonFilesLength") {
             const clean = key === "anonFilesStyle" ? (ANON_STYLES.includes(value) ? value : undefined) : anonLength(value);
@@ -542,7 +535,6 @@
         if (features.hideBlocked && featureFor(key) === "hideBlocked") hideBlockedChanged();
         if (features.bulkDelete && key === "bulkDelete" && !value) bulkDeleteCancel();
         if (features.bulkDelete && key === "bulkDeleteIncludeCached" && bulkDelete.active) bulkDeleteRedrawChannel(bulkDelete.channelId);
-        if (features.whoReacted && key === "whoReacted") whoSync();
         if (features.experiments && key === "experiments") { if (value) experimentsEnable(); else if (experiments.unlocked && !backup.restoring) later(experimentsAskReopen, 0); }
         if (features.quests || features.badges || features.userNotif) backgroundSync();
         return true;
@@ -612,7 +604,6 @@
             restoreDeleted();
             if (features.quests) { if (!enabled("quests")) questsStop(); else questsLoaded(); }
             if (features.badges) { if (!enabled("badges")) badgesStop(); else badgesLoaded(); }
-            if (features.whoReacted) whoSync();
             if (features.userNotif) {
                 userNotifSync();
                 if (enabled("userNotif") && settings.userNotifPush) userNotifCheckPermissions();
@@ -878,141 +869,6 @@
         stopFirst("delete", true); stopFirst("handleComplete", false); stopFirst("handleError", false);
         status.conversion = true;
     }
-    // Who reacted (#100, based on Who Reacted by Palm): each reaction pill in chat shows up to three faces of people who
-    // reacted. The pills are Discord's native views, so the faces are drawn natively (app.venus.chat.WhoReacted); JS
-    // only decides whose. As rows are generated (RowGenerator.generate, 7742), every reaction on them is noted. Faces
-    // Discord already knows (MessageReactionsStore 7894, filled when you open the reactions sheet) are used at once;
-    // the rest are asked from Discord's API one request at a time, a quarter second apart, and only for pills on screen
-    // right now, newest message first. A reaction is asked again only when its count drops, or grows while it still
-    // shows fewer than three faces. Messages with more different reactions than the limit are skipped.
-    const WHO_FACES = 3, WHO_PENDING = 600, WHO_CACHE = 2000, WHO_GAP_MS = 250, WHO_IDLE_MS = 700;
-    function whoMax(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(20, n)) : 10; }
-    const whoState = {on:false, store:null, known:new Map(), pending:new Map(), running:false, generation:0, nativeOn:null};
-    function whoNative(action, payload) {
-        if (!files || typeof files.removeFile !== "function") return Promise.resolve("");
-        return Promise.resolve().then(() => files.removeFile("venus-react-v1:" + action, payload || "")).catch(() => "");
-    }
-    // Native draws faces only while this is on, so turning the feature off clears every pill at once.
-    function whoSync() {
-        const on = !!(features.whoReacted && enabled("whoReacted"));
-        whoState.on = on;
-        if (whoState.nativeOn === on) return;
-        whoState.nativeOn = on;
-        if (!on) { whoState.generation++; whoState.pending.clear(); whoState.known.clear(); }
-        whoNative(on ? "on" : "off");
-    }
-    function whoAvatar(user) {
-        if (!user || typeof user.id !== "string") return null;
-        let uri = null;
-        const avatars = inspectedExport(1415, "default");
-        try { if (avatars && typeof avatars.getUserAvatarURL === "function") uri = avatars.getUserAvatarURL(user, false, 48); } catch (_) {}
-        if (typeof uri === "string" && /^https?:\/\//.test(uri)) return uri;
-        if (typeof user.avatar === "string" && user.avatar) return "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=48";
-        // Default avatars are bundled with Discord, not links: the CDN has the same pictures.
-        let index = 0;
-        if (user.discriminator && user.discriminator !== "0") index = Number(user.discriminator) % 5;
-        else { const tail = Number(user.id.slice(-6)); index = Number.isFinite(tail) ? tail % 6 : 0; }
-        return "https://cdn.discordapp.com/embed/avatars/" + (Number.isFinite(index) ? index : 0) + ".png";
-    }
-    function whoRemember(key, value) {
-        whoState.known.delete(key);
-        whoState.known.set(key, value);
-        if (whoState.known.size > WHO_CACHE) whoState.known.delete(whoState.known.keys().next().value);
-    }
-    function whoNeeds(target) {
-        const known = whoState.known.get(target.key);
-        if (!known) return true;
-        if (known.count === target.count) return false;
-        if (target.count < known.count || known.faces.length < WHO_FACES) return true;
-        known.count = target.count;
-        return false;
-    }
-    // Faces Discord already has (the reactions sheet fetched them), so no request is needed.
-    function whoFromStore(target) {
-        const store = whoState.store;
-        if (!store || typeof store.getReactions !== "function") return null;
-        let users = null;
-        try { users = store.getReactions(target.channelId, target.messageId, target.emoji, WHO_FACES, target.type); } catch (_) { return null; }
-        if (!users) return null;
-        const list = Array.isArray(users) ? users : typeof users.values === "function" ? Array.from(users.values()) : Object.values(users);
-        if (list.length < Math.min(target.count, WHO_FACES)) return null;
-        return list.slice(0, WHO_FACES).map(whoAvatar).filter(Boolean);
-    }
-    function whoSeen(message) {
-        const reactions = message && message.reactions;
-        if (!Array.isArray(reactions) || !reactions.length || reactions.length > settings.whoReactedMax) return;
-        const messageId = message.id, channelId = message.channel_id || message.channelId;
-        if (typeof messageId !== "string" || typeof channelId !== "string") return;
-        let out = null;
-        for (let i = 0; i < reactions.length; i++) {
-            const reaction = reactions[i], emoji = reaction && reaction.emoji;
-            if (!emoji || !emoji.name && !emoji.id) continue;
-            const id = emoji.id || emoji.name;
-            // Discord shows a reaction with both kinds as two pills: normal (0) and super (1).
-            for (let type = 0; type < 2; type++) {
-                const count = type ? Number(reaction.burst_count || reaction.burstCount || 0) : Number(reaction.count || 0);
-                if (!(count > 0)) continue;
-                const key = messageId + ":" + id + ":" + type, known = whoState.known.get(key);
-                if (known && known.count === count) continue;
-                const target = {key, channelId, messageId, emoji:{id:emoji.id || null, name:emoji.name}, type, count};
-                const faces = whoFromStore(target);
-                if (faces && faces.length) { whoRemember(key, {count, faces}); (out || (out = {}))[key] = faces; continue; }
-                if (whoNeeds(target)) whoQueue(target);
-            }
-        }
-        if (out) whoNative("put", JSON.stringify(out));
-    }
-    function whoOlder(a, b) { return a.length < b.length || a.length === b.length && a < b; }
-    function whoQueue(target) {
-        whoState.pending.set(target.key, target);
-        // Too many waiting: drop the oldest message's (snowflakes sort by time).
-        if (whoState.pending.size > WHO_PENDING) {
-            let oldest = null;
-            whoState.pending.forEach(t => { if (!oldest || whoOlder(t.messageId, oldest.messageId)) oldest = t; });
-            if (oldest) whoState.pending.delete(oldest.key);
-        }
-        if (!whoState.running) whoRun(whoState.generation);
-    }
-    function whoSleep(ms) { return new Promise(resolve => later(resolve, ms)); }
-    function whoRun(generation) {
-        whoState.running = true;
-        const step = () => {
-            if (generation !== whoState.generation || !whoState.on || !whoState.pending.size) { whoState.running = false; return undefined; }
-            return whoNative("shown").then(text => {
-                let shown = [];
-                try { shown = JSON.parse(text || "[]"); } catch (_) {}
-                let next = null;
-                for (let i = 0; i < shown.length; i++) {
-                    const t = whoState.pending.get(shown[i]);
-                    if (t && (!next || whoOlder(next.messageId, t.messageId))) next = t;
-                }
-                // Native can't tell when a pill scrolls into view, so it's asked again in a moment.
-                if (!next) return whoSleep(WHO_IDLE_MS).then(step);
-                whoState.pending.delete(next.key);
-                if (!whoNeeds(next)) return step();
-                return whoFetch(next, generation).then(() => whoSleep(WHO_GAP_MS)).then(step);
-            });
-        };
-        Promise.resolve().then(step).catch(() => { whoState.running = false; });
-    }
-    function whoFetch(target, generation) {
-        const http = inspectedExport(1295, "HTTP"), endpoints = inspectedExport(1085, "Endpoints");
-        if (!http || typeof http.get !== "function") return Promise.resolve();
-        const emoji = target.emoji.id ? target.emoji.name + ":" + target.emoji.id : target.emoji.name;
-        const url = endpoints && typeof endpoints.REACTIONS === "function" ? endpoints.REACTIONS(target.channelId, target.messageId, emoji) :
-            "/channels/" + target.channelId + "/messages/" + target.messageId + "/reactions/" + encodeURIComponent(emoji);
-        // Rate limits are waited out by Discord's own HTTP client.
-        return Promise.resolve().then(() => http.get({url, query:{limit:WHO_FACES, type:target.type}, oldFormErrors:true})).then(response => {
-            if (generation !== whoState.generation) return;
-            const body = response && response.body;
-            const faces = Array.isArray(body) ? body.slice(0, WHO_FACES).map(whoAvatar).filter(Boolean) : [];
-            whoRemember(target.key, {count:target.count, faces});
-            if (faces.length) whoNative("put", JSON.stringify({[target.key]:faces}));
-        }, () => {
-            // No access, or the message is gone: not asked again until the count changes.
-            if (generation === whoState.generation) whoRemember(target.key, {count:target.count, faces:[]});
-        });
-    }
     // Anonymous file names (#100, based on Anonymous File Names by k1ng_op): every file you send gets a random name,
     // so the name on your phone ("IMG_20261027_142233.jpg", "Screenshot_Bank_Statement.png") never reaches Discord.
     // The extension stays, so previews and players still work, and SPOILER_ stays on spoilered files unless you turn
@@ -1133,7 +989,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^whoReacted[A-Z]/.test(key) ? "whoReacted" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -1163,7 +1019,7 @@
     const FEATURE_ICONS = {noDelete:[5049, "TrashIcon"], translate:[15723, "LanguageIcon"], gestures:[8956, "ReactionIcon"],
         quickDelete:[6296, "CircleXIcon"], jumpToTop:[10473, "ArrowLargeUpIcon"], favouriteAnything:[9549, "StarIcon"],
         freeNitro:[9031, "NitroWheelIcon"], voice:[12595, "WaveformIcon"], splitMessages:[9337, "PaperIcon"], noTyping:[12822, "KeyboardIcon"],
-        picker:[10024, "AttachmentIcon"], anonFiles:[6650, "EyeSlashIcon"], whoReacted:[8956, "ReactionIcon"], pastelize:[15560, "PaintPaletteIcon"], platformIndicators:[15232, "LaptopPhoneIcon"],
+        picker:[10024, "AttachmentIcon"], anonFiles:[6650, "EyeSlashIcon"], pastelize:[15560, "PaintPaletteIcon"], platformIndicators:[15232, "LaptopPhoneIcon"],
         validUser:[8213, "AtIcon"], copyBios:[5042, "CopyIcon"], reviewDB:[9354, "ThumbsUpIcon"], readAll:[15928, "DoubleCheckmarkIcon"],
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
@@ -1210,7 +1066,6 @@
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed", "Imgur", "Newgrounds",
             "Post style", "Translate posts", "Full post", "Media", "Text", "File", "Translate", "Gallery"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
-        whoReacted:["Reactions", "Avatars", "Faces", "Who reacted", "Reactors"],
         anonFiles:["File names", "Random name", "Letters and numbers", "Only numbers", "Date and time", "Spoiler", "Privacy", "Rename"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
@@ -1549,7 +1404,6 @@
         withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
-        withOptions("messages", "whoReacted", "VENUS_WHOREACTED", "Who reacted", "Reactions in chat show the faces of the first people who reacted.", "Who reacted", WhoReactedSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
         withOptions("messages", "gestures", "VENUS_GESTURES", "Double-tap to reply", "Double-tap to reply, or to edit your own message.", "Tap gestures", GestureSettings);
         toggle("messages", "quickDelete", "Skip delete confirmation", "Deletes messages without asking first. Can't be undone.");
@@ -6088,44 +5942,6 @@
                 [el(RN.View, {key:"body", style:{minHeight:236, flexDirection:"row", overflow:"hidden"}}, rail, channels, menu, sheet)],
                 {footer:watching ? storyStrip(k, s, story) : null}));
     }
-    // Who reacted: a message with three reactions, each pill with the faces of people who reacted, the way chat shows them.
-    const WHO_SAMPLE = [["\ud83d\udd25", 5, ["#eb459e", "#3ba55c", "#faa61a"], ["S", "J", "M"]], ["\ud83d\ude02", 2, ["#5865f2", "#ed4245"], ["A", "R"]], ["\ud83c\udf89", 1, ["#00a8fc"], ["K"]]];
-    const WHO_DARK = {pill:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:8, height:30, borderRadius:8, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff10"},
-        mine:{backgroundColor:"#5865f226", borderColor:"#5865f2"}, face:{borderColor:"#2b2d31"}};
-    function WhoReactedPreview(props) {
-        useSettings("whoReacted");
-        const s = useChatPreviewStyles(), on = !!props.on;
-        const w = useThemed("whoReactedPreview", c => ({pill:Object.assign({}, WHO_DARK.pill, {backgroundColor:c.BACKGROUND_MOD_SUBTLE || c.CARD_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE}),
-            mine:Object.assign({}, WHO_DARK.mine, {backgroundColor:c.BACKGROUND_MOD_NORMAL || "#5865f226", borderColor:c.BACKGROUND_BRAND || "#5865f2"}),
-            face:{borderColor:c.BACKGROUND_MOD_SUBTLE || c.CARD_BACKGROUND_DEFAULT}}), WHO_DARK);
-        const pills = WHO_SAMPLE.map(([emoji, count, colors, letters], i) => el(RN.View, {key:"p" + i, style:[w.pill, i === 0 ? w.mine : null]},
-            el(RN.Text, {style:{fontSize:16}}, emoji),
-            el(RN.Text, {style:[s.text, {fontSize:14, fontWeight:"600"}]}, String(count)),
-            on ? popIn("faces" + i, el(RN.View, {style:{flexDirection:"row", marginLeft:2}}, colors.map((color, j) =>
-                el(RN.View, {key:"f" + j, style:[{width:18, height:18, borderRadius:9, borderWidth:1.5, marginLeft:j ? -6 : 0, backgroundColor:color,
-                    alignItems:"center", justifyContent:"center"}, w.face]},
-                    el(RN.Text, {style:{color:"#ffffff", fontSize:9, fontWeight:"700"}}, letters[j]))))) : null));
-        return el(RN.View, {key:"preview"}, previewScreen(s, "preview", "Who reacted preview", [
-            previewMessage(s, "sam", "Sam", "#eb459e", tr("Today at 4:01 PM"), el(RN.View, null,
-                el(RN.Text, {style:s.text}, tr("We won the tournament!")),
-                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:6, marginTop:6}}, pills)))]));
-    }
-    function WhoReactedSettings() {
-        useSettings("whoReacted");
-        const ui = reviewUI();
-        if (!React || !RN) return null;
-        const on = enabled("whoReacted");
-        const groups = [
-            on ? null : offCard("status", venusIcon(8956, "ReactionIcon"), "whoReacted"),
-            el(WhoReactedPreview, {key:"preview", on}),
-            el(RN.View, {key:"max", style:{gap:8}},
-                groupTitle("maxTitle", "Most reactions on a message"),
-                venusSegmented({key:"whoMax", value:settings.whoReactedMax, disabled:!on, onChange:value => setSetting("whoReactedMax", value),
-                    items:[3, 5, 10, 20].map(n => ({value:n, label:n === 20 ? tr("Any number") : pl(n, "{n} reaction", "{n} reactions")}))}),
-                footnote("maxHint", "Messages with more different reactions than this show no faces, so busy chats load fewer pictures.")),
-            footnote("note", "Faces load a few at a time, only for reactions on screen.")];
-        return settingsBody(ui, groups);
-    }
     // Anonymous file names: two attachments in a chat, named the way your phone names them, and the name Discord gets.
     // The random part is drawn again whenever an option changes, so you see what your choice looks like.
     const ANON_SAMPLE = [["IMG_20261027_142233.jpg", 8210, "ImageIcon"], ["Screenshot_Bank_Statement.png", 8210, "ImageIcon"], ["Voice note to Mom.m4a", 12595, "WaveformIcon"]];
@@ -6878,7 +6694,6 @@
     messageRow.call1 = (orig, self, row) => messageRowResult(orig.call(self, row), row);
     function messageRowResult(result, row) {
         if (!result || !row || row.rowType !== 1 || !result.message) return result;
-        if (features.whoReacted && whoState.on) whoSeen(row.message || result.message);
         const pastelOn = enabled("pastelize"), translateOn = enabled("translate"), noDeleteOn = enabled("noDelete"), highlightOn = enabled("messageHighlight"), bulkOn = features.bulkDelete && bulkDelete.active;
         let message = result.message;
         if (pastelOn) message = pastelMessage(message,row.message);
@@ -15212,7 +15027,7 @@
             case 1264: if (features.pastelize) pastelHash = typeof exports === "function" ? exports : exports.default; return exports;
             case 2125: if (features.pastelize) guildMembers = exports.default; return exports;
             case 7742:
-                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight || features.bulkDelete || features.whoReacted) && exports.default && exports.default.prototype)
+                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight || features.bulkDelete) && exports.default && exports.default.prototype)
                     hookExport(exports.default.prototype, "generate", messageRow);
                 return exports;
             case 5108: if (features.platformIndicators || features.userNotif) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); } return exports;
@@ -15300,7 +15115,7 @@
             case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
-                if (exports && exports.default && (features.whoReacted || features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete || features.experiments))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete || features.experiments))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
@@ -15442,7 +15257,6 @@
                 }
                 return exports.default ? replaceValue(exports, "default", capabilities) : capabilities;
             }
-            case 7894: if (features.whoReacted && exports && exports.default) whoState.store = exports.default; return exports;
             case 7784: return features.anonFiles ? hookExport(exports, "getUploadPayload", anonPayload) : exports;
             case 7755: return features.anonFiles ? hookExport(exports, "getAttachmentPayload", anonPayload) : exports;
             case 7047:
