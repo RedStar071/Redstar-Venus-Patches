@@ -6095,11 +6095,11 @@
             on ? null : offCard("status", venusIcon(8956, "ReactionIcon"), "whoReacted"),
             el(WhoReactedPreview, {key:"preview", on}),
             el(RN.View, {key:"max", style:{gap:8}},
-                groupTitle("maxTitle", "Show faces on messages with up to"),
+                groupTitle("maxTitle", "Most reactions on a message"),
                 venusSegmented({key:"whoMax", value:settings.whoReactedMax, disabled:!on, onChange:value => setSetting("whoReactedMax", value),
                     items:[3, 5, 10, 20].map(n => ({value:n, label:n === 20 ? tr("Any number") : pl(n, "{n} reaction", "{n} reactions")}))}),
-                footnote("maxHint", "Messages with more different reactions than this stay as they are, so busy chats load fewer pictures.")),
-            footnote("note", "Faces are asked from Discord a few at a time, only for reactions on screen, and appear as they arrive.")];
+                footnote("maxHint", "Messages with more different reactions than this show no faces, so busy chats load fewer pictures.")),
+            footnote("note", "Faces load a few at a time, only for reactions on screen.")];
         return settingsBody(ui, groups);
     }
     // Anonymous file names: two attachments in a chat, named the way your phone names them, and the name Discord gets.
@@ -6139,14 +6139,14 @@
                 groupTitle("styleTitle", "New names"),
                 venusSegmented({key:"anonStyle", value:settings.anonFilesStyle, disabled:!on, onChange:value => setSetting("anonFilesStyle", value),
                     items:[{value:"letters", label:tr("Letters and numbers")}, {value:"numbers", label:tr("Only numbers")}, {value:"date", label:tr("Date and time")}]}),
-                footnote("styleHint", date ? "When you send it, plus 4 random characters: 20261027_142233_7f3a." : "Random every time, like k3Vq9TzL0b. The extension stays, so previews still work.")),
+                footnote("styleHint", date ? "The moment you send it, plus 4 random characters: 20261027_142233_7f3a." : "Different every time, like k3Vq9TzL0b. The file type stays, so previews still work.")),
             date ? null : el(RN.View, {key:"length", style:{gap:8}},
                 groupTitle("lengthTitle", "Length"),
                 venusSegmented({key:"anonLength", value:settings.anonFilesLength, disabled:!on, onChange:value => setSetting("anonFilesLength", value),
                     items:[6, 10, 16, 24].map(n => ({value:n, label:pl(n, "{n} character", "{n} characters")}))})),
             el(Group, {key:"spoiler", title:tr("Spoilers")},
                 switchRow(Switch, "anonFilesKeepSpoiler", "Keep spoilers hidden", "Files you mark as spoilers stay blurred for everyone.", rowIcon(6650, "EyeSlashIcon"))),
-            footnote("note", "Only the name changes. The file itself, its size and what's in it are sent as they are.")];
+            footnote("note", "Only the name changes. The file itself is sent as it is.")];
         return settingsBody(ui, groups);
     }
     function ServerInfoSettings() {
