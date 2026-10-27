@@ -2346,7 +2346,7 @@
     const MAX_EDITED = 2000, MAX_VERSIONS = 10, MAX_VERSION_TEXT = 4000;
     let archiveTimer;
     const hiddenViews = new Map(), hiddenNames = new Map(), hiddenScans = new Map();
-    let hiddenAccount;
+    let hiddenAccount, hiddenNamesVersion = 0;
     const HIDDEN_CHANNEL = "Hidden channel", HIDDEN_CATEGORY = "Hidden category";
     // Server redactions: "hidden", "__hidden__", "_hidden" and underscore variants (HBC string 25605), any case.
     // One regex test instead of replace() + toLowerCase(), which built two strings for every channel of every
@@ -2367,7 +2367,7 @@
         // Directory scans pass the account once; don't ask UserStore again for every channel.
         let owner = accountId;
         if (typeof owner !== "string") { const current = userStore && userStore.getCurrentUser(); owner = current && current.id; }
-        if (hiddenAccount !== owner) {hiddenNames.clear();hiddenAccount = owner;}
+        if (hiddenAccount !== owner) {hiddenNames.clear();hiddenNamesVersion++;hiddenAccount = owner;}
         if (!channel) return;
         const guild = guildId || channel.guild_id;
         const name = knownName || receivedName(channel);
@@ -2377,12 +2377,13 @@
         if (known && known.guild === guild && known.name === name) return;
         if (hiddenNames.size >= 4096 && !known) hiddenNames.delete(hiddenNames.keys().next().value);
         hiddenNames.set(channel.id,{guild,name});
+        hiddenNamesVersion++;
     }
     function hiddenName(channel) {
         // Basic records can retain names absent from full/obfuscated records. Never
         // fetch an inaccessible channel, guess a name, or change its permissions/flags.
         const current = userStore && userStore.getCurrentUser();
-        if (hiddenAccount !== (current && current.id)) {hiddenNames.clear();hiddenAccount = current && current.id;}
+        if (hiddenAccount !== (current && current.id)) {hiddenNames.clear();hiddenNamesVersion++;hiddenAccount = current && current.id;}
         const basic = channelStore && typeof channelStore.getBasicChannel === "function" && channelStore.getBasicChannel(channel.id);
         const full = channelStore && typeof channelStore.getChannel === "function" && channelStore.getChannel(channel.id);
         const name = receivedName(channel) || (basic && basic.guild_id === channel.guild_id && receivedName(basic)) ||
@@ -2411,15 +2412,15 @@
         // the incoming user, otherwise the first post-READY lookup erases it.
         const owner = event.type === "CONNECTION_OPEN" && event.user && event.user.id || current && current.id;
         if (event.type === "LOGOUT" || hiddenAccount !== owner) {
-            hiddenNames.clear();hiddenViews.clear();hiddenScans.clear();hiddenAccount = owner;
+            hiddenNames.clear();hiddenViews.clear();hiddenScans.clear();hiddenNamesVersion++;hiddenAccount = owner;
             try { hiddenConfirmed.clear(); hiddenPrompts.clear(); } catch (_) {}
         }
-        if (event.type === "CHANNEL_DELETE") hiddenNames.delete(event.channel && event.channel.id || event.channelId || event.id);
+        if (event.type === "CHANNEL_DELETE" && hiddenNames.delete(event.channel && event.channel.id || event.channelId || event.id)) hiddenNamesVersion++;
         // A server outage also arrives as GUILD_DELETE (guild.unavailable). Its channels come back with the server, so
         // only leaving it forgets their names; an outage used to wipe the names Discord had already redacted.
         if (event.type === "GUILD_DELETE" && !(event.guild && event.guild.unavailable)) {
             const guild = event.guild && event.guild.id || event.guildId;
-            for (const [id,entry] of hiddenNames) if (entry.guild === guild) hiddenNames.delete(id);
+            for (const [id,entry] of hiddenNames) if (entry.guild === guild) { hiddenNames.delete(id); hiddenNamesVersion++; }
         }
         if (!features.hiddenChannels) return;
         // Cache even while the toggle is off so enabling later still has READY names.
@@ -3036,7 +3037,7 @@
         // Always cache names from the current store even while the toggle is off,
         // so enabling later still resolves. This read-only scan never changes permissions.
         // One read of both caches per lookup; the remembered names are reused below.
-        let full, basic, source;
+        let full, basic, source, version;
         // Resolve the account once per lookup, not once per channel, and walk basic then full
         // records: the same final cache as walking the merged map, without visiting basic twice.
         function remember() {
@@ -3045,7 +3046,7 @@
             // bumps getGuildChannelsVersion, so the same table object can hold different channels. Once a server is
             // loaded its basic table is that same object too. Keying on identity alone kept the first merged copy
             // for good: a deleted locked channel stayed listed and a new one never showed.
-            const version = typeof channelStore.getGuildChannelsVersion === "function" ? channelStore.getGuildChannelsVersion(guild) : undefined;
+            version = typeof channelStore.getGuildChannelsVersion === "function" ? channelStore.getGuildChannelsVersion(guild) : undefined;
             const last = hiddenScans.get(guild);
             if (last && last.full === full && last.basic === basic && last.version === version && last.owner === owner && last.source) {
                 source = last.source;
@@ -3071,6 +3072,17 @@
         if (!enabled("hiddenChannels") || !result || !readable || !permissions) return result;
         // The read above threw part-way: retry once, letting a real error surface as before.
         if (!source) { read(); if (!source) return result; }
+        // Every channel-list render asks again with nothing changed. The answer only depends on Discord's result,
+        // the server's channel tables and their version, the permission version (hiddenMetadata's cache), the
+        // remembered names and the language of the placeholders, so when all of them match, the last view is
+        // still right: no permission pass, name lookups or signature string. Hermes HBC98, 300-channel server:
+        // see the commit message for the numbers.
+        let permVersion;
+        if (permissionsVersion) try { permVersion = permissionsVersion(); } catch (_) { permVersion = undefined; }
+        const cached = hiddenViews.get(guild);
+        if (cached && permVersion !== undefined && version !== undefined && cached.orig === result && cached.source === full &&
+            cached.basic === basic && cached.version === version && cached.permVersion === permVersion &&
+            cached.namesVersion === hiddenNamesVersion && cached.lang === i18n.version) return cached.value;
         const extra = [];
         for (const k in source) {
             if (Object.prototype.hasOwnProperty.call(source, k) && hiddenMetadata(source[k])) extra.push(source[k]);
@@ -3088,7 +3100,6 @@
             const parent = source[c.parent_id];
             if (parent) references.push(parent);
         }
-        const cached = hiddenViews.get(guild);
         if (cached && cached.orig === result && cached.source === full && cached.basic === basic && cached.signature === signature &&
             references.length === cached.references.length) {
             let sameRefs = true;
@@ -3149,7 +3160,7 @@
         append("VOCAL", vocal);
         append(4, parents);
         if (hiddenViews.size >= 16 && !hiddenViews.has(guild)) hiddenViews.delete(hiddenViews.keys().next().value);
-        hiddenViews.set(guild, {orig:result,source:full,basic,signature,references,value:next});
+        hiddenViews.set(guild, {orig:result,source:full,basic,signature,references,value:next,version,permVersion,namesVersion:hiddenNamesVersion,lang:i18n.version});
         return next;
     }
     const hiddenConfirmed = new Set();
