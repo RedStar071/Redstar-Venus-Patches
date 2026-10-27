@@ -3760,8 +3760,11 @@
     // QuestVariants.MOBILE_ACTIVITY_QUEST: an Activity Quest that Discord's phone app reports itself.
     const QUEST_MOBILE_ACTIVITY = 36;
     // Discord answers 401 when a phone reports play time, so Play and Activity heartbeats are sent as Discord
-    // Stable for Windows: host 1.0.9261, web build 634304, updater metadata 93252, Electron 42.11.10.
-    const QUEST_DESKTOP = {version:"1.0.9261", build:634304, native:93252, electron:"42.11.10", chrome:"148.0.7778.280",
+    // Stable for Windows: host 1.0.9265, web build 650389 (the client discord.com serves a desktop app on launch),
+    // updater metadata 96160 (what desktop sends as native_build_number), Electron 42.11.15, Chrome 148.0.7778.280.
+    // Read from the 1.0.9265 package (Discord.exe, build_info.json, core.asar) and the live updater manifest.
+    // Bump all of them together when Discord does.
+    const QUEST_DESKTOP = {version:"1.0.9265", build:650389, native:96160, electron:"42.11.15", chrome:"148.0.7778.280",
         osVersion:"10.0.26100", osSdk:"26100"};
     const QUEST_DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/" +
         QUEST_DESKTOP.version + " Chrome/" + QUEST_DESKTOP.chrome + " Electron/" + QUEST_DESKTOP.electron + " Safari/537.36";
