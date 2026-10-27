@@ -2233,11 +2233,24 @@
         hiddenNames.set(channel.id,{guild,name});
         hiddenNamesVersion++;
     }
+    // Every locked row asks for its name on every render (label, directory, details), and the answer was rebuilt
+    // each time: two store lookups, three name checks and a placeholder translation. It only changes with the
+    // remembered names (hiddenNamesVersion, which an account switch also bumps), Venus's language and the server's
+    // channel tables (getGuildChannelsVersion), so one answer per record is kept until one of those moves.
+    let hiddenNameMemo = new WeakMap();
     function hiddenName(channel) {
-        // Basic records can retain names absent from full/obfuscated records. Never
-        // fetch an inaccessible channel, guess a name, or change its permissions/flags.
         const current = userStore && userStore.getCurrentUser();
         if (hiddenAccount !== (current && current.id)) {hiddenNames.clear();hiddenNamesVersion++;hiddenAccount = current && current.id;}
+        const tables = channelStore && typeof channelStore.getGuildChannelsVersion === "function" ? channelStore.getGuildChannelsVersion(channel.guild_id) : undefined;
+        const memo = hiddenNameMemo.get(channel);
+        if (memo && memo.names === hiddenNamesVersion && memo.lang === i18n.version && memo.tables === tables) return memo.value;
+        const value = resolveHiddenName(channel);
+        hiddenNameMemo.set(channel, {names:hiddenNamesVersion, lang:i18n.version, tables, value});
+        return value;
+    }
+    function resolveHiddenName(channel) {
+        // Basic records can retain names absent from full/obfuscated records. Never
+        // fetch an inaccessible channel, guess a name, or change its permissions/flags.
         const basic = channelStore && typeof channelStore.getBasicChannel === "function" && channelStore.getBasicChannel(channel.id);
         const full = channelStore && typeof channelStore.getChannel === "function" && channelStore.getChannel(channel.id);
         const name = receivedName(channel) || (basic && basic.guild_id === channel.guild_id && receivedName(basic)) ||
