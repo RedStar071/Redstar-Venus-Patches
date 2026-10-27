@@ -239,13 +239,18 @@ object WhoReacted {
 
     private fun render(view: LinearLayout, urls: Array<String>?) {
         val existing = stacks[view]
-        if (urls == null || urls.size == 0 || !on) { existing?.visibility = View.GONE; return }
+        if (urls == null || urls.size == 0 || !on) {
+            if (existing != null) existing.visibility = View.GONE
+            return
+        }
         val maker = drawee ?: return
-        val stack = existing ?: AvatarStack(view.context, maker).also {
-            view.addView(it, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                marginStart = (5 * view.resources.displayMetrics.density).toInt()
-            })
-            stacks[view] = it
+        var stack = existing
+        if (stack == null) {
+            stack = AvatarStack(view.context, maker)
+            val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            params.marginStart = (5 * view.resources.displayMetrics.density).toInt()
+            view.addView(stack, params)
+            stacks[view] = stack
         }
         stack.visibility = View.VISIBLE
         stack.show(urls)
