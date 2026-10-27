@@ -74,7 +74,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, language:"auto", hiddenFeatures:"" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -91,7 +91,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, language: "auto", hiddenFeatures: ""
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -101,6 +101,10 @@
     const starter = {done:false, justOn:null};
     // What you typed in the Features list's search bar (#68).
     const featureSearch = {query:"", rows:[], listeners:new Set(), cache:null};
+    // Editing the Features list: edit shows every feature with an eye to hide or show it; open is whether the Hidden
+    // features row at the bottom is expanded. Both reset when you leave the page. Which features are hidden is the
+    // hiddenFeatures setting (comma-separated keys), so it's saved and backed up like any other choice.
+    const featureList = {edit:false, open:false};
     const status = { picker: false, attachment: false, request: false, menu: false, conversion: false, audioError: "", storage: "waiting" };
     const listeners = new Set();
     const dirty = new Set();
@@ -377,6 +381,7 @@
         if (key === "badgesCycleMinutes") return badgeCycleMinutes(value);
         if (key === "badgesGamesAtOnce") return badgeAtOnce(value);
         if (key === "fixEmbedsSites") return fixSitesText(value);
+        if (key === "hiddenFeatures") return hiddenFeaturesText(value);
         if (key === "materialYouColor") return myIsColor(value) ? value.toLowerCase() : undefined;
         if (key === "materialYouTint") return MY_TINTS.includes(value) ? value : undefined;
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
@@ -387,6 +392,13 @@
             if (!isLanguage(value)) return false;
             if (settings.language === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.language = value; dirty.add(key); save(); loadLanguage(uiLanguage()); languageChanged(); return true;
+        }
+        // Which features the Features list hides. Like the language, it's about Venus's own list, not a feature.
+        if (key === "hiddenFeatures") {
+            const clean = hiddenFeaturesText(value);
+            if (clean === undefined) return false;
+            if (settings.hiddenFeatures === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.hiddenFeatures = clean; dirty.add(key); save(); notify(key); return true;
         }
         if (!owns(settings, key) || !features[featureFor(key)]) return false;
         if (key === "readAllMode") {
@@ -1120,6 +1132,7 @@
     const STARTER_FEATURES = ["noDelete", "freeNitro", "platformIndicators", "readAll", "jumpToTop", "validUser", "copyBios", "picker"];
     function starterKeys() { return STARTER_FEATURES.filter(key => features[key]); }
     function starterVisible() {
+        if (featureList.edit) return false;
         if (starter.justOn) return true;
         if (starter.done || status.storage === "waiting" || status.storage === "loading") return false;
         return starterKeys().length >= 3 && !Object.keys(FEATURE_ICONS).some(key => features[key] && settings[key]);
@@ -1176,24 +1189,128 @@
                 done ? [starterAction("undo", tr("Undo"), "secondary", starterUndo), starterAction("ok", tr("Done"), "primary", starterClose)] :
                     [starterAction("later", tr("Not now"), "secondary", starterClose), starterAction("on", tr("Turn them on"), "primary", starterTurnOn)]));
     }
+    // Hiding features (the Features list's Edit list): which patched features you've hidden. Only the list changes:
+    // a hidden feature that's on keeps working, and search still finds it.
+    const HIDDEN_MAX = 2000;
+    function hiddenFeaturesText(raw) {
+        if (typeof raw !== "string" || raw.length > HIDDEN_MAX) return undefined;
+        const keys = [];
+        raw.split(",").forEach(part => { const key = part.trim(); if (owns(FEATURE_ICONS, key) && keys.indexOf(key) < 0) keys.push(key); });
+        return keys.join(",");
+    }
+    let hiddenCache = null;
+    function hiddenFeatureKeys() {
+        const text = settings.hiddenFeatures || "";
+        if (!hiddenCache || hiddenCache.text !== text) hiddenCache = {text, keys:text ? text.split(",").filter(key => features[key]) : []};
+        return hiddenCache.keys;
+    }
+    function featureHidden(key) { return !!settings.hiddenFeatures && hiddenFeatureKeys().indexOf(key) >= 0; }
+    function setFeatureHidden(key, hide) {
+        const keys = (settings.hiddenFeatures ? settings.hiddenFeatures.split(",") : []).filter(entry => entry !== key);
+        if (hide) keys.push(key);
+        animateLayout(); haptic("SELECTION");
+        setSetting("hiddenFeatures", keys.join(","));
+    }
+    function showAllFeatures() {
+        animateLayout(); haptic("SELECTION");
+        featureList.open = false;
+        setSetting("hiddenFeatures", "");
+        featureListChanged();
+    }
+    // Edit list and the Hidden features row aren't settings: they wake the page, its header and the rows that show them.
+    function featureListChanged() { featureSearch.listeners.forEach(fn => fn()); notify("hiddenFeatures"); }
+    function setFeatureEdit(on) {
+        if (featureList.edit === !!on) return;
+        animateLayout(); haptic("IMPACT_LIGHT");
+        featureList.edit = !!on;
+        featureListChanged();
+    }
+    function toggleHiddenOpen() {
+        animateLayout(); haptic("SELECTION");
+        featureList.open = !featureList.open;
+        featureListChanged();
+    }
+    const FEATURE_BAR_DARK = {bar:{flexDirection:"row", alignItems:"center", gap:12, paddingTop:12, paddingHorizontal:4},
+        pill:{flexDirection:"row", alignItems:"center", gap:6, height:32, paddingLeft:10, paddingRight:12, borderRadius:16, backgroundColor:"#4e50584d"},
+        done:{flexDirection:"row", alignItems:"center", gap:6, height:32, paddingLeft:10, paddingRight:12, borderRadius:16, backgroundColor:"#5865f2"},
+        eye:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f229"},
+        eyeOff:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", borderWidth:1.5, borderColor:"#4e5058", backgroundColor:"transparent"},
+        eyeIcon:{color:"#949cf7"}, eyeOffIcon:{color:"#80848e"}};
+    function useFeatureBarStyles() {
+        return useThemed("featureBar", c => ({bar:FEATURE_BAR_DARK.bar,
+            pill:Object.assign({}, FEATURE_BAR_DARK.pill, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            done:Object.assign({}, FEATURE_BAR_DARK.done, {backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}),
+            eye:Object.assign({}, FEATURE_BAR_DARK.eye, {backgroundColor:c.TOGGLEBUTTON_BACKGROUND_SELECTED || c.MENTION_BACKGROUND}),
+            eyeOff:Object.assign({}, FEATURE_BAR_DARK.eyeOff, {borderColor:c.BORDER_STRONG || c.BACKGROUND_MOD_STRONG}),
+            eyeIcon:{color:c.ICON_BRAND || c.TEXT_BRAND}, eyeOffIcon:{color:c.ICON_MUTED || c.TEXT_MUTED}}), FEATURE_BAR_DARK);
+    }
+    // Under the search bar: how many are on, and Edit list (Done while editing). Its own component, so the header's
+    // hooks never change between renders.
+    function FeatureListBar() {
+        useFeatureSearch(); useSettings();
+        const s = useFeatureBarStyles();
+        if (!RN) return null;
+        const Text = inspectedExport(5088, "Text"), Press = RN.Pressable || RN.TouchableOpacity || RN.View, edit = featureList.edit;
+        const keys = Object.keys(FEATURE_ICONS).filter(key => features[key]), on = keys.filter(key => settings[key]).length, hidden = hiddenFeatureKeys().length;
+        const summary = edit ? tr("Tap the eye to hide or show a feature.") :
+            tr("{on} of {total} turned on", {on, total:keys.length}) + (hidden ? " \u00b7 " + pl(hidden, "{n} feature hidden", "{n} features hidden") : "");
+        const label = tr(edit ? "Done" : "Edit list"), Icon = edit ? venusIcon(6823, "CheckmarkSmallIcon") : venusIcon(9720, "PencilIcon");
+        return el(RN.View, {style:s.bar},
+            el(RN.View, {style:{flex:1}}, Text ? el(Text, {variant:"text-sm/medium", color:"text-muted", numberOfLines:2}, summary) :
+                el(RN.Text, {style:{color:"#949ba4", fontSize:14}, numberOfLines:2}, summary)),
+            el(Press, {onPress:() => setFeatureEdit(!edit), accessibilityRole:"button", accessibilityLabel:label, hitSlop:{top:6, bottom:6, left:6, right:6}, style:edit ? s.done : s.pill},
+                popIn(edit ? "bar:done" : "bar:edit", el(Icon, {size:"xs", color:edit ? "#ffffff" : undefined})),
+                Text ? el(Text, {variant:"text-sm/semibold", color:edit ? "always-white" : "text-strong", style:edit ? {color:"#ffffff"} : undefined}, label) :
+                    el(RN.Text, {style:{color:edit ? "#ffffff" : "#f2f3f5", fontSize:14, fontWeight:"600"}}, label)));
+    }
+    // A row's eye while editing: filled in the brand color while the feature is listed, an empty outline once it's hidden.
+    function FeatureEye(props) {
+        useSettings("hiddenFeatures");
+        const s = useFeatureBarStyles();
+        const Press = RN.Pressable || RN.TouchableOpacity || RN.View, hidden = featureHidden(props.feature);
+        const Icon = hidden ? venusIcon(6650, "EyeSlashIcon") : venusIcon(6652, "EyeIcon");
+        return el(Press, {onPress:() => setFeatureHidden(props.feature, !hidden), style:hidden ? s.eyeOff : s.eye, hitSlop:{top:4, bottom:4, left:4, right:4},
+            accessibilityRole:"switch", accessibilityState:{checked:!hidden}, accessibilityLabel:tr(hidden ? "Show" : "Hide") + ": " + props.label},
+            popIn(hidden ? "eye:off" : "eye:on", el(Icon, {size:"sm", color:hidden ? s.eyeOffIcon.color : s.eyeIcon.color})));
+    }
+    // The Hidden features row's arrow, pointing down while closed and up while open.
+    function HiddenChevron() {
+        useSettings("hiddenFeatures");
+        const Chevron = venusIcon(10534, "ChevronSmallDownIcon");
+        return el(RN.View, {style:{transform:[{rotate:featureList.open ? "180deg" : "0deg"}]}}, el(Chevron, {size:"sm"}));
+    }
     // The Features list: Discord's own settings list, with the search bar as its header. While you search it only keeps
     // the rows that match, still under their group titles, and the search clears when you leave the page.
-    function featuresPage(groups) {
-        const full = {type:"list", sections:groups.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length)};
-        let header = null, filtered = null;
+    // Hidden features leave their groups for one Hidden features row at the bottom that opens to show them, still
+    // working; Edit list shows every feature with an eye instead of its switch. Search always looks through all of them.
+    function featuresPage(groups, keyOf) {
+        let header = null, built = null;
         return function VenusFeaturesPage() {
-            useFeatureSearch();
-            React.useEffect(() => () => { featureSearch.query = ""; featureSearch.cache = null; }, []);
+            useFeatureSearch(); useSettings("hiddenFeatures");
+            React.useEffect(() => () => { featureSearch.query = ""; featureSearch.cache = null; featureList.edit = false; featureList.open = false; }, []);
             const List = SettingsList || (SettingsList = inspectedExport(14971, "SettingsList"));
             if (!React || !List) return null;
-            if (!header) full.ListHeaderComponent = header = el(FeatureSearchBar, {key:"venus-search"});
-            const query = featureSearch.query.trim();
-            if (!query) return el(List, {node:full});
-            const ids = featureMatches(query);
-            if (!filtered || filtered.ids !== ids)
-                filtered = {ids, node:{type:"list", ListHeaderComponent:header,
-                    sections:groups.map(([label, list]) => section(label, list.filter(id => ids.has(id)))).filter(entry => entry.settings.length)}};
-            return el(List, {node:filtered.node});
+            if (!header) header = el(RN.View, {key:"venus-header"}, el(FeatureSearchBar, {key:"search"}), el(FeatureListBar, {key:"bar"}));
+            const query = featureSearch.query.trim(), ids = query ? featureMatches(query) : null, edit = featureList.edit;
+            const hidden = hiddenFeatureKeys(), open = featureList.open;
+            const signature = (edit ? "e" : "v") + "|" + (query ? "q" : "") + "|" + hidden.join(",") + "|" + (open ? 1 : 0);
+            if (built && built.signature === signature && built.ids === ids) return el(List, {node:built.node});
+            const sections = groups.map(([label, list]) => {
+                let shown = ids ? list.filter(id => ids.has(id)) : list;
+                if (edit) shown = shown.map(id => "VENUS_EDIT_" + keyOf[id]);
+                else if (!ids && hidden.length) shown = shown.filter(id => hidden.indexOf(keyOf[id]) < 0);
+                return section(label, shown);
+            }).filter(entry => entry.settings.length);
+            if (!edit && !ids && hidden.length) {
+                const rows = ["VENUS_HIDDEN_TOGGLE"];
+                if (open) {
+                    groups.forEach(([, list]) => list.forEach(id => { if (hidden.indexOf(keyOf[id]) >= 0) rows.push(id); }));
+                    rows.push("VENUS_HIDDEN_SHOWALL");
+                }
+                sections.push(section("Hidden features", rows));
+            }
+            built = {signature, ids, node:{type:"list", ListHeaderComponent:header, sections}};
+            return el(List, {node:built.node});
         };
     }
     function settingNode(key, title, description, parent) {
@@ -1449,8 +1566,27 @@
             ["Servers", groups.servers], ["Appearance", groups.appearance], ["Quests", groups.quests], ["Advanced", groups.advanced]];
         const sections = listed.map(([label, ids]) => section(label, ids)).filter(entry => entry.settings.length);
         route(P, "Features", sections, undefined, venusIcon(15241, "PuzzlePieceIcon", icon));
+        // Edit list: each feature again, with an eye instead of its switch; tapping the row hides or shows it too.
+        const keyOf = {};
+        featureSearch.rows.forEach(row => {
+            keyOf[row.id] = row.key;
+            const key = row.key, title = row.title, hint = row.hint;
+            next["VENUS_EDIT_" + key] = { type: "pressable", parent: P, unsearchable: true, IconComponent: iconFor(key),
+                useTitle: () => { useLanguage(); return tr(title); },
+                onPress: () => setFeatureHidden(key, !featureHidden(key)),
+                useTrailing: () => el(FeatureEye, {feature:key, label:tr(title)}) };
+            if (hint) next["VENUS_EDIT_" + key].useDescription = () => tr(hint);
+        });
+        // The bottom of the list: one row that opens to show the hidden features, and Show all to bring them all back.
+        next.VENUS_HIDDEN_TOGGLE = { type: "pressable", parent: P, unsearchable: true, IconComponent: venusIcon(6650, "EyeSlashIcon", icon),
+            useTitle: function () { useSettings("hiddenFeatures"); const n = hiddenFeatureKeys().length; return pl(n, "{n} feature hidden", "{n} features hidden"); },
+            useDescription: function () { useSettings("hiddenFeatures"); return tr(featureList.open ? "Tap to fold them away again." : "They keep working. Tap to see them."); },
+            onPress: toggleHiddenOpen, useTrailing: () => el(HiddenChevron, null) };
+        next.VENUS_HIDDEN_SHOWALL = { type: "pressable", parent: P, unsearchable: true, IconComponent: venusIcon(6652, "EyeIcon", icon),
+            useTitle: () => { useLanguage(); return tr("Show all"); },
+            useDescription: () => tr("Puts every hidden feature back in its group."), onPress: showAllFeatures };
         // The nodes above stay for Discord's settings search; the page itself adds the Features search bar.
-        const FeaturesPage = featuresPage(listed);
+        const FeaturesPage = featuresPage(listed, keyOf);
         next[P].screen.getComponent = () => FeaturesPage;
         // "5 of 26 on", right on the entry, so you see at a glance what Venus is doing before opening it.
         next[P].useDescription = function () {
@@ -1568,7 +1704,7 @@
         return {on:keys.filter(key => settings[key]).length, total:keys.length, changed, people:features.userNotif ? userNotif.ids.size : 0,
             themes:features.customThemes ? customThemes.list.length : 0,
             iconPacks:features.iconPacks ? (iconPacks.active ? 1 : 0) + iconPacks.custom.length : 0,
-            language:settings.language !== "auto"};
+            language:settings.language !== "auto", hidden:hiddenFeatureKeys().length};
     }
     function backupIsDefault() {
         const defaults = defaultSettings();
@@ -1631,7 +1767,7 @@
         try {
             animateLayout();
             Object.keys(defaults).forEach(key => {
-                if (key !== "language" && !features[featureFor(key)]) return;
+                if (key !== "language" && key !== "hiddenFeatures" && !features[featureFor(key)]) return;
                 setSetting(key, owns(parsed.values, key) ? parsed.values[key] : defaults[key]);
             });
             if (features.userNotif && parsed.people) {
@@ -1738,7 +1874,7 @@
     }
     function backupReset() {
         confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes and people stay.", "Reset",
-            () => backupApply({values:Object.assign({}, defaultSettings(), {language:settings.language}), people:null, themes:null}, true));
+            () => backupApply({values:Object.assign({}, defaultSettings(), {language:settings.language, hiddenFeatures:settings.hiddenFeatures}), people:null, themes:null}, true));
     }
     const BACKUP_DARK = {chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"}};
     // Backup and restore: what a backup holds right now, two ways to save it, two ways to bring one back.
@@ -1756,6 +1892,7 @@
             what.people ? chip("people", 4815, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
             what.themes ? chip("themes", 15652, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
             what.iconPacks ? chip("iconPacks", 11063, "ImageSparkleIcon", pl(what.iconPacks, "{n} icon pack", "{n} icon packs")) : null,
+            what.hidden ? chip("hidden", 6650, "EyeSlashIcon", pl(what.hidden, "{n} feature hidden", "{n} features hidden")) : null,
             what.language ? chip("language", 15723, "LanguageIcon", languageLabel(settings.language)) : null];
         const backupRow = (key, label, sub, id, name, onPress, disabled) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true,
             onPress, disabled:!!busy || !!disabled}) : null;

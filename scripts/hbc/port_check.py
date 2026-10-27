@@ -134,6 +134,7 @@ BOOTSTRAP_MODULES = [
     (6640, 'design/components/Icon/native/redesign/generated/KeyIcon.tsx', ['KeyIcon'], 'KeyIcon'),
     (6642, 'design/components/Icon/native/redesign/generated/MobilePhoneIcon.tsx', ['MobilePhoneIcon'], 'MobilePhoneIcon'),
     (6650, 'design/components/Icon/native/redesign/generated/EyeSlashIcon.tsx', ['EyeSlashIcon'], 'EyeSlashIcon'),
+    (6652, 'design/components/Icon/native/redesign/generated/EyeIcon.tsx', ['EyeIcon'], 'EyeIcon'),
     (6739, 'design/components/TextField/native/SearchField.native.tsx', ['SearchField'], 'SearchField'),
     (6740, 'design/components/Icon/native/redesign/generated/MagnifyingGlassIcon.tsx', ['MagnifyingGlassIcon'], 'MagnifyingGlassIcon'),
     (6800, 'actions/ReadStateActionCreators.tsx', ['ack', 'ackCategory', 'ackChannel'], 'ReadStateActionCreators'),
