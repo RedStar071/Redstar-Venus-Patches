@@ -152,6 +152,7 @@ BOOTSTRAP_MODULES = [
     (7092, 'design/components/Icon/native/redesign/generated/SettingsIcon.tsx', ['SettingsIcon'], 'SettingsIcon'),
     (7094, 'modules/user_settings/core/native/openUserSettings.tsx', ['openUserSettings'], 'UserSettingsActionCreators'),
     (7174, 'actions/MessageActionCreators.tsx', ['default'], 'MessageActionCreators'),
+    (7477, 'utils/native/PrivateChannelCallUtils.tsx', ['openGuildVoiceModal', 'navigateToVoiceChannel', 'openChannelCallModal'], 'PrivateChannelCallUtils (Hidden channels asks before a locked voice channel opens)'),
     (6054, 'modules/guild_scheduled_events/GuildScheduledEventStore.tsx', ['default', 'getGuildScheduledEventsForGuild'], 'GuildScheduledEventStore'),
     (7246, 'modules/guild_sidebar/ChannelListState.tsx', ['CannotShow', 'DoNotShow', 'WouldShowIfUncollapsed'], 'useGuildChannelsList'),
     (6078, 'stores/GuildReadStateStore.tsx', ['default'], 'GuildReadStateStore'),

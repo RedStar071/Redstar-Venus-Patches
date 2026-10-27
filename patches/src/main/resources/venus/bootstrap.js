@@ -21,7 +21,7 @@
     if (features.quickDelete) selectModules([5300, 1126]);
     if (features.noDelete) selectModules([584, 5432, 5434, 1390, 2065, 7174, 7742]);
     if (features.jumpToTop) selectModules([11968, 11969, 11970, 9379, 7174, 5432]);
-    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2065, 2116, 4748, 7246, 4750, 5421, 7174, 584, 1390, 16671, 8218, 6035, 6078, 14193]);
+    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2065, 2116, 4748, 7246, 4750, 5421, 7174, 584, 1390, 16671, 8218, 6035, 6078, 14193, 7477]);
     if (features.pastelize) selectModules([7742, 1264, 2125]);
     if (features.platformIndicators) selectModules([5108, 5112, 1390, 2065, 10533, 10229, 12862, 16475, 8792, 14419, 13156]);
     if (features.reviewDB) selectModules([13181, 14213, 14281, 10725, 6265, 6896, 1390, 584]);
@@ -3143,6 +3143,15 @@
         // With the details menu turned off, tapping a locked channel simply does nothing.
         if (enabled("hiddenChannelsMenu")) showHidden(receivedChannel(id), () => { hiddenConfirmed.add(id); return orig.apply(self, args); });
         return; // Wait for user choice; View Anyway then navigates.
+    }
+    // Voice and stage rows don't navigate: a tap opens the voice panel straight away (VoiceChannel 16677 and
+    // StageVoiceChannel 16680 call PrivateChannelCallUtils 7477 openGuildVoiceModal, also exported as
+    // navigateToVoiceChannel, with the channel record). That skipped the navigation guard, so a locked voice
+    // channel opened an empty voice panel instead of its details. Same choice as a text channel: ask, or nothing.
+    function hiddenVoicePanel(orig, self, args) {
+        const channel = args[0], id = channel && typeof channel === "object" ? channel.id : channel;
+        if (typeof id !== "string" || !hiddenChannel(id) || hiddenConfirmed.has(id)) return orig.apply(self, args);
+        if (enabled("hiddenChannelsMenu")) showHidden(receivedChannel(id), () => { hiddenConfirmed.add(id); return orig.apply(self, args); });
     }
     function hiddenGuildNavigation(orig, self, args) {
         // Opening a server by itself (with a locked channel Discord remembered) goes to the server's first real
@@ -15055,6 +15064,10 @@
                 if (features.bulkDelete && exports.Permissions && bulkDelete.managePermission === undefined)
                     bulkDelete.managePermission = exports.Permissions.MANAGE_MESSAGES;
                 return exports;
+            case 7477:
+                if (!features.hiddenChannels) return exports;
+                exports = hookExport(exports, "openGuildVoiceModal", hiddenVoicePanel);
+                return hookExport(exports, "navigateToVoiceChannel", hiddenVoicePanel);
             case 1112:
                 if (!features.hiddenChannels) return exports;
                 exports = hookExport(exports, "transitionTo", hiddenNavigation);
