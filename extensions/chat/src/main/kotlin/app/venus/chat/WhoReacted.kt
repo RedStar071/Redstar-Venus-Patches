@@ -135,7 +135,8 @@ object WhoReacted {
         }
         for (m in accessory.javaClass.methods) {
             if (m.parameterTypes.size != 0) continue
-            if (m.name.startsWith("getMessageId") && m.returnType == String::class.java) messageId = m
+            val name = m.name
+            if (name.length >= 12 && name.substring(0, 12) == "getMessageId" && m.returnType == String::class.java) messageId = m
             if (m.name == "getReactions" && List::class.java.isAssignableFrom(m.returnType)) reactions = m
         }
         try {
