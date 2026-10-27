@@ -2647,7 +2647,8 @@
     };
     // The mobile list has a second VIEW_CHANNEL filter. Give ONLY that factory a
     // metadata-list facade; the real permission store and all other callers stay stock.
-    function listImport(importer) {
+    function listImport(importer, owner) {
+        if (owner !== undefined && owner !== 7246) return realImport(importer);
         if (typeof importer !== "function") return importer;
         return function () {
             const result = importer.apply(this,arguments);
@@ -2684,8 +2685,6 @@
     // counted locked channels as unread or mentioned, so a server kept its unread dot and badge for messages
     // nobody can open or acknowledge. markGuildsAsRead (14193) read the locked channels the directory adds to
     // SELECTABLE/VOCAL and acknowledged them too. These modules get Discord's real answers, like stock Discord.
-    const HIDDEN_REAL_IMPORTERS = new Uint8Array(32768);
-    HIDDEN_REAL_IMPORTERS[6035] = HIDDEN_REAL_IMPORTERS[6078] = HIDDEN_REAL_IMPORTERS[14193] = 1;
     let realPermissions = null, realGuildChannels = null;
     function realImport(importer) {
         if (typeof importer !== "function") return importer;
@@ -15009,11 +15008,12 @@
                 return define(factory, id, dependencies);
             const wrappedFactory = function () {
                 let result;
-                if (features.hiddenChannels && (id === 7246 || HIDDEN_REAL_IMPORTERS[id] === 1)) {
-                    const factoryArgs = Array.from(arguments), wrap = id === 7246 ? listImport : realImport;
-                    factoryArgs[1] = wrap(factoryArgs[1]);
-                    factoryArgs[2] = wrap(factoryArgs[2]);
-                    factoryArgs[3] = wrap(factoryArgs[3]);
+                // 7246 (the channel list) and the read-state modules (6035, 6078, 14193) get their own imports.
+                if (features.hiddenChannels && (id === 7246 || id === 6035 || id === 6078 || id === 14193)) {
+                    const factoryArgs = Array.from(arguments);
+                    factoryArgs[1] = listImport(factoryArgs[1], id);
+                    factoryArgs[2] = listImport(factoryArgs[2], id);
+                    factoryArgs[3] = listImport(factoryArgs[3], id);
                     result = factory.apply(this, factoryArgs);
                 } else {
                     result = factory.apply(this, arguments);
