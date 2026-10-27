@@ -155,7 +155,7 @@ BOOTSTRAP_MODULES = [
     (7477, 'utils/native/PrivateChannelCallUtils.tsx', ['openGuildVoiceModal', 'navigateToVoiceChannel', 'openChannelCallModal'], 'PrivateChannelCallUtils (Hidden channels asks before a locked voice channel opens)'),
     (8449, 'modules/icymi/ICYMIStore.tsx', ['ICYMIStore'], 'ICYMIStore (Hidden channels keeps its real VIEW_CHANNEL answers)'),
     (14008, 'modules/guilds_bar/GuildMediaStateStore.tsx', ['GuildMediaStateStore'], 'GuildMediaStateStore (Hidden channels keeps its real VIEW_CHANNEL answers)'),
-    (16501, 'modules/main_tabs_v2/native/shared_components/happening_now/useHappeningNowData.tsx', ['addUser'], 'useHappeningNowData (Hidden channels keeps its real VIEW_CHANNEL answers)'),
+    (16501, 'modules/main_tabs_v2/native/shared_components/happening_now/useHappeningNowData.tsx', ['HappeningNowItem', 'MemberListRowTypes'], 'useHappeningNowData (Hidden channels keeps its real VIEW_CHANNEL answers)'),
     (6054, 'modules/guild_scheduled_events/GuildScheduledEventStore.tsx', ['default', 'getGuildScheduledEventsForGuild'], 'GuildScheduledEventStore'),
     (7246, 'modules/guild_sidebar/ChannelListState.tsx', ['CannotShow', 'DoNotShow', 'WouldShowIfUncollapsed'], 'useGuildChannelsList'),
     (6078, 'stores/GuildReadStateStore.tsx', ['default'], 'GuildReadStateStore'),

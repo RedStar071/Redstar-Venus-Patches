@@ -181,6 +181,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8317 | `modules/badges/BadgeDirectoryActionCreators.tsx` | fetchBadgeDirectory | BadgeDirectoryActionCreators (Badge Completer) |
 | 8396 | `design/components/Icon/native/redesign/generated/PlayIcon.tsx` | PlayIcon | PlayIcon (preview Watch button) |
 | 8398 | `design/components/Icon/native/redesign/generated/PauseIcon.tsx` | PauseIcon | PauseIcon (preview player) |
+| 8449 | `modules/icymi/ICYMIStore.tsx` | ICYMIStore | ICYMIStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
 | 8575 | `design/void/Form/native/index.tsx` | Form, FormArrow, FormCheckbox | Form |
 | 8617 | `design/components/Icon/native/redesign/generated/ShieldUserIcon.tsx` | ShieldUserIcon | ShieldUserIcon |
 | 8675 | `design/components/Icon/native/redesign/generated/CalendarIcon.tsx` | CalendarIcon | CalendarIcon |
@@ -293,6 +294,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 13820 | `design/components/Icon/native/redesign/generated/BoostTier3Icon.tsx` | BoostTier3Icon | BoostTier3Icon |
 | 13933 | `modules/gateway/GatewaySocketSingleton.tsx` | handleIdentify, socket, localPresenceState | GatewaySocketSingleton |
 | 13968 | `modules/gateway/PauseGatewaySocket.tsx` | getIsPaused, setIsPaused | PauseGatewaySocket |
+| 14008 | `modules/guilds_bar/GuildMediaStateStore.tsx` | GuildMediaStateStore | GuildMediaStateStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
 | 14048 | `stores/PrivateChannelReadStateStore.tsx` | default | PrivateChannelReadStateStore |
 | 14193 | `modules/guild/markGuildsAsRead.tsx` | default | markGuildsAsRead |
 | 14213 | `modules/guild_action_sheet/native/components/GuildActionSheetProgress.tsx` | default | GuildActionSheetJoinRequestRow |
@@ -330,6 +332,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16384 | `modules/auth/native/RegistrationUtils.tsx` | BackButtonWithTracking, getTrackRegTransition | RegistrationUtils (Account switcher) |
 | 16387 | `modules/auth/register.tsx` | default, registerFull | register (Account switcher) |
 | 16475 | `modules/main_tabs_v2/native/tabs/messages/items/channel/MessagesItemChannelContent.tsx` | default | MessagesItemChannelContent |
+| 16501 | `modules/main_tabs_v2/native/shared_components/happening_now/useHappeningNowData.tsx` | HappeningNowItem, MemberListRowTypes | useHappeningNowData (Hidden channels keeps its real VIEW_CHANNEL answers) |
 | 16521 | `design/components/Icon/native/redesign/generated/SpotifyNeutralIcon.tsx` | SpotifyNeutralIcon | SpotifyNeutralIcon (Fix link previews) |
 | 16663 | `design/components/Icon/native/redesign/generated/BoostTier2Icon.tsx` | BoostTier2Icon | BoostTier2Icon |
 | 16671 | `modules/guild_sidebar/native/ChannelInfo.tsx` | default | ChannelInfo |
