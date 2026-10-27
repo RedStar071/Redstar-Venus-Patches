@@ -73,7 +73,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, anonFilesLength:10, anonFilesStyle:"letters", anonFilesKeepSpoiler:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, anonFilesLength:10, anonFilesStyle:"letters", anonFilesKeepSpoiler:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -90,7 +90,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, anonFilesLength: 10, anonFilesStyle: "letters", anonFilesKeepSpoiler: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, anonFilesLength: 10, anonFilesStyle: "letters", anonFilesKeepSpoiler: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -122,6 +122,9 @@
     const GESTURE_OWN_MODES = ["edit", "reply"];
     // Which language Translate messages translates into: Discord's own language, the phone's, or one you pick (#79).
     const TRANSLATE_TARGETS = ["discord", "phone", "custom"];
+    // Fix link previews: how posts look (the full post, only its media, only its text, or the file itself), and which
+    // language services that can translate a post write it in.
+    const FIX_STYLES = ["full", "gallery", "text", "media"], FIX_TRANSLATE = ["off", "discord", "phone", "custom"];
     // The languages you can pick for "Another language", as Google Translate codes (#79). Chinese comes in both scripts.
     const TRANSLATE_LANGUAGES = ["af", "ar", "bg", "bn", "ca", "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "fa", "fi", "fil", "fr",
         "ga", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "jv", "ka", "kk", "km", "ko", "la", "lt", "lv", "mk", "ml", "mn",
@@ -364,6 +367,7 @@
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
             key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) || key === "tenorGifsSource" && !TENOR_SOURCES.includes(value) ||
+            key === "fixEmbedsStyle" && !FIX_STYLES.includes(value) || key === "fixEmbedsTranslate" && !FIX_TRANSLATE.includes(value) || key === "fixEmbedsLanguage" && !TRANSLATE_LANGUAGES.includes(value) ||
             (key === "systemFontSource" || key === "systemEmojiSource") && !FONT_SOURCES.includes(value) ||
             key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
@@ -415,6 +419,11 @@
             if (!TENOR_SOURCES.includes(value)) return false;
             if (settings.tenorGifsSource === value && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings.tenorGifsSource = value; dirty.add(key); save(); notify(key); return true;
+        }
+        if (key === "fixEmbedsStyle" || key === "fixEmbedsTranslate" || key === "fixEmbedsLanguage") {
+            if (!(key === "fixEmbedsStyle" ? FIX_STYLES : key === "fixEmbedsTranslate" ? FIX_TRANSLATE : TRANSLATE_LANGUAGES).includes(value)) return false;
+            if (settings[key] === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings[key] = value; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "fixEmbedsSites") {
             const clean = fixSitesText(value);
@@ -1054,7 +1063,8 @@
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
-            "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
+            "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed", "Imgur", "Newgrounds",
+            "Post style", "Translate posts", "Full post", "Media", "Text", "File", "Translate", "Gallery"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         anonFiles:["File names", "Random name", "Letters and numbers", "Only numbers", "Date and time", "Spoiler", "Privacy", "Rename"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
@@ -6204,7 +6214,8 @@
         tumblr:"/wumpus/752839474927902720", facebook:"/reel/1180000000000000", mastodon:"/@wumpus/113289104412093482",
         ptt:"/bbs/C_Chat/M.1729000000.A.1B2.html", youtube:"/watch?v=dQw4w9WgXcQ", twitch:"/wumpus/clip/GoodGoodWaffleTwitchRaid",
         bilibili:"/video/BV1xx411c7mD", spotify:"/track/4cOdK2wGLETKBW3PvgPWqT", pixiv:"/artworks/123456789",
-        deviantart:"/wumpus/art/Final-Boss-1093497633", furaffinity:"/view/42140481", pinterest:"/pin/424605071145119869/"};
+        deviantart:"/wumpus/art/Final-Boss-1093497633", furaffinity:"/view/42140481", pinterest:"/pin/424605071145119869/",
+        imgur:"/gallery/chCWdcH", newgrounds:"/portal/view/59593"};
     const FIX_VIDEO = {x:true, instagram:true, tiktok:true, facebook:true, bilibili:true, youtube:true, twitch:true, spotify:true};
     const FIX_PREVIEW_DARK = {link:{color:"#00a8fc"}, embed:{backgroundColor:"#2b2d31", borderColor:"#ffffff14"}, ring:{borderColor:"#5865f2"}};
     function useFixStyles() {
@@ -6252,12 +6263,16 @@
             el(RN.View, {style:{position:"absolute", right:-24, top:-24, width:96, height:96, borderRadius:48, backgroundColor:"#ffffff1f"}}),
             el(RN.View, {style:{width:44, height:44, borderRadius:22, alignItems:"center", justifyContent:"center", backgroundColor:"#00000080"}},
                 el(FIX_VIDEO[siteId] ? Play : Picture, {size:"sm", color:"#ffffff"})));
+        // What the embed shows follows Post style, where the service has it; a translated post says what it was translated from.
+        const look = live && live.styles && owns(live.styles, settings.fixEmbedsStyle) ? settings.fixEmbedsStyle : "full";
+        const textShown = look === "full" || look === "text", mediaShown = look !== "text", translated = !!(live && fixLanguageFor(live));
         const embed = el(RN.View, {style:[f.embed, {marginTop:6, borderRadius:8, borderWidth:1, borderLeftWidth:4, borderLeftColor:site.color, padding:12, maxWidth:320}]},
             el(RN.View, {style:{flexDirection:"row", alignItems:"center", gap:6, marginBottom:4}}, fixBadge(site, 16),
                 el(RN.Text, {style:[s.muted, {fontWeight:"600"}], numberOfLines:1}, site.name)),
             el(RN.Text, {style:[s.name, {fontSize:14}], numberOfLines:1}, "Wumpus (@wumpus)"),
-            el(RN.Text, {style:[s.text, {fontSize:14, marginTop:2}], numberOfLines:2}, tr("Just beat the final boss on my first try!")),
-            media);
+            textShown ? el(RN.Text, {style:[s.text, {fontSize:14, marginTop:2}], numberOfLines:2}, tr("Just beat the final boss on my first try!")) : null,
+            textShown && translated ? el(RN.Text, {style:[s.muted, {fontSize:12, marginTop:4}], numberOfLines:1}, tr("Translated from {language}", {language:languageName("ja")})) : null,
+            mediaShown ? media : null);
         const body = el(RN.View, null, el(RN.Text, {style:[f.link, {fontSize:15}], numberOfLines:2}, fixed), view.embed ? popIn("embed:" + siteId, embed) : null);
         const rows = fixRows();
         const marks = el(RN.ScrollView || RN.View, {key:"sites", horizontal:true, showsHorizontalScrollIndicator:false, accessibilityRole:"tablist",
@@ -6352,21 +6367,40 @@
         if (!React || !RN) return null;
         const on = enabled("fixEmbeds"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Icon = venusIcon(12910, "EmbedIcon");
         const none = !fixRows().some(row => fixService(fixEmbeds.sites[row[0]])), tumblr = fixService(fixSite("tumblr"));
-        const changed = settings.fixEmbedsSites !== "" || !settings.fixEmbedsClean || !settings.fixEmbedsDark;
+        const changed = settings.fixEmbedsSites !== "" || !settings.fixEmbedsClean || !settings.fixEmbedsDark || settings.fixEmbedsStyle !== "full" || settings.fixEmbedsTranslate !== "off";
+        const name = kind => languageName(localeCode(kind)), style = settings.fixEmbedsStyle, translating = settings.fixEmbedsTranslate !== "off";
         const groups = [
             !on ? offCard("status", Icon, "fixEmbeds") : none ? statusCard("status", "Turn on a site below.", {title:tr("No sites turned on"), IconComponent:Icon}) :
                 fixEmbeds.count ? statusCard("status", pl(fixEmbeds.count, "Fixed {n} link since Discord opened.", "Fixed {n} links since Discord opened."),
                     {title:tr("Fixing links"), IconComponent:Icon}) : null,
             el(FixEmbedsPreview, {key:"preview", on}),
             el(FixSiteList, {key:"sites", on}),
+            // How posts look: FxTwitter, FxBluesky, fxTikTok and phixiv each have a subdomain for it (g.fixupx.com...).
+            el(RN.View, {key:"style", style:{gap:8}},
+                groupTitle("title", "Post style"),
+                venusSegmented({key:"fix:style", value:style, disabled:!on, onChange:value => setSetting("fixEmbedsStyle", value),
+                    items:[{value:"full", label:tr("Full post")}, {value:"gallery", label:tr("Media")}, {value:"text", label:tr("Text")}, {value:"media", label:tr("File")}]}),
+                footnote("hint", style === "gallery" ? "Just the picture or video and who posted it, without the text or counts. X, Bluesky, TikTok and pixiv." :
+                    style === "text" ? "Just the text, without pictures or videos. X and Bluesky." :
+                    style === "media" ? "Only the picture or video file, played right in chat. X, Bluesky and TikTok." :
+                    "The text, pictures or video, and likes. TikTok videos show their caption too.")),
+            // Translated posts: FxTwitter, vxTwitter and FxBluesky translate a post when its link ends in a language (/ja).
+            radioGroup(ui, "translate", "Translate posts", "fixEmbedsTranslate", on, [
+                ["off", tr("Off"), tr("Posts show in the language they were written in."), rowIcon(9099, "GlobeEarthIcon")],
+                ["discord", tr("Discord's language"), name("discord") + ".", rowIcon(12901, "ChatSmileIcon")],
+                ["phone", tr("Your phone's language"), name("phone") + ".", rowIcon(6642, "MobilePhoneIcon")],
+                ["custom", tr("Another language"), translateLanguageName(settings.fixEmbedsLanguage) + ".", rowIcon(15723, "LanguageIcon")]], true),
+            settings.fixEmbedsTranslate === "custom" ? el(TranslateLanguagePicker, {key:"language", on, feature:"fixEmbeds", setting:"fixEmbedsLanguage"}) : null,
+            translating ? footnote("translateNote", "Posts on X and Bluesky show the translation with the original under it, for everyone in the chat. pixiv shows titles and tags in English, Chinese or Korean.") : null,
             el(Group, {key:"privacy", title:tr("Privacy")},
                 switchRow(Switch, "fixEmbedsClean", "Remove tracking from links", "Drops share IDs like ?igsh= and ?si= from the links Venus fixes.", rowIcon(10410, "ShieldIcon"))),
             // Only fxtumblr can draw a dark post, so the switch shows while Tumblr links go through it (#87).
             tumblr && tumblr.dark ? el(Group, {key:"look", title:tr("Look")},
                 switchRow(Switch, "fixEmbedsDark", "Dark Tumblr posts", "Tumblr posts are drawn on a dark background, to match Discord.", rowIcon(12689, "ThemeDarkIcon"))) : null,
             changed ? el(Group, {key:"manage", title:tr("Manage")}, actionRow(ui, "reset", "Reset to defaults", "Every site back to how it started.", () =>
-                confirmAction("Reset to defaults?", "Every site goes back to how it started, and tracking is removed again.", "Reset", () => {
-                    animateLayout(); setSetting("fixEmbedsSites", ""); setSetting("fixEmbedsClean", true); setSetting("fixEmbedsDark", true); }), !on, true)) : null,
+                confirmAction("Reset to defaults?", "Every site goes back to how it started, posts show in full and untranslated, and tracking is removed again.", "Reset", () => {
+                    animateLayout(); setSetting("fixEmbedsSites", ""); setSetting("fixEmbedsClean", true); setSetting("fixEmbedsDark", true);
+                    setSetting("fixEmbedsStyle", "full"); setSetting("fixEmbedsTranslate", "off"); }), !on, true)) : null,
             footnote("note", "Only the link changes, and only when you send or edit a message. Links in code or in <angle brackets> are sent as written.")];
         return settingsBody(ui, groups);
     }
@@ -9673,27 +9707,44 @@
     // A service is [id, name, {from host: to host}, extra], or [id, name, "template"] for one that takes the whole link:
     // {url} is the link, encoded; {host} and {path} are its parts. A "*.tumblr.com" host matches any blog's own address and
     // keeps the blog's name ("staff.tumblr.com" becomes "staff.tpmblr.com"). extra.dark: the query that asks for a dark post.
+    // extra.styles: the subdomain that asks for each look ("g." gallery, "t." text, "d." the file itself; "full" when the full
+    // post needs one too). extra.lang: how the service translates a post ("fx" and "vx" add /ja after it, "pixiv" puts it in
+    // front), and extra.at: the post addresses it can be added to.
     // Options: group (where the site is listed), off (starts off: Discord already shows a fair preview), sub (blog addresses).
     // Every service here was checked with Discord's own link crawler against real posts.
     // Built only when a link is first sent or the page opens, never while Discord starts.
+    // The X addresses a language can be added to: a post, or one of its pictures or videos (/photo/2).
+    const FIX_X_POST = /^\/(?:[A-Za-z0-9_]{1,15}|i(?:\/web)?)\/status(?:es)?\/\d+(?:\/(?:photo|video)\/\d)?\/?$/;
+    const FIX_PIXIV_POST = /^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?artworks\/\d+/;
+    // Every X address goes to the service's x.com host, except twitter.com links, which keep their own.
+    function fixMirror(x, twitter) {
+        const out = {"twitter.com":twitter};
+        ["x.com", "nitter.net", "xcancel.com", "nitter.poast.org", "nitter.privacyredirect.com", "nitter.space", "nitter.tiekoetter.com", "lightbrd.com"].forEach(host => { out[host] = x; });
+        return out;
+    }
     function fixSiteRows() {
         const FIXEMBED = ["fixembed", "FixEmbed", "https://fixembed.app/embed?url={url}"];
         return [
-            ["x", "X (Twitter)", "#000000", [8128, "XNeutralIcon"], ["x.com", "twitter.com", "nitter.net", "xcancel.com"], /^\/(?:[A-Za-z0-9_]{1,15}|i(?:\/web)?)\/status(?:es)?\/\d+/,
-                [["fxtwitter", "FxTwitter", {"x.com":"fixupx.com", "twitter.com":"fxtwitter.com", "nitter.net":"fixupx.com", "xcancel.com":"fixupx.com"}],
-                 ["vxtwitter", "vxTwitter", {"x.com":"fixvx.com", "twitter.com":"vxtwitter.com", "nitter.net":"fixvx.com", "xcancel.com":"fixvx.com"}], FIXEMBED], {group:"social"}],
-            ["instagram", "Instagram", "#e1306c", [8132, "InstagramNeutralIcon"], ["instagram.com"], /^\/(?:[\w.]+\/)?(?:p|reels?|tv|share(?:\/(?:p|reels?))?)\/[\w-]+/,
+            // FxTwitter and vxTwitter translate a post when its link ends in a language (/status/20/ja), and FxTwitter can show
+            // just the media (g.), just the text (t.) or the file itself (d.).
+            ["x", "X (Twitter)", "#000000", [8128, "XNeutralIcon"], ["x.com", "twitter.com", "nitter.net", "xcancel.com", "nitter.poast.org", "nitter.privacyredirect.com",
+                "nitter.space", "nitter.tiekoetter.com", "lightbrd.com"], /^\/(?:[A-Za-z0-9_]{1,15}|i(?:\/web)?)\/status(?:es)?\/\d+/,
+                [["fxtwitter", "FxTwitter", fixMirror("fixupx.com", "fxtwitter.com"), {styles:{gallery:"g.", text:"t.", media:"d."}, lang:"fx", at:FIX_X_POST}],
+                 ["vxtwitter", "vxTwitter", fixMirror("fixvx.com", "vxtwitter.com"), {styles:{media:"d."}, lang:"vx", at:FIX_X_POST}], FIXEMBED], {group:"social"}],
+            ["instagram", "Instagram", "#e1306c", [8132, "InstagramNeutralIcon"], ["instagram.com"], /^\/(?:(?:[\w.]+\/)?(?:p|reels?|tv|share(?:\/(?:p|reels?))?)\/[\w-]+|stories\/[\w.]+\/\d+)/,
                 [["oginstagram", "OGInstagram", {"instagram.com":"oginstagram.com"}], ["instafix", "InstaFix", {"instagram.com":"eeinstagram.com"}],
                  ["kkinstagram", "KKInstagram", {"instagram.com":"kkinstagram.com"}], ["vxinstagram", "vxInstagram", {"instagram.com":"vxinstagram.com"}], FIXEMBED], {group:"social"}],
             ["tiktok", "TikTok", "#ee1d52", [12055, "TiktokNeutralIcon"], ["tiktok.com", "vm.tiktok.com", "vt.tiktok.com"],
                 {"tiktok.com":/^\/(?:@[\w.-]+\/(?:video|photo)\/\d+|t\/\w+)/, "vm.tiktok.com":/^\/\w+/, "vt.tiktok.com":/^\/\w+/},
-                [["fxtiktok", "fxTikTok", {"tiktok.com":"tnktok.com", "vm.tiktok.com":"vm.tnktok.com", "vt.tiktok.com":"vt.tnktok.com"}],
+                [["fxtiktok", "fxTikTok", {"tiktok.com":"tnktok.com", "vm.tiktok.com":"vm.tnktok.com", "vt.tiktok.com":"vt.tnktok.com"}, {styles:{full:"a.", gallery:"", media:"d."}}],
                  ["tiktxk", "tiktxk", {"tiktok.com":"tiktxk.com", "vm.tiktok.com":"vm.tiktxk.com", "vt.tiktok.com":"vt.tiktxk.com"}], FIXEMBED], {group:"video"}],
-            ["reddit", "Reddit", "#ff4500", [9105, "RedditNeutralIcon"], ["reddit.com"], /^\/(?:r|u|user)\/[\w-]+\/(?:comments|s)\/\w+/,
-                [["vxreddit", "vxReddit", {"reddit.com":"vxreddit.com"}], ["fixreddit", "FixReddit", {"reddit.com":"fxreddit.seria.moe"}], ["rxddit", "rxddit", {"reddit.com":"rxddit.com"}], FIXEMBED],
+            ["reddit", "Reddit", "#ff4500", [9105, "RedditNeutralIcon"], ["reddit.com", "redd.it"], {"reddit.com":/^\/(?:r|u|user)\/[\w-]+\/(?:comments|s)\/\w+/, "redd.it":/^\/\w{5,10}(?:$|[\/?#])/},
+                [["vxreddit", "vxReddit", {"reddit.com":"vxreddit.com", "redd.it":"vxreddit.com"}], ["fixreddit", "FixReddit", {"reddit.com":"fxreddit.seria.moe", "redd.it":"fxreddit.seria.moe"}],
+                 ["rxddit", "rxddit", {"reddit.com":"rxddit.com", "redd.it":"rxddit.com"}], FIXEMBED],
                 {group:"social"}],
             ["bluesky", "Bluesky", "#1185fe", [9103, "BlueskyNeutralIcon"], ["bsky.app"], /^\/profile\/[^\/\s]+\/post\/\w+/,
-                [["fxbsky", "FxBluesky", {"bsky.app":"fxbsky.app"}], ["vixbluesky", "VixBluesky", {"bsky.app":"bskx.app"}], ["fixbluesky", "FixBluesky", {"bsky.app":"bsyy.app"}],
+                [["fxbsky", "FxBluesky", {"bsky.app":"fxbsky.app"}, {styles:{gallery:"g.", text:"t.", media:"d."}, lang:"bsky", at:/^\/profile\/[^\/\s?#]+\/post\/\w+(?:\/photo\/\d+)?\/?$/}],
+                 ["vixbluesky", "VixBluesky", {"bsky.app":"bskx.app"}, {styles:{media:"r."}}], ["fixbluesky", "FixBluesky", {"bsky.app":"bsyy.app"}],
                  ["bskye", "bskye", {"bsky.app":"bskye.app"}]], {group:"social"}],
             ["threads", "Threads", "#101010", "@", ["threads.net", "threads.com"], /^\/@[\w.]+\/post\/[\w-]+/,
                 [FIXEMBED, ["fixthreads", "FixThreads", {"threads.net":"fixthreads.seria.moe", "threads.com":"fixthreads.seria.moe"}]], {group:"social"}],
@@ -9701,7 +9752,7 @@
             ["tumblr", "Tumblr", "#001935", "t", ["tumblr.com"], {"tumblr.com":/^\/[\w-]+\/\d+/, "*.tumblr.com":/^\/post\/\d+/},
                 [["fxtumblr", "fxtumblr", {"tumblr.com":"tpmblr.com", "*.tumblr.com":"*.tpmblr.com"}, {dark:"dark"}], FIXEMBED], {group:"social", sub:true}],
             ["facebook", "Facebook", "#0866ff", [8130, "FacebookNeutralIcon"], ["facebook.com"],
-                /^\/(?:reel\/\d+|watch\/?\?|share\/[rvp]\/\w+|[\w.]+\/(?:videos|posts)\/[\w.-]+|story\.php|permalink\.php)/,
+                /^\/(?:reel\/\d+|watch\/?\?|share\/[rvp]\/\w+|[\w.]+\/(?:videos|posts)\/[\w.-]+|story\.php|permalink\.php|groups\/[\w.]+\/(?:posts|permalink)\/\w+)/,
                 [["facebed", "facebed", {"facebook.com":"facebed.com"}]], {group:"social"}],
             ["mastodon", "Mastodon", "#6364ff", "M", ["mastodon.social", "mstdn.social", "mastodon.online", "mastodon.world", "mas.to", "mstdn.jp", "fosstodon.org",
                 "hachyderm.io", "infosec.exchange", "techhub.social", "mastodon.art", "mastodon.cloud"], /^\/@[\w.]+(?:@[\w.-]+)?\/\d+/,
@@ -9719,14 +9770,21 @@
                  FIXEMBED], {group:"video"}],
             ["spotify", "Spotify", "#1db954", [16521, "SpotifyNeutralIcon"], ["open.spotify.com"], /^\/(?:intl-[\w-]+\/)?track\/\w+/,
                 [["fxspotify", "FxSpotify", {"open.spotify.com":"fxspotify.com"}]], {group:"video", off:true}],
-            ["pixiv", "pixiv", "#0096fa", "P", ["pixiv.net"], /^\/(?:[a-z]{2}\/)?artworks\/\d+/,
-                [["phixiv", "phixiv", {"pixiv.net":"phixiv.net"}], ["ppxiv", "ppxiv", {"pixiv.net":"ppxiv.net"}], FIXEMBED], {group:"art"}],
+            // phixiv shows the title and tags in English, Chinese or Korean when the link starts with the language (/en/artworks/...).
+            ["pixiv", "pixiv", "#0096fa", "P", ["pixiv.net"], /^\/(?:(?:[a-z]{2}(?:_[a-z]{2})?\/)?artworks\/\d+|member_illust\.php\?(?:[^#]*&)?illust_id=\d+)/,
+                [["phixiv", "phixiv", {"pixiv.net":"phixiv.net"}, {styles:{gallery:"c."}, lang:"pixiv", at:FIX_PIXIV_POST}],
+                 ["ppxiv", "ppxiv", {"pixiv.net":"ppxiv.net"}, {styles:{gallery:"c."}, lang:"pixiv", at:FIX_PIXIV_POST}], FIXEMBED], {group:"art"}],
             ["deviantart", "DeviantArt", "#00c853", "D", ["deviantart.com"], /^\/[\w-]+\/art\/[\w-]+-\d+/,
                 [["fixdeviantart", "fixDeviantArt", {"deviantart.com":"fixdeviantart.com"}], FIXEMBED], {group:"art"}],
             ["furaffinity", "Fur Affinity", "#2e3b41", "FA", ["furaffinity.net"], /^\/(?:view|full)\/\d+/,
                 [["xfuraffinity", "xfuraffinity", {"furaffinity.net":"xfuraffinity.net"}]], {group:"art"}],
             ["pinterest", "Pinterest", "#e60023", "P", ["pinterest.com"], /^\/pin\/\d+/,
-                [FIXEMBED, ["embedez", "EmbedEZ", {"pinterest.com":"pinterestez.com"}]], {group:"art", off:true}]];
+                [FIXEMBED, ["embedez", "EmbedEZ", {"pinterest.com":"pinterestez.com"}]], {group:"art", off:true}],
+            // Discord shows Imgur's own pictures (i.imgur.com), but not posts and albums.
+            ["imgur", "Imgur", "#1bb76e", "i", ["imgur.com"], /^\/(?:(?:gallery|a)\/[\w-]+|[A-Za-z0-9]{7}(?=$|[?#]))/,
+                [["embedez", "EmbedEZ", {"imgur.com":"imgurez.com"}]], {group:"art"}],
+            ["newgrounds", "Newgrounds", "#f7931e", "NG", ["newgrounds.com"], /^\/(?:art\/view\/[\w-]+\/[\w-]+|portal\/view\/\d+)/,
+                [["embedez", "EmbedEZ", {"newgrounds.com":"newgroundsez.com"}]], {group:"art"}]];
     }
     // Share and tracking parameters each site adds when you copy a link: who shared it, from which app, and when. They're
     // removed from links Venus fixes, so neither the embed service nor anyone who taps the link sees them. utm_*, si and fbclid go everywhere.
@@ -9744,7 +9802,8 @@
     function fixTables() {
         const hosts = Object.create(null), sites = Object.create(null), rows = fixSiteRows();
         rows.forEach(row => {
-            const opts = row[7] || {}, services = row[6].map(s => ({id:s[0], name:s[1], to:s[2], dark:s[3] && s[3].dark || null}));
+            const opts = row[7] || {}, services = row[6].map(s => { const extra = s[3] || {};
+                return {id:s[0], name:s[1], to:s[2], dark:extra.dark || null, styles:extra.styles || null, lang:extra.lang || null, at:extra.at || null}; });
             const site = {id:row[0], name:row[1], color:row[2], icon:row[3], hosts:row[4], path:row[5], services, group:opts.group || "social", sub:!!opts.sub,
                 start:opts.off ? "off" : services[0].id};
             sites[site.id] = site;
@@ -9794,6 +9853,33 @@
         });
         return kept.length ? "?" + kept.join("&") : "";
     }
+    // The subdomain that asks the service for the look you picked ("g.fixupx.com"). Only on the service's own two-part host:
+    // vm.tnktok.com or fxreddit.seria.moe can't take one. Looks a service doesn't have send the full post.
+    function fixStylePrefix(service, to) {
+        const styles = service.styles;
+        if (!styles || to.split("/")[0].split(".").length !== 2) return "";
+        return owns(styles, settings.fixEmbedsStyle) ? styles[settings.fixEmbedsStyle] : styles.full || "";
+    }
+    // The language posts are translated into, as a Google code like Translate messages uses, or null while it's off.
+    function fixTargetLanguage() {
+        const mode = settings.fixEmbedsTranslate;
+        if (mode === "custom") return TRANSLATE_LANGUAGES.includes(settings.fixEmbedsLanguage) ? settings.fixEmbedsLanguage : null;
+        if (mode !== "discord" && mode !== "phone") return null;
+        const parts = localeCode(mode).split("-"), base = parts[0].toLowerCase();
+        return base === "zh" ? (/^(TW|HK|MO|Hant)$/i.test(parts[1] || "") ? "zh-TW" : "zh-CN") : base === "nb" || base === "nn" ? "no" : base === "iw" ? "he" : base;
+    }
+    // Each service's name for that language, checked against their own translations; null where it has none.
+    // phixiv only has English, Chinese and Korean (Japanese is pixiv's own).
+    const FIX_LANGUAGE_CODES = {fx:{"zh-CN":"zh-cn", "zh-TW":"zh-tw", fil:"tl"}, vx:{"zh-CN":"zh-hans", "zh-TW":"zh-hant", no:"nb", fil:"tl", pt:null, km:null},
+        bsky:{no:"nb", fil:null, "zh-CN":"zh-cn", "zh-TW":"zh-tw"}, pixiv:{en:"en", "zh-CN":"zh", "zh-TW":"zh_tw", ko:"ko"}};
+    function fixLanguageFor(service) {
+        if (!service.lang) return null;
+        const code = fixTargetLanguage();
+        if (!code) return null;
+        const table = FIX_LANGUAGE_CODES[service.lang];
+        if (owns(table, code)) return table[code];
+        return service.lang === "pixiv" ? null : code;
+    }
     // One link: {site, service, link}, or null when it isn't a post on a site you fix. A closing ")" or "." stays outside it.
     const FIX_TAIL = /[.,!?:;'")\]}*_~]+$/, FIX_SUBDOMAIN = /^(?:www|m|mobile|old|new|web)\./, FIX_BLOG = /^[a-z0-9-]{1,32}$/;
     function fixLink(host, rest, clean) {
@@ -9820,6 +9906,13 @@
             const q = noHash.indexOf("?");
             if (q >= 0) noHash = noHash.slice(0, q) + fixClean(site, noHash.slice(q + 1));
         }
+        // Translated posts: FxTwitter, vxTwitter and FxBluesky add the language after the post (/status/20/ja), phixiv in front.
+        const language = fixLanguageFor(service);
+        if (language) {
+            const q = noHash.indexOf("?"), path = q < 0 ? noHash : noHash.slice(0, q), query = q < 0 ? "" : noHash.slice(q);
+            if (service.at && service.at.test(path)) noHash = (service.lang === "pixiv" ? path.replace(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?/, "/" + language + "/") :
+                path.replace(/\/$/, "") + "/" + language) + query;
+        }
         // Dark posts (#87): fxtumblr draws the post on a dark background.
         if (service.dark && settings.fixEmbedsDark && !new RegExp("[?&]" + service.dark + "(?:[=&]|$)").test(noHash))
             noHash += (noHash.indexOf("?") < 0 ? "?" : "&") + service.dark;
@@ -9827,7 +9920,10 @@
         let fixed;
         if (typeof service.to === "string") fixed = service.to.replace(/\{(url|host|path)\}/g, (_, part) =>
             part === "url" ? encodeURIComponent("https://" + bare + address) : part === "host" ? bare : address);
-        else fixed = "https://" + service.to[key].replace("*", blog) + address;
+        else {
+            const to = service.to[key].replace("*", blog);
+            fixed = "https://" + fixStylePrefix(service, to) + to + address;
+        }
         return {site, service, link:fixed + (tail ? tail[0] : "")};
     }
     // Code, escaped text and <links in angle brackets> (Discord's way to send a link without a preview) are left as written.
@@ -10924,7 +11020,8 @@
     // Each language is listed in its own words with Venus's name for it under it (#82), with Discord's search field.
     // Picking one closes the list again, so the rest of the page is never pushed far down.
     function TranslateLanguagePicker(props) {
-        useSettings("translate");
+        useSettings(props.feature || "translate");
+        const key = props.setting || "translateLanguage";
         const [query, setQuery] = React.useState(""), [open, setOpen] = React.useState(false), ui = reviewUI(), on = !!props.on;
         const RadioGroup = inspectedExport(6263, "TableRadioGroup"), RadioRow = inspectedExport(6262, "TableRadioRow");
         const SearchField = inspectedExport(6739, "SearchField"), Group = ui.TableRowGroup || RN.View;
@@ -10938,22 +11035,23 @@
         const shown = needle ? all.filter(entry => entry.search.includes(needle)) : all;
         const toggle = () => { if (!on) return; haptic("SELECTION"); animateLayout(); setOpen(!open); setQuery(""); };
         const pick = value => {
-            if (value !== settings.translateLanguage) { haptic("SELECTION"); setSetting("translateLanguage", value); }
+            if (value !== settings[key]) { haptic("SELECTION"); setSetting(key, value); }
             animateLayout(); setOpen(false); setQuery("");
         };
-        const current = all.find(entry => entry.code === settings.translateLanguage);
+        const current = all.find(entry => entry.code === settings[key]);
         const Chevron = venusIcon(open ? 10534 : 6906, open ? "ChevronSmallDownIcon" : "ChevronSmallRightIcon");
-        const head = ui.TableRow ? el(ui.TableRow, {key:"current", label:current ? current.label : settings.translateLanguage, subLabel:current && current.sub,
+        const subLabel = props.note ? (current && current.sub ? current.sub + " \u00b7 " : "") + props.note : current && current.sub;
+        const head = ui.TableRow ? el(ui.TableRow, {key:"current", label:current ? current.label : settings[key], subLabel,
             icon:rowIcon(15723, "LanguageIcon"), trailing:el(Chevron, {size:"sm"}), onPress:toggle, disabled:!on,
             accessibilityHint:tr(open ? "Close the list" : "Choose a language")}) : null;
         if (!open) return el(Group, {key:"language", title:tr("Language")}, head);
         const search = SearchField ? el(SearchField, {key:"search", placeholder:tr("Search languages"), value:query, onChange:text => setQuery(String(text || "")), isDisabled:!on}) :
             ui.TextInput ? el(ui.TextInput, {key:"search", placeholder:tr("Search languages"), value:query, onChange:text => setQuery(String(text || "")), editable:on}) : null;
         const rows = !shown.length ? (ui.TableRow ? el(ui.TableRow, {key:"none", label:tr("No matching languages"), disabled:true}) : null) :
-            RadioGroup && RadioRow ? el(RadioGroup, {key:"list", value:settings.translateLanguage, onChange:pick},
+            RadioGroup && RadioRow ? el(RadioGroup, {key:"list", value:settings[key], onChange:pick},
                 shown.map(entry => el(RadioRow, {key:entry.code, value:entry.code, label:entry.label, subLabel:entry.sub, disabled:!on}))) :
             el(Group, {key:"list"}, shown.map(entry => ui.TableRow && el(ui.TableRow, {key:entry.code, label:entry.label, subLabel:entry.sub,
-                trailing:entry.code === settings.translateLanguage ? el(venusIcon(6823, "CheckmarkSmallIcon"), {size:"sm"}) : undefined, disabled:!on, onPress:() => pick(entry.code)})));
+                trailing:entry.code === settings[key] ? el(venusIcon(6823, "CheckmarkSmallIcon"), {size:"sm"}) : undefined, disabled:!on, onPress:() => pick(entry.code)})));
         return el(RN.View, {key:"language", style:{gap:12}}, el(Group, {key:"head", title:tr("Language")}, head),
             el(RN.View, {style:{paddingHorizontal:16}}, search), rows);
     }
