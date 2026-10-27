@@ -28,6 +28,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Bulk delete messages | Select multiple messages in chat and delete them all at once |
 | | Hide blocked or ignored messages | Removes the "blocked messages" and "ignored messages" rows from chat, and can hide replies to them too |
 | | Message highlights | Pick bar width, plus the color and brightness of replies and mentions |
+| | Who reacted | Reactions in chat show the faces of the first people who reacted. Faces load a few at a time, only for reactions on screen, and messages with too many different reactions are skipped. Based on WhoReacted by Palm |
 | | Translate messages | Messages in other languages show in yours, automatically or only when you ask: a whole chat from a bar that appears when it has messages in another language, or one message from its menu. Translate into Discord's language, your phone's, or any of 70 others |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
 | | Skip delete confirmation | Messages and link previews are removed with no "Are you sure?" |
@@ -40,18 +41,18 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Send long messages | Type past the character limit; long messages are sent in parts |
 | | Hide typing indicator | Others won't see when you're typing |
 | | Show file sizes when attaching | Photos and videos in the picker show their size |
+| | Anonymous file names | Files you send get a random name instead of the one on your phone: letters and numbers, only numbers, or the date and time. The file type stays so previews still work, and spoilers stay spoilers. Based on Anonymous File Names by k1ng_op |
 | **People** | Pastel name colors | Names without a role color get a soft pastel color |
 | | Show device indicators | Desktop, mobile, web, console or VR icons next to names |
 | | Fix unknown mentions | @unknown-user mentions show the person's name |
 | | Copy profile bios | Hold a bio to select and copy it |
 | | User and server reviews | Read and write reviews, from ReviewDB |
-| | User activity notifications | Shows a notice when chosen friends or users change status, start typing or send a message |
+| | User activity notifications | Shows a notice when chosen friends or users change status, start typing or send a message. Nothing shows for the chat you have open, and typing is announced once a minute per person and chat |
 | | Account switcher | Switch between up to 50 Discord accounts from the profile bar or Venus settings. Create a new account from Discord's Add account screen or the Account switcher page, without logging out |
 | **Servers** | Read all button | Marks servers, DMs or both as read in one tap |
 | | Show hidden channels | Channels you can't open appear with a lock. Only a tap opens their details menu, which you can turn off |
 | | Server info | Hold a server's icon to see live details: who's online, channels, roles, emojis, boost progress, the owner, your friends there, when it was made and when you joined |
-| | Spaces in channel names | "general chat" instead of "general-chat" |
-| | Clean channel names | Removes emoji, dividers and symbols (🎫┃, ✦, 「」) and fancy fonts (𝐂𝐎𝐌𝐌𝐔𝐍𝐈𝐓𝐘) from channel and category names, each with its own switch. Only how names look changes: links, mentions and search still use the real name, and a name made only of emoji stays as it is |
+| | Clean channel names | Removes emoji, dividers and symbols (🎫┃, ✦, 「」) and fancy fonts (𝐂𝐎𝐌𝐌𝐔𝐍𝐈𝐓𝐘) from channel and category names, each with its own switch, and can show "general chat" instead of "general-chat". Only how names look changes: links, mentions and search still use the real name, and a name made only of emoji stays as it is |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
 | | Use your phone's emojis | Your phone's emojis instead of Discord's, or the emojis from a color emoji font you import (like Twemoji or Noto Color Emoji) |
 | | Hide the gift button | Removes the Nitro gift button from the message bar |
