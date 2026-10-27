@@ -13,7 +13,6 @@
     if (features.picker) targetModules[414] = 1;
     if (features.voice) selectModules([1295, 7752, 7755]);
     if (features.copyBios) targetModules[10615] = 1;
-    if (features.dashless) selectModules([2065, 5421, 5412, 7365]);
     if (features.cleanChannels) selectModules([2065, 5421, 5412, 7365]);
     if (features.favouriteAnything) selectModules([13066, 9732, 9735]);
     if (features.freeNitro) selectModules([1390, 2065, 5987, 6030, 4769, 14299, 7047, 7174]);
@@ -61,7 +60,7 @@
     const deferred = new Map();
     // Every feature starts off: nothing changes in Discord until you turn it on. Options inside a feature keep
     // their own defaults, so turning a feature on does what it says straight away.
-    const settings = { picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
+    const settings = { picker: false, voice: false, copyBios: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
         noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true,
@@ -73,12 +72,12 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
         return DEFAULT_SETTINGS || (DEFAULT_SETTINGS = Object.freeze({
-            picker: false, voice: false, copyBios: false, dashless: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
+            picker: false, voice: false, copyBios: false, favouriteAnything: false, freeNitro: false, emojis: true, stickers: true, hyperlinks: true,
             noTyping: false, quickDelete: false, noDelete: false, noDeleteSave: false, noDeleteLimit: 512, noDeleteEdits: true, noDeleteColor: "default", noDeleteBrightness: 50,
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true,
@@ -90,7 +89,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -344,9 +343,18 @@
     function deleteLimit(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(1, Math.min(MAX_DELETED, n)) : 512; }
     // 1.18.0 moved the deleted messages color from Message highlights to Keep deleted messages: a settings file or
     // backup from before keeps the color you picked.
+    // 1.20.0 folded Spaces in channel names into Clean channel names: someone who only had spaces on keeps exactly that
+    // (cleaning on, with only its Spaces option), and someone who had both keeps both.
     function migrateSettings(raw) {
         if (raw && typeof raw === "object" && raw.noDeleteColor === undefined && typeof raw.messageHighlightDeletedColor === "string")
             raw.noDeleteColor = raw.messageHighlightDeletedColor;
+        if (raw && typeof raw === "object" && raw.dashless === true && raw.cleanChannelsSpaces === undefined) {
+            raw.cleanChannelsSpaces = true;
+            if (raw.cleanChannels !== true) {
+                raw.cleanChannels = true;
+                raw.cleanChannelsEmoji = false; raw.cleanChannelsSymbols = false; raw.cleanChannelsFonts = false;
+            }
+        }
         return raw;
     }
     // A saved or imported value for one setting, cleaned up, or undefined when it can't be used. Shared by the settings
@@ -475,7 +483,7 @@
         // it used to write an empty file, so turning it back on lost every saved message.
         if (key === "noDelete" && !value) { clearDeleted(true, settings.noDeleteSave); archiveRestored = false; }
         if (key === "hiddenChannels") {hiddenViews.clear();}
-        if ((key === "dashless" || key === "hiddenChannels" || featureFor(key) === "cleanChannels") && channelStore && typeof channelStore.emitChange === "function")
+        if ((key === "hiddenChannels" || featureFor(key) === "cleanChannels") && channelStore && typeof channelStore.emitChange === "function")
             try { channelStore.emitChange(); } catch (_) {}
         if (key === "gestures" && !value && features.gestures) gestureCancel();
         if (key === "splitMessages" && !value && features.splitMessages) split.generation++;
@@ -932,7 +940,7 @@
         freeNitro:[9031, "NitroWheelIcon"], voice:[12595, "WaveformIcon"], splitMessages:[9337, "PaperIcon"], noTyping:[12822, "KeyboardIcon"],
         picker:[10024, "AttachmentIcon"], pastelize:[15560, "PaintPaletteIcon"], platformIndicators:[15232, "LaptopPhoneIcon"],
         validUser:[8213, "AtIcon"], copyBios:[5042, "CopyIcon"], reviewDB:[9354, "ThumbsUpIcon"], readAll:[15928, "DoubleCheckmarkIcon"],
-        hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
+        hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
         customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"]};
@@ -976,7 +984,7 @@
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
-        cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Categories", "Channel names", "Decorations"],
+        cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
         bulkDelete:["Select Messages", "Select all", "Delete", "Clear kept deleted messages", "Include kept deleted messages", "Ask before deleting"],
@@ -1347,8 +1355,7 @@
         withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button that marks servers and DMs as read.", "Read all", ReadAllSettings);
         withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open show with a lock. Messages stay hidden.", "Hidden channels", HiddenChannelsSettings);
         withOptions("servers", "serverInfo", "VENUS_SERVERINFO", "Server info", "Hold a server's icon to see its details, boosts and friends there.", "Server info", ServerInfoSettings);
-        toggle("servers", "dashless", "Spaces in channel names", "Shows \"general chat\" instead of \"general-chat\".");
-        withOptions("servers", "cleanChannels", "VENUS_CLEANCHANNELS", "Clean channel names", "Removes emoji and symbols from channel and category names.", "Clean names", CleanChannelsSettings);
+        withOptions("servers", "cleanChannels", "VENUS_CLEANCHANNELS", "Clean channel names", "Removes emoji and symbols from channel names, and can show spaces instead of dashes.", "Clean names", CleanChannelsSettings);
         // Appearance
         withOptions("appearance", "systemFont", "VENUS_SYSTEMFONT", "Use your phone's font", "Replaces Discord's font everywhere with your phone's or one you import. Android 9 or newer.", "Font", SystemFontSettings);
         withOptions("appearance", "systemEmoji", "VENUS_SYSTEMEMOJI", "Use your phone's emojis", "In chat, reactions and the emoji picker, or from an emoji font you import.", "Emojis", SystemEmojiSettings);
@@ -1746,21 +1753,12 @@
     // GUILD_TEXT (0), GUILD_ANNOUNCEMENT (5), GUILD_STORE (6), GUILD_DIRECTORY (14), GUILD_FORUM (15), GUILD_MEDIA (16), GUILD_APP (21).
     const DASHLESS_TYPES = new Set([0, 5, 6, 14, 15, 16, 21]);
     const FALSE_FN = () => false;
-    const dashlessNames = new Map();
-    function dashlessFormat(channel, name) {
-        if (!enabled("dashless") || !channel || !DASHLESS_TYPES.has(channel.type) || typeof name !== "string" || name.indexOf("-") < 0) return name;
-        const cached = dashlessNames.get(name);
-        if (cached !== undefined) return cached;
-        const formatted = name.replace(/-/g, " ");
-        if (dashlessNames.size >= 512) dashlessNames.delete(dashlessNames.keys().next().value);
-        dashlessNames.set(name, formatted);
-        return formatted;
-    }
     // Clean channel names (#95): channel and category names lose the emoji, dividers and fancy fonts servers decorate
     // them with ("🎫┃quick-help" -> "quick-help", "🛠️ | SUPPORT & RESOURCE | 🛠️" -> "SUPPORT & RESOURCE",
     // "𝓰𝓮𝓷𝓮𝓻𝓪𝓵" -> "general"). Only what Discord draws changes: the channel record, links, mentions you send and search
     // all keep the real name. A name made only of emoji or symbols is left as it is, so no channel ever goes blank.
     // Guild channels and categories only (threads and forum posts have free-text titles, DMs have people's names).
+    // Spaces instead of dashes (once its own feature, Spaces in channel names) is one more option here: "general chat".
     const CLEAN_TYPES = new Set([0, 2, 4, 5, 6, 13, 14, 15, 16, 21]);
     // Emoji_Presentation code points outside the 1F000 planes: drawn as emoji even without U+FE0F.
     const CLEAN_EMOJI_BMP = new Set([0x231a, 0x231b, 0x23e9, 0x23ea, 0x23eb, 0x23ec, 0x23f0, 0x23f3, 0x25fd, 0x25fe, 0x2614, 0x2615,
@@ -1847,22 +1845,29 @@
         // Nothing readable left (a name of only emoji or symbols): keep Discord's.
         return /[0-9A-Za-z\u00c0-\uffff]/.test(result) ? result : name;
     }
+    // The options as one short key, so the cache below is dropped whenever one changes.
+    function cleanOptionsKey() {
+        return (settings.cleanChannelsEmoji ? "e" : "") + (settings.cleanChannelsSymbols ? "s" : "") + (settings.cleanChannelsFonts ? "f" : "") + (settings.cleanChannelsSpaces ? "d" : "");
+    }
+    // The cleaned name with every option applied, in order: decorations first, then dashes, so "🎫┃quick-help" becomes
+    // "quick help". One cache for both steps: a channel label is read on every render of the channel list.
     function cleanFormat(channel, name) {
         if (!channel || typeof name !== "string" || !name || !enabled("cleanChannels") || !CLEAN_TYPES.has(channel.type)) return name;
-        const version = (settings.cleanChannelsEmoji ? "e" : "") + (settings.cleanChannelsSymbols ? "s" : "") + (settings.cleanChannelsFonts ? "f" : "");
+        const version = cleanOptionsKey();
         if (!version) return name;
         if (version !== cleanVersion) { cleanNames.clear(); cleanVersion = version; }
         const slug = DASHLESS_TYPES.has(channel.type), key = (slug ? "#" : "") + name;
         const cached = cleanNames.get(key);
         if (cached !== undefined) return cached;
-        const result = cleanName(name, slug, {emoji:settings.cleanChannelsEmoji, symbols:settings.cleanChannelsSymbols, fonts:settings.cleanChannelsFonts});
+        let result = settings.cleanChannelsEmoji || settings.cleanChannelsSymbols || settings.cleanChannelsFonts ?
+            cleanName(name, slug, {emoji:settings.cleanChannelsEmoji, symbols:settings.cleanChannelsSymbols, fonts:settings.cleanChannelsFonts}) : name;
+        if (slug && settings.cleanChannelsSpaces && result.indexOf("-") >= 0) result = result.replace(/-/g, " ");
         if (cleanNames.size >= 1024) cleanNames.delete(cleanNames.keys().next().value);
         cleanNames.set(key, result);
         return result;
     }
-    // Both name features, in order: clean first, so "🎫┃quick-help" becomes "quick help" with Spaces in channel names.
     function channelNameFormat(channel, name) {
-        return dashlessFormat(channel, features.cleanChannels ? cleanFormat(channel, name) : name);
+        return features.cleanChannels ? cleanFormat(channel, name) : name;
     }
     function channelLabel(orig, self, args) {
         const channel=args[0];
@@ -1884,7 +1889,6 @@
         hiddenMetadata(channel) ? channelLabel(orig, self, [channel, b]) : channelNameFormat(channel, orig.call(self, channel, b));
     function useChannelLabel(orig, self, args) {
         if (React) {
-            if (features.dashless) useSettings("dashless");
             if (features.hiddenChannels) useSettings("hiddenChannels");
             if (features.cleanChannels) useSettings("cleanChannels");
         }
@@ -1892,7 +1896,6 @@
     }
     useChannelLabel.call1 = (orig, self, channel) => {
         if (React) {
-            if (features.dashless) useSettings("dashless");
             if (features.hiddenChannels) useSettings("hiddenChannels");
             if (features.cleanChannels) useSettings("cleanChannels");
         }
@@ -1900,7 +1903,6 @@
     };
     useChannelLabel.call2 = (orig, self, channel, b) => {
         if (React) {
-            if (features.dashless) useSettings("dashless");
             if (features.hiddenChannels) useSettings("hiddenChannels");
             if (features.cleanChannels) useSettings("cleanChannels");
         }
@@ -1924,14 +1926,14 @@
     function parserStateChannels(orig, self, args) {
         const state = orig.apply(self, args);
         const clean = features.cleanChannels && enabled("cleanChannels");
-        if (!(enabled("dashless") || clean) || !state || !Array.isArray(state.channels) || !channelStore || typeof channelStore.getChannel !== "function") return state;
+        if (!clean || !state || !Array.isArray(state.channels) || !channelStore || typeof channelStore.getChannel !== "function") return state;
         let extras = null;
         for (let i = 0; i < state.channels.length; i++) {
             const entry = state.channels[i];
-            if (!entry || typeof entry.text !== "string" || !clean && !entry.text.includes(" ")) continue;
+            if (!entry || typeof entry.text !== "string") continue;
             const ch = channelStore.getChannel(entry.id);
             // A typed #name matches the name you see, and the real one too (both point at the same channel).
-            if (ch && (DASHLESS_TYPES.has(ch.type) || clean && CLEAN_TYPES.has(ch.type)) && typeof ch.name === "string" && ch.name !== entry.text) {
+            if (ch && CLEAN_TYPES.has(ch.type) && typeof ch.name === "string" && ch.name !== entry.text) {
                 if (!extras) extras = state.channels.slice();
                 extras.push({id:entry.id, text:ch.name});
             }
@@ -13820,7 +13822,7 @@
         return settingsBody(ui, groups);
     }
     // Clean channel names: the preview is a server's channel list with names decorated the way real servers do it.
-    // While on, each name is cleaned with the options below (and Spaces in channel names, if that's on too) and glides in.
+    // While on, each name is cleaned with the options below and glides in.
     const CLEAN_SAMPLE = [["cat", "\ud83d\udee0\ufe0f | SUPPORT & RESOURCE | \ud83d\udee0\ufe0f"], ["text", "\ud83c\udfab\uff5cquick-help"], ["text", "\ud83d\udd0d\u2503mchose-support-center"],
         ["cat", "\u2726 \ud835\udc02\ud835\udc0e\ud835\udc0c\ud835\udc0c\ud835\udc14\ud835\udc0d\ud835\udc08\ud835\udc13\ud835\udc18 \u2726"], ["text", "\u300c\ud83d\udce6\u300dunbox-reviews"], ["text", "\ud835\udcf0\ud835\udcee\ud835\udcf7\ud835\udcee\ud835\udcfb\ud835\udcea\ud835\udcf5-\ud835\udcec\ud835\udcf1\ud835\udcea\ud835\udcfd"], ["voice", "\ud83d\udd0a \u30fb Lounge"]];
     function CleanChannelsPreview(props) {
@@ -13830,9 +13832,9 @@
         const opts = {emoji:settings.cleanChannelsEmoji, symbols:settings.cleanChannelsSymbols, fonts:settings.cleanChannelsFonts};
         const anything = opts.emoji || opts.symbols || opts.fonts;
         const show = ([type, name]) => {
-            if (!on || !anything) return name;
-            const cleaned = cleanName(name, type === "text", opts);
-            return features.dashless && enabled("dashless") && type === "text" ? cleaned.replace(/-/g, " ") : cleaned;
+            if (!on) return name;
+            const cleaned = anything ? cleanName(name, type === "text", opts) : name;
+            return settings.cleanChannelsSpaces && type === "text" ? cleaned.replace(/-/g, " ") : cleaned;
         };
         const rows = CLEAN_SAMPLE.map((entry, i) => {
             const name = show(entry);
@@ -13861,7 +13863,7 @@
         if (!React || !RN) return null;
         const on = enabled("cleanChannels"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
         const Icon = venusIcon(12605, "MagicWandIcon");
-        const hasAny = !!(settings.cleanChannelsEmoji || settings.cleanChannelsSymbols || settings.cleanChannelsFonts);
+        const hasAny = !!(settings.cleanChannelsEmoji || settings.cleanChannelsSymbols || settings.cleanChannelsFonts || settings.cleanChannelsSpaces);
         const groups = [
             !on ? offCard("status", Icon, "cleanChannels") : !hasAny ? statusCard("status", "Turn on at least one option below.",
                 {title:tr("Names stay as they are"), IconComponent:Icon}) : null,
@@ -13870,6 +13872,8 @@
                 switchRow(Switch, "cleanChannelsEmoji", "Emoji", "\ud83c\udfab, \ud83d\udee0\ufe0f, \ud83c\udf89 and flags, wherever they are in the name.", rowIcon(8956, "ReactionIcon")),
                 switchRow(Switch, "cleanChannelsSymbols", "Symbols and dividers", "\u2503, \u30fb, \u2726, \u300c\u300d and the bars around category names.", rowIcon(10621, "SlashBoxIcon")),
                 switchRow(Switch, "cleanChannelsFonts", "Fancy letters", "Turns \ud835\udc02\ud835\udc0e\ud835\udc0c\ud835\udc0c\ud835\udc14\ud835\udc0d\ud835\udc08\ud835\udc13\ud835\udc18 and \ud835\udcf0\ud835\udcee\ud835\udcf7\ud835\udcee\ud835\udcfb\ud835\udcea\ud835\udcf5 into plain letters.", rowIcon(15974, "LettersIcon"))),
+            el(Group, {key:"spaces", title:tr("Text channels")},
+                switchRow(Switch, "cleanChannelsSpaces", "Spaces instead of dashes", "Shows \"general chat\" instead of \"general-chat\".", rowIcon(15892, "HashmarkIcon"))),
             footnote("note", "Only how names look changes: links, mentions and search still use the real name. A name with nothing else in it is left as it is.")
         ];
         return settingsBody(ui, groups);
@@ -14707,12 +14711,12 @@
             case 14971: SettingsList = exports.SettingsList; return exports;
             case 10615: return features.copyBios ? hookComponent(exports, copyBio) : exports;
             case 5421:
-                if (!features.dashless && !features.hiddenChannels && !features.cleanChannels) return exports;
+                if (!features.hiddenChannels && !features.cleanChannels) return exports;
                 exports = hookExport(exports, "computeChannelName", channelLabel);
                 return hookExport(exports, "default", useChannelLabel);
-            case 5412: return features.dashless || features.cleanChannels ? hookExport(exports, "getChannel", mentionChannelInfo) : exports;
+            case 5412: return features.cleanChannels ? hookExport(exports, "getChannel", mentionChannelInfo) : exports;
             case 7365:
-                if (!features.dashless && !features.cleanChannels) return exports;
+                if (!features.cleanChannels) return exports;
                 exports = hookExport(exports, "createParserState", parserStateChannels);
                 if (exports && exports.default) exports = replaceValue(exports, "default", hookExport(exports.default, "createParserState", parserStateChannels));
                 return exports;

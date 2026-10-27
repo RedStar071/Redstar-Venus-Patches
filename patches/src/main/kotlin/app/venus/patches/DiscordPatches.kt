@@ -42,7 +42,6 @@ private fun runtimeRevision(source: String): String =
 private var pickerSelected = false
 private var voiceSelected = false
 private var copyBiosSelected = false
-private var dashlessSelected = false
 private var favouriteAnythingSelected = false
 private var freeNitroSelected = false
 private var questAgentGuarded = false
@@ -59,7 +58,6 @@ private val runtimeAssets = rawResourcePatch {
         pickerSelected = false
         voiceSelected = false
         copyBiosSelected = false
-        dashlessSelected = false
         favouriteAnythingSelected = false
         freeNitroSelected = false
         questAgentGuarded = false
@@ -74,7 +72,7 @@ private val runtimeAssets = rawResourcePatch {
         val selected = bootstrap.replace(
             "/*__FEATURES__*/",
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
-                "dashless:$dashlessSelected,favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
+                "favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
                     "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
@@ -260,19 +258,8 @@ val copyBios = rawResourcePatch(
 }
 
 @Suppress("unused")
-val dashless = rawResourcePatch(
-    name = "Spaces in channel names",
-    description = "Shows \"general chat\" instead of \"general-chat\"."
-) {
-    compatibleWith(discord)
-    section(PLUGINS)
-    dependsOn(venusSettings)
-    execute { dashlessSelected = true }
-}
-
-@Suppress("unused")
 val cleanChannels = bundledPlugin("cleanChannels", "Clean channel names",
-    "Removes emoji and symbols from channel and category names.")
+    "Removes emoji and symbols from channel names, and can show spaces instead of dashes.")
 
 @Suppress("unused")
 val favouriteAnything = rawResourcePatch(
