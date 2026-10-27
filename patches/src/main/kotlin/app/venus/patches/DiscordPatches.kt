@@ -74,7 +74,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag", "removedAlerts")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag", "removedAlerts", "fullImages")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -257,6 +257,10 @@ val staffTags = bundledPlugin("staffTag", "Label server owners and mods",
 @Suppress("unused")
 val removedConnectionAlerts = bundledPlugin("removedAlerts", "Alert when a friend or server removes you",
     "Get notified when a friend removes you or a server drops you. Based on RemovedConnectionAlerts by iyu46.")
+
+@Suppress("unused")
+val fullQualityImages = bundledPlugin("fullImages", "Load full-quality images",
+    "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy. Based on Uncompressed Discord Images by Knewest.")
 
 @Suppress("unused")
 val copyBios = rawResourcePatch(

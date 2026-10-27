@@ -36,6 +36,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 1390 | `stores/UserStore.tsx` | default, users, ASSISTANT_WUMPUS_VOICE_USER | UserStore |
 | 1401 | `modules/user/UserStoreUtils.tsx` | isStaffEnv, isStaffEnvRawData, getEnv | UserStoreUtils.isStaffEnv (Unlock Discord experiments) |
 | 1415 | `utils/AvatarUtils.tsx` | default | AvatarUtils |
+| 1496 | `utils/native/ImageUtils.tsx` | default, getMobileOptimizedSrc, getSrcWithWidthAndHeight | ImageUtils (Load full-quality images) |
 | 1503 | `design/components/Navigator/native/useNavigation.native.tsx` | useNavigation, useNativeStackNavigation, useStackNavigation | useStackNavigation |
 | 1999 | `stores/native/AppStateStore.tsx` | default | AppStateStore |
 | 2012 | `stores/MediaEngineStore.tsx` | default | MediaEngineStore (Badge Completer) |
@@ -182,6 +183,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8304 | `../discord_common/js/shared/shared-constants/BadgeId.tsx` | BadgeId | BadgeId (Badge Completer) |
 | 8312 | `modules/badges/BadgeDirectoryStore.tsx` | default | BadgeDirectoryStore (Badge Completer) |
 | 8317 | `modules/badges/BadgeDirectoryActionCreators.tsx` | fetchBadgeDirectory | BadgeDirectoryActionCreators (Badge Completer) |
+| 8388 | `modules/media_viewer/native/MediaSourceUtil.tsx` | extractMediaFromAttachment, extractMediaFromEmbed, extractMediaFromMessageComponents, extractMediaSourcesFromMessage, extractMediaSourcesFromEmbed, extractMediaSourcesFromComponent | MediaSourceUtil (Load full-quality images) |
 | 8396 | `design/components/Icon/native/redesign/generated/PlayIcon.tsx` | PlayIcon | PlayIcon (preview Watch button) |
 | 8398 | `design/components/Icon/native/redesign/generated/PauseIcon.tsx` | PauseIcon | PauseIcon (preview player) |
 | 8449 | `modules/icymi/ICYMIStore.tsx` | ICYMIStore | ICYMIStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
@@ -313,6 +315,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15232 | `design/components/Icon/native/redesign/generated/LaptopPhoneIcon.tsx` | LaptopPhoneIcon | LaptopPhoneIcon |
 | 15241 | `design/components/Icon/native/redesign/generated/PuzzlePieceIcon.tsx` | PuzzlePieceIcon | PuzzlePieceIcon |
 | 15285 | `design/components/Icon/native/redesign/generated/FiltersHorizontalIcon.tsx` | FiltersHorizontalIcon | FiltersHorizontalIcon (translate bar, #82) |
+| 15327 | `design/components/Icon/native/redesign/generated/FullscreenEnterIcon.tsx` | FullscreenEnterIcon | FullscreenEnterIcon (Load full-quality images) |
 | 15371 | `modules/quests/native/QuestHooks.native.tsx` | useMobileQuestDockHeight, useMobileQuestDock, useIsMobileQuestDockVisibleToUser | useMobileQuestDock |
 | 15378 | `modules/main_tabs_v2/native/you_bar/YouBarConstants.tsx` | CONNECTION_BANNER_HEIGHT, YOU_BAR_SPRING_CONFIG, YOU_BAR_PADDING | YouBarConstants |
 | 15460 | `modules/client_themes/ClientThemesBackgroundActionCreators.tsx` | updateBackgroundGradientPreset, resetPreviewClientTheme | ClientThemesBackgroundActionCreators (Unlock Nitro themes) |

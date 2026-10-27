@@ -30,6 +30,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Message highlights | Pick bar width, plus the color and brightness of replies and mentions |
 | | Translate messages | Messages in other languages show in yours, automatically or only when you ask: a whole chat from a bar that appears when it has messages in another language, or one message from its menu. Translate into Discord's language, your phone's, or any of 70 others |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
+| | Load full-quality images | Pictures in chat and full screen load the file that was uploaded instead of Discord's smaller, compressed copy. Choose chat, full screen or both, and whether GIFs load whole too. Pictures over 16 megapixels stay as Discord sends them so the app doesn't run out of memory. Based on Uncompressed Discord Images by Knewest |
 | | Skip delete confirmation | Messages and link previews are removed with no "Are you sure?" |
 | | Jump to first message | A button to go straight to the start of a chat |
 | | Favourite any image or video | Star any image or video to keep it in your GIF favourites |

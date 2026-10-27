@@ -51,6 +51,7 @@
     if (features.tenorGifs) selectModules([1295, 9733]);
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     if (features.staffTag) targetModules[7742] = 1;
+    if (features.fullImages) selectModules([1496, 8388]);
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
@@ -75,7 +76,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, removedAlerts:false, removedAlertsFriends:true, removedAlertsServers:true, removedAlertsClosed:true, removedAlertsPush:false, language:"auto", hiddenFeatures:"" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, removedAlerts:false, removedAlertsFriends:true, removedAlertsServers:true, removedAlertsClosed:true, removedAlertsPush:false, fullImages:false, fullImagesChat:true, fullImagesViewer:true, fullImagesGifs:false, language:"auto", hiddenFeatures:"" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -92,7 +93,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, removedAlerts: false, removedAlertsFriends: true, removedAlertsServers: true, removedAlertsClosed: true, removedAlertsPush: false, language: "auto", hiddenFeatures: ""
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, removedAlerts: false, removedAlertsFriends: true, removedAlertsServers: true, removedAlertsClosed: true, removedAlertsPush: false, fullImages: false, fullImagesChat: true, fullImagesViewer: true, fullImagesGifs: false, language: "auto", hiddenFeatures: ""
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -995,7 +996,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : /^fullImages[A-Z]/.test(key) ? "fullImages" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -1030,7 +1031,7 @@
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], fullImages:[11587, "ImagesIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1074,6 +1075,7 @@
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         anonFiles:["File names", "Random name", "Privacy", "Rename"],
         staffTag:["Owner", "Admin", "Manager", "Mod", "Crown", "Staff", "Moderator", "Tags", "Staff tags", "StaffTag", "Label", "Badge"],
+        fullImages:["Uncompressed", "Uncompressed images", "Original", "Full quality", "Lossless", "Compression", "Blurry", "Thumbnail", "Resolution", "Pictures", "Photos"],
         removedAlerts:["Removed", "Unfriend", "Friend", "Kicked", "Banned", "Server", "Left", "Alert", "Notifier", "Relationship", "Connection", "Removed connection alerts", "Relationship notifier", "Notify"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
@@ -1519,6 +1521,7 @@
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
         withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
         withOptions("people", "staffTag", "VENUS_STAFFTAG", "Label server owners and mods", "Adds a label next to server owners, admins and moderators in chat.", "Label server owners and mods", StaffTagSettings);
+        withOptions("messages", "fullImages", "VENUS_FULLIMAGES", "Load full-quality images", "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy.", "Load full-quality images", FullImagesSettings);
         withOptions("people", "removedAlerts", "VENUS_REMOVEDALERTS", "Alert when a friend or server removes you", "Get notified when a friend removes you or a server drops you.", "Alert when a friend or server removes you", RemovedAlertsSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
@@ -14795,6 +14798,84 @@
             footnote("note", "Venus remembers who was on your friends list and which servers you were in. Things you remove or leave on this phone are ignored, and so are servers you're only previewing. Removals you make on another device can still show up here.")];
         return settingsBody(ui, groups);
     }
+    // Load full-quality images (#108, based on Uncompressed Discord Images by Knewest). The BetterDiscord plugin swaps each
+    // thumbnail for the uploaded file by editing the page; Android has no page to edit. Here the app builds every picture's address
+    // in ImageUtils.getMobileOptimizedSrc (1496): for an upload it takes the proxy address and adds Discord's resize parameters
+    // (width, height, format=webp). For pictures people uploaded, Venus answers with the address of the original file instead.
+    // The chat row and the full-screen viewer share that function; calls made while MediaSourceUtil (8388) builds the viewer's
+    // pictures are counted, so each place has its own switch. Pictures too big for a phone to hold keep Discord's copy.
+    const FULL_IMAGE_URL = /^(https:\/\/(?:cdn\.discordapp\.com|media\.discordapp\.net))(\/attachments\/[^?#\s]+)(?:\?([^#\s]*))?$/;
+    const FULL_IMAGE_RESIZE = /^(?:width|height|format|quality|animated)=/;
+    const FULL_IMAGE_SIDE = 4096, FULL_IMAGE_PIXELS = 16000000;
+    const FULL_IMAGE_VIEWER_CALLS = ["extractMediaSourcesFromMessage", "extractMediaSourcesFromEmbed", "extractMediaSourcesFromComponent",
+        "extractMediaFromAttachment", "extractMediaFromEmbed", "extractMediaFromMessageComponents"];
+    const fullImages = {viewer:0};
+    // The address of the uploaded file for a resized one, or null to leave the picture to Discord.
+    function fullImageUrl(src, width, height, gifs) {
+        if (typeof src !== "string" || src.length > 2048 || src.indexOf("/attachments/") < 0) return null;
+        const match = FULL_IMAGE_URL.exec(src), ext = match && /\.(png|jpe?g|webp|gif)$/i.exec(match[2]);
+        if (!ext || (ext[1].toLowerCase() === "gif" && !gifs)) return null;
+        const w = Number(width), h = Number(height);
+        if (!(w > 0 && h > 0) || w > FULL_IMAGE_SIDE || h > FULL_IMAGE_SIDE || w * h > FULL_IMAGE_PIXELS) return null;
+        const kept = match[3] ? match[3].split("&").filter(part => part && !FULL_IMAGE_RESIZE.test(part)) : [];
+        return match[1] + match[2] + (kept.length ? "?" + kept.join("&") : "");
+    }
+    function fullImagesSrc(orig, self, args) {
+        if (enabled("fullImages") && (fullImages.viewer > 0 ? settings.fullImagesViewer : settings.fullImagesChat)) {
+            try { const url = fullImageUrl(args[0], args[1], args[2], settings.fullImagesGifs); if (url) return url; } catch (_) {}
+        }
+        return orig.apply(self, args);
+    }
+    function hookFullImagesViewer(exports) {
+        FULL_IMAGE_VIEWER_CALLS.forEach(key => {
+            exports = hookExport(exports, key, (orig, self, args) => {
+                fullImages.viewer++;
+                try { return orig.apply(self, args); } finally { fullImages.viewer--; }
+            });
+        });
+        return exports;
+    }
+    // The preview is one chat message with a picture in it: the mock picture has fine detail that goes soft and grainy when off.
+    function FullImagesPreview(props) {
+        useSettings("fullImages");
+        const s = useChatPreviewStyles(), sharp = !!props.on && !!settings.fullImagesChat;
+        const Pic = venusIcon(8210, "ImageIcon");
+        const lines = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => el(RN.View, {key:"l" + i,
+            style:{position:"absolute", left:0, right:0, top:52 + i * 5, height:1, backgroundColor:"#ffffff", opacity:sharp ? 0.6 : 0.12}}));
+        const chip = popIn("chip:" + sharp, el(RN.View, {style:{position:"absolute", left:8, bottom:8, flexDirection:"row", alignItems:"center", gap:4,
+            paddingHorizontal:8, paddingVertical:4, borderRadius:12, backgroundColor:sharp ? "#248046" : "#000000b3"}},
+            el(Pic, {size:"xs", color:"#ffffff"}),
+            el(RN.Text, {style:{color:"#ffffff", fontSize:11, fontWeight:"700"}, numberOfLines:1}, sharp ? tr("Original quality") : tr("Compressed by Discord"))));
+        const picture = el(RN.View, {key:"picture", style:{height:150, borderRadius:8, overflow:"hidden", backgroundColor:"#4a6fd1"}},
+            el(RN.View, {style:{position:"absolute", left:0, right:0, bottom:0, height:72, backgroundColor:"#3d8f5f"}}),
+            el(RN.View, {style:{position:"absolute", right:28, top:18, width:34, height:34, borderRadius:17, backgroundColor:"#ffd966"}}),
+            lines,
+            sharp ? null : el(RN.View, {style:{position:"absolute", left:0, right:0, top:0, bottom:0, backgroundColor:"#80848e", opacity:0.3}}),
+            chip);
+        const body = el(RN.View, {style:{gap:6}}, el(RN.Text, {style:s.text}, tr("Here's the screenshot!")), picture);
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Full-quality images preview", [previewMessage(s, "msg", "Sam", "#5865f2", tr("Today at 4:01 PM"), body)]));
+    }
+    function FullImagesSettings() {
+        useSettings("fullImages");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("fullImages"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const Icon = venusIcon(11587, "ImagesIcon");
+        const where = !!(settings.fullImagesChat || settings.fullImagesViewer);
+        const groups = [
+            !on ? offCard("status", Icon, "fullImages") : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
+                title:where ? tr("Loading pictures as uploaded") : tr("Nothing loads in full"),
+                body:where ? tr("Pictures people upload show in their original quality, not Discord's smaller copy.") : tr("Turn on at least one option below.")}),
+            el(FullImagesPreview, {key:"preview", on}),
+            el(Group, {key:"where", title:tr("Load in full")},
+                switchRow(Switch, "fullImagesChat", "In chat", "Pictures in messages, as soon as they appear.", rowIcon(8194, "ChatIcon")),
+                switchRow(Switch, "fullImagesViewer", "When opened", "Pictures you tap to view full screen.", rowIcon(15327, "FullscreenEnterIcon"))),
+            el(Group, {key:"data", title:tr("Mobile data")},
+                switchRow(Switch, "fullImagesGifs", "GIFs and animated pictures", "Loads the whole GIF instead of Discord's lighter copy. Can use a lot of data.", rowIcon(9748, "GifIcon"))),
+            footnote("note", "Only pictures people upload to Discord change, not links to other sites. Pictures over 16 megapixels stay as Discord sends them, so the app doesn't run out of memory. Pictures already on screen update when you reopen the chat.")];
+        return settingsBody(ui, groups);
+    }
     // Clean channel names: the preview is a server's channel list with names decorated the way real servers do it.
     // While on, each name is cleaned with the options below and glides in.
     const CLEAN_SAMPLE = [["cat", "\ud83d\udee0\ufe0f | SUPPORT & RESOURCE | \ud83d\udee0\ufe0f"], ["text", "\ud83c\udfab\uff5cquick-help"], ["text", "\ud83d\udd0d\u2503mchose-support-center"],
@@ -15717,6 +15798,8 @@
                 }
                 return exports;
             case 7386: if (features.quests) questAttach(exports.default); return exports;
+            case 1496: return features.fullImages ? hookExport(exports, "getMobileOptimizedSrc", fullImagesSrc) : exports;
+            case 8388: return features.fullImages ? hookFullImagesViewer(exports) : exports;
             case 7018: return features.removedAlerts ? hookRemovedMine(exports, ["removeFriend", "removeRelationship"]) : exports;
             case 6098: return features.removedAlerts ? hookRemovedMine(exports, ["deleteGuild"]) : exports;
             case 8633: return features.removedAlerts ? hookRemovedMine(exports, ["leaveGuild", "deleteGuild"]) : exports;
