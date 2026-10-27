@@ -3743,12 +3743,13 @@
     // QuestVariants.MOBILE_ACTIVITY_QUEST: an Activity Quest that Discord's phone app reports itself.
     const QUEST_MOBILE_ACTIVITY = 36;
     // Discord answers 401 when a phone reports play time, so Play and Activity heartbeats are sent as Discord
-    // Stable for Windows: host 1.0.9265, web build 650389 (the client discord.com serves a desktop app on launch),
+    // Stable for Windows: host 1.0.9265, web build 652418 (the client discord.com serves a desktop app on launch; the site
+    // ships several builds a day and a desktop session keeps the one it loaded, so a recent one is as real as the newest),
     // updater metadata 96160 (what desktop sends as native_build_number), Electron 42.11.15, Chrome 148.0.7778.280.
     // Read from the 1.0.9265 package (Discord.exe, build_info.json, core.asar) and the live updater manifest.
     // Bump all of them together when Discord does.
     // brands is the sec-ch-ua Electron 42.11.15 sends (captured from the real binary; Chromium picks the grease brand per major).
-    const QUEST_DESKTOP = {version:"1.0.9265", build:650389, native:96160, electron:"42.11.15", chrome:"148.0.7778.280",
+    const QUEST_DESKTOP = {version:"1.0.9265", build:652418, native:96160, electron:"42.11.15", chrome:"148.0.7778.280",
         osVersion:"10.0.26100", osSdk:"26100", brands:'"Not/A)Brand";v="99", "Chromium";v="148"'};
     // Where desktop's page is served from: Chromium reports it as Origin (writes) and Referer on every API call.
     const QUEST_DESKTOP_ORIGIN = "https://discord.com", QUEST_DESKTOP_PAGE = "https://discord.com/channels/@me";
