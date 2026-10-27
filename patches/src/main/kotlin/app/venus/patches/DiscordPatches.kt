@@ -1069,6 +1069,93 @@ val bulkDelete = bytecodePatch(
     }
 }
 
+internal const val WHO_REACTED = "Lapp/venus/chat/WhoReacted;"
+internal const val ACCESSORIES_ADAPTER = "Lcom/discord/chat/presentation/message/MessageAccessoriesAdapter;"
+internal const val REACTIONS_HOLDER = "Lcom/discord/chat/presentation/message/viewholder/ReactionsViewHolder;"
+internal const val REACTIONS_ACCESSORY = "Lcom/discord/chat/presentation/message/messagepart/ReactionsMessageAccessory;"
+/** Instructions [whoReactedBridge] adds before Discord's own removeFile code, counting the nop its label lands on. */
+internal const val WHO_REACTED_BRIDGE_SIZE = 9
+
+/**
+ * Who reacted talks to its native side through FileModule.removeFile(storageDir, path, promise) with a private storageDir
+ * prefix: Venus never removes files, Discord only passes its own directory names, and no other Venus guard uses this
+ * method. p1 = storageDir (the request), p2 = path (the payload), p3 = Promise. 11 registers, 4 of them parameters.
+ */
+internal fun whoReactedBridge(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    if (method.parameterTypes.map { it.toString() } != listOf("Ljava/lang/String;", "Ljava/lang/String;", PROMISE) || method.returnType != "V" ||
+        (method.implementation?.registerCount ?: 0) - 4 < 2)
+        throw PatchException("FileModule.removeFile ABI changed")
+    requireUnpatched(method, "venus-")
+    method.addInstructions(0, """
+        const-string v0, "venus-react-v1:"
+        invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+        move-result v0
+        if-eqz v0, :venus_remove_file
+        invoke-static {p1, p2, p3}, $WHO_REACTED->dispatch(Ljava/lang/String;Ljava/lang/String;$PROMISE)Z
+        move-result v1
+        if-eqz v1, :venus_remove_file
+        return-void
+        :venus_remove_file
+        nop
+    """)
+}
+
+/**
+ * Right after MessageAccessoriesAdapter binds a message's reaction pills (ReactionsViewHolder.bind), hand the holder and
+ * its ReactionsMessageAccessory to [WHO_REACTED] so each pill can show who reacted. The holder and the accessory are
+ * already cast to those types in the registers bind's range starts from; only that one call is matched.
+ */
+internal fun whoReactedHook(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) {
+    val code = method.implementation?.instructions?.toList() ?: throw PatchException("${method.name} has no code")
+    val sites = code.withIndex().filter { (_, ins) ->
+        ins.opcode == com.android.tools.smali.dexlib2.Opcode.INVOKE_VIRTUAL_RANGE &&
+            ((ins as com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction).reference as
+                com.android.tools.smali.dexlib2.iface.reference.MethodReference).let { it.definingClass == REACTIONS_HOLDER && it.name == "bind" }
+    }
+    if (sites.size != 1) throw PatchException("$ACCESSORIES_ADAPTER: expected one ReactionsViewHolder.bind call, found ${sites.size}")
+    val (at, call) = sites.single()
+    val holder = (call as com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction).startRegister
+    // The accessory: the register last cast to ReactionsMessageAccessory before the call.
+    val cast = code.subList(0, at).withIndex().lastOrNull { (_, ins) ->
+        ins.opcode == com.android.tools.smali.dexlib2.Opcode.CHECK_CAST &&
+            (ins as com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction).reference.toString() == REACTIONS_ACCESSORY
+    } ?: throw PatchException("$ACCESSORIES_ADAPTER: ReactionsMessageAccessory cast not found")
+    val accessory = (cast.value as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
+    if (holder > 15 || accessory > 15) throw PatchException("$ACCESSORIES_ADAPTER: Who reacted registers out of range")
+    // Neither register may be written between the cast and the call, or the hook would pass the wrong objects.
+    for (ins in code.subList(cast.index + 1, at)) {
+        val written = (ins as? com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction)?.registerA
+        if (ins.opcode.setsRegister() && (written == accessory)) throw PatchException("$ACCESSORIES_ADAPTER: accessory register reused before bind")
+    }
+    method.addInstructions(at + 1, "invoke-static {v$holder, v$accessory}, $WHO_REACTED->bound(Ljava/lang/Object;Ljava/lang/Object;)V")
+}
+
+@Suppress("unused")
+val whoReacted = bytecodePatch(
+    name = "Who reacted",
+    description = "Reactions in chat show the faces of the first people who reacted. Based on Who Reacted by Palm."
+) {
+    compatibleWith(discord)
+    section(PLUGINS)
+    dependsOn(venusSettings)
+    extendWith("extensions/chat.mpe")
+    execute {
+        additionalSelections += "whoReacted"
+        whoReactedBridge(Fingerprint(
+            definingClass = FILE_MODULE,
+            name = "removeFile",
+            returnType = "V",
+            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", PROMISE)
+        ).method)
+        whoReactedHook(Fingerprint(
+            definingClass = ACCESSORIES_ADAPTER,
+            name = "onBindViewHolder",
+            returnType = "V",
+            parameters = listOf("Lcom/discord/chat/presentation/message/viewholder/MessagePartViewHolder;", "I")
+        ).method)
+    }
+}
+
 internal const val HANDSFREE = "Lapp/venus/audio/Handsfree;"
 internal const val AUDIO_MANAGER = "Landroid/media/AudioManager;"
 
