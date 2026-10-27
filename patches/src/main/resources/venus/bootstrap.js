@@ -22,7 +22,7 @@
     if (features.quickDelete) selectModules([5300, 1126]);
     if (features.noDelete) selectModules([584, 5432, 5434, 1390, 2065, 7174, 7742]);
     if (features.jumpToTop) selectModules([11968, 11969, 11970, 9379, 7174, 5432]);
-    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2065, 2116, 4748, 7246, 4750, 5421, 7174, 584, 1390, 16671, 8218, 6035, 6078, 14193, 7477]);
+    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2065, 2116, 4748, 7246, 4750, 5421, 7174, 584, 1390, 16671, 8218, 6035, 6078, 14193, 7477, 14008, 16501, 8449]);
     if (features.pastelize) selectModules([7742, 1264, 2125]);
     if (features.platformIndicators) selectModules([5108, 5112, 1390, 2065, 10533, 10229, 12862, 16475, 8792, 14419, 13156]);
     if (features.reviewDB) selectModules([13181, 14213, 14281, 10725, 6265, 6896, 1390, 584]);
@@ -2939,7 +2939,10 @@
     // getGuildChannelUnreadState) and GuildReadStateStore (6078 isCountableChannel) asked PermissionStore.can and
     // counted locked channels as unread or mentioned, so a server kept its unread dot and badge for messages
     // nobody can open or acknowledge. markGuildsAsRead (14193) read the locked channels the directory adds to
-    // SELECTABLE/VOCAL and acknowledged them too. These modules get Discord's real answers, like stock Discord.
+    // SELECTABLE/VOCAL and acknowledged them too. The same answer also reached the server bar's voice badge
+    // (GuildMediaStateStore 14008 isBadgeableVoiceChannel: a server lit up for talk in a voice channel you can't
+    // join), Happening Now (16501 addUser listed people in locked voice channels) and the ICYMI feed's events in
+    // locked channels (ICYMIStore 8449 injectGuildEvents). These modules get Discord's real answers, like stock Discord.
     let realPermissions = null, realGuildChannels = null;
     function realImport(importer) {
         if (typeof importer !== "function") return importer;
@@ -15529,8 +15532,8 @@
                 return define(factory, id, dependencies);
             const wrappedFactory = function () {
                 let result;
-                // 7246 (the channel list) and the read-state modules (6035, 6078, 14193) get their own imports.
-                if (features.hiddenChannels && (id === 7246 || id === 6035 || id === 6078 || id === 14193)) {
+                // 7246 (the channel list) and the modules that must keep Discord's real answers get their own imports.
+                if (features.hiddenChannels && (id === 7246 || id === 6035 || id === 6078 || id === 14193 || id === 14008 || id === 16501 || id === 8449)) {
                     const factoryArgs = Array.from(arguments);
                     factoryArgs[1] = listImport(factoryArgs[1], id);
                     factoryArgs[2] = listImport(factoryArgs[2], id);
