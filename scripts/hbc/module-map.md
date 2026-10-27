@@ -152,11 +152,13 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 7386 | `modules/quests/QuestStore.tsx` | default | QuestStore |
 | 7394 | `modules/quests/utils/QuestServerUtils.tsx` | isQuestWithKnownConfigVersion, questConfigFromServer, questUserStatusFromServer | questUserStatusFromServer |
 | 7404 | `stores/DeveloperExperimentStore.tsx` | default | DeveloperExperimentStore (Unlock Discord experiments) |
+| 7477 | `utils/native/PrivateChannelCallUtils.tsx` | openGuildVoiceModal, navigateToVoiceChannel, openChannelCallModal | PrivateChannelCallUtils (Hidden channels asks before a locked voice channel opens) |
 | 7567 | `design/components/Icon/native/redesign/generated/WarningIcon.tsx` | WarningIcon | WarningIcon (Risky chip) |
 | 7701 | `design/components/Icon/native/redesign/generated/LinkExternalSmallIcon.tsx` | LinkExternalSmallIcon | LinkExternalSmallIcon |
 | 7742 | `modules/messages/native/renderer/RowGenerator.tsx` | default | RowGenerator |
 | 7752 | `lib/uploader/CloudUpload.tsx` | NOT_STARTED, STARTED, UPLOADING | CloudUpload |
 | 7755 | `utils/UploadUtils.tsx` | MAX_TOTAL_ATTACHMENT_SIZE, MAX_TOTAL_ATTACHMENT_SIZE_1GB, MAX_TOTAL_ATTACHMENT_SIZE_MB | AttachmentUtils |
+| 7784 | `lib/uploader/native/CloudUploaderUtils.tsx` | default, prepareMessagePayload, getUploadPayload | CloudUploaderUtils (Anonymous file names) |
 | 7982 | `modules/double_tap_to_react/native/DoubleTapToReactUtils.tsx` | getFallbackDoubleTapDisambiguatedEmoji, reactionEmojiFromSettingsValue, disambiguatedEmojiFromSettingsValue | DoubleTapToReactUtils |
 | 7989 | `modules/replies/canReplyToMessage.tsx` | useCanReplyToMessage, canReplyToMessage | canReplyToMessage |
 | 8128 | `design/components/Icon/native/redesign/generated/XNeutralIcon.tsx` | XNeutralIcon | XNeutralIcon (Fix link previews) |
