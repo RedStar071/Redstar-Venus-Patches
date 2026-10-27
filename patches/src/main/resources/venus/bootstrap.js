@@ -20,7 +20,7 @@
     if (features.quickDelete) selectModules([5300, 1126]);
     if (features.noDelete) selectModules([584, 5432, 5434, 1390, 2065, 7174, 7742]);
     if (features.jumpToTop) selectModules([11968, 11969, 11970, 9379, 7174, 5432]);
-    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2065, 2116, 4748, 7246, 4750, 5421, 7174, 584, 1390, 16671, 8218]);
+    if (features.hiddenChannels) selectModules([1085, 1096, 1112, 2065, 2116, 4748, 7246, 4750, 5421, 7174, 584, 1390, 16671, 8218, 6035, 6078, 14193]);
     if (features.pastelize) selectModules([7742, 1264, 2125]);
     if (features.platformIndicators) selectModules([5108, 5112, 1390, 2065, 10533, 10229, 12862, 16475, 8792, 14419, 13156]);
     if (features.reviewDB) selectModules([13181, 14213, 14281, 10725, 6265, 6896, 1390, 584]);
@@ -2096,7 +2096,7 @@
         return code === stickerRules.StickerSendability.SENDABLE;
     }
     let msgStore, msgActions, permissions, viewPermission, locale, dispatcher, messageRecords, chatHeight, jumpPill, jumpIcon;
-    let permissionsCanOrig = null;
+    let permissionsCanOrig = null, permissionsBasicOrig = null, guildChannelsGetOrig = null;
     let deletedRevision = 0, archiveRestored = false, archiveLoading = false, archiveWriting = false, archivePending;
     const deletedViews = new Map();
     const ARCHIVE = "venus-deleted-messages.json";
@@ -2677,6 +2677,39 @@
                 return real.can.apply(real,arguments);
             };
             return result.default ? cloneWith(result,"default",facade) : facade;
+        };
+    }
+    // The global VIEW_CHANNEL answer also reached the read-state stores: ReadStateStore (6035 canTrackUnreads,
+    // getGuildChannelUnreadState) and GuildReadStateStore (6078 isCountableChannel) asked PermissionStore.can and
+    // counted locked channels as unread or mentioned, so a server kept its unread dot and badge for messages
+    // nobody can open or acknowledge. markGuildsAsRead (14193) read the locked channels the directory adds to
+    // SELECTABLE/VOCAL and acknowledged them too. These modules get Discord's real answers, like stock Discord.
+    const HIDDEN_REAL_IMPORTERS = new Uint8Array(32768);
+    HIDDEN_REAL_IMPORTERS[6035] = HIDDEN_REAL_IMPORTERS[6078] = HIDDEN_REAL_IMPORTERS[14193] = 1;
+    let realPermissions = null, realGuildChannels = null;
+    function realImport(importer) {
+        if (typeof importer !== "function") return importer;
+        return function () {
+            const result = importer.apply(this, arguments), id = arguments[0];
+            if (!result || id !== 4750 && id !== 4748) return result;
+            const real = result.default || result;
+            let facade = null;
+            if (id === 4750 && permissionsCanOrig) {
+                if (!realPermissions || Object.getPrototypeOf(realPermissions) !== real) {
+                    realPermissions = Object.create(real);
+                    realPermissions.can = permissionsCanOrig;
+                    if (permissionsBasicOrig) realPermissions.canBasicChannel = permissionsBasicOrig;
+                }
+                facade = realPermissions;
+            } else if (id === 4748 && guildChannelsGetOrig) {
+                if (!realGuildChannels || Object.getPrototypeOf(realGuildChannels) !== real) {
+                    realGuildChannels = Object.create(real);
+                    realGuildChannels.getChannels = guildChannelsGetOrig;
+                }
+                facade = realGuildChannels;
+            }
+            if (!facade) return result;
+            return result.default ? cloneWith(result, "default", facade) : facade;
         };
     }
     function receivedChannel(id) {
@@ -14784,6 +14817,7 @@
                 try {
                     if (candidate && !permissionsCanOrig) {
                         permissionsCanOrig = candidate.can.bind(candidate);
+                        if (typeof candidate.canBasicChannel === "function") permissionsBasicOrig = candidate.canBasicChannel.bind(candidate);
                         permissions = hookExport(hookExport(candidate, "can", hiddenCan), "canBasicChannel", hiddenCan);
                         return candidate === exports ? permissions : replaceValue(exports, "default", permissions);
                     }
@@ -14792,6 +14826,8 @@
             }
             case 4748: {
                 if (!features.hiddenChannels) return exports;
+                if (exports.default && typeof exports.default.getChannels === "function" && !guildChannelsGetOrig)
+                    guildChannelsGetOrig = exports.default.getChannels.bind(exports.default);
                 const store = hookExport(hookExport(exports.default, "getChannels", hiddenDirectory), "getFirstChannel", hiddenFirstChannel);
                 guildChannels = store;
                 return replaceValue(exports, "default", store);
@@ -14973,11 +15009,11 @@
                 return define(factory, id, dependencies);
             const wrappedFactory = function () {
                 let result;
-                if (features.hiddenChannels && id === 7246) {
-                    const factoryArgs = Array.from(arguments);
-                    factoryArgs[1] = listImport(factoryArgs[1]);
-                    factoryArgs[2] = listImport(factoryArgs[2]);
-                    factoryArgs[3] = listImport(factoryArgs[3]);
+                if (features.hiddenChannels && (id === 7246 || HIDDEN_REAL_IMPORTERS[id] === 1)) {
+                    const factoryArgs = Array.from(arguments), wrap = id === 7246 ? listImport : realImport;
+                    factoryArgs[1] = wrap(factoryArgs[1]);
+                    factoryArgs[2] = wrap(factoryArgs[2]);
+                    factoryArgs[3] = wrap(factoryArgs[3]);
                     result = factory.apply(this, factoryArgs);
                 } else {
                     result = factory.apply(this, arguments);
