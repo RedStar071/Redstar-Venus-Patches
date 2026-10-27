@@ -10037,7 +10037,9 @@
     // Where a service sends links, for the list: "fixupx.com".
     function fixServiceHost(site, service) {
         const to = typeof service.to === "string" ? service.to.replace(/^https:\/\//, "") : service.to[site.hosts[0]] || "";
-        return to.split("/")[0].replace("*.", "");
+        // With the look picked under Post style, so the row shows where links really go: "g.fixupx.com".
+        const host = to.split("/")[0].replace("*.", "");
+        return (typeof service.to === "string" ? "" : fixStylePrefix(service, host)) + host;
     }
     function fixClean(site, query) {
         const own = fixEmbeds.tracking[site.id], kept = query.split("&").filter(pair => {
