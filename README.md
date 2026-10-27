@@ -28,7 +28,6 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Bulk delete messages | Select multiple messages in chat and delete them all at once |
 | | Hide blocked or ignored messages | Removes the "blocked messages" and "ignored messages" rows from chat, and can hide replies to them too |
 | | Message highlights | Pick bar width, plus the color and brightness of replies and mentions |
-| | Who reacted | Reactions in chat show the faces of the first people who reacted. Faces load a few at a time, only for reactions on screen, and messages with too many different reactions are skipped. Based on WhoReacted by Palm |
 | | Translate messages | Messages in other languages show in yours, automatically or only when you ask: a whole chat from a bar that appears when it has messages in another language, or one message from its menu. Translate into Discord's language, your phone's, or any of 70 others |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
 | | Skip delete confirmation | Messages and link previews are removed with no "Are you sure?" |

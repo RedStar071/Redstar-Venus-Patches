@@ -169,7 +169,6 @@ BOOTSTRAP_MODULES = [
     (9699, 'modules/foreground_service/mobile/ForegroundServiceManager.android.tsx', ['default'], 'ForegroundServiceManager'),
     (7752, 'lib/uploader/CloudUpload.tsx', ['NOT_STARTED', 'STARTED', 'UPLOADING'], 'CloudUpload'),
     (7784, 'lib/uploader/native/CloudUploaderUtils.tsx', ['default', 'prepareMessagePayload', 'getUploadPayload'], 'CloudUploaderUtils (Anonymous file names)'),
-    (7894, 'stores/MessageReactionsStore.tsx', ['default'], 'MessageReactionsStore (Who reacted)'),
     (9317, 'design/components/Icon/native/redesign/generated/PhoneCallIcon.tsx', ['PhoneCallIcon'], 'PhoneCallIcon'),
     (9337, 'design/components/Icon/native/redesign/generated/PaperIcon.tsx', ['PaperIcon'], 'PaperIcon'),
     (9354, 'design/components/Icon/native/redesign/generated/ThumbsUpIcon.tsx', ['ThumbsUpIcon'], 'ThumbsUpIcon'),

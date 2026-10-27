@@ -122,22 +122,11 @@ fun main(args: Array<String>) {
     }
     fun isHost(type: String) = type.startsWith("Lkotlin/") || type.startsWith("Lapp/venus/") ||
         type.startsWith("Lcom/facebook/react/")
-    // A Venus class that extends an Android or Java class (a ViewGroup, a LinkedHashMap) inherits methods the phone's
-    // framework supplies, which aren't in the APK. Those still resolve on the device; Kotlin and host parents don't.
-    fun inheritsFramework(type: String, seen: MutableSet<String> = mutableSetOf()): Boolean {
-        if (!seen.add(type)) return false
-        val definition = allClasses[type] ?: return !isHost(type)
-        return definition.superclass?.let { inheritsFramework(it, seen) } == true ||
-            definition.interfaces.any { inheritsFramework(it, seen) }
-    }
     for (reference in references) {
         when (reference) {
             is MethodReference -> if (isHost(reference.definingClass)) {
                 val resolved = resolve(reference)
-                if (resolved == null) {
-                    if (!(reference.definingClass.startsWith("Lapp/venus/") && inheritsFramework(reference.definingClass)))
-                        abiErrors.add("Unresolved extension dependency: $reference")
-                }
+                if (resolved == null) abiErrors.add("Unresolved extension dependency: $reference")
                 else if (!reference.definingClass.startsWith("Lapp/venus/") && resolved.accessFlags and 0x1 == 0)
                     abiErrors.add("Non-public host dependency: $reference")
             }
