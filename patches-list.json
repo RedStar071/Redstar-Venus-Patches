@@ -37,6 +37,40 @@
       "options": []
     },
     {
+      "name": "Anonymous file names",
+      "description": "Files you send get a random name instead of the one on your phone. Based on Anonymous File Names by k1ng_op.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Bring back Tenor GIFs",
       "description": "Tenor GIFs show in Discord's GIF picker again, mixed with Discord's own or on their own. Inspired by BringBackTenor by Livie.",
       "default": true,
@@ -106,7 +140,7 @@
     },
     {
       "name": "Clean channel names",
-      "description": "Removes emoji and symbols from channel and category names.",
+      "description": "Removes emoji and symbols from channel names, and can show spaces instead of dashes.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -596,7 +630,7 @@
     },
     {
       "name": "Fix link previews",
-      "description": "Links to X, Instagram, TikTok, Tumblr and more show the post. Links you send go through an embed service like FxTwitter, without tracking. Inspired by FixEmbed by the ShiggyCord team.",
+      "description": "Links to X, Instagram, TikTok, Tumblr and more show the post. Links you send go through an embed service like FxTwitter, without tracking, and X and Bluesky posts can be translated. Inspired by FixEmbed by the ShiggyCord team.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -1412,40 +1446,6 @@
       "options": []
     },
     {
-      "name": "Spaces in channel names",
-      "description": "Shows \"general chat\" instead of \"general-chat\".",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "Translate messages",
       "description": "Messages in other languages show in yours. Their text is sent to Google Translate, without your account.",
       "default": true,
@@ -1760,6 +1760,40 @@
         "RawResourcePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Who reacted",
+      "description": "Reactions in chat show the faces of the first people who reacted. Based on Who Reacted by Palm.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
         "BytecodePatch"
       ],
       "compatiblePackages": [
