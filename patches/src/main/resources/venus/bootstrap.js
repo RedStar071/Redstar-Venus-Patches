@@ -2153,7 +2153,7 @@
     const READY_EVENTS = new Set(["CONNECTION_OPEN","CONNECTION_OPEN_SUPPLEMENTAL"]), BATCH_EVENTS = new Set(["CHANNEL_UPDATES","THREAD_LIST_SYNC"]);
     const MESSAGE_EVENTS = new Set(["MESSAGE_CREATE","MESSAGE_UPDATE"]), RESTORE_EVENTS = new Set(["CONNECTION_OPEN","CACHE_LOADED"]);
     // Every Flux event passes through here: leave typing, presence, voice and the rest alone.
-    const HIDDEN_EVENTS = new Set(["LOGOUT","CHANNEL_DELETE","GUILD_DELETE",...CHANNEL_EVENTS,...GUILD_EVENTS,...READY_EVENTS,...BATCH_EVENTS,...MESSAGE_EVENTS]);
+    const HIDDEN_EVENTS = new Set(["LOGOUT","CHANNEL_DELETE","GUILD_DELETE","BACKGROUND_SYNC",...CHANNEL_EVENTS,...GUILD_EVENTS,...READY_EVENTS,...BATCH_EVENTS,...MESSAGE_EVENTS]);
     // Every type dispatchEvent or channelMetadataEvent acts on. Anything else (presence, typing, voice, acks: most of the
     // traffic) goes straight to Discord. Add a type here when a new branch reads it.
     const DISPATCH_EVENTS = new Set([...HIDDEN_EVENTS, ...RESTORE_EVENTS, "MESSAGE_DELETE", "MESSAGE_DELETE_BULK"]);
@@ -2201,6 +2201,15 @@
         }
         if (GUILD_EVENTS.has(event.type)) rememberGuild(event.guild);
         if (READY_EVENTS.has(event.type) && Array.isArray(event.guilds)) event.guilds.forEach(rememberGuild);
+        // Discord resyncs servers in the background (ChannelStore 2065 handleBackgroundSync): data_mode "full" sends
+        // every channel, "partial" only the changed ones under partial_updates. Those names were never cached.
+        if (event.type === "BACKGROUND_SYNC" && Array.isArray(event.guilds)) {
+            for (let i = 0; i < event.guilds.length; i++) {
+                const guild = event.guilds[i];
+                if (!guild || !guild.id || guild.data_mode === "unavailable") continue;
+                rememberList(guild.data_mode === "partial" ? guild.partial_updates && guild.partial_updates.channels : guild.channels, guild.id);
+            }
+        }
         if (BATCH_EVENTS.has(event.type)) {
             for (const key of ["channels","threads"]) if (Array.isArray(event[key]))
                 event[key].forEach(channel => rememberChannelName(channel,owner,undefined,channel && channel.guild_id || event.guildId));
