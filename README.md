@@ -43,6 +43,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Anonymous file names | Files you send get a random name like `k3Vq9TzL0b.jpg` instead of the one on your phone, so names like `IMG_20261027_142233.jpg` or `Bank statement March.pdf` never reach Discord. The file type stays, so previews and players still work. Spoilers stay spoilers. Based on Anonymous File Names by k1ng_op |
 | **People** | Pastel name colors | Names without a role color get a soft pastel color |
 | | Show device indicators | Desktop, mobile, web, console or VR icons next to names |
+| | Staff tags | Tags server owners, admins, managers and moderators next to their names in chat, worked out from the roles you can see. Pick who gets one and whether owners get a crown. Based on StaffTag by mwittrien |
 | | Fix unknown mentions | @unknown-user mentions show the person's name |
 | | Copy profile bios | Hold a bio to select and copy it |
 | | User and server reviews | Read and write reviews, from ReviewDB |

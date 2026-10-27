@@ -50,6 +50,7 @@
     if (features.fixEmbeds) selectModules([1390, 7174]);
     if (features.tenorGifs) selectModules([1295, 9733]);
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
+    if (features.staffTag) targetModules[7742] = 1;
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
     const revision = "1.19.0";
@@ -73,7 +74,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -90,7 +91,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -525,6 +526,7 @@
         if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
         if (features.messageHighlight && key === "messageHighlight") later(messageHighlightRedraw, 0);
         if (features.hideBlocked && featureFor(key) === "hideBlocked") hideBlockedChanged();
+        if (features.staffTag && featureFor(key) === "staffTag") later(staffTagChanged, 0);
         if (features.bulkDelete && key === "bulkDelete" && !value) bulkDeleteCancel();
         if (features.bulkDelete && key === "bulkDeleteIncludeCached" && bulkDelete.active) bulkDeleteRedrawChannel(bulkDelete.channelId);
         if (features.experiments && key === "experiments") { if (value) experimentsEnable(); else if (experiments.unlocked && !backup.restoring) later(experimentsAskReopen, 0); }
@@ -971,7 +973,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -1006,7 +1008,7 @@
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1049,6 +1051,7 @@
             "Post style", "Translate posts", "Full post", "Media", "Text", "File", "Translate", "Gallery"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         anonFiles:["File names", "Random name", "Privacy", "Rename"],
+        staffTag:["Owner", "Admin", "Manager", "Mod", "Crown", "Staff", "Moderator", "Tags"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
@@ -1384,6 +1387,7 @@
         // Messages
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
         withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
+        withOptions("people", "staffTag", "VENUS_STAFFTAG", "Staff tags", "Tags server owners, admins and moderators next to their names in chat.", "Staff tags", StaffTagSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
@@ -6690,6 +6694,7 @@
             const reply = pastelReply(message.referencedMessage.message);
             if (reply !== message.referencedMessage.message) message = Object.assign({},message,{referencedMessage:Object.assign({},message.referencedMessage,{message:reply})});
         }
+        if (features.staffTag && enabled("staffTag")) message = staffTagMessage(message, row.message);
         let next = message === result.message ? result : Object.assign({},result,{message});
         if (!translateOn && !features.translate && !(noDeleteOn && (edits.size || deleted.size)) && !highlightOn && !features.messageHighlight && !bulkOn) return next;
         const source = row.message || message;
@@ -14194,6 +14199,123 @@
         ];
         return settingsBody(ui, groups);
     }
+    // Staff tags: Discord's own chat tag (the BOT chip) on server owners, admins, managers and moderators.
+    // Row by row, on the way to the native message: nothing is stored on the message and nothing is sent.
+    // Who counts is worked out from the roles you can see: the server's owner, then the Administrator permission,
+    // then the manage permissions, then the moderation ones. The highest one a person has is the one that shows.
+    const STAFF_TAG_KINDS = ["owner", "admin", "manager", "mod"];
+    const STAFF_TAG_COLORS = {owner:"#d9951a", admin:"#e5393d", manager:"#5865f2", mod:"#1e9a52"};
+    const staffTag = {guilds:null, members:null, roles:null, cache:new Map(), masks:null};
+    function staffTagLabel(kind) {
+        return kind === "owner" ? tr("Owner") : kind === "admin" ? tr("Admin") : kind === "manager" ? tr("Manager") : tr("Mod");
+    }
+    function staffTagText(kind) {
+        return kind === "owner" && settings.staffTagCrown ? "\ud83d\udc51 " + staffTagLabel(kind) : staffTagLabel(kind);
+    }
+    function staffTagBits(value) {
+        if (value == null) return null;
+        try { return typeof value === "bigint" ? value : BigInt(value); } catch (_) { return null; }
+    }
+    function staffTagKind(guildId, authorId) {
+        const key = guildId + ":" + authorId, now = Date.now(), hit = staffTag.cache.get(key);
+        // A role or permission can change at any time, so what was found is only kept for half a minute.
+        if (hit && now - hit.at < 30000) return hit.kind;
+        let kind = null;
+        try {
+            const guilds = staffTag.guilds || (staffTag.guilds = inspectedExport(2087, "default"));
+            const members = staffTag.members || (staffTag.members = inspectedExport(2125, "default"));
+            const roles = staffTag.roles || (staffTag.roles = inspectedExport(2119, "default"));
+            const guild = guilds && typeof guilds.getGuild === "function" ? guilds.getGuild(guildId) : null;
+            if (guild && String(guild.ownerId) === String(authorId)) kind = "owner";
+            else if (guild && members && roles && typeof members.getMember === "function" && typeof roles.getRole === "function") {
+                const member = members.getMember(guildId, authorId);
+                const masks = staffTag.masks || (staffTag.masks = {admin:BigInt(8), manager:BigInt(16) | BigInt(32) | BigInt(268435456),
+                    mod:BigInt(2) | BigInt(4) | BigInt(8192) | BigInt(1099511627776), none:BigInt(0)});
+                let bits = masks.none;
+                const list = member && member.roles;
+                if (list && list.length) for (let i = 0; i < list.length; i++) {
+                    const role = roles.getRole(guildId, list[i]), value = role && staffTagBits(role.permissions);
+                    if (value != null) bits |= value;
+                }
+                if ((bits & masks.admin) !== masks.none) kind = "admin";
+                else if ((bits & masks.manager) !== masks.none) kind = "manager";
+                else if ((bits & masks.mod) !== masks.none) kind = "mod";
+            }
+        } catch (_) { kind = null; }
+        if (staffTag.cache.size > 2000) staffTag.cache.clear();
+        staffTag.cache.set(key, {kind, at:now});
+        return kind;
+    }
+    // Called for every chat row, so a message with nothing to tag comes back untouched, not copied.
+    function staffTagMessage(message, source) {
+        if (!message || !message.guildId || !message.authorId || message.tagText != null || source && source.webhookId) return message;
+        const kind = staffTagKind(message.guildId, message.authorId);
+        if (!kind || !settings["staffTag" + kind.charAt(0).toUpperCase() + kind.slice(1)]) return message;
+        const color = STAFF_TAG_COLORS[kind], text = highlightProcess(color), tint = highlightProcess(color + "33");
+        if (text == null || tint == null) return message;
+        const copy = Object.assign({}, message), label = staffTagText(kind);
+        copy.tagText = label;
+        copy.tagAccessibilityLabel = label;
+        copy.tagType = "staff";
+        copy.tagVerified = false;
+        copy.tagTextColor = text;
+        copy.tagBackgroundColor = tint;
+        return copy;
+    }
+    // Switched on or off, or an option changed: redraw the chat that's open, the way Message highlights does.
+    function staffTagChanged() {
+        staffTag.cache.clear();
+        const selected = inspectedExport(2116, "default"), store = msgStore || (msgStore = inspectedExport(5432, "default"));
+        const channelId = selected && typeof selected.getChannelId === "function" ? selected.getChannelId() : null;
+        if (!channelId || !store || typeof store.getMessages !== "function") return;
+        let messages = null;
+        try { messages = store.getMessages(channelId); } catch (_) {}
+        const ids = [];
+        try {
+            const arr = messages && Array.isArray(messages._array) ? messages._array : null;
+            if (arr) for (let i = 0; i < arr.length; i++) { if (arr[i] && arr[i].id) ids.push(String(arr[i].id)); }
+        } catch (_) {}
+        bulkDeleteRedrawIds(channelId, ids);
+    }
+    function StaffTagPreview(props) {
+        useSettings("staffTag");
+        const s = useChatPreviewStyles(), k = usePreviewChrome(), on = !!props.on;
+        const sample = [["owner", "Alex", "#3ba55c", tr("Today at 4:01 PM"), tr("Are we still playing tonight?")], ["admin", "Sam", "#eb459e", tr("Today at 4:02 PM"), tr("Yes, see you there!")],
+            ["manager", "Jordan", "#5865f2", tr("Today at 4:03 PM"), tr("Count me in!")], ["mod", "Riley", "#faa61a", tr("Today at 4:04 PM"), tr("I'm in!")],
+            [null, "Max", "#80848e", tr("Today at 4:05 PM"), tr("Great, it starts at 6 AM!")]];
+        const rows = sample.map(([kind, who, color, time, text]) => {
+            const shown = on && kind && settings["staffTag" + kind.charAt(0).toUpperCase() + kind.slice(1)];
+            const chip = shown ? popIn("tag:" + kind + ":" + staffTagText(kind), el(RN.View, {style:{paddingHorizontal:5, paddingVertical:1, borderRadius:4, marginTop:1,
+                backgroundColor:STAFF_TAG_COLORS[kind] + "33"}}, el(RN.Text, {style:{color:STAFF_TAG_COLORS[kind], fontSize:10, fontWeight:"700"}, numberOfLines:1}, staffTagText(kind)))) : null;
+            return previewMessage(s, kind || "none", who, color, time, el(RN.Text, {style:s.text}, text), {badges:chip});
+        });
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Staff tags preview", [el(RN.View, {key:"chat"}, rows)],
+                {header:previewHeader(k, {title:"general"}),
+                 footer:previewInput(k, s, {placeholder:tr("Message {channel}", {channel:"#general"})})}));
+    }
+    function StaffTagSettings() {
+        useSettings("staffTag");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("staffTag"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const Icon = venusIcon(10262, "CrownIcon");
+        const hasAny = !!(settings.staffTagOwner || settings.staffTagAdmin || settings.staffTagManager || settings.staffTagMod);
+        const groups = [
+            !on ? offCard("status", Icon, "staffTag") : !hasAny ? statusCard("status", "Turn on at least one option below.",
+                {title:tr("Nobody is tagged"), IconComponent:Icon}) : null,
+            el(StaffTagPreview, {key:"preview", on}),
+            el(Group, {key:"who", title:tr("Tag these people")},
+                switchRow(Switch, "staffTagOwner", "Owners", "Whoever owns the server.", rowIcon(10262, "CrownIcon")),
+                switchRow(Switch, "staffTagAdmin", "Admins", "Anyone with the Administrator permission.", rowIcon(10410, "ShieldIcon")),
+                switchRow(Switch, "staffTagManager", "Managers", "Anyone who can manage the server, its roles or its channels.", rowIcon(15869, "WrenchIcon")),
+                switchRow(Switch, "staffTagMod", "Moderators", "Anyone who can kick, ban, time out or delete messages.", rowIcon(8617, "ShieldUserIcon"))),
+            el(Group, {key:"look", title:tr("Look")},
+                switchRow(Switch, "staffTagCrown", "Crown for owners", "Puts a \ud83d\udc51 in front of the Owner tag.", rowIcon(10262, "CrownIcon"))),
+            footnote("note", "Each person shows their highest tag, worked out from the roles you can see. Bots and webhooks keep their own. Changes show in chat right away, with no restart.")
+        ];
+        return settingsBody(ui, groups);
+    }
     // Clean channel names: the preview is a server's channel list with names decorated the way real servers do it.
     // While on, each name is cleaned with the options below and glides in.
     const CLEAN_SAMPLE = [["cat", "\ud83d\udee0\ufe0f | SUPPORT & RESOURCE | \ud83d\udee0\ufe0f"], ["text", "\ud83c\udfab\uff5cquick-help"], ["text", "\ud83d\udd0d\u2503mchose-support-center"],
@@ -15016,7 +15138,7 @@
             case 1264: if (features.pastelize) pastelHash = typeof exports === "function" ? exports : exports.default; return exports;
             case 2125: if (features.pastelize) guildMembers = exports.default; return exports;
             case 7742:
-                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight || features.bulkDelete) && exports.default && exports.default.prototype)
+                if ((features.pastelize || features.noDelete || features.translate || features.messageHighlight || features.bulkDelete || features.staffTag) && exports.default && exports.default.prototype)
                     hookExport(exports.default.prototype, "generate", messageRow);
                 return exports;
             case 5108: if (features.platformIndicators || features.userNotif) { presenceStore = exports.default; if (features.userNotif) userNotifSeedStatuses(); } return exports;

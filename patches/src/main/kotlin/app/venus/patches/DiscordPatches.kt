@@ -74,7 +74,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles")
+                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -249,6 +249,10 @@ val fileSizeOnPicker = rawResourcePatch(
 @Suppress("unused")
 val anonymousFileNames = bundledPlugin("anonFiles", "Anonymous file names",
     "Files you send get a random name instead of the one on your phone. Based on Anonymous File Names by k1ng_op.")
+
+@Suppress("unused")
+val staffTags = bundledPlugin("staffTag", "Staff tags",
+    "Tags server owners, admins and moderators next to their names in chat. Based on StaffTag by mwittrien.")
 
 @Suppress("unused")
 val copyBios = rawResourcePatch(
