@@ -2173,7 +2173,9 @@
             try { hiddenConfirmed.clear(); hiddenPrompts.clear(); } catch (_) {}
         }
         if (event.type === "CHANNEL_DELETE") hiddenNames.delete(event.channel && event.channel.id || event.channelId || event.id);
-        if (event.type === "GUILD_DELETE") {
+        // A server outage also arrives as GUILD_DELETE (guild.unavailable). Its channels come back with the server, so
+        // only leaving it forgets their names; an outage used to wipe the names Discord had already redacted.
+        if (event.type === "GUILD_DELETE" && !(event.guild && event.guild.unavailable)) {
             const guild = event.guild && event.guild.id || event.guildId;
             for (const [id,entry] of hiddenNames) if (entry.guild === guild) hiddenNames.delete(id);
         }
