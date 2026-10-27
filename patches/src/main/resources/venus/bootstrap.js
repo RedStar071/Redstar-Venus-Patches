@@ -1381,31 +1381,34 @@
             {cancelable:true, onDismiss:cancel});
         else cancel();
     }
-    const RISK_CHIP_DARK = {row:{flexDirection:"row", flexWrap:"wrap", gap:6, marginTop:4, marginBottom:2},
-        chip:{flexDirection:"row", alignItems:"center", gap:4, height:20, paddingLeft:6, paddingRight:8, borderRadius:10, borderWidth:1,
-            borderColor:"#f23f43", backgroundColor:"#f23f431f"}, text:{color:"#f57376", fontSize:11, fontWeight:"700", letterSpacing:0.3}};
-    // The row's description with the chips above it: [⚠ Risky] [⚗ Experimental], outlined in Discord's danger red.
+    // Soft tinted pills in sentence case: they flag the risk without shouting over the rest of the list.
+    const RISK_CHIP_DARK = {row:{flexDirection:"row", flexWrap:"wrap", gap:6, marginTop:4, marginBottom:4},
+        chip:{flexDirection:"row", alignItems:"center", gap:4, height:20, paddingLeft:6, paddingRight:8, borderRadius:10,
+            backgroundColor:"#f23f431f"}, text:{color:"#f57376", fontSize:12, fontWeight:"600"}};
+    // The row's description with the chips above it: [⚠ Risky] [⚗ Experimental], tinted in Discord's danger red.
     function RiskyDescription(props) {
         useLanguage();
         const s = useRiskChips();
         const Text = inspectedExport(5088, "Text");
         return el(RN.View, {accessible:true, accessibilityLabel:tr("Risky") + ", " + tr("Experimental") + ". " + tr(props.hint)},
             riskChips(s),
-            Text ? el(Text, {variant:"text-xs/medium", color:"text-subtle"}, tr(props.hint)) : el(RN.Text, {style:{color:"#949ba4", fontSize:12}}, tr(props.hint)));
+            // The same size and color as every other row's description, so this row doesn't look out of place.
+            Text ? el(Text, {variant:"text-sm/medium", color:"text-muted"}, tr(props.hint)) : el(RN.Text, {style:{color:"#949ba4", fontSize:14}}, tr(props.hint)));
     }
     function riskChips(s, flush) {
         const chip = (key, Icon, label) => el(RN.View, {key, style:s.chip},
             el(Icon, {size:"xxs", color:s.text.color}),
-            el(RN.Text, {numberOfLines:1, style:s.text}, tr(label).toLocaleUpperCase()));
+            el(RN.Text, {numberOfLines:1, style:s.text}, tr(label)));
         return el(RN.View, {style:flush ? [s.row, {marginTop:0, marginBottom:0}] : s.row}, chip("risky", venusIcon(7567, "WarningIcon"), "Risky"), chip("experimental", venusIcon(15894, "BeakerIcon"), "Experimental"));
     }
     function useRiskChips() {
         return useThemed("riskChips", c => ({row:RISK_CHIP_DARK.row,
-            chip:Object.assign({}, RISK_CHIP_DARK.chip, {borderColor:c.BORDER_FEEDBACK_CRITICAL || c.TEXT_FEEDBACK_CRITICAL, backgroundColor:c.BACKGROUND_FEEDBACK_CRITICAL}),
+            chip:Object.assign({}, RISK_CHIP_DARK.chip, {backgroundColor:c.BACKGROUND_FEEDBACK_CRITICAL}),
             text:Object.assign({}, RISK_CHIP_DARK.text, {color:c.TEXT_FEEDBACK_CRITICAL})}), RISK_CHIP_DARK);
     }
-    // The top of a risky feature's page: a card outlined in red with the same chips and what the risk is.
-    const RISK_CARD_DARK = {card:{borderRadius:16, borderWidth:1.5, borderColor:"#f23f43", backgroundColor:"#f23f4314", paddingHorizontal:16, paddingVertical:14, gap:8,
+    // The top of a risky feature's page: a red-tinted card that names the risk in one short line, then says what it is.
+    // The card is the warning, so it doesn't repeat the list's chips inside it.
+    const RISK_CARD_DARK = {card:{borderRadius:16, borderWidth:1, borderColor:"#f23f4366", backgroundColor:"#f23f4314", paddingHorizontal:16, paddingVertical:14, gap:8,
         flexDirection:"row", alignItems:"flex-start"}, badge:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:"#f23f4329"}};
     function riskCard(key, body) {
         const s = useRiskChips(), c = useThemed("riskCard", t => ({card:Object.assign({}, RISK_CARD_DARK.card, {borderColor:t.BORDER_FEEDBACK_CRITICAL || t.TEXT_FEEDBACK_CRITICAL,
@@ -1413,8 +1416,8 @@
         const Warn = venusIcon(7567, "WarningIcon");
         return el(RN.View, {key, style:[c.card, {gap:12}], accessible:true, accessibilityLabel:tr("Risky") + ", " + tr("Experimental") + ". " + tr(body)},
             el(RN.View, {style:c.badge}, el(Warn, {size:"sm", color:s.text.color})),
-            el(RN.View, {style:{flex:1, gap:6}},
-                riskChips(s, true),
+            el(RN.View, {style:{flex:1, gap:4}},
+                el(RN.Text, {style:[s.text, {fontSize:14, fontWeight:"700"}]}, tr("Risky") + " \u00b7 " + tr("Experimental")),
                 badgeText(tr(body), "text-sm/medium", "text-default", {color:"#dbdee1", fontSize:14})));
     }
     let stackNavigation, trailingSwitch, trailingChevron;
@@ -1650,19 +1653,21 @@
             const list = featureGroups && featureGroups[group] || [];
             if (!list.length) return null;
             const count = list.filter(key => settings[key]).length;
-            return el(RN.View, {key:group, style:[s.chip, {opacity:count ? 1 : 0.6}], accessible:true, accessibilityLabel:tr(label) + ": " + count + "/" + list.length},
+            return el(RN.View, {key:group, style:s.chip, accessible:true, accessibilityLabel:tr(label) + ": " + count + "/" + list.length},
                 el(venusIcon(id, name), {size:"xs"}), text(tr(label) + " " + count + "/" + list.length, "text-xs/semibold", count ? "text-strong" : "text-muted", {color:"#dbdee1", fontSize:12}));
         });
         const linkRow = (key, label, sub, url, id, name) => Row ? el(Row, {key, label:tr(label), subLabel:tr(sub), icon:rowIcon(id, name), arrow:true, onPress:() => openLink(url)}) : null;
+        // One card: who you're running on top, how much of it is on underneath. Two stacked cards read as two things.
         const groups = [
-            el(RN.View, {key:"hero", style:s.hero, accessible:true},
-                popIn("logo", el(RN.View, {style:s.logo}, el(Sparkles, {size:"lg", color:"#ffffff"}))),
-                text("Venus Patches " + revision, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
-                text(tr("For Discord {version}", {version:DISCORD_VERSION}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
-            el(RN.View, {key:"features", style:s.card},
-                text(keys.length ? tr("{on} of {total} turned on", {on, total:keys.length}) : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
-                keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
-                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:4}}, chips)),
+            el(RN.View, {key:"hero", style:s.hero},
+                el(RN.View, {style:{alignItems:"center", gap:6}, accessible:true},
+                    popIn("logo", el(RN.View, {style:s.logo}, el(Sparkles, {size:"lg", color:"#ffffff"}))),
+                    text("Venus Patches " + revision, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700"}),
+                    text(tr("For Discord {version}", {version:DISCORD_VERSION}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14})),
+                el(RN.View, {style:{alignSelf:"stretch", gap:10, marginTop:14}},
+                    text(keys.length ? tr("{on} of {total} turned on", {on, total:keys.length}) : tr("No features were patched in."), "text-md/semibold", "text-strong", {color:"#f2f3f5", fontSize:16, fontWeight:"600"}),
+                    keys.length ? el(VenusProgress, {key:"bar", value:on / keys.length}) : null,
+                    el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:8, marginTop:2}}, chips))),
             // Only when there's something to know: a green "Everything's working" card on every visit is just filler.
             health === "online" ? null : el(RN.View, {key:"status", style:[s.card, {flexDirection:"row", alignItems:"center", gap:14}]},
                 el(RN.View, {style:{width:12, height:12, borderRadius:6, backgroundColor:STATUS_HEX[health]}}),
