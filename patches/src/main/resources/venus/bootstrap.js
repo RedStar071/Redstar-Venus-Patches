@@ -4203,6 +4203,7 @@
             // less is left, else a minute. `left` comes from the store as it is before this beat's answer.
             const sentAt = Date.now(), left = Math.max(0, (target - questProgress(item, type)) * 1000);
             const wait = left <= QUEST_HEARTBEAT_MS ? left + QUEST_HEARTBEAT_TAIL_MS : QUEST_HEARTBEAT_MS;
+            entry.beating = desktop;
             const beat = await questHeartbeat(entry, desktop);
             if (!questActive(entry)) return false;
             questProgressed(entry, beat.value);
@@ -4215,6 +4216,24 @@
             await questSleep(Math.max(0, wait - (Date.now() - sentAt)));
         }
         return false;
+    }
+    // QuestProgressManager.terminateHeartbeat: when desktop stops beating for a Quest that is still enrolled, not done and
+    // not expired (the game closed), it sends one last beat with only terminal:true. JSON drops the undefined fields, so
+    // the body is exactly {"terminal":true}. Quest Completer does the same when you switch it off on the same account;
+    // logging out or switching accounts sends nothing, as the token would be another account's.
+    function questTerminate(entry) {
+        if (!entry || entry.beating === undefined || entry.terminated || entry.generation !== quest.generation) return;
+        entry.terminated = true;
+        const user = quest.user, desktop = entry.beating;
+        try {
+            const store = questStore(), item = store && store.getQuest(entry.id);
+            if (!item || !item.userStatus || !item.userStatus.enrolledAt || item.userStatus.completedAt ||
+                !(questTime(item.config && item.config.expiresAt) > Date.now())) return;
+        } catch (_) { return; }
+        questRequest("/quests/" + entry.id + "/heartbeat", {terminal:true}, desktop, undefined, () => quest.user === user).then(response => {
+            const status = quest.user === user ? questUserStatus(response && response.body) : null;
+            if (status) questDispatch({type:"QUESTS_SEND_HEARTBEAT_SUCCESS", questId:entry.id, userStatus:status});
+        }, () => {});
     }
     // Activity Quests: Discord counts time in the Activity without it being started. A mobile Activity Quest is
     // one the phone app reports itself, so only the others are sent as desktop.
@@ -4249,7 +4268,8 @@
         quest.refetchTimer = global.setTimeout(questsRefetchLoop, delay);
     }
     // Stops everything in flight: switching it off, logging out, or another account signing in.
-    function questsStop() {
+    function questsStop(graceful) {
+        if (graceful) questTerminate(quest.running);
         quest.generation++;
         quest.running = null; quest.enrolling = false; quest.enrollBlockedUntil = 0; quest.skip.clear();
         if (global.clearTimeout) {
@@ -4283,13 +4303,14 @@
         if (quest.user && quest.refetchTimer === undefined && !quest.running) questsStart(8000);
     }
     function questsSettingChanged(key, value) {
-        if (key === "quests" && !value) { questsStop(); return; }
+        if (key === "quests" && !value) { questsStop(true); return; }
         if (!enabled("quests")) return;
         if (key === "quests") { questsStart(1000); return; }
         // Turning a quest type off stops that kind if it's the one running.
         const running = quest.running && quest.running.task;
         if (!value && running && (key === "questsVideo" && running.kind === "video" || key === "questsActivity" && running.kind === "activity" ||
             key === "questsPlay" && running.kind === "play")) {
+            questTerminate(quest.running);
             quest.generation++; quest.running = null; quest.enrolling = false;
             if (quest.scanTimer !== undefined && global.clearTimeout) global.clearTimeout(quest.scanTimer);
             quest.scanTimer = undefined;
