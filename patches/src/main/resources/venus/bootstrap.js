@@ -2180,10 +2180,22 @@
         if (!features.hiddenChannels) return;
         // Cache even while the toggle is off so enabling later still has READY names.
         if (CHANNEL_EVENTS.has(event.type)) rememberChannelName(event.channel,owner);
+        // A gateway guild's channels are not an array in 350.8: ChannelStore's handleOneGuildCreate (2065) reads
+        // {op:"full_sync", items} or {op:"update", writes, deletes}; threads stay a plain array. Only taking arrays
+        // meant CONNECTION_OPEN and GUILD_CREATE never cached a single channel name.
+        function rememberList(list, guildId) {
+            if (!Array.isArray(list)) return;
+            for (let i = 0; i < list.length; i++) {
+                const channel = list[i];
+                rememberChannelName(channel, owner, undefined, channel && channel.guild_id || guildId);
+            }
+        }
         function rememberGuild(guild) {
             if (!guild || !guild.id) return;
-            for (const key of ["channels","threads"]) if (Array.isArray(guild[key]))
-                guild[key].forEach(channel => rememberChannelName(channel,owner,undefined,channel && channel.guild_id || guild.id));
+            const channels = guild.channels;
+            if (Array.isArray(channels)) rememberList(channels, guild.id);
+            else if (channels) rememberList(channels.op === "full_sync" ? channels.items : channels.writes, guild.id);
+            rememberList(guild.threads, guild.id);
         }
         if (GUILD_EVENTS.has(event.type)) rememberGuild(event.guild);
         if (READY_EVENTS.has(event.type) && Array.isArray(event.guilds)) event.guilds.forEach(rememberGuild);
