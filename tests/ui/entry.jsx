@@ -132,6 +132,8 @@ window.__venusStart = function () {
 // tap=<text>: taps the first element whose accessibility label or text is exactly that, after the page draws.
 if (q.get("tap")) setTimeout(() => {
   const want = q.get("tap"), all = Array.from(document.querySelectorAll("#root [aria-label], #root div[tabindex], #root [role]"));
-  const hit = all.find(e => e.getAttribute("aria-label") === want) || all.find(e => (e.innerText || "").trim() === want);
+  // A row's own text (its title, without the description under it) taps the row it's in.
+  const hit = all.find(e => e.getAttribute("aria-label") === want) || all.find(e => (e.innerText || "").trim() === want) ||
+    Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && (e.textContent || "").trim() === want);
   if (hit) hit.click(); else console.warn("tap: nothing labelled " + want);
 }, 400);
