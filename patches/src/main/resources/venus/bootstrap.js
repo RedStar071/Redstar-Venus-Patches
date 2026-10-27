@@ -12,6 +12,7 @@
     selectModules([17, 19, 120, 1162, 2129, 10664, 14839, 14971]);
     if (features.picker) targetModules[414] = 1;
     if (features.voice) selectModules([1295, 7752, 7755]);
+    if (features.anonFiles) selectModules([7755, 7784]);
     if (features.copyBios) targetModules[10615] = 1;
     if (features.cleanChannels) selectModules([2065, 5421, 5412, 7365]);
     if (features.favouriteAnything) selectModules([13066, 9732, 9735]);
@@ -72,7 +73,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, anonFilesLength:10, anonFilesStyle:"letters", anonFilesKeepSpoiler:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -89,7 +90,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, anonFilesLength: 10, anonFilesStyle: "letters", anonFilesKeepSpoiler: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -373,6 +374,8 @@
         if (key === "fixEmbedsSites") return fixSitesText(value);
         if (key === "materialYouColor") return myIsColor(value) ? value.toLowerCase() : undefined;
         if (key === "materialYouTint") return MY_TINTS.includes(value) ? value : undefined;
+        if (key === "anonFilesStyle") return ANON_STYLES.includes(value) ? value : undefined;
+        if (key === "anonFilesLength") return anonLength(value);
         return typeof value === "number" && !Number.isFinite(value) ? undefined : value;
     }
     function setSetting(key, value) {
@@ -427,6 +430,12 @@
             settings[key] = clean; dirty.add(key); save(); notify(key);
             if (clean === "wallpaper" && enabled("materialYou")) myReadSystem();
             customThemesApply(); return true;
+        }
+        if (key === "anonFilesStyle" || key === "anonFilesLength") {
+            const clean = key === "anonFilesStyle" ? (ANON_STYLES.includes(value) ? value : undefined) : anonLength(value);
+            if (clean === undefined) return false;
+            if (settings[key] === clean && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings[key] = clean; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "noDeleteLimit") {
             const limit = deleteLimit(value);
@@ -851,6 +860,69 @@
         stopFirst("delete", true); stopFirst("handleComplete", false); stopFirst("handleError", false);
         status.conversion = true;
     }
+    // Anonymous file names (#100, based on Anonymous File Names by k1ng_op): every file you send gets a random name,
+    // so the name on your phone ("IMG_20261027_142233.jpg", "Screenshot_Bank_Statement.png") never reaches Discord.
+    // The extension stays, so previews and players still work, and SPOILER_ stays on spoilered files unless you turn
+    // that off. The name is swapped in the two payloads that carry it to Discord: the upload request
+    // (CloudUploaderUtils.getUploadPayload, 7784) and the message's attachment list (UploadUtils.getAttachmentPayload, 7755),
+    // so the CDN link and the name people see always match. The upload object itself is never changed: Discord keeps
+    // reading the real file from your phone. One random name per upload, remembered for that upload only.
+    const ANON_STYLES = ["letters", "numbers", "date"];
+    const ANON_MIN = 4, ANON_MAX = 32;
+    function anonLength(value) { const n = Math.floor(Number(value)); return Number.isFinite(n) ? Math.max(ANON_MIN, Math.min(ANON_MAX, n)) : 10; }
+    const ANON_CHARS = {letters:"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", numbers:"0123456789"};
+    const anonNames = new WeakMap();
+    // Crypto-quality bytes when the runtime has them, Math.random otherwise (Hermes on Android has no crypto).
+    function anonBytes(n) {
+        const out = new Uint8Array(n), c = global.crypto;
+        try { if (c && typeof c.getRandomValues === "function") { c.getRandomValues(out); return out; } } catch (_) {}
+        for (let i = 0; i < n; i++) out[i] = Math.floor(Math.random() * 256);
+        return out;
+    }
+    function anonStem(style, length) {
+        if (style === "date") {
+            // Like a camera's own name, but for the moment you send it, not when it was taken: 20261027_142233_7f3a.
+            const d = new Date(), two = v => (v < 10 ? "0" : "") + v, tail = anonBytes(2);
+            return d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + "_" + two(d.getHours()) + two(d.getMinutes()) + two(d.getSeconds()) +
+                "_" + ((tail[0] << 8 | tail[1]) + 0x10000).toString(16).slice(1);
+        }
+        const chars = ANON_CHARS[style] || ANON_CHARS.letters, bytes = anonBytes(length);
+        let out = "";
+        for (let i = 0; i < length; i++) out += chars[bytes[i] % chars.length];
+        return out;
+    }
+    // "SPOILER_" + random stem + the real extension (lowercased, letters and digits only, at most 10 long).
+    function anonFileName(name, style, length, keepSpoiler) {
+        const text = typeof name === "string" ? name : "";
+        const spoiler = keepSpoiler && /^SPOILER_/i.test(text);
+        const dot = text.lastIndexOf(".");
+        const ext = dot > 0 && dot < text.length - 1 ? text.slice(dot + 1).toLowerCase() : "";
+        const suffix = /^[a-z0-9]{1,10}$/.test(ext) ? "." + ext : "";
+        return (spoiler ? "SPOILER_" : "") + anonStem(style, length) + suffix;
+    }
+    function anonNameFor(upload) {
+        if (!upload || typeof upload !== "object") return null;
+        const real = typeof upload.filename === "string" ? upload.filename : null;
+        if (!real) return null;
+        const known = anonNames.get(upload);
+        // A converted file (HEIC to JPEG, audio to a voice message) changes its extension: give it a fresh name.
+        if (known && known.from === real) return known.name;
+        const name = anonFileName(real, settings.anonFilesStyle, settings.anonFilesLength, settings.anonFilesKeepSpoiler);
+        anonNames.set(upload, {from:real, name});
+        return name;
+    }
+    function anonPayload(orig, self, args) {
+        const result = orig.apply(self, args);
+        if (!enabled("anonFiles") || !result || typeof result !== "object" || typeof result.filename !== "string") return result;
+        const name = anonNameFor(args[0]);
+        return name && name !== result.filename ? Object.assign({}, result, {filename:name}) : result;
+    }
+    anonPayload.call1 = (orig, self, upload) => {
+        const result = orig.call(self, upload);
+        if (!enabled("anonFiles") || !result || typeof result !== "object" || typeof result.filename !== "string") return result;
+        const name = anonNameFor(upload);
+        return name && name !== result.filename ? Object.assign({}, result, {filename:name}) : result;
+    };
     function attachmentPayload(orig, self, args) {
         const result = orig.apply(self, args);
         const metadata = readyUploads.get(args[0]);
@@ -908,7 +980,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -938,7 +1010,7 @@
     const FEATURE_ICONS = {noDelete:[5049, "TrashIcon"], translate:[15723, "LanguageIcon"], gestures:[8956, "ReactionIcon"],
         quickDelete:[6296, "CircleXIcon"], jumpToTop:[10473, "ArrowLargeUpIcon"], favouriteAnything:[9549, "StarIcon"],
         freeNitro:[9031, "NitroWheelIcon"], voice:[12595, "WaveformIcon"], splitMessages:[9337, "PaperIcon"], noTyping:[12822, "KeyboardIcon"],
-        picker:[10024, "AttachmentIcon"], pastelize:[15560, "PaintPaletteIcon"], platformIndicators:[15232, "LaptopPhoneIcon"],
+        picker:[10024, "AttachmentIcon"], anonFiles:[6650, "EyeSlashIcon"], pastelize:[15560, "PaintPaletteIcon"], platformIndicators:[15232, "LaptopPhoneIcon"],
         validUser:[8213, "AtIcon"], copyBios:[5042, "CopyIcon"], reviewDB:[9354, "ThumbsUpIcon"], readAll:[15928, "DoubleCheckmarkIcon"],
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
@@ -984,6 +1056,7 @@
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
+        anonFiles:["File names", "Random name", "Letters and numbers", "Only numbers", "Date and time", "Spoiler", "Privacy", "Rename"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
@@ -1337,6 +1410,7 @@
         toggle("sending", "splitMessages", "Send long messages", "Type past the limit. Long messages are sent in parts.");
         toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing.");
         toggle("sending", "picker", "Show file sizes when attaching", "Photos and videos in the picker show their size.");
+        withOptions("sending", "anonFiles", "VENUS_ANONFILES", "Anonymous file names", "Files you send get a random name instead of the one on your phone.", "File names", AnonFilesSettings);
         // People
         withOptions("people", "pastelize", "VENUS_PASTELIZE", "Pastel name colors", "Names without a role color get a soft pastel one.", "Pastel names",
             () => ({page:PastelSettings, sections:[section("Colors", [option("pastelAll", "Replace role colors", "Every name uses its pastel color, even with a role color.", "VENUS_PASTELIZE"),
@@ -5824,6 +5898,53 @@
             previewScreen(s, "preview", "Server info preview",
                 [el(RN.View, {key:"body", style:{minHeight:236, flexDirection:"row", overflow:"hidden"}}, rail, channels, menu, sheet)],
                 {footer:watching ? storyStrip(k, s, story) : null}));
+    }
+    // Anonymous file names: two attachments in a chat, named the way your phone names them, and the name Discord gets.
+    // The random part is drawn again whenever an option changes, so you see what your choice looks like.
+    const ANON_SAMPLE = [["IMG_20261027_142233.jpg", 8210, "ImageIcon"], ["Screenshot_Bank_Statement.png", 8210, "ImageIcon"], ["Voice note to Mom.m4a", 12595, "WaveformIcon"]];
+    const ANON_DARK = {file:{flexDirection:"row", alignItems:"center", gap:10, padding:10, borderRadius:10, borderWidth:1, borderColor:"#ffffff14", backgroundColor:"#2b2d31"},
+        icon:{width:32, height:32, borderRadius:8, alignItems:"center", justifyContent:"center", backgroundColor:"#5865f233"}};
+    function AnonFilesPreview(props) {
+        useSettings("anonFiles");
+        const s = useChatPreviewStyles(), on = !!props.on;
+        const a = useThemed("anonFilesPreview", c => ({file:Object.assign({}, ANON_DARK.file, {backgroundColor:c.CARD_BACKGROUND_DEFAULT || c.BACKGROUND_SURFACE_HIGH, borderColor:c.BORDER_SUBTLE}),
+            icon:Object.assign({}, ANON_DARK.icon, {backgroundColor:c.BACKGROUND_MOD_SUBTLE || c.BACKGROUND_MOD_NORMAL})}), ANON_DARK);
+        const key = settings.anonFilesStyle + ":" + settings.anonFilesLength + ":" + settings.anonFilesKeepSpoiler;
+        const names = React.useMemo(() => ANON_SAMPLE.map(([name], i) =>
+            anonFileName(i === 1 ? "SPOILER_" + name : name, settings.anonFilesStyle, settings.anonFilesLength, settings.anonFilesKeepSpoiler)), [key]);
+        const rows = ANON_SAMPLE.map(([real, iconId, iconName], i) => {
+            const shown = on ? names[i] : i === 1 ? "SPOILER_" + real : real, Icon = venusIcon(iconId, iconName);
+            return el(RN.View, {key:"f" + i, style:a.file},
+                el(RN.View, {style:a.icon}, el(Icon, {size:"sm", color:s.name.color})),
+                el(RN.View, {style:{flex:1}},
+                    popIn("n" + i + shown, el(RN.Text, {style:[s.text, {fontWeight:"600", fontSize:14}], numberOfLines:1, ellipsizeMode:"middle"}, shown)),
+                    on ? el(RN.Text, {style:[s.muted, {textDecorationLine:"line-through"}], numberOfLines:1, ellipsizeMode:"middle"}, i === 1 ? "SPOILER_" + real : real) : null));
+        });
+        return el(RN.View, {key:"preview"}, previewScreen(s, "preview", "Anonymous file names preview", [
+            previewMessage(s, "you", tr("You"), "#5865f2", tr("Today at 4:01 PM"), el(RN.View, {style:{gap:6, marginTop:2}}, rows))]));
+    }
+    function AnonFilesSettings() {
+        useSettings("anonFiles");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("anonFiles"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const date = settings.anonFilesStyle === "date";
+        const groups = [
+            on ? null : offCard("status", venusIcon(6650, "EyeSlashIcon"), "anonFiles"),
+            el(AnonFilesPreview, {key:"preview", on}),
+            el(RN.View, {key:"style", style:{gap:8}},
+                groupTitle("styleTitle", "New names"),
+                venusSegmented({key:"anonStyle", value:settings.anonFilesStyle, disabled:!on, onChange:value => setSetting("anonFilesStyle", value),
+                    items:[{value:"letters", label:tr("Letters and numbers")}, {value:"numbers", label:tr("Only numbers")}, {value:"date", label:tr("Date and time")}]}),
+                footnote("styleHint", date ? "When you send it, plus 4 random characters: 20261027_142233_7f3a." : "Random every time, like k3Vq9TzL0b. The extension stays, so previews still work.")),
+            date ? null : el(RN.View, {key:"length", style:{gap:8}},
+                groupTitle("lengthTitle", "Length"),
+                venusSegmented({key:"anonLength", value:settings.anonFilesLength, disabled:!on, onChange:value => setSetting("anonFilesLength", value),
+                    items:[6, 10, 16, 24].map(n => ({value:n, label:pl(n, "{n} character", "{n} characters")}))})),
+            el(Group, {key:"spoiler", title:tr("Spoilers")},
+                switchRow(Switch, "anonFilesKeepSpoiler", "Keep spoilers hidden", "Files you mark as spoilers stay blurred for everyone.", rowIcon(6650, "EyeSlashIcon"))),
+            footnote("note", "Only the name changes. The file itself, its size and what's in it are sent as they are.")];
+        return settingsBody(ui, groups);
     }
     function ServerInfoSettings() {
         useSettings("serverInfo");
@@ -14941,6 +15062,8 @@
                 }
                 return exports.default ? replaceValue(exports, "default", capabilities) : capabilities;
             }
+            case 7784: return features.anonFiles ? hookExport(exports, "getUploadPayload", anonPayload) : exports;
+            case 7755: return features.anonFiles ? hookExport(exports, "getAttachmentPayload", anonPayload) : exports;
             case 7047:
                 if (!features.freeNitro) return exports;
                 stickerRules = exports;
