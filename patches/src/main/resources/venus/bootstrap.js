@@ -3747,8 +3747,11 @@
     // updater metadata 96160 (what desktop sends as native_build_number), Electron 42.11.15, Chrome 148.0.7778.280.
     // Read from the 1.0.9265 package (Discord.exe, build_info.json, core.asar) and the live updater manifest.
     // Bump all of them together when Discord does.
+    // brands is the sec-ch-ua Electron 42.11.15 sends (captured from the real binary; Chromium picks the grease brand per major).
     const QUEST_DESKTOP = {version:"1.0.9265", build:650389, native:96160, electron:"42.11.15", chrome:"148.0.7778.280",
-        osVersion:"10.0.26100", osSdk:"26100"};
+        osVersion:"10.0.26100", osSdk:"26100", brands:'"Not/A)Brand";v="99", "Chromium";v="148"'};
+    // Where desktop's page is served from: Chromium reports it as Origin (writes) and Referer on every API call.
+    const QUEST_DESKTOP_ORIGIN = "https://discord.com", QUEST_DESKTOP_PAGE = "https://discord.com/channels/@me";
     const QUEST_DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/" +
         QUEST_DESKTOP.version + " Chrome/" + QUEST_DESKTOP.chrome + " Electron/" + QUEST_DESKTOP.electron + " Safari/537.36";
     // Bits desktop's launch signature keeps clear when it detects no client mod (docs.discord.food, Launch Signature).
@@ -3802,7 +3805,7 @@
         if (typeof send !== "function") return Promise.reject(new Error("Discord's network client isn't ready"));
         const request = {url, interceptResponse:questIntercept};
         if (body !== undefined) request.body = body;
-        if (desktop) request.onRequestCreated = questDesktopRequest;
+        if (desktop) request.onRequestCreated = r => questDesktopRequest(r, (method || "post") !== "get");
         // Check at the send boundary too: a queued microtask must not send for an account we just left.
         return Promise.resolve().then(() => active && !active() ? null : send.call(http, request));
     }
@@ -3857,7 +3860,7 @@
     // Discord's HTTP client hands over the request before its prepareRequest adds the phone's X-Super-Properties,
     // so those headers are swapped as they're set. The native User-Agent interceptor leaves this Windows agent
     // alone (see questCompleter in DiscordPatches.kt); every other request still says Discord-Android.
-    function questDesktopRequest(request) {
+    function questDesktopRequest(request, write) {
         if (!request || typeof request.set !== "function") return;
         const properties = questDesktopProperties(), set = request.set;
         const value = (name, original) => {
@@ -3874,6 +3877,15 @@
         };
         request.set("User-Agent", QUEST_DESKTOP_UA);
         request.set("X-Super-Properties", properties);
+        // What Chromium adds to every same-origin API call from Discord for Windows and a phone's HTTP stack doesn't
+        // (captured from Electron 42.11.15). Accept-Language is the one Discord's prepareRequest only sets on desktop.
+        // Accept-Encoding stays OkHttp's: it only unpacks gzip when it chose that header itself, so claiming br or
+        // zstd would hand back unreadable bodies.
+        const hints = {"sec-ch-ua-platform":'"Windows"', "sec-ch-ua":QUEST_DESKTOP.brands, "sec-ch-ua-mobile":"?0", "Accept":"*/*"};
+        if (write) hints.Origin = QUEST_DESKTOP_ORIGIN;
+        hints["Sec-Fetch-Site"] = "same-origin"; hints["Sec-Fetch-Mode"] = "cors"; hints["Sec-Fetch-Dest"] = "empty";
+        hints.Referer = QUEST_DESKTOP_PAGE; hints["Accept-Language"] = quest.desktop.locale;
+        for (const name of Object.keys(hints)) request.set(name, hints[name]);
     }
     // QuestStore exposes these as getters in 350.8; accept a method too.
     function questFlag(store, key) {
