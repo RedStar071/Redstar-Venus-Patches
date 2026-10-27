@@ -6,7 +6,7 @@ const { chromium } = require("../../work/ui/node_modules/playwright-core");
 const { execFileSync } = require("child_process");
 const http = require("http"), fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, "../.."), UI = path.join(ROOT, "work/ui");
-const PAGES = ["NODELETE:noDelete", "HIDEBLOCKED:hideBlocked", "MESSAGEHIGHLIGHT:messageHighlight", "TRANSLATE:translate", "GESTURES:gestures", "FREENITRO:freeNitro",
+const PAGES = ["NODELETE:noDelete", "HIDEBLOCKED:hideBlocked", "REMOVEDALERTS:removedAlerts", "STAFFTAG:staffTag", "MESSAGEHIGHLIGHT:messageHighlight", "TRANSLATE:translate", "GESTURES:gestures", "FREENITRO:freeNitro",
   "TENORGIFS:tenorGifs", "FIXEMBEDS:fixEmbeds", "PASTELIZE:pastelize", "PLATFORMINDICATORS:platformIndicators", "REVIEWDB:reviewDB",
   "USERNOTIF:userNotif", "ACCOUNTSWITCHER:accountSwitcher", "READALL:readAll", "HIDDENCHANNELS:hiddenChannels", "SERVERINFO:serverInfo",
   "HIDEBUTTONS:hideButtons", "MATERIALYOU:materialYou", "CUSTOMTHEMES:customThemes", "ICONPACKS:iconPacks", "QUESTS:quests", "BADGES:badges"];

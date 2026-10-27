@@ -51,6 +51,7 @@
     if (features.tenorGifs) selectModules([1295, 9733]);
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     if (features.staffTag) targetModules[7742] = 1;
+    if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
     const revision = "1.19.0";
@@ -74,7 +75,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, language:"auto", hiddenFeatures:"" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, removedAlerts:false, removedAlertsFriends:true, removedAlertsServers:true, removedAlertsClosed:true, removedAlertsPush:false, language:"auto", hiddenFeatures:"" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -91,7 +92,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, language: "auto", hiddenFeatures: ""
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, removedAlerts: false, removedAlertsFriends: true, removedAlertsServers: true, removedAlertsClosed: true, removedAlertsPush: false, language: "auto", hiddenFeatures: ""
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -318,6 +319,7 @@
         const extra = {};
         if (features.reviewDB && reviewToken && reviewAccount) extra.reviewAuth = {account:reviewAccount, token:reviewToken};
         if (features.userNotif && userNotif.ids.size) extra.userNotifIds = Array.from(userNotif.ids);
+        if (features.removedAlerts && settings.removedAlerts) { const seen = removedSeenData(); if (seen) extra.removedSeen = seen; }
         if (features.badges && badges.played.size) extra.badgesPlayedIds = Array.from(badges.played);
         if (features.badges && Object.keys(badges.grants).length) extra.badgesGrants = badges.grants;
         // Kept until someone signs in to take it over, so a save before that doesn't lose it.
@@ -529,6 +531,9 @@
         if (features.translate && featureFor(key) === "translate") later(translateChanged, 0);
         if (features.userNotif && key === "userNotifPush" && value && status.storage !== "loading" && status.storage !== "waiting") later(() => userNotifRequestPermissions(false), 0);
         if (features.userNotif && featureFor(key) === "userNotif") userNotifSync();
+        if (features.removedAlerts && key === "removedAlertsPush" && value && status.storage !== "loading" && status.storage !== "waiting") later(() => userNotifRequestPermissions(false), 0);
+        if (features.removedAlerts && key === "removedAlerts" && value && status.storage !== "loading" && status.storage !== "waiting") removedTurnedOn();
+        if (features.removedAlerts && featureFor(key) === "removedAlerts") removedSync();
         if (features.accountSwitcher && featureFor(key) === "accountSwitcher") accountSwitcherSync();
         if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.customThemes && key === "customThemesBackground") customThemesApply();
@@ -542,7 +547,7 @@
         if (features.bulkDelete && key === "bulkDelete" && !value) bulkDeleteCancel();
         if (features.bulkDelete && key === "bulkDeleteIncludeCached" && bulkDelete.active) bulkDeleteRedrawChannel(bulkDelete.channelId);
         if (features.experiments && key === "experiments") { if (value) experimentsEnable(); else if (experiments.unlocked && !backup.restoring) later(experimentsAskReopen, 0); }
-        if (features.quests || features.badges || features.userNotif) backgroundSync();
+        if (features.quests || features.badges || features.userNotif || features.removedAlerts) backgroundSync();
         return true;
     }
     function initFiles(module) {
@@ -588,6 +593,7 @@
                     userNotif.ids.clear();
                     loaded.userNotifIds.slice(0, USER_NOTIF_MAX_IDS).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) userNotif.ids.add(id); });
                 }
+                if (features.removedAlerts) removedLoad(loaded.removedSeen);
                 if (features.badges) {
                     if (Array.isArray(loaded.badgesPlayedIds))
                         loaded.badgesPlayedIds.slice(0, BADGES_MAX_PLAYED).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) badges.played.add(id); });
@@ -614,13 +620,17 @@
                 userNotifSync();
                 if (enabled("userNotif") && settings.userNotifPush) userNotifCheckPermissions();
             }
+            if (features.removedAlerts) {
+                removedSync();
+                if (enabled("removedAlerts") && settings.removedAlertsPush) userNotifCheckPermissions();
+            }
             if (features.accountSwitcher) accountSwitcherSync();
             if (features.customThemes && enabled("customThemes")) customThemesRestore();
             if (features.materialYou && enabled("materialYou")) { myStart(); customThemesApply(); }
             if (features.iconPacks && enabled("iconPacks")) iconPacksRestore();
             if (features.hideBlocked && enabled("hideBlocked")) hideBlockedChanged();
             if (features.experiments && enabled("experiments")) experimentsEnable();
-            if (features.quests || features.badges || features.userNotif) backgroundSync();
+            if (features.quests || features.badges || features.userNotif || features.removedAlerts) backgroundSync();
             // Saved translations are read as soon as Discord starts, so the first chat you open already has them.
             if (enabled("translate")) translateRestore();
             i18n.shownIn = uiLanguage(); loadLanguage(i18n.shownIn);
@@ -985,7 +995,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -1020,7 +1030,7 @@
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1064,6 +1074,7 @@
         hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
         anonFiles:["File names", "Random name", "Privacy", "Rename"],
         staffTag:["Owner", "Admin", "Manager", "Mod", "Crown", "Staff", "Moderator", "Tags"],
+        removedAlerts:["Removed", "Unfriend", "Friend", "Kicked", "Banned", "Server", "Left", "Alert", "Notifier", "Relationship", "Connection"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
@@ -1505,6 +1516,7 @@
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
         withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
         withOptions("people", "staffTag", "VENUS_STAFFTAG", "Staff tags", "Tags server owners, admins and moderators next to their names in chat.", "Staff tags", StaffTagSettings);
+        withOptions("people", "removedAlerts", "VENUS_REMOVEDALERTS", "Removed connection alerts", "Get notified when a friend removes you or a server drops you.", "Removed connection alerts", RemovedAlertsSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
@@ -8563,7 +8575,7 @@
     function backgroundNeeded() {
         const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
         const badgeBusy = !!(enabled("badges") && (badges.current && badgeNeedsGame() || badges.granting));
-        const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
+        const pushListening = !!(settings.userNotifPush && userNotifHasTargets()) || removedPushing();
         return questBusy || badgeBusy || pushListening;
     }
     function unpauseGateway() {
@@ -8581,7 +8593,7 @@
     function backgroundSync() {
         const questBusy = !!(enabled("quests") && (quest.running || quest.enrolling));
         const badgeBusy = !!(enabled("badges") && (badges.current && badgeNeedsGame() || badges.granting));
-        const pushListening = !!(settings.userNotifPush && userNotifHasTargets());
+        const pushListening = !!(settings.userNotifPush && userNotifHasTargets()) || removedPushing();
         const needed = questBusy || badgeBusy || pushListening;
         if (needed) unpauseGateway();
         const fg = bgKeepAlive.fg || inspectedExport(9699, "default");
@@ -14453,6 +14465,331 @@
         ];
         return settingsBody(ui, groups);
     }
+    // Removed connection alerts (#108, based on RemovedConnectionAlerts by iyu46): a banner when a friend removes you or a
+    // server drops you. Discord says nothing when it happens, so Venus keeps the list of friends and servers it saw, tells a
+    // real removal (RELATIONSHIP_REMOVE, GUILD_DELETE) from one you did yourself (the action creators mark the id for 30 s),
+    // and on every new connection looks for anything that went missing while Discord was closed or offline.
+    const REMOVED_EVENTS = ["CONNECTION_OPEN", "RELATIONSHIP_ADD", "RELATIONSHIP_UPDATE", "RELATIONSHIP_REMOVE", "GUILD_CREATE", "GUILD_UPDATE", "GUILD_DELETE", "LOGOUT"];
+    const REMOVED_KEEP = 20, REMOVED_MAX_FRIENDS = 2000, REMOVED_MAX_GUILDS = 600, REMOVED_BATCH = 3, REMOVED_MINE_MS = 30000, REMOVED_COOLDOWN_MS = 10000;
+    const removed = {dispatcher:null, subscribed:false, friends:new Map(), guilds:new Map(), saved:null, history:[], mine:new Map(), cooldowns:new Map(),
+        user:null, shown:0, refreshQueued:false, checkQueued:false, rels:null, guildStore:null};
+    function removedRels() { return removed.rels || (removed.rels = inspectedExport(4760, "default")); }
+    function removedGuildStore() { return removed.guildStore || (removed.guildStore = inspectedExport(2087, "default")); }
+    function removedMyId() { const me = currentUser(); return me && typeof me.id === "string" ? me.id : null; }
+    function removedUserName(id) {
+        const rels = removedRels();
+        try { const nick = rels && typeof rels.getNickname === "function" && rels.getNickname(id); if (typeof nick === "string" && nick.trim()) return nick.trim().slice(0, 40); } catch (_) {}
+        let user = null;
+        try { user = userStore && userStore.getUser(id); } catch (_) {}
+        const name = user && (user.globalName || user.global_name || user.username);
+        return typeof name === "string" ? name.trim().slice(0, 40) : "";
+    }
+    // Every friend Discord has loaded, as id -> name. null when the store isn't there to ask.
+    function removedLiveFriends() {
+        const rels = removedRels(), out = new Map();
+        try {
+            const ids = rels && typeof rels.getFriendIDs === "function" ? rels.getFriendIDs() : null;
+            if (!Array.isArray(ids)) return null;
+            for (let i = 0; i < ids.length && out.size < REMOVED_MAX_FRIENDS; i++) {
+                const id = ids[i];
+                if (typeof id !== "string" || !/^\d{17,20}$/.test(id)) continue;
+                out.set(id, removed.friends.get(id) || removedUserName(id));
+            }
+        } catch (_) { return null; }
+        return out;
+    }
+    function removedLurking(id) {
+        const store = inspectedExport(4751, "default");
+        try { return !!(store && typeof store.isLurking === "function" && store.isLurking(id)); } catch (_) { return false; }
+    }
+    function removedUnavailable(id) {
+        const store = inspectedExport(5965, "default");
+        try { return !!(store && typeof store.isUnavailable === "function" && store.isUnavailable(id)); } catch (_) { return false; }
+    }
+    // Every server you belong to, as id -> name. Servers you're only previewing (lurking) don't count.
+    function removedLiveGuilds() {
+        const store = removedGuildStore(), out = new Map();
+        try {
+            let ids = store && typeof store.getGuildIds === "function" ? store.getGuildIds() : null;
+            if (!Array.isArray(ids) && store && typeof store.getGuilds === "function") ids = Object.keys(store.getGuilds() || {});
+            if (!Array.isArray(ids)) return null;
+            for (let i = 0; i < ids.length && out.size < REMOVED_MAX_GUILDS; i++) {
+                const id = ids[i];
+                if (typeof id !== "string" || removedLurking(id)) continue;
+                const guild = store.getGuild(id);
+                if (guild && typeof guild.name === "string") out.set(id, guild.name.slice(0, 60));
+            }
+        } catch (_) { return null; }
+        return out;
+    }
+    function removedMarkMine(id) {
+        if (id == null) return;
+        if (removed.mine.size >= 50) removed.mine.delete(removed.mine.keys().next().value);
+        removed.mine.set(String(id), Date.now());
+    }
+    function removedMine(id) {
+        const at = removed.mine.get(id);
+        if (at === undefined) return false;
+        removed.mine.delete(id);
+        return Date.now() - at < REMOVED_MINE_MS;
+    }
+    function removedAllowed(id) {
+        const now = Date.now(), prev = removed.cooldowns.get(id) || 0;
+        if (now - prev < REMOVED_COOLDOWN_MS) return false;
+        if (removed.cooldowns.size >= 200) removed.cooldowns.delete(removed.cooldowns.keys().next().value);
+        removed.cooldowns.set(id, now);
+        return true;
+    }
+    // One line for the banner, the notification and the Recent list. entry: {k:"friend"|"guild"|"batch", n:name, c:count, t:time}
+    function removedLabel(entry) {
+        if (entry.k === "batch") return pl(entry.c || 0, "{n} connection was removed while Discord was closed.", "{n} connections were removed while Discord was closed.");
+        if (entry.k === "guild") return tr("You're no longer in {server}", {server:entry.n || tr("Someone")});
+        return tr("{name} is no longer your friend", {name:entry.n || tr("Someone")});
+    }
+    function removedAgo(ms) {
+        const diff = Math.max(0, Date.now() - ms), minute = 60000, hour = 60 * minute, day = 24 * hour;
+        if (diff < minute) return tr("just now");
+        return tr("{time} ago", {time:diff < hour ? pl(Math.floor(diff / minute), "{n} minute", "{n} minutes") :
+            diff < day ? pl(Math.floor(diff / hour), "{n} hour", "{n} hours") : pl(Math.floor(diff / day), "{n} day", "{n} days")});
+    }
+    function removedPushing() {
+        return !!(enabled("removedAlerts") && settings.removedAlertsPush && (settings.removedAlertsFriends || settings.removedAlertsServers));
+    }
+    function removedPushSend(text) {
+        if (!settings.removedAlertsPush || isAppActive()) return;
+        const pushMod = inspectedExport(11033, "default"), mid = String(Date.now());
+        try {
+            if (pushMod && typeof pushMod.presentLocalNotification === "function")
+                pushMod.presentLocalNotification({alertTitle:tr("Connection removed"), alertBody:text,
+                    channelId:"venus-user-notif", channel_id:"venus-user-notif", messageId:mid, message_id:mid});
+        } catch (_) {}
+    }
+    function removedShow(entry) {
+        removed.shown++;
+        entry.t = Date.now();
+        removed.history.unshift(entry);
+        if (removed.history.length > REMOVED_KEEP) removed.history.length = REMOVED_KEEP;
+        const text = removedLabel(entry);
+        try { showToast(reviewUI(), "venus-removed:" + removed.shown, text, venusIcon(5036, "UserMinusIcon")); } catch (_) {}
+        removedPushSend(text);
+        save();
+        notify("removedAlerts");
+    }
+    // Keeps what Discord has loaded for the next comparison. Only ever adds: removals come from events and removedCheck.
+    function removedRefresh() {
+        removed.refreshQueued = false;
+        if (!enabled("removedAlerts")) return;
+        const friends = removedLiveFriends(), guilds = removedLiveGuilds();
+        let changed = false;
+        if (friends) friends.forEach((name, id) => { if (removed.friends.get(id) !== name) { removed.friends.set(id, name); changed = true; } });
+        if (guilds) guilds.forEach((name, id) => { if (removed.guilds.get(id) !== name) { removed.guilds.set(id, name); changed = true; } });
+        const me = removedMyId();
+        if (me && removed.user !== me) { removed.user = me; changed = true; }
+        if (changed) { save(); notify("removedAlerts"); }
+    }
+    function removedRefreshSoon() {
+        if (removed.refreshQueued) return;
+        removed.refreshQueued = true;
+        later(removedRefresh, 1500);
+    }
+    // Friends and servers that are in the remembered lists but not in what Discord has now. Runs a few seconds after
+    // each new connection, once Discord has filled its stores. A list that looks empty or mostly gone is a loading
+    // hiccup or an outage, not a removal, so it's left alone.
+    function removedCheck() {
+        removed.checkQueued = false;
+        if (!enabled("removedAlerts") || status.storage === "loading" || status.storage === "waiting") return;
+        const me = removedMyId();
+        if (!me) return;
+        if (removed.user && removed.user !== me) { removedReset(); removed.user = me; }
+        if (removed.saved && removed.saved.user === me) {
+            removed.saved.friends.forEach((name, id) => { if (!removed.friends.has(id)) removed.friends.set(id, name); });
+            removed.saved.guilds.forEach((name, id) => { if (!removed.guilds.has(id)) removed.guilds.set(id, name); });
+        }
+        removed.saved = null;
+        removed.user = me;
+        const friends = removedLiveFriends(), guilds = removedLiveGuilds(), gone = [];
+        if (friends && !(friends.size === 0 && removed.friends.size >= 3)) {
+            removed.friends.forEach((name, id) => { if (!friends.has(id)) gone.push({k:"friend", n:name, id}); });
+            gone.forEach(entry => removed.friends.delete(entry.id));
+        }
+        if (guilds && guilds.size > 0) {
+            const missing = [];
+            removed.guilds.forEach((name, id) => { if (!guilds.has(id) && !removedUnavailable(id)) missing.push({k:"guild", n:name, id}); });
+            if (!(removed.guilds.size >= 6 && missing.length > removed.guilds.size / 2)) {
+                missing.forEach(entry => { removed.guilds.delete(entry.id); gone.push(entry); });
+            }
+        }
+        removedRefresh();
+        if (!settings.removedAlertsClosed) return;
+        const wanted = gone.filter(entry => entry.k === "friend" ? settings.removedAlertsFriends : settings.removedAlertsServers);
+        if (!wanted.length) return;
+        if (wanted.length > REMOVED_BATCH) removedShow({k:"batch", c:wanted.length});
+        else wanted.forEach(entry => removedShow({k:entry.k, n:entry.n}));
+    }
+    function removedCheckSoon() {
+        if (removed.checkQueued) return;
+        removed.checkQueued = true;
+        later(removedCheck, 4000);
+    }
+    function removedFriendGone(id, name) {
+        const known = removed.friends.get(id);
+        removed.friends.delete(id);
+        save();
+        if (removedMine(id) || !settings.removedAlertsFriends || !removedAllowed("f:" + id)) return;
+        removedShow({k:"friend", n:known || name || removedUserName(id)});
+    }
+    function removedGuildGone(id) {
+        const name = removed.guilds.get(id);
+        if (name === undefined) return;
+        removed.guilds.delete(id);
+        save();
+        if (removedMine(id) || !settings.removedAlertsServers || !removedAllowed("g:" + id)) return;
+        removedShow({k:"guild", n:name});
+    }
+    function removedReset() {
+        removed.friends.clear(); removed.guilds.clear(); removed.mine.clear(); removed.cooldowns.clear(); removed.history.length = 0; removed.saved = null; removed.user = null;
+    }
+    function removedEvent(event) {
+        if (!event || typeof event.type !== "string") return;
+        switch (event.type) {
+        case "CONNECTION_OPEN": removedRefreshSoon(); removedCheckSoon(); return;
+        case "RELATIONSHIP_REMOVE": {
+            const rel = event.relationship;
+            if (rel && rel.type === 1 && typeof rel.id === "string") removedFriendGone(rel.id);
+            return;
+        }
+        case "RELATIONSHIP_ADD":
+        case "RELATIONSHIP_UPDATE": {
+            const rel = event.relationship;
+            // A friend who blocks you, or turns into something else, is gone from the list too.
+            if (rel && typeof rel.id === "string" && rel.type !== 1 && removed.friends.has(rel.id)) removedFriendGone(rel.id);
+            else removedRefreshSoon();
+            return;
+        }
+        case "GUILD_CREATE":
+        case "GUILD_UPDATE": {
+            const guild = event.guild;
+            if (guild && typeof guild.id === "string" && typeof guild.name === "string" && !guild.unavailable && removed.guilds.size < REMOVED_MAX_GUILDS &&
+                (removed.guilds.has(guild.id) || !removedLurking(guild.id))) removed.guilds.set(guild.id, guild.name.slice(0, 60));
+            removedRefreshSoon();
+            return;
+        }
+        case "GUILD_DELETE": {
+            const guild = event.guild;
+            // A server outage arrives the same way, marked unavailable. It's not a removal.
+            if (guild && typeof guild.id === "string" && !guild.unavailable) removedGuildGone(guild.id);
+            return;
+        }
+        case "LOGOUT": removedReset(); notify("removedAlerts"); return;
+        }
+    }
+    function removedSync() {
+        const d = removed.dispatcher;
+        if (!d || typeof d.subscribe !== "function") return;
+        const active = enabled("removedAlerts");
+        if (active && !removed.subscribed) {
+            removed.subscribed = true;
+            REMOVED_EVENTS.forEach(type => d.subscribe(type, removedEvent));
+            removedRefreshSoon(); removedCheckSoon();
+        } else if (!active && removed.subscribed) {
+            removed.subscribed = false;
+            if (typeof d.unsubscribe === "function") REMOVED_EVENTS.forEach(type => d.unsubscribe(type, removedEvent));
+            removed.friends.clear(); removed.guilds.clear(); removed.mine.clear(); removed.cooldowns.clear();
+        }
+    }
+    function removedInit(d) {
+        if (removed.dispatcher || !d || typeof d.subscribe !== "function") return;
+        removed.dispatcher = d;
+        removedSync();
+    }
+    function removedTurnedOn() {
+        removed.saved = null;
+        later(() => { removedRefresh(); removedCheckSoon(); }, 0);
+    }
+    function removedSeenData() {
+        if (!removed.user || !removed.friends.size && !removed.guilds.size && !removed.history.length) return null;
+        const friends = {}, guilds = {};
+        removed.friends.forEach((name, id) => { friends[id] = name; });
+        removed.guilds.forEach((name, id) => { guilds[id] = name; });
+        return {user:removed.user, friends, guilds, history:removed.history.map(entry => ({k:entry.k, n:entry.n || "", c:entry.c || 0, t:entry.t}))};
+    }
+    // Validates what was saved: ids, short names and the recent list, nothing else.
+    function removedLoad(seen) {
+        if (!seen || typeof seen !== "object" || typeof seen.user !== "string" || !/^\d{17,20}$/.test(seen.user)) return;
+        const read = (source, max) => {
+            const out = new Map();
+            if (source && typeof source === "object" && !Array.isArray(source)) {
+                const ids = Object.keys(source);
+                for (let i = 0; i < ids.length && out.size < max; i++) if (/^\d{17,20}$/.test(ids[i]) && typeof source[ids[i]] === "string") out.set(ids[i], source[ids[i]].slice(0, 60));
+            }
+            return out;
+        };
+        removed.saved = {user:seen.user, friends:read(seen.friends, REMOVED_MAX_FRIENDS), guilds:read(seen.guilds, REMOVED_MAX_GUILDS)};
+        removed.user = seen.user;
+        removed.history = (Array.isArray(seen.history) ? seen.history : []).filter(entry => entry && (entry.k === "friend" || entry.k === "guild" || entry.k === "batch") &&
+            typeof entry.t === "number" && isFinite(entry.t)).slice(0, REMOVED_KEEP).map(entry => ({k:entry.k, n:typeof entry.n === "string" ? entry.n.slice(0, 60) : "",
+            c:typeof entry.c === "number" && isFinite(entry.c) ? Math.max(0, Math.min(9999, Math.floor(entry.c))) : 0, t:entry.t}));
+    }
+    // Anything you do yourself (unfriend, block, leave, delete) is marked first, so its event isn't taken for a removal.
+    function hookRemovedMine(exports, keys) {
+        const target = exports && exports.default;
+        if (!target) return exports;
+        let patched = target;
+        keys.forEach(key => { patched = hookExport(patched, key, (orig, self, args) => { removedMarkMine(args[0]); return orig.apply(self, args); }); });
+        return patched === target ? exports : replaceValue(exports, "default", patched);
+    }
+    const REMOVED_RED = "#f23f43";
+    function removedBanner(s, key, text, on) {
+        const Icon = venusIcon(5036, "UserMinusIcon");
+        const body = el(RN.View, {style:{flexDirection:"row", gap:12, alignItems:"center", marginHorizontal:12, marginVertical:6, padding:12, borderRadius:12,
+            backgroundColor:REMOVED_RED + "1f", borderWidth:1, borderColor:REMOVED_RED + "47", opacity:on ? 1 : 0.45}},
+            el(RN.View, {style:{width:36, height:36, borderRadius:18, alignItems:"center", justifyContent:"center", backgroundColor:REMOVED_RED + "33"}},
+                el(Icon, {size:"md", color:REMOVED_RED})),
+            el(RN.View, {style:{flex:1, gap:2}},
+                el(RN.Text, {style:[s.name, {fontSize:14}], numberOfLines:2}, text),
+                el(RN.Text, {style:s.muted}, tr("just now"))));
+        return on ? popIn(key + ":" + text, body) : body;
+    }
+    function RemovedAlertsPreview(props) {
+        useSettings("removedAlerts");
+        const s = useChatPreviewStyles(), on = !!props.on;
+        return el(RN.View, {key:"preview"},
+            previewScreen(s, "preview", "Removed connection alerts preview", [
+                removedBanner(s, "friend", removedLabel({k:"friend", n:"Alex"}), on && settings.removedAlertsFriends),
+                removedBanner(s, "guild", removedLabel({k:"guild", n:"Pixel Garden"}), on && settings.removedAlertsServers)]));
+    }
+    function RemovedAlertsSettings() {
+        useSettings("removedAlerts");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("removedAlerts"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Row = ui.TableRow;
+        const Icon = venusIcon(5036, "UserMinusIcon");
+        const watching = !!(settings.removedAlertsFriends || settings.removedAlertsServers || settings.removedAlertsClosed);
+        const groups = [
+            !on ? offCard("status", Icon, "removedAlerts") : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
+                title:watching ? tr("Watching for removals") : tr("Nothing is watched"),
+                body:watching ? tr("Remembers {friends} and {servers} on this phone, so it can tell when one is gone.",
+                    {friends:pl(removed.friends.size, "{n} friend", "{n} friends"), servers:pl(removed.guilds.size, "{n} server", "{n} servers")}) : tr("Turn on at least one option below.")}),
+            el(RemovedAlertsPreview, {key:"preview", on}),
+            el(Group, {key:"when", title:tr("Alert me when")},
+                switchRow(Switch, "removedAlertsFriends", "A friend removes you", "They take you off their friends list.", rowIcon(5036, "UserMinusIcon")),
+                switchRow(Switch, "removedAlertsServers", "A server removes you", "You're kicked or banned, or the server is deleted. Leaving a server yourself never counts.", rowIcon(9239, "ServerIcon")),
+                switchRow(Switch, "removedAlertsClosed", "Check when Discord opens", "Finds friends and servers that went missing while Discord was closed or offline.", rowIcon(5051, "ClockIcon"))),
+            el(Group, {key:"push", title:tr("Outside Discord")},
+                switchRow(Switch, "removedAlertsPush", "Phone notifications", "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.", rowIcon(6642, "MobilePhoneIcon")),
+                settings.removedAlertsPush && userNotif.permissionGranted === false && Row ?
+                    el(Row, {key:"perm", label:tr("Allow notification permission"), subLabel:tr("Android notifications are turned off for Discord. Tap to check or open system settings."),
+                        icon:rowIcon(10347, "BellSlashIcon"), variant:"danger", arrow:true, disabled:!on,
+                        onPress:() => Promise.resolve(userNotifRequestPermissions(true)).then(() => notify("removedAlerts"))}) : null),
+            el(Group, {key:"recent", title:tr("Recent")},
+                removed.history.length && Row ? removed.history.map((entry, i) => el(Row, {key:"h" + i + ":" + entry.t, label:removedLabel(entry), subLabel:removedAgo(entry.t),
+                    icon:rowIcon(entry.k === "guild" ? 9239 : 5036, entry.k === "guild" ? "ServerIcon" : "UserMinusIcon")})) :
+                    Row ? el(Row, {key:"none", label:tr("Nothing has been removed yet."), disabled:true}) : null),
+            removed.history.length ? el(Group, {key:"manage", title:tr("Manage")},
+                actionRow(ui, "clear", "Clear recent alerts", "Empties the list above.", () => { removed.history.length = 0; save(); notify("removedAlerts"); }, false, true)) : null,
+            footnote("note", "Venus remembers who was on your friends list and which servers you were in. Things you remove or leave on this phone are ignored, and so are servers you're only previewing. Removals you make on another device can still show up here.")];
+        return settingsBody(ui, groups);
+    }
     // Clean channel names: the preview is a server's channel list with names decorated the way real servers do it.
     // While on, each name is cleaned with the options below and glides in.
     const CLEAN_SAMPLE = [["cat", "\ud83d\udee0\ufe0f | SUPPORT & RESOURCE | \ud83d\udee0\ufe0f"], ["text", "\ud83c\udfab\uff5cquick-help"], ["text", "\ud83d\udd0d\u2503mchose-support-center"],
@@ -15261,9 +15598,9 @@
             case 7308: if (features.hideBlocked && exports && exports.default) hideBlocked.references = exports.default; return exports;
             case 11624: return features.hideBlocked ? hookExport(exports, "default", hideBlockedChannelStream) : exports;
             case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
-            case 9699: if ((features.quests || features.badges || features.userNotif) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
-            case 13933: return (features.quests || features.badges || features.userNotif) ? hookGatewaySocket(exports) : exports;
-            case 13968: return (features.quests || features.badges || features.userNotif) ? hookPauseGateway(exports) : exports;
+            case 9699: if ((features.quests || features.badges || features.userNotif || features.removedAlerts) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
+            case 13933: return (features.quests || features.badges || features.userNotif || features.removedAlerts) ? hookGatewaySocket(exports) : exports;
+            case 13968: return (features.quests || features.badges || features.userNotif || features.removedAlerts) ? hookPauseGateway(exports) : exports;
             case 5759: return features.badges ? hookSelfPresenceStore(exports) : exports;
             case 8312: if (features.badges && exports && exports.default) badgesAttachStore(exports.default); return exports;
             case 9675:
@@ -15363,7 +15700,7 @@
             case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
-                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete || features.experiments))
+                if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.removedAlerts || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete || features.experiments))
                     userStore = exports.default;
                 if (features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels) restoreDeleted();
                 return exports;
@@ -15375,8 +15712,12 @@
                 }
                 return exports;
             case 7386: if (features.quests) questAttach(exports.default); return exports;
+            case 7018: return features.removedAlerts ? hookRemovedMine(exports, ["removeFriend", "removeRelationship"]) : exports;
+            case 6098: return features.removedAlerts ? hookRemovedMine(exports, ["deleteGuild"]) : exports;
+            case 8633: return features.removedAlerts ? hookRemovedMine(exports, ["leaveGuild", "deleteGuild"]) : exports;
             case 584:
                 if (features.userNotif && exports && exports.default) userNotifInit(exports.default);
+                if (features.removedAlerts && exports && exports.default) removedInit(exports.default);
                 if (features.translate && exports && exports.default) translateInit(exports.default);
                 if (features.validUser && exports && exports.default) validInit(exports.default);
                 if (features.quests) questsInit(exports.default);

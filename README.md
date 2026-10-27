@@ -44,6 +44,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | **People** | Pastel name colors | Names without a role color get a soft pastel color |
 | | Show device indicators | Desktop, mobile, web, console or VR icons next to names |
 | | Staff tags | Tags server owners, admins, managers and moderators next to their names in chat, worked out from the roles you can see. Pick who gets one and whether owners get a crown. Based on StaffTag by mwittrien |
+| | Removed connection alerts | Get notified when a friend removes you or a server drops you, and for anything that went missing while Discord was closed. Choose friends, servers or both, and whether to also get a phone notification. Things you remove or leave yourself never alert. Based on RemovedConnectionAlerts by iyu46. |
 | | Fix unknown mentions | @unknown-user mentions show the person's name |
 | | Copy profile bios | Hold a bio to select and copy it |
 | | User and server reviews | Read and write reviews, from ReviewDB |
