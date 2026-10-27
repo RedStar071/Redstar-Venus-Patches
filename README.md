@@ -40,7 +40,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Send long messages | Type past the character limit; long messages are sent in parts |
 | | Hide typing indicator | Others won't see when you're typing |
 | | Show file sizes when attaching | Photos and videos in the picker show their size |
-| | Anonymous file names | Files you send get a random name instead of the one on your phone: letters and numbers, only numbers, or the date and time. The file type stays so previews still work, and spoilers stay spoilers. Based on Anonymous File Names by k1ng_op |
+| | Anonymous file names | Files you send get a random name like `k3Vq9TzL0b.jpg` instead of the one on your phone, so names like `IMG_20261027_142233.jpg` or `Bank statement March.pdf` never reach Discord. The file type stays, so previews and players still work. Spoilers stay spoilers. Based on Anonymous File Names by k1ng_op |
 | **People** | Pastel name colors | Names without a role color get a soft pastel color |
 | | Show device indicators | Desktop, mobile, web, console or VR icons next to names |
 | | Fix unknown mentions | @unknown-user mentions show the person's name |
