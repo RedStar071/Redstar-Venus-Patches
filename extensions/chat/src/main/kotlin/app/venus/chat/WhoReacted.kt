@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.util.WeakHashMap
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Who reacted (#100), native side: up to three small avatars of people who reacted, inside each reaction pill in chat.
@@ -49,6 +50,9 @@ object WhoReacted {
     /** Pill -> the reaction it shows right now. Main thread writes, the bridge thread reads for [shownKeys]. */
     private val bound = WeakHashMap<LinearLayout, String>()
     private val stacks = WeakHashMap<LinearLayout, AvatarStack>()
+    // Explicit locks: Kotlin's synchronized {} links kotlin.Unit, which Discord's build doesn't keep.
+    private val avatarsLock = ReentrantLock()
+    private val boundLock = ReentrantLock()
     private val main = Handler(Looper.getMainLooper())
     @Volatile private var on = false
 
@@ -98,7 +102,8 @@ object WhoReacted {
             val pills = separate?.invoke(companion, list) as? List<*> ?: list
             var i = 0
             val n = row.childCount
-            synchronized(bound) {
+            boundLock.lock()
+            try {
                 while (i < n) {
                     val view = row.getChildAt(i) as? LinearLayout
                     val pill = if (i < pills.size) pills[i] else null
@@ -107,13 +112,20 @@ object WhoReacted {
                         else {
                             val key = keyOf(id, pill)
                             if (key == null) { bound.remove(view); render(view, null) }
-                            else { bound[view] = key; render(view, synchronized(avatars) { avatars[key] }) }
+                            else { bound[view] = key; render(view, cached(key)) }
                         }
                     }
                     i++
                 }
+            } finally {
+                boundLock.unlock()
             }
         } catch (_: Throwable) { }
+    }
+
+    private fun cached(key: String): Array<String>? {
+        avatarsLock.lock()
+        try { return avatars[key] } finally { avatarsLock.unlock() }
     }
 
     private fun keyOf(messageId: String, pill: Any): String? {
@@ -166,16 +178,20 @@ object WhoReacted {
             val n = if (list.length() < MAX_AVATARS) list.length() else MAX_AVATARS
             updates[key] = Array(n) { list.optString(it) }
         }
-        synchronized(avatars) { avatars.putAll(updates) }
+        avatarsLock.lock()
+        try { avatars.putAll(updates) } finally { avatarsLock.unlock() }
         main.post(object : Runnable {
             override fun run() {
                 val changed = java.util.ArrayList<View>()
-                synchronized(bound) {
+                boundLock.lock()
+                try {
                     for (entry in bound.entries) {
                         val urls = updates[entry.value] ?: continue
                         render(entry.key, urls)
                         changed.add(entry.key)
                     }
+                } finally {
+                    boundLock.unlock()
                 }
                 relayout(changed)
             }
@@ -186,18 +202,27 @@ object WhoReacted {
     private fun shownKeys(): String {
         val out = JSONArray()
         val seen = java.util.HashSet<String>()
-        synchronized(bound) {
+        boundLock.lock()
+        try {
             for (entry in bound.entries) if (entry.key.isAttachedToWindow && entry.key.isShown && seen.add(entry.value)) out.put(entry.value)
+        } finally {
+            boundLock.unlock()
         }
         return out.toString()
     }
 
     private fun clear() {
-        synchronized(avatars) { avatars.clear() }
+        avatarsLock.lock()
+        try { avatars.clear() } finally { avatarsLock.unlock() }
         main.post(object : Runnable {
             override fun run() {
                 val changed = java.util.ArrayList<View>()
-                synchronized(bound) { for (view in bound.keys) { render(view, null); changed.add(view) } }
+                boundLock.lock()
+                try {
+                    for (view in bound.keys) { render(view, null); changed.add(view) }
+                } finally {
+                    boundLock.unlock()
+                }
                 relayout(changed)
             }
         })
@@ -205,7 +230,11 @@ object WhoReacted {
 
     private fun hideAll(row: ViewGroup) {
         var i = 0
-        while (i < row.childCount) { (row.getChildAt(i) as? LinearLayout)?.let { stacks[it]?.visibility = View.GONE }; i++ }
+        while (i < row.childCount) {
+            val view = row.getChildAt(i) as? LinearLayout
+            if (view != null) { val stack = stacks[view]; if (stack != null) stack.visibility = View.GONE }
+            i++
+        }
     }
 
     private fun render(view: LinearLayout, urls: Array<String>?) {
