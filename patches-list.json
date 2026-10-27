@@ -1787,40 +1787,6 @@
         }
       ],
       "options": []
-    },
-    {
-      "name": "Who reacted",
-      "description": "Reactions in chat show the faces of the first people who reacted. Based on Who Reacted by Palm.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
     }
   ]
 }
