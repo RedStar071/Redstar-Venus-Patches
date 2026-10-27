@@ -39,7 +39,7 @@
     if (features.youBarSettings) targetModules[16858] = 1;
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
     if (features.translate) selectModules([584, 1390, 5432, 7742, 9675, 10368]);
-    if (features.userNotif) selectModules([584, 1390, 2065, 2087, 4760, 5108, 9699, 13933, 13968]);
+    if (features.userNotif) selectModules([584, 1390, 2065, 2087, 2116, 2125, 4760, 5108, 7012, 9699, 13933, 13968]);
     if (features.accountSwitcher) selectModules([1390, 5938, 6623, 12129, 12130, 12131, 16387, 16840, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
     if (features.nitroThemes) selectModules([584, 1390, 2046, 4769, 4937, 14299, 15566]);
@@ -8666,12 +8666,14 @@
         });
         return exports;
     }
-    const USER_NOTIF_MAX_IDS = 500, USER_NOTIF_COOLDOWN_MS = 8000;
+    // Typing repeats every ~9 s while someone keeps typing, so it gets a longer quiet time than status changes.
+    const USER_NOTIF_MAX_IDS = 500, USER_NOTIF_COOLDOWN_MS = 8000, USER_NOTIF_TYPING_MS = 60000;
     const USER_NOTIF_EVENTS = ["PRESENCE_UPDATES", "PRESENCE_UPDATE", "MESSAGE_CREATE", "TYPING_START", "CONNECTION_OPEN",
         "CONNECTION_OPEN_SUPPLEMENTAL", "PRESENCES_REPLACE", "OVERLAY_INITIALIZE", "RELATIONSHIP_ADD", "RELATIONSHIP_UPDATE",
         "CONNECTION_RESUMED", "GUILD_CREATE", "IDLE", "LOGOUT"];
+    // subscribedGuilds: servers asked for presences on this connection, so each is asked once, not on every event.
     const userNotif = {dispatcher:null, subscribed:false, relationships:null, guilds:null, ids:new Set(), dirty:false,
-        statuses:new Map(), cooldowns:new Map(), shown:0, last:null, permissionGranted:null};
+        statuses:new Map(), cooldowns:new Map(), shown:0, last:null, permissionGranted:null, subscribedGuilds:new Set(), seedQueued:false, subscribeQueued:false};
     function userNotifNativePerm() {
         const native = RN && RN.NativeModules;
         return native && (native.NativePermissionManager || native.RTNNativePermissionManager) || null;
@@ -8720,13 +8722,13 @@
         }
         return checkStatus();
     }
-    function userNotifPushSend(content) {
+    function userNotifPushSend(content, title) {
         if (!settings.userNotifPush || isAppActive()) return;
         const pushMod = inspectedExport(11033, "default");
         const mid = String(userNotif.shown);
         try {
             if (pushMod && typeof pushMod.presentLocalNotification === "function")
-                pushMod.presentLocalNotification({alertTitle:tr("Activity notifications"), alertBody:content,
+                pushMod.presentLocalNotification({alertTitle:title || tr("Activity notifications"), alertBody:content,
                     channelId:"venus-user-notif", channel_id:"venus-user-notif", messageId:mid, message_id:mid});
         } catch (_) {}
     }
@@ -8748,12 +8750,22 @@
         } catch (_) {}
         return false;
     }
+    // Called for every presence update Discord receives (hundreds a second in big servers): cheapest checks first. IDs
+    // were checked when they were added and friend IDs come from Discord, so no pattern test here.
     function userNotifWatched(id) {
-        if (typeof id !== "string") return false;
-        if (!userNotif.ids.has(id) && !(settings.userNotifFriends && userNotifIsFriend(id))) return false;
-        if (!/^\d{17,20}$/.test(id)) return false;
+        if (typeof id !== "string" || !(userNotif.ids.has(id) || settings.userNotifFriends && userNotifIsFriend(id))) return false;
         const me = currentUser();
         return !(me && me.id === id);
+    }
+    // The chat you're looking at right now, while Discord is open: its messages and typing are already on screen.
+    function userNotifInView(channelId) {
+        if (!channelId || !isAppActive()) return false;
+        const store = inspectedExport(2116, "default");
+        try {
+            const current = store && (typeof store.getCurrentlySelectedChannelId === "function" ? store.getCurrentlySelectedChannelId() :
+                typeof store.getChannelId === "function" ? store.getChannelId() : null);
+            return current != null && String(current) === String(channelId);
+        } catch (_) { return false; }
     }
     function userNotifPersonName(id, fallbackUser) {
         const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4760, "default"));
@@ -8775,13 +8787,16 @@
         const gId = guildId || channel && (channel.guild_id || channel.guildId);
         const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2087, "default"));
         const guild = guilds && gId && typeof guilds.getGuild === "function" ? guilds.getGuild(gId) : null;
-        const cName = channel && typeof channel.name === "string" && channel.name.trim() ? channel.name.trim() : "";
+        const raw = channel && typeof channel.name === "string" ? channel.name : "";
+        const shownName = raw && features.cleanChannels ? channelNameFormat(channel, raw) : raw;
+        const cName = shownName && shownName.trim() ? shownName.trim() : "";
         const gName = guild && typeof guild.name === "string" && guild.name.trim() ? guild.name.trim() : "";
         const isDm = !gId && (!channel || channel.type === 1 || channel.type === 3);
         return {isDm:!!isDm, cName, gName};
     }
     function userNotifSubscribeGuild(guildId, subFn) {
-        if (typeof guildId !== "string" || !/^\d{17,20}$/.test(guildId)) return;
+        if (typeof guildId !== "string" || !/^\d{17,20}$/.test(guildId) || userNotif.subscribedGuilds.has(guildId)) return;
+        userNotif.subscribedGuilds.add(guildId);
         const sub = subFn !== undefined ? subFn : inspectedExport(7012, "subscribeGuild");
         try {
             if (typeof sub === "function") { sub(guildId); return; }
@@ -8789,8 +8804,23 @@
         const d = userNotif.dispatcher;
         try { if (d && typeof d.dispatch === "function") d.dispatch({type:"GUILD_SUBSCRIPTIONS", guildId}); } catch (_) {}
     }
+    // Discord sends friends' presences by itself; only people who aren't friends need their servers subscribed. Many
+    // events ask for this at once (connect, resume, idle, a settings change), so it runs once after them.
     function userNotifSubscribeGuilds() {
+        if (userNotif.subscribeQueued) return;
+        userNotif.subscribeQueued = true;
+        later(() => { userNotif.subscribeQueued = false; userNotifSubscribeGuildsNow(); }, 0);
+    }
+    function userNotifStrangers() {
+        const out = [];
+        userNotif.ids.forEach(id => { if (!userNotifIsFriend(id)) out.push(id); });
+        return out;
+    }
+    function userNotifSubscribeGuildsNow() {
         if (!userNotifHasTargets()) return;
+        const strangers = userNotifStrangers();
+        if (!strangers.length) return;
+        const members = inspectedExport(2125, "default"), isMember = members && typeof members.isMember === "function" ? members : null;
         const guilds = userNotif.guilds || (userNotif.guilds = inspectedExport(2087, "default"));
         if (!guilds) return;
         let ids = null;
@@ -8803,11 +8833,25 @@
         } catch (_) {}
         if (!Array.isArray(ids)) return;
         const sub = inspectedExport(7012, "subscribeGuild");
-        for (let i = 0; i < ids.length && i < 200; i++) userNotifSubscribeGuild(ids[i], sub);
+        let asked = 0;
+        for (let i = 0; i < ids.length && asked < 200; i++) {
+            const guildId = ids[i];
+            if (userNotif.subscribedGuilds.has(guildId)) continue;
+            // Only servers one of them is known to be in; with no member list loaded yet, every server, as before.
+            if (isMember) {
+                let shared = false, known = false;
+                for (let j = 0; j < strangers.length && !shared; j++) {
+                    try { const r = isMember.isMember(guildId, strangers[j]); if (r) shared = true; else if (r === false) known = true; } catch (_) {}
+                }
+                if (!shared && known) continue;
+            }
+            userNotifSubscribeGuild(guildId, sub);
+            asked++;
+        }
     }
-    function userNotifAllowed(id, kind) {
+    function userNotifAllowed(id, kind, quietMs) {
         const now = Date.now(), key = id + ":" + kind, prev = userNotif.cooldowns.get(key) || 0;
-        if (now - prev < USER_NOTIF_COOLDOWN_MS) return false;
+        if (now - prev < (quietMs || USER_NOTIF_COOLDOWN_MS)) return false;
         if (userNotif.cooldowns.size >= 500) userNotif.cooldowns.delete(userNotif.cooldowns.keys().next().value);
         userNotif.cooldowns.set(key, now);
         return true;
@@ -8820,8 +8864,14 @@
         try {
             showToast(ui, "venus-user-notif:" + userNotif.shown, content, Icon);
         } catch (_) {}
-        userNotifPushSend(content);
+        userNotifPushSend(content, vars && typeof vars.name === "string" ? vars.name : "");
         notify("userNotif");
+    }
+    // Every server that loads at startup used to walk the whole friends list again; now it's done once after them.
+    function userNotifSeedSoon() {
+        if (userNotif.seedQueued) return;
+        userNotif.seedQueued = true;
+        later(() => { userNotif.seedQueued = false; userNotifSeedStatuses(true); }, 0);
     }
     function userNotifSeedStatuses(includeOffline) {
         if (!presenceStore || typeof presenceStore.getStatus !== "function") return;
@@ -8856,9 +8906,11 @@
                 if (typeof stored === "string" && stored && stored !== nextStatus) prev = stored;
             } catch (_) {}
         }
-        // Flux stores update before dispatcher.subscribe listeners run: if a watched person was offline (never seeded
+        // Flux stores update before dispatcher.subscribe listeners run: if a watched friend was offline (never seeded
         // or not yet in statuses) and just came online/idle/dnd, PresenceStore.getStatus(id) already equals nextStatus.
-        if (prev === undefined && nextStatus !== "offline" && nextStatus !== "invisible") prev = "offline";
+        // Discord sends every friend's presence when it connects, so an unknown friend really was offline. For someone
+        // added by ID it only means their presence hadn't arrived yet: learn it quietly instead of saying they came online.
+        if (prev === undefined && nextStatus !== "offline" && nextStatus !== "invisible" && userNotifIsFriend(id)) prev = "offline";
         if (userNotif.statuses.size >= 2000 && !userNotif.statuses.has(id))
             userNotif.statuses.delete(userNotif.statuses.keys().next().value);
         userNotif.statuses.set(id, nextStatus);
@@ -8870,9 +8922,13 @@
         const message = event.message;
         if (!message || message.state === "SENDING") return;
         const author = message.author, id = author && author.id;
-        if (!id || !userNotifWatched(id) || !userNotifAllowed(id, "message")) return;
+        const channelId = message.channel_id || message.channelId || event.channelId;
+        if (!id || !userNotifWatched(id)) return;
+        // They sent it, so the next time they start typing is news again.
+        userNotif.cooldowns.delete(id + ":typing:" + channelId);
+        if (userNotifInView(channelId) || !userNotifAllowed(id, "message")) return;
         const name = userNotifPersonName(id, author);
-        const place = userNotifPlace(message.channel_id || message.channelId || event.channelId, message.guild_id || message.guildId || event.guildId);
+        const place = userNotifPlace(channelId, message.guild_id || message.guildId || event.guildId);
         if (place.isDm) userNotifShow("{name} sent you a DM", {name});
         else if (place.cName && place.gName) userNotifShow("{name} sent a message in #{channel} ({server})", {name, channel:place.cName, server:place.gName});
         else if (place.cName) userNotifShow("{name} sent a message in #{channel}", {name, channel:place.cName});
@@ -8880,10 +8936,10 @@
     }
     function userNotifTyping(event) {
         if (!enabled("userNotif") || !settings.userNotifTyping || !event) return;
-        const id = event.userId || event.user && event.user.id;
-        if (!id || !userNotifWatched(id) || !userNotifAllowed(id, "typing")) return;
+        const id = event.userId || event.user && event.user.id, channelId = event.channelId || event.channel_id;
+        if (!id || !userNotifWatched(id) || userNotifInView(channelId) || !userNotifAllowed(id, "typing:" + channelId, USER_NOTIF_TYPING_MS)) return;
         const name = userNotifPersonName(id, event.user);
-        const place = userNotifPlace(event.channelId || event.channel_id, event.guildId || event.guild_id);
+        const place = userNotifPlace(channelId, event.guildId || event.guild_id);
         if (place.isDm) userNotifShow("{name} is typing in your DM", {name});
         else if (place.cName && place.gName) userNotifShow("{name} is typing in #{channel} ({server})", {name, channel:place.cName, server:place.gName});
         else if (place.cName) userNotifShow("{name} is typing in #{channel}", {name, channel:place.cName});
@@ -8893,32 +8949,34 @@
         if (!event || !enabled("userNotif")) return;
         switch (event.type) {
         case "PRESENCE_UPDATES":
-            if (Array.isArray(event.updates)) for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
+            if (settings.userNotifStatus && Array.isArray(event.updates)) for (let i = 0; i < event.updates.length; i++) userNotifPresence(event.updates[i]);
             return;
         case "PRESENCE_UPDATE": userNotifPresence(event); return;
         case "MESSAGE_CREATE": userNotifMessage(event); return;
         case "TYPING_START": userNotifTyping(event); return;
-        case "CONNECTION_OPEN": userNotif.statuses.clear(); userNotifSeedStatuses(false); userNotifSubscribeGuilds(); return;
+        case "CONNECTION_OPEN":
+            // A new connection starts with no subscriptions, so every server can be asked again.
+            userNotif.statuses.clear(); userNotif.subscribedGuilds.clear(); userNotifSeedStatuses(false); userNotifSubscribeGuilds(); return;
         case "CONNECTION_OPEN_SUPPLEMENTAL":
         case "PRESENCES_REPLACE":
         case "OVERLAY_INITIALIZE":
-            userNotifSeedStatuses(true);
+            userNotifSeedSoon();
             userNotifSubscribeGuilds();
             return;
         case "RELATIONSHIP_ADD":
         case "RELATIONSHIP_UPDATE":
-            userNotifSeedStatuses(true);
+            userNotifSeedSoon();
             return;
         case "CONNECTION_RESUMED":
         case "IDLE":
             userNotifSubscribeGuilds();
             return;
         case "GUILD_CREATE":
-            userNotifSeedStatuses(true);
-            if (event.guild && event.guild.id) userNotifSubscribeGuild(event.guild.id);
+            // A server joined or loaded later: its members may include someone added by ID.
+            if (event.guild && event.guild.id) { userNotif.subscribedGuilds.delete(String(event.guild.id)); userNotifSubscribeGuilds(); }
             return;
         case "LOGOUT":
-            userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif");
+            userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.subscribedGuilds.clear(); userNotif.shown = 0; userNotif.last = null; notify("userNotif");
             return;
         }
     }
@@ -8934,7 +8992,7 @@
         } else if (!active && userNotif.subscribed) {
             userNotif.subscribed = false;
             if (typeof d.unsubscribe === "function") USER_NOTIF_EVENTS.forEach(type => d.unsubscribe(type, userNotifEvent));
-            userNotif.statuses.clear(); userNotif.cooldowns.clear();
+            userNotif.statuses.clear(); userNotif.cooldowns.clear(); userNotif.subscribedGuilds.clear();
         } else if (active) {
             userNotifSeedStatuses();
             userNotifSubscribeGuilds();
