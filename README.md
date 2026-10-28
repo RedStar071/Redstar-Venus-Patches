@@ -60,6 +60,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide the gift button | Removes the Nitro gift button from the message bar |
 | | Hide the call button | Removes Call from people's profiles |
 | | Hide extra buttons | Removes the Quests, Shop and Nitro buttons from your profile and Apps from the attach menu; you can also pick Polls and Photos. The rest close up, so the pill and the menu shrink with no gaps |
+| | Remove anything | Turn on **removal mode** and go anywhere in Discord: every button you can remove gets a red ✕. Tap it, say yes, and it's gone right away, with Undo on the floating bar. Covers the voice message, attach, Apps and gift buttons in the message bar; call, video call and search in DMs; search, message requests, Add Friends and new message on the Messages tab; Call on profiles; and Quests, Shop and Nitro on your profile. Venus → Remove anything lists what you removed, to bring each back, plus a switch for every button |
 | | Venus button on profile bar | A shortcut to Venus, next to the notifications bell |
 | | Unlock app icons | Use any Discord app icon in Settings without Nitro |
 | | Unlock Nitro themes | Use Discord's gradient themes in Settings > Appearance without Nitro. Only this phone sees them |
