@@ -1550,9 +1550,9 @@
         // Messages
         withOptions("messages", "noDelete", "VENUS_NODELETE", "Keep deleted messages", "Deleted messages stay in chat, and edits keep their history.", "Deleted messages", NoDeleteSettings);
         withOptions("messages", "bulkDelete", "VENUS_BULKDELETE", "Bulk delete messages", "Select multiple messages in chat and delete them all at once.", "Bulk delete", BulkDeleteSettings);
-        withOptions("people", "staffTag", "VENUS_STAFFTAG", "Label server owners and mods", "Adds a label next to server owners, admins and moderators in chat.", "Label server owners and mods", StaffTagSettings);
+        withOptions("people", "staffTag", "VENUS_STAFFTAG", "Show owner and mod tags", "Shows an Owner, Admin, Manager or Mod tag next to people's names in chat.", "Show owner and mod tags", StaffTagSettings);
         withOptions("messages", "fullImages", "VENUS_FULLIMAGES", "Load full-quality images", "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy.", "Load full-quality images", FullImagesSettings);
-        withOptions("people", "removedAlerts", "VENUS_REMOVEDALERTS", "Alert when a friend or server removes you", "Get notified when a friend removes you or a server drops you.", "Alert when a friend or server removes you", RemovedAlertsSettings);
+        withOptions("people", "removedAlerts", "VENUS_REMOVEDALERTS", "Alert when you're removed", "Get a heads-up when a friend unfriends you, or a server kicks or bans you.", "Alert when you're removed", RemovedAlertsSettings);
         withOptions("messages", "hideBlocked", "VENUS_HIDEBLOCKED", "Hide blocked or ignored messages", "Removes the \"blocked messages\" and \"ignored messages\" rows from chat.", "Blocked and ignored", HideBlockedSettings);
         withOptions("messages", "messageHighlight", "VENUS_MESSAGEHIGHLIGHT", "Message highlights", "Pick bar width and colors for replies, mentions and deleted messages.", "Message highlights", MessageHighlightSettings);
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
@@ -14902,14 +14902,16 @@
             !on ? offCard("status", Icon, "staffTag") : !hasAny ? statusCard("status", "Turn on at least one option below.",
                 {title:tr("Nobody is tagged"), IconComponent:Icon}) : null,
             el(StaffTagPreview, {key:"preview", on}),
-            el(Group, {key:"who", title:tr("Tag these people")},
+            el(Group, {key:"who", title:tr("Who gets a tag")},
                 switchRow(Switch, "staffTagOwner", "Owners", "Whoever owns the server.", rowIcon(10262, "CrownIcon")),
+                // The crown belongs to the Owner tag, so it sits right under it, only while owners are tagged, and its
+                // subtitle shows the tag as chat draws it (already translated, so switchRow's tr() leaves it as is).
+                settings.staffTagOwner ? switchRow(Switch, "staffTagCrown", "Crown for owners",
+                    tr("Shows the tag as {tag}.", {tag:"\ud83d\udc51 " + staffTagLabel("owner")}), rowIcon(10262, "CrownIcon")) : null,
                 switchRow(Switch, "staffTagAdmin", "Admins", "Anyone with the Administrator permission.", rowIcon(10410, "ShieldIcon")),
                 switchRow(Switch, "staffTagManager", "Managers", "Anyone who can manage the server, its roles or its channels.", rowIcon(15869, "WrenchIcon")),
                 switchRow(Switch, "staffTagMod", "Moderators", "Anyone who can kick, ban, time out or delete messages.", rowIcon(8617, "ShieldUserIcon"))),
-            el(Group, {key:"look", title:tr("Look")},
-                switchRow(Switch, "staffTagCrown", "Crown for owners", "Puts a \ud83d\udc51 in front of the Owner tag.", rowIcon(10262, "CrownIcon"))),
-            footnote("note", "Each person shows their highest tag, worked out from the roles you can see. Bots and webhooks keep their own. Changes show in chat right away, with no restart.")
+            footnote("note", "Tags come from the roles you can see, and each person only gets their highest one. Bots keep their own tags.")
         ];
         return settingsBody(ui, groups);
     }
@@ -15211,15 +15213,16 @@
         const groups = [
             !on ? offCard("status", Icon, "removedAlerts") : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
                 title:watching ? tr("Watching for removals") : tr("Nothing is watched"),
-                body:watching ? tr("Remembers {friends} and {servers} on this phone, so it can tell when one is gone.",
-                    {friends:pl(removed.friends.size, "{n} friend", "{n} friends"), servers:pl(removed.guilds.size, "{n} server", "{n} servers")}) : tr("Turn on at least one option below.")}),
+                body:!watching ? tr("Turn on at least one option below.") : !removed.friends.size && !removed.guilds.size ? tr("Starts once Discord has loaded your friends and servers.") :
+                    tr("Remembers {friends} and {servers} on this phone, so it can tell when one is gone.",
+                    {friends:pl(removed.friends.size, "{n} friend", "{n} friends"), servers:pl(removed.guilds.size, "{n} server", "{n} servers")})}),
             el(RemovedAlertsPreview, {key:"preview", on}),
             el(Group, {key:"when", title:tr("Alert me when")},
-                switchRow(Switch, "removedAlertsFriends", "A friend removes you", "They take you off their friends list.", rowIcon(5036, "UserMinusIcon")),
-                switchRow(Switch, "removedAlertsServers", "A server removes you", "You're kicked or banned, or the server is deleted. Leaving a server yourself never counts.", rowIcon(9239, "ServerIcon")),
-                switchRow(Switch, "removedAlertsClosed", "Check when Discord opens", "Finds friends and servers that went missing while Discord was closed or offline.", rowIcon(5051, "ClockIcon"))),
+                switchRow(Switch, "removedAlertsFriends", "A friend removes you", "They unfriend you.", rowIcon(5036, "UserMinusIcon")),
+                switchRow(Switch, "removedAlertsServers", "A server removes you", "You're kicked or banned, or the server is deleted. Never when you leave yourself.", rowIcon(9239, "ServerIcon")),
+                switchRow(Switch, "removedAlertsClosed", "Catch up when Discord opens", "Also tells you about removals that happened while Discord was closed or offline.", rowIcon(5051, "ClockIcon"))),
             el(Group, {key:"push", title:tr("Outside Discord")},
-                switchRow(Switch, "removedAlertsPush", "Phone notifications", "Also notify you while Discord is closed. Keeps Discord connected, which uses more battery.", rowIcon(6642, "MobilePhoneIcon")),
+                switchRow(Switch, "removedAlertsPush", "Phone notifications", "Get these even while Discord is closed. Keeps Discord connected in the background, which uses more battery.", rowIcon(6642, "MobilePhoneIcon")),
                 settings.removedAlertsPush && userNotif.permissionGranted === false && Row ?
                     el(Row, {key:"perm", label:tr("Allow notification permission"), subLabel:tr("Android notifications are turned off for Discord. Tap to check or open system settings."),
                         icon:rowIcon(10347, "BellSlashIcon"), variant:"danger", arrow:true, disabled:!on,
@@ -15227,10 +15230,10 @@
             el(Group, {key:"recent", title:tr("Recent")},
                 removed.history.length && Row ? removed.history.map((entry, i) => el(Row, {key:"h" + i + ":" + entry.t, label:removedLabel(entry), subLabel:removedAgo(entry.t),
                     icon:rowIcon(entry.k === "guild" ? 9239 : 5036, entry.k === "guild" ? "ServerIcon" : "UserMinusIcon")})) :
-                    Row ? el(Row, {key:"none", label:tr("Nothing has been removed yet."), disabled:true}) : null),
+                    Row ? el(Row, {key:"none", label:tr("No removals yet"), disabled:true}) : null),
             removed.history.length ? el(Group, {key:"manage", title:tr("Manage")},
                 actionRow(ui, "clear", "Clear recent alerts", "Empties the list above.", () => { removed.history.length = 0; save(); notify("removedAlerts"); }, false, true)) : null,
-            footnote("note", "Venus remembers who was on your friends list and which servers you were in. Things you remove or leave on this phone are ignored, and so are servers you're only previewing. Removals you make on another device can still show up here.")];
+            footnote("note", "Venus compares your friends and servers with what it saw last time. Anything you remove or leave on this phone never alerts you, and servers you're only previewing don't count.")];
         return settingsBody(ui, groups);
     }
     // Load full-quality images (#108, based on Uncompressed Discord Images by Knewest). The BetterDiscord plugin swaps each
