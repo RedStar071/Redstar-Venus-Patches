@@ -24,6 +24,10 @@ rm -rf "$W/ui-apk"   # the separate copy older versions of this script kept
 [ -f "$TMP/split_config.xxhdpi.apk" ] || unzip -o -q "$APKM" split_config.xxhdpi.apk -d "$TMP"
 [ "$(ls "$U/icons" | wc -l)" -gt 100 ] || unzip -o -q -j "$TMP/split_config.xxhdpi.apk" \
   'res/drawable-xxhdpi-v4/design_components_icon_native_redesign_generated_images_*' 'res/drawable-xxhdpi-v4/images_native_gifting_wumpus_box_premium120.png' -d "$U/icons"
+# Drawables Venus shows by name (Nitro links' sample emoji and sticker), checked separately so an older setup gets them too.
+# (the Wumpus wave ships in base.apk, the gift box in the xxhdpi split).
+[ -f "$U/icons/modules_guilds_bar_native_images_wumpus_wave.png" ] || unzip -o -q -j "$TMP/base.apk" \
+  'res/drawable-xxhdpi-v4/modules_guilds_bar_native_images_wumpus_wave.png' -d "$U/icons"
 [ -f "$U/fonts/ggsans-Normal.ttf" ] || unzip -o -q -j "$TMP/base.apk" 'assets/fonts/ggsans-*' -d "$U/fonts"
 [ -f "$W/new/assets/index.android.bundle" ] || unzip -o -q "$TMP/base.apk" assets/index.android.bundle -d "$W/new"
 cd "$ROOT"

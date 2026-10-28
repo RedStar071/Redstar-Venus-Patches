@@ -53,7 +53,11 @@ function build() {
   if (!jobs.length) throw new Error("Nothing to draw: node tests/ui/shot.cjs <name> '<query>' | --all | --scenes");
   const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".png": "image/png", ".ttf": "font/ttf" };
   const server = http.createServer((req, res) => {
-    const file = path.join(UI, decodeURIComponent(req.url.split("?")[0]) === "/" ? "index.html" : decodeURIComponent(req.url.split("?")[0]));
+    const want = decodeURIComponent(req.url.split("?")[0]);
+    let file = path.join(UI, want === "/" ? "index.html" : want);
+    // On Android, an image uri that's a bare name (no scheme, no extension) is a drawable from the APK, e.g. Nitro links'
+    // sample "modules_guilds_bar_native_images_wumpus_wave". Serve those from the icons tests/ui/setup.sh extracted.
+    if (/^\/[a-z0-9_]+$/.test(want)) file = path.join(UI, "icons", want.slice(1) + ".png");
     fs.readFile(file, (e, data) => { if (e) { res.writeHead(404); res.end(); return; } res.writeHead(200, { "Content-Type": types[path.extname(file)] || "application/octet-stream" }); res.end(data); });
   }).listen(0);
   fs.mkdirSync(path.join(UI, "shots"), { recursive: true });
@@ -66,8 +70,12 @@ function build() {
     page.on("console", m => { const t = m.text(); if (!/React DevTools|is not a prop|deprecated|Each child in a list/.test(t) && (m.type() !== "log" || /^(ALERT|DIALOG|TOAST)/.test(t))) logs.push(t.split("\n")[0]); });
     page.on("pageerror", e => logs.push("PAGE ERROR: " + e.message));
     // A broken page: an exception, React's own error, or a stand-in reporting something it couldn't do.
-    page.on("console", m => { if (m.type() === "error" && !/React DevTools|is not a prop|deprecated|Each child in a list|unique "key"/.test(m.text()) || m.type() === "warning" && /^(No |tap: |Unknown )/.test(m.text())) failed.add(name); });
+    page.on("console", m => { if (m.type() === "error" && !/React DevTools|is not a prop|deprecated|Each child in a list|unique "key"|^Failed to load resource/.test(m.text()) || m.type() === "warning" && /^(No |tap: |Unknown )/.test(m.text())) failed.add(name); });
     page.on("pageerror", () => failed.add(name));
+    // A file the preview should have (an icon, a font, a drawable) that it doesn't is a failure; an outside service that
+    // answers 429 or 5xx (icon pack repositories, ReviewDB) is only reported: it says nothing about the page.
+    page.on("response", r => { if (r.status() < 400) return; const local = r.url().startsWith(`http://127.0.0.1:${server.address().port}/`);
+      logs.push((local ? "MISSING " : "REMOTE ") + r.status() + " " + r.url().replace(/^http:\/\/127\.0\.0\.1:\d+/, "").slice(0, 110)); if (local) failed.add(name); });
     await page.goto(`http://127.0.0.1:${server.address().port}/?${query}`);
     await page.waitForTimeout(+(process.env.WAIT || 700));
     const height = await page.evaluate(() => document.getElementById("root").scrollHeight);
