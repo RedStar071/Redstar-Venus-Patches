@@ -8468,6 +8468,16 @@
         if (type === inspectedExport(16468, "default")) return "messages.requests";
         return null;
     }
+    // The message bar's actions (ChatInputActions 11935) hold the attach button next to Apps and gift/thread, which are
+    // their own components and hooked as their own spots. The attach button is Discord's action button with the media
+    // keyboard icon, or the ContextMenu wrapped around it; the gallery button (ImageIcon) counts as attaching too.
+    function chatAttachSpot(node) {
+        const type = node.type;
+        if (!type || typeof type === "string") return null;
+        if (type === inspectedExport(9358, "ContextMenu")) return "chat.attach";
+        const Icon = node.props.IconComponent;
+        return Icon && (Icon === inspectedExport(11940, "MediaKeyboardButtonIcon") || Icon === inspectedExport(8210, "ImageIcon")) ? "chat.attach" : null;
+    }
     // Your profile's floating pill (YouBannerDecorations 9115) keys its buttons by name, like Hide extra buttons reads them.
     function youSpot(node) { const k = node.key; return k === "quests" || k === "shop" || k === "nitro" ? "you." + k : null; }
     // With the voice message button removed, the send button acts as it does where voice messages aren't allowed.
@@ -8532,7 +8542,7 @@
     function hideAnythingHooks(id, exports) {
         if (!exports) return exports;
         switch (id) {
-            case 11935: return hookComponent(exports, hideWhole("chat.attach"));
+            case 11935: return hookComponent(exports, hideTree(chatAttachSpot));
             case 11942: return hookComponent(exports, hideWhole("chat.apps"));
             case 11946: return hookComponent(exports, hideWhole("chat.gift"));
             case 11957: return hookComponent(exports, hideWhole("chat.voice"));

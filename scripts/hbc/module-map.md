@@ -213,6 +213,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 9317 | `design/components/Icon/native/redesign/generated/PhoneCallIcon.tsx` | PhoneCallIcon | PhoneCallIcon |
 | 9337 | `design/components/Icon/native/redesign/generated/PaperIcon.tsx` | PaperIcon | PaperIcon |
 | 9354 | `design/components/Icon/native/redesign/generated/ThumbsUpIcon.tsx` | ThumbsUpIcon | ThumbsUpIcon |
+| 9358 | `design/components/ContextMenu/native/ContextMenu.native.tsx` | ContextMenu | ContextMenu (Remove anything: attach button wrapper) |
 | 9379 | `modules/chat_input/native/useChatBottomManagerUIStore.tsx` | default, updateChatInputContainerHeight, updateShowingAutoComplete | ChatInputHeightContext |
 | 9401 | `design/components/Icon/native/redesign/generated/UploadIcon.tsx` | UploadIcon | UploadIcon |
 | 9434 | `modules/double_tap_to_react/native/DoubleTapReminderToast.tsx` | maybeShowDoubleTapReminderToast | DoubleTapReminderToast |
@@ -269,6 +270,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 11828 | `design/components/Icon/native/redesign/generated/ShopIcon.tsx` | ShopIcon | ShopIcon (Hide extra buttons) |
 | 11841 | `design/components/Icon/native/redesign/generated/ArrowsUpDownIcon.tsx` | ArrowsUpDownIcon | ArrowsUpDownIcon |
 | 11935 | `modules/chat_input/native/action_buttons/ChatInputActions.tsx` | displayName, default | ChatInputSendAndGiftButton |
+| 11940 | `modules/media_keyboard/native/MediaKeyboardButtonIcon.tsx` | MediaKeyboardButtonIcon | MediaKeyboardButtonIcon (Remove anything: attach button) |
 | 11942 | `modules/chat_input/native/action_buttons/ChatInputActionButtonApps.tsx` | default | ChatInputActionButtonApps (Remove anything: Apps button) |
 | 11946 | `modules/chat_input/native/action_buttons/ChatInputActionButtonGiftOrThread.tsx` | default | ChatInputActionButtonGiftOrThread (Remove anything: gift/thread button) |
 | 11956 | `modules/chat_input/native/accessories/ChatInputSendButton.tsx` | default | ChatInputSendButton (Remove anything: canSendVoiceMessage) |

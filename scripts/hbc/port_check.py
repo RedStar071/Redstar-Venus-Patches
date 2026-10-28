@@ -279,6 +279,8 @@ BOOTSTRAP_MODULES = [
     (10260, 'design/components/Icon/native/redesign/generated/XLargeIcon.tsx', ['XLargeIcon'], 'XLargeIcon (Remove anything icon)'),
     (10483, 'design/components/Icon/native/redesign/generated/XSmallBoldIcon.tsx', ['XSmallBoldIcon'], 'XSmallBoldIcon (Remove anything: red X badge)'),
     (15389, 'design/components/Icon/native/redesign/generated/UndoIcon.tsx', ['UndoIcon'], 'UndoIcon (Remove anything: bring everything back)'),
+    (9358, 'design/components/ContextMenu/native/ContextMenu.native.tsx', ['ContextMenu'], 'ContextMenu (Remove anything: attach button wrapper)'),
+    (11940, 'modules/media_keyboard/native/MediaKeyboardButtonIcon.tsx', ['MediaKeyboardButtonIcon'], 'MediaKeyboardButtonIcon (Remove anything: attach button)'),
     (11942, 'modules/chat_input/native/action_buttons/ChatInputActionButtonApps.tsx', ['default'], 'ChatInputActionButtonApps (Remove anything: Apps button)'),
     (11946, 'modules/chat_input/native/action_buttons/ChatInputActionButtonGiftOrThread.tsx', ['default'], 'ChatInputActionButtonGiftOrThread (Remove anything: gift/thread button)'),
     (11956, 'modules/chat_input/native/accessories/ChatInputSendButton.tsx', ['default'], 'ChatInputSendButton (Remove anything: canSendVoiceMessage)'),
