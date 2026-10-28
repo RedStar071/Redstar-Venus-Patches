@@ -1097,7 +1097,7 @@
     const FEATURE_KEYWORDS = {hideAnything:["Removal mode", "Voice message button", "Video call button", "Message requests", "Add Friends button", "New message button", "Quests banner", "Attach menu", "Polls", "Photos"], systemFont:["Import a font", "Font file"], systemEmoji:["Import an emoji font", "Emoji font"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
-        userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account"],
+        userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account", "Export accounts", "Import accounts"],
         hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
@@ -10110,6 +10110,119 @@
             accessibilityLabel:tr("Switch accounts"), onPress:openAccountSwitcherSheet, onLongPress:() => openManageAccounts(),
             icon:el(accountSwitcher.youBarParts.Icon, {size:"custom", style:accountSwitcher.youBarParts.style, color:nameplate ? "white" : undefined})});
     }
+    // Export and import accounts (#111): the saved accounts and their sign-ins (TokenManager 1111) go to a file, so another
+    // phone or a fresh install gets them back without signing in again. Kept out of Backup and restore on purpose: the file
+    // signs in to every account in it, so it is only made after a warning. Importing follows the MultiAccountStore rules
+    // above: nothing is written until Discord has loaded its storage and initialized the store, accounts already saved are
+    // left alone, and Discord's own validateMultiAccountTokens then checks every new sign-in.
+    const ACCOUNTS_KIND = "venus-accounts", ACCOUNTS_FORMAT = 1, ACCOUNT_ID = /^\d{17,20}$/;
+    function accountTokens() {
+        const raw = global.__r && global.__r(1111);
+        return raw && typeof raw.setToken === "function" ? raw : raw && raw.default && typeof raw.default.setToken === "function" ? raw.default : null;
+    }
+    function accountsReady() {
+        const store = accountSwitcherStore();
+        return enabled("accountSwitcher") && !!store && store._isInitialized === true && accountSwitcherStorageReady() && typeof store.getState === "function" ? store : null;
+    }
+    function accountsExportList() {
+        const tokens = accountTokens();
+        if (!tokens || typeof tokens.getToken !== "function") return [];
+        accountSwitcherSync();
+        const me = currentUser(), out = [];
+        accountSwitcherUsers().forEach(acc => {
+            if (!acc || !ACCOUNT_ID.test(String(acc.id)) || out.some(a => a.id === acc.id)) return;
+            let token = null;
+            try { token = tokens.getToken(acc.id) || (me && me.id === acc.id ? tokens.getToken() : null); } catch (_) {}
+            if (typeof token === "string" && token) out.push({id:acc.id, username:acc.username || "", discriminator:acc.discriminator || "0", avatar:acc.avatar || null, token});
+        });
+        return out;
+    }
+    function accountsExport() {
+        const accounts = accountsExportList();
+        if (!accounts.length) { showProblem("Couldn't export accounts", tr("Try again in a moment.")); return; }
+        confirmAction("Export accounts?", "The file signs in to every saved account. Anyone who gets it can use them, so keep it private and never send it to anyone.", "Export", () => {
+            const text = JSON.stringify({app:BACKUP_APP, kind:ACCOUNTS_KIND, format:ACCOUNTS_FORMAT, created:Date.now(), accounts});
+            const toClipboard = () => {
+                const clip = reviewUI().clipboard || RN && RN.Clipboard;
+                try { clip.setString(text); } catch (_) { showProblem("Couldn't export accounts", tr("Try again in a moment.")); return; }
+                reviewToast(reviewUI(), "Accounts copied", venusIcon(5042, "CopyIcon"));
+            };
+            const saveDocuments = inspectedExport(12803, "saveDocuments"), dir = cacheDir();
+            if (!files || typeof saveDocuments !== "function" || !dir) { toClipboard(); return; }
+            const name = "venus-accounts-" + backupDate(Date.now()) + ".json", path = dir + "/" + name;
+            const cleanup = () => { try { if (typeof files.removeFile === "function") files.removeFile(path); else files.writeFile("cache", name, "", "utf8"); } catch (_) {} };
+            Promise.resolve().then(() => files.writeFile("cache", name, text, "utf8"))
+                .then(() => saveDocuments({sourceUris:["file://" + path], fileName:name, mimeType:"application/json"}))
+                .then(result => {
+                    const first = Array.isArray(result) ? result[0] : result;
+                    if (first && first.error) throw new Error(String(first.error));
+                    cleanup();
+                    reviewToast(reviewUI(), "Accounts exported", venusIcon(6868, "CircleCheckIcon"));
+                }).catch(error => { cleanup(); if (!pickerCancelled(error)) showProblem("Couldn't export accounts", tr("Try again in a moment.")); });
+        });
+    }
+    // Adds every valid account from an export that isn't saved yet; returns how many were added, or a reason it couldn't.
+    function accountsImportText(text) {
+        let data = null;
+        try { data = typeof text === "string" && text.length <= BACKUP_MAX_BYTES ? JSON.parse(text) : null; } catch (_) { data = null; }
+        if (!data || data.kind !== ACCOUNTS_KIND || typeof data.format !== "number" || data.format > ACCOUNTS_FORMAT || !Array.isArray(data.accounts))
+            return {error:tr("That isn't a Venus accounts export.")};
+        const store = accountsReady(), tokens = accountTokens();
+        if (!store || !tokens || typeof store.initialize !== "function") return {error:tr("Try again in a moment.")};
+        const state = store.getState() || {}, saved = Array.isArray(state.users) ? state.users.slice() : [];
+        const me = currentUser(), statuses = inspectedExport(12129, "MultiAccountTokenStatus");
+        const checking = statuses && typeof statuses.VALIDATING === "number" ? statuses.VALIDATING : 1;
+        let added = 0, full = false;
+        data.accounts.slice(0, 200).forEach(acc => {
+            if (!acc || typeof acc !== "object" || !ACCOUNT_ID.test(String(acc.id)) || typeof acc.token !== "string" || !acc.token || acc.token.length > 512 || /\s/.test(acc.token)) return;
+            if ((me && me.id === acc.id) || saved.some(u => u && u.id === acc.id)) return;
+            if (accountSwitcherWithCurrent(saved, false).length >= multiAccountLimit()) { full = true; return; }
+            try { tokens.setToken(acc.token, acc.id); } catch (_) { return; }
+            saved.push({id:acc.id, avatar:typeof acc.avatar === "string" ? acc.avatar : null, username:typeof acc.username === "string" ? acc.username.slice(0, 64) : "",
+                discriminator:typeof acc.discriminator === "string" ? acc.discriminator.slice(0, 4) : "0", tokenStatus:checking});
+            added++;
+        });
+        if (!added) return {error:full ? tr("There's no room for more accounts.") : tr("Every account in it is already saved.")};
+        try {
+            store.initialize(Object.assign({}, state, {users:accountSwitcherWithCurrent(saved, false), canUseMultiAccountMobile:true}));
+            if (typeof store.asyncPersist === "function") store.asyncPersist();
+            if (typeof store.emitChange === "function") store.emitChange();
+        } catch (_) { return {error:tr("Try again in a moment.")}; }
+        const validate = inspectedExport(12133, "validateMultiAccountTokens");
+        try { if (typeof validate === "function") validate(); } catch (_) {}
+        notify("accountSwitcher");
+        return {added};
+    }
+    function accountsImportDone(text) {
+        const result = accountsImportText(text);
+        if (result.error) showProblem("Couldn't import accounts", result.error);
+        else reviewToast(reviewUI(), pl(result.added, "{n} account added", "{n} accounts added"), venusIcon(6868, "CircleCheckIcon"));
+    }
+    function accountsImport() {
+        const pick = inspectedExport(12803, "pick"), keep = inspectedExport(12803, "keepLocalCopy"), types = inspectedExport(12803, "types");
+        if (!files || typeof pick !== "function" || typeof keep !== "function") {
+            const clip = reviewUI().clipboard || RN && RN.Clipboard;
+            if (!clip || typeof clip.getString !== "function") return;
+            Promise.resolve().then(() => clip.getString()).then(accountsImportDone, () => accountsImportDone(""));
+            return;
+        }
+        Promise.resolve().then(() => pick({type:[types && types.allFiles || "*/*"], allowMultiSelection:false, mode:"import"})).then(picked => {
+            const file = Array.isArray(picked) ? picked[0] : picked;
+            if (!file || typeof file.uri !== "string") throw new Error("cancel");
+            if (typeof file.size === "number" && file.size > BACKUP_MAX_BYTES) throw new Error(tr("That file couldn't be opened."));
+            return Promise.resolve(keep({files:[{uri:file.uri, fileName:"venus-accounts-import.json"}], destination:"cachesDirectory"})).then(copies => {
+                const copy = Array.isArray(copies) ? copies[0] : copies;
+                if (!copy || copy.status !== "success" || typeof copy.localUri !== "string") throw new Error(tr("That file couldn't be opened."));
+                const local = decodeURIComponent(copy.localUri.replace(/^file:\/\//, ""));
+                return Promise.resolve(files.readFile(local, "utf8")).then(text => {
+                    try { if (typeof files.removeFile === "function") files.removeFile(local); } catch (_) {}
+                    return text;
+                });
+            });
+        }).then(accountsImportDone).catch(error => {
+            if (!pickerCancelled(error)) showProblem("Couldn't import accounts", String(error && error.message && !/^[A-Z_]+$/.test(error.message) ? error.message : tr("That file couldn't be opened.")));
+        });
+    }
     function accountSwitcherSummary() {
         if (!enabled("accountSwitcher")) return tr("Turned off. Switch it on in Features to start.");
         const accounts = accountSwitcherUsers();
@@ -10172,6 +10285,10 @@
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openAddAccountModal}) : null,
                 Row ? el(Row, {key:"register", label:tr("Create a new account"), subLabel:tr("Register a new Discord account right inside the app."), icon:rowIcon(13139, "NewUserIcon"),
                     arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:openRegister}) : null,
+                Row ? el(Row, {key:"export", label:tr("Export accounts"), subLabel:tr("Save your accounts and their sign-ins to a file, for another phone or a fresh install."), icon:rowIcon(5044, "DownloadIcon"),
+                    arrow:true, disabled:!on || !accounts.length, onPress:accountsExport}) : null,
+                Row ? el(Row, {key:"import", label:tr("Import accounts"), subLabel:tr("Add accounts from an export, without signing in again."), icon:rowIcon(9401, "UploadIcon"),
+                    arrow:true, disabled:!on || accounts.length >= multiAccountLimit(), onPress:accountsImport}) : null,
                 Row ? el(Row, {key:"manage", label:tr("Manage accounts"), subLabel:tr("Open Discord's account manager to reorder or remove accounts."), icon:rowIcon(7092, "SettingsIcon"),
                     arrow:true, disabled:!on, onPress:() => openManageAccounts()}) : null,
                 null),
