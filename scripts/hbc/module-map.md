@@ -190,11 +190,13 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8396 | `design/components/Icon/native/redesign/generated/PlayIcon.tsx` | PlayIcon | PlayIcon (preview Watch button) |
 | 8398 | `design/components/Icon/native/redesign/generated/PauseIcon.tsx` | PauseIcon | PauseIcon (preview player) |
 | 8449 | `modules/icymi/ICYMIStore.tsx` | ICYMIStore | ICYMIStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
+| 8525 | `design/components/SegmentedControl/native/SegmentedControlState.native.tsx` | useSegmentedControlState | SegmentedControlState (Remove anything: profile tabs) |
 | 8575 | `design/void/Form/native/index.tsx` | Form, FormArrow, FormCheckbox | Form |
 | 8617 | `design/components/Icon/native/redesign/generated/ShieldUserIcon.tsx` | ShieldUserIcon | ShieldUserIcon |
 | 8633 | `modules/guild_settings/GuildSettingsActionCreators.tsx` | default, leaveGuild, deleteGuild | GuildSettingsActionCreators (Alert when you're removed) |
 | 8675 | `design/components/Icon/native/redesign/generated/CalendarIcon.tsx` | CalendarIcon | CalendarIcon |
 | 8768 | `design/components/Icon/native/redesign/generated/BellIcon.tsx` | BellIcon | BellIcon |
+| 8775 | `design/components/SegmentedControl/native/SegmentedControlItem.native.tsx` | SegmentedControlItem | SegmentedControlItem (Remove anything: marks profile tabs) |
 | 8792 | `modules/voice_panel/native/shared/FormComponents.tsx` | VoicePanelFormSection, MemberRowItem | VoiceChannelMembers |
 | 8921 | `design/components/Icon/native/redesign/generated/TrophyIcon.tsx` | TrophyIcon | TrophyIcon (Badge Completer) |
 | 8956 | `design/components/Icon/native/redesign/generated/ReactionIcon.tsx` | ReactionIcon | ReactionIcon |
@@ -215,8 +217,10 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 9337 | `design/components/Icon/native/redesign/generated/PaperIcon.tsx` | PaperIcon | PaperIcon |
 | 9354 | `design/components/Icon/native/redesign/generated/ThumbsUpIcon.tsx` | ThumbsUpIcon | ThumbsUpIcon |
 | 9358 | `design/components/ContextMenu/native/ContextMenu.native.tsx` | ContextMenu | ContextMenu (Remove anything: attach button wrapper) |
+| 9359 | `design/components/ContextMenu/native/ContextMenuState.native.tsx` | hideContextMenu | ContextMenuState (Remove anything: closes the menu before asking) |
 | 9379 | `modules/chat_input/native/useChatBottomManagerUIStore.tsx` | default, updateChatInputContainerHeight, updateShowingAutoComplete | ChatInputHeightContext |
 | 9401 | `design/components/Icon/native/redesign/generated/UploadIcon.tsx` | UploadIcon | UploadIcon |
+| 9405 | `design/components/Icon/native/redesign/generated/BoostGemIcon.tsx` | BoostGemIcon | BoostGemIcon (Remove anything: Boost button in the server menu) |
 | 9434 | `modules/double_tap_to_react/native/DoubleTapReminderToast.tsx` | maybeShowDoubleTapReminderToast | DoubleTapReminderToast |
 | 9464 | `modules/app_icons/native/AppIconConstants.tsx` | getDefaultIcon, getOfficialAlternateIcons, getLimitedAlternateIcons | AppIconConstants |
 | 9549 | `design/components/Icon/native/redesign/generated/StarIcon.tsx` | StarIcon | StarIcon |
@@ -280,6 +284,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 11969 | `modules/chat_input/native/ChatFloatingNavButton.tsx` | default | JumpToPresentPill |
 | 11970 | - | __packager_asset, registerAsset | JumpToPresent arrow asset |
 | 11990 | `modules/double_tap_to_react/native/DoubleTapToReactChatInputBanner.tsx` | DoubleTapToReactChatInputBanner | DoubleTapToReactChatInputBanner |
+| 11997 | `modules/channel_list_v2/native/components/GuildSearchAndInvite.tsx` | default | GuildSearchAndInvite (Remove anything: Search / Invite / Events) |
 | 12055 | `design/components/Icon/native/redesign/generated/TiktokNeutralIcon.tsx` | TiktokNeutralIcon | TiktokNeutralIcon (Fix link previews) |
 | 12129 | `modules/multi_account/MultiAccountStore.tsx` | INVALID, VALIDATING, VALID | MultiAccountStore |
 | 12130 | `modules/multi_account/Constants.tsx` | YOU_ACCOUNT_ACTION_SHEET, CHOOSE_ACCOUNT, MANAGE_ACCOUNTS_MODAL | MultiAccountConstants |
@@ -315,8 +320,13 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 13968 | `modules/gateway/PauseGatewaySocket.tsx` | getIsPaused, setIsPaused | PauseGatewaySocket |
 | 14008 | `modules/guilds_bar/GuildMediaStateStore.tsx` | GuildMediaStateStore | GuildMediaStateStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
 | 14048 | `stores/PrivateChannelReadStateStore.tsx` | default | PrivateChannelReadStateStore |
+| 14143 | `modules/guild_action_sheet/native/components/GuildActionSheetActions.tsx` | GuildUnreadAction, GuildActionSheetSecondaryActions | GuildActionSheetActions (Remove anything: server menu rows) |
 | 14193 | `modules/guild/markGuildsAsRead.tsx` | default | markGuildsAsRead |
+| 14206 | `modules/guild_action_sheet/native/components/GuildActionSheetHeader.tsx` | default | GuildActionSheetHeader (Remove anything: Community Server pill) |
+| 14212 | `modules/guild_action_sheet/native/components/GuildActionSheetTabItems.tsx` | default | GuildActionSheetTabItems (Remove anything: Boost / Invite / Notifications) |
 | 14213 | `modules/guild_action_sheet/native/components/GuildActionSheetProgress.tsx` | default | GuildActionSheetJoinRequestRow |
+| 14216 | `modules/guild_action_sheet/native/components/GuildActionSheetEmojiSection.tsx` | default | GuildActionSheetEmojiSection (Remove anything: Server Emoji) |
+| 14279 | `design/components/ContextMenu/native/ContextMenuItem.native.tsx` | ContextMenuItem | ContextMenuItem (Remove anything: marks profile menu items) |
 | 14281 | `design/components/ContextMenu/native/ContextMenuPopout.native.tsx` | ContextMenuPopout | ContextMenuPopout |
 | 14299 | `modules/premium/ProductCatalog.tsx` | ANIMATED_EMOJIS, EMOJIS_EVERYWHERE, STICKERS_EVERYWHERE, CLIENT_THEMES | EmojiPermissions |
 | 14419 | `design/void/Status/native/Status.tsx` | default, StatusWithTyping | Status |
