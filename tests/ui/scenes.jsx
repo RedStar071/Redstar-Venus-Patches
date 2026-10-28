@@ -16,6 +16,8 @@
 //   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
+// Each scene turns on the features it shows (SCENE_SETTINGS below), so scene=serverInfo needs no on=; set= still wins
+// (set={"readAll":false} draws the screen with the feature off). shot.cjs --scenes draws every one of them.
 import * as React from "react";
 import * as RN from "react-native-web";
 import * as D from "./discord.jsx";
@@ -37,6 +39,14 @@ const guild = { id: snowflake(now - 3.2 * 365 * DAY), name: "Game Night", icon: 
   verificationLevel: 2, preferredLocale: "en-US", features: new Set(["COMMUNITY"]) };
 const guilds = [guild, { id: "1100000000000000002", name: "Art Room", icon: null }, { id: "1100000000000000003", name: "Work Devs", icon: null }];
 const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i) } }));
+
+// The saved settings each scene starts from: the features it draws, plus the options its description names.
+export const SCENE_SETTINGS = {
+  serverMenu: { serverInfo: true }, serverInfo: { serverInfo: true }, readAll: { readAll: true }, readAllHold: { readAll: true },
+  reviews: { reviewDB: true }, serverSheet: { reviewDB: true }, hiddenChannel: { hiddenChannels: true }, settings: {},
+  youBar: { youBarSettings: true, accountSwitcher: true }, translateBar: { translate: true, translateMode: "manual" },
+  messageMenu: { translate: true }, bulkDelete: { bulkDelete: true }, longMessageFailed: { splitMessages: true }, longEdit: { splitMessages: true },
+};
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
 export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379];
@@ -125,7 +135,7 @@ function YouBarButton(p) {
 // The profile bar under the server and channel lists: avatar, name and status, then the bell and what Venus adds.
 function YouBar({ defined }) {
   const Bell = defined[16858].exports.default;
-  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST"), justifyContent: "flex-end" }}>
+  return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST"), justifyContent: "flex-end" }}>
     <RN.View style={{ marginLeft: 8, marginRight: 12, marginBottom: 12, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 84, paddingRight: 8, height: 64,
       borderRadius: 20, borderWidth: 1, borderColor: D.tok("BORDER_SUBTLE"), backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
       <RN.View style={{ position: "absolute", left: 4, bottom: 4, width: 72, height: 72, borderRadius: 36, backgroundColor: "#f0b232" }}>
@@ -142,7 +152,7 @@ const SPANISH = [{ id: "1", channel_id: CHAT, content: "¡Hola a todos! ¿Quién
   { id: "4", channel_id: CHAT, content: "Let me clean these up", author: { id: "123456789012345678", username: "venus" }, state: "SENT", type: 0 }];
 function Chat({ defined }) {
   const Wrapper = defined[10368].exports.default;
-  return <RN.View style={{ width: 412, height: 520, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+  return <RN.View style={{ width: D.W, height: 520, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
     <RN.View style={{ height: 52, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderColor: D.tok("BORDER_SUBTLE") }}>
       {React.createElement(D.makeIcon("HashmarkIcon"), { size: "sm", color: D.tok("CHANNEL_ICON") })}<D.Text variant="text-md/bold" color="text-strong">general</D.Text></RN.View>
     <Wrapper channelId={CHAT}>
@@ -176,7 +186,7 @@ window.fetch = (url, o) => /manti\.vendicated\.dev/.test(String(url)) ?
 // A profile: banner, avatar, name, then its cards ending with the note (and what Venus adds after it).
 function Profile({ defined }) {
   const Note = defined[13181].exports.default;
-  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+  return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
     <RN.View style={{ height: 110, backgroundColor: "#3ba55c" }} />
     <RN.View style={{ paddingHorizontal: 16, marginTop: -44, gap: 4 }}>
       <RN.View style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 6, borderColor: D.tok("BACKGROUND_BASE_LOWER"), backgroundColor: "#3ba55c", alignItems: "center", justifyContent: "center" }}>
@@ -309,7 +319,7 @@ function SettingsScreen({ defined, registry }) {
   const config = defined[10664].exports.createList({ sections: DISCORD_SECTIONS.map(([label, rows]) => ({ label, settings: rows.map(r => r[0]) })) });
   const List = defined[14971] ? defined[14971].exports.SettingsList : null;
   const all = Object.assign({}, registry, plain);
-  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
+  return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
     <RN.View style={{ height: 56, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}><D.Text variant="heading-lg/bold" color="text-strong">Settings</D.Text></RN.View>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 16 }}><D.SearchField placeholder="Search" /></RN.View>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 24, gap: 24 }}>
@@ -360,11 +370,11 @@ export function Scene({ name, defined, registry }) {
   const top = sheets[sheets.length - 1];
   // With a sheet open, the screen behind is dimmed and the sheet is laid out in full below a strip of it, so the
   // screenshot shows the whole sheet the way you'd scroll through it.
-  if (top) return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_SCRIM") }}>
+  if (top) return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_SCRIM") }}>
     {top.key === "alert" ? null : <RN.View style={{ height: 72 }} />}
     {top.content}
   </RN.View>;
-  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
+  return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
     <RN.View style={{ flexDirection: "row", height: 520 }}>
       <GuildBar defined={defined} />
       <Channels />

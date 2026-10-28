@@ -6,6 +6,8 @@ import * as React from "react";
 import * as RN from "react-native-web";
 import tokensAll from "../../work/ui/tokens.json";
 
+// The phone width every frame is drawn at: the viewport shot.cjs opens (WIDTH=360 for a narrow phone, 412 by default).
+export const W = window.innerWidth || 412;
 export const themeName = new URLSearchParams(location.search).get("theme") || "dark";
 export const T = tokensAll[themeName] || tokensAll.dark;
 // Discord's real color tables (work/discord_colors.json), handed to Venus as modules 589/590/591 so a theme it compiles
