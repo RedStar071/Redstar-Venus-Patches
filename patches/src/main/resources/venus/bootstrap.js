@@ -8322,9 +8322,10 @@
         }
         try { if (RN && RN.Alert) RN.Alert.alert(title, body, [{text:tr("Cancel"), style:"cancel"}, {text:tr("Remove"), style:"destructive", onPress:confirm}], {cancelable:true}); } catch (_) {}
     }
-    // The mark drawn over a removable button in removal mode: a dashed red outline over the whole button (a tap anywhere on
-    // it asks to remove it, so Discord's own action doesn't run) and a red X in its corner. The wrapper takes the button's
-    // own flex and margins, so the row keeps its layout.
+    // The mark drawn over a removable button in removal mode: a dashed red outline over the whole button and a red X in its
+    // corner. Only the X asks to remove it; the outline catches taps on the button itself so Discord's own action doesn't
+    // run by mistake (no Add Friend or Leave Server while you're tidying up). The wrapper takes the button's own flex and
+    // margins, so the row keeps its layout.
     const HIDE_LAYOUT_KEYS = ["flex", "flexGrow", "flexShrink", "flexBasis", "alignSelf", "margin", "marginLeft", "marginRight", "marginTop", "marginBottom",
         "marginHorizontal", "marginVertical", "marginStart", "marginEnd", "position", "top", "left", "right", "bottom"];
     const HIDE_MARK = {cover:{position:"absolute", top:-3, left:-3, right:-3, bottom:-3, borderRadius:14, borderWidth:2, borderStyle:"dashed",
@@ -8337,6 +8338,15 @@
             borderColor:"#f23f43", backgroundColor:"#f23f431a"},
         badge:{position:"absolute", top:"50%", marginTop:-11, right:12, width:22, height:22, borderRadius:11, alignItems:"center", justifyContent:"center",
             backgroundColor:"#f23f43", borderWidth:2, borderColor:"#ffffff", elevation:6}};
+    const swallowTap = () => true, ignoreTap = () => {};
+    // The red X on its own: the one place a tap asks to remove the spot. before() runs first (the profile menu closes itself).
+    function HideBadge(props) {
+        const Press = RN.Pressable || RN.TouchableOpacity || RN.View, X = inspectedExport(10483, "XSmallBoldIcon");
+        const ask = () => { if (props.before) try { props.before(); } catch (_) {} askRemoveSpot(props.spot); };
+        return el(Press, {style:props.style, onPress:ask, hitSlop:{top:12, bottom:12, left:12, right:12}, accessibilityRole:"button",
+            accessibilityLabel:tr("Remove: {name}", {name:hideSpotTitle(props.spot)})},
+            X ? el(X, {size:"xxs", color:"#ffffff"}) : el(RN.Text, {style:HIDE_MARK.x}, "\u2715"));
+    }
     function HideMark(props) {
         const base = props.base, key = props.spot;
         let layout = null;
@@ -8344,13 +8354,11 @@
             const flat = base && base.props && base.props.style && RN.StyleSheet ? RN.StyleSheet.flatten(base.props.style) : null;
             if (flat) for (const name of HIDE_LAYOUT_KEYS) if (flat[name] !== undefined) (layout || (layout = {}))[name] = flat[name];
         } catch (_) {}
-        const Press = RN.Pressable || RN.TouchableOpacity || RN.View, X = inspectedExport(10483, "XSmallBoldIcon");
-        const label = tr("Remove: {name}", {name:hideSpotTitle(key)}), ask = () => askRemoveSpot(key);
         return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false},
             base,
-            el(Press, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onPress:ask, accessibilityRole:"button", accessibilityLabel:label}),
-            el(Press, {style:props.inset ? HIDE_INSET.badge : HIDE_MARK.badge, onPress:ask, hitSlop:{top:10, bottom:10, left:10, right:10}, accessibilityRole:"button", accessibilityLabel:label},
-                X ? el(X, {size:"xxs", color:"#ffffff"}) : el(RN.Text, {style:HIDE_MARK.x}, "\u2715")));
+            el(RN.View, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onStartShouldSetResponder:swallowTap, onResponderRelease:ignoreTap,
+                importantForAccessibility:"no-hide-descendants", accessibilityElementsHidden:true}),
+            el(HideBadge, {spot:key, before:props.before, style:props.inset ? HIDE_INSET.badge : HIDE_MARK.badge}));
     }
     function hideMarked(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node}); }
     function hideMarkedRow(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node, inset:true}); }
