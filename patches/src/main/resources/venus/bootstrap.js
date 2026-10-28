@@ -8360,8 +8360,8 @@
     // Asks first, in Discord's own alert, then removes it right away.
     function askRemoveSpot(key) {
         haptic("IMPACT_LIGHT");
-        const name = hideSpotTitle(key), title = tr("Remove {name}?", {name});
-        const body = tr("It disappears right away. Bring it back any time in Venus, under Remove anything.");
+        const name = hideSpotTitle(key), title = tr("Remove this button?");
+        const body = tr("{name} disappears right away. You can bring it back any time in Venus, under Remove anything.", {name});
         const confirm = () => { setSpotHidden(key, true); haptic("IMPACT_MEDIUM"); };
         const alerts = inspectedExport(5300, "default");
         if (alerts && typeof alerts.show === "function") {
@@ -8388,7 +8388,7 @@
             if (flat) for (const name of HIDE_LAYOUT_KEYS) if (flat[name] !== undefined) (layout || (layout = {}))[name] = flat[name];
         } catch (_) {}
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View, X = inspectedExport(10483, "XSmallBoldIcon");
-        const label = tr("Remove {name}", {name:hideSpotTitle(key)}), ask = () => askRemoveSpot(key);
+        const label = tr("Remove: {name}", {name:hideSpotTitle(key)}), ask = () => askRemoveSpot(key);
         return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false},
             base,
             el(Press, {style:HIDE_MARK.cover, onPress:ask, accessibilityRole:"button", accessibilityLabel:label}),
@@ -8520,7 +8520,7 @@
         }, [last, fresh]);
         if (!RN || !hideEditing()) return null;
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View, n = hiddenSpots().size;
-        const sub = fresh ? tr("{name} removed", {name:hideSpotTitle(last.key)}) : n ? pl(n, "{n} button removed", "{n} buttons removed") : tr("Tap \u2715 on any button to remove it");
+        const sub = fresh ? tr("Removed: {name}", {name:hideSpotTitle(last.key)}) : n ? pl(n, "{n} button removed", "{n} buttons removed") : tr("Tap \u2715 on any button to remove it");
         const button = (key, style, text, textStyle, onPress, label) => el(Press, {key, style, onPress, accessibilityRole:"button", accessibilityLabel:label || text,
             hitSlop:{top:6, bottom:6, left:4, right:4}}, el(RN.Text, {style:textStyle}, text));
         return el(RN.View, {pointerEvents:"box-none", style:[HIDE_BAR.wrap, hideEdit.top ? {top:52} : {bottom:136}]},
@@ -8594,7 +8594,7 @@
         const groups = [
             on ? null : offCard("status", venusIcon(10260, "XLargeIcon"), "hideAnything"),
             el(HideAnythingHero, {key:"hero", on}),
-            removed.length && Row ? el(Group, {key:"removed", title:pl(removed.length, "{n} removed", "{n} removed")},
+            removed.length && Row ? el(Group, {key:"removed", title:pl(removed.length, "{n} button removed", "{n} buttons removed")},
                 removed.map(spot => el(Row, {key:spot[0], label:hideSpotTitle(spot[0]), subLabel:hidePlaceTitle(spot[1]), icon:icon(spot), disabled:!on,
                     trailing:Button ? el(Button, {text:tr("Bring back"), size:"sm", variant:"secondary", disabled:!on, onPress:() => { haptic("SELECTION"); setSpotHidden(spot[0], false); }}) : undefined,
                     onPress:() => { haptic("SELECTION"); setSpotHidden(spot[0], false); }})).concat(removed.length > 1 ? [el(Row, {key:"all", label:tr("Bring everything back"),
@@ -8602,7 +8602,7 @@
             .concat(HIDE_PLACES.map(place => el(Group, {key:"place:" + place, title:hidePlaceTitle(place)},
                 HIDE_SPOTS.filter(spot => spot[1] === place).map(spot => Switch ? el(Switch, {key:spot[0], label:hideSpotTitle(spot[0]), icon:icon(spot),
                     value:hidden.has(spot[0]), disabled:!on, onValueChange:value => setSpotHidden(spot[0], value)}) : null))))
-            .concat([footnote("note", "Switched on means removed. Removed buttons are only hidden on this phone, and the rest of the row closes up with no gap.")]);
+            .concat([footnote("note", "Switched on means removed. Buttons are only removed on this phone, and the ones left close up with no gap.")]);
         return settingsBody(ui, groups);
     }
     // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
