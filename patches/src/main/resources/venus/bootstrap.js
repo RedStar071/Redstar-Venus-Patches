@@ -15190,27 +15190,6 @@
         });
         return exports;
     }
-    // The preview is one chat message with a picture in it: the mock picture has fine detail that goes soft and grainy when off.
-    function FullImagesPreview(props) {
-        useSettings("fullImages");
-        const s = useChatPreviewStyles(), sharp = !!props.on && !!settings.fullImagesChat;
-        const Pic = venusIcon(8210, "ImageIcon");
-        const lines = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => el(RN.View, {key:"l" + i,
-            style:{position:"absolute", left:0, right:0, top:52 + i * 5, height:1, backgroundColor:"#ffffff", opacity:sharp ? 0.6 : 0.12}}));
-        const chip = popIn("chip:" + sharp, el(RN.View, {style:{position:"absolute", left:8, bottom:8, flexDirection:"row", alignItems:"center", gap:4,
-            paddingHorizontal:8, paddingVertical:4, borderRadius:12, backgroundColor:sharp ? "#248046" : "#000000b3"}},
-            el(Pic, {size:"xs", color:"#ffffff"}),
-            el(RN.Text, {style:{color:"#ffffff", fontSize:11, fontWeight:"700"}, numberOfLines:1}, sharp ? tr("Original quality") : tr("Compressed by Discord"))));
-        const picture = el(RN.View, {key:"picture", style:{height:150, borderRadius:8, overflow:"hidden", backgroundColor:"#4a6fd1"}},
-            el(RN.View, {style:{position:"absolute", left:0, right:0, bottom:0, height:72, backgroundColor:"#3d8f5f"}}),
-            el(RN.View, {style:{position:"absolute", right:28, top:18, width:34, height:34, borderRadius:17, backgroundColor:"#ffd966"}}),
-            lines,
-            sharp ? null : el(RN.View, {style:{position:"absolute", left:0, right:0, top:0, bottom:0, backgroundColor:"#80848e", opacity:0.3}}),
-            chip);
-        const body = el(RN.View, {style:{gap:6}}, el(RN.Text, {style:s.text}, tr("Here's the screenshot!")), picture);
-        return el(RN.View, {key:"preview"},
-            previewScreen(s, "preview", "Full-quality images preview", [previewMessage(s, "msg", "Sam", "#5865f2", tr("Today at 4:01 PM"), body)]));
-    }
     function FullImagesSettings() {
         useSettings("fullImages");
         const ui = reviewUI();
@@ -15222,7 +15201,6 @@
             !on ? offCard("status", Icon, "fullImages") : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
                 title:where ? tr("Loading pictures as uploaded") : tr("Nothing loads in full"),
                 body:where ? tr("Pictures people upload show in their original quality, not Discord's smaller copy.") : tr("Turn on at least one option below.")}),
-            el(FullImagesPreview, {key:"preview", on}),
             el(Group, {key:"where", title:tr("Load in full")},
                 switchRow(Switch, "fullImagesChat", "In chat", "Pictures in messages, as soon as they appear.", rowIcon(8194, "ChatIcon")),
                 switchRow(Switch, "fullImagesViewer", "When opened", "Pictures you tap to view full screen.", rowIcon(15327, "FullscreenEnterIcon"))),
