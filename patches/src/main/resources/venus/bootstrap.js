@@ -564,7 +564,7 @@
         if (features.accountSwitcher && featureFor(key) === "accountSwitcher") accountSwitcherSync();
         if (features.customThemes && key === "customThemes") { if (value) customThemesRestore(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.customThemes && key === "customThemesBackground") customThemesApply();
-        if (features.nitroThemes && key === "nitroThemes" && !value) nitroThemeTurnedOff();
+        if (features.nitroThemes && key === "nitroThemes") { if (!value) nitroThemeTurnedOff(); nitroThemeRecheck(); }
         if (features.materialYou && key === "materialYou") { if (value) myStart(); customThemesApply(); if (features.iconPacks) iconPacksApply(); }
         if (features.iconPacks && key === "iconPacks") { if (value) iconPacksRestore(); iconPacksApply(); }
         if (features.iconPacks && key === "iconPacksTheme") iconPacksApply();
@@ -636,6 +636,7 @@
                 }
             }
             status.storage = "ready";
+            if (features.nitroThemes && settings.nitroThemes) nitroThemeRecheck();
             if (features.nitroThemes && nitroTheme.preset != null) later(nitroThemeReapply, 0);
             if (!starter.done && Object.keys(FEATURE_ICONS).some(key => features[key] && settings[key])) starter.done = true;
             fontInUse = settings.systemFont;
@@ -8053,6 +8054,15 @@
             } catch (_) {}
         }
         return exports;
+    }
+    // ClientThemesBackgroundStore keeps its own "locked" flag next to isPreview, set from canUseClientThemes when it
+    // initializes and recomputed only when UserStore changes (handleUserStoreChange, a syncWith on UserStore 1390). On a
+    // cold start that runs before the settings file is read, so the flag stayed locked: with "Same as device" (per-mode
+    // theming) the gradientPreset getter then returned nothing, the light and dark mode gradients never showed outside
+    // the picker, every pick was treated as a throwaway preview, and reset() cleared it. A UserStore change makes the store
+    // read the capability again; it is sent once the settings are read and whenever the switch changes.
+    function nitroThemeRecheck() {
+        later(() => { try { if (userStore && typeof userStore.emitChange === "function") userStore.emitChange(); } catch (_) {} }, 0);
     }
     // Why the theme fell back to Dark: picking a gradient saves it to your account (saveClientTheme 5260 ->
     // PreloadedUserSettingsActionCreators.updateAsync("appearance") 2046), and Discord's servers drop a gradient an account
