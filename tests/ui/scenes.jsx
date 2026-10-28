@@ -15,8 +15,8 @@
 //                      selection bar in the message bar's place (add on=translate&set={"translateMode":"manual"} for both bars)
 //   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
 //   scene=removeMode   Remove anything: the Messages tab header, a DM header, a profile's buttons, your profile pill and the message
-//                      bar, in removal mode (a red X on every removable button, the floating bar at the bottom). ask=<spot> taps that
-//                      spot's X (dm.call, chat.voice...), so the "Remove this button?" alert shows; mode=off draws them without removal
+//                      bar, in removal mode (a red X on every removable button, the floating bar at the bottom). ask=<name> taps that
+//                      button's X (ask=Voice call button), so the "Remove this button?" alert shows; mode=off draws them without removal
 //                      mode, so set={"hideAnythingSpots":"..."} shows the rows closed up
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
@@ -133,7 +133,8 @@ export function modules(store, me) {
       <RN.Pressable onPress={() => {}} style={ROUND}>{icon(10771, "VideoIcon", "sm")}</RN.Pressable>
       <RN.Pressable onPress={() => {}} style={ROUND}>{icon(6740, "MagnifyingGlassIcon", "sm")}</RN.Pressable></RN.View> },
     13425: { default: () => <RN.View style={{ flexDirection: "row", gap: 8 }}>
-      <ProfileButton icon={icon(8194, "ChatIcon", "sm")} text="Message" /><ProfileButton icon={icon(9317, "PhoneCallIcon", "sm")} text="Call" /></RN.View> },
+      <RN.View style={{ flex: 1 }}><ProfileButton icon={icon(8194, "ChatIcon", "sm")} text="Message" /></RN.View>
+      <RN.View style={{ flex: 1 }}><ProfileButton icon={icon(9317, "PhoneCallIcon", "sm")} text="Call" /></RN.View></RN.View> },
     9115: { default: () => <RN.View style={{ flexDirection: "row", alignSelf: "center", gap: 8, padding: 8, borderRadius: 28, backgroundColor: D.tok("BACKGROUND_SURFACE_HIGH") }}>
       {[["quests", 13012, "QuestsIcon"], ["shop", 11828, "ShopIcon"], ["nitro", 9031, "NitroWheelIcon"], ["settings", 7092, "SettingsIcon"]].map(([key, id, name]) =>
         <RN.View key={key} style={[ROUND, { backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }]}>{icon(id, name, "sm")}</RN.View>)}</RN.View> },
@@ -376,7 +377,7 @@ function ActionButton(p) {
     {React.createElement(p.IconComponent, { size: "sm", color: p.brand ? "#fff" : undefined })}</RN.Pressable>;
 }
 function ProfileButton(p) {
-  return <RN.Pressable style={{ flex: 1, height: 40, borderRadius: 20, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: D.tok("CONTROL_SECONDARY_BACKGROUND_DEFAULT") }}>
+  return <RN.Pressable style={{ height: 40, borderRadius: 20, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: D.tok("CONTROL_SECONDARY_BACKGROUND_DEFAULT") }}>
     {p.icon}<D.Text variant="text-md/semibold" color="text-strong">{p.text}</D.Text></RN.Pressable>;
 }
 function Caption(p) { return <RN.View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6 }}><D.Text variant="text-xs/bold" color="text-muted">{p.children}</D.Text></RN.View>; }
@@ -388,10 +389,10 @@ function RemoveMode({ defined, registry }) {
   React.useEffect(() => {
     if (q.get("mode") === "off") return;
     const press = (find, then) => { let tries = 0; const go = () => { const hit = find(); if (hit) { hit.click(); if (then) setTimeout(then, 150); } else if (++tries < 30) setTimeout(go, 50); }; go(); };
-    press(() => Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && /^(Start removing|Stop removing)$/.test((e.textContent || "").trim()) || false) ||
-      Array.from(document.querySelectorAll("#hide-page [tabindex]")).find(e => e.querySelector("div")) , q.get("ask") ? () =>
-      press(() => document.querySelector(`[data-spot="${q.get("ask")}"]`) || Array.from(document.querySelectorAll("#root [aria-label]")).find(e => e.getAttribute("aria-label").indexOf(":") > 0 &&
-        e.closest("[data-hide-spot]") && e.closest("[data-hide-spot]").getAttribute("data-hide-spot") === q.get("ask"))) : null);
+    const text = want => Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && (e.textContent || "").trim() === want);
+    const tappable = e => e && (e.closest("[tabindex]") || e);
+    // ask= is a button's name as Venus says it (Voice call button): its X is labelled "Remove: <name>".
+    press(() => tappable(text("Start removing")), q.get("ask") ? () => press(() => document.querySelector(`[aria-label="Remove: ${q.get("ask")}"]`)) : null);
   }, []);
   const card = { marginHorizontal: 12, borderRadius: 16, padding: 12, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") };
   return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
