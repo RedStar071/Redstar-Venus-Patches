@@ -51,7 +51,7 @@
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467]);
+    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467, 14279, 8525, 8775, 10533, 11997, 14206, 14212, 14143, 14216]);
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -8195,7 +8195,7 @@
         return enabled("appIcons") && React ? withoutAppIconUpsell(rendered, 0, inspectedExport(9778, "default"), inspectedExport(6180, "TableRow") || null) : rendered;
     }
     // Remove anything: buttons you never use, removed right where they are. Each removable button is a "spot". Removal mode
-    // (hideEdit.on, never saved) marks every spot on screen with a dashed outline and a red X; a tap asks first, then the
+    // (hideEdit.on, never saved) marks every spot on screen with a dashed outline and a red X; a tap on the X asks first, then the
     // spot is added to hideAnythingSpots and disappears at once. Venus -> Remove anything lists them to bring back.
     // Spots are matched by Discord's own components and icons, never by translated text.
     const HIDE_SPOTS = [
@@ -8214,7 +8214,23 @@
         ["menu.copyInfo", "menu", 9237, "MoreHorizontalIcon"], ["menu.apps", "menu", 9237, "MoreHorizontalIcon"],
         ["menu.shopLook", "menu", 9237, "MoreHorizontalIcon"], ["menu.removeFromGroup", "menu", 9237, "MoreHorizontalIcon"],
         ["menu.ignore", "menu", 9237, "MoreHorizontalIcon"], ["menu.block", "menu", 9237, "MoreHorizontalIcon"],
-        ["menu.report", "menu", 9237, "MoreHorizontalIcon"]];
+        ["menu.report", "menu", 9237, "MoreHorizontalIcon"],
+        ["profile.guildTag", "profile", 9071, "TagIcon"], ["profile.addFriend", "profile", 5032, "UserPlusIcon"], ["profile.message", "profile", 8194, "ChatIcon"],
+        ["profile.activity", "profile", 17294, "ActivitiesIcon"], ["profile.wishlist", "profile", 11540, "GiftIcon"],
+        ["server.search", "server", 6740, "MagnifyingGlassIcon"], ["server.invite", "server", 5032, "UserPlusIcon"], ["server.events", "server", 8675, "CalendarIcon"],
+        ["guild.community", "guild", 9099, "GlobeEarthIcon"], ["guild.boost", "guild", 9405, "BoostGemIcon"], ["guild.invite", "guild", 5032, "UserPlusIcon"],
+        ["guild.notifications", "guild", 8768, "BellIcon"], ["guild.markRead", "guild", 15171, "ChatCheckIcon"], ["guild.channelsRoles", "guild", 18349, "ListBulletsIcon"],
+        ["guild.serverProfile", "guild", 9720, "PencilIcon"], ["guild.showAll", "guild", 6652, "EyeIcon"], ["guild.hideMuted", "guild", 6650, "EyeSlashIcon"],
+        ["guild.dms", "guild", 6770, "EnvelopeIcon"], ["guild.requests", "guild", 8194, "ChatIcon"], ["guild.report", "guild", 9571, "FlagIcon"],
+        ["guild.leave", "guild", 10994, "DoorExitIcon"], ["guild.emoji", "guild", 8956, "ReactionIcon"]];
+    // Spots that are Discord's own buttons and rows are named with Discord's own message (any language); English if it's missing.
+    const DISCORD_SPOTS = {"profile.guildTag":["2QmKZ2", "Server Tag"], "profile.addFriend":["7815ae", "Add Friend"], "profile.message":["zROXEV", "Message"],
+        "profile.activity":["chq59f", "Activity"], "profile.wishlist":["7lZ31J", "Wishlist"], "server.search":["5h0QOP", "Search"], "server.invite":["VINpSK", "Invite"],
+        "server.events":["tlopTM", "Events"], "guild.community":["K7iRig", "Community Server"], "guild.boost":["Uj0md3", "Boost"], "guild.invite":["VINpSK", "Invite"],
+        "guild.notifications":["HcoRu0", "Notifications"], "guild.markRead":["e6RscS", "Mark as Read"], "guild.channelsRoles":["h9mGOP", "Channels & Roles"],
+        "guild.serverProfile":["PKQB/H", "Edit Per-server Profile"], "guild.showAll":["FB2ZZV", "Show All Channels"], "guild.hideMuted":["UwOLJO", "Hide Muted Channels"],
+        "guild.dms":["KXNTgb", "Allow Direct Messages"], "guild.requests":["7UgSGP", "Allow Message Requests"], "guild.report":["Aen9eh", "Report Server"],
+        "guild.leave":["J2TBi3", "Leave Server"], "guild.emoji":["Q60n1E", "Server Emoji"]};
     // The profile's ⋯ menu (UserProfileOverflowMenu 13092) labels its items with Discord's own messages; these are their
     // message keys (both states for items that flip, like Block / Unblock). The label Discord shows is matched, in any language.
     const MENU_SPOTS = {"menu.mainProfile":["GISTta"], "menu.serverProfile":["DisZzB"], "menu.nickname":["BGYkaH", "8pOYUE"], "menu.invite":["Sd8Ixw"],
@@ -8242,15 +8258,19 @@
         hiddenSpots().forEach(key => { if (/^row\./.test(key) && rowLabels.has(key.slice(4))) { out[key.slice(4)] = rowLabels.get(key.slice(4)); any = true; } });
         return any ? out : null;
     }
-    const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "menu", "you"];
+    const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "menu", "server", "guild", "you"];
     const HIDE_SPOT_KEYS = Object.create(null);
     HIDE_SPOTS.forEach(spot => { HIDE_SPOT_KEYS[spot[0]] = spot; });
     // Modules hooked for it (also selected in targetModules).
-    const HIDE_HOOKED = {13092:1, 14973:1, 14974:1, 10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1};
+    const HIDE_HOOKED = {13092:1, 14973:1, 14974:1, 10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1,
+        14279:1, 8525:1, 8775:1, 10533:1, 11997:1, 14206:1, 14212:1, 14143:1, 14216:1};
     const hideEdit = {on:false, top:false, last:null};
+    // Labels of the profile menu's removable items while removal mode draws them (ContextMenuItem only gets the label).
+    const hideMenuLabels = new Map();
     // Written out so every label is a plain tr() call the language check can see.
     function hideSpotTitle(key) {
         if (MENU_SPOTS[key]) { for (const hash of MENU_SPOTS[key]) { const text = discordText(hash); if (text) return text; } return MENU_FALLBACK[key]; }
+        if (DISCORD_SPOTS[key]) return discordText(DISCORD_SPOTS[key][0]) || DISCORD_SPOTS[key][1];
         if (/^settings\./.test(key)) return settingTitle(key.slice(9));
         if (/^row\./.test(key)) { const label = rowLabels.get(key.slice(4)); return label ? tr(label) : key.slice(4); }
         switch (key) {
@@ -8277,7 +8297,7 @@
     }
     function hidePlaceTitle(place) {
         return place === "menu" ? tr("Profile menu") : place === "settings" ? tr("Settings") : place === "options" ? tr("Venus options") : place === "chat" ? tr("Message bar") : place === "attach" ? tr("Attach menu") : place === "dm" ? tr("Direct messages") : place === "messages" ? tr("Messages tab") :
-            place === "profile" ? tr("Other people's profiles") : tr("Your profile");
+            place === "profile" ? tr("Other people's profiles") : place === "server" ? tr("Channel list") : place === "guild" ? tr("Server menu") : tr("Your profile");
     }
     function hideSpotsText(raw) {
         if (typeof raw !== "string" || raw.length > 8000) return undefined;
@@ -8297,6 +8317,7 @@
         on = !!on && enabled("hideAnything");
         if (hideEdit.on === on) return;
         hideEdit.on = on; hideEdit.last = null;
+        if (!on) hideMenuLabels.clear();
         animateLayout();
         notify("hideAnythingEdit");
         pokeSettingsList();
@@ -8347,21 +8368,37 @@
             accessibilityLabel:tr("Remove: {name}", {name:hideSpotTitle(props.spot)})},
             X ? el(X, {size:"xxs", color:"#ffffff"}) : el(RN.Text, {style:HIDE_MARK.x}, "\u2715"));
     }
+    // Rows with a switch or a picture at the end keep their X clear of it.
+    const HIDE_TRAIL = {right:76};
     function HideMark(props) {
         const base = props.base, key = props.spot;
+        // Only once it's laid out with a size: a button that draws nothing (a tag someone doesn't have) gets no floating X.
+        const [shown, setShown] = React.useState(false);
         let layout = null;
         try {
             const flat = base && base.props && base.props.style && RN.StyleSheet ? RN.StyleSheet.flatten(base.props.style) : null;
             if (flat) for (const name of HIDE_LAYOUT_KEYS) if (flat[name] !== undefined) (layout || (layout = {}))[name] = flat[name];
         } catch (_) {}
-        return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false},
+        const onLayout = event => {
+            const size = event && event.nativeEvent && event.nativeEvent.layout, next = !!size && size.width > 1 && size.height > 1;
+            if (next !== shown) setShown(next);
+        };
+        const badge = props.inset ? (props.trail ? [HIDE_INSET.badge, HIDE_TRAIL] : HIDE_INSET.badge) : HIDE_MARK.badge;
+        return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false, onLayout},
             base,
-            el(RN.View, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onStartShouldSetResponder:swallowTap, onResponderRelease:ignoreTap,
-                importantForAccessibility:"no-hide-descendants", accessibilityElementsHidden:true}),
-            el(HideBadge, {spot:key, before:props.before, style:props.inset ? HIDE_INSET.badge : HIDE_MARK.badge}));
+            shown ? el(RN.View, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onStartShouldSetResponder:swallowTap, onResponderRelease:ignoreTap,
+                importantForAccessibility:"no-hide-descendants", accessibilityElementsHidden:true}) : null,
+            shown ? el(HideBadge, {spot:key, before:props.before, style:badge}) : null);
     }
     function hideMarked(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node}); }
     function hideMarkedRow(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node, inset:true}); }
+    // Rows in the server menu get the row mark (their X at the end, clear of a switch); buttons get the corner mark.
+    const HIDE_ROW_SPOTS = {"guild.markRead":1, "guild.channelsRoles":1, "guild.report":1, "guild.leave":1,
+        "guild.serverProfile":2, "guild.showAll":2, "guild.hideMuted":2, "guild.dms":2, "guild.requests":2};
+    function hideMarkFor(node, key) {
+        const row = HIDE_ROW_SPOTS[key];
+        return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node, inset:!!row, trail:row === 2});
+    }
     // Discord's Settings list (SettingsList 14971) reads its rows through toSettingListItems (14974) and redraws when its
     // blocklist (SettingBlocklistStore 14838) changes, so removed rows are left out there and a fresh blocklist redraws it.
     function settingTitle(key) {
@@ -8396,8 +8433,8 @@
         const rendered = orig.apply(self, args), props = args[0], key = props && props.setting;
         return rendered && hideEditing() && settingRemovable(key) ? hideMarkedRow(rendered, "settings." + key) : rendered;
     }
-    // The profile's ⋯ menu: removed items are left out (an empty group goes too); in removal mode each removable item starts
-    // with ✕ and a tap asks to remove it instead.
+    // The profile's ⋯ menu: removed items are left out (an empty group goes too); in removal mode each removable item gets
+    // the same dashed outline and red X as every other button (drawn by menuItemMark), and tapping the item itself does nothing.
     function menuItems(items, labels, edit) {
         if (!Array.isArray(items)) return items;
         let changed = false;
@@ -8414,7 +8451,8 @@
             if (spotHidden(key)) { changed = true; continue; }
             if (!edit) { out.push(item); continue; }
             changed = true;
-            out.push(Object.assign({}, item, {label:"\u2715  " + item.label, action:() => askRemoveSpot(key)}));
+            hideMenuLabels.set(item.label, key);
+            out.push(Object.assign({}, item, {action:ignoreTap}));
         }
         return changed ? out : items;
     }
@@ -8428,6 +8466,7 @@
         if (!Menu) return rendered;
         const labels = new Map();
         Object.keys(MENU_SPOTS).forEach(key => MENU_SPOTS[key].forEach(hash => { const text = discordText(hash); if (text) labels.set(text, key); }));
+        if (edit) hideMenuLabels.clear();
         return cloneTree(rendered, (node, props) => {
             if (node.type !== Menu || !Array.isArray(props.items)) return props;
             const items = menuItems(props.items, labels, edit);
@@ -8458,11 +8497,14 @@
         if (Array.isArray(node)) {
             let changed = false;
             const next = node.map(child => { const value = hideWalk(child, depth + 1, classify, edit); if (value !== child) changed = true; return value; });
-            return changed ? next.filter(child => child !== null) : node;
+            if (!changed) return node;
+            const kept = next.filter(child => child !== null);
+            // A badge dot drawn beside a removed button (hidden from screen readers, no content of its own) goes with it.
+            return kept.length && kept.every(child => child && child.props && child.props.accessibilityElementsHidden === true && child.props.children == null) ? [] : kept;
         }
         if (!node.props) return node;
         const key = classify(node);
-        if (key) return spotHidden(key) ? null : edit ? hideMarked(node, key) : node;
+        if (key) return spotHidden(key) ? null : edit ? hideMarkFor(node, key) : node;
         const children = node.props.children;
         if (children == null || typeof children !== "object") return node;
         const next = hideWalk(children, depth + 1, classify, edit);
@@ -8495,9 +8537,13 @@
         return node.props ? iconSpot(node.props.icon, depth + 1, icons) || iconSpot(node.props.children, depth + 1, icons) : null;
     }
     function dmSpot(node) { return typeof node.props.onPress === "function" ? iconSpot(node.props.children, 0, dmIconSpots()) : null; }
+    // Someone's profile (UserProfileContactButtons 13425): Message and Call carry ChatIcon / PhoneCallIcon (as a Button or an
+    // IconButton), and Add Friend is the FriendRequestButton, the one element given a ButtonComponent.
     function profileSpot(node) {
-        const icon = node.props.icon;
-        return icon && typeof icon === "object" && icon.type && icon.type === inspectedExport(9317, "PhoneCallIcon") ? "profile.call" : null;
+        const props = node.props, icon = props.icon, type = icon && typeof icon === "object" ? icon.type : null;
+        if (type && type === inspectedExport(9317, "PhoneCallIcon")) return "profile.call";
+        if (type && type === inspectedExport(8194, "ChatIcon")) return "profile.message";
+        return props.ButtonComponent && props.user && "hasCustomProfileTheme" in props ? "profile.addFriend" : null;
     }
     // The Messages tab header (MessagesHeader 16467): search and new message are IconButtons (new message's icon is
     // PlusLargeIcon), Add Friends is the only Button, and message requests is its own component (16468).
@@ -8524,6 +8570,100 @@
     }
     // Your profile's floating pill (YouBannerDecorations 9115) keys its buttons by name, like Hide extra buttons reads them.
     function youSpot(node) { const k = node.key; return k === "quests" || k === "shop" || k === "nitro" ? "you." + k : null; }
+    // The ⋯ menu's rows are drawn by ContextMenuItem (14279), which only gets each item's label: the ones profileMenu marked
+    // get the dashed outline and the X. Tapping the X closes the menu first, so the "Remove this button?" alert is on top.
+    function closeContextMenu() { try { const hide = inspectedExport(9359, "hideContextMenu"); if (typeof hide === "function") hide(); } catch (_) {} }
+    function menuItemMark(orig, self, args) {
+        const rendered = orig.apply(self, args), props = args[0];
+        if (!rendered || !hideMenuLabels.size || !props || typeof props.label !== "string" || !hideEditing()) return rendered;
+        const key = hideMenuLabels.get(props.label);
+        return key && !spotHidden(key) ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered, inset:true, before:closeContextMenu}) : rendered;
+    }
+    // A profile's tabs (UserProfileContent 13190) are {id, label, page} items for useSegmentedControlState (8525), Main always
+    // first: removed tabs are left out of the items, so the tab bar and its pages close up together.
+    const PROFILE_TABS = Object.assign(Object.create(null), {activity:"profile.activity", wishlist:"profile.wishlist"});
+    function profileTabItems(items) { return Array.isArray(items) && items.length > 1 && !!items[0] && items[0].id === "main" && "page" in items[0]; }
+    const hideTabCache = new WeakMap();
+    function segmentedState(orig, self, args) {
+        const options = args[0];
+        if (!options || typeof options !== "object" || !profileTabItems(options.items)) return orig.apply(self, args);
+        // Main stays the first tab for the profile's whole life, so this hook is always called there and nowhere else.
+        useSettings("hideAnything");
+        if (!settings.hideAnythingSpots || !enabled("hideAnything")) return orig.apply(self, args);
+        const text = settings.hideAnythingSpots;
+        let entry = hideTabCache.get(options.items);
+        if (!entry || entry.text !== text) {
+            const kept = options.items.filter(item => !(item && PROFILE_TABS[item.id] && spotHidden(PROFILE_TABS[item.id])));
+            entry = {text, items:kept.length === options.items.length ? options.items : kept};
+            hideTabCache.set(options.items, entry);
+        }
+        if (entry.items === options.items) return orig.apply(self, args);
+        const next = Array.from(args);
+        next[0] = Object.assign({}, options, {items:entry.items});
+        if (typeof options.defaultIndex === "number" && options.defaultIndex >= entry.items.length) next[0].defaultIndex = 0;
+        return orig.apply(self, next);
+    }
+    // Each tab (SegmentedControlItem 8775) knows its index into state.items, so Activity and Wishlist are found by id.
+    function segmentedItemMark(orig, self, args) {
+        const rendered = orig.apply(self, args), props = args[0];
+        if (!rendered || !props || !props.state || !profileTabItems(props.state.items) || !hideEditing()) return rendered;
+        const item = props.state.items[props.index], key = item && PROFILE_TABS[item.id];
+        return key ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered}) : rendered;
+    }
+    // The server tag next to someone's name (UserProfilePrimaryInfo 10533) is its local GuildTag, the one element given a
+    // primaryGuildOverride without badges; only when they have a tag, so there's never an empty outline.
+    function profileTagSpot(node) {
+        const props = node.props;
+        if (!("primaryGuildOverride" in props) || !("showToastOnPress" in props) || "badges" in props || "userId" in props) return null;
+        const guild = props.primaryGuildOverride || props.user && props.user.primaryGuild;
+        return guild && guild.tag && guild.identityEnabled !== false ? "profile.guildTag" : null;
+    }
+    // The top of a server's channel list (GuildSearchAndInvite 11997): Search is its only Button (or the pressable around
+    // SearchButtonContent), Invite is the IconButton with onPressDisabled, Events the other IconButton.
+    function serverHeaderSpot(node) {
+        const type = node.type, props = node.props;
+        if (!type || typeof type === "string") return null;
+        if (type === inspectedExport(7569, "IconButton")) return "onPressDisabled" in props ? "server.invite" : "server.events";
+        if (type === inspectedExport(5379, "Button")) return "server.search";
+        return typeof props.onPressIn === "function" && typeof props.onPressOut === "function" ? "server.search" : null;
+    }
+    // The server menu (GuildActionSheet 14211). Its header's Community Server pill is the one element given guildVisibility.
+    function guildHeaderSpot(node) { const props = node.props; return "guildVisibility" in props && !("guild" in props) ? "guild.community" : null; }
+    // Boost, Invite and Notifications (GuildActionSheetTabItems 14212) are IconButtons: Boost by its gem icon (its label can be
+    // a count), the others by Discord's own label.
+    function guildTabSpot(node) {
+        if (node.type !== inspectedExport(7569, "IconButton")) return null;
+        const icon = node.props.icon, label = node.props.label;
+        if (icon && typeof icon === "object" && icon.type && icon.type === inspectedExport(9405, "BoostGemIcon")) return "guild.boost";
+        if (typeof label !== "string" || !label) return null;
+        return label === discordText("VINpSK") ? "guild.invite" : label === discordText("HcoRu0") ? "guild.notifications" : label === discordText("Uj0md3") ? "guild.boost" : null;
+    }
+    // Its rows (GuildUnreadAction and GuildActionSheetSecondaryActions, 14143): plain rows by Discord's own label, and the
+    // module's own option components by name, since they draw their rows themselves.
+    const GUILD_ROW_NAMES = Object.assign(Object.create(null), {BrowseChannelsOption:"guild.channelsRoles", ChangeIdentityOption:"guild.serverProfile",
+        HideMutedChannelsOption:"guild.hideMuted", RestrictedGuildPrivacyOption:"guild.dms", MessageRequestRestrictedGuildPrivacyOption:"guild.requests"});
+    const GUILD_ROW_LABELS = {"guild.markRead":["e6RscS"], "guild.showAll":["FB2ZZV"], "guild.report":["Aen9eh"], "guild.leave":["J2TBi3", "Dv8gFT"]};
+    let guildLabelCache = null;
+    function guildRowLabels() {
+        const probe = discordText("e6RscS");
+        if (guildLabelCache && guildLabelCache.probe === probe) return guildLabelCache.map;
+        const map = new Map();
+        Object.keys(GUILD_ROW_LABELS).forEach(key => GUILD_ROW_LABELS[key].forEach(hash => { const text = discordText(hash); if (text) map.set(text, key); }));
+        guildLabelCache = {probe, map};
+        return map;
+    }
+    function componentName(type) {
+        const inner = typeof type === "function" ? type : type && typeof type === "object" ? type.type || type.render : null;
+        return typeof inner === "function" ? String(inner.displayName || inner.name || "") : "";
+    }
+    function guildRowSpot(node) {
+        const type = node.type;
+        if (!type || typeof type === "string" || typeof type === "symbol") return null;
+        const named = GUILD_ROW_NAMES[componentName(type)];
+        if (named) return named;
+        const label = node.props.label;
+        return typeof label === "string" && label ? guildRowLabels().get(label) || null : null;
+    }
     // With the voice message button removed, the send button acts as it does where voice messages aren't allowed.
     function withoutVoiceButton(props) {
         useSettings("hideAnything");
@@ -8539,7 +8679,7 @@
         if (!Marked || Marked.base !== Icon) {
             Marked = function (props) {
                 return el(RN.View, {style:{position:"relative"}}, el(Icon, props),
-                    el(RN.View, {pointerEvents:"none", style:[HIDE_MARK.badge, {top:-8, right:-12}]}, el(RN.Text, {style:HIDE_MARK.x}, "\u2715")));
+                    el(HideBadge, {spot:key, style:[HIDE_MARK.badge, {top:-8, right:-12}]}));
             };
             Marked.base = Icon; attachMarks.set(key, Marked);
         }
@@ -8561,7 +8701,7 @@
             if (spotHidden(key)) { changed = true; continue; }
             if (!edit) { out.push(button); continue; }
             changed = true;
-            out.push(Object.assign({}, button, {IconComponent:attachMarked(button.IconComponent, key), onPress:() => askRemoveSpot(key)}));
+            out.push(Object.assign({}, button, {IconComponent:attachMarked(button.IconComponent, key), onPress:ignoreTap}));
         }
         return changed && out.length ? Object.assign({}, props, {overflowButtons:out}) : props;
     }
@@ -8636,6 +8776,15 @@
             case 14973: return hookExport(exports, "renderSettingItem", settingItemMark);
             case 14974: return hookExport(exports, "toSettingListItems", settingListItems);
             case 10028: return exports.default ? replaceValue(exports, "default", propsComponent(exports.default, attachMenuSpots)) : exports;
+            case 14279: return hookComponent(exports, menuItemMark, "ContextMenuItem");
+            case 8525: return hookExport(exports, "useSegmentedControlState", segmentedState);
+            case 8775: return hookComponent(exports, segmentedItemMark, "SegmentedControlItem");
+            case 10533: return hookComponent(exports, hideTree(profileTagSpot));
+            case 11997: return hookComponent(exports, hideTree(serverHeaderSpot));
+            case 14206: return hookComponent(exports, hideTree(guildHeaderSpot));
+            case 14212: return hookComponent(exports, hideTree(guildTabSpot));
+            case 14143: return hookComponent(hookComponent(exports, hideTree(guildRowSpot), "GuildUnreadAction"), hideTree(guildRowSpot), "GuildActionSheetSecondaryActions");
+            case 14216: return hookComponent(exports, hideWhole("guild.emoji"));
             case 15371: return hideQuestHooks(exports);
             case 15465: return hideQuestDock(exports);
         }
