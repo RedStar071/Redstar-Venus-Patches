@@ -251,12 +251,12 @@ val anonymousFileNames = bundledPlugin("anonFiles", "Anonymous file names",
     "Files you send get a random name instead of the one on your phone. Based on Anonymous File Names by k1ng_op.")
 
 @Suppress("unused")
-val staffTags = bundledPlugin("staffTag", "Label server owners and mods",
-    "Adds a label next to server owners, admins and moderators in chat. Based on StaffTag by mwittrien.")
+val staffTags = bundledPlugin("staffTag", "Show owner and mod tags",
+    "Shows an Owner, Admin, Manager or Mod tag next to people's names in chat. Based on StaffTag by mwittrien.")
 
 @Suppress("unused")
-val removedConnectionAlerts = bundledPlugin("removedAlerts", "Alert when a friend or server removes you",
-    "Get notified when a friend removes you or a server drops you. Based on RemovedConnectionAlerts by iyu46.")
+val removedConnectionAlerts = bundledPlugin("removedAlerts", "Alert when you're removed",
+    "Get a heads-up when a friend unfriends you, or a server kicks or bans you. Based on RemovedConnectionAlerts by iyu46.")
 
 @Suppress("unused")
 val fullQualityImages = bundledPlugin("fullImages", "Load full-quality images",

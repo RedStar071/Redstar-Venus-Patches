@@ -44,8 +44,8 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Anonymous file names | Files you send get a random name like `k3Vq9TzL0b.jpg` instead of the one on your phone, so names like `IMG_20261027_142233.jpg` or `Bank statement March.pdf` never reach Discord. The file type stays, so previews and players still work. Spoilers stay spoilers. Based on Anonymous File Names by k1ng_op |
 | **People** | Pastel name colors | Names without a role color get a soft pastel color |
 | | Show device indicators | Desktop, mobile, web, console or VR icons next to names |
-| | Label server owners and mods | Adds a label next to server owners, admins, managers and moderators next to their names in chat, worked out from the roles you can see. Pick who gets one and whether owners get a crown. Based on StaffTag by mwittrien |
-| | Alert when a friend or server removes you | Get notified when a friend removes you or a server drops you, and for anything that went missing while Discord was closed. Choose friends, servers or both, and whether to also get a phone notification. Things you remove or leave yourself never alert. Based on RemovedConnectionAlerts by iyu46. |
+| | Show owner and mod tags | Shows an Owner, Admin, Manager or Mod tag next to people's names in chat, worked out from the roles you can see. Pick who gets one and whether owners get a crown. Based on StaffTag by mwittrien |
+| | Alert when you're removed | Get a heads-up when a friend unfriends you, or a server kicks or bans you, and catch up on anything that happened while Discord was closed. Choose friends, servers or both, and whether to also get a phone notification. Things you remove or leave yourself never alert. Based on RemovedConnectionAlerts by iyu46. |
 | | Fix unknown mentions | @unknown-user mentions show the person's name |
 | | Copy profile bios | Hold a bio to select and copy it |
 | | User and server reviews | Read and write reviews, from ReviewDB |

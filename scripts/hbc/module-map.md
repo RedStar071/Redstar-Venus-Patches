@@ -94,7 +94,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 5932 | `stores/ConsentStore.tsx` | default | ConsentStore (Badge Completer) |
 | 5938 | `utils/TrackedHTTPUtils.tsx` | default | TrackedHTTPUtils (Account switcher: sign-up requests go out signed out) |
 | 5963 | `stores/SortedGuildStore.tsx` | default, GuildsNodeType, insertUnsortedGuilds | SortedGuildStore |
-| 5965 | `stores/GuildAvailabilityStore.tsx` | default, isUnavailable | GuildAvailabilityStore (Alert when a friend or server removes you) |
+| 5965 | `stores/GuildAvailabilityStore.tsx` | default, isUnavailable | GuildAvailabilityStore (Alert when you're removed) |
 | 5967 | `modules/read_states/ReadStateConstants.tsx` | CHANNEL, GUILD_EVENT, NOTIFICATION_CENTER | ReadStateTypes |
 | 5979 | `../discord_common/js/shared/shared-constants/AdCreativeType.tsx` | INVALID, QUEST, QUEST_HOME_HERO | AdCreativeType |
 | 5987 | `modules/emojis/EmojiStore.tsx` | Unloaded, Loading, Loaded | EmojiStore |
@@ -144,7 +144,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 6906 | `design/components/Icon/native/redesign/generated/ChevronSmallRightIcon.tsx` | ChevronSmallRightIcon | ChevronSmallRightIcon |
 | 6923 | `stores/views/PrivateChannelSortStore.tsx` | default | PrivateChannelSortStore (Read all, more than 20 unread DMs) |
 | 7012 | `actions/GuildSubscriptionsActionCreators.tsx` | subscribeGuild | GuildSubscriptionsActionCreators |
-| 7018 | `actions/RelationshipActionCreators.tsx` | default, removeFriend, removeRelationship | RelationshipActionCreators (Alert when a friend or server removes you) |
+| 7018 | `actions/RelationshipActionCreators.tsx` | default, removeFriend, removeRelationship | RelationshipActionCreators (Alert when you're removed) |
 | 7047 | `modules/stickers/StickerSendability.tsx` | SENDABLE, SENDABLE_WITH_PREMIUM, NONSENDABLE | StickerUtils |
 | 7092 | `design/components/Icon/native/redesign/generated/SettingsIcon.tsx` | SettingsIcon | SettingsIcon |
 | 7094 | `modules/user_settings/core/native/openUserSettings.tsx` | openUserSettings | UserSettingsActionCreators |
@@ -192,7 +192,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8449 | `modules/icymi/ICYMIStore.tsx` | ICYMIStore | ICYMIStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
 | 8575 | `design/void/Form/native/index.tsx` | Form, FormArrow, FormCheckbox | Form |
 | 8617 | `design/components/Icon/native/redesign/generated/ShieldUserIcon.tsx` | ShieldUserIcon | ShieldUserIcon |
-| 8633 | `modules/guild_settings/GuildSettingsActionCreators.tsx` | default, leaveGuild, deleteGuild | GuildSettingsActionCreators (Alert when a friend or server removes you) |
+| 8633 | `modules/guild_settings/GuildSettingsActionCreators.tsx` | default, leaveGuild, deleteGuild | GuildSettingsActionCreators (Alert when you're removed) |
 | 8675 | `design/components/Icon/native/redesign/generated/CalendarIcon.tsx` | CalendarIcon | CalendarIcon |
 | 8768 | `design/components/Icon/native/redesign/generated/BellIcon.tsx` | BellIcon | BellIcon |
 | 8792 | `modules/voice_panel/native/shared/FormComponents.tsx` | VoicePanelFormSection, MemberRowItem | VoiceChannelMembers |
