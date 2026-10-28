@@ -37,6 +37,40 @@
       "options": []
     },
     {
+      "name": "Alert when a friend or server removes you",
+      "description": "Get notified when a friend removes you or a server drops you. Based on RemovedConnectionAlerts by iyu46.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Anonymous file names",
       "description": "Files you send get a random name instead of the one on your phone. Based on Anonymous File Names by k1ng_op.",
       "default": true,
@@ -1037,6 +1071,74 @@
       "options": []
     },
     {
+      "name": "Label server owners and mods",
+      "description": "Adds a label next to server owners, admins and moderators in chat. Based on StaffTag by mwittrien.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Load full-quality images",
+      "description": "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy. Based on Uncompressed Discord Images by Knewest.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Material You colors",
       "description": "Colors Discord to match your wallpaper, in light and dark. Wallpaper colors need Android 12 or newer.",
       "default": true,
@@ -1142,6 +1244,40 @@
     {
       "name": "Read all button",
       "description": "A button under Direct Messages that marks servers, DMs or both as read.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Remove anything",
+      "description": "Tap a button you never use to remove it, right where it is: turn on removal mode, then tap the red X on the voice message, attach, call, video, search or other buttons. Bring them back any time in Venus.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -1414,40 +1550,6 @@
     {
       "name": "Skip delete confirmation",
       "description": "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Staff tags",
-      "description": "Tags server owners, admins and moderators next to their names in chat. Based on StaffTag by mwittrien.",
       "default": true,
       "category": "Features",
       "dependencies": [
