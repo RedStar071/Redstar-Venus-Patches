@@ -58,6 +58,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 4815 | `design/components/Icon/native/redesign/generated/FriendsIcon.tsx` | FriendsIcon | FriendsIcon |
 | 4817 | `design/components/Icon/native/BaseIconImage.tsx` | BaseIconImage | BaseIconImage (Icon packs) |
 | 4831 | `../discord_common/js/packages/design/components/ThemeContextProvider/ThemeContext.tsx` | createThemedContext, useThemeContext, FALLBACK_THEME_CONTEXT_VALUE | ThemeContext |
+| 4839 | `../discord_common/js/packages/design/components/ThemeContextProvider/ThemeContextProvider.tsx` | ThemeContextProvider | ThemeContextProvider (Custom themes re-keys the server list and DMs too) |
 | 4937 | `modules/client_themes/ClientThemesBackgroundStore.tsx` | default | ClientThemesBackgroundStore (Unlock Nitro themes) |
 | 4976 | `modules/main_tabs_v2/helpers/NavigationRouteUtils.native.tsx` | navigateToChannel, navigateToRootTab, pushModal, popModal | ModalAPI |
 | 4977 | `modules/main_tabs_v2/RootNavigationRef.native.tsx` | getRootNavigationRef | RootNavigationRef |
