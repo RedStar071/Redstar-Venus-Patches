@@ -50,6 +50,7 @@ export const SCENE_SETTINGS = {
   reviews: { reviewDB: true }, serverSheet: { reviewDB: true }, hiddenChannel: { hiddenChannels: true }, settings: {},
   youBar: { youBarSettings: true, accountSwitcher: true }, translateBar: { translate: true, translateMode: "manual" },
   messageMenu: { translate: true }, bulkDelete: { bulkDelete: true }, longMessageFailed: { splitMessages: true }, longEdit: { splitMessages: true },
+  removeMode: { hideAnything: true },
 };
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
