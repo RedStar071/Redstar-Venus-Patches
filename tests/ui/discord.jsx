@@ -152,15 +152,29 @@ export function createStyles(spec) {
 export const colors = new Proxy({}, { get: (_, k) => typeof k === "string" && T[k] ? { __token: k } : undefined });
 
 // Discord's SettingsList, enough to draw the Features list and its rows (toggle, pressable, route) from Venus's nodes.
+// Like Discord's SettingsList (14971): the rows come through toSettingListItems (14974) and each is drawn by renderSettingItem
+// (14973), the two places Venus changes, and the list redraws when SettingBlocklistStore (14838) changes.
 export function makeSettingsList(registry) {
   return function SettingsList({ node }) {
+    const [, bump] = React.useState(0);
+    React.useEffect(() => { const store = global.__r(14838).default; return store && store.subscribe ? store.subscribe(() => bump(n => n + 1)) : undefined; }, []);
+    const items = global.__r(14974).toSettingListItems, render = global.__r(14973).renderSettingItem;
+    const list = typeof items === "function" ? items(node) : node;
     return <RN.View style={{ paddingHorizontal: 12, paddingVertical: 16, gap: 24 }}>
-      {node.ListHeaderComponent || null}
-      {node.sections.map((section, i) => <TableRowGroup key={section.label + i} title={section.label}>
-        {section.settings.map(id => <SettingRow key={id} node={registry()[id]} />)}
+      {list.ListHeaderComponent || null}
+      {list.sections.filter(section => section.settings.length).map((section, i) => <TableRowGroup key={section.label + i} title={section.label}>
+        {section.settings.map(id => <React.Fragment key={id}>{typeof render === "function" ? render({ setting: id }) : <SettingRow node={registry()[id]} />}</React.Fragment>)}
       </TableRowGroup>)}
     </RN.View>;
   };
+}
+// renderSettingItem's stand-in: one row of the registry, by its key.
+export function makeSettingItem(registry) { return props => <SettingRow node={registry()[props.setting]} />; }
+// SettingBlocklistStore's stand-in: a tiny Zustand store.
+export function makeBlocklistStore() {
+  let state = { blocklist: new Set() };
+  const subs = new Set();
+  return { getState: () => state, setState: next => { state = Object.assign({}, state, next); subs.forEach(fn => fn()); }, subscribe: fn => { subs.add(fn); return () => subs.delete(fn); } };
 }
 function SettingRow({ node }) {
   if (!node) return null;

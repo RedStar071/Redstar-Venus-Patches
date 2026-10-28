@@ -5777,8 +5777,14 @@
         return text ? el(RN.View, {key:"hint", style:{paddingHorizontal:16, paddingTop:2}}, popIn("cap:" + text, el(RN.Text, {style:s.muted}, text))) : null;
     }
     // Shared by every option page: Discord's spacing and scrolling, with each group revealed in turn.
+    // A row group whose rows Remove anything took away goes too, so no title is left over an empty space.
+    function emptyGroup(group) {
+        if (!features.hideAnything || !group || typeof group!=="object" || !group.props || !("children" in group.props) || !group.props.title) return false;
+        const kids=[].concat(group.props.children);
+        return kids.length>0 && kids.every(kid => !kid);
+    }
     function settingsBody(ui,groups,scroll) {
-        const shown=groups.filter(Boolean).map((group,i) => typeof group==="object" ?
+        const shown=groups.filter(group => group && !emptyGroup(group)).map((group,i) => typeof group==="object" ?
             el(VenusReveal,{key:group.key != null ? group.key : group.props && group.props.key != null ? group.props.key : "group"+i,index:i},group) : group);
         const body=ui.Stack ? el(ui.Stack,{style:{paddingVertical:24,paddingHorizontal:12},spacing:24},shown) :
             el(RN.View,{style:{paddingVertical:24,paddingHorizontal:12,gap:24}},shown);

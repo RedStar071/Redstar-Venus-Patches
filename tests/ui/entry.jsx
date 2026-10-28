@@ -98,10 +98,13 @@ function boot() {
   colorTables();
   modules[14839] = { SETTING_RENDERER_CONFIG: { ACCOUNT: { type: "route", IconComponent: D.makeIcon("UserCircleIcon") } } };
   modules[14971] = { SettingsList: D.makeSettingsList(() => registry) };
+  modules[14974] = { toSettingListItems: node => node };
+  modules[14973] = { renderSettingItem: D.makeSettingItem(() => registry) };
+  modules[14838] = { default: D.makeBlocklistStore() };
   modules[10664] = { createList: x => x };
   const define = (id, exports) => global.__d((g, r, i, a, module) => { module.exports = exports; }, id, []);
   define(120, { default: () => {} });
-  [17, 19, 1162, 6265, 6896, 14971, 10664, 14839, 591, 589, 590, 1205].concat(S.hooked).forEach(id => define(id, modules[id]));
+  [17, 19, 1162, 6265, 6896, 14971, 14973, 14974, 14838, 10664, 14839, 591, 589, 590, 1205].concat(S.hooked).forEach(id => define(id, modules[id]));
   defined[120].exports.default();
   registry = defined[14839].exports.SETTING_RENDERER_CONFIG;
 }
