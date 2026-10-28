@@ -324,6 +324,7 @@
         else if (features.badges && badges.legacyGrant) extra.badgesGrant = badges.legacyGrant;
         if (backup.last) extra.lastBackup = backup.last;
         if (starter.done) extra.setupDone = true;
+        if (features.hideAnything && settings.hideAnythingSpots) { const labels = hideRowLabels(); if (labels) extra.hideAnythingLabels = labels; }
         if (features.materialYou && materialYou.system) extra.materialYouSystem = materialYou.system;
         if (features.nitroThemes && nitroTheme.preset != null) extra.nitroTheme = {preset:nitroTheme.preset, theme:nitroTheme.theme};
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
@@ -601,6 +602,10 @@
                 }
                 if (typeof loaded.lastBackup === "number" && Number.isFinite(loaded.lastBackup) && !backup.last) backup.last = loaded.lastBackup;
                 if (loaded.setupDone === true) starter.done = true;
+                if (loaded.hideAnythingLabels && typeof loaded.hideAnythingLabels === "object") Object.keys(loaded.hideAnythingLabels).forEach(key => {
+                    const label = loaded.hideAnythingLabels[key];
+                    if (/^[A-Za-z0-9]{2,60}$/.test(key) && typeof label === "string" && label.length < 200 && !rowLabels.has(key)) rowLabels.set(key, label);
+                });
                 const savedPalette = loaded.materialYouSystem;
                 if (features.materialYou && !materialYou.system && savedPalette && typeof savedPalette === "object" &&
                     ["accent1", "accent2", "accent3", "neutral1", "neutral2"].every(k => Array.isArray(savedPalette[k]) && savedPalette[k].length === 13 && savedPalette[k].every(v => /^#[0-9a-f]{6}$/i.test(v))))
@@ -8219,6 +8224,14 @@
     const HIDE_DYNAMIC = /^(?:settings\.[A-Z0-9_]{2,80}|row\.[A-Za-z0-9]{2,60})$/;
     function settingRemovable(key) { return typeof key === "string" && /^[A-Z0-9_]{2,80}$/.test(key) && key !== "VENUS_PLUGINS" && key.indexOf("HIDEANYTHING") < 0; }
     const rowLabels = new Map();
+    // The English labels of removed switches, saved with the settings so the Remove anything page can name them before
+    // their own page has been opened this session.
+    function hideRowLabels() {
+        const out = {};
+        let any = false;
+        hiddenSpots().forEach(key => { if (/^row\./.test(key) && rowLabels.has(key.slice(4))) { out[key.slice(4)] = rowLabels.get(key.slice(4)); any = true; } });
+        return any ? out : null;
+    }
     const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "menu", "you"];
     const HIDE_SPOT_KEYS = Object.create(null);
     HIDE_SPOTS.forEach(spot => { HIDE_SPOT_KEYS[spot[0]] = spot; });

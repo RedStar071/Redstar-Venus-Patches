@@ -357,14 +357,21 @@ function SettingsScreen({ defined, registry }) {
   const config = defined[10664].exports.createList({ sections: DISCORD_SECTIONS.map(([label, rows]) => ({ label, settings: rows.map(r => r[0]) })) });
   const List = defined[14971] ? defined[14971].exports.SettingsList : null;
   const all = Object.assign({}, registry, plain);
+  // Through toSettingListItems (14974) like Discord's list, which leaves out rows Remove anything took away.
+  const toItems = global.__r(14974).toSettingListItems, listed = typeof toItems === "function" ? toItems(config) : config;
+  const render = global.__r(14973).renderSettingItem;
+  const [, bump] = React.useState(0);
+  React.useEffect(() => { const store = global.__r(14838).default; return store && store.subscribe ? store.subscribe(() => bump(n => n + 1)) : undefined; }, []);
   return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
     <RN.View style={{ height: 56, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}><D.Text variant="heading-lg/bold" color="text-strong">Settings</D.Text></RN.View>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 16 }}><D.SearchField placeholder="Search" /></RN.View>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 24, gap: 24 }}>
-      {config.sections.map((section, i) => <D.TableRowGroup key={i} title={section.label}>
+      {listed.sections.filter(section => section.settings.length).map((section, i) => <D.TableRowGroup key={i} title={section.label}>
         {section.settings.map(id => { const n = all[id]; if (!n) return null;
           const title = n.useTitle ? n.useTitle() : n.title, desc = n.useDescription ? n.useDescription() : null;
-          return <D.TableRow key={id} label={title} subLabel={desc} icon={n.IconComponent ? <D.TableRowIcon IconComponent={n.IconComponent} /> : null} arrow />; })}
+          const row = <D.TableRow label={title} subLabel={desc} icon={n.IconComponent ? <D.TableRowIcon IconComponent={n.IconComponent} /> : null} arrow />;
+          // Through renderSettingItem (14973) as Discord draws each row, so removal mode marks it.
+          return <React.Fragment key={id}>{render ? render({ setting: id, row }) : row}</React.Fragment>; })}
       </D.TableRowGroup>)}
     </RN.View>
   </RN.View>;

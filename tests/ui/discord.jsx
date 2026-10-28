@@ -169,7 +169,7 @@ export function makeSettingsList(registry) {
   };
 }
 // renderSettingItem's stand-in: one row of the registry, by its key.
-export function makeSettingItem(registry) { return props => <SettingRow node={registry()[props.setting]} />; }
+export function makeSettingItem(registry) { return props => props.row || <SettingRow node={registry()[props.setting]} />; }
 // SettingBlocklistStore's stand-in: a tiny Zustand store.
 export function makeBlocklistStore() {
   let state = { blocklist: new Set() };
