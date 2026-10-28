@@ -16,7 +16,7 @@
 //   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
 //   scene=removeMode   Remove anything: the Messages tab header, a DM header, a profile's buttons, your profile pill and the message
 //                      bar, in removal mode (a red X on every removable button, the floating bar at the bottom). ask=<name> taps that
-//                      button's X (ask=Voice call button), so the "Remove this button?" alert shows; mode=off draws them without removal
+//                      button's X (ask=Voice call button), and confirm=1 then answers Remove, so the "Remove this button?" alert shows; mode=off draws them without removal
 //                      mode, so set={"hideAnythingSpots":"..."} shows the rows closed up
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
@@ -392,7 +392,9 @@ function RemoveMode({ defined, registry }) {
     const text = want => Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && (e.textContent || "").trim() === want);
     const tappable = e => e && (e.closest("[tabindex]") || e);
     // ask= is a button's name as Venus says it (Voice call button): its X is labelled "Remove: <name>".
-    press(() => tappable(text("Start removing")), q.get("ask") ? () => press(() => document.querySelector(`[aria-label="Remove: ${q.get("ask")}"]`)) : null);
+    // confirm=1 then says yes in the alert, so the button goes and the bar offers Undo.
+    const yes = q.get("confirm") ? () => press(() => tappable(text("Remove"))) : null;
+    press(() => tappable(text("Start removing")), q.get("ask") ? () => press(() => document.querySelector(`[aria-label="Remove: ${q.get("ask")}"]`), yes) : null);
   }, []);
   const card = { marginHorizontal: 12, borderRadius: 16, padding: 12, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") };
   return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
