@@ -51,7 +51,7 @@
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    if (features.hideAnything) selectModules([9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467]);
+    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467]);
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -5787,8 +5787,12 @@
     // Greyed out while the main switch is off, like the options on the Settings list.
     function switchRow(Switch,key,label,subLabel,icon) {
         const owner=featureFor(key);
-        return Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],
+        const row=Switch ? el(Switch,{key,label:tr(label),subLabel:subLabel && tr(subLabel),icon,value:settings[key],disabled:owner!==key && !settings[owner],
             onValueChange:value => { animateLayout(); setSetting(key,value); }}) : null;
+        if (!row || !features.hideAnything) return row;
+        // Remove anything can take this switch off its page too.
+        rowLabels.set(key,label);
+        return spotHidden("row."+key) ? null : el(HideRow,{key,spot:"row."+key,child:row});
     }
     // One choice from a few: Discord's radio list (TableRadioGroup 6263 / TableRadioRow 6262), or check-marked rows.
     // Each choice may carry a fourth item, its row icon (rowIcon), like Discord's own radio lists.
@@ -8181,15 +8185,45 @@
         ["messages.newDM", "messages", 10310, "PlusLargeIcon"], ["profile.call", "profile", 9317, "PhoneCallIcon"],
         ["attach.apps", "attach", 8229, "AppsIcon"], ["attach.polls", "attach", 10022, "PollsIcon"], ["attach.photos", "attach", 8210, "ImageIcon"],
         ["you.quests", "you", 13012, "QuestsIcon"], ["you.shop", "you", 11828, "ShopIcon"], ["you.nitro", "you", 9031, "NitroWheelIcon"],
-        ["you.questBanner", "you", 6650, "EyeSlashIcon"]];
-    const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "you"];
+        ["you.questBanner", "you", 6650, "EyeSlashIcon"],
+        ["menu.mainProfile", "menu", 9237, "MoreHorizontalIcon"], ["menu.serverProfile", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.nickname", "menu", 9237, "MoreHorizontalIcon"], ["menu.invite", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.ring", "menu", 9237, "MoreHorizontalIcon"], ["menu.copyUsername", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.copyLink", "menu", 9237, "MoreHorizontalIcon"], ["menu.copyId", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.copyInfo", "menu", 9237, "MoreHorizontalIcon"], ["menu.apps", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.shopLook", "menu", 9237, "MoreHorizontalIcon"], ["menu.removeFromGroup", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.ignore", "menu", 9237, "MoreHorizontalIcon"], ["menu.block", "menu", 9237, "MoreHorizontalIcon"],
+        ["menu.report", "menu", 9237, "MoreHorizontalIcon"]];
+    // The profile's ⋯ menu (UserProfileOverflowMenu 13092) labels its items with Discord's own messages; these are their
+    // message keys (both states for items that flip, like Block / Unblock). The label Discord shows is matched, in any language.
+    const MENU_SPOTS = {"menu.mainProfile":["GISTta"], "menu.serverProfile":["DisZzB"], "menu.nickname":["BGYkaH", "8pOYUE"], "menu.invite":["Sd8Ixw"],
+        "menu.ring":["bHa9kN", "ygslb0"], "menu.copyUsername":["y5MwJy"], "menu.copyLink":["WqhZss"], "menu.copyId":["/AXYnE"], "menu.copyInfo":["QvQeLv"],
+        "menu.apps":["PHjkRE"], "menu.shopLook":["xNdRDO"], "menu.removeFromGroup":["n5zMI+"], "menu.ignore":["ytCpKs", "8wXU9B"],
+        "menu.block":["l4Emac", "XyHpKH"], "menu.report":["wqHXNt", "TbHyMG", "jhJzez"]};
+    const MENU_FALLBACK = {"menu.mainProfile":"View Main Profile", "menu.serverProfile":"View Per-server Profile", "menu.nickname":"Add Friend Nickname",
+        "menu.invite":"Invite to Server", "menu.ring":"Ring", "menu.copyUsername":"Copy Username", "menu.copyLink":"Copy Link", "menu.copyId":"Copy User ID",
+        "menu.copyInfo":"Copy User Info", "menu.apps":"Apps", "menu.shopLook":"Shop This Look", "menu.removeFromGroup":"Remove from Group",
+        "menu.ignore":"Ignore", "menu.block":"Block", "menu.report":"Report User Profile"};
+    // A message in Discord's language (intl 1126), or "" when it isn't there.
+    function discordText(hash) {
+        try { const m = global.__r(1126), msg = m && m.t && m.t[hash]; return msg != null && m.intl ? String(m.intl.string(msg) || "") : ""; } catch (_) { return ""; }
+    }
+    // Rows on Discord's Settings screen and Venus's lists (settings.KEY) and switches on Venus option pages (row.key) are spots too.
+    // Features and Remove anything themselves can't be removed, so there is always a way back.
+    const HIDE_DYNAMIC = /^(?:settings\.[A-Z0-9_]{2,80}|row\.[A-Za-z0-9]{2,60})$/;
+    function settingRemovable(key) { return typeof key === "string" && /^[A-Z0-9_]{2,80}$/.test(key) && key !== "VENUS_PLUGINS" && key.indexOf("HIDEANYTHING") < 0; }
+    const rowLabels = new Map();
+    const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "menu", "you"];
     const HIDE_SPOT_KEYS = Object.create(null);
     HIDE_SPOTS.forEach(spot => { HIDE_SPOT_KEYS[spot[0]] = spot; });
     // Modules hooked for it (also selected in targetModules).
-    const HIDE_HOOKED = {10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1};
+    const HIDE_HOOKED = {13092:1, 14973:1, 14974:1, 10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1};
     const hideEdit = {on:false, top:false, last:null};
     // Written out so every label is a plain tr() call the language check can see.
     function hideSpotTitle(key) {
+        if (MENU_SPOTS[key]) { for (const hash of MENU_SPOTS[key]) { const text = discordText(hash); if (text) return text; } return MENU_FALLBACK[key]; }
+        if (/^settings\./.test(key)) return settingTitle(key.slice(9));
+        if (/^row\./.test(key)) { const label = rowLabels.get(key.slice(4)); return label ? tr(label) : key.slice(4); }
         switch (key) {
             case "chat.voice": return tr("Voice message button");
             case "chat.attach": return tr("Attach button");
@@ -8213,13 +8247,13 @@
         return key;
     }
     function hidePlaceTitle(place) {
-        return place === "chat" ? tr("Message bar") : place === "attach" ? tr("Attach menu") : place === "dm" ? tr("Direct messages") : place === "messages" ? tr("Messages tab") :
+        return place === "menu" ? tr("Profile menu") : place === "settings" ? tr("Settings") : place === "options" ? tr("Venus options") : place === "chat" ? tr("Message bar") : place === "attach" ? tr("Attach menu") : place === "dm" ? tr("Direct messages") : place === "messages" ? tr("Messages tab") :
             place === "profile" ? tr("Other people's profiles") : tr("Your profile");
     }
     function hideSpotsText(raw) {
-        if (typeof raw !== "string" || raw.length > 2000) return undefined;
+        if (typeof raw !== "string" || raw.length > 8000) return undefined;
         const keys = [];
-        raw.split(",").forEach(part => { const key = part.trim(); if (HIDE_SPOT_KEYS[key] && keys.indexOf(key) < 0) keys.push(key); });
+        raw.split(",").forEach(part => { const key = part.trim(); if ((HIDE_SPOT_KEYS[key] || HIDE_DYNAMIC.test(key)) && keys.indexOf(key) < 0) keys.push(key); });
         return keys.join(",");
     }
     let hideSpotCache = null;
@@ -8236,6 +8270,7 @@
         hideEdit.on = on; hideEdit.last = null;
         animateLayout();
         notify("hideAnythingEdit");
+        pokeSettingsList();
     }
     function setSpotHidden(key, hide) {
         const keys = Array.from(hiddenSpots()).filter(entry => entry !== key);
@@ -8243,8 +8278,9 @@
         hideEdit.last = hide ? {key, at:Date.now()} : null;
         animateLayout();
         setSetting("hideAnythingSpots", keys.join(","));
+        pokeSettingsList();
     }
-    function restoreAllSpots() { hideEdit.last = null; animateLayout(); haptic("SELECTION"); setSetting("hideAnythingSpots", ""); }
+    function restoreAllSpots() { hideEdit.last = null; animateLayout(); haptic("SELECTION"); setSetting("hideAnythingSpots", ""); pokeSettingsList(); }
     // Asks first, in Discord's own alert, then removes it right away.
     function askRemoveSpot(key) {
         haptic("IMPACT_LIGHT");
@@ -8268,6 +8304,10 @@
             backgroundColor:"#f23f43", borderWidth:2, borderColor:"#ffffff", elevation:6, shadowColor:"#000000", shadowOpacity:0.3, shadowRadius:3,
             shadowOffset:{width:0, height:1}},
         x:{color:"#ffffff", fontSize:12, lineHeight:14, fontWeight:"700", includeFontPadding:false, textAlign:"center"}};
+    const HIDE_INSET = {cover:{position:"absolute", top:2, left:2, right:2, bottom:2, borderRadius:12, borderWidth:2, borderStyle:"dashed",
+            borderColor:"#f23f43", backgroundColor:"#f23f431a"},
+        badge:{position:"absolute", top:"50%", marginTop:-11, right:12, width:22, height:22, borderRadius:11, alignItems:"center", justifyContent:"center",
+            backgroundColor:"#f23f43", borderWidth:2, borderColor:"#ffffff", elevation:6}};
     function HideMark(props) {
         const base = props.base, key = props.spot;
         let layout = null;
@@ -8279,11 +8319,90 @@
         const label = tr("Remove: {name}", {name:hideSpotTitle(key)}), ask = () => askRemoveSpot(key);
         return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false},
             base,
-            el(Press, {style:HIDE_MARK.cover, onPress:ask, accessibilityRole:"button", accessibilityLabel:label}),
-            el(Press, {style:HIDE_MARK.badge, onPress:ask, hitSlop:{top:10, bottom:10, left:10, right:10}, accessibilityRole:"button", accessibilityLabel:label},
+            el(Press, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onPress:ask, accessibilityRole:"button", accessibilityLabel:label}),
+            el(Press, {style:props.inset ? HIDE_INSET.badge : HIDE_MARK.badge, onPress:ask, hitSlop:{top:10, bottom:10, left:10, right:10}, accessibilityRole:"button", accessibilityLabel:label},
                 X ? el(X, {size:"xxs", color:"#ffffff"}) : el(RN.Text, {style:HIDE_MARK.x}, "\u2715")));
     }
     function hideMarked(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node}); }
+    function hideMarkedRow(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node, inset:true}); }
+    // Discord's Settings list (SettingsList 14971) reads its rows through toSettingListItems (14974) and redraws when its
+    // blocklist (SettingBlocklistStore 14838) changes, so removed rows are left out there and a fresh blocklist redraws it.
+    function settingTitle(key) {
+        try { const get = inspectedExport(14837, "getCachedSettingTitle"), title = typeof get === "function" ? get(key) : null; if (typeof title === "string" && title) return title; } catch (_) {}
+        const words = key.replace(/^VENUS_/, "").replace(/_ROW$/, "").toLowerCase().replace(/_/g, " ");
+        return words.charAt(0).toUpperCase() + words.slice(1);
+    }
+    function pokeSettingsList() {
+        try {
+            const store = inspectedExport(14838, "default"), state = store && typeof store.getState === "function" ? store.getState() : null;
+            if (state && typeof store.setState === "function") store.setState({blocklist:new Set(state.blocklist || [])});
+        } catch (_) {}
+    }
+    function settingListItems(orig, self, args) {
+        const node = args[0];
+        if (!node || !Array.isArray(node.sections) || !settings.hideAnythingSpots || !enabled("hideAnything")) return orig.apply(self, args);
+        const hidden = hiddenSpots();
+        let changed = false;
+        const sections = node.sections.map(section => {
+            if (!section || !Array.isArray(section.settings)) return section;
+            const kept = section.settings.filter(key => !(typeof key === "string" && settingRemovable(key) && hidden.has("settings." + key)));
+            if (kept.length === section.settings.length) return section;
+            changed = true;
+            return cloneWith(section, "settings", kept);
+        });
+        if (!changed) return orig.apply(self, args);
+        const next = Array.from(args); next[0] = cloneWith(node, "sections", sections);
+        return orig.apply(self, next);
+    }
+    // Each row Discord draws (renderSettingItem 14973) gets the mark in removal mode.
+    function settingItemMark(orig, self, args) {
+        const rendered = orig.apply(self, args), props = args[0], key = props && props.setting;
+        return rendered && hideEditing() && settingRemovable(key) ? hideMarkedRow(rendered, "settings." + key) : rendered;
+    }
+    // The profile's ⋯ menu: removed items are left out (an empty group goes too); in removal mode each removable item starts
+    // with ✕ and a tap asks to remove it instead.
+    function menuItems(items, labels, edit) {
+        if (!Array.isArray(items)) return items;
+        let changed = false;
+        const out = [];
+        for (const item of items) {
+            if (Array.isArray(item)) {
+                const next = menuItems(item, labels, edit);
+                if (next !== item) changed = true;
+                if (next.length) out.push(next); else changed = true;
+                continue;
+            }
+            const key = item && typeof item.label === "string" ? labels.get(item.label) : null;
+            if (!key) { out.push(item); continue; }
+            if (spotHidden(key)) { changed = true; continue; }
+            if (!edit) { out.push(item); continue; }
+            changed = true;
+            out.push(Object.assign({}, item, {label:"\u2715  " + item.label, action:() => askRemoveSpot(key)}));
+        }
+        return changed ? out : items;
+    }
+    function profileMenu(orig, self, args) {
+        useSettings("hideAnything");
+        const rendered = orig.apply(self, args);
+        if (!React || !enabled("hideAnything")) return rendered;
+        const edit = hideEditing();
+        if (!edit && !settings.hideAnythingSpots) return rendered;
+        const Menu = inspectedExport(9358, "ContextMenu");
+        if (!Menu) return rendered;
+        const labels = new Map();
+        Object.keys(MENU_SPOTS).forEach(key => MENU_SPOTS[key].forEach(hash => { const text = discordText(hash); if (text) labels.set(text, key); }));
+        return cloneTree(rendered, (node, props) => {
+            if (node.type !== Menu || !Array.isArray(props.items)) return props;
+            const items = menuItems(props.items, labels, edit);
+            return items === props.items ? props : Object.assign({}, props, {items});
+        }, 0);
+    }
+    // Switches on Venus's option pages (switchRow): gone once removed, marked in removal mode.
+    function HideRow(props) {
+        useSettings("hideAnything");
+        if (spotHidden(props.spot)) return null;
+        return hideEditing() ? hideMarkedRow(props.child, props.spot) : props.child;
+    }
     // A component that is one spot: gone when removed, marked in removal mode. Discord's render always runs, so its hooks
     // never change between renders.
     function hideWhole(key) {
@@ -8476,6 +8595,9 @@
             case 16467: return hookComponent(exports, hideTree(messagesSpot));
             case 9115: return hookComponent(exports, hideTree(youSpot));
             case 14827: return hookComponent(exports, appWithHideBar);
+            case 13092: return hookComponent(exports, profileMenu);
+            case 14973: return hookExport(exports, "renderSettingItem", settingItemMark);
+            case 14974: return hookExport(exports, "toSettingListItems", settingListItems);
             case 10028: return exports.default ? replaceValue(exports, "default", propsComponent(exports.default, attachMenuSpots)) : exports;
             case 15371: return hideQuestHooks(exports);
             case 15465: return hideQuestDock(exports);
@@ -8516,7 +8638,8 @@
         const ui = reviewUI();
         if (!React || !RN) return null;
         const on = enabled("hideAnything"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow, Row = ui.TableRow, Button = inspectedExport(5379, "Button");
-        const hidden = hiddenSpots(), removed = HIDE_SPOTS.filter(spot => hidden.has(spot[0]));
+        const hidden = hiddenSpots(), removed = HIDE_SPOTS.filter(spot => hidden.has(spot[0])).concat(Array.from(hidden).filter(key => !HIDE_SPOT_KEYS[key])
+            .map(key => [key, /^settings\./.test(key) ? "settings" : "options", 7092, "SettingsIcon"]));
         const icon = spot => rowIcon(spot[2], spot[3]);
         const groups = [
             on ? null : offCard("status", venusIcon(10260, "XLargeIcon"), "hideAnything"),
