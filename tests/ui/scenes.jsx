@@ -16,7 +16,7 @@
 //   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
 //   scene=removeMode   Remove anything: the Messages tab header, a DM header, a profile's buttons, your profile pill and the message
 //                      bar, in removal mode (a red X on every removable button, the floating bar at the bottom). ask=<name> taps that
-//                      button's X (ask=Voice call button), and confirm=1 then answers Remove, so the "Remove this button?" alert shows; mode=off draws them without removal
+//                      button's X (ask=Voice call button), and confirm=1 then answers Remove, so the "Remove this button?" alert shows; mode=off draws them without removal; scene=settings&mode=on shows Settings in removal mode
 //                      mode, so set={"hideAnythingSpots":"..."} shows the rows closed up
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
@@ -362,6 +362,13 @@ function SettingsScreen({ defined, registry }) {
   const render = global.__r(14973).renderSettingItem;
   const [, bump] = React.useState(0);
   React.useEffect(() => { const store = global.__r(14838).default; return store && store.subscribe ? store.subscribe(() => bump(n => n + 1)) : undefined; }, []);
+  // mode=on starts removal mode from the Remove anything page (drawn out of sight), so every row shows its X.
+  const node = registry.VENUS_HIDEANYTHING, Page = q.get("mode") === "on" && node && node.screen && node.screen.getComponent();
+  React.useEffect(() => {
+    if (!Page) return;
+    let tries = 0; const go = () => { const hit = Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && (e.textContent || "").trim() === "Start removing");
+      if (hit) (hit.closest("[tabindex]") || hit).click(); else if (++tries < 30) setTimeout(go, 50); }; go();
+  }, []);
   return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
     <RN.View style={{ height: 56, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}><D.Text variant="heading-lg/bold" color="text-strong">Settings</D.Text></RN.View>
     <RN.View style={{ paddingHorizontal: 12, paddingBottom: 16 }}><D.SearchField placeholder="Search" /></RN.View>
@@ -374,6 +381,7 @@ function SettingsScreen({ defined, registry }) {
           return <React.Fragment key={id}>{render ? render({ setting: id, row }) : row}</React.Fragment>; })}
       </D.TableRowGroup>)}
     </RN.View>
+    {Page ? <RN.View style={{ height: 1, overflow: "hidden", opacity: 0 }}><Page /></RN.View> : null}
   </RN.View>;
 }
 
