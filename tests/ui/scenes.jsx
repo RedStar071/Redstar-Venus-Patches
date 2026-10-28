@@ -14,6 +14,10 @@
 //   scene=bulkDelete   Bulk delete messages: Select Messages tapped in your message's hold menu, so the chat shows the
 //                      selection bar in the message bar's place (add on=translate&set={"translateMode":"manual"} for both bars)
 //   scene=longMessageFailed  Send long messages: a 3-part message whose second part Discord refused (the alert that offers the rest)
+//   scene=removeMode   Remove anything: the Messages tab header, a DM header, a profile's buttons, your profile pill and the message
+//                      bar, in removal mode (a red X on every removable button, the floating bar at the bottom). ask=<spot> taps that
+//                      spot's X (dm.call, chat.voice...), so the "Remove this button?" alert shows; mode=off draws them without removal
+//                      mode, so set={"hideAnythingSpots":"..."} shows the rows closed up
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 // Each scene turns on the features it shows (SCENE_SETTINGS below), so scene=serverInfo needs no on=; set= still wins
@@ -49,7 +53,8 @@ export const SCENE_SETTINGS = {
 };
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379];
+export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379,
+  14827, 16467, 12854, 13425, 9115, 11935, 11942, 11946, 11957, 11956];
 let host = null; // the Scene, once drawn: shows and hides sheets
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
@@ -108,6 +113,37 @@ export function modules(store, me) {
     7174: { default: { sendMessage: (() => { let n = 0; return () => ++n === 2 ? Promise.reject(new Error("429")) : Promise.resolve({ ok: true }); })(),
       editMessage: () => { console.log("TOAST edit reached Discord"); return Promise.resolve(); } } },
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
+    // Remove anything: Discord's buttons, drawn from the same icons Venus matches them by (global.__r, like inspectedExport).
+    14827: { default: p => <RN.View style={{ flex: 1 }}>{p.children}</RN.View> },
+    7569: { IconButton: p => <RN.Pressable accessibilityLabel={p.accessibilityLabel} onPress={p.onPress} style={ROUND}>{p.icon}</RN.Pressable> },
+    11940: { MediaKeyboardButtonIcon: D.makeIcon("PlusLargeIcon") },
+    16468: { default: () => <RN.Pressable style={[ROUND, { flexDirection: "row", width: undefined, paddingHorizontal: 12, gap: 6 }]}>{icon(6770, "EnvelopeIcon", "sm")}
+      <D.Text variant="text-sm/bold" color="text-strong">9</D.Text></RN.Pressable> },
+    16467: { default: () => <RN.View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, gap: 12 }}>
+      <D.Text variant="heading-xl/bold" color="text-strong">Messages</D.Text>
+      <RN.View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        {React.createElement(global.__r(7569).IconButton, { icon: icon(6740, "MagnifyingGlassIcon", "sm"), accessibilityLabel: "Search" })}
+        {React.createElement(global.__r(16468).default)}
+        <RN.View style={{ flex: 1 }}><D.Button text="Add Friends" variant="secondary" size="sm" /></RN.View>
+        {React.createElement(global.__r(7569).IconButton, { icon: icon(10310, "PlusLargeIcon", "sm"), accessibilityLabel: "New message" })}
+      </RN.View></RN.View> },
+    12854: { default: () => <RN.View style={{ flexDirection: "row", gap: 6 }}>
+      <RN.Pressable onPress={() => {}} style={ROUND}>{icon(9317, "PhoneCallIcon", "sm")}</RN.Pressable>
+      <RN.Pressable onPress={() => {}} style={ROUND}>{icon(10771, "VideoIcon", "sm")}</RN.Pressable>
+      <RN.Pressable onPress={() => {}} style={ROUND}>{icon(6740, "MagnifyingGlassIcon", "sm")}</RN.Pressable></RN.View> },
+    13425: { default: () => <RN.View style={{ flexDirection: "row", gap: 8 }}>
+      <ProfileButton icon={icon(8194, "ChatIcon", "sm")} text="Message" /><ProfileButton icon={icon(9317, "PhoneCallIcon", "sm")} text="Call" /></RN.View> },
+    9115: { default: () => <RN.View style={{ flexDirection: "row", alignSelf: "center", gap: 8, padding: 8, borderRadius: 28, backgroundColor: D.tok("BACKGROUND_SURFACE_HIGH") }}>
+      {[["quests", 13012, "QuestsIcon"], ["shop", 11828, "ShopIcon"], ["nitro", 9031, "NitroWheelIcon"], ["settings", 7092, "SettingsIcon"]].map(([key, id, name]) =>
+        <RN.View key={key} style={[ROUND, { backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }]}>{icon(id, name, "sm")}</RN.View>)}</RN.View> },
+    11935: { default: () => <RN.View style={{ flexDirection: "row", gap: 6 }}>
+      <ActionButton IconComponent={global.__r(11940).MediaKeyboardButtonIcon} />
+      {React.createElement(global.__r(11942).default)}{React.createElement(global.__r(11946).default, { shouldShowGiftButton: true })}</RN.View> },
+    11942: { default: () => <ActionButton IconComponent={global.__r(8229).AppsIcon} /> },
+    11946: { default: () => <ActionButton IconComponent={global.__r(11540).GiftIcon} /> },
+    11957: { default: () => <ActionButton IconComponent={global.__r(11106).MicrophoneIcon} /> },
+    11956: { default: p => p.canSendVoiceMessage ? React.createElement(global.__r(11957).default) :
+      <ActionButton IconComponent={global.__r(5040).SendMessageIcon} brand /> },
   };
 }
 // The channel's ID is its creation date, like every Discord ID.
@@ -332,6 +368,52 @@ function SettingsScreen({ defined, registry }) {
   </RN.View>;
 }
 
+const ROUND = { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") };
+const icon = (id, name, size) => React.createElement(global.__r(id)[name], { size: size || "md" });
+function ActionButton(p) {
+  return <RN.Pressable style={[ROUND, p.brand ? { backgroundColor: D.tok("CONTROL_PRIMARY_BACKGROUND_DEFAULT") } : null]}>
+    {React.createElement(p.IconComponent, { size: "sm", color: p.brand ? "#fff" : undefined })}</RN.Pressable>;
+}
+function ProfileButton(p) {
+  return <RN.Pressable style={{ flex: 1, height: 40, borderRadius: 20, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: D.tok("CONTROL_SECONDARY_BACKGROUND_DEFAULT") }}>
+    {p.icon}<D.Text variant="text-md/semibold" color="text-strong">{p.text}</D.Text></RN.Pressable>;
+}
+function Caption(p) { return <RN.View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6 }}><D.Text variant="text-xs/bold" color="text-muted">{p.children}</D.Text></RN.View>; }
+// Removal mode starts from the Remove anything page's own button, drawn out of sight, as a tap there would.
+function RemoveMode({ defined, registry }) {
+  const node = registry.VENUS_HIDEANYTHING, Page = node && node.screen && node.screen.getComponent();
+  const App = defined[14827].exports.default, Messages = defined[16467].exports.default, Dm = defined[12854].exports.default;
+  const Contact = defined[13425].exports.default, Pill = defined[9115].exports.default, Actions = defined[11935].exports.default, Send = defined[11956].exports.default;
+  React.useEffect(() => {
+    if (q.get("mode") === "off") return;
+    const press = (find, then) => { let tries = 0; const go = () => { const hit = find(); if (hit) { hit.click(); if (then) setTimeout(then, 150); } else if (++tries < 30) setTimeout(go, 50); }; go(); };
+    press(() => Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && /^(Start removing|Stop removing)$/.test((e.textContent || "").trim()) || false) ||
+      Array.from(document.querySelectorAll("#hide-page [tabindex]")).find(e => e.querySelector("div")) , q.get("ask") ? () =>
+      press(() => document.querySelector(`[data-spot="${q.get("ask")}"]`) || Array.from(document.querySelectorAll("#root [aria-label]")).find(e => e.getAttribute("aria-label").indexOf(":") > 0 &&
+        e.closest("[data-hide-spot]") && e.closest("[data-hide-spot]").getAttribute("data-hide-spot") === q.get("ask"))) : null);
+  }, []);
+  const card = { marginHorizontal: 12, borderRadius: 16, padding: 12, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") };
+  return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
+    <App>
+      <Messages />
+      <Caption>DIRECT MESSAGE</Caption>
+      <RN.View style={[card, { flexDirection: "row", alignItems: "center", gap: 10 }]}>
+        <RN.View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#eb459e" }} />
+        <RN.View style={{ flex: 1 }}><D.Text variant="text-md/bold" color="text-strong">Dippy</D.Text></RN.View><Dm /></RN.View>
+      <Caption>ALEX'S PROFILE</Caption>
+      <RN.View style={card}><Contact /></RN.View>
+      <Caption>YOUR PROFILE</Caption>
+      <RN.View style={{ paddingVertical: 4 }}><Pill /></RN.View>
+      <Caption>MESSAGE BAR</Caption>
+      <RN.View style={[card, { flexDirection: "row", alignItems: "center", gap: 6, padding: 8, borderRadius: 28 }]}>
+        <Actions /><RN.View style={{ flex: 1, height: 40, borderRadius: 20, paddingHorizontal: 14, justifyContent: "center", backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>
+          <D.Text variant="text-md/medium" color="text-muted">Message @Dippy</D.Text></RN.View>
+        <Send canSendVoiceMessage /></RN.View>
+      <RN.View style={{ height: 200 }} />
+    </App>
+    <RN.View nativeID="hide-page" style={{ height: 1, overflow: "hidden", opacity: 0 }}>{Page ? <Page /> : null}</RN.View>
+  </RN.View>;
+}
 export function Scene({ name, defined, registry }) {
   const [sheets, setSheets] = React.useState([]);
   host = { show: (key, content) => setSheets(list => list.filter(s => s.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(s => s.key !== key)) };
@@ -363,6 +445,7 @@ export function Scene({ name, defined, registry }) {
       if (fiber) fiber.memoizedProps.onLongPress({}); else if (++tries < 20) setTimeout(hold, 50); else console.warn("No Read all hold");
     }; setTimeout(hold, 50); }
   }, []);
+  if (name === "removeMode" && !sheets.length) return <RemoveMode defined={defined} registry={registry} />;
   if (name === "reviews") return <Profile defined={defined} />;
   if (name === "youBar") return <YouBar defined={defined} />;
   if (name === "translateBar" || name === "bulkDelete" && !sheets.length) return <Chat defined={defined} />;
