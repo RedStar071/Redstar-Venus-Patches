@@ -38,9 +38,9 @@
     if (features.accountSwitcher) selectModules([1390, 5938, 6623, 12129, 12130, 12131, 16387, 16840, 16858]);
     if (features.appIcons) selectModules([1390, 4769, 9464, 14299, 15831, 15832, 17697, 18051]);
     if (features.nitroThemes) selectModules([584, 1390, 2046, 4769, 4937, 14299, 15566]);
-    if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 11191, 10368]);
-    if (features.materialYou) selectModules([589, 590, 591, 1205, 4831, 11191]);
-    if (features.iconPacks) selectModules([81, 84, 328, 1205, 4817, 4831, 11191]);
+    if (features.customThemes) selectModules([589, 590, 591, 1205, 4831, 4839, 11191, 10368]);
+    if (features.materialYou) selectModules([589, 590, 591, 1205, 4831, 4839, 11191]);
+    if (features.iconPacks) selectModules([81, 84, 328, 1205, 4817, 4831, 4839, 11191]);
     if (features.messageHighlight) selectModules([584, 1390, 5432, 7742]);
     if (features.serverInfo) selectModules([1390, 16748]);
     if (features.fixEmbeds) selectModules([1390, 7174]);
@@ -12644,10 +12644,25 @@
         if (features.iconPacks) useSettings("iconPacks");
         // Switching Light, Ash, Dark or Onyx re-renders this provider: the native table follows the new appearance.
         if (features.customThemes && materialYou.nativeSlot && customThemesActiveEntry() && nativeThemeSlot() !== materialYou.nativeSlot) myNativeSync(customThemesActiveEntry());
-        const tree = orig.apply(self, args);
-        if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value.key !== "string") return tree;
+        return themeContextRekey(orig.apply(self, args));
+    }
+    // The server list (Guilds) and DMs (MainTabs) sit under a second ThemeContextProvider (4839) that memoizes its own
+    // value on its props and the parent's theme, flags and so on, never on the parent's key. On a cold start they mount
+    // before the saved theme is read, so that memo kept the key from before it and createStyles kept serving Discord's
+    // colors there (#110). Re-keyed the same way, they recolor with the rest of Discord.
+    function nestedThemeContextProvider(orig, self, args) {
+        return themeContextRekey(orig.apply(self, args));
+    }
+    // One re-keyed copy per memoized value and revision, so a provider that re-renders with the same value hands down
+    // the same object and doesn't re-render every consumer under it.
+    const themeContextRekeyed = new WeakMap();
+    function themeContextRekey(tree) {
+        if (customThemes.revision <= 0 || !tree || !tree.props || !tree.props.value || typeof tree.props.value !== "object" || typeof tree.props.value.key !== "string") return tree;
         const value = tree.props.value, key = value.key.split("#v")[0] + "#v" + customThemes.revision;
-        return value.key === key ? tree : React.cloneElement(tree, {value:Object.assign({}, value, {key})});
+        if (value.key === key) return tree;
+        let copy = themeContextRekeyed.get(value);
+        if (!copy || copy.key !== key) { copy = Object.assign({}, value, {key}); themeContextRekeyed.set(value, copy); }
+        return React.cloneElement(tree, {value:copy});
     }
     function hookCreateThemedContext(exports) {
         if (!exports) return exports;
@@ -15983,6 +15998,7 @@
             case 11191: return (features.customThemes || features.materialYou || features.iconPacks) ? hookComponent(exports, rootThemeContextProvider, "RootThemeContextProvider") : exports;
             case 1205: if ((features.customThemes || features.materialYou || features.iconPacks) && exports && exports.default) customThemes.themeStore = exports.default; return exports;
             case 4831: return (features.customThemes || features.materialYou || features.iconPacks) ? hookCreateThemedContext(exports) : exports;
+            case 4839: return (features.customThemes || features.materialYou || features.iconPacks) ? hookComponent(exports, nestedThemeContextProvider, "ThemeContextProvider") : exports;
             case 10368:
                 // ChatViewWrapper {channelId, stickyHeader, children}: the theme background behind chat, and the translate bar (#82)
                 // in the sticky header slot above the messages, where Discord shows its own New messages bar.
