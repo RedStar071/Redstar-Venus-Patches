@@ -8712,15 +8712,23 @@
         }
         return checkStatus();
     }
+    // Android's native renderer (NotificationRenderer.displayLocal) builds the notification tag from
+    // userInfo.channel_id + userInfo.message_id and posts every local push under notification id 0.
+    // Top-level channelId/messageId keys are never read, so pushes used to share one tag and each new
+    // one silently replaced the one before it. A unique message_id inside userInfo keeps them all.
+    let pushCounter = 0;
+    function venusPush(title, body) {
+        const pushMod = inspectedExport(11033, "default");
+        if (!pushMod || typeof pushMod.presentLocalNotification !== "function") return false;
+        const mid = "venus-" + Date.now().toString(36) + "-" + (++pushCounter);
+        try {
+            pushMod.presentLocalNotification({alertTitle:title, alertBody:body, userInfo:{message_id:mid}});
+            return true;
+        } catch (_) { return false; }
+    }
     function userNotifPushSend(content, title) {
         if (!settings.userNotifPush || isAppActive()) return;
-        const pushMod = inspectedExport(11033, "default");
-        const mid = String(userNotif.shown);
-        try {
-            if (pushMod && typeof pushMod.presentLocalNotification === "function")
-                pushMod.presentLocalNotification({alertTitle:title || tr("Activity notifications"), alertBody:content,
-                    channelId:"venus-user-notif", channel_id:"venus-user-notif", messageId:mid, message_id:mid});
-        } catch (_) {}
+        venusPush(title || tr("Activity notifications"), content);
     }
     function userNotifFriendIds() {
         const store = userNotif.relationships || (userNotif.relationships = inspectedExport(4760, "default"));
@@ -14565,12 +14573,7 @@
     }
     function removedPushSend(text) {
         if (!settings.removedAlertsPush || isAppActive()) return;
-        const pushMod = inspectedExport(11033, "default"), mid = String(Date.now());
-        try {
-            if (pushMod && typeof pushMod.presentLocalNotification === "function")
-                pushMod.presentLocalNotification({alertTitle:tr("Connection removed"), alertBody:text,
-                    channelId:"venus-user-notif", channel_id:"venus-user-notif", messageId:mid, message_id:mid});
-        } catch (_) {}
+        venusPush(tr("Connection removed"), text);
     }
     function removedShow(entry) {
         removed.shown++;
