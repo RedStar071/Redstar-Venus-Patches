@@ -55,7 +55,7 @@
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    if (features.hideAnything) selectModules([11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467, 16468]);
+    if (features.hideAnything) selectModules([9115, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467]);
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
