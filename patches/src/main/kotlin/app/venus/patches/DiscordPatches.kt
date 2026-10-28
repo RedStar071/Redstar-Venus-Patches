@@ -74,7 +74,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "hideGift", "hideQuestDock", "hideButtons", "gestures", "hideCall", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag", "removedAlerts", "fullImages", "hideAnything")
+                    "systemEmoji", "gestures", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag", "removedAlerts", "fullImages", "hideAnything")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -660,28 +660,12 @@ val forceSystemEmojis = bytecodePatch(
 }
 
 @Suppress("unused")
-val hideGiftButton = bundledPlugin("hideGift", "Hide the gift button",
-    "Removes the Nitro gift button from the message bar.")
-
-@Suppress("unused")
 val messageGestures = bundledPlugin("gestures", "Double-tap to reply",
     "Double-tap a message to reply, or your own to edit it. Triple-tap your own to delete it. Based on Geastures+ by kmmiio99o.")
 
 @Suppress("unused")
-val hideCallButton = bundledPlugin("hideCall", "Hide the call button",
-    "Removes Call from people's profiles. Message fills the space.")
-
-@Suppress("unused")
-val hideExtraButtons = bundledPlugin("hideButtons", "Hide extra buttons",
-    "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Polls and Photos in the attach menu; the rest close up with no gaps.")
-
-@Suppress("unused")
 val removeAnything = bundledPlugin("hideAnything", "Remove anything",
-    "Tap a button you never use to remove it, right where it is: turn on removal mode, then tap the red X on the voice message, attach, call, video, search or other buttons. Bring them back any time in Venus.")
-
-@Suppress("unused")
-val hideQuestDock = bundledPlugin("hideQuestDock", "Hide the Quests banner",
-    "Removes the Quest promotion above your profile bar. Quests still work.")
+    "Tap a button you never use to remove it, right where it is: turn on removal mode, then tap the red X on the voice message, attach, gift, call, video, search, Quests, Shop or Nitro buttons, the Quests banner, attach menu items and more. Bring them back any time in Venus.")
 
 @Suppress("unused")
 val validUser = bundledPlugin("validUser", "Fix unknown mentions",

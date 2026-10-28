@@ -28,12 +28,8 @@
     if (features.readAll) targetModules[16754] = 1;
     if (features.quests) selectModules([584, 7386, 9699, 13933, 13968]);
     if (features.badges) selectModules([584, 1390, 5759, 8312, 9699, 13933, 13968]);
-    if (features.hideGift) selectModules([11935, 12146]);
-    if (features.hideQuestDock) selectModules([15371, 15465]);
-    if (features.hideButtons) selectModules([9115, 10028]);
     if (features.systemEmoji) targetModules[6820] = 1;
     if (features.gestures) selectModules([7982, 9434, 12837, 11990, 1390, 10694]);
-    if (features.hideCall) targetModules[13425] = 1;
     if (features.validUser) selectModules([584, 1390]);
     if (features.youBarSettings) targetModules[16858] = 1;
     if (features.splitMessages) selectModules([1085, 1390, 2065, 7174, 9255]);
@@ -55,7 +51,7 @@
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    if (features.hideAnything) selectModules([9115, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467]);
+    if (features.hideAnything) selectModules([9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467]);
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -70,7 +66,7 @@
         jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize:false, pastelAll:false, pastelContent:false, platformIndicators:false, piDmHeader:true, piUserList:true, piProfile:true, piHideMobile:true, reviewDB:false, reviewWarning:true, readAll:false, readAllMode:"guilds",
         quests:false, questsVideo:true, questsPlay:true, questsActivity:true, questsEnroll:true,
         badges:false, badgesGameTime:true, badgesUniqueGames:true, badgesCycleMinutes:15, badgesGamesAtOnce:2, systemFont:false, systemFontSource:"phone",
-        hideGift:false, hideQuestDock:false, hideButtons:false, hideButtonsQuests:true, hideButtonsShop:true, hideButtonsNitro:true, hideButtonsApps:true, hideButtonsPolls:false, hideButtonsPhotos:false, systemEmoji:false, systemEmojiSource:"phone", gestures:false, gestureOwn:"edit", gestureTripleDelete:true, hideCall:false,
+        systemEmoji:false, systemEmojiSource:"phone", gestures:false, gestureOwn:"edit", gestureTripleDelete:true,
         validUser:false, youBarSettings:false, splitMessages:false,
         translate:false, translateTarget:"discord", translateLanguage:"en", translateMode:"auto", translateAsk:"both", translateNote:true, translateOriginal:false,
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
@@ -87,7 +83,7 @@
             jumpToTop: false, hiddenChannels: false, hiddenChannelsMenu: true, pastelize: false, pastelAll: false, pastelContent: false, platformIndicators: false, piDmHeader: true, piUserList: true, piProfile: true, piHideMobile: true, reviewDB: false, reviewWarning: true, readAll: false, readAllMode: "guilds",
             quests: false, questsVideo: true, questsPlay: true, questsActivity: true, questsEnroll: true,
             badges: false, badgesGameTime: true, badgesUniqueGames: true, badgesCycleMinutes: 15, badgesGamesAtOnce: 2, systemFont: false, systemFontSource: "phone",
-            hideGift: false, hideQuestDock: false, hideButtons: false, hideButtonsQuests: true, hideButtonsShop: true, hideButtonsNitro: true, hideButtonsApps: true, hideButtonsPolls: false, hideButtonsPhotos: false, systemEmoji: false, systemEmojiSource: "phone", gestures: false, gestureOwn: "edit", gestureTripleDelete: true, hideCall: false,
+            systemEmoji: false, systemEmojiSource: "phone", gestures: false, gestureOwn: "edit", gestureTripleDelete: true,
             validUser: false, youBarSettings: false, splitMessages: false,
             translate: false, translateTarget: "discord", translateLanguage: "en", translateMode: "auto", translateAsk: "both", translateNote: true, translateOriginal: false,
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
@@ -359,6 +355,26 @@
     // 1.20.0 folded Spaces in channel names into Clean channel names: someone who only had spaces on keeps exactly that
     // (cleaning on, with only its Spaces option), and someone who had both keeps both.
     function migrateSettings(raw) {
+        // 1.20.0 folded Hide the gift button, Hide the call button, Hide extra buttons and Hide the Quests banner into Remove
+        // anything: whatever they hid stays removed, as Remove anything spots.
+        if (raw && typeof raw === "object" && (raw.hideGift === true || raw.hideCall === true || raw.hideButtons === true || raw.hideQuestDock === true)) {
+            const spots = typeof raw.hideAnythingSpots === "string" && raw.hideAnythingSpots ? raw.hideAnythingSpots.split(",") : [];
+            const add = key => { if (spots.indexOf(key) < 0) spots.push(key); };
+            const option = (key, fallback) => raw[key] === undefined ? fallback : raw[key] === true;
+            if (raw.hideGift === true) add("chat.gift");
+            if (raw.hideCall === true) add("profile.call");
+            if (raw.hideQuestDock === true) add("you.questBanner");
+            if (raw.hideButtons === true) {
+                if (option("hideButtonsQuests", true)) add("you.quests");
+                if (option("hideButtonsShop", true)) add("you.shop");
+                if (option("hideButtonsNitro", true)) add("you.nitro");
+                if (option("hideButtonsApps", true)) add("attach.apps");
+                if (option("hideButtonsPolls", false)) add("attach.polls");
+                if (option("hideButtonsPhotos", false)) add("attach.photos");
+            }
+            raw.hideAnythingSpots = spots.join(",");
+            raw.hideAnything = true;
+        }
         if (raw && typeof raw === "object" && raw.noDeleteColor === undefined && typeof raw.messageHighlightDeletedColor === "string")
             raw.noDeleteColor = raw.messageHighlightDeletedColor;
         if (raw && typeof raw === "object" && raw.dashless === true && raw.cleanChannelsSpaces === undefined) {
@@ -1005,7 +1021,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : /^fullImages[A-Z]/.test(key) ? "fullImages" : /^hideAnything[A-Z]/.test(key) ? "hideAnything" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : /^fullImages[A-Z]/.test(key) ? "fullImages" : /^hideAnything[A-Z]/.test(key) ? "hideAnything" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -1038,9 +1054,9 @@
         picker:[10024, "AttachmentIcon"], anonFiles:[6650, "EyeSlashIcon"], pastelize:[15560, "PaintPaletteIcon"], platformIndicators:[15232, "LaptopPhoneIcon"],
         validUser:[8213, "AtIcon"], copyBios:[5042, "CopyIcon"], reviewDB:[9354, "ThumbsUpIcon"], readAll:[15928, "DoubleCheckmarkIcon"],
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
-        hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
-        badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], hideAnything:[10260, "XLargeIcon"], fullImages:[11587, "ImagesIcon"]};
+        youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
+        badges:[8921, "TrophyIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], hideAnything:[10260, "XLargeIcon"], fullImages:[11587, "ImagesIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1072,7 +1088,7 @@
     }
     // Features list search (#68): every row is found by its title, its description, its page's title, its group and the
     // names of the options on its page, in the language Venus is shown in and in English, ignoring case and accents.
-    const FEATURE_KEYWORDS = {hideAnything:["Removal mode", "Voice message button", "Video call button", "Message requests", "Add Friends button", "New message button"], systemFont:["Import a font", "Font file"], systemEmoji:["Import an emoji font", "Emoji font"], hideButtons:["Quests", "Shop", "Nitro", "Apps", "Polls", "Photos"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
+    const FEATURE_KEYWORDS = {hideAnything:["Removal mode", "Voice message button", "Video call button", "Message requests", "Add Friends button", "New message button", "Quests banner", "Attach menu", "Polls", "Photos"], systemFont:["Import a font", "Font file"], systemEmoji:["Import an emoji font", "Emoji font"], noDelete:["Show edit history", "Keep after restarting", "Color", "Brightness", "Keep up to"], translate:["Show the original language", "Show the original text", "Another language", "How you ask", "Top bar", "Message menu"],
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account"],
@@ -1573,9 +1589,6 @@
         // Appearance
         withOptions("appearance", "systemFont", "VENUS_SYSTEMFONT", "Use your phone's font", "Replaces Discord's font everywhere with your phone's or one you import. Android 9 or newer.", "Font", SystemFontSettings);
         withOptions("appearance", "systemEmoji", "VENUS_SYSTEMEMOJI", "Use your phone's emojis", "In chat, reactions and the emoji picker, or from an emoji font you import.", "Emojis", SystemEmojiSettings);
-        toggle("appearance", "hideGift", "Hide the gift button", "Removes the gift button from the message bar.");
-        toggle("appearance", "hideCall", "Hide the call button", "Removes Call from people's profiles.");
-        withOptions("appearance", "hideButtons", "VENUS_HIDEBUTTONS", "Hide extra buttons", "Removes the Quests, Shop, Nitro and Apps buttons you don't use.", "Extra buttons", HideButtonsSettings);
         withOptions("appearance", "hideAnything", "VENUS_HIDEANYTHING", "Remove anything", "Tap a button you never use to remove it, right where it is.", "Remove anything", HideAnythingSettings);
         toggle("appearance", "youBarSettings", "Venus button on profile bar", "A shortcut to Venus next to the notifications bell.");
         toggle("appearance", "appIcons", "Unlock app icons", "Use any Discord app icon without Nitro.");
@@ -1585,7 +1598,6 @@
         withOptions("appearance", "iconPacks", "VENUS_ICONPACKS", "Icon packs", "Replace Discord's icons with community icon packs or a custom pack.", "Icon packs", IconPacksSettings);
         // Quests
         withOptions("quests", "quests", "VENUS_QUESTS", "Complete Quests automatically", "Finishes video, Play and Activity Quests in the background.", "Quests", QuestSettings);
-        toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
         // Advanced
         toggle("advanced", "experiments", "Unlock Discord experiments", "Adds Dev Tools to Settings, to try features Discord is still testing.");
         toggle("advanced", "noHandsfree", "Keep Bluetooth audio clear in calls", "Headphones stay in music quality in calls. Your phone's mic picks up your voice.");
@@ -5688,7 +5700,7 @@
         const Plus = venusIcon(10310, "PlusLargeIcon"), Gift = venusIcon(11540, "GiftIcon"),
             Expr = props.pickerOpen ? venusIcon(12822, "KeyboardIcon") : venusIcon(8956, "ReactionIcon"),
             Mic = venusIcon(11106, "MicrophoneIcon"), Send = venusIcon(5040, "SendMessageIcon"), Press = RN.Pressable || RN.View, text = props.text || "";
-        const showGift = !text && !(features.hideGift && enabled("hideGift"));
+        const showGift = !text && !(features.hideAnything && spotHidden("chat.gift"));
         const exprIcon = el(RN.View, {style:{justifyContent:"center", alignItems:"center"}},
             el(Expr, {size:"sm", color:props.pickerOpen ? s.name.color : k.icon.color}), props.smileRipple || null);
         return el(RN.View, {key:"input"}, props.bar || null, props.above || null,
@@ -7946,106 +7958,6 @@
         }
         return component;
     }
-    function withoutGift(props) {
-        useSettings("hideGift");
-        return enabled("hideGift") && props && props.shouldShowGiftButton ? Object.assign({}, props, {shouldShowGiftButton:false}) : props;
-    }
-    // Hide extra buttons (#85). Your profile's floating pill (YouBannerDecorations 9115) renders its buttons as elements
-    // keyed "conjure", "quests", "shop", "nitro" and "settings" inside YouScreenNavIconMeasurer, which sizes the pill from the
-    // buttons it measures: a button taken out is unmeasured and the pill shrinks around the rest, with Discord's own gap.
-    const YOU_PILL_KEYS = {quests:"hideButtonsQuests", shop:"hideButtonsShop", nitro:"hideButtonsNitro"};
-    function withoutPillButtons(node, depth) {
-        if (!node || depth > 8) return node;
-        if (Array.isArray(node)) {
-            let changed = false;
-            const out = [];
-            for (const child of node) {
-                const next = withoutPillButtons(child, depth + 1);
-                if (next !== child) changed = true;
-                if (next != null && next !== false) out.push(next); else if (child != null && child !== false) changed = true;
-            }
-            return changed ? out : node;
-        }
-        if (typeof node !== "object" || !node.props) return node;
-        const setting = node.key != null && YOU_PILL_KEYS[node.key];
-        if (setting && settings[setting]) return null;
-        const children = node.props.children;
-        if (children == null) return node;
-        const next = withoutPillButtons(children, depth + 1);
-        return next === children ? node : React.cloneElement(node, null, next);
-    }
-    function youPillButtons(orig, self, args) {
-        useSettings("hideButtons");
-        const rendered = orig.apply(self, args);
-        return enabled("hideButtons") && (settings.hideButtonsQuests || settings.hideButtonsShop || settings.hideButtonsNitro) ? withoutPillButtons(rendered, 0) : rendered;
-    }
-    // The attach menu's buttons (MediaKeyboardBottomSheetActions 10028) are {text, IconComponent, onPress} in a row where each
-    // grows to fill it, so the ones left share the width evenly. Matched by Discord's own icon, never by translated text.
-    function attachMenuButtons(props) {
-        useSettings("hideButtons");
-        const list = props && props.overflowButtons;
-        if (!enabled("hideButtons") || !Array.isArray(list)) return props;
-        const gone = new Set();
-        for (const [, id, name, , key] of HIDE_ATTACH) if (settings[key]) { const Icon = inspectedExport(id, name); if (Icon) gone.add(Icon); }
-        if (!gone.size) return props;
-        const kept = list.filter(b => !(b && gone.has(b.IconComponent)));
-        // Never leave the row empty, whatever Discord adds to it later.
-        return kept.length === list.length || !kept.length ? props : Object.assign({}, props, {overflowButtons:kept});
-    }
-    // The page's preview: the two places as Discord draws them, following the switches below as you flip them.
-    const HIDE_PILL = [["quests", 13012, "QuestsIcon", "hideButtonsQuests"], ["shop", 11828, "ShopIcon", "hideButtonsShop"],
-        ["nitro", 9031, "NitroWheelIcon", "hideButtonsNitro"], ["settings", 7092, "SettingsIcon", null]];
-    const HIDE_ATTACH = [["photos", 8210, "ImageIcon", "Photos", "hideButtonsPhotos"], ["polls", 10022, "PollsIcon", "Polls", "hideButtonsPolls"],
-        ["apps", 8229, "AppsIcon", "Apps", "hideButtonsApps"], ["files", 10024, "AttachmentIcon", "Files", null]];
-    const HIDE_PREVIEW_DARK = {stage:{borderRadius:16, overflow:"hidden", backgroundColor:"#1a1a1e", borderWidth:1, borderColor:"#ffffff14", padding:16, gap:18},
-        pill:{flexDirection:"row", alignSelf:"center", alignItems:"center", gap:8, padding:8, borderRadius:28, backgroundColor:"#2b2d31",
-            shadowColor:"#000000", shadowOpacity:0.25, shadowRadius:8, shadowOffset:{width:0, height:3}, elevation:4},
-        round:{width:40, height:40, borderRadius:20, alignItems:"center", justifyContent:"center", backgroundColor:"#ffffff0f"},
-        bar:{flexDirection:"row", gap:8, padding:8, borderRadius:20, backgroundColor:"#2b2d31", borderWidth:1, borderColor:"#ffffff0f"},
-        button:{flexGrow:1, flexBasis:0, minHeight:64, alignItems:"center", justifyContent:"center", gap:6, borderRadius:14, backgroundColor:"#ffffff0f"},
-        label:{color:"#dbdee1", fontSize:12, fontWeight:"600"}, caption:{color:"#949ba4", fontSize:12, fontWeight:"600", textAlign:"center"}, icon:{color:"#dbdee1"}};
-    // Files always stays, so the row is never empty; the fallback only guards against a future Discord change.
-    function attachShown(isHidden) { const left = HIDE_ATTACH.filter(b => !isHidden(b)); return left.length ? left : HIDE_ATTACH; }
-    // Written out so every label is a plain tr() call the language check can see.
-    function hideAttachLabel(k) { return k === "photos" ? tr("Photos") : k === "polls" ? tr("Polls") : k === "apps" ? tr("Apps") : tr("Files"); }
-    function HideButtonsPreview(props) {
-        useSettings("hideButtons");
-        const s = useThemed("hidePreview", c => ({stage:Object.assign({}, HIDE_PREVIEW_DARK.stage, {backgroundColor:c.BACKGROUND_BASE_LOWER || c.CHANNEL_BACKGROUND_DEFAULT, borderColor:c.BORDER_SUBTLE}),
-            pill:Object.assign({}, HIDE_PREVIEW_DARK.pill, {backgroundColor:c.BACKGROUND_SURFACE_HIGH || c.CARD_BACKGROUND_DEFAULT}),
-            round:Object.assign({}, HIDE_PREVIEW_DARK.round, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
-            bar:Object.assign({}, HIDE_PREVIEW_DARK.bar, {backgroundColor:c.MOBILE_FLOATINGBAR_BACKGROUND_HIGHER || c.BACKGROUND_SURFACE_HIGH, borderColor:c.BORDER_MUTED || c.BORDER_SUBTLE}),
-            button:Object.assign({}, HIDE_PREVIEW_DARK.button, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
-            label:Object.assign({}, HIDE_PREVIEW_DARK.label, {color:c.TEXT_DEFAULT}), caption:Object.assign({}, HIDE_PREVIEW_DARK.caption, {color:c.TEXT_MUTED}),
-            icon:{color:c.INTERACTIVE_ICON_DEFAULT || c.TEXT_DEFAULT}}), HIDE_PREVIEW_DARK);
-        const hidden = key => props.on && key && settings[key];
-        return el(RN.View, {key:"preview", style:s.stage, accessible:true, accessibilityLabel:tr("Buttons preview")},
-            el(RN.Text, {style:s.caption}, tr("Your profile")),
-            el(RN.View, {style:s.pill}, HIDE_PILL.filter(b => !hidden(b[3])).map(([k, id, name]) =>
-                el(RN.View, {key:k, style:s.round}, el(venusIcon(id, name), {size:"sm", color:s.icon.color})))),
-            el(RN.Text, {style:s.caption}, tr("Attach menu")),
-            el(RN.View, {style:s.bar}, attachShown(b => hidden(b[4])).map(([k, id, name, label]) =>
-                el(RN.View, {key:k, style:s.button}, el(venusIcon(id, name), {size:"md", color:s.icon.color}),
-                    el(RN.Text, {numberOfLines:1, style:s.label}, hideAttachLabel(k))))));
-    }
-    function HideButtonsSettings() {
-        useSettings("hideButtons");
-        const ui = reviewUI();
-        if (!React || !RN) return null;
-        const on = enabled("hideButtons"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
-        const groups = [
-            on ? null : offCard("status", venusIcon(15612, "CircleMinusIcon"), "hideButtons"),
-            el(HideButtonsPreview, {key:"preview", on}),
-            el(Group, {key:"profile", title:tr("Hide on your profile")},
-                switchRow(Switch, "hideButtonsQuests", "Quests", "The Quests button at the bottom of your profile.", rowIcon(13012, "QuestsIcon")),
-                switchRow(Switch, "hideButtonsShop", "Shop", "The Shop button at the bottom of your profile.", rowIcon(11828, "ShopIcon")),
-                switchRow(Switch, "hideButtonsNitro", "Nitro", "The Nitro button at the bottom of your profile.", rowIcon(9031, "NitroWheelIcon"))),
-            el(Group, {key:"attach", title:tr("Hide in the attach menu")},
-                switchRow(Switch, "hideButtonsApps", "Apps", "Activities and app commands.", rowIcon(8229, "AppsIcon")),
-                switchRow(Switch, "hideButtonsPolls", "Polls", "Start a poll.", rowIcon(10022, "PollsIcon")),
-                switchRow(Switch, "hideButtonsPhotos", "Photos", "Opens your full gallery. Recent photos still show above the buttons.", rowIcon(8210, "ImageIcon"))),
-            footnote("note", "The buttons that are left move together and grow to fill the space, so there are no gaps.")];
-        return settingsBody(ui, groups);
-    }
     // Unlock app icons: lets you pick any Discord app icon in Settings -> App Icon without Nitro, stops
     // AppIconPremiumManager (18051) from resetting the icon on app state changes, and removes the "Unlock all
     // icons with Nitro" upsell button and "Nitro" section heading on the App Icon screen (15831 / 15832).
@@ -8257,40 +8169,6 @@
         const rendered = orig.apply(self, args);
         return enabled("appIcons") && React ? withoutAppIconUpsell(rendered, 0, inspectedExport(9778, "default"), inspectedExport(6180, "TableRow") || null) : rendered;
     }
-    // Hide call button: UserProfileContactButtons (13425) draws Message and Call side by side, each in a
-    // flex:1 slot, or as icon buttons next to a friend button. Its disableCalls prop only greys Call out, so
-    // the Call button and the slot it sat in are left out of what it renders. Message's slot then takes the
-    // whole row, and the change animates when the setting flips while a profile is open.
-    // The icon is looked up once per render, not once for every element in the row.
-    function withoutCall(node, depth, Phone) {
-        if (!node || typeof node !== "object" || depth > 12) return node;
-        if (Array.isArray(node)) {
-            let changed = false;
-            const next = node.map(child => { const value = withoutCall(child, depth + 1, Phone); if (value !== child) changed = true; return value; });
-            return changed ? next.filter(child => child !== null) : node;
-        }
-        if (!node.props) return node;
-        const icon = node.props.icon;
-        if (icon && icon.type === Phone) return null;
-        const children = node.props.children, next = withoutCall(children, depth + 1, Phone);
-        if (next === children) return node;
-        // A slot that only held the Call button goes too, so nothing keeps half the row.
-        if (next === null || Array.isArray(next) && !next.length) return null;
-        return React.cloneElement(node, Object.assign({}, node.props, {children:next}));
-    }
-    function profileButtons(orig, self, args) {
-        useSettings("hideCall");
-        const hidden = !!enabled("hideCall"), last = React.useRef(hidden);
-        if (last.current !== hidden) {
-            last.current = hidden;
-            const animate = RN && RN.LayoutAnimation;
-            try { if (animate && animate.Presets) animate.configureNext(animate.Presets.easeInEaseOut); } catch (_) {}
-        }
-        const rendered = orig.apply(self, args);
-        if (!hidden) return rendered;
-        const Phone = inspectedExport(9317, "PhoneCallIcon");
-        return Phone ? withoutCall(rendered, 0, Phone) : rendered;
-    }
     // Remove anything: buttons you never use, removed right where they are. Each removable button is a "spot". Removal mode
     // (hideEdit.on, never saved) marks every spot on screen with a dashed outline and a red X; a tap asks first, then the
     // spot is added to hideAnythingSpots and disappears at once. Venus -> Remove anything lists them to bring back.
@@ -8301,12 +8179,14 @@
         ["dm.search", "dm", 6740, "MagnifyingGlassIcon"], ["messages.search", "messages", 6740, "MagnifyingGlassIcon"],
         ["messages.requests", "messages", 6770, "EnvelopeIcon"], ["messages.addFriend", "messages", 5032, "UserPlusIcon"],
         ["messages.newDM", "messages", 10310, "PlusLargeIcon"], ["profile.call", "profile", 9317, "PhoneCallIcon"],
-        ["you.quests", "you", 13012, "QuestsIcon"], ["you.shop", "you", 11828, "ShopIcon"], ["you.nitro", "you", 9031, "NitroWheelIcon"]];
-    const HIDE_PLACES = ["chat", "dm", "messages", "profile", "you"];
+        ["attach.apps", "attach", 8229, "AppsIcon"], ["attach.polls", "attach", 10022, "PollsIcon"], ["attach.photos", "attach", 8210, "ImageIcon"],
+        ["you.quests", "you", 13012, "QuestsIcon"], ["you.shop", "you", 11828, "ShopIcon"], ["you.nitro", "you", 9031, "NitroWheelIcon"],
+        ["you.questBanner", "you", 6650, "EyeSlashIcon"]];
+    const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "you"];
     const HIDE_SPOT_KEYS = Object.create(null);
     HIDE_SPOTS.forEach(spot => { HIDE_SPOT_KEYS[spot[0]] = spot; });
     // Modules hooked for it (also selected in targetModules).
-    const HIDE_HOOKED = {11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1};
+    const HIDE_HOOKED = {10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1};
     const hideEdit = {on:false, top:false, last:null};
     // Written out so every label is a plain tr() call the language check can see.
     function hideSpotTitle(key) {
@@ -8325,11 +8205,15 @@
             case "you.quests": return tr("Quests button");
             case "you.shop": return tr("Shop button");
             case "you.nitro": return tr("Nitro button");
+            case "you.questBanner": return tr("Quests banner");
+            case "attach.apps": return tr("Apps");
+            case "attach.polls": return tr("Polls");
+            case "attach.photos": return tr("Photos");
         }
         return key;
     }
     function hidePlaceTitle(place) {
-        return place === "chat" ? tr("Message bar") : place === "dm" ? tr("Direct messages") : place === "messages" ? tr("Messages tab") :
+        return place === "chat" ? tr("Message bar") : place === "attach" ? tr("Attach menu") : place === "dm" ? tr("Direct messages") : place === "messages" ? tr("Messages tab") :
             place === "profile" ? tr("Other people's profiles") : tr("Your profile");
     }
     function hideSpotsText(raw) {
@@ -8489,6 +8373,42 @@
         useSettings("hideAnything");
         return props && props.canSendVoiceMessage && !hideEditing() && spotHidden("chat.voice") ? Object.assign({}, props, {canSendVoiceMessage:false}) : props;
     }
+    // The attach menu's buttons (MediaKeyboardBottomSheetActions 10028) are {text, IconComponent, onPress} in a row where each
+    // grows to fill it, so the ones left share the width. In removal mode a marked button's icon carries the red X and a tap
+    // asks to remove it. Matched by Discord's own icon, never by translated text; Files always stays, so the row is never empty.
+    const ATTACH_SPOTS = [[8229, "AppsIcon", "attach.apps"], [10022, "PollsIcon", "attach.polls"], [8210, "ImageIcon", "attach.photos"]];
+    const attachMarks = new Map();
+    function attachMarked(Icon, key) {
+        let Marked = attachMarks.get(key);
+        if (!Marked || Marked.base !== Icon) {
+            Marked = function (props) {
+                return el(RN.View, {style:{position:"relative"}}, el(Icon, props),
+                    el(RN.View, {pointerEvents:"none", style:[HIDE_MARK.badge, {top:-8, right:-12}]}, el(RN.Text, {style:HIDE_MARK.x}, "\u2715")));
+            };
+            Marked.base = Icon; attachMarks.set(key, Marked);
+        }
+        return Marked;
+    }
+    function attachMenuSpots(props) {
+        useSettings("hideAnything");
+        const list = props && props.overflowButtons;
+        if (!Array.isArray(list) || !enabled("hideAnything")) return props;
+        const edit = hideEditing();
+        if (!edit && !settings.hideAnythingSpots) return props;
+        const icons = new Map();
+        ATTACH_SPOTS.forEach(([id, name, key]) => { const Icon = inspectedExport(id, name); if (Icon) icons.set(Icon, key); });
+        let changed = false;
+        const out = [];
+        for (const button of list) {
+            const key = button && icons.get(button.IconComponent);
+            if (!key) { out.push(button); continue; }
+            if (spotHidden(key)) { changed = true; continue; }
+            if (!edit) { out.push(button); continue; }
+            changed = true;
+            out.push(Object.assign({}, button, {IconComponent:attachMarked(button.IconComponent, key), onPress:() => askRemoveSpot(key)}));
+        }
+        return changed && out.length ? Object.assign({}, props, {overflowButtons:out}) : props;
+    }
     // The bar that floats over Discord while removal mode is on. It sits beside the whole app (AppContainer 14827),
     // outside Discord's theme, so it only uses plain views and text; a boundary keeps any failure in it from reaching Discord.
     let HideSafe = null;
@@ -8556,6 +8476,9 @@
             case 16467: return hookComponent(exports, hideTree(messagesSpot));
             case 9115: return hookComponent(exports, hideTree(youSpot));
             case 14827: return hookComponent(exports, appWithHideBar);
+            case 10028: return exports.default ? replaceValue(exports, "default", propsComponent(exports.default, attachMenuSpots)) : exports;
+            case 15371: return hideQuestHooks(exports);
+            case 15465: return hideQuestDock(exports);
         }
         return exports;
     }
@@ -8611,7 +8534,7 @@
     }
     // Discord's own "no Quest to show" answer, so the dock, the space kept for it and its tracking all go away together.
     let noQuestDock = null;
-    function questDockHidden() { useSettings("hideQuestDock"); return enabled("hideQuestDock"); }
+    function questDockHidden() { useSettings("hideAnything"); return spotHidden("you.questBanner"); }
     function hideQuestHooks(exports) {
         const types = inspectedExport(5979, "AdCreativeType");
         if (!types || types.NO_FILL === undefined) return exports;
@@ -8626,7 +8549,7 @@
     function hideQuestDock(exports) {
         const Dock = exports && exports.default;
         if (!Dock) return exports;
-        const HiddenQuestDock = function (props) { return questDockHidden() ? null : el(Dock, props); };
+        const HiddenQuestDock = function (props) { if (questDockHidden()) return null; const dock = el(Dock, props); return hideEditing() ? hideMarked(dock, "you.questBanner") : dock; };
         HiddenQuestDock.displayName = "QuestDock";
         return replaceValue(exports, "default", HiddenQuestDock);
     }
@@ -16150,12 +16073,6 @@
             case 13181: return features.reviewDB ? hookComponent(exports, reviewNote) : exports;
             case 14281: return features.reviewDB ? hookExport(exports, "ContextMenuPopout", reviewMenu) : exports;
             case 14213: return features.reviewDB ? hookComponent(exports, reviewGuild) : exports;
-            case 11935: case 12146: return features.hideGift && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, withoutGift)) : exports;
-            case 13425: return features.hideCall ? hookComponent(exports, profileButtons) : exports;
-            case 9115: return features.hideButtons ? hookComponent(exports, youPillButtons) : exports;
-            case 10028: return features.hideButtons && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, attachMenuButtons)) : exports;
-            case 15371: return features.hideQuestDock ? hideQuestHooks(exports) : exports;
-            case 15465: return features.hideQuestDock ? hideQuestDock(exports) : exports;
             case 6820: return features.systemEmoji && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, systemEmojiProps)) : exports;
             case 14839: exports.SETTING_RENDERER_CONFIG = nativeRegistry(exports.SETTING_RENDERER_CONFIG); return exports;
             case 10664: return hookExport(exports, "createList", settingsSections);
