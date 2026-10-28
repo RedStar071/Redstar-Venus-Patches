@@ -8369,7 +8369,7 @@
             X ? el(X, {size:"xxs", color:"#ffffff"}) : el(RN.Text, {style:HIDE_MARK.x}, "\u2715"));
     }
     // Rows with a switch or a picture at the end keep their X clear of it.
-    const HIDE_TRAIL = {right:76};
+    const HIDE_TRAIL = {right:76}, HIDE_MENU_BADGE = {right:48};
     function HideMark(props) {
         const base = props.base, key = props.spot;
         // Only once it's laid out with a size: a button that draws nothing (a tag someone doesn't have) gets no floating X.
@@ -8383,7 +8383,7 @@
             const size = event && event.nativeEvent && event.nativeEvent.layout, next = !!size && size.width > 1 && size.height > 1;
             if (next !== shown) setShown(next);
         };
-        const badge = props.inset ? (props.trail ? [HIDE_INSET.badge, HIDE_TRAIL] : HIDE_INSET.badge) : HIDE_MARK.badge;
+        const badge = props.inset ? (props.trail ? [HIDE_INSET.badge, props.trail === "menu" ? HIDE_MENU_BADGE : HIDE_TRAIL] : HIDE_INSET.badge) : HIDE_MARK.badge;
         return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false, onLayout},
             base,
             shown ? el(RN.View, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onStartShouldSetResponder:swallowTap, onResponderRelease:ignoreTap,
@@ -8577,12 +8577,12 @@
         const rendered = orig.apply(self, args), props = args[0];
         if (!rendered || !hideMenuLabels.size || !props || typeof props.label !== "string" || !hideEditing()) return rendered;
         const key = hideMenuLabels.get(props.label);
-        return key && !spotHidden(key) ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered, inset:true, before:closeContextMenu}) : rendered;
+        return key && !spotHidden(key) ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered, inset:true, trail:"menu", before:closeContextMenu}) : rendered;
     }
     // A profile's tabs (UserProfileContent 13190) are {id, label, page} items for useSegmentedControlState (8525), Main always
     // first: removed tabs are left out of the items, so the tab bar and its pages close up together.
     const PROFILE_TABS = Object.assign(Object.create(null), {activity:"profile.activity", wishlist:"profile.wishlist"});
-    function profileTabItems(items) { return Array.isArray(items) && items.length > 1 && !!items[0] && items[0].id === "main" && "page" in items[0]; }
+    function profileTabItems(items) { return Array.isArray(items) && items.length > 0 && !!items[0] && items[0].id === "main" && "page" in items[0]; }
     const hideTabCache = new WeakMap();
     function segmentedState(orig, self, args) {
         const options = args[0];
@@ -8611,12 +8611,10 @@
         return key ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered}) : rendered;
     }
     // The server tag next to someone's name (UserProfilePrimaryInfo 10533) is its local GuildTag, the one element given a
-    // primaryGuildOverride without badges; only when they have a tag, so there's never an empty outline.
+    // primaryGuildOverride without badges. Someone without a tag draws nothing there, so HideMark shows no outline.
     function profileTagSpot(node) {
         const props = node.props;
-        if (!("primaryGuildOverride" in props) || !("showToastOnPress" in props) || "badges" in props || "userId" in props) return null;
-        const guild = props.primaryGuildOverride || props.user && props.user.primaryGuild;
-        return guild && guild.tag && guild.identityEnabled !== false ? "profile.guildTag" : null;
+        return "primaryGuildOverride" in props && "showToastOnPress" in props && !("badges" in props) && !("userId" in props) ? "profile.guildTag" : null;
     }
     // The top of a server's channel list (GuildSearchAndInvite 11997): Search is its only Button (or the pressable around
     // SearchButtonContent), Invite is the IconButton with onPressDisabled, Events the other IconButton.
