@@ -304,6 +304,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 12910 | `design/components/Icon/native/redesign/generated/EmbedIcon.tsx` | EmbedIcon | EmbedIcon (Fix link previews) |
 | 13012 | `design/components/Icon/native/redesign/generated/QuestsIcon.tsx` | QuestsIcon | QuestsIcon |
 | 13066 | `modules/media_viewer/native/components/overlay/MediaViewerOverlayButtonFavoriteGIF.tsx` | default | MediaViewerHeader |
+| 13092 | `modules/user_profile/native/UserProfileOverflowMenu.tsx` | default | UserProfileOverflowMenu (Remove anything: profile menu items) |
 | 13139 | `design/components/Icon/native/redesign/generated/NewUserIcon.tsx` | NewUserIcon | NewUserIcon (Create a new account) |
 | 13156 | `modules/user_profile/native/UserProfileActivityVoiceChannelUsers.tsx` | default | UserProfileActivityVoiceChannelUsers |
 | 13181 | `modules/user_profile/native/UserProfileNote.tsx` | default | UserProfileNote |
@@ -320,9 +321,12 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 14299 | `modules/premium/ProductCatalog.tsx` | ANIMATED_EMOJIS, EMOJIS_EVERYWHERE, STICKERS_EVERYWHERE, CLIENT_THEMES | EmojiPermissions |
 | 14419 | `design/void/Status/native/Status.tsx` | default, StatusWithTyping | Status |
 | 14827 | `components_native/AppContainer.tsx` | default | AppContainer (Remove anything: removal mode bar) |
+| 14837 | `modules/settings/native/renderer/SettingHookHarness.tsx` | default, getCachedSettingTitle, getCachedSettingSearchTerms | SettingHookHarness (Remove anything: setting titles) |
+| 14838 | `modules/settings/native/renderer/stores/SettingBlocklistStore.tsx` | default | SettingBlocklistStore (Remove anything: redraws Settings) |
 | 14839 | `modules/user_settings/core/native/SettingsRendererConfig.tsx` | SETTING_RENDERER_CONFIG | SettingRendererConfig |
 | 14850 | `modules/color_picker/native/showCustomColorPickerActionSheet.tsx` | CUSTOM_COLOR_PICKER_KEY, CustomColorPicker | showCustomColorPickerActionSheet |
 | 14971 | `modules/settings/native/renderer/SettingListRenderer.tsx` | SettingsList, SearchableSettingsList | SettingsList |
+| 14973 | `modules/settings/native/renderer/SettingRenderer.tsx` | GuildSelectDefaultIcon, renderSettingItem, renderSettingSearchResultItem, renderSettingSearchResultPlaceholderItem | SettingRenderer (Remove anything: marks Settings rows) |
 | 14974 | `modules/settings/native/renderer/SettingRendererUtils.tsx` | onRouteSettingOnPress, getSettingTitle, getSettingSearchableTitles | SettingScreens |
 | 15139 | `actions/ConsentActionCreators.tsx` | setConsents | ConsentActionCreators (Badge Completer) |
 | 15232 | `design/components/Icon/native/redesign/generated/LaptopPhoneIcon.tsx` | LaptopPhoneIcon | LaptopPhoneIcon |
