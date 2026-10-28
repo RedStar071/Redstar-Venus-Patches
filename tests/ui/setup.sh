@@ -17,8 +17,11 @@ if command -v apt-get >/dev/null; then
     libxkbcommon0 libpango-1.0-0 libcairo2 libasound2 libnss3 libcups2 fonts-noto-color-emoji python3-pil >/dev/null 2>&1 || true
 fi
 # Discord's own icons (xxhdpi PNGs, drawn as masks in any color), its gg sans font, the Wumpus art and the color tokens.
-TMP=$W/ui-apk; mkdir -p "$TMP"
-[ -f "$TMP/base.apk" ] || unzip -o -q "$APKM" base.apk split_config.xxhdpi.apk -d "$TMP"
+# One extracted copy for every tool: base.apk lives in work/new, where scripts/hbc/setup.sh puts it too.
+TMP=$W/new
+rm -rf "$W/ui-apk"   # the separate copy older versions of this script kept
+[ -f "$TMP/base.apk" ] || unzip -o -q "$APKM" base.apk -d "$TMP"
+[ -f "$TMP/split_config.xxhdpi.apk" ] || unzip -o -q "$APKM" split_config.xxhdpi.apk -d "$TMP"
 [ "$(ls "$U/icons" | wc -l)" -gt 100 ] || unzip -o -q -j "$TMP/split_config.xxhdpi.apk" \
   'res/drawable-xxhdpi-v4/design_components_icon_native_redesign_generated_images_*' 'res/drawable-xxhdpi-v4/images_native_gifting_wumpus_box_premium120.png' -d "$U/icons"
 [ -f "$U/fonts/ggsans-Normal.ttf" ] || unzip -o -q -j "$TMP/base.apk" 'assets/fonts/ggsans-*' -d "$U/fonts"
