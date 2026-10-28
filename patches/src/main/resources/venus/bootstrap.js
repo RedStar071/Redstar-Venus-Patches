@@ -555,7 +555,7 @@
         if (features.hideBlocked && featureFor(key) === "hideBlocked") hideBlockedChanged();
         if (features.staffTag && featureFor(key) === "staffTag") later(staffTagChanged, 0);
         if (features.bulkDelete && key === "bulkDelete" && !value) bulkDeleteCancel();
-        if (features.bulkDelete && key === "bulkDeleteIncludeCached" && bulkDelete.active) bulkDeleteRedrawChannel(bulkDelete.channelId);
+        if (features.bulkDelete && (key === "bulkDeleteIncludeCached" || key === "noDelete") && bulkDelete.active) { bulkDeletePruneKept(); bulkDeleteRedrawChannel(bulkDelete.channelId); }
         if (features.experiments && key === "experiments") { if (value) experimentsEnable(); else if (experiments.unlocked && !backup.restoring) later(experimentsAskReopen, 0); }
         if (features.quests || features.badges || features.userNotif || features.removedAlerts) backgroundSync();
         return true;
@@ -2513,6 +2513,7 @@
         let bucket = deletedByChannel.get(entry.channelId);
         if (!bucket) deletedByChannel.set(entry.channelId, bucket = new Map());
         bucket.set(key, entry);
+        if (features.bulkDelete && bulkDelete.active && bulkDelete.selected.has(String(entry.id))) bulkDeletePruneKept();
     }
     function dropDeleted(key) {
         const entry = deleted.get(key);
@@ -2759,6 +2760,9 @@
     function rememberDeleted(event, orig, self) {
         const key = deletedKey(event.channelId, event.id);
         if (deleted.has(key)) return true;
+        // A bulk delete is meant to clear messages for real: keeping each one first flashed it red, saved the archive and
+        // took a second removal right after.
+        if (features.bulkDelete && bulkDelete.removing.size && bulkDelete.removing.has(key)) return false;
         const message = msgStore && msgStore.getMessage(event.channelId,event.id);
         if (!retainable(message, event)) return false;
         while (deleted.size >= settings.noDeleteLimit) {
@@ -15302,6 +15306,12 @@
         // The last list of selectable messages, reused while the chat, kept messages and options are unchanged.
         selectable:null,
         subscribed:false,
+        // "channelId:id" -> the redraw whose restore hasn't run yet ({content, temp}), so overlapping redraws keep the real text.
+        redrawing:new Map(),
+        // "channelId:id" of live messages this run is deleting right now: Keep deleted messages lets them go instead of keeping them.
+        removing:new Set(),
+        // Messages this run has tried so far (deleted or failed), for the progress text.
+        attempted:0,
         // Each delete run gets a number; a run that was stopped (chat left, account switched, feature off) sees a newer one.
         run:0
     };
@@ -15384,18 +15394,52 @@
         if (typeof d !== "function") return;
         const store = msgStore || (msgStore = inspectedExport(5432, "default"));
         if (!store || typeof store.getMessage !== "function") return;
-        const restores = [];
+        const restores = [], pending = bulkDelete.redrawing;
         for (let i = 0; i < ids.length; i++) {
             const id = String(ids[i]);
             let msg = null;
             try { msg = store.getMessage(channelId, id); } catch (_) {}
             // Not in the store means it isn't drawn either: nothing to redraw.
             if (!msg) continue;
-            const content = typeof msg.content === "string" ? msg.content : "";
-            try { d({type:"MESSAGE_UPDATE", message:{id, channel_id:channelId, content:content + "\u200b"}}); } catch (_) { continue; }
-            restores.push({id, channel_id:channelId, content});
+            const key = channelId + ":" + id, live = typeof msg.content === "string" ? msg.content : "";
+            // A second redraw before the first one's restore (a quick second tap, Select all right after Select Messages)
+            // used to read the marked text as the real one and put that back, leaving a zero-width space in the message.
+            const was = pending.get(key);
+            const content = was && live === was.temp ? was.content : live, temp = content + "\u200b";
+            try { d({type:"MESSAGE_UPDATE", message:{id, channel_id:channelId, content:temp}}); } catch (_) { continue; }
+            const entry = {id, channel_id:channelId, content, temp};
+            pending.set(key, entry);
+            restores.push(entry);
         }
-        if (restores.length) later(() => { for (let i = 0; i < restores.length; i++) try { d({type:"MESSAGE_UPDATE", message:restores[i]}); } catch (_) {} }, 35);
+        if (restores.length) later(() => {
+            for (let i = 0; i < restores.length; i++) {
+                const entry = restores[i], key = entry.channel_id + ":" + entry.id;
+                // A newer redraw of this message puts the text back itself.
+                if (pending.get(key) !== entry) continue;
+                pending.delete(key);
+                // Only while the message still shows the marked copy: an edit (or another feature's restore) that landed in
+                // between is newer than what was read, and used to be overwritten with the old text.
+                let now = null;
+                try { now = store.getMessage(entry.channel_id, entry.id); } catch (_) {}
+                if (!now || typeof now.content === "string" && now.content !== entry.temp) continue;
+                try { d({type:"MESSAGE_UPDATE", message:{id:entry.id, channel_id:entry.channel_id, content:entry.content}}); } catch (_) {}
+            }
+        }, 35);
+    }
+    // Kept deleted messages can only stay selected while they can be selected: Include kept deleted messages (or Keep
+    // deleted messages) turned off, or a selected message someone deleted being kept, used to leave them counted without
+    // a circle, and Delete removed them from the kept list anyway.
+    function bulkDeletePruneKept() {
+        if (!bulkDelete.active || bulkDelete.deleting || !bulkDelete.selected.size) return false;
+        if (features.noDelete && enabled("noDelete") && settings.bulkDeleteIncludeCached) return false;
+        const chId = bulkDelete.channelId, bucket = chId && deletedByChannel.get(chId);
+        if (!bucket) return false;
+        const dropped = [];
+        bulkDelete.selected.forEach(id => { if (bucket.has(deletedKey(chId, id))) dropped.push(id); });
+        if (!dropped.length) return false;
+        dropped.forEach(id => bulkDelete.selected.delete(id));
+        notify("bulkDelete");
+        return true;
     }
     function bulkDeleteChannelSelectableIds(channelId) {
         if (!channelId) return [];
@@ -15474,6 +15518,8 @@
         // A run stopped halfway still says what it removed, instead of looking like nothing happened.
         const stoppedAfter = bulkDelete.deleting ? bulkDelete.progress : 0;
         bulkDelete.run++;
+        bulkDelete.removing.clear();
+        bulkDelete.attempted = 0;
         animateLayout();
         bulkDelete.active = false;
         bulkDelete.deleting = false;
@@ -15538,6 +15584,8 @@
     }
     function bulkDeleteConfirmAndRun() {
         if (!bulkDelete.active || bulkDelete.deleting || !bulkDelete.selected.size || !bulkDelete.channelId) return;
+        bulkDeletePruneKept();
+        if (!bulkDelete.selected.size) return;
         const count = bulkDelete.selected.size;
         if (!settings.bulkDeleteConfirm) {
             bulkDeleteExecute();
@@ -15554,6 +15602,9 @@
     // Discord's DELETE /messages/:id. Its route bucket allows about 5 deletes per 5 seconds: one every 1.1 s rarely meets a
     // 429, and when one comes the wait it asks for (retryAfter, in seconds) is honoured before trying that message again.
     const BULK_DELETE_GAP_MS = 1100, BULK_DELETE_RETRIES = 3;
+    // A server hiccup (5xx) or a dropped connection (no status) is worth another try after a growing wait; 4xx answers
+    // other than 429 (no permission, too old, unknown channel) won't change.
+    function bulkDeleteRetryable(info) { return info.status === 429 || info.status === 0 || info.status >= 500; }
     function bulkDeleteError(error) {
         const status = error && (error.status || error.statusCode || error.body && error.body.status);
         const body = error && error.body;
@@ -15573,10 +15624,20 @@
             if (entry) cachedEntries.push(entry);
             else liveIds.push(id);
         });
+        if (!settings.bulkDeleteIncludeCached || !(features.noDelete && enabled("noDelete"))) {
+            // Can't be selected now (see bulkDeletePruneKept): leave them kept.
+            for (let i = cachedEntries.length - 1; i >= 0; i--) bulkDelete.selected.delete(String(cachedEntries[i].id));
+            cachedEntries.length = 0;
+            ids.length = 0;
+            Array.prototype.push.apply(ids, liveIds);
+            if (!ids.length) { notify("bulkDelete"); return; }
+        }
         const run = ++bulkDelete.run;
         bulkDelete.deleting = true;
         bulkDelete.total = ids.length;
         bulkDelete.progress = 0;
+        bulkDelete.attempted = 0;
+        bulkDelete.removing.clear();
         haptic("IMPACT_MEDIUM");
 
         // Kept deleted messages are already gone from Discord: remove them here, in one batch.
@@ -15587,6 +15648,7 @@
             dispatchRemovals(cachedEntries);
             cachedEntries.forEach(entry => bulkDelete.selected.delete(String(entry.id)));
             bulkDelete.progress += cachedEntries.length;
+            bulkDelete.attempted += cachedEntries.length;
             bulkDelete.deletedSession += cachedEntries.length;
         }
         notify("bulkDelete");
@@ -15602,19 +15664,22 @@
             const me = currentUser();
             if (bulkDelete.userId && !(me && String(me.id) === bulkDelete.userId)) { bulkDeleteCancel(); return; }
             if (idx >= liveIds.length) { bulkDeleteFinish(bulkDelete.progress, failed); return; }
-            const id = liveIds[idx];
+            const id = liveIds[idx], key = deletedKey(chId, id);
             let p;
+            bulkDelete.removing.add(key);
             try { p = actions.deleteMessage(chId, id, false); } catch (error) { p = Promise.reject(error); }
             Promise.resolve(p).then(() => null, error => error || {}).then(error => {
+                bulkDelete.removing.delete(key);
                 if (run !== bulkDelete.run) return;
                 const info = error && bulkDeleteError(error);
-                if (info && info.status === 429 && tries < BULK_DELETE_RETRIES) {
-                    // Rate limited: same message again after the wait Discord asked for.
+                if (info && bulkDeleteRetryable(info) && tries < BULK_DELETE_RETRIES) {
+                    // Rate limited: same message again after the wait Discord asked for. Otherwise 2.2 s, 4.4 s, 8.8 s.
                     tries++;
-                    later(step, Math.max(info.retryMs, BULK_DELETE_GAP_MS), false);
+                    later(step, Math.max(info.retryMs, info.status === 429 ? BULK_DELETE_GAP_MS : BULK_DELETE_GAP_MS << tries), false);
                     return;
                 }
                 idx++; tries = 0;
+                bulkDelete.attempted++;
                 // 404: someone else already deleted it, which is what you wanted.
                 if (!error || info.status === 404) {
                     // Keep deleted messages keeps your own deletions too; a bulk delete is meant to clear them for real.
@@ -15636,6 +15701,8 @@
         const prevChannel = bulkDelete.channelId;
         const left = failed && failed.length ? failed.slice() : [];
         bulkDelete.run++;
+        bulkDelete.removing.clear();
+        bulkDelete.attempted = 0;
         bulkDelete.deleting = false;
         bulkDelete.progress = 0;
         bulkDelete.total = 0;
@@ -15806,7 +15873,7 @@
         const allSelected = selectable.length > 0 && bulkDelete.selected.size >= selectable.length && selectable.every(id => bulkDelete.selected.has(id));
         const Trash = venusIcon(5049, "TrashIcon"), Close = venusIcon(6296, "CircleXIcon");
         const statusText = deleting ?
-            tr("Deleting {done} of {total}…", {done:Math.min(bulkDelete.progress + 1, bulkDelete.total), total:bulkDelete.total}) :
+            tr("Deleting {done} of {total}…", {done:Math.min(bulkDelete.attempted + 1, bulkDelete.total), total:bulkDelete.total}) :
             tr("{n} selected", {n:count});
         const height = Math.max(56, Number.isFinite(inputHeight) && inputHeight > 0 ? inputHeight : 0);
         // A plain view placed with layout, never a native-driven transform or popIn wrapper: on Android those draw the bar
