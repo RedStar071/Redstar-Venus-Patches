@@ -8673,7 +8673,22 @@
         const native = RN && RN.NativeModules;
         return native && (native.NativePermissionManagerModule || native.NativePermissionManager) || null;
     }
+    // The warning row comes from the last check, so coming back from Android's settings (where it was just
+    // fixed) has to check again, or the row keeps saying notifications are off.
+    function userNotifWatchPermission() {
+        if (userNotif.permWatch || !RN || !RN.AppState || typeof RN.AppState.addEventListener !== "function") return;
+        try {
+            userNotif.permWatch = RN.AppState.addEventListener("change", state => {
+                if (state !== "active") return;
+                const users = enabled("userNotif") && settings.userNotifPush, removing = enabled("removedAlerts") && settings.removedAlertsPush;
+                if (!users && !removing) return;
+                const before = userNotif.permissionGranted;
+                userNotifCheckPermissions().then(() => { if (removing && before !== userNotif.permissionGranted) notify("removedAlerts"); });
+            });
+        } catch (_) {}
+    }
     function userNotifCheckPermissions() {
+        userNotifWatchPermission();
         const perm = userNotifNativePerm();
         if (perm && typeof perm.getNotificationAuthorizationStatus === "function") {
             return Promise.resolve().then(() => perm.getNotificationAuthorizationStatus()).then(code => {
