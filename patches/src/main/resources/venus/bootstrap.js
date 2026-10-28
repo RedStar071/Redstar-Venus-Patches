@@ -8664,9 +8664,14 @@
     // subscribedGuilds: servers asked for presences on this connection, so each is asked once, not on every event.
     const userNotif = {dispatcher:null, subscribed:false, relationships:null, guilds:null, ids:new Set(), dirty:false,
         statuses:new Map(), cooldowns:new Map(), shown:0, last:null, permissionGranted:null, subscribedGuilds:new Set(), seedQueued:false, subscribeQueued:false};
+    // Discord loads this as a TurboModule ("NativePermissionManagerModule", module 7501), so it is not in
+    // NativeModules. Looking it up there found nothing and every check reported "allowed", even with
+    // Android's notifications switched off for Discord, so the pushes were lost without any warning.
     function userNotifNativePerm() {
+        const turbo = inspectedExport(7501, "default");
+        if (turbo && typeof turbo.getNotificationAuthorizationStatus === "function") return turbo;
         const native = RN && RN.NativeModules;
-        return native && (native.NativePermissionManager || native.RTNNativePermissionManager) || null;
+        return native && (native.NativePermissionManagerModule || native.NativePermissionManager) || null;
     }
     function userNotifCheckPermissions() {
         const perm = userNotifNativePerm();

@@ -206,6 +206,7 @@ BOOTSTRAP_MODULES = [
     (10410, 'design/components/Icon/native/redesign/generated/ShieldIcon.tsx', ['ShieldIcon'], 'ShieldIcon'),
     (12901, 'design/components/Icon/native/redesign/generated/ChatSmileIcon.tsx', ['ChatSmileIcon'], 'ChatSmileIcon'),
     (11033, 'lib/pushnotification/PushNotification.tsx', ['default'], 'PushNotification'),
+    (7501, '../discord_common/js/packages/rtn-codegen/js/NativePermissionManagerModule.tsx', ['default'], 'NativePermissionManagerModule'),
     (9379, 'modules/chat_input/native/useChatBottomManagerUIStore.tsx', ['default', 'updateChatInputContainerHeight', 'updateShowingAutoComplete'], 'ChatInputHeightContext'),
     (8617, 'design/components/Icon/native/redesign/generated/ShieldUserIcon.tsx', ['ShieldUserIcon'], 'ShieldUserIcon'),
     (8768, 'design/components/Icon/native/redesign/generated/BellIcon.tsx', ['BellIcon'], 'BellIcon'),

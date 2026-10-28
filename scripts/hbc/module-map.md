@@ -157,6 +157,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 7394 | `modules/quests/utils/QuestServerUtils.tsx` | isQuestWithKnownConfigVersion, questConfigFromServer, questUserStatusFromServer | questUserStatusFromServer |
 | 7404 | `stores/DeveloperExperimentStore.tsx` | default | DeveloperExperimentStore (Unlock Discord experiments) |
 | 7477 | `utils/native/PrivateChannelCallUtils.tsx` | openGuildVoiceModal, navigateToVoiceChannel, openChannelCallModal | PrivateChannelCallUtils (Hidden channels asks before a locked voice channel opens) |
+| 7501 | `../discord_common/js/packages/rtn-codegen/js/NativePermissionManagerModule.tsx` | default | NativePermissionManagerModule |
 | 7567 | `design/components/Icon/native/redesign/generated/WarningIcon.tsx` | WarningIcon | WarningIcon (Risky chip) |
 | 7701 | `design/components/Icon/native/redesign/generated/LinkExternalSmallIcon.tsx` | LinkExternalSmallIcon | LinkExternalSmallIcon |
 | 7742 | `modules/messages/native/renderer/RowGenerator.tsx` | default | RowGenerator |
