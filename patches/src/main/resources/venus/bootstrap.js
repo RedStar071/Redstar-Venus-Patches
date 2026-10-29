@@ -9834,7 +9834,7 @@
     // you picked opens a sheet over the page with a search box, a strip of servers and a grid of sounds with their emoji.
     // Tapping a sound picks it and closes the sheet; tapping the picked one again clears it.
     const VOICE_SHEET = "VenusVoiceSounds", VOICE_TILE_MIN = 150, VOICE_GAP = 8, VOICE_PEEK = 3;
-    const VOICE_SOUND_DARK = {top:{backgroundColor:"#2b2d31", paddingHorizontal:16, paddingBottom:12, gap:12},
+    const VOICE_SOUND_DARK = {top:{backgroundColor:"#2b2d31", paddingHorizontal:16, paddingBottom:12},
         chip:{height:44, borderRadius:14, alignItems:"center", justifyContent:"center", overflow:"hidden", borderWidth:2, borderColor:"transparent", backgroundColor:"#35373c"},
         chipOn:{borderColor:"#5865f2"}, initials:{color:"#dbdee1", fontSize:14, fontWeight:"700"},
         tile:{flexDirection:"row", alignItems:"center", gap:8, height:46, paddingHorizontal:10, borderRadius:10, borderWidth:2, borderColor:"transparent", backgroundColor:"#35373c"},
@@ -9921,7 +9921,8 @@
         const initials = label => String(label).split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join("").toUpperCase();
         const search = SearchField ? el(SearchField, {key:"search", placeholder:tr("Search sounds"), value:query, onChange:text => setQuery(String(text || ""))}) :
             ui.TextInput ? el(ui.TextInput, {key:"search", placeholder:tr("Search sounds"), value:query, onChange:text => setQuery(String(text || ""))}) : null;
-        const strip = data.order.length > 1 && !needle ? el(RN.ScrollView, {key:"servers", horizontal:true, showsHorizontalScrollIndicator:false, contentContainerStyle:{gap:VOICE_GAP}},
+        const strip = data.order.length > 1 && !needle ? el(RN.ScrollView, {key:"servers", horizontal:true, showsHorizontalScrollIndicator:false,
+            style:{marginTop:12, flexGrow:0}, contentContainerStyle:{gap:VOICE_GAP}},
             [chip("", tr("All"), el(RN.Text, {numberOfLines:1, style:s.initials}, tr("All")), true)].concat(data.order.map(guild => {
                 const uri = guild === data.defaultId ? null : serverIconUri(data.guildOf(guild), 96), label = data.name(guild);
                 return chip(guild, label, guild === data.defaultId ? el(Icon, {size:"md"}) : uri ? el(RN.Image, {style:{width:40, height:40}, source:{uri}}) :
