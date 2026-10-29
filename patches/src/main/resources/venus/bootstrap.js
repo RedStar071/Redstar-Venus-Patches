@@ -51,7 +51,7 @@
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467, 14279, 8525, 8775, 10533, 11997, 14206, 14212, 14143, 14216, 12364, 12365, 13418, 10614, 6882, 13402, 13181, 16466, 16575]);
+    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467, 14279, 8525, 8775, 10533, 11997, 14206, 14212, 14143, 14216, 12364, 12365, 13418, 10614, 6882, 13402, 13181, 16466, 16575, 12208, 11864, 10515, 17567, 16074, 16577, 17499, 17487, 10748]);
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -7631,10 +7631,13 @@
             open ? el(ReviewSection,{key:props.guildId,userId:props.guildId,standalone:true}) : null);
     }
     function reviewGuild(orig,self,args) {
-        if (React) useSettings("reviewDB");
+        if (React) { useSettings("reviewDB"); useSettings("hideAnything"); }
         const props=args[0] || {}, guild=props.guild, ui=reviewUI();
         if (!enabled("reviewDB") || !React || !RN || !guild || !/^\d{17,20}$/.test(guild.id) || !ui.TableRow) return React ? el(orig,props) : orig.apply(self,args);
-        return el(ServerReviews,{key:guild.id,guildId:guild.id});
+        // Remove anything: the Reviews row can be removed from the server menu like Discord's own rows.
+        if (spotHidden("guild.reviews")) return el(orig,props);
+        const row = el(ServerReviews,{key:guild.id,guildId:guild.id});
+        return hideEditing() ? hideMarkedRow(row, "guild.reviews") : row;
     }
     // User long-press context menu gets a "Reviews" item.
     function reviewMenu(orig,self,args) {
@@ -8233,7 +8236,17 @@
         ["guild.notifications", "guild", 8768, "BellIcon"], ["guild.markRead", "guild", 15171, "ChatCheckIcon"], ["guild.channelsRoles", "guild", 18349, "ListBulletsIcon"],
         ["guild.serverProfile", "guild", 9720, "PencilIcon"], ["guild.showAll", "guild", 6652, "EyeIcon"], ["guild.hideMuted", "guild", 6650, "EyeSlashIcon"],
         ["guild.dms", "guild", 6770, "EnvelopeIcon"], ["guild.requests", "guild", 8194, "ChatIcon"], ["guild.report", "guild", 9571, "FlagIcon"],
-        ["guild.leave", "guild", 10994, "DoorExitIcon"], ["guild.emoji", "guild", 8956, "ReactionIcon"]];
+        ["guild.leave", "guild", 10994, "DoorExitIcon"], ["guild.emoji", "guild", 8956, "ReactionIcon"],
+        ["chat.emoji", "chat", 8956, "ReactionIcon"], ["dm.options", "dm", 7092, "SettingsIcon"], ["dm.mute", "dm", 8768, "BellIcon"],
+        ["dm.deauthorize", "dm", 10994, "DoorExitIcon"], ["dm.reportSpam", "dm", 9571, "FlagIcon"],
+        ["details.search", "details", 6740, "MagnifyingGlassIcon"], ["details.mute", "details", 8768, "BellIcon"], ["details.settings", "details", 7092, "SettingsIcon"],
+        ["details.more", "details", 9237, "MoreHorizontalIcon"], ["details.members", "details", 8212, "GroupIcon"], ["details.media", "details", 8210, "ImageIcon"],
+        ["details.pins", "details", 10334, "PinIcon"], ["details.links", "details", 5038, "LinkIcon"], ["details.files", "details", 8197, "FolderIcon"],
+        ["details.newGroup", "details", 10759, "ChatPlusIcon"], ["profile.pronouns", "profile", 8203, "TextIcon"],
+        ["server.memberCount", "server", 8212, "GroupIcon"], ["server.community", "server", 9099, "GlobeEarthIcon"],
+        ["guild.icon", "guild", 9239, "ServerIcon"], ["guild.online", "guild", 10287, "UserCircleIcon"], ["guild.members", "guild", 8212, "GroupIcon"],
+        ["guild.reviews", "guild", 9549, "StarIcon"], ["guild.serverTag", "guild", 9071, "TagIcon"],
+        ["you.status", "you", 8194, "ChatIcon"], ["you.friends", "you", 8212, "GroupIcon"], ["you.orbs", "you", 9035, "OrbsIcon"]];
     // Spots that are Discord's own buttons and rows are named with Discord's own message (any language); English if it's missing.
     const DISCORD_SPOTS = {"profile.guildTag":["2QmKZ2", "Server Tag"], "profile.addFriend":["7815ae", "Add Friend"], "profile.message":["zROXEV", "Message"],
         "profile.activity":["chq59f", "Activity"], "profile.wishlist":["7lZ31J", "Wishlist"], "profile.badges":["l6w3Vj", "Badges"],
@@ -8243,7 +8256,12 @@
         "guild.notifications":["HcoRu0", "Notifications"], "guild.markRead":["e6RscS", "Mark as Read"], "guild.channelsRoles":["h9mGOP", "Channels & Roles"],
         "guild.serverProfile":["PKQB/H", "Edit Per-server Profile"], "guild.showAll":["FB2ZZV", "Show All Channels"], "guild.hideMuted":["UwOLJO", "Hide Muted Channels"],
         "guild.dms":["KXNTgb", "Allow Direct Messages"], "guild.requests":["7UgSGP", "Allow Message Requests"], "guild.report":["Aen9eh", "Report Server"],
-        "guild.leave":["J2TBi3", "Leave Server"], "guild.emoji":["Q60n1E", "Server Emoji"]};
+        "guild.leave":["J2TBi3", "Leave Server"], "guild.emoji":["Q60n1E", "Server Emoji"],
+        "dm.options":["+1H47t", "Options"], "dm.mute":["w4m945", "Mute"], "dm.deauthorize":["xUqheM", "Deauthorize"], "dm.reportSpam":["HHZmDn", "Report Spam"],
+        "details.search":["5h0QOP", "Search"], "details.mute":["w4m945", "Mute"], "details.settings":["3D5yo/", "Settings"], "details.more":["UKOtz+", "More"],
+        "details.members":["9Oq93m", "Members"], "details.media":["Aw9+/M", "Media"], "details.pins":["/MoGoB", "Pins"], "details.links":["DFSvTt", "Links"],
+        "details.files":["WgVYR/", "Files"], "details.newGroup":["3hF1W4", "New Group"], "profile.pronouns":["+T3RI/", "Pronouns"],
+        "server.community":["1g9A/f", "Community"], "guild.serverTag":["2QmKZ2", "Server Tag"], "you.friends":["TdEu5X", "Friends"], "you.orbs":["gGtZpz", "Orbs Balance"]};
     // The profile's ⋯ menu (UserProfileOverflowMenu 13092) labels its items with Discord's own messages; these are their
     // message keys (both states for items that flip, like Block / Unblock). The label Discord shows is matched, in any language.
     const MENU_SPOTS = {"menu.mainProfile":["GISTta"], "menu.serverProfile":["DisZzB"], "menu.nickname":["BGYkaH", "8pOYUE"], "menu.invite":["Sd8Ixw"],
@@ -8273,13 +8291,14 @@
         hiddenSpots().forEach(key => { if (/^row\./.test(key) && rowLabels.has(key.slice(4))) { out[key.slice(4)] = rowLabels.get(key.slice(4)); any = true; } });
         return any ? out : null;
     }
-    const HIDE_PLACES = ["chat", "attach", "dm", "messages", "profile", "menu", "server", "guild", "you"];
+    const HIDE_PLACES = ["chat", "attach", "dm", "details", "messages", "profile", "menu", "server", "guild", "you"];
     const HIDE_SPOT_KEYS = Object.create(null);
     HIDE_SPOTS.forEach(spot => { HIDE_SPOT_KEYS[spot[0]] = spot; });
     // Modules hooked for it (also selected in targetModules).
     const HIDE_HOOKED = {13092:1, 14973:1, 14974:1, 10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1,
         14279:1, 8525:1, 8775:1, 10533:1, 11997:1, 14206:1, 14212:1, 14143:1, 14216:1,
-        12364:1, 12365:1, 13418:1, 10614:1, 6882:1, 13402:1, 13181:1, 16466:1, 16575:1};
+        12364:1, 12365:1, 13418:1, 10614:1, 6882:1, 13402:1, 13181:1, 16466:1, 16575:1,
+        12208:1, 11864:1, 10515:1, 17567:1, 16074:1, 16577:1, 17499:1, 17487:1, 10748:1};
     const hideEdit = {on:false, top:false, last:null};
     // Labels of the profile menu's removable items while removal mode draws them (ContextMenuItem only gets the label).
     const hideMenuLabels = new Map();
@@ -8310,12 +8329,18 @@
             case "attach.apps": return tr("Apps");
             case "attach.polls": return tr("Polls");
             case "attach.photos": return tr("Photos");
+            case "chat.emoji": return tr("Emoji button");
+            case "you.status": return tr("Status bubble");
+            case "guild.icon": return tr("Server icon");
+            case "guild.online": return tr("Online count");
+            case "guild.members": case "server.memberCount": return tr("Member count");
+            case "guild.reviews": return tr("Reviews");
         }
         return key;
     }
     function hidePlaceTitle(place) {
         return place === "menu" ? tr("Profile menu") : place === "settings" ? tr("Settings") : place === "options" ? tr("Venus options") : place === "chat" ? tr("Message bar") : place === "attach" ? tr("Attach menu") : place === "dm" ? tr("Direct messages") : place === "messages" ? tr("Messages tab") :
-            place === "profile" ? tr("Other people's profiles") : place === "server" ? tr("Channel list") : place === "guild" ? tr("Server menu") : tr("Your profile");
+            place === "profile" ? tr("Other people's profiles") : place === "server" ? tr("Channel list") : place === "guild" ? tr("Server menu") : place === "details" ? tr("Channel details") : tr("Your profile");
     }
     function hideSpotsText(raw) {
         if (typeof raw !== "string" || raw.length > 8000) return undefined;
@@ -8415,7 +8440,7 @@
     function hideMarked(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node}); }
     function hideMarkedRow(node, key) { return el(HideMark, {key:node && node.key != null ? node.key : key, spot:key, base:node, inset:true}); }
     // Rows in the server menu get the row mark (their X at the end, clear of a switch); buttons get the corner mark.
-    const HIDE_ROW_SPOTS = {"guild.markRead":1, "guild.channelsRoles":1, "guild.report":1, "guild.leave":1,
+    const HIDE_ROW_SPOTS = {"guild.markRead":1, "guild.serverTag":1, "guild.channelsRoles":1, "guild.report":1, "guild.leave":1,
         "guild.serverProfile":2, "guild.showAll":2, "guild.hideMuted":2, "guild.dms":2, "guild.requests":2};
     function hideMarkFor(node, key) {
         const row = HIDE_ROW_SPOTS[key];
@@ -8555,10 +8580,10 @@
     // The DM header (PrivateChannelButtons 12854): pressables holding the call (or hang up / join), video and search icons.
     let hideDmIcons = null;
     function dmIconSpots() {
-        if (hideDmIcons && hideDmIcons.size >= 6) return hideDmIcons;
+        if (hideDmIcons && hideDmIcons.size >= 7) return hideDmIcons;
         const map = new Map();
         [[9317, "PhoneCallIcon", "dm.call"], [9319, "PhoneHangUpIcon", "dm.call"], [8224, "VoiceNormalIcon", "dm.call"], [10771, "VideoIcon", "dm.video"],
-            [12878, "VideoDenyIcon", "dm.video"], [6740, "MagnifyingGlassIcon", "dm.search"]].forEach(([id, name, key]) => { const Icon = inspectedExport(id, name); if (Icon) map.set(Icon, key); });
+            [12878, "VideoDenyIcon", "dm.video"], [6740, "MagnifyingGlassIcon", "dm.search"], [7092, "SettingsIcon", "dm.options"]].forEach(([id, name, key]) => { const Icon = inspectedExport(id, name); if (Icon) map.set(Icon, key); });
         return hideDmIcons = map;
     }
     function iconSpot(node, depth, icons) {
@@ -8622,6 +8647,8 @@
     // A profile's tabs (UserProfileContent 13190) are {id, label, page} items for useSegmentedControlState (8525), Main always
     // first: removed tabs are left out of the items, so the tab bar and its pages close up together.
     const PROFILE_TABS = Object.assign(Object.create(null), {activity:"profile.activity", wishlist:"profile.wishlist"});
+    // A channel's details (the DM's Members, Media, Pins, Links and Files tabs) are SearchTabsLayout's {label, id, page, count} items.
+    const SEARCH_TAB_SPOTS = Object.assign(Object.create(null), {members:"details.members", media:"details.media", pins:"details.pins", links:"details.links", files:"details.files"});
     function profileTabItems(items) { return Array.isArray(items) && items.length > 0 && !!items[0] && items[0].id === "main" && "page" in items[0]; }
     const hideTabCache = new WeakMap();
     function segmentedState(orig, self, args) {
@@ -8647,8 +8674,9 @@
     // and Wishlist are found by id.
     function segmentedItemMark(orig, self, args) {
         const rendered = orig.apply(self, args), props = args[0];
-        if (!rendered || !props || !props.state || !profileTabItems(props.state.items) || !hideEditing()) return rendered;
-        const item = props.state.items[props.index], key = item && PROFILE_TABS[item.id];
+        if (!rendered || !props || !props.state || !Array.isArray(props.state.items) || !hideEditing()) return rendered;
+        const item = props.state.items[props.index];
+        const key = !item ? null : profileTabItems(props.state.items) ? PROFILE_TABS[item.id] : "page" in item && "count" in item ? SEARCH_TAB_SPOTS[item.id] : null;
         return key ? markInside(rendered, key) : rendered;
     }
     // The server tag next to someone's name (UserProfilePrimaryInfo 10533) is its local GuildTag, the one element given a
@@ -8869,7 +8897,15 @@
         return el(wrapInner(rendered.type, serverHeaderSpot), Object.assign({key:rendered.key}, rendered.props));
     }
     // The server menu (GuildActionSheet 14211). Its header's Community Server pill is the one element given guildVisibility.
-    function guildHeaderSpot(node) { const props = node.props; return "guildVisibility" in props && !("guild" in props) ? "guild.community" : null; }
+    // The server's icon is the one element given guild, size and animate; the online and member counts are MemberCount (12868),
+    // given a type ("online" or not) and a count.
+    function guildHeaderSpot(node) {
+        const props = node.props;
+        if ("guildVisibility" in props && !("guild" in props)) return "guild.community";
+        if ("guild" in props && "animate" in props && "size" in props) return "guild.icon";
+        if ("count" in props && typeof props.type === "string" && !("guild" in props) && !("children" in props)) return props.type === "online" ? "guild.online" : "guild.members";
+        return null;
+    }
     // Boost, Invite and Notifications (GuildActionSheetTabItems 14212) are IconButtons: Boost by its gem icon (its label can be
     // a count), the others by Discord's own label.
     function guildTabSpot(node) {
@@ -8882,7 +8918,7 @@
     // Its rows (GuildUnreadAction and GuildActionSheetSecondaryActions, 14143): plain rows by Discord's own label, and the
     // module's own option components by name, since they draw their rows themselves.
     const GUILD_ROW_NAMES = Object.assign(Object.create(null), {BrowseChannelsOption:"guild.channelsRoles", ChangeIdentityOption:"guild.serverProfile",
-        HideMutedChannelsOption:"guild.hideMuted", RestrictedGuildPrivacyOption:"guild.dms", MessageRequestRestrictedGuildPrivacyOption:"guild.requests"});
+        HideMutedChannelsOption:"guild.hideMuted", RestrictedGuildPrivacyOption:"guild.dms", MessageRequestRestrictedGuildPrivacyOption:"guild.requests", ServerTagOption:"guild.serverTag"});
     const GUILD_ROW_LABELS = {"guild.markRead":["e6RscS"], "guild.showAll":["FB2ZZV"], "guild.report":["Aen9eh"], "guild.leave":["J2TBi3", "Dv8gFT"]};
     let guildLabelCache = null;
     function guildRowLabels() {
@@ -8904,6 +8940,185 @@
         if (named) return named;
         const label = node.props.label;
         return typeof label === "string" && label ? guildRowLabels().get(label) || null : null;
+    }
+    // Swaps the elements test() picks for swap(node), anywhere in a drawn tree.
+    function swapWhere(node, depth, test, swap) {
+        if (!node || typeof node !== "object" || depth > 14) return node;
+        if (Array.isArray(node)) {
+            let changed = false;
+            const next = node.map(child => { const value = swapWhere(child, depth + 1, test, swap); if (value !== child) changed = true; return value; });
+            return changed ? next : node;
+        }
+        if (!node.props) return node;
+        if (test(node)) return swap(node);
+        const kids = node.props.children;
+        if (kids == null || typeof kids !== "object") return node;
+        const next = swapWhere(kids, depth + 1, test, swap);
+        return next === kids ? node : React.cloneElement(node, {children:next});
+    }
+    // Pronouns beside the username (UserTagAndPronouns, local to UserProfilePrimaryInfo 10533): removed by drawing it with no
+    // pronouns (it then leaves them out, as for someone without any); in removal mode the pronouns get the mark.
+    const primaryInfoTree = hideTree(profilePrimarySpot);
+    const pronounWraps = new WeakMap();
+    function pronounsNode(node) {
+        const props = node.props;
+        return typeof node.type === "function" && "userTag" in props && "pronouns" in props && typeof props.pronouns === "string" && props.pronouns.length > 0;
+    }
+    function pronounsText(children, pronouns) { return children === pronouns || Array.isArray(children) && children.indexOf(pronouns) >= 0; }
+    function pronounsType(type) {
+        let Wrapped = pronounWraps.get(type);
+        if (!Wrapped) {
+            Wrapped = function UserTagAndPronouns(props) {
+                const out = type(props);
+                return out ? hideWalk(out, 0, node => pronounsText(node.props.children, props.pronouns) ? "profile.pronouns" : null, true, () => false) : out;
+            };
+            pronounWraps.set(type, Wrapped);
+        }
+        return Wrapped;
+    }
+    function primaryInfo(orig, self, args) {
+        const out = primaryInfoTree(orig, self, args);
+        if (!out || !React || !enabled("hideAnything")) return out;
+        const hidden = spotHidden("profile.pronouns"), edit = hideEditing();
+        if (!hidden && !edit) return out;
+        return swapWhere(out, 0, pronounsNode, node => hidden ? React.cloneElement(node, {pronouns:""}) :
+            el(pronounsType(node.type), Object.assign({key:node.key}, node.props)));
+    }
+    // The start of a DM (ChatBeginningRow 12208): a bot's Mute, Deauthorize and Report Spam buttons are the module's own
+    // MuteAppButton, DeauthorizeAppButton and DMSpamButton, drawn by its local ChatBeginningRowDMGuard -> ChatBeginningRowDM.
+    // Those two are swapped for wrappers that draw Discord's and walk what it drew.
+    const BEGIN_PASS = Object.assign(Object.create(null), {ChatBeginningRowDMGuard:1, ChatBeginningRowDM:1});
+    const BEGIN_SPOTS = Object.assign(Object.create(null), {MuteAppButton:"dm.mute", DeauthorizeAppButton:"dm.deauthorize", DMSpamButton:"dm.reportSpam"});
+    function beginSpot(node) { const type = node.type; return type && typeof type !== "string" ? BEGIN_SPOTS[componentName(type)] || null : null; }
+    const beginWraps = new WeakMap();
+    function beginType(type) {
+        let Wrapped = beginWraps.get(type);
+        if (!Wrapped) {
+            Wrapped = function (props) { useSettings("hideAnything"); return beginTree(type(props)); };
+            Wrapped.displayName = componentName(type);
+            beginWraps.set(type, Wrapped);
+        }
+        return Wrapped;
+    }
+    function beginTree(out) {
+        if (!out || !React) return out;
+        // Always swapped (the wrapper is the same every time), so turning things off and on never remounts the row.
+        out = swapWhere(out, 0, node => typeof node.type === "function" && BEGIN_PASS[componentName(node.type)] === 1,
+            node => el(beginType(node.type), Object.assign({key:node.key}, node.props)));
+        if (!enabled("hideAnything")) return out;
+        const edit = hideEditing();
+        if (!edit && !settings.hideAnythingSpots) return out;
+        // Someone who isn't a bot gets Report Spam handed to RelationshipButtons as its reportButton.
+        out = swapWhere(out, 0, node => !!node.props.reportButton && typeof node.props.reportButton === "object", node => {
+            const button = hideWalk(node.props.reportButton, 0, beginSpot, edit, null);
+            return button === node.props.reportButton ? node : React.cloneElement(node, {reportButton:button});
+        });
+        return hideWalk(out, 0, beginSpot, edit, null);
+    }
+    function chatBeginning(orig, self, args) { useSettings("hideAnything"); return beginTree(orig.apply(self, args)); }
+    // The status bubble on your own profile (UserProfileCustomStatusBubble 10515 with editEnabled), "What have you been playing?"
+    // until you set one. Other people's statuses stay.
+    const statusWhole = hideWhole("you.status");
+    function statusBubble(orig, self, args) { const props = args[0]; return props && props.editEnabled ? statusWhole(orig, self, args) : orig.apply(self, args); }
+    // Under a server's name in the channel list (ChannelListStickyHeader 16577): the member count, a dot, then "Community".
+    // The dot goes with either of them.
+    function stickySubheader(node, depth, Text, community, edit) {
+        if (!node || typeof node !== "object" || depth > 14) return node;
+        if (Array.isArray(node)) {
+            let changed = false;
+            const next = node.map(child => { const value = stickySubheader(child, depth + 1, Text, community, edit); if (value !== child) changed = true; return value; });
+            return changed ? next : node;
+        }
+        if (!node.props) return node;
+        const kids = node.props.children;
+        if (Array.isArray(kids)) {
+            const at = kids.findIndex(kid => !!kid && !!kid.props && kid.type === Text && kid.props.children === community);
+            if (at >= 0) {
+                const next = kids.slice(), isText = kid => !!kid && !!kid.props && kid.type === Text;
+                const isDot = kid => !!kid && !!kid.props && kid.type !== Text && kid.props.children == null;
+                const countAt = at >= 2 && isText(kids[at - 2]) && isDot(kids[at - 1]) ? at - 2 : -1;
+                const goneCommunity = spotHidden("server.community"), goneCount = countAt >= 0 && spotHidden("server.memberCount");
+                next[at] = goneCommunity ? null : edit ? hideMarked(kids[at], "server.community") : kids[at];
+                if (countAt >= 0) {
+                    next[countAt] = goneCount ? null : edit ? hideMarked(kids[countAt], "server.memberCount") : kids[countAt];
+                    if (goneCount || goneCommunity) next[countAt + 1] = null;
+                }
+                return React.cloneElement(node, {children:next});
+            }
+        }
+        if (kids == null || typeof kids !== "object") return node;
+        const next = stickySubheader(kids, depth + 1, Text, community, edit);
+        return next === kids ? node : React.cloneElement(node, {children:next});
+    }
+    function channelStickyHeader(orig, self, args) {
+        useSettings("hideAnything");
+        const out = orig.apply(self, args);
+        if (!out || !React || !enabled("hideAnything")) return out;
+        const edit = hideEditing();
+        if (!edit && !spotHidden("server.memberCount") && !spotHidden("server.community")) return out;
+        const Text = inspectedExport(5088, "Text"), community = discordText("1g9A/f");
+        return Text && community ? stickySubheader(out, 0, Text, community, edit) : out;
+    }
+    // A channel's details (ChannelDetailsNavigationBar 17499): its TransitionGroup draws NavigationHeader through renderItem,
+    // and NavigationHeader holds the module's own SearchButton, MuteButton and SettingsButton, plus MoreButton (17500).
+    const DETAILS_BUTTONS = Object.assign(Object.create(null), {SearchButton:"details.search", MuteButton:"details.mute", SettingsButton:"details.settings", MoreButton:"details.more"});
+    function detailsButtonSpot(node) { const type = node.type; return type && typeof type !== "string" ? DETAILS_BUTTONS[componentName(type)] || null : null; }
+    const renderItemWraps = new WeakMap();
+    function detailsRenderItem(render) {
+        let Wrapped = renderItemWraps.get(render);
+        if (!Wrapped) {
+            Wrapped = function () {
+                const out = render.apply(this, arguments);
+                return out && out.props && typeof out.type === "function" && componentName(out.type) === "NavigationHeader" ?
+                    el(wrapInner(out.type, detailsButtonSpot), Object.assign({key:out.key}, out.props)) : out;
+            };
+            renderItemWraps.set(render, Wrapped);
+        }
+        return Wrapped;
+    }
+    function detailsBar(orig, self, args) {
+        const out = orig.apply(self, args);
+        if (!out || !React) return out;
+        return swapWhere(out, 0, node => typeof node.props.renderItem === "function" && Array.isArray(node.props.items),
+            node => React.cloneElement(node, {renderItem:detailsRenderItem(node.props.renderItem)}));
+    }
+    // The details' tabs (useSearchSegmentedControlState 17487): removed tabs are left out of both its items and visibleTabs,
+    // so the tab bar and its pages close up together.
+    const searchTabCache = new WeakMap(), searchVisibleCache = new WeakMap();
+    function searchTabGone(id) { return !!SEARCH_TAB_SPOTS[id] && spotHidden(SEARCH_TAB_SPOTS[id]); }
+    function keptCached(cache, list, text, gone) {
+        let entry = cache.get(list);
+        if (!entry || entry.text !== text) {
+            const kept = list.filter(item => !gone(item));
+            entry = {text, list:kept.length && kept.length !== list.length ? kept : list};
+            cache.set(list, entry);
+        }
+        return entry.list;
+    }
+    function searchTabsState(orig, self, args) {
+        useSettings("hideAnything");
+        const options = args[0];
+        if (!options || typeof options !== "object" || !Array.isArray(options.items) || !settings.hideAnythingSpots || !enabled("hideAnything")) return orig.apply(self, args);
+        const text = settings.hideAnythingSpots, items = keptCached(searchTabCache, options.items, text, item => !!item && searchTabGone(item.id));
+        if (items === options.items) return orig.apply(self, args);
+        const next = Array.from(args);
+        next[0] = Object.assign({}, options, {items});
+        if (Array.isArray(options.visibleTabs)) next[0].visibleTabs = keptCached(searchVisibleCache, options.visibleTabs, text, searchTabGone);
+        return orig.apply(self, next);
+    }
+    // New Group above a DM's members (useMemberListAction 10748, the row it hands the member list to draw).
+    function memberListAction(orig, self, args) {
+        useSettings("hideAnything");
+        const out = orig.apply(self, args), options = args[0], channel = options && options.channel;
+        let dm = false;
+        try { dm = !!channel && typeof channel.isDM === "function" && channel.isDM(); } catch (_) {}
+        const mode = !out || !dm || !enabled("hideAnything") ? null : spotHidden("details.newGroup") ? "gone" : hideEditing() ? "edit" : null;
+        return React.useMemo(() => {
+            if (!mode || typeof out.listActionRenderer !== "function") return out;
+            if (mode === "gone") return Object.assign({}, out, {listActionRenderer:() => null, listActionHeight:() => 0});
+            const render = out.listActionRenderer;
+            return Object.assign({}, out, {listActionRenderer:function () { const row = render.apply(this, arguments); return row ? hideMarkedRow(row, "details.newGroup") : row; }});
+        }, [out, mode]);
     }
     // With the voice message button removed, the send button acts as it does where voice messages aren't allowed.
     function withoutVoiceButton(props) {
@@ -9029,12 +9244,21 @@
             case 14279: return hookComponent(exports, menuItemMark, "ContextMenuItem");
             case 8525: return hookExport(exports, "useSegmentedControlState", segmentedState);
             case 8775: return hookComponent(exports, segmentedItemMark, "SegmentedControlItem");
-            case 10533: return hookComponent(exports, hideTree(profilePrimarySpot));
+            case 10533: return hookComponent(exports, primaryInfo);
             case 11997: return hookComponent(exports, serverHeaderOuter);
             case 14206: return hookComponent(exports, hideTree(guildHeaderSpot));
             case 14212: return hookComponent(exports, hideTree(guildTabSpot));
             case 14143: return hookComponent(hookComponent(exports, hideTree(guildRowSpot), "GuildUnreadAction"), hideTree(guildRowSpot), "GuildActionSheetSecondaryActions");
             case 14216: return hookComponent(exports, hideWhole("guild.emoji"));
+            case 12208: return hookComponent(exports, chatBeginning);
+            case 11864: return hookComponent(exports, hideWhole("chat.emoji"));
+            case 10515: return hookComponent(exports, statusBubble);
+            case 17567: return hookComponent(exports, hideWhole("you.friends"));
+            case 16074: return hookComponent(exports, hideWhole("you.orbs"));
+            case 16577: return hookComponent(exports, channelStickyHeader);
+            case 17499: return hookComponent(exports, detailsBar);
+            case 17487: return hookExport(exports, "useSearchSegmentedControlState", searchTabsState);
+            case 10748: return hookExport(exports, "default", memberListAction);
             case 15371: return hideQuestHooks(exports);
             case 15465: return hideQuestDock(exports);
         }
