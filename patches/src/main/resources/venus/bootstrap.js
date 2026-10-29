@@ -8260,8 +8260,10 @@
     }
     // Rows on Discord's Settings screen and Venus's lists (settings.KEY) and switches on Venus option pages (row.key) are spots too.
     // Features and Remove anything themselves can't be removed, so there is always a way back.
-    const HIDE_DYNAMIC = /^(?:settings\.[A-Z0-9_]{2,80}|row\.[A-Za-z0-9]{2,60})$/;
-    function settingRemovable(key) { return typeof key === "string" && /^[A-Z0-9_]{2,80}$/.test(key) && key !== "VENUS_PLUGINS" && key.indexOf("HIDEANYTHING") < 0; }
+    // Most setting keys are CONSTANT_CASE, but some of Discord's are plain names ("Stack", "Tag Group", "Form Primitives" under
+    // Design Systems), so any key without a comma (the list's separator) counts.
+    const HIDE_DYNAMIC = /^(?:settings\.[A-Za-z0-9_][A-Za-z0-9_ .\-]{1,79}|row\.[A-Za-z0-9]{2,60})$/;
+    function settingRemovable(key) { return typeof key === "string" && /^[A-Za-z0-9_][A-Za-z0-9_ .\-]{1,79}$/.test(key) && key !== "VENUS_PLUGINS" && key.indexOf("HIDEANYTHING") < 0; }
     const rowLabels = new Map();
     // The English labels of removed switches, saved with the settings so the Remove anything page can name them before
     // their own page has been opened this session.
