@@ -18,6 +18,11 @@
 //                      bar, in removal mode (a red X on every removable button, the floating bar at the bottom). ask=<name> taps that
 //                      button's X (ask=Voice call button), and confirm=1 then answers Remove, so the "Remove this button?" alert shows; mode=off draws them without removal; scene=settings&mode=on shows Settings in removal mode
 //                      mode, so set={"hideAnythingSpots":"..."} shows the rows closed up
+//   scene=removeProfile  Remove anything on someone's profile: the ⋯ button, server tag, badges, mutual servers, Add Friend, Message, Call,
+//                      the Activity and Wishlist tabs, both Member Since dates, Roles, Connections and the note (mode=off: no removal mode)
+//   scene=removeMenu   the same profile with its ⋯ menu open
+//   scene=removeHeaders  the Messages tab header and a server's channel list header, laid out from the heights Discord measures
+//   scene=removeGuild  the server menu: Community Server pill, Boost / Invite / Notifications, its rows and switches, Server Emoji
 //   scene=longEdit     Send long messages: saving an edit past Discord's limit (the alert that explains why it wasn't sent)
 // Edge cases: friends=0 (none of your friends are in Game Night), owner=me (you own it), desc=0 (no description).
 // Each scene turns on the features it shows (SCENE_SETTINGS below), so scene=serverInfo needs no on=; set= still wins
@@ -50,13 +55,20 @@ export const SCENE_SETTINGS = {
   reviews: { reviewDB: true }, serverSheet: { reviewDB: true }, hiddenChannel: { hiddenChannels: true }, settings: {},
   youBar: { youBarSettings: true, accountSwitcher: true }, translateBar: { translate: true, translateMode: "manual" },
   messageMenu: { translate: true }, bulkDelete: { bulkDelete: true }, longMessageFailed: { splitMessages: true }, longEdit: { splitMessages: true },
-  removeMode: { hideAnything: true },
+  removeMode: { hideAnything: true }, removeProfile: { hideAnything: true }, removeMenu: { hideAnything: true },
+  removeHeaders: { hideAnything: true }, removeGuild: { hideAnything: true },
 };
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
 export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379,
-  14827, 16467, 12854, 13425, 9115, 11935, 11942, 11946, 11957, 11956];
+  14827, 16467, 12854, 13425, 9115, 11935, 11942, 11946, 11957, 11956,
+  13092, 14279, 10533, 13418, 8525, 12364, 12365, 10614, 6882, 13402, 16466, 16575, 11997, 14206, 14212, 14143, 14216];
 let host = null; // the Scene, once drawn: shows and hides sheets
+// Discord's own text for the message keys Remove anything matches labels by (en-GB, from the APK), served as intl (1126) in
+// the remove* scenes, so labels are found the way they are in Discord.
+const EN_TEXT = {"/AXYnE": "Copy User ID", "2QmKZ2": "Server Tag", "3fe7U5": "Connections", "4lTDZq": "Mutual Servers", "5h0QOP": "Search", "7815ae": "Add Friend", "7UgSGP": "Allow Message Requests", "7lZ31J": "Wishlist", "8pOYUE": "Change Friend Nickname", "8wXU9B": "Unignore", "Aen9eh": "Report Server", "BGYkaH": "Add Friend Nickname", "DisZzB": "View Per-server Profile", "Dv8gFT": "Leave Hub", "FB2ZZV": "Show All Channels", "GISTta": "View Main Profile", "HcoRu0": "Notifications", "J2TBi3": "Leave Server", "K7iRig": "Community Server", "KXNTgb": "Allow Direct Messages", "LPJmL/": "Roles", "LXw470": "Main", "PHjkRE": "Apps", "PKQB/H": "Edit Per-server Profile", "PdRCRg": "More Options", "Q60n1E": "Server Emoji", "QvQeLv": "Copy User Info", "Sd8Ixw": "Invite to Server", "TbHyMG": "Report This User for Abuse", "Uj0md3": "Boost", "UwOLJO": "Hide Muted Channels", "VINpSK": "Invite", "WqhZss": "Copy Link", "XyHpKH": "Unblock", "a6XYD9": "Member Since", "bHa9kN": "Ring", "chq59f": "Activity", "e6RscS": "Mark as Read", "h9mGOP": "Channels & Roles", "jhJzez": "Report App", "l4Emac": "Block", "l6w3Vj": "Badges", "mQKv+v": "Note (only visible to you)", "n5zMI+": "Remove from Group", "tlopTM": "Events", "xNdRDO": "Shop This Look", "y5MwJy": "Copy Username", "ygslb0": "Stop Ringing", "ytCpKs": "Ignore", "zROXEV": "Message"};
+const T_ = k => EN_TEXT[k] || k;
+const removeScene = /^remove(Profile|Menu|Headers|Guild)$/.test(q.get("scene") || "");
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
   return {
@@ -116,11 +128,36 @@ export function modules(store, me) {
     16754: { default: () => ({ listDataProps: { itemSize: s => s === SECTIONS.SEPARATOR ? 12 : 56, renderItem: guildBarItem } }) },
     // Remove anything: Discord's buttons, drawn from the same icons Venus matches them by (global.__r, like inspectedExport).
     14827: { default: p => <RN.View style={{ flex: 1 }}>{p.children}</RN.View> },
-    7569: { IconButton: p => <RN.Pressable accessibilityLabel={p.accessibilityLabel} onPress={p.onPress} style={ROUND}>{p.icon}</RN.Pressable> },
+    7569: { IconButton: p => p.label ? <RN.Pressable accessibilityLabel={p.label} onPress={p.onPress} style={[TILE, p.grow ? { flexGrow: 1 } : null]}>{p.icon}
+      <D.Text variant="text-sm/semibold" color="text-strong">{p.label}</D.Text></RN.Pressable> :
+      <RN.Pressable accessibilityLabel={p.accessibilityLabel} onPress={p.onPress} style={ROUND}>{p.icon}</RN.Pressable> },
+    ...(removeScene ? { 1126: { t: Object.fromEntries(Object.keys(EN_TEXT).map(k => [k, k])), intl: { string: k => EN_TEXT[k] || "" } } } : {}),
+    6055: { default: store({ getMessageRequestsCount: () => 9 }) }, 6056: { default: store({ getSpamChannelsCount: () => 0 }) },
+    9358: { ContextMenu: StubContextMenu }, 14279: { ContextMenuItem: StubMenuItem },
+    13092: { default: () => React.createElement(global.__r(9358).ContextMenu, { items: MENU_ITEMS, children: p => <RN.Pressable {...p} accessibilityLabel="More" style={MORE}>
+      {icon(9237, "MoreHorizontalIcon", "sm")}</RN.Pressable> }) },
+    10533: { default: PrimaryInfo },
+    13418: { default: () => <RN.View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><RN.View style={{ width: 18, height: 18, borderRadius: 6, backgroundColor: "#eb459e" }} />
+      <D.Text variant="text-sm/semibold" color="text-default">1 Mutual Server</D.Text></RN.View> },
+    8525: { useSegmentedControlState: o => ({ items: o.items }) },
+    12364: { Tabs: p => <RN.View style={{ flexDirection: "row", paddingHorizontal: 16, borderBottomWidth: 1, borderColor: D.tok("BORDER_SUBTLE") }}>
+      {p.state.items.map((item, i) => React.createElement(global.__r(12365).TabItem, { key: item.id, index: i, state: p.state, label: item.label, grow: true }))}</RN.View> },
+    12365: { TabItem: p => <RN.View style={{ flexGrow: 1, alignItems: "center", paddingVertical: 12, borderBottomWidth: 2, borderColor: p.index === 0 ? D.tok("TEXT_STRONG") : "transparent" }}>
+      <D.Text variant="text-md/semibold" color={p.index === 0 ? "text-strong" : "text-muted"}>{p.label}</D.Text></RN.View> },
+    10614: { default: AboutMe },
+    6882: { default: () => <Section title={T_("LPJmL/")}><RN.View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{ROLES.map(([name, color]) =>
+      <RN.View key={name} style={[CHIP, { gap: 6 }]}><RN.View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color }} />
+        <D.Text variant="text-sm/medium" color="text-strong">{name}</D.Text></RN.View>)}</RN.View></Section> },
+    13402: { UserProfileAccountConnectionsCard: () => <Section title={T_("3fe7U5")}><RN.View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14,
+      borderRadius: 12, backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>{icon(9207, "GameControllerIcon", "md")}<D.Text variant="text-md/semibold" color="text-strong">CynfulSolver</D.Text></RN.View></Section> },
+    16466: { default: () => ({ headerSize: MSG_HEADER, listTop: MSG_HEADER }) },
+    16575: { useRedesignGuildHeaderHeight: () => GUILD_HEADER }, 5384: { SMALL_BUTTON_HEIGHT: 40 }, 11762: { SEARCH_BAR_MARGIN_BOTTOM: 12 },
+    11997: { default: function ConnectedGuildSearchAndInviteInner(p) { return <GuildSearchAndInvite guildId={p.guildId} canInvite />; } },
+    14206: { default: GuildSheetHeader }, 14212: { default: GuildTabItems }, 14143: { GuildUnreadAction, GuildActionSheetSecondaryActions }, 14216: { default: GuildEmoji },
     11940: { MediaKeyboardButtonIcon: D.makeIcon("PlusLargeIcon") },
     16468: { default: () => <RN.Pressable style={[ROUND, { flexDirection: "row", width: undefined, paddingHorizontal: 12, gap: 6 }]}>{icon(6770, "EnvelopeIcon", "sm")}
       <D.Text variant="text-sm/bold" color="text-strong">9</D.Text></RN.Pressable> },
-    16467: { default: () => <RN.View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, gap: 12 }}>
+    16467: { default: () => <RN.View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, gap: 8 }}>
       <D.Text variant="heading-xl/bold" color="text-strong">Messages</D.Text>
       <RN.View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         {React.createElement(global.__r(7569).IconButton, { icon: icon(6740, "MagnifyingGlassIcon", "sm"), accessibilityLabel: "Search" })}
@@ -132,7 +169,13 @@ export function modules(store, me) {
       <RN.Pressable onPress={() => {}} style={ROUND}>{icon(9317, "PhoneCallIcon", "sm")}</RN.Pressable>
       <RN.Pressable onPress={() => {}} style={ROUND}>{icon(10771, "VideoIcon", "sm")}</RN.Pressable>
       <RN.Pressable onPress={() => {}} style={ROUND}>{icon(6740, "MagnifyingGlassIcon", "sm")}</RN.Pressable></RN.View> },
-    13425: { default: () => <RN.View style={{ flexDirection: "row", gap: 8 }}>
+    // UserProfileContactButtons: Message and Call for a friend (the removeMode scene); Add Friend, then Message and Call as
+    // icon buttons, for someone who isn't one yet (the removeProfile scene).
+    13425: { default: () => removeScene ? <RN.View style={{ flexDirection: "row", gap: 8 }}>
+      <RN.View style={{ flex: 1 }}><FriendRequestButton user={PROFILE_USER} location="profile" hasCustomProfileTheme={false} ButtonComponent={ProfileButton} /></RN.View>
+      {React.createElement(global.__r(7569).IconButton, { icon: icon(8194, "ChatIcon", "sm"), accessibilityLabel: "Message" })}
+      {React.createElement(global.__r(7569).IconButton, { icon: icon(9317, "PhoneCallIcon", "sm"), accessibilityLabel: "Call" })}</RN.View> :
+      <RN.View style={{ flexDirection: "row", gap: 8 }}>
       <RN.View style={{ flex: 1 }}><ProfileButton icon={icon(8194, "ChatIcon", "sm")} text="Message" /></RN.View>
       <RN.View style={{ flex: 1 }}><ProfileButton icon={icon(9317, "PhoneCallIcon", "sm")} text="Call" /></RN.View></RN.View> },
     9115: { default: () => <RN.View style={{ flexDirection: "row", alignSelf: "center", gap: 8, padding: 8, borderRadius: 28, backgroundColor: D.tok("BACKGROUND_SURFACE_HIGH") }}>
@@ -392,15 +435,13 @@ function ActionButton(p) {
     {React.createElement(p.IconComponent, { size: "sm", color: p.brand ? "#fff" : undefined })}</RN.Pressable>;
 }
 function ProfileButton(p) {
-  return <RN.Pressable style={{ height: 40, borderRadius: 20, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: D.tok("CONTROL_SECONDARY_BACKGROUND_DEFAULT") }}>
+  return <RN.Pressable style={{ height: 40, borderRadius: 20, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center",
+    backgroundColor: D.tok(p.brand ? "CONTROL_PRIMARY_BACKGROUND_DEFAULT" : "CONTROL_SECONDARY_BACKGROUND_DEFAULT") }}>
     {p.icon}<D.Text variant="text-md/semibold" color="text-strong">{p.text}</D.Text></RN.Pressable>;
 }
 function Caption(p) { return <RN.View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6 }}><D.Text variant="text-xs/bold" color="text-muted">{p.children}</D.Text></RN.View>; }
 // Removal mode starts from the Remove anything page's own button, drawn out of sight, as a tap there would.
-function RemoveMode({ defined, registry }) {
-  const node = registry.VENUS_HIDEANYTHING, Page = node && node.screen && node.screen.getComponent();
-  const App = defined[14827].exports.default, Messages = defined[16467].exports.default, Dm = defined[12854].exports.default;
-  const Contact = defined[13425].exports.default, Pill = defined[9115].exports.default, Actions = defined[11935].exports.default, Send = defined[11956].exports.default;
+function useStartRemoving() {
   React.useEffect(() => {
     if (q.get("mode") === "off") return;
     const press = (find, then) => { let tries = 0; const go = () => { const hit = find(); if (hit) { hit.click(); if (then) setTimeout(then, 150); } else if (++tries < 30) setTimeout(go, 50); }; go(); };
@@ -411,6 +452,12 @@ function RemoveMode({ defined, registry }) {
     const yes = q.get("confirm") ? () => press(() => tappable(text("Remove"))) : null;
     press(() => tappable(text("Start removing")), q.get("ask") ? () => press(() => document.querySelector(`[aria-label="Remove: ${q.get("ask")}"]`), yes) : null);
   }, []);
+}
+function RemoveMode({ defined, registry }) {
+  const node = registry.VENUS_HIDEANYTHING, Page = node && node.screen && node.screen.getComponent();
+  const App = defined[14827].exports.default, Messages = defined[16467].exports.default, Dm = defined[12854].exports.default;
+  const Contact = defined[13425].exports.default, Pill = defined[9115].exports.default, Actions = defined[11935].exports.default, Send = defined[11956].exports.default;
+  useStartRemoving();
   const card = { marginHorizontal: 12, borderRadius: 16, padding: 12, backgroundColor: D.tok("BACKGROUND_BASE_LOWER") };
   return <RN.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
     <App>
@@ -465,6 +512,8 @@ export function Scene({ name, defined, registry }) {
     }; setTimeout(hold, 50); }
   }, []);
   if (name === "removeMode" && !sheets.length) return <RemoveMode defined={defined} registry={registry} />;
+  if (/^remove(Profile|Menu|Headers|Guild)$/.test(name) && !sheets.length) return <RemoveScene defined={defined} registry={registry} dim={name === "removeGuild"}>
+    {name === "removeHeaders" ? <HeadersScreen defined={defined} /> : name === "removeGuild" ? <GuildMenuSheet defined={defined} /> : <ProfileScreen defined={defined} />}</RemoveScene>;
   if (name === "reviews") return <Profile defined={defined} />;
   if (name === "youBar") return <YouBar defined={defined} />;
   if (name === "translateBar" || name === "bulkDelete" && !sheets.length) return <Chat defined={defined} />;
@@ -482,5 +531,200 @@ export function Scene({ name, defined, registry }) {
       <Channels />
       {name === "serverMenu" ? <GuildMenu defined={defined} /> : null}
     </RN.View>
+  </RN.View>;
+}
+
+// ---- Remove anything: someone's profile, the server header and the server menu, built the way Discord builds them, so
+// Venus finds every spot by the same props, icons and message keys it uses in Discord.
+const TILE = { minHeight: 64, borderRadius: 16, paddingVertical: 10, paddingHorizontal: 8, gap: 6, alignItems: "center", justifyContent: "center",
+  backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") };
+const CHIP = { flexDirection: "row", alignItems: "center", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") };
+const MORE = { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "#00000066" };
+const ROLES = [["Good Kitty <3", "#f47fff"], ["She/Her", "#5ad7e3"], ["He/Him", "#45ddc0"], ["Announcement Pings", "#a37ca0"], ["Server Booster", "#ff73fa"]];
+const MSG_HEADER = 100, GUILD_HEADER = 122;
+const PROFILE_USER = { id: "1200000000000000004", username: "cynfulsolver", globalName: "Cyn" };
+const REPORT = ["wqHXNt", "TbHyMG", "jhJzez"].map(k => EN_TEXT[k]).find(Boolean) || "Report User Profile";
+const MENU_ITEMS = [[{ label: T_("GISTta"), action() {} }, { label: T_("Sd8Ixw"), action() {} }, { label: T_("y5MwJy"), action() {} }, { label: T_("PHjkRE"), action() {} }],
+  [{ label: T_("ytCpKs"), action() {} }, { label: T_("l4Emac"), variant: "destructive", action() {} }, { label: REPORT, variant: "destructive", action() {} }]];
+function StubContextMenu(p) {
+  const open = q.get("scene") === "removeMenu", Item = global.__r(14279).ContextMenuItem;
+  const groups = (p.items || []).map(g => Array.isArray(g) ? g : [g]).filter(g => g.length);
+  return <RN.View style={{ position: "relative", zIndex: 5 }}>
+    {typeof p.children === "function" ? p.children({ onPress() {} }) : p.children}
+    {open ? <RN.View style={{ position: "absolute", top: 44, right: 0, width: 280, borderRadius: 16, overflow: "hidden", backgroundColor: D.tok("BACKGROUND_SURFACE_HIGHEST"),
+      borderWidth: 1, borderColor: D.tok("BORDER_SUBTLE") }}>
+      {groups.map((g, gi) => <RN.View key={gi} style={{ borderTopWidth: gi ? 6 : 0, borderColor: D.tok("BORDER_SUBTLE") }}>
+        {g.map((it, i) => <Item key={it.label} index={i} label={it.label} variant={it.variant} onPress={it.action} />)}</RN.View>)}
+    </RN.View> : null}
+  </RN.View>;
+}
+function StubMenuItem(p) {
+  return <RN.Pressable onPress={p.onPress} style={{ minHeight: 52, paddingHorizontal: 16, justifyContent: "center", borderTopWidth: p.index ? 1 : 0, borderColor: D.tok("BORDER_SUBTLE") }}>
+    <D.Text variant="text-md/medium" color={p.variant === "destructive" ? "text-feedback-critical" : "text-strong"}>{p.label}</D.Text></RN.Pressable>;
+}
+function GuildTag(p) { return <RN.View style={[CHIP, { paddingVertical: 2, gap: 4 }]}><D.Text variant="text-sm/semibold" color="text-strong">💧 GOOP</D.Text></RN.View>; }
+function ProfileBadgeRows() {
+  return <RN.View style={[CHIP, { alignSelf: "flex-start", gap: 8 }]}>{["#f0b232", "#eb459e", "#5865f2", "#23a55a", "#00a8fc"].map(c =>
+    <RN.View key={c} style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: c }} />)}</RN.View>;
+}
+// UserProfilePrimaryInfo: name, username and pronouns with the server tag, then the badges.
+function PrimaryInfo() {
+  return <RN.View style={{ gap: 6 }}>
+    <D.Text variant="heading-xl/bold" color="text-strong">Cyn / Emotional Support Kitty</D.Text>
+    <RN.View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
+      <D.Text variant="text-md/medium" color="text-default">cynfulsolver • He/Him or She/Her</D.Text>
+      <GuildTag user={PROFILE_USER} themeType="dark" showToastOnPress primaryGuildOverride={null} />
+    </RN.View>
+    <ProfileBadgeRows userId={PROFILE_USER.id} badges={[1, 2, 3, 4, 5]} catalogBadges={[]} showToastOnPress themeType="dark" />
+  </RN.View>;
+}
+function Section(p) { return <RN.View style={{ gap: 8 }}><D.Text variant="text-md/semibold" color="text-strong">{p.title}</D.Text>{p.children}</RN.View>; }
+function TextWithIcon(p) { return <RN.View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>{p.icon}<D.Text variant="text-md/medium" color="text-default">{p.children}</D.Text></RN.View>; }
+function ServerIcon(p) { return <RN.View style={{ width: 18, height: 18, borderRadius: 6, backgroundColor: "#eb459e" }} />; }
+function Bio(p) { return <Section title="Bio"><D.Text variant="text-md/normal" color="text-default">Meow meow nya mrow nya meow</D.Text></Section>; }
+// MemberJoinDates: the heading, then Discord's date and the server's with a dot between.
+function MemberJoinDates(p) {
+  return <RN.View style={{ gap: 8 }}><D.Text variant="text-md/semibold" color="text-strong">{T_("a6XYD9")}</D.Text>
+    <RN.View style={{ flexDirection: "row", alignItems: "center", columnGap: 8 }}>
+      <TextWithIcon themeType="dark" icon={React.createElement(global.__r(10173).ClydeIcon, { size: "sm" })} accessibilityLabel="Joined Discord: Apr 23, 2020">Apr 23, 2020</TextWithIcon>
+      <D.Text variant="text-md/medium" color="text-muted" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">•</D.Text>
+      <TextWithIcon themeType="dark" icon={<ServerIcon guild={guild} size="XXSMALL" />} accessibilityLabel="Joined Game Night: Sep 2, 2026">Sep 2, 2026</TextWithIcon>
+    </RN.View></RN.View>;
+}
+function AboutMe(p) {
+  return <RN.View style={{ gap: 16 }}>
+    <Bio userId={p.userId} displayProfile={{}} pendingBio={null} themeType="dark" lineClamp={6} />
+    <MemberJoinDates userId={p.userId} guildId={p.guildId} themeType="dark" />
+  </RN.View>;
+}
+function FriendRequestButton(p) { const Btn = p.ButtonComponent; return <Btn brand icon={icon(5032, "UserPlusIcon", "sm")} text={T_("7815ae")} />; }
+function ProfileScreen({ defined }) {
+  const Menu = defined[13092].exports.default, Info = defined[10533].exports.default, Mutuals = defined[13418].exports.default, Contact = defined[13425].exports.default;
+  const Tabs = defined[12364].exports.Tabs, About = defined[10614].exports.default, Roles = defined[6882].exports.default;
+  const Connections = defined[13402].exports.UserProfileAccountConnectionsCard, Note = defined[13181].exports.default;
+  const state = defined[8525].exports.useSegmentedControlState({ items: [{ id: "main", label: T_("LXw470"), page: null }, { id: "activity", label: T_("chq59f"), page: null },
+    { id: "wishlist", label: T_("7lZ31J"), page: null }] });
+  return <RN.View style={{ backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+    <RN.View style={{ height: 120, backgroundColor: "#4e3d6b" }}>
+      <RN.View style={{ position: "absolute", top: 12, right: 12 }}><Menu /></RN.View></RN.View>
+    <RN.View style={{ paddingHorizontal: 16, marginTop: -44, gap: 12 }}>
+      <RN.View style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 6, borderColor: D.tok("BACKGROUND_BASE_LOWER"), backgroundColor: "#2b2d6b" }} />
+      <Info user={PROFILE_USER} guildId={guild.id} />
+      <Mutuals user={PROFILE_USER} guildId={guild.id} />
+      <Contact user={PROFILE_USER} />
+    </RN.View>
+    <RN.View style={{ marginTop: 12 }}><Tabs state={state} /></RN.View>
+    <RN.View style={{ padding: 16, gap: 20 }}>
+      <About userId={PROFILE_USER.id} guildId={guild.id} />
+      <Roles userId={PROFILE_USER.id} guildId={guild.id} />
+      <Connections user={PROFILE_USER} />
+      <Note userId={PROFILE_USER.id} />
+    </RN.View>
+  </RN.View>;
+}
+// The Messages tab and a server's channel list, each placed under the header height Discord measures for it.
+function SearchPill(p) {
+  return <RN.Pressable onPress={p.onPress} style={{ flexGrow: 1, height: 40, borderRadius: 20, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center",
+    backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>{icon(6740, "MagnifyingGlassIcon", "sm")}<D.Text variant="text-md/semibold" color="text-default">{T_("5h0QOP")}</D.Text></RN.Pressable>;
+}
+function GuildSearchAndInvite(p) {
+  return <RN.View style={{ flexDirection: "row", gap: 8 }}>
+    <SearchPill onPress={() => {}} onPressIn={() => {}} onPressOut={() => {}} />
+    {React.createElement(global.__r(7569).IconButton, { icon: icon(5032, "UserPlusIcon", "sm"), accessibilityLabel: T_("VINpSK"), onPress() {}, onPressDisabled() {} })}
+    {React.createElement(global.__r(7569).IconButton, { icon: icon(8675, "CalendarIcon", "sm"), accessibilityLabel: T_("tlopTM"), onPress() {} })}
+  </RN.View>;
+}
+function DmRows({ n }) {
+  return <RN.View style={{ paddingHorizontal: 12, gap: 6 }}>{["Adreanne", "Dippy", "dertodeskonig", "PowerBot"].slice(0, n).map((name, i) =>
+    <RN.View key={name} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 8 }}>
+      <RN.View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: ["#eb459e", "#f0b232", "#5865f2", "#23a55a"][i] }} />
+      <D.Text variant="text-md/semibold" color="text-strong">{name}</D.Text></RN.View>)}</RN.View>;
+}
+function HeadersScreen({ defined }) {
+  const Messages = defined[16467].exports.default, specs = defined[16466].exports.default(), Search = defined[11997].exports.default;
+  const height = defined[16575].exports.useRedesignGuildHeaderHeight(guild);
+  return <RN.View style={{ gap: 12 }}>
+    <Caption>MESSAGES TAB</Caption>
+    <RN.View style={{ marginHorizontal: 12, borderRadius: 16, overflow: "hidden", backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+      <RN.View style={{ height: specs.listTop, overflow: "hidden" }}><Messages /></RN.View><DmRows n={3} /></RN.View>
+    <Caption>CHANNEL LIST</Caption>
+    <RN.View style={{ marginHorizontal: 12, borderRadius: 16, overflow: "hidden", backgroundColor: D.tok("BACKGROUND_BASE_LOWER") }}>
+      <RN.View style={{ height, overflow: "hidden", paddingHorizontal: 16, paddingTop: 16 }}>
+        <D.Text variant="heading-lg/bold" color="text-strong">veil . . .</D.Text>
+        <D.Text variant="text-sm/medium" color="text-muted" style={{ marginBottom: 12 }}>269 Members • Community</D.Text>
+        <Search guildId={guild.id} /></RN.View>
+      {["levels", "arrival", "general chat"].map(c => <RN.View key={c} style={{ flexDirection: "row", gap: 8, alignItems: "center", paddingHorizontal: 16, paddingVertical: 8 }}>
+        {React.createElement(D.makeIcon("HashmarkIcon"), { size: "sm", color: D.tok("CHANNEL_ICON") })}<D.Text variant="text-md/medium" color="text-muted">{c}</D.Text></RN.View>)}
+    </RN.View>
+  </RN.View>;
+}
+// The server menu: header with the Community Server pill, the button row, its rows and switches, then Server Emoji.
+function CommunityPill(p) {
+  return <RN.View style={[CHIP, { alignSelf: "flex-start", gap: 6, paddingVertical: 4 }]}>{icon(9099, "GlobeEarthIcon", "xs")}
+    <D.Text variant="text-sm/semibold" color="text-strong">{T_("K7iRig")}</D.Text></RN.View>;
+}
+function GuildSheetHeader() {
+  return <RN.View style={{ gap: 8 }}>
+    <RN.View style={{ width: 68, height: 68, borderRadius: 20, backgroundColor: D.tok("BACKGROUND_SURFACE_HIGH") }} />
+    <D.Text variant="heading-xl/bold" color="text-strong">Nai's Patches</D.Text>
+    <CommunityPill guildVisibility="PUBLIC" />
+    <D.Text variant="text-sm/medium" color="text-muted">46 Online • 483 Members</D.Text>
+  </RN.View>;
+}
+function GuildTabItems() {
+  const B = global.__r(7569).IconButton;
+  return <RN.View style={{ flexDirection: "row", gap: 8 }}>
+    <B variant="secondary" grow label="9 Boosts" icon={icon(9405, "BoostGemIcon", "md")} onPress={() => {}} />
+    <B variant="secondary" grow label={T_("VINpSK")} icon={icon(5032, "UserPlusIcon", "md")} onPress={() => {}} />
+    <B variant="secondary" grow label={T_("HcoRu0")} icon={icon(8768, "BellIcon", "md")} onPress={() => {}} />
+  </RN.View>;
+}
+const named = (name, fn) => { fn.displayName = name; return fn; };
+const Row = p => <D.TableRow label={p.label} variant={p.variant === "danger" ? "danger" : undefined} onPress={p.onPress || (() => {})} arrow={p.arrow} />;
+const SwitchRow = p => <D.TableSwitchRow label={p.label} subLabel={p.subLabel} value={!!p.value} onValueChange={() => {}} />;
+const BrowseChannelsOption = named("BrowseChannelsOption", () => <Row label={T_("h9mGOP")} arrow />);
+const ChangeIdentityOption = named("ChangeIdentityOption", () => <Row label={T_("PKQB/H")} />);
+const HideMutedChannelsOption = named("HideMutedChannelsOption", () => <SwitchRow label={T_("UwOLJO")} />);
+const RestrictedGuildPrivacyOption = named("RestrictedGuildPrivacyOption", () => <SwitchRow label={T_("KXNTgb")} subLabel="Anyone in the server can message you" value />);
+const MessageRequestRestrictedGuildPrivacyOption = named("MessageRequestRestrictedGuildPrivacyOption", () =>
+  <SwitchRow label={T_("7UgSGP")} subLabel="Filter messages from members you may not know" value />);
+function GuildUnreadAction() {
+  return <D.TableRowGroup>
+    <Row label={T_("e6RscS")} />
+    <BrowseChannelsOption guild={guild} />
+  </D.TableRowGroup>;
+}
+function GuildActionSheetSecondaryActions() {
+  return <D.TableRowGroup>
+    <ChangeIdentityOption guild={guild} user={PROFILE_USER} />
+    <SwitchRow label={T_("FB2ZZV")} value />
+    <HideMutedChannelsOption guild={guild} />
+    <RestrictedGuildPrivacyOption guild={guild} />
+    <MessageRequestRestrictedGuildPrivacyOption guild={guild} />
+    <Row label={T_("Aen9eh")} />
+    <Row label={T_("J2TBi3")} variant="danger" />
+  </D.TableRowGroup>;
+}
+function GuildEmoji() {
+  return <Section title={T_("Q60n1E")}><RN.View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, padding: 12, borderRadius: 16, backgroundColor: D.tok("BACKGROUND_MOD_SUBTLE") }}>
+    {["🔺", "🐸", "🔻", "😏", "🥹", "⭐", "📺", "🤣"].map(e => <D.Text key={e} variant="heading-lg/bold" color="text-strong">{e}</D.Text>)}</RN.View></Section>;
+}
+function GuildMenuSheet({ defined }) {
+  const Header = defined[14206].exports.default, TabItems = defined[14212].exports.default, A = defined[14143].exports, Emoji = defined[14216].exports.default;
+  return <RN.View style={{ backgroundColor: D.tok("MOBILE_ACTIONSHEET_BACKGROUND"), borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 16, gap: 16, marginTop: 24 }}>
+    <Header guild={guild} />
+    <TabItems guild={guild} />
+    <A.GuildUnreadAction guild={guild} />
+    <A.GuildActionSheetSecondaryActions guild={guild} />
+    <Emoji guildId={guild.id} />
+  </RN.View>;
+}
+function RemoveScene({ defined, registry, children }) {
+  const node = registry.VENUS_HIDEANYTHING, Page = node && node.screen && node.screen.getComponent();
+  const App = defined[14827].exports.default;
+  useStartRemoving();
+  return <RN.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOWEST") }}>
+    <App>{children}<RN.View style={{ height: 180 }} /></App>
+    <RN.View style={{ height: 1, overflow: "hidden", opacity: 0 }}>{Page ? <Page /> : null}</RN.View>
   </RN.View>;
 }
