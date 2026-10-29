@@ -52,6 +52,8 @@
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
+    if (features.voiceOutput) targetModules[584] = 1;
+    if (features.voiceSounds) targetModules[10982] = 1;
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -73,7 +75,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, voiceOutput:false, voiceOutputDevice:"speaker", voiceSounds:false, voiceSoundsJoin:true, voiceSoundsLeave:true, voiceSoundsVolume:50, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -90,7 +92,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, voiceOutput: false, voiceOutputDevice: "speaker", voiceSounds: false, voiceSoundsJoin: true, voiceSoundsLeave: true, voiceSoundsVolume: 50, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -354,12 +356,13 @@
     function acceptedSetting(key, value) {
         if (!owns(settings, key) || typeof value !== typeof settings[key]) return undefined;
         if (key === "readAllMode" && !READ_ALL_MODES.includes(value) || key === "gestureOwn" && !GESTURE_OWN_MODES.includes(value) ||
-            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) || key === "tenorGifsSource" && !TENOR_SOURCES.includes(value) ||
+            key === "translateTarget" && !TRANSLATE_TARGETS.includes(value) || key === "translateLanguage" && !TRANSLATE_LANGUAGES.includes(value) || key === "translateMode" && !TRANSLATE_MODES.includes(value) || key === "translateAsk" && !TRANSLATE_ASKS.includes(value) || key === "tenorGifsSource" && !TENOR_SOURCES.includes(value) || key === "voiceOutputDevice" && !VOICE_OUTPUTS.includes(value) ||
             (key === "systemFontSource" || key === "systemEmojiSource") && !FONT_SOURCES.includes(value) ||
             key === "messageHighlightThickness" && !HIGHLIGHT_THICKNESSES.includes(value) || key === "language" && !isLanguage(value)) return undefined;
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
         if (key === "noDeleteLimit") return deleteLimit(value);
+        if (key === "voiceSoundsVolume") return brightness(value);
         if (key === "badgesCycleMinutes") return badgeCycleMinutes(value);
         if (key === "badgesGamesAtOnce") return badgeAtOnce(value);
         if (key === "fixEmbedsSites") return fixSitesText(value);
@@ -399,6 +402,17 @@
             if (features[font ? "systemFont" : "systemEmoji"] && settings[font ? "systemFont" : "systemEmoji"] && !backup.restoring &&
                 status.storage !== "loading" && status.storage !== "waiting" && value !== (font ? fontSourceInUse : emojiSourceInUse)) later(() => askRestart(font ? "font" : "emoji"), 0);
             return true;
+        }
+        if (key === "voiceOutputDevice") {
+            if (!VOICE_OUTPUTS.includes(value)) return false;
+            if (settings.voiceOutputDevice === value && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.voiceOutputDevice = value; dirty.add(key); save(); notify(key); return true;
+        }
+        if (key === "voiceSoundsVolume") {
+            if (typeof value !== "number" || !Number.isFinite(value)) return false;
+            const level = brightness(value);
+            if (settings.voiceSoundsVolume === level && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.voiceSoundsVolume = level; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "tenorGifsSource") {
             if (!TENOR_SOURCES.includes(value)) return false;
@@ -900,7 +914,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^voiceOutput[A-Z]/.test(key) ? "voiceOutput" : /^voiceSounds[A-Z]/.test(key) ? "voiceSounds" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -935,7 +949,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], voiceOutput:[8224, "VoiceNormalIcon"], voiceSounds:[8768, "BellIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -979,6 +993,8 @@
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
+        voiceOutput:["Speaker", "Earpiece", "Bluetooth", "Wired headset", "Headphones", "Voice channels", "Output"],
+        voiceSounds:["Join sound", "Leave sound", "Volume", "Voice channels", "Notification", "Mute"],
         bulkDelete:["Select Messages", "Select all", "Delete", "Clear kept deleted messages", "Include kept deleted messages", "Ask before deleting"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
@@ -1366,6 +1382,8 @@
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
         // Advanced
         toggle("advanced", "experiments", "Unlock Discord experiments", "Adds Dev Tools to Settings, to try features Discord is still testing.");
+        withOptions("advanced", "voiceOutput", "VENUS_VOICEOUTPUT", "Audio output when joining", "Voice channels start on the audio output you choose.", "Audio output", VoiceOutputSettings);
+        withOptions("advanced", "voiceSounds", "VENUS_VOICESOUNDS", "Join and leave sounds", "Choose which voice channel sounds play, and how loud.", "Join and leave sounds", VoiceSoundsSettings);
         toggle("advanced", "noHandsfree", "Keep Bluetooth audio clear in calls", "Headphones stay in music quality in calls. Your phone's mic picks up your voice.");
         withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Plays real PC games in the background for game time and unique games.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
@@ -6132,6 +6150,36 @@
                 picked ? popIn("check:" + site.id + ":" + item.id, el(Check, {size:"sm"})) : null);
         }));
     }
+    function VoiceOutputSettings() {
+        useSettings("voiceOutput");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("voiceOutput");
+        const groups = [
+            !on ? offCard("status", venusIcon(8224, "VoiceNormalIcon"), "voiceOutput") : null,
+            radioGroup(ui, "device", "Play sound through", "voiceOutputDevice", on, [
+                ["speaker", "Speaker", null, rowIcon(8224, "VoiceNormalIcon")],
+                ["earpiece", "Earpiece", null, rowIcon(11538, "PhoneIcon")],
+                ["bluetooth", "Bluetooth", null, rowIcon(12271, "HeadphonesIcon")],
+                ["wired", "Wired headset", null, rowIcon(12271, "HeadphonesIcon")]]),
+            footnote("note", "If it isn't connected, Discord picks as usual.")];
+        return settingsBody(ui, groups);
+    }
+    function VoiceSoundsSettings() {
+        useSettings("voiceSounds");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("voiceSounds"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const groups = [
+            !on ? offCard("status", venusIcon(8768, "BellIcon"), "voiceSounds") : null,
+            el(Group, {key:"play"},
+                switchRow(Switch, "voiceSoundsJoin", "Join sound", undefined, rowIcon(8768, "BellIcon")),
+                switchRow(Switch, "voiceSoundsLeave", "Leave sound", undefined, rowIcon(10347, "BellSlashIcon"))),
+            el(PresetOrCustom, {key:"volume", title:"Volume", value:settings.voiceSoundsVolume, disabled:!on, min:0, max:100, placeholder:50,
+                inputLabel:tr("Volume, 0 to 100"), format:n => tr("{n}%", {n}), onChange:value => setSetting("voiceSoundsVolume", value),
+                presets:BRIGHTNESS_STEPS.map(n => ({value:n, label:tr("{n}%", {n})}))})];
+        return settingsBody(ui, groups);
+    }
     function TenorSettings() {
         useSettings("tenorGifs");
         const ui = reviewUI();
@@ -9680,6 +9728,61 @@
         return orig.apply(self, next);
     }
 
+    // Audio output when joining (#103): once the voice connection is up (RTC_CONNECTION_STATE, RTC_CONNECTED), the chosen
+    // device is picked from AudioManagerStore (8782) with Discord's own action, the one the output sheet in the voice panel
+    // uses (AudioManagerActionCreator 8791). Devices are told apart by simpleDeviceType (AudioDeviceType, 8783). A device
+    // that isn't connected leaves Discord's choice alone, and so does one that's already in use. The action runs on the
+    // next tick: Flux can't start a dispatch from inside a listener.
+    const VOICE_OUTPUTS = ["speaker", "earpiece", "bluetooth", "wired"];
+    const VOICE_OUTPUT_TYPES = {speaker:"SPEAKERPHONE", earpiece:"EARPIECE", bluetooth:"BLUETOOTH_HEADSET", wired:"WIRED_HEADSET"};
+    const voiceOutput = {dispatcher:null};
+    function voiceOutputInit(dispatcher) {
+        if (voiceOutput.dispatcher || !dispatcher || typeof dispatcher.subscribe !== "function") return;
+        voiceOutput.dispatcher = dispatcher;
+        dispatcher.subscribe("RTC_CONNECTION_STATE", voiceOutputState);
+    }
+    function voiceOutputState(event) {
+        if (!event || !enabled("voiceOutput")) return;
+        const states = inspectedExport(1085, "RTCConnectionStates"), contexts = inspectedExport(5117, "MediaEngineContextTypes");
+        if (!states || event.state !== states.CONNECTED || contexts && event.context !== contexts.DEFAULT) return;
+        later(voiceOutputApply, 0);
+    }
+    function voiceOutputApply() {
+        if (!enabled("voiceOutput")) return;
+        const store = inspectedExport(8782, "default"), choose = inspectedExport(8791, "setAudioOutputDevice"), types = inspectedExport(8783, "AudioDeviceType");
+        if (!store || typeof choose !== "function" || !types || typeof store.getAudioDevices !== "function") return;
+        try {
+            const devices = store.getAudioDevices(), wanted = types[VOICE_OUTPUT_TYPES[settings.voiceOutputDevice]];
+            const device = Array.isArray(devices) && wanted !== undefined ? devices.find(entry => entry && entry.simpleDeviceType === wanted) : null;
+            if (!device) return;
+            const active = typeof store.getActiveAudioDevice === "function" ? store.getActiveAudioDevice() : null;
+            if (!active || active.deviceId !== device.deviceId) choose(device);
+        } catch (_) {}
+    }
+    // Join and leave sounds (#103): Discord's voice panel plays them through playSound (SoundUtils 10982) by name, the way
+    // every in-app sound plays. Turned off, the call is skipped. Quieter, the sound's volume (0 to 1, MobileAudioSound
+    // 10986) is set from the moment it's made until it plays: both happen inside this one synchronous call, so the level
+    // only ever reaches these two sounds.
+    const VOICE_SOUNDS = {user_join:"voiceSoundsJoin", user_leave:"voiceSoundsLeave"};
+    let voiceSoundLevel = null, voiceSoundPatched = false;
+    function voiceSoundPlay(orig, self, args) {
+        const key = VOICE_SOUNDS[args[0]];
+        if (!key || !enabled("voiceSounds")) return orig.apply(self, args);
+        if (!settings[key]) return Promise.resolve();
+        if (settings.voiceSoundsVolume >= 100 || !voiceSoundPatch()) return orig.apply(self, args);
+        voiceSoundLevel = settings.voiceSoundsVolume / 100;
+        try { return orig.apply(self, args); } finally { voiceSoundLevel = null; }
+    }
+    function voiceSoundPatch() {
+        if (voiceSoundPatched) return true;
+        const Sound = inspectedExport(10986, "MobileAudioSound"), proto = Sound && Sound.prototype;
+        if (!proto || typeof proto.play !== "function" || typeof proto.playWithListener !== "function") return false;
+        ["play", "playWithListener"].forEach(name => {
+            const orig = proto[name];
+            proto[name] = function () { if (voiceSoundLevel !== null) try { this.volume = voiceSoundLevel; } catch (_) {} return orig.apply(this, arguments); };
+        });
+        return voiceSoundPatched = true;
+    }
     // Bring back Tenor GIFs (#83): Discord's GIF picker asks Discord's API for /gifs/search, /gifs/trending and the rest
     // (GIFPickerActionCreators 9732 through HTTP.get, 1295), and since Tenor's API closed to Discord those answers come from
     // Klipy. Venus answers the same requests from Tenor's public v1 API, in the exact shape the picker's store (9731) reads,
@@ -14713,6 +14816,7 @@
                 return exports;
             case 13066: return features.favouriteAnything ? hookComponent(exports, favouriteButton) : exports;
             case 1295: return features.tenorGifs && exports && exports.HTTP ? (hookExport(hookExport(exports.HTTP, "get", tenorGet), "post", tenorPost), exports) : exports;
+            case 10982: return features.voiceSounds ? hookExport(exports, "playSound", voiceSoundPlay) : exports;
             case 9733: return features.tenorGifs ? hookExport(exports, "getSearchPlaceholder", tenorPlaceholder) : exports;
             case 9732: return features.favouriteAnything ? hookExport(exports, "addFavoriteGIF", favouriteAdd) : exports;
             case 9735: return features.favouriteAnything ? hookExport(exports, "useFavoriteGIFsMobile", favouriteList) : exports;
@@ -14743,6 +14847,7 @@
                 if (features.nitroThemes && exports && exports.default) nitroThemeAttach(exports.default);
                 if (features.bulkDelete && exports && exports.default) bulkDeleteInit(exports.default);
                 if (features.experiments && exports && exports.default) experimentsInit(exports.default);
+                if (features.voiceOutput && exports && exports.default) voiceOutputInit(exports.default);
                 if ((features.messageHighlight || features.bulkDelete) && exports && exports.default && !dispatcher)
                     dispatcher = exports.default.dispatch.bind(exports.default);
                 if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {

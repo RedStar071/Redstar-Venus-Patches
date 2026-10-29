@@ -79,6 +79,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 5108 | `stores/PresenceStore.tsx` | default, sortActivity | PresenceStore |
 | 5112 | `stores/SessionsStore.tsx` | default | SessionsStore |
 | 5113 | `stores/VoiceStateStore.tsx` | default | VoiceStateStore (Badge Completer) |
+| 5117 | `../discord_common/js/packages/media-engine/Constants.tsx` | MediaEngineContextTypes | MediaEngineContextTypes (Audio output when joining) |
 | 5300 | `actions/native/AlertActionCreators.tsx` | default | AlertActionCreators |
 | 5377 | `design/components/Stack/native/Stack.native.tsx` | Stack | Stack |
 | 5379 | `design/components/Button/native/Button.native.tsx` | Button | Button |
@@ -171,6 +172,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8212 | `design/components/Icon/native/redesign/generated/GroupIcon.tsx` | GroupIcon | GroupIcon |
 | 8213 | `design/components/Icon/native/redesign/generated/AtIcon.tsx` | AtIcon | AtIcon |
 | 8218 | `design/components/Icon/native/redesign/generated/LockIcon.tsx` | LockIcon | LockIcon |
+| 8224 | `design/components/Icon/native/redesign/generated/VoiceNormalIcon.tsx` | VoiceNormalIcon | VoiceNormalIcon (Audio output when joining) |
 | 8229 | `design/components/Icon/native/redesign/generated/AppsIcon.tsx` | AppsIcon | AppsIcon |
 | 8299 | `modules/user_profile/native/showUserProfileActionSheet.tsx` | default, showUserProfileActionSheet | showUserProfileActionSheet |
 | 8301 | `actions/UserActionCreators.tsx` | fetchCurrentUser, acceptAgreements, setFlag | UserActionCreators |
@@ -183,6 +185,9 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8617 | `design/components/Icon/native/redesign/generated/ShieldUserIcon.tsx` | ShieldUserIcon | ShieldUserIcon |
 | 8675 | `design/components/Icon/native/redesign/generated/CalendarIcon.tsx` | CalendarIcon | CalendarIcon |
 | 8768 | `design/components/Icon/native/redesign/generated/BellIcon.tsx` | BellIcon | BellIcon |
+| 8782 | `modules/voice_calls/native/AudioManagerStore.android.tsx` | default | AudioManagerStore (Audio output when joining) |
+| 8783 | `../discord_common/js/packages/rtn-codegen/js/NativeAudioManagerModule.tsx` | AudioDeviceType, getInvalidAndroidDevice | NativeAudioManagerModule (Audio output when joining) |
+| 8791 | `modules/voice_calls/native/AudioManagerActionCreator.tsx` | setAudioOutputDevice | AudioManagerActionCreator (Audio output when joining) |
 | 8792 | `modules/voice_panel/native/shared/FormComponents.tsx` | VoicePanelFormSection, MemberRowItem | VoiceChannelMembers |
 | 8921 | `design/components/Icon/native/redesign/generated/TrophyIcon.tsx` | TrophyIcon | TrophyIcon (Badge Completer) |
 | 8956 | `design/components/Icon/native/redesign/generated/ReactionIcon.tsx` | ReactionIcon | ReactionIcon |
@@ -242,6 +247,8 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 10771 | `design/components/Icon/native/redesign/generated/VideoIcon.tsx` | VideoIcon | VideoIcon |
 | 10782 | `modules/replies/native/replyToMessage.tsx` | default | replyToMessage |
 | 10783 | `modules/messages/canEditMessage.tsx` | default | canEditMessage |
+| 10982 | `modules/sound_playback/SoundUtils.tsx` | createSoundForPack, createSound, playSound | SoundUtils (Join and leave sounds) |
+| 10986 | `modules/sound_playback/native/SoundUtils.tsx` | MobileAudioSound | MobileAudioSound (Join and leave sounds) |
 | 10994 | `design/components/Icon/native/redesign/generated/DoorExitIcon.tsx` | DoorExitIcon | DoorExitIcon |
 | 11015 | `design/components/Icon/native/redesign/generated/HandRequestSpeakIcon.tsx` | HandRequestSpeakIcon | HandRequestSpeakIcon (preview Try it button) |
 | 11033 | `lib/pushnotification/PushNotification.tsx` | default | PushNotification |
@@ -249,6 +256,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 11106 | `design/components/Icon/native/redesign/generated/MicrophoneIcon.tsx` | MicrophoneIcon | MicrophoneIcon (preview message bar) |
 | 11191 | `design/components/ThemeContextProvider/native/RootThemeContextProvider.native.tsx` | RootThemeContextProvider, DisableCustomTheme | RootThemeContextProvider (Custom themes re-keys its memoized context) |
 | 11382 | `design/components/Icon/native/redesign/generated/UserIcon.tsx` | UserIcon | UserIcon |
+| 11538 | `design/components/Icon/native/redesign/generated/PhoneIcon.tsx` | PhoneIcon | PhoneIcon (Audio output when joining) |
 | 11540 | `design/components/Icon/native/redesign/generated/GiftIcon.tsx` | GiftIcon | GiftIcon |
 | 11587 | `design/components/Icon/native/redesign/generated/ImagesIcon.tsx` | ImagesIcon | ImagesIcon (Bring back Tenor GIFs) |
 | 11624 | `modules/messages/native/createChannelStream.tsx` | default | createChannelStream (Hide blocked or ignored messages) |
