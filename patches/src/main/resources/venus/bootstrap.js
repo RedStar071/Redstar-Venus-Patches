@@ -8796,6 +8796,29 @@
         if (type === inspectedExport(5379, "Button")) return "server.search";
         return typeof props.onPressIn === "function" && typeof props.onPressOut === "function" ? "server.search" : null;
     }
+    // GuildSearchAndInvite's default is a memo of a connector that only draws the module's own (local) GuildSearchAndInvite,
+    // the component that holds the buttons. That element's type is swapped for a wrapper that draws Discord's and walks it.
+    const innerWraps = new WeakMap();
+    function wrapInner(type, classify) {
+        let Wrapped = innerWraps.get(type);
+        if (!Wrapped) {
+            Wrapped = function (props) {
+                useSettings("hideAnything");
+                const rendered = type(props);
+                if (!rendered || !React || !enabled("hideAnything")) return rendered;
+                const edit = hideEditing();
+                return edit || settings.hideAnythingSpots ? hideWalk(rendered, 0, classify, edit, null) : rendered;
+            };
+            Wrapped.displayName = type.displayName || type.name || "Wrapped";
+            innerWraps.set(type, Wrapped);
+        }
+        return Wrapped;
+    }
+    function serverHeaderOuter(orig, self, args) {
+        const rendered = orig.apply(self, args);
+        if (!rendered || !React || typeof rendered.type !== "function" || !rendered.props || !("guildId" in rendered.props)) return rendered;
+        return el(wrapInner(rendered.type, serverHeaderSpot), Object.assign({key:rendered.key}, rendered.props));
+    }
     // The server menu (GuildActionSheet 14211). Its header's Community Server pill is the one element given guildVisibility.
     function guildHeaderSpot(node) { const props = node.props; return "guildVisibility" in props && !("guild" in props) ? "guild.community" : null; }
     // Boost, Invite and Notifications (GuildActionSheetTabItems 14212) are IconButtons: Boost by its gem icon (its label can be
@@ -8958,7 +8981,7 @@
             case 8525: return hookExport(exports, "useSegmentedControlState", segmentedState);
             case 8775: return hookComponent(exports, segmentedItemMark, "SegmentedControlItem");
             case 10533: return hookComponent(exports, hideTree(profilePrimarySpot));
-            case 11997: return hookComponent(exports, hideTree(serverHeaderSpot));
+            case 11997: return hookComponent(exports, serverHeaderOuter);
             case 14206: return hookComponent(exports, hideTree(guildHeaderSpot));
             case 14212: return hookComponent(exports, hideTree(guildTabSpot));
             case 14143: return hookComponent(hookComponent(exports, hideTree(guildRowSpot), "GuildUnreadAction"), hideTree(guildRowSpot), "GuildActionSheetSecondaryActions");
