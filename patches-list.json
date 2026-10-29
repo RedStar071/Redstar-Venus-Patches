@@ -37,8 +37,8 @@
       "options": []
     },
     {
-      "name": "Alert when a friend or server removes you",
-      "description": "Get notified when a friend removes you or a server drops you. Based on RemovedConnectionAlerts by iyu46.",
+      "name": "Alert when you're removed",
+      "description": "Get a heads-up when a friend unfriends you, or a server kicks or bans you. Based on RemovedConnectionAlerts by iyu46.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -765,142 +765,6 @@
       "options": []
     },
     {
-      "name": "Hide extra buttons",
-      "description": "Removes the Quests, Shop, Nitro and Apps buttons you don't use. Pick which ones, including Polls and Photos in the attach menu; the rest close up with no gaps.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Hide the Quests banner",
-      "description": "Removes the Quest promotion above your profile bar. Quests still work.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Hide the call button",
-      "description": "Removes Call from people's profiles. Message fills the space.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Hide the gift button",
-      "description": "Removes the Nitro gift button from the message bar.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "Hide typing indicator",
       "description": "Others won't see when you're typing. You still see when they are.",
       "default": true,
@@ -1039,40 +903,6 @@
     {
       "name": "Keep deleted messages",
       "description": "Deleted messages stay in chat, outlined in red, and edited messages show what they said before. Can be kept after restarting.",
-      "default": true,
-      "category": "Features",
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.discord",
-          "name": "Discord",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#5865F2",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "350.8 - Stable",
-              "versionCodes": {
-                "ARM64_V8A": 350008,
-                "ARMEABI_V7A": 350008,
-                "X86_64": 350008,
-                "X86": 350008
-              },
-              "isExperimental": false,
-              "minSdk": 26,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Label server owners and mods",
-      "description": "Adds a label next to server owners, admins and moderators in chat. Based on StaffTag by mwittrien.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -1277,7 +1107,7 @@
     },
     {
       "name": "Remove anything",
-      "description": "Tap a button you never use to remove it, right where it is: turn on removal mode, then tap the red X on the voice message, attach, call, video, search or other buttons. Bring them back any time in Venus.",
+      "description": "Tap a button you never use to remove it, right where it is: turn on removal mode, then tap the red X on the voice message, attach, gift, call, video, search, Quests, Shop or Nitro buttons, the Quests banner, attach menu items, profile menu items, Settings rows and more. Bring them back any time in Venus.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -1516,6 +1346,40 @@
     {
       "name": "Show hidden channels",
       "description": "Channels you can't open appear with a lock. Only their name and dates show, not messages.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Show owner and mod tags",
+      "description": "Shows an Owner, Admin, Manager or Mod tag next to people's names in chat. Based on StaffTag by mwittrien.",
       "default": true,
       "category": "Features",
       "dependencies": [

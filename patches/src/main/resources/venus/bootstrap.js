@@ -4059,14 +4059,20 @@
         const properties = questDesktopProperties(), set = request.set;
         const value = (name, original) => {
             const key = String(name).toLowerCase();
-            return key === "x-super-properties" ? properties : key === "user-agent" ? QUEST_DESKTOP_UA : original;
+            return key === "x-super-properties" ? properties : key === "user-agent" ? QUEST_DESKTOP_UA
+                : key === "accept-language" ? quest.desktop.locale : original;
         };
+        // Discord's prepareRequest runs after this hook and sets the phone's identity on the request. The phone's
+        // installation id and fingerprint would tie these Windows heartbeats to the Android client, so they are dropped
+        // (both are optional on the wire), and the phone's Accept-Language list would replace the single tag Chromium sends.
+        const phoneOnly = key => key === "x-installation-id" || key === "x-fingerprint";
         request.set = function (name, original) {
             if (name && typeof name === "object") {
                 const copy = {};
-                for (const key of Object.keys(name)) copy[key] = value(key, name[key]);
+                for (const key of Object.keys(name)) if (!phoneOnly(key.toLowerCase())) copy[key] = value(key, name[key]);
                 return set.call(this, copy);
             }
+            if (phoneOnly(String(name).toLowerCase())) return this;
             return set.call(this, name, value(name, original));
         };
         request.set("User-Agent", QUEST_DESKTOP_UA);
