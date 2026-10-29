@@ -8679,8 +8679,9 @@
         return messagesHeaderEmpty(count) ? key => key === "messages.requests" || spotHidden(key) : null;
     }
     // The Messages list sits under a header of a measured height (useMessagesSpecs 16466: headerSize, and listTop = safe area +
-    // headerSize). getMessagesHeaderHeight counts the button row as SMALL_BUTTON_HEIGHT plus the 8 dp gap above it, so that
-    // much comes off when the row is gone and the list moves up under the title.
+    // headerSize). getMessagesHeaderHeight is 16 (top padding) + the title's line height + 8 (the title row's own paddingBottom)
+    // + SMALL_BUTTON_HEIGHT + the bottom padding. Only the button row goes: the title row and its 8 dp stay, so only
+    // SMALL_BUTTON_HEIGHT comes off. Taking the 8 off too left the list 8 dp over the bottom of "Messages".
     const specsCache = new WeakMap();
     function messagesSpecs(orig, self, args) {
         useSettings("hideAnything");
@@ -8689,7 +8690,7 @@
         if (!specs || typeof specs !== "object" || typeof specs.headerSize !== "number" || !enabled("hideAnything") || !messagesHeaderEmpty(count)) return specs;
         let entry = specsCache.get(specs);
         if (!entry) {
-            const button = inspectedExport(5384, "SMALL_BUTTON_HEIGHT"), row = (typeof button === "number" ? button : 32) + 8;
+            const button = inspectedExport(5384, "SMALL_BUTTON_HEIGHT"), row = typeof button === "number" ? button : 32;
             entry = Object.assign({}, specs, {headerSize:Math.max(0, specs.headerSize - row)});
             if (typeof specs.listTop === "number") entry.listTop = Math.max(0, specs.listTop - row);
             specsCache.set(specs, entry);
