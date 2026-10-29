@@ -5,7 +5,7 @@
 //   set={"readAllMode":"dms"} any other saved settings, as JSON
 //   fresh=1                   a fresh install: nothing saved yet (shows Start with the essentials)
 //   theme=dark|light|midnight|darker   lang=de   search=pin   (search: typed into the Features search bar)
-//   tap=Custom                 taps the element with that accessibility label or text once the page is drawn
+//   tap=Custom                 taps the element with that accessibility label or text once the page is drawn (a|b taps a, then b)
 //   scene=serverMenu|readAll   instead of a settings page, a Discord screen with what Venus adds to it, on made-up
 //                              data (tests/ui/scenes.jsx); sheets Venus opens (Server info, Read all) slide up over it
 import * as React from "react";
@@ -44,7 +44,7 @@ const files = { getConstants: () => ({ DocumentsDirPath: "/docs", CacheDirPath: 
   writeFile: () => Promise.resolve(), getVideoDimensions: () => Promise.resolve(),
   readAsset: name => fetch("i18n/" + name.split(":").pop() + ".json").then(r => r.text()) };
 
-const me = { id: "123456789012345678", username: "venus", globalName: "Venus", avatar: null };
+const me = { id: "123456789012345678", username: "venus", globalName: "Venus", avatar: null, premiumType: q.get("nitro") === "0" ? 0 : 2 };
 const store = extra => Object.assign({ addChangeListener() {}, removeChangeListener() {} }, extra);
 const go = route => { const next = new URLSearchParams(location.search); next.set("page", route); location.search = next.toString(); };
 const modules = {
@@ -60,7 +60,17 @@ const modules = {
   5300: { default: { show: o => console.log("DIALOG " + o.title + " | " + o.body) } },
   4809: { default: { open: (key, o) => console.log("TOAST " + (o && o.text)) } },
   6889: { Clipboard: { setString() {}, getString: () => Promise.resolve("") } },
+  // Voice channel options: the sounds Discord's soundboard store has loaded, one list per server (the servers come from scenes.jsx).
+  5428: { default: store({ getSounds: () => SOUNDS }) }, 5430: { DEFAULT_SOUND_GUILD_ID: "0" }, 7048: { maybeFetchSoundboardSounds() {} },
 };
+const sound = (guildId, i, name, emojiName) => ({ soundId: String(100 + i), guildId, name, emojiName, emojiId: null, available: true });
+const SOUNDS = q.get("sounds") === "0" ? new Map() : new Map([
+  ["0", [["Quack", "\u{1F986}"], ["Airhorn", "\u{1F4E2}"], ["Crickets", "\u{1F997}"], ["Cow", "\u{1F42E}"], ["Wow", "\u{1F62E}"], ["Golf clap", "\u{1F44F}"],
+    ["Sad horn", "\u{1F3BA}"], ["Bonk", "\u{1F528}"], ["Ba dum tss", "\u{1F941}"]].map(([name, emoji], i) => sound("0", i, name, emoji))],
+  ["1100000000000000002", [["SUS", "\u{1F928}"], ["RAHHH", "\u{1F480}"], ["Cat laughing", "\u{1F63C}"], ["Metal pipe", "\u{1F974}"], ["Yippee", "\u{1F389}"], ["Boing", "\u{1F998}"],
+    ["Fart", "\u{1F4A9}"]].map(([name, emoji], i) => sound("1100000000000000002", 20 + i, name, emoji))],
+  ["1100000000000000003", [["EXE stopped", "\u274C"], ["Yoda death sound", ""], ["Trololo", "\u{1F921}"]].map(([name, emoji], i) => sound("1100000000000000003", 40 + i, name, emoji))],
+]);
 Object.assign(modules, S.modules(store, me));
 const icons = {};
 const fallback = new Proxy({}, { get: (_, k) => typeof k === "string" && /Icon$/.test(k) ? icons[k] || (icons[k] = D.makeIcon(k)) : undefined });
@@ -117,7 +127,7 @@ window.__venusStart = function () {
     const [, bump] = React.useState(0);
     rerender = () => bump(n => n + 1);
     const title = node && node.useTitle ? node.useTitle() : page;
-    return <RNW.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
+    return <RNW.View style={{ width: Number(q.get("width")) || 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
       <RNW.View style={{ height: 56, flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16 }}>
         {React.createElement(D.makeIcon("ArrowLargeLeftIcon"), { size: "md", color: D.tok("INTERACTIVE_ICON_DEFAULT") })}
         <D.Text variant="heading-lg/bold" color="text-strong">{title}</D.Text>
@@ -130,8 +140,9 @@ window.__venusStart = function () {
 };
 
 // tap=<text>: taps the first element whose accessibility label or text is exactly that, after the page draws.
-if (q.get("tap")) setTimeout(() => {
-  const want = q.get("tap"), all = Array.from(document.querySelectorAll("#root [aria-label], #root div[tabindex], #root [role]"));
+// Several taps are separated by "|" and run one after another.
+if (q.get("tap")) q.get("tap").split("|").forEach((want, i) => setTimeout(() => {
+  const all = Array.from(document.querySelectorAll("#root [aria-label], #root div[tabindex], #root [role]"));
   const hit = all.find(e => e.getAttribute("aria-label") === want) || all.find(e => (e.innerText || "").trim() === want);
   if (hit) hit.click(); else console.warn("tap: nothing labelled " + want);
-}, 400);
+}, 400 + i * 300));

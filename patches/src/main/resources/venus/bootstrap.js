@@ -6180,7 +6180,8 @@
                 presets:BRIGHTNESS_STEPS.map(n => ({value:n, label:tr("{n}%", {n})}))}),
             el(Group, {key:"exit"},
                 switchRow(Switch, "voiceOptionsExit", "Soundboard sound when you leave", "Everyone in the channel hears it. Needs Nitro.", rowIcon(12269, "SoundboardIcon"))),
-            !voiceNitro() ? footnote("exitNitro", "Your account doesn't have Nitro, so no sound is sent.") : null].concat(voiceExitGroups(ui, on && settings.voiceOptionsExit));
+            !voiceNitro() ? footnote("exitNitro", "Your account doesn't have Nitro, so no sound is sent.") : null,
+            settings.voiceOptionsExit ? el(VoiceSoundPicker, {key:"exitSound", on}) : null];
         return settingsBody(ui, groups);
     }
     function TenorSettings() {
@@ -9829,11 +9830,18 @@
         sent.then(leave, leave);
         later(leave, 1500);
     }
-    // The sound picker on the options page: every sound the store has loaded, one list per server, Discord's own first.
-    function voiceExitGroups(ui, on) {
-        const store = inspectedExport(5428, "default"), fetchSounds = inspectedExport(7048, "maybeFetchSoundboardSounds");
-        if (!voiceOptions.asked && typeof fetchSounds === "function") { voiceOptions.asked = true; try { fetchSounds(); } catch (_) {} }
-        const defaultId = String(inspectedExport(5430, "DEFAULT_SOUND_GUILD_ID")), guilds = inspectedExport(2087, "default");
+    // The sound picker on the options page, laid out like Discord's own soundboard: a search box, a strip of servers and a grid
+    // of sounds with their emoji, all under a row that shows the sound you picked. Tapping the picked sound again clears it.
+    const VOICE_TILE_MIN = 150, VOICE_GAP = 8, VOICE_PEEK = 2;
+    const VOICE_SOUND_DARK = {panel:{backgroundColor:"#2b2d31", borderRadius:16, padding:12, gap:12},
+        chip:{height:44, borderRadius:14, alignItems:"center", justifyContent:"center", overflow:"hidden", borderWidth:2, borderColor:"transparent", backgroundColor:"#35373c"},
+        chipOn:{borderColor:"#5865f2"}, initials:{color:"#dbdee1", fontSize:14, fontWeight:"700"},
+        tile:{flexDirection:"row", alignItems:"center", gap:8, height:46, paddingHorizontal:10, borderRadius:10, borderWidth:2, borderColor:"transparent", backgroundColor:"#35373c"},
+        tileOn:{borderColor:"#5865f2", backgroundColor:"#5865f229"}, name:{color:"#f2f3f5", fontSize:14, fontWeight:"600", flexShrink:1},
+        head:{flexDirection:"row", alignItems:"center", gap:4, paddingVertical:2}};
+    // Every sound the store has loaded, one list per server with Discord's own first. Each is {id, name, emojiId, emojiName}.
+    function voiceSoundLists() {
+        const store = inspectedExport(5428, "default"), defaultId = String(inspectedExport(5430, "DEFAULT_SOUND_GUILD_ID")), guilds = inspectedExport(2087, "default");
         let raw = null;
         try { raw = store && typeof store.getSounds === "function" ? store.getSounds() : null; } catch (_) {}
         const lists = new Map();
@@ -9844,16 +9852,91 @@
                 if (!sound || sound.soundId == null || typeof sound.name !== "string" || sound.available === false) continue;
                 const guild = String(sound.guildId != null ? sound.guildId : key), id = guild + ":" + sound.soundId;
                 if (!VOICE_SOUND_ID.test(id)) continue;
+                const emojiId = sound.emojiId != null ? String(sound.emojiId) : "";
                 let list = lists.get(guild); if (!list) lists.set(guild, list = []);
-                list.push([id, sound.name, null]);
+                list.push({id, name:sound.name, emojiId:/^\d{1,24}$/.test(emojiId) ? emojiId : "", emojiName:typeof sound.emojiName === "string" ? sound.emojiName : ""});
             }
         };
         if (raw instanceof Map) raw.forEach((sounds, key) => add(String(key), sounds));
         else if (raw && typeof raw === "object") Object.keys(raw).forEach(key => add(key, raw[key]));
-        const name = guild => { try { const found = guilds && typeof guilds.getGuild === "function" ? guilds.getGuild(guild) : null; return found && found.name ? found.name : guild; } catch (_) { return guild; } };
-        const order = Array.from(lists.keys()).sort((a, b) => a === defaultId ? -1 : b === defaultId ? 1 : name(a).localeCompare(name(b)));
-        if (!order.length) return [footnote("exitEmpty", "Your sounds show up here once Discord has loaded them. Open the soundboard in a voice channel if the list is empty.")];
-        return order.slice(0, 40).map(guild => radioGroup(ui, "exit:" + guild, guild === defaultId ? tr("Default sounds") : name(guild), "voiceOptionsExitSound", on, lists.get(guild), true));
+        const guildOf = guild => { try { return guilds && typeof guilds.getGuild === "function" ? guilds.getGuild(guild) : null; } catch (_) { return null; } };
+        const name = guild => guild === defaultId ? tr("Default sounds") : (guildOf(guild) || {}).name || guild;
+        const order = Array.from(lists.keys()).sort((a, b) => a === defaultId ? -1 : b === defaultId ? 1 : name(a).localeCompare(name(b))).slice(0, 40);
+        return {lists, order, defaultId, guildOf, name};
+    }
+    // The sound's own emoji (a custom one is an image, a standard one is text), or Discord's soundboard icon.
+    function VoiceSoundEmoji(props) {
+        const Icon = venusIcon(12269, "SoundboardIcon"), sound = props.sound;
+        if (sound.emojiId) return el(RN.Image, {style:{width:24, height:24}, source:{uri:"https://cdn.discordapp.com/emojis/" + sound.emojiId + ".webp?size=64&quality=lossless"}, accessible:false});
+        if (sound.emojiName) return el(RN.Text, {style:{fontSize:20, width:24, textAlign:"center"}, accessible:false}, sound.emojiName);
+        return el(RN.View, {style:{width:24, alignItems:"center"}}, el(Icon, {size:"sm", color:props.color}));
+    }
+    function VoiceSoundPicker(props) {
+        const [open, setOpen] = React.useState(false), [query, setQuery] = React.useState(""), [server, setServer] = React.useState(""), [width, setWidth] = React.useState(0), [, refresh] = React.useState(0);
+        const ui = reviewUI(), on = props.on, Group = ui.TableRowGroup || RN.View, Text = inspectedExport(5088, "Text"), SearchField = inspectedExport(6739, "SearchField");
+        const Press = RN.Pressable || RN.TouchableOpacity, Icon = venusIcon(12269, "SoundboardIcon"), Chevron = venusIcon(open ? 10534 : 6906, open ? "ChevronSmallDownIcon" : "ChevronSmallRightIcon");
+        const s = useThemed("voiceSounds", c => ({panel:Object.assign({}, VOICE_SOUND_DARK.panel, {backgroundColor:c.CARD_BACKGROUND_DEFAULT}),
+            chip:Object.assign({}, VOICE_SOUND_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}), chipOn:{borderColor:c.BACKGROUND_BRAND},
+            initials:Object.assign({}, VOICE_SOUND_DARK.initials, {color:c.TEXT_DEFAULT}),
+            tile:Object.assign({}, VOICE_SOUND_DARK.tile, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            tileOn:{borderColor:c.BACKGROUND_BRAND, backgroundColor:c.MENTION_BACKGROUND}, name:Object.assign({}, VOICE_SOUND_DARK.name, {color:c.TEXT_STRONG}),
+            head:VOICE_SOUND_DARK.head}), VOICE_SOUND_DARK);
+        React.useEffect(() => {
+            const store = inspectedExport(5428, "default"), fetchSounds = inspectedExport(7048, "maybeFetchSoundboardSounds");
+            if (!voiceOptions.asked && typeof fetchSounds === "function") { voiceOptions.asked = true; try { fetchSounds(); } catch (_) {} }
+            if (!store || typeof store.addChangeListener !== "function") return undefined;
+            const fn = () => refresh(n => n + 1);
+            store.addChangeListener(fn);
+            return () => { try { store.removeChangeListener(fn); } catch (_) {} };
+        }, []);
+        const data = voiceSoundLists(), saved = settings.voiceOptionsExitSound;
+        let current = null, currentGuild = "";
+        data.lists.forEach((list, guild) => { const found = list.find(sound => sound.id === saved); if (found) { current = found; currentGuild = guild; } });
+        const pick = sound => {
+            if (!on) return;
+            haptic("SELECTION"); setSetting("voiceOptionsExitSound", sound.id === saved ? "" : sound.id);
+        };
+        const toggle = () => { if (!on) return; haptic("SELECTION"); animateLayout(); setOpen(!open); setQuery(""); setServer(""); };
+        const head = ui.TableRow ? el(ui.TableRow, {key:"current", label:current ? current.name : tr("Choose a sound"), subLabel:current ? data.name(currentGuild) : undefined,
+            icon:current && (current.emojiId || current.emojiName) ? el(VoiceSoundEmoji, {sound:current}) : rowIcon(12269, "SoundboardIcon"),
+            trailing:el(Chevron, {size:"sm"}), onPress:toggle, disabled:!on, accessibilityHint:tr(open ? "Close the list" : "Choose a sound")}) : null;
+        const headGroup = el(Group, {key:"head"}, head);
+        if (!open) return headGroup;
+        const needle = searchFold(query.trim()), inner = width - 24, columns = Math.max(2, Math.floor((inner + VOICE_GAP) / (VOICE_TILE_MIN + VOICE_GAP)));
+        const tileWidth = Math.floor((inner - VOICE_GAP * (columns - 1)) / columns);
+        const tile = sound => el(Press, {key:sound.id, onPress:() => pick(sound), accessibilityRole:"button", accessibilityLabel:sound.name, accessibilityState:{selected:sound.id === saved},
+            style:[s.tile, sound.id === saved ? s.tileOn : null, {width:tileWidth}]}, el(VoiceSoundEmoji, {sound}),
+            Text ? el(Text, {variant:"text-sm/semibold", color:"text-strong", lineClamp:1, style:{flexShrink:1}}, sound.name) : el(RN.Text, {numberOfLines:1, style:s.name}, sound.name));
+        const chip = (guild, label, content, wide) => el(Press, {key:"chip:" + guild, onPress:() => { haptic("SELECTION"); animateLayout(); setServer(guild); }, accessibilityRole:"button",
+            accessibilityLabel:label, accessibilityState:{selected:server === guild}, style:[s.chip, wide ? {minWidth:44, paddingHorizontal:12} : {width:44}, server === guild ? s.chipOn : null]}, content);
+        const initials = label => String(label).split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join("").toUpperCase();
+        const strip = data.order.length > 1 && !needle ? el(RN.ScrollView, {key:"servers", horizontal:true, showsHorizontalScrollIndicator:false, contentContainerStyle:{gap:VOICE_GAP}},
+            [chip("", tr("All"), el(RN.Text, {numberOfLines:1, style:s.initials}, tr("All")), true)].concat(data.order.map(guild => {
+                const uri = guild === data.defaultId ? null : serverIconUri(data.guildOf(guild), 96), label = data.name(guild);
+                return chip(guild, label, guild === data.defaultId ? el(Icon, {size:"md"}) : uri ? el(RN.Image, {style:{width:40, height:40}, source:{uri}}) :
+                    el(RN.Text, {style:s.initials}, initials(label)));
+            }))) : null;
+        const sections = [];
+        data.order.forEach(guild => {
+            if (server && !needle && guild !== server) return;
+            const all = data.lists.get(guild).filter(sound => !needle || searchFold(sound.name).includes(needle));
+            if (!all.length) return;
+            const capped = !server && !needle && all.length > columns * VOICE_PEEK;
+            sections.push(el(RN.View, {key:"section:" + guild, style:{gap:8}},
+                el(Press, {onPress:capped ? () => { haptic("SELECTION"); animateLayout(); setServer(guild); } : undefined, disabled:!capped, accessibilityRole:capped ? "button" : undefined,
+                    accessibilityLabel:data.name(guild), style:s.head},
+                    Text ? el(Text, {variant:"text-sm/semibold", color:"text-muted", lineClamp:1, style:{flexShrink:1}}, data.name(guild)) :
+                        el(RN.Text, {numberOfLines:1, style:{color:"#949ba4", fontSize:13, fontWeight:"600", flexShrink:1}}, data.name(guild)),
+                    capped ? el(venusIcon(6906, "ChevronSmallRightIcon"), {size:"xs"}) : null),
+                el(RN.View, {style:{flexDirection:"row", flexWrap:"wrap", gap:VOICE_GAP}}, (capped ? all.slice(0, columns * VOICE_PEEK) : all.slice(0, 60)).map(tile))));
+        });
+        const empty = !data.order.length ? footnote("empty", "Your sounds show up here once Discord has loaded them. Open the soundboard in a voice channel if the list is empty.") :
+            !sections.length ? footnote("none", "No matching sounds") : null;
+        const search = SearchField ? el(SearchField, {key:"search", placeholder:tr("Search sounds"), value:query, onChange:text => setQuery(String(text || "")), isDisabled:!on}) :
+            ui.TextInput ? el(ui.TextInput, {key:"search", placeholder:tr("Search sounds"), value:query, onChange:text => setQuery(String(text || "")), editable:on}) : null;
+        return el(RN.View, {key:"picker", style:{gap:12}}, headGroup,
+            el(RN.View, {style:s.panel, onLayout:event => { const w = event && event.nativeEvent && event.nativeEvent.layout && event.nativeEvent.layout.width;
+                if (w && Math.abs(w - width) > 0.5) setWidth(w); }}, search, strip, width ? (empty ? null : sections) : null, empty));
     }
     // Bring back Tenor GIFs (#83): Discord's GIF picker asks Discord's API for /gifs/search, /gifs/trending and the rest
     // (GIFPickerActionCreators 9732 through HTTP.get, 1295), and since Tenor's API closed to Discord those answers come from
