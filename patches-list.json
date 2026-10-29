@@ -37,6 +37,40 @@
       "options": []
     },
     {
+      "name": "Audio output when joining",
+      "description": "Voice channels start on the audio output you choose.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Bring back Tenor GIFs",
       "description": "Tenor GIFs show in Discord's GIF picker again, mixed with Discord's own or on their own. Inspired by BringBackTenor by Livie.",
       "default": true,
@@ -869,6 +903,40 @@
     {
       "name": "Icon packs",
       "description": "Replace Discord's icons with community icon packs or a custom icon pack link. Works with Themes+ icon packs.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Join and leave sounds",
+      "description": "Choose which voice channel sounds play, and how loud.",
       "default": true,
       "category": "Features",
       "dependencies": [
