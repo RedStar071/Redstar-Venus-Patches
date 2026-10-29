@@ -41,6 +41,7 @@ const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
 export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379];
 let host = null; // the Scene, once drawn: shows and hides sheets
+export function setHost(next) { host = next; } // a settings page can host sheets too
 export function modules(store, me) {
   const user = id => id === me.id ? me : allPeople.find(p => p.id === id) || null;
   return {

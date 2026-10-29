@@ -124,8 +124,10 @@ window.__venusStart = function () {
   const Page = node && node.screen && node.screen.getComponent();
   if (q.get("search")) setTimeout(() => { const input = document.querySelector("input"); if (input) { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(input, q.get("search")); input.dispatchEvent(new Event("input", { bubbles: true })); } }, 300);
   function Frame() {
-    const [, bump] = React.useState(0);
+    const [, bump] = React.useState(0), [sheets, setSheets] = React.useState([]);
     rerender = () => bump(n => n + 1);
+    // Sheets Venus opens (showActionSheet) slide up over the page, like Discord's.
+    S.setHost({ show: (key, content) => setSheets(list => list.filter(x => x.key !== key).concat([{ key, content }])), hide: key => setSheets(list => list.filter(x => x.key !== key)) });
     const title = node && node.useTitle ? node.useTitle() : page;
     return <RNW.View style={{ width: Number(q.get("width")) || 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
       <RNW.View style={{ height: 56, flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16 }}>
@@ -133,6 +135,9 @@ window.__venusStart = function () {
         <D.Text variant="heading-lg/bold" color="text-strong">{title}</D.Text>
       </RNW.View>
       {Page ? <Page /> : <D.Text color="text-feedback-critical">No page called {page}</D.Text>}
+      {sheets.length ? <RNW.View style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: Number(q.get("width")) || 412, backgroundColor: D.tok("BACKGROUND_SCRIM"), justifyContent: "flex-end" }}>
+        <RNW.View style={{ maxHeight: "92%", overflow: "scroll" }}>{sheets[sheets.length - 1].content}</RNW.View>
+      </RNW.View> : null}
     </RNW.View>;
   }
   ReactDOM.createRoot(document.getElementById("root")).render(<Frame />);
