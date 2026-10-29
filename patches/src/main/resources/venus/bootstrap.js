@@ -52,6 +52,7 @@
     if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
+    if (features.quietVoice) targetModules[584] = 1;
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -73,7 +74,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, language:"auto" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, quietVoice:false, quietVoiceVolume:50, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, language:"auto" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -90,7 +91,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, language: "auto"
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, quietVoice: false, quietVoiceVolume: 50, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, language: "auto"
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -360,6 +361,7 @@
         if (key === "messageHighlightPingColor" || key === "noDeleteColor") return isHighlightColor(value) ? normalizeHighlightColor(value) : undefined;
         if (key === "messageHighlightBrightness" || key === "noDeleteBrightness") return brightness(value);
         if (key === "noDeleteLimit") return deleteLimit(value);
+        if (key === "quietVoiceVolume") return brightness(value);
         if (key === "badgesCycleMinutes") return badgeCycleMinutes(value);
         if (key === "badgesGamesAtOnce") return badgeAtOnce(value);
         if (key === "fixEmbedsSites") return fixSitesText(value);
@@ -451,6 +453,12 @@
             const level = brightness(value);
             if (settings[key] === level && status.storage !== "loading" && status.storage !== "waiting") return true;
             settings[key] = level; dirty.add(key); save(); notify(key); later(key === "noDeleteBrightness" ? deletedRedraw : messageHighlightRedraw, 0); return true;
+        }
+        if (key === "quietVoiceVolume") {
+            if (typeof value !== "number" || !Number.isFinite(value)) return false;
+            const level = brightness(value);
+            if (settings.quietVoiceVolume === level && status.storage !== "loading" && status.storage !== "waiting") return true;
+            settings.quietVoiceVolume = level; dirty.add(key); save(); notify(key); return true;
         }
         if (key === "noDeleteColor") {
             if (!isHighlightColor(value)) return false;
@@ -900,7 +908,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideButtons[A-Z]/.test(key) ? "hideButtons" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^quietVoice[A-Z]/.test(key) ? "quietVoice" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -935,7 +943,7 @@
         hiddenChannels:[8218, "LockIcon"], dashless:[15892, "HashmarkIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         hideGift:[11540, "GiftIcon"], hideCall:[9317, "PhoneCallIcon"], youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], hideQuestDock:[6650, "EyeSlashIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], hideButtons:[15612, "CircleMinusIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], quietVoice:[8224, "VoiceNormalIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -979,6 +987,7 @@
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
         noHandsfree:["Bluetooth", "Headphones", "Hands-free", "Calls", "Voice channels", "Microphone"],
+        quietVoice:["Volume", "Mute everyone", "Voice channels", "Speaker", "Loud", "Quiet"],
         bulkDelete:["Select Messages", "Select all", "Delete", "Clear kept deleted messages", "Include kept deleted messages", "Ask before deleting"],
         badges:["Game time", "Unique games", "Switch games every", "Games at once", "Add hours now", "Advanced", "Hours Played", "Unique Games Played", "Years Active", "Personalization"]};
     function searchFold(text) {
@@ -1366,6 +1375,7 @@
         toggle("quests", "hideQuestDock", "Hide the Quests banner", "Removes the Quest promotion above your profile bar.");
         // Advanced
         toggle("advanced", "experiments", "Unlock Discord experiments", "Adds Dev Tools to Settings, to try features Discord is still testing.");
+        withOptions("advanced", "quietVoice", "VENUS_QUIETVOICE", "Quiet voice channels", "Voice channels start at the volume you choose.", "Quiet voice channels", QuietVoiceSettings);
         toggle("advanced", "noHandsfree", "Keep Bluetooth audio clear in calls", "Headphones stay in music quality in calls. Your phone's mic picks up your voice.");
         withOptions("quests", "badges", "VENUS_BADGES", "Complete badges automatically", "Plays real PC games in the background for game time and unique games.", "Badges", BadgeSettings);
         const listed = [["Messages", groups.messages], ["Sending", groups.sending], ["People", groups.people],
@@ -6132,6 +6142,18 @@
                 picked ? popIn("check:" + site.id + ":" + item.id, el(Check, {size:"sm"})) : null);
         }));
     }
+    function QuietVoiceSettings() {
+        useSettings("quietVoice");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("quietVoice");
+        const groups = [
+            !on ? offCard("status", venusIcon(8224, "VoiceNormalIcon"), "quietVoice") : null,
+            el(PresetOrCustom, {key:"volume", title:"Volume when you join", value:settings.quietVoiceVolume, disabled:!on, min:0, max:100, placeholder:50,
+                inputLabel:tr("Volume, 0 to 100"), format:n => tr("{n}%", {n}), onChange:value => setSetting("quietVoiceVolume", value),
+                presets:QUIET_VOICE_STEPS.map(n => ({value:n, label:tr("{n}%", {n})})), hint:"Applied each time you join. 0% mutes everyone, and you can still change it once you're in."})];
+        return settingsBody(ui, groups);
+    }
     function TenorSettings() {
         useSettings("tenorGifs");
         const ui = reviewUI();
@@ -9680,6 +9702,28 @@
         return orig.apply(self, next);
     }
 
+    // Quiet voice channels (#103): joining a voice channel sets Discord's output volume (AudioActionCreators 5243, the same
+    // action as the slider in Voice settings, 100 being Discord's default) to the saved level. VOICE_CHANNEL_SELECT carries
+    // the new channelId, null on leaving. Only a join from no channel counts, so switching channels doesn't undo a volume
+    // changed in the call. The action runs on the next tick: Flux can't start a dispatch from inside a listener.
+    const QUIET_VOICE_STEPS = [0, 25, 50, 75, 100];
+    const quietVoice = {dispatcher:null, joined:false};
+    function quietVoiceInit(dispatcher) {
+        if (quietVoice.dispatcher || !dispatcher || typeof dispatcher.subscribe !== "function") return;
+        quietVoice.dispatcher = dispatcher;
+        dispatcher.subscribe("VOICE_CHANNEL_SELECT", quietVoiceSelect);
+        dispatcher.subscribe("LOGOUT", () => { quietVoice.joined = false; });
+    }
+    function quietVoiceSelect(event) {
+        const joined = !!(event && event.channelId), joining = joined && !quietVoice.joined;
+        quietVoice.joined = joined;
+        if (joining && enabled("quietVoice")) later(quietVoiceApply, 0);
+    }
+    function quietVoiceApply() {
+        if (!enabled("quietVoice")) return;
+        const audio = inspectedExport(5243, "default");
+        if (audio && typeof audio.setOutputVolume === "function") try { audio.setOutputVolume(settings.quietVoiceVolume); } catch (_) {}
+    }
     // Bring back Tenor GIFs (#83): Discord's GIF picker asks Discord's API for /gifs/search, /gifs/trending and the rest
     // (GIFPickerActionCreators 9732 through HTTP.get, 1295), and since Tenor's API closed to Discord those answers come from
     // Klipy. Venus answers the same requests from Tenor's public v1 API, in the exact shape the picker's store (9731) reads,
@@ -14743,6 +14787,7 @@
                 if (features.nitroThemes && exports && exports.default) nitroThemeAttach(exports.default);
                 if (features.bulkDelete && exports && exports.default) bulkDeleteInit(exports.default);
                 if (features.experiments && exports && exports.default) experimentsInit(exports.default);
+                if (features.quietVoice && exports && exports.default) quietVoiceInit(exports.default);
                 if ((features.messageHighlight || features.bulkDelete) && exports && exports.default && !dispatcher)
                     dispatcher = exports.default.dispatch.bind(exports.default);
                 if ((features.noDelete || features.reviewDB || features.hiddenChannels) && id === 584) {

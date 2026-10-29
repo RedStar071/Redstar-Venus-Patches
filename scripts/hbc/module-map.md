@@ -79,6 +79,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 5108 | `stores/PresenceStore.tsx` | default, sortActivity | PresenceStore |
 | 5112 | `stores/SessionsStore.tsx` | default | SessionsStore |
 | 5113 | `stores/VoiceStateStore.tsx` | default | VoiceStateStore (Badge Completer) |
+| 5243 | `actions/AudioActionCreators.tsx` | default | AudioActionCreators (Quiet voice channels) |
 | 5300 | `actions/native/AlertActionCreators.tsx` | default | AlertActionCreators |
 | 5377 | `design/components/Stack/native/Stack.native.tsx` | Stack | Stack |
 | 5379 | `design/components/Button/native/Button.native.tsx` | Button | Button |
@@ -171,6 +172,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8212 | `design/components/Icon/native/redesign/generated/GroupIcon.tsx` | GroupIcon | GroupIcon |
 | 8213 | `design/components/Icon/native/redesign/generated/AtIcon.tsx` | AtIcon | AtIcon |
 | 8218 | `design/components/Icon/native/redesign/generated/LockIcon.tsx` | LockIcon | LockIcon |
+| 8224 | `design/components/Icon/native/redesign/generated/VoiceNormalIcon.tsx` | VoiceNormalIcon | VoiceNormalIcon (Quiet voice channels) |
 | 8229 | `design/components/Icon/native/redesign/generated/AppsIcon.tsx` | AppsIcon | AppsIcon |
 | 8299 | `modules/user_profile/native/showUserProfileActionSheet.tsx` | default, showUserProfileActionSheet | showUserProfileActionSheet |
 | 8301 | `actions/UserActionCreators.tsx` | fetchCurrentUser, acceptAgreements, setFlag | UserActionCreators |

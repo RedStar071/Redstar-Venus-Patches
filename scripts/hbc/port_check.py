@@ -311,6 +311,8 @@ BOOTSTRAP_MODULES = [
     (7404, 'stores/DeveloperExperimentStore.tsx', ['default'], 'DeveloperExperimentStore (Unlock Discord experiments)'),
     (15869, 'design/components/Icon/native/redesign/generated/WrenchIcon.tsx', ['WrenchIcon'], 'WrenchIcon (Advanced group)'),
     (12271, 'design/components/Icon/native/redesign/generated/HeadphonesIcon.tsx', ['HeadphonesIcon'], 'HeadphonesIcon (Keep Bluetooth audio clear in calls)'),
+    (5243, 'actions/AudioActionCreators.tsx', ['default'], 'AudioActionCreators (Quiet voice channels)'),
+    (8224, 'design/components/Icon/native/redesign/generated/VoiceNormalIcon.tsx', ['VoiceNormalIcon'], 'VoiceNormalIcon (Quiet voice channels)'),
     (15894, 'design/components/Icon/native/redesign/generated/BeakerIcon.tsx', ['BeakerIcon'], 'BeakerIcon (Experimental chip)'),
     (15928, 'design/components/Icon/native/redesign/generated/DoubleCheckmarkIcon.tsx', ['DoubleCheckmarkIcon'], 'DoubleCheckmarkIcon'),
     (15974, 'design/components/Icon/native/redesign/generated/LettersIcon.tsx', ['LettersIcon'], 'LettersIcon'),
