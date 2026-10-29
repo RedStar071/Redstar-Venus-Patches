@@ -312,7 +312,7 @@ BOOTSTRAP_MODULES = [
     (13402, 'modules/user_profile/native/UserProfileConnections.tsx', ['UserProfileAccountConnectionsCard'], 'UserProfileConnections (Remove anything: Connections)'),
     (16466, 'modules/main_tabs_v2/native/tabs/messages/useMessagesSpecs.tsx', ['default', 'headerSize'], 'useMessagesSpecs (Remove anything: Messages header closes up)'),
     (16575, 'modules/channel_list_v2/native/RedesignGuildHeader.tsx', ['useRedesignGuildHeaderHeight'], 'RedesignGuildHeader (Remove anything: channel list header closes up)'),
-    (12208, 'components_native/chat/ChatBeginningRow.tsx', ['default'], 'ChatBeginningRow (Remove anything: a bot DM's Mute / Deauthorize / Report Spam)'),
+    (12208, 'components_native/chat/ChatBeginningRow.tsx', ['default'], 'ChatBeginningRow (Remove anything: bot DM Mute / Deauthorize / Report Spam)'),
     (11864, 'modules/chat_input/native/accessories/ChatInputExpressionButton.tsx', ['default'], 'ChatInputExpressionButton (Remove anything: emoji button)'),
     (10515, 'modules/user_profile/native/UserProfileCustomStatusBubble.tsx', ['default'], 'UserProfileCustomStatusBubble (Remove anything: your status bubble)'),
     (17567, 'modules/user_profile/native/UserProfileYourFriendsCard.tsx', ['default'], 'UserProfileYourFriendsCard (Remove anything: Friends)'),
