@@ -8385,6 +8385,9 @@
             const flat = base && base.props && base.props.style && RN.StyleSheet ? RN.StyleSheet.flatten(base.props.style) : null;
             if (flat) for (const name of HIDE_LAYOUT_KEYS) if (flat[name] !== undefined) (layout || (layout = {}))[name] = flat[name];
         } catch (_) {}
+        // Discord's own grow / shrink props (Add Friends, the server menu's buttons) set the flex the button had in its row.
+        if (base && base.props && base.props.grow === true) (layout || (layout = {})).flexGrow = 1;
+        if (base && base.props && base.props.shrink === true) (layout || (layout = {})).flexShrink = 1;
         // A button that measures itself (a tab, for the line under the selected one) keeps doing so from here, where it sits.
         const own = base && base.props && typeof base.props.onLayout === "function" ? base.props.onLayout : null;
         const onLayout = event => {
@@ -8597,6 +8600,15 @@
         const key = hideMenuLabels.get(props.label);
         return key && !spotHidden(key) ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered, inset:true, before:closeContextMenu}) : rendered;
     }
+    // A tab measures where it sits for the line under the selected one, so its mark is drawn inside it instead of around it.
+    function markInside(rendered, key) {
+        if (!rendered || !rendered.props) return rendered;
+        const kids = rendered.props.children;
+        const cover = el(RN.View, {key:"hide-cover", pointerEvents:"none", style:HIDE_MARK.cover, importantForAccessibility:"no-hide-descendants", accessibilityElementsHidden:true});
+        const badge = el(HideBadge, {key:"hide-x", spot:key, style:HIDE_MARK.badge});
+        const children = typeof kids === "function" ? function () { return [kids.apply(this, arguments), cover, badge]; } : [kids, cover, badge];
+        return React.cloneElement(rendered, {style:[rendered.props.style, {position:"relative", overflow:"visible"}], children});
+    }
     // A profile's tabs (UserProfileContent 13190) are {id, label, page} items for useSegmentedControlState (8525), Main always
     // first: removed tabs are left out of the items, so the tab bar and its pages close up together.
     const PROFILE_TABS = Object.assign(Object.create(null), {activity:"profile.activity", wishlist:"profile.wishlist"});
@@ -8627,7 +8639,7 @@
         const rendered = orig.apply(self, args), props = args[0];
         if (!rendered || !props || !props.state || !profileTabItems(props.state.items) || !hideEditing()) return rendered;
         const item = props.state.items[props.index], key = item && PROFILE_TABS[item.id];
-        return key ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered}) : rendered;
+        return key ? markInside(rendered, key) : rendered;
     }
     // The server tag next to someone's name (UserProfilePrimaryInfo 10533) is its local GuildTag, the one element given a
     // primaryGuildOverride without badges. Someone without a tag draws nothing there, so HideMark shows no outline.
