@@ -3951,7 +3951,7 @@
     // Bits desktop's launch signature keeps clear when it detects no client mod (docs.discord.food, Launch Signature).
     const QUEST_SIGNATURE_BITS = [119, 108, 100, 91, 84, 75, 61, 55, 48, 38, 24, 11];
     const QUEST_HEARTBEAT_SESSION_MS = 30 * 60 * 1000;
-    const QUEST_REFETCH_MS = 30 * 60 * 1000, QUEST_RETRY_MS = 30 * 60 * 1000, QUEST_REFUSED_MS = 6 * 60 * 60 * 1000, QUEST_OFFLINE_MS = 5 * 60 * 1000;
+    const QUEST_REFETCH_MS = 30 * 60 * 1000, QUEST_REFETCH_JITTER_MS = 10 * 60 * 1000, QUEST_RETRY_MS = 30 * 60 * 1000, QUEST_REFUSED_MS = 6 * 60 * 60 * 1000, QUEST_OFFLINE_MS = 5 * 60 * 1000;
     // Heartbeats in a row that Discord answers without counting any more time before Quest Completer gives up for now.
     const QUEST_STALLED_BEATS = 5;
     const quest = {store:null, dispatcher:null, generation:0, running:null, enrolling:false, skip:new Map(), enrollBlockedUntil:0,
@@ -4460,7 +4460,9 @@
         quest.refetchTimer = undefined;
         if (!enabled("quests") || typeof global.setTimeout !== "function") return;
         questsFetch(false); questsSchedule(1000);
-        quest.refetchTimer = global.setTimeout(questsRefetchLoop, QUEST_REFETCH_MS);
+        // Discord's own client never asks on a fixed beat (its initial fetch waits a random jitter, and the 30-minute
+        // timer only fetches after a day), so the poll gets a random extra wait instead of an exact 30-minute rhythm.
+        quest.refetchTimer = global.setTimeout(questsRefetchLoop, QUEST_REFETCH_MS + Math.floor(Math.random() * QUEST_REFETCH_JITTER_MS));
     }
     function questsStart(delay) {
         if (!enabled("quests") || typeof global.setTimeout !== "function") return;
