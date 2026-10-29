@@ -307,7 +307,7 @@ BOOTSTRAP_MODULES = [
     (12364, 'design/components/Tabs/native/Tabs.native.tsx', ['Tabs'], 'Tabs (Remove anything: profile tab bar)'),
     (12365, 'design/components/Tabs/native/TabItem.native.tsx', ['TabItem'], 'TabItem (Remove anything: marks Activity / Wishlist)'),
     (13418, 'modules/user_profile/native/UserProfileMutuals.tsx', ['default'], 'UserProfileMutuals (Remove anything: mutual servers)'),
-    (10614, 'modules/user_profile/native/UserProfileAboutMeCard.tsx', ['default', 'MemberJoinDates'], 'UserProfileAboutMeCard (Remove anything: Member Since dates)'),
+    (10614, 'modules/user_profile/native/UserProfileAboutMeCard.tsx', ['default', 'a6XYD9'], 'UserProfileAboutMeCard (Remove anything: Member Since dates)'),
     (6882, 'modules/user_profile/native/UserProfileRolesCard.tsx', ['default'], 'UserProfileRolesCard (Remove anything: Roles)'),
     (13402, 'modules/user_profile/native/UserProfileConnections.tsx', ['UserProfileAccountConnectionsCard'], 'UserProfileConnections (Remove anything: Connections)'),
     (16466, 'modules/main_tabs_v2/native/tabs/messages/useMessagesSpecs.tsx', ['default', 'headerSize'], 'useMessagesSpecs (Remove anything: Messages header closes up)'),

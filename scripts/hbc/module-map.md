@@ -256,7 +256,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 10483 | `design/components/Icon/native/redesign/generated/XSmallBoldIcon.tsx` | XSmallBoldIcon | XSmallBoldIcon (Remove anything: red X badge) |
 | 10533 | `modules/user_profile/native/UserProfilePrimaryInfo.tsx` | default, DisplayName, UserTagAndPronouns | UserProfileHeaderName |
 | 10534 | `design/components/Icon/native/redesign/generated/ChevronSmallDownIcon.tsx` | ChevronSmallDownIcon | ChevronSmallDownIcon (preview channel category) |
-| 10614 | `modules/user_profile/native/UserProfileAboutMeCard.tsx` | default, MemberJoinDates | UserProfileAboutMeCard (Remove anything: Member Since dates) |
+| 10614 | `modules/user_profile/native/UserProfileAboutMeCard.tsx` | default, a6XYD9 | UserProfileAboutMeCard (Remove anything: Member Since dates) |
 | 10615 | `modules/profile_customization/native/BioText.tsx` | default | UserProfileBio |
 | 10621 | `design/components/Icon/native/redesign/generated/SlashBoxIcon.tsx` | SlashBoxIcon | SlashBoxIcon (Clean channel names) |
 | 10649 | `stores/LocalActivityStore.tsx` | default | LocalActivityStore (Badge Completer) |
