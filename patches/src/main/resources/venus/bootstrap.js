@@ -8375,7 +8375,7 @@
             X ? el(X, {size:"xxs", color:"#ffffff"}) : el(RN.Text, {style:HIDE_MARK.x}, "\u2715"));
     }
     // Rows with a switch or a picture at the end keep their X clear of it.
-    const HIDE_TRAIL = {right:76}, HIDE_MENU_BADGE = {right:48};
+    const HIDE_TRAIL = {right:76};
     function HideMark(props) {
         const base = props.base, key = props.spot;
         // Only once it's laid out with a size: a button that draws nothing (a tag someone doesn't have) gets no floating X.
@@ -8392,7 +8392,7 @@
             const size = event && event.nativeEvent && event.nativeEvent.layout, next = !!size && size.width > 1 && size.height > 1;
             if (next !== shown) setShown(next);
         };
-        const badge = props.inset ? (props.trail ? [HIDE_INSET.badge, props.trail === "menu" ? HIDE_MENU_BADGE : HIDE_TRAIL] : HIDE_INSET.badge) : HIDE_MARK.badge;
+        const badge = props.inset ? (props.trail ? [HIDE_INSET.badge, HIDE_TRAIL] : HIDE_INSET.badge) : HIDE_MARK.badge;
         return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false, onLayout},
             own ? React.cloneElement(base, {onLayout:undefined}) : base,
             shown ? el(RN.View, {pointerEvents:"none", style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover,
@@ -8481,11 +8481,13 @@
             if (node.type !== Menu || !Array.isArray(props.items)) return props;
             const items = menuItems(props.items, labels, edit);
             if (!items.length) empty = true;
-            return items === props.items ? props : Object.assign({}, props, {items});
+            const next = items === props.items ? props : Object.assign({}, props, {items});
+            if (!edit || typeof props.children !== "function") return next;
+            const render = props.children;
+            return Object.assign({}, next, {children:function () { const out = render.apply(this, arguments); return out ? hideMarked(out, "profile.more") : out; }});
         }, 0);
         // Nothing left in this person's menu: the ⋯ button goes too. Someone whose menu still has items keeps theirs.
-        if (empty) return null;
-        return edit && tree ? hideMarked(tree, "profile.more") : tree;
+        return empty ? null : tree;
     }
     // Switches on Venus's option pages (switchRow): gone once removed, marked in removal mode.
     function HideRow(props) {
@@ -8593,7 +8595,7 @@
         const rendered = orig.apply(self, args), props = args[0];
         if (!rendered || !hideMenuLabels.size || !props || typeof props.label !== "string" || !hideEditing()) return rendered;
         const key = hideMenuLabels.get(props.label);
-        return key && !spotHidden(key) ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered, inset:true, trail:"menu", before:closeContextMenu}) : rendered;
+        return key && !spotHidden(key) ? el(HideMark, {key:"hide:" + key, spot:key, base:rendered, inset:true, before:closeContextMenu}) : rendered;
     }
     // A profile's tabs (UserProfileContent 13190) are {id, label, page} items for useSegmentedControlState (8525), Main always
     // first: removed tabs are left out of the items, so the tab bar and its pages close up together.
@@ -8762,7 +8764,31 @@
         return next === children ? node : React.cloneElement(node, {children:next});
     }
     // Always swapped (the wrapper is the same every time), so turning things off and on never remounts the card.
-    function aboutMeCard(orig, self, args) { const rendered = orig.apply(self, args); return React && rendered ? swapJoinDates(rendered, 0) : rendered; }
+    function stripJoinDates(node, depth) {
+        if (!node || typeof node !== "object" || depth > 8) return node;
+        if (Array.isArray(node)) return node.map(child => stripJoinDates(child, depth + 1));
+        if (!node.props) return node;
+        if (isJoinDates(node)) return null;
+        const children = node.props.children;
+        if (children == null || typeof children !== "object") return node;
+        const next = stripJoinDates(children, depth + 1);
+        return next === children ? node : React.cloneElement(node, {children:next});
+    }
+    function hasChildren(root) {
+        const kids = root && root.props ? root.props.children : null, list = Array.isArray(kids) ? kids : [kids];
+        return list.some(kid => kid != null && kid !== false && kid !== "");
+    }
+    function aboutMeCard(orig, self, args) {
+        useSettings("hideAnything");
+        const rendered = orig.apply(self, args), props = args[0] || {};
+        if (!React || !rendered) return rendered;
+        // Both dates gone (or the only one there is): Member Since goes, and the card with it when nothing else is in it.
+        if (enabled("hideAnything") && !hideEditing() && spotHidden("profile.discordJoined") && (spotHidden("profile.serverJoined") || !props.guildId)) {
+            const stripped = stripJoinDates(rendered, 0);
+            return hasChildren(stripped) ? stripped : null;
+        }
+        return swapJoinDates(rendered, 0);
+    }
     // Roles (UserProfileRolesCard 6882) on a profile; the card a new member sees after onboarding isn't a profile and stays.
     function rolesCard(orig, self, args) {
         const props = args[0];
