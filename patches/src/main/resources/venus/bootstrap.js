@@ -51,7 +51,7 @@
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
-    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467, 14279, 8525, 8775, 10533, 11997, 14206, 14212, 14143, 14216]);
+    if (features.hideAnything) selectModules([13092, 14973, 14974, 9115, 10028, 15371, 15465, 11935, 11942, 11946, 11956, 11957, 12854, 13425, 14827, 16467, 14279, 8525, 8775, 10533, 11997, 14206, 14212, 14143, 14216, 12364, 12365, 13418, 10614, 6882, 13402, 13181, 16466, 16575]);
     const revision = "1.19.0";
     // The Discord build these patches are pinned to (DiscordPatches.kt compatibleWith); shown on the About page.
     const DISCORD_VERSION = "350.8";
@@ -8217,6 +8217,9 @@
         ["menu.report", "menu", 9237, "MoreHorizontalIcon"],
         ["profile.guildTag", "profile", 9071, "TagIcon"], ["profile.addFriend", "profile", 5032, "UserPlusIcon"], ["profile.message", "profile", 8194, "ChatIcon"],
         ["profile.activity", "profile", 17294, "ActivitiesIcon"], ["profile.wishlist", "profile", 11540, "GiftIcon"],
+        ["profile.more", "profile", 9237, "MoreHorizontalIcon"], ["profile.badges", "profile", 9549, "StarIcon"], ["profile.mutuals", "profile", 9239, "ServerIcon"],
+        ["profile.discordJoined", "profile", 10173, "ClydeIcon"], ["profile.serverJoined", "profile", 8675, "CalendarIcon"], ["profile.roles", "profile", 8617, "ShieldUserIcon"],
+        ["profile.connections", "profile", 15241, "PuzzlePieceIcon"], ["profile.note", "profile", 9337, "PaperIcon"],
         ["server.search", "server", 6740, "MagnifyingGlassIcon"], ["server.invite", "server", 5032, "UserPlusIcon"], ["server.events", "server", 8675, "CalendarIcon"],
         ["guild.community", "guild", 9099, "GlobeEarthIcon"], ["guild.boost", "guild", 9405, "BoostGemIcon"], ["guild.invite", "guild", 5032, "UserPlusIcon"],
         ["guild.notifications", "guild", 8768, "BellIcon"], ["guild.markRead", "guild", 15171, "ChatCheckIcon"], ["guild.channelsRoles", "guild", 18349, "ListBulletsIcon"],
@@ -8225,7 +8228,9 @@
         ["guild.leave", "guild", 10994, "DoorExitIcon"], ["guild.emoji", "guild", 8956, "ReactionIcon"]];
     // Spots that are Discord's own buttons and rows are named with Discord's own message (any language); English if it's missing.
     const DISCORD_SPOTS = {"profile.guildTag":["2QmKZ2", "Server Tag"], "profile.addFriend":["7815ae", "Add Friend"], "profile.message":["zROXEV", "Message"],
-        "profile.activity":["chq59f", "Activity"], "profile.wishlist":["7lZ31J", "Wishlist"], "server.search":["5h0QOP", "Search"], "server.invite":["VINpSK", "Invite"],
+        "profile.activity":["chq59f", "Activity"], "profile.wishlist":["7lZ31J", "Wishlist"], "profile.badges":["l6w3Vj", "Badges"],
+        "profile.more":["PdRCRg", "More Options"], "profile.mutuals":["4lTDZq", "Mutual Servers"], "profile.roles":["LPJmL/", "Roles"],
+        "profile.connections":["3fe7U5", "Connections"], "profile.note":["mQKv+v", "Note (only visible to you)"], "server.search":["5h0QOP", "Search"], "server.invite":["VINpSK", "Invite"],
         "server.events":["tlopTM", "Events"], "guild.community":["K7iRig", "Community Server"], "guild.boost":["Uj0md3", "Boost"], "guild.invite":["VINpSK", "Invite"],
         "guild.notifications":["HcoRu0", "Notifications"], "guild.markRead":["e6RscS", "Mark as Read"], "guild.channelsRoles":["h9mGOP", "Channels & Roles"],
         "guild.serverProfile":["PKQB/H", "Edit Per-server Profile"], "guild.showAll":["FB2ZZV", "Show All Channels"], "guild.hideMuted":["UwOLJO", "Hide Muted Channels"],
@@ -8263,7 +8268,8 @@
     HIDE_SPOTS.forEach(spot => { HIDE_SPOT_KEYS[spot[0]] = spot; });
     // Modules hooked for it (also selected in targetModules).
     const HIDE_HOOKED = {13092:1, 14973:1, 14974:1, 10028:1, 15371:1, 15465:1, 11935:1, 11942:1, 11946:1, 11956:1, 11957:1, 12854:1, 13425:1, 14827:1, 16467:1, 9115:1,
-        14279:1, 8525:1, 8775:1, 10533:1, 11997:1, 14206:1, 14212:1, 14143:1, 14216:1};
+        14279:1, 8525:1, 8775:1, 10533:1, 11997:1, 14206:1, 14212:1, 14143:1, 14216:1,
+        12364:1, 12365:1, 13418:1, 10614:1, 6882:1, 13402:1, 13181:1, 16466:1, 16575:1};
     const hideEdit = {on:false, top:false, last:null};
     // Labels of the profile menu's removable items while removal mode draws them (ContextMenuItem only gets the label).
     const hideMenuLabels = new Map();
@@ -8285,6 +8291,8 @@
             case "messages.addFriend": return tr("Add Friends button");
             case "messages.newDM": return tr("New message button");
             case "profile.call": return tr("Call button");
+            case "profile.discordJoined": return tr("Discord join date");
+            case "profile.serverJoined": return tr("Server join date");
             case "you.quests": return tr("Quests button");
             case "you.shop": return tr("Shop button");
             case "you.nitro": return tr("Nitro button");
@@ -8343,10 +8351,9 @@
         }
         try { if (RN && RN.Alert) RN.Alert.alert(title, body, [{text:tr("Cancel"), style:"cancel"}, {text:tr("Remove"), style:"destructive", onPress:confirm}], {cancelable:true}); } catch (_) {}
     }
-    // The mark drawn over a removable button in removal mode: a dashed red outline over the whole button and a red X in its
-    // corner. Only the X asks to remove it; the outline catches taps on the button itself so Discord's own action doesn't
-    // run by mistake (no Add Friend or Leave Server while you're tidying up). The wrapper takes the button's own flex and
-    // margins, so the row keeps its layout.
+    // The mark drawn over a removable button in removal mode: a dashed red outline around the whole button and a red X in its
+    // corner. The button itself keeps working (menus open, Block blocks); only the X asks to remove it. The wrapper takes the
+    // button's own flex and margins, so the row keeps its layout.
     const HIDE_LAYOUT_KEYS = ["flex", "flexGrow", "flexShrink", "flexBasis", "alignSelf", "margin", "marginLeft", "marginRight", "marginTop", "marginBottom",
         "marginHorizontal", "marginVertical", "marginStart", "marginEnd", "position", "top", "left", "right", "bottom"];
     const HIDE_MARK = {cover:{position:"absolute", top:-3, left:-3, right:-3, bottom:-3, borderRadius:14, borderWidth:2, borderStyle:"dashed",
@@ -8359,7 +8366,6 @@
             borderColor:"#f23f43", backgroundColor:"#f23f431a"},
         badge:{position:"absolute", top:"50%", marginTop:-11, right:12, width:22, height:22, borderRadius:11, alignItems:"center", justifyContent:"center",
             backgroundColor:"#f23f43", borderWidth:2, borderColor:"#ffffff", elevation:6}};
-    const swallowTap = () => true, ignoreTap = () => {};
     // The red X on its own: the one place a tap asks to remove the spot. before() runs first (the profile menu closes itself).
     function HideBadge(props) {
         const Press = RN.Pressable || RN.TouchableOpacity || RN.View, X = inspectedExport(10483, "XSmallBoldIcon");
@@ -8379,14 +8385,17 @@
             const flat = base && base.props && base.props.style && RN.StyleSheet ? RN.StyleSheet.flatten(base.props.style) : null;
             if (flat) for (const name of HIDE_LAYOUT_KEYS) if (flat[name] !== undefined) (layout || (layout = {}))[name] = flat[name];
         } catch (_) {}
+        // A button that measures itself (a tab, for the line under the selected one) keeps doing so from here, where it sits.
+        const own = base && base.props && typeof base.props.onLayout === "function" ? base.props.onLayout : null;
         const onLayout = event => {
+            if (own) try { own(event); } catch (_) {}
             const size = event && event.nativeEvent && event.nativeEvent.layout, next = !!size && size.width > 1 && size.height > 1;
             if (next !== shown) setShown(next);
         };
         const badge = props.inset ? (props.trail ? [HIDE_INSET.badge, props.trail === "menu" ? HIDE_MENU_BADGE : HIDE_TRAIL] : HIDE_INSET.badge) : HIDE_MARK.badge;
         return el(RN.View, {style:layout ? [{position:"relative"}, layout] : {position:"relative"}, collapsable:false, onLayout},
-            base,
-            shown ? el(RN.View, {style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover, onStartShouldSetResponder:swallowTap, onResponderRelease:ignoreTap,
+            own ? React.cloneElement(base, {onLayout:undefined}) : base,
+            shown ? el(RN.View, {pointerEvents:"none", style:props.inset ? HIDE_INSET.cover : HIDE_MARK.cover,
                 importantForAccessibility:"no-hide-descendants", accessibilityElementsHidden:true}) : null,
             shown ? el(HideBadge, {spot:key, before:props.before, style:badge}) : null);
     }
@@ -8434,7 +8443,7 @@
         return rendered && hideEditing() && settingRemovable(key) ? hideMarkedRow(rendered, "settings." + key) : rendered;
     }
     // The profile's ⋯ menu: removed items are left out (an empty group goes too); in removal mode each removable item gets
-    // the same dashed outline and red X as every other button (drawn by menuItemMark), and tapping the item itself does nothing.
+    // the same dashed outline and red X as every other button (drawn by menuItemMark); the item itself still does what it does.
     function menuItems(items, labels, edit) {
         if (!Array.isArray(items)) return items;
         let changed = false;
@@ -8450,9 +8459,8 @@
             if (!key) { out.push(item); continue; }
             if (spotHidden(key)) { changed = true; continue; }
             if (!edit) { out.push(item); continue; }
-            changed = true;
             hideMenuLabels.set(item.label, key);
-            out.push(Object.assign({}, item, {action:ignoreTap}));
+            out.push(item);
         }
         return changed ? out : items;
     }
@@ -8460,6 +8468,7 @@
         useSettings("hideAnything");
         const rendered = orig.apply(self, args);
         if (!React || !enabled("hideAnything")) return rendered;
+        if (spotHidden("profile.more")) return null;
         const edit = hideEditing();
         if (!edit && !settings.hideAnythingSpots) return rendered;
         const Menu = inspectedExport(9358, "ContextMenu");
@@ -8467,11 +8476,16 @@
         const labels = new Map();
         Object.keys(MENU_SPOTS).forEach(key => MENU_SPOTS[key].forEach(hash => { const text = discordText(hash); if (text) labels.set(text, key); }));
         if (edit) hideMenuLabels.clear();
-        return cloneTree(rendered, (node, props) => {
+        let empty = false;
+        const tree = cloneTree(rendered, (node, props) => {
             if (node.type !== Menu || !Array.isArray(props.items)) return props;
             const items = menuItems(props.items, labels, edit);
+            if (!items.length) empty = true;
             return items === props.items ? props : Object.assign({}, props, {items});
         }, 0);
+        // Nothing left in this person's menu: the ⋯ button goes too. Someone whose menu still has items keeps theirs.
+        if (empty) return null;
+        return edit && tree ? hideMarked(tree, "profile.more") : tree;
     }
     // Switches on Venus's option pages (switchRow): gone once removed, marked in removal mode.
     function HideRow(props) {
@@ -8492,11 +8506,11 @@
     }
     // A component holding several spots: classify(node) names the spot an element is. Removed ones are left out, and a
     // wrapper that only held removed buttons goes too, so nothing keeps empty space.
-    function hideWalk(node, depth, classify, edit) {
+    function hideWalk(node, depth, classify, edit, gone) {
         if (!node || typeof node !== "object" || depth > 14) return node;
         if (Array.isArray(node)) {
             let changed = false;
-            const next = node.map(child => { const value = hideWalk(child, depth + 1, classify, edit); if (value !== child) changed = true; return value; });
+            const next = node.map(child => { const value = hideWalk(child, depth + 1, classify, edit, gone); if (value !== child) changed = true; return value; });
             if (!changed) return node;
             const kept = next.filter(child => child !== null);
             // A badge dot drawn beside a removed button (hidden from screen readers, no content of its own) goes with it.
@@ -8504,21 +8518,23 @@
         }
         if (!node.props) return node;
         const key = classify(node);
-        if (key) return spotHidden(key) ? null : edit ? hideMarkFor(node, key) : node;
+        if (key) return (gone ? gone(key) : spotHidden(key)) ? null : edit ? hideMarkFor(node, key) : node;
         const children = node.props.children;
         if (children == null || typeof children !== "object") return node;
-        const next = hideWalk(children, depth + 1, classify, edit);
+        const next = hideWalk(children, depth + 1, classify, edit, gone);
         if (next === children) return node;
         if (next === null || Array.isArray(next) && !next.length) return null;
         return React.cloneElement(node, {children:next});
     }
-    function hideTree(classify) {
+    // prepare() runs on every render (it may use hooks) and can return its own "is this spot gone" check.
+    function hideTree(classify, prepare) {
         return function (orig, self, args) {
             useSettings("hideAnything");
+            const gone = prepare ? prepare() : null;
             const rendered = orig.apply(self, args);
             if (!React || !enabled("hideAnything")) return rendered;
             const edit = hideEditing();
-            return edit || settings.hideAnythingSpots ? hideWalk(rendered, 0, classify, edit) : rendered;
+            return edit || settings.hideAnythingSpots ? hideWalk(rendered, 0, classify, edit, gone) : rendered;
         };
     }
     // The DM header (PrivateChannelButtons 12854): pressables holding the call (or hang up / join), video and search icons.
@@ -8603,7 +8619,8 @@
         if (typeof options.defaultIndex === "number" && options.defaultIndex >= entry.items.length) next[0].defaultIndex = 0;
         return orig.apply(self, next);
     }
-    // Each tab (SegmentedControlItem 8775) knows its index into state.items, so Activity and Wishlist are found by id.
+    // Each tab (TabItem 12365 on profiles, SegmentedControlItem 8775 elsewhere) knows its index into state.items, so Activity
+    // and Wishlist are found by id.
     function segmentedItemMark(orig, self, args) {
         const rendered = orig.apply(self, args), props = args[0];
         if (!rendered || !props || !props.state || !profileTabItems(props.state.items) || !hideEditing()) return rendered;
@@ -8612,6 +8629,160 @@
     }
     // The server tag next to someone's name (UserProfilePrimaryInfo 10533) is its local GuildTag, the one element given a
     // primaryGuildOverride without badges. Someone without a tag draws nothing there, so HideMark shows no outline.
+    // Message requests (MessageRequestsButton 16468) only draws while there are some, so the header counts them too.
+    function messageRequestCount() {
+        try {
+            const a = inspectedExport(6055, "default"), b = inspectedExport(6056, "default");
+            return (a && typeof a.getMessageRequestsCount === "function" ? a.getMessageRequestsCount() || 0 : 0) +
+                (b && typeof b.getSpamChannelsCount === "function" ? b.getSpamChannelsCount() || 0 : 0);
+        } catch (_) { return 0; }
+    }
+    function useMessageRequestCount() {
+        const [count, setCount] = React.useState(messageRequestCount);
+        React.useEffect(() => {
+            const stores = [inspectedExport(6055, "default"), inspectedExport(6056, "default")].filter(store => store && typeof store.addChangeListener === "function");
+            const update = () => setCount(messageRequestCount());
+            stores.forEach(store => store.addChangeListener(update));
+            update();
+            return () => stores.forEach(store => { try { store.removeChangeListener(update); } catch (_) {} });
+        }, []);
+        return count;
+    }
+    // Every button under "Messages" gone (message requests too, or none to show): the row goes, not just its buttons.
+    function messagesHeaderEmpty(requests) {
+        return spotHidden("messages.search") && spotHidden("messages.addFriend") && spotHidden("messages.newDM") && (spotHidden("messages.requests") || !requests);
+    }
+    function messagesGone() {
+        const count = useMessageRequestCount();
+        return messagesHeaderEmpty(count) ? key => key === "messages.requests" || spotHidden(key) : null;
+    }
+    // The Messages list sits under a header of a measured height (useMessagesSpecs 16466: headerSize, and listTop = safe area +
+    // headerSize). getMessagesHeaderHeight counts the button row as SMALL_BUTTON_HEIGHT plus the 8 dp gap above it, so that
+    // much comes off when the row is gone and the list moves up under the title.
+    const specsCache = new WeakMap();
+    function messagesSpecs(orig, self, args) {
+        useSettings("hideAnything");
+        const count = useMessageRequestCount();
+        const specs = orig.apply(self, args);
+        if (!specs || typeof specs !== "object" || typeof specs.headerSize !== "number" || !enabled("hideAnything") || !messagesHeaderEmpty(count)) return specs;
+        let entry = specsCache.get(specs);
+        if (!entry) {
+            const button = inspectedExport(5384, "SMALL_BUTTON_HEIGHT"), row = (typeof button === "number" ? button : 32) + 8;
+            entry = Object.assign({}, specs, {headerSize:Math.max(0, specs.headerSize - row)});
+            if (typeof specs.listTop === "number") entry.listTop = Math.max(0, specs.listTop - row);
+            specsCache.set(specs, entry);
+        }
+        return entry;
+    }
+    // A server's channel list keeps room for its Search row (useRedesignGuildHeaderHeight 16575: SMALL_BUTTON_HEIGHT plus
+    // SEARCH_BAR_MARGIN_BOTTOM). With Search, Invite and Events all removed the row is gone, so its room goes too.
+    function serverHeaderEmpty() { return spotHidden("server.search") && spotHidden("server.invite") && spotHidden("server.events"); }
+    function guildHeaderHeight(orig, self, args) {
+        useSettings("hideAnything");
+        const height = orig.apply(self, args), guild = args[0];
+        if (typeof height !== "number" || !enabled("hideAnything") || !serverHeaderEmpty()) return height;
+        // Only real servers have the row (not Favorites).
+        if (!guild || typeof guild.id !== "string" || !/^\d{15,}$/.test(guild.id)) return height;
+        const button = inspectedExport(5384, "SMALL_BUTTON_HEIGHT"), margin = inspectedExport(11762, "SEARCH_BAR_MARGIN_BOTTOM");
+        return Math.max(0, height - (typeof button === "number" ? button : 32) - (typeof margin === "number" ? margin : 0));
+    }
+    // A profile's tab bar (Tabs 12364) with only Main left is just a label: it goes, and Main's page shows on its own.
+    function profileTabsBar(orig, self, args) {
+        const rendered = orig.apply(self, args), props = args[0], items = props && props.state && props.state.items;
+        if (!rendered || !profileTabItems(items) || items.length !== 1 || hideEditing()) return rendered;
+        return spotHidden("profile.activity") || spotHidden("profile.wishlist") ? null : rendered;
+    }
+    // Badges (ProfileBadgeRows) beside the server tag in UserProfilePrimaryInfo 10533: the one element with badges and catalogBadges.
+    function profilePrimarySpot(node) {
+        const props = node.props;
+        if ("badges" in props && "catalogBadges" in props && "userId" in props) return "profile.badges";
+        return profileTagSpot(node);
+    }
+    // Member Since (UserProfileAboutMeCard 10614) is its local MemberJoinDates: a heading, then the Discord date (ClydeIcon) and
+    // the server date (the server's icon) with a dot between. It's swapped for a wrapper that draws Discord's and leaves out what
+    // was removed: the dot goes with either date, and the heading goes when no date is left.
+    function joinDateSpot(node) {
+        const props = node.props, icon = props.icon;
+        if (!icon || typeof icon !== "object" || !("themeType" in props) || !("accessibilityLabel" in props)) return null;
+        if (icon.type && icon.type === inspectedExport(10173, "ClydeIcon")) return "profile.discordJoined";
+        return icon.props && "guild" in icon.props ? "profile.serverJoined" : null;
+    }
+    function isBullet(node) { return !!node && !!node.props && node.props.accessibilityElementsHidden === true && typeof node.props.children === "string" && node.props.children.trim().length <= 2; }
+    function dropLoneBullets(node, depth) {
+        if (!node || typeof node !== "object" || depth > 12) return node;
+        if (Array.isArray(node)) {
+            const mapped = node.map(child => dropLoneBullets(child, depth + 1));
+            const real = mapped.filter(child => child && typeof child === "object" && !isBullet(child)).length;
+            return real <= 1 ? mapped.filter(child => !isBullet(child)) : mapped;
+        }
+        if (!node.props || node.props.children == null || typeof node.props.children !== "object") return node;
+        const next = dropLoneBullets(node.props.children, depth + 1);
+        return next === node.props.children ? node : React.cloneElement(node, {children:next});
+    }
+    function countJoinDates(node, depth) {
+        if (!node || typeof node !== "object" || depth > 14) return 0;
+        if (Array.isArray(node)) return node.reduce((sum, child) => sum + countJoinDates(child, depth + 1), 0);
+        if (!node.props) return 0;
+        if (joinDateSpot(node) || node.props.spot === "profile.discordJoined" || node.props.spot === "profile.serverJoined") return 1;
+        return countJoinDates(node.props.children, depth + 1);
+    }
+    function joinDatesTree(out) {
+        if (!out || !enabled("hideAnything")) return out;
+        const discord = spotHidden("profile.discordJoined"), server = spotHidden("profile.serverJoined"), edit = hideEditing();
+        if (!edit && !discord && !server) return out;
+        let tree = hideWalk(out, 0, joinDateSpot, edit, null);
+        if (discord || server) tree = dropLoneBullets(tree, 0);
+        return countJoinDates(tree, 0) ? tree : null;
+    }
+    const joinWrappers = new WeakMap();
+    function joinDatesType(type) {
+        let Wrapped = joinWrappers.get(type);
+        if (!Wrapped) {
+            Wrapped = function MemberJoinDates(props) { useSettings("hideAnything"); return joinDatesTree(type(props)); };
+            joinWrappers.set(type, Wrapped);
+        }
+        return Wrapped;
+    }
+    function isJoinDates(node) {
+        const props = node.props;
+        return typeof node.type === "function" && "guildId" in props && "userId" in props && "themeType" in props && !("displayProfile" in props) && !("pendingBio" in props);
+    }
+    function swapJoinDates(node, depth) {
+        if (!node || typeof node !== "object" || depth > 8) return node;
+        if (Array.isArray(node)) {
+            let changed = false;
+            const next = node.map(child => { const value = swapJoinDates(child, depth + 1); if (value !== child) changed = true; return value; });
+            return changed ? next : node;
+        }
+        if (!node.props) return node;
+        if (isJoinDates(node)) return el(joinDatesType(node.type), Object.assign({key:node.key}, node.props));
+        const children = node.props.children;
+        if (children == null || typeof children !== "object") return node;
+        const next = swapJoinDates(children, depth + 1);
+        return next === children ? node : React.cloneElement(node, {children:next});
+    }
+    // Always swapped (the wrapper is the same every time), so turning things off and on never remounts the card.
+    function aboutMeCard(orig, self, args) { const rendered = orig.apply(self, args); return React && rendered ? swapJoinDates(rendered, 0) : rendered; }
+    // Roles (UserProfileRolesCard 6882) on a profile; the card a new member sees after onboarding isn't a profile and stays.
+    function rolesCard(orig, self, args) {
+        const props = args[0];
+        return props && ("user" in props || "userId" in props || "guildMember" in props) ? hideWhole("profile.roles")(orig, self, args) : orig.apply(self, args);
+    }
+    // The note (UserProfileNote 13181). With User and server reviews on, Venus draws Reviews right after it: only the note goes.
+    function noteSpot(orig, self, args) {
+        useSettings("hideAnything");
+        const rendered = orig.apply(self, args);
+        if (!rendered || !React || !enabled("hideAnything")) return rendered;
+        const hidden = spotHidden("profile.note"), edit = hideEditing();
+        if (!hidden && !edit) return rendered;
+        const kids = rendered.type === React.Fragment && rendered.props && Array.isArray(rendered.props.children) ? rendered.props.children : null;
+        if (kids && kids.length > 1 && kids[1] && kids[1].key != null && String(kids[1].key).indexOf("venus-reviews:") === 0) {
+            const next = kids.slice();
+            next[0] = hidden ? null : hideMarked(kids[0], "profile.note");
+            return React.cloneElement(rendered, {children:next});
+        }
+        return hidden ? null : hideMarked(rendered, "profile.note");
+    }
     function profileTagSpot(node) {
         const props = node.props;
         return "primaryGuildOverride" in props && "showToastOnPress" in props && !("badges" in props) && !("userId" in props) ? "profile.guildTag" : null;
@@ -8699,7 +8870,7 @@
             if (spotHidden(key)) { changed = true; continue; }
             if (!edit) { out.push(button); continue; }
             changed = true;
-            out.push(Object.assign({}, button, {IconComponent:attachMarked(button.IconComponent, key), onPress:ignoreTap}));
+            out.push(Object.assign({}, button, {IconComponent:attachMarked(button.IconComponent, key)}));
         }
         return changed && out.length ? Object.assign({}, props, {overflowButtons:out}) : props;
     }
@@ -8767,7 +8938,16 @@
             case 11956: return exports.default ? replaceValue(exports, "default", propsComponent(exports.default, withoutVoiceButton)) : exports;
             case 12854: return hookComponent(exports, hideTree(dmSpot));
             case 13425: return hookComponent(exports, hideTree(profileSpot));
-            case 16467: return hookComponent(exports, hideTree(messagesSpot));
+            case 16467: return hookComponent(exports, hideTree(messagesSpot, messagesGone));
+            case 16466: return hookExport(exports, "default", messagesSpecs);
+            case 16575: return hookExport(exports, "useRedesignGuildHeaderHeight", guildHeaderHeight);
+            case 12364: return hookComponent(exports, profileTabsBar, "Tabs");
+            case 12365: return hookComponent(exports, segmentedItemMark, "TabItem");
+            case 13418: return hookComponent(exports, hideWhole("profile.mutuals"));
+            case 10614: return hookComponent(exports, aboutMeCard);
+            case 6882: return hookComponent(exports, rolesCard);
+            case 13402: return hookComponent(exports, hideWhole("profile.connections"), "UserProfileAccountConnectionsCard");
+            case 13181: return hookComponent(exports, noteSpot);
             case 9115: return hookComponent(exports, hideTree(youSpot));
             case 14827: return hookComponent(exports, appWithHideBar);
             case 13092: return hookComponent(exports, profileMenu);
@@ -8777,7 +8957,7 @@
             case 14279: return hookComponent(exports, menuItemMark, "ContextMenuItem");
             case 8525: return hookExport(exports, "useSegmentedControlState", segmentedState);
             case 8775: return hookComponent(exports, segmentedItemMark, "SegmentedControlItem");
-            case 10533: return hookComponent(exports, hideTree(profileTagSpot));
+            case 10533: return hookComponent(exports, hideTree(profilePrimarySpot));
             case 11997: return hookComponent(exports, hideTree(serverHeaderSpot));
             case 14206: return hookComponent(exports, hideTree(guildHeaderSpot));
             case 14212: return hookComponent(exports, hideTree(guildTabSpot));
