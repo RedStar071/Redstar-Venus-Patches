@@ -1,5 +1,5 @@
 // Boots the real Venus runtime (patches/src/main/resources/venus/bootstrap.js, every feature patched in) on a tiny
-// stand-in for Metro, then draws one Venus settings page in a 412 dp wide phone frame. Driven by the URL:
+// stand-in for Metro, then draws one Venus settings page in a phone-wide frame (412 dp, or WIDTH). Driven by the URL:
 //   page=VENUS_PLUGINS        the route to draw (VENUS_PLUGINS, VENUS_GENERAL, VENUS_BACKUP, VENUS_LANGUAGE, VENUS_<FEATURE>)
 //   on=noDelete,quests        features (or any boolean settings) turned on
 //   set={"readAllMode":"dms"} any other saved settings, as JSON
@@ -30,7 +30,10 @@ const RN = Object.assign({}, RNW, { Animated, Modal: RNW.Modal || (() => null),
 
 // Discord's file module: the saved settings file comes from the URL, language packs from the repo.
 const on = (q.get("on") || "").split(",").filter(Boolean);
-const saved = Object.assign({ language: q.get("lang") || "en", setupDone: true }, Object.fromEntries(on.map(k => [k, true])), JSON.parse(q.get("set") || "{}"));
+// A scene starts with the features it draws turned on (S.SCENE_SETTINGS); on= and set= still win.
+const scene = q.get("scene");
+if (scene && !S.SCENE_SETTINGS[scene]) console.warn("No scene called " + scene + " (the list is at the top of tests/ui/scenes.jsx)");
+const saved = Object.assign({ language: q.get("lang") || "en", setupDone: true }, scene ? S.SCENE_SETTINGS[scene] : null, Object.fromEntries(on.map(k => [k, true])), JSON.parse(q.get("set") || "{}"));
 const settingsText = q.get("fresh") === "1" ? null : JSON.stringify(saved);
 // installed=<file in work/themes>[,<file>...]: those published themes are installed (the first one in use), as if added
 // from their links, so every page and scene draws in that theme's compiled colors (and wallpaper).
@@ -95,10 +98,13 @@ function boot() {
   colorTables();
   modules[14839] = { SETTING_RENDERER_CONFIG: { ACCOUNT: { type: "route", IconComponent: D.makeIcon("UserCircleIcon") } } };
   modules[14971] = { SettingsList: D.makeSettingsList(() => registry) };
+  modules[14974] = { toSettingListItems: node => node };
+  modules[14973] = { renderSettingItem: D.makeSettingItem(() => registry) };
+  modules[14838] = { default: D.makeBlocklistStore() };
   modules[10664] = { createList: x => x };
   const define = (id, exports) => global.__d((g, r, i, a, module) => { module.exports = exports; }, id, []);
   define(120, { default: () => {} });
-  [17, 19, 1162, 6265, 6896, 14971, 10664, 14839, 591, 589, 590, 1205].concat(S.hooked).forEach(id => define(id, modules[id]));
+  [17, 19, 1162, 6265, 6896, 14971, 14973, 14974, 14838, 10664, 14839, 591, 589, 590, 1205].concat(S.hooked).forEach(id => define(id, modules[id]));
   defined[120].exports.default();
   registry = defined[14839].exports.SETTING_RENDERER_CONFIG;
 }
@@ -111,13 +117,14 @@ window.__venusStart = function () {
     ReactDOM.createRoot(document.getElementById("root")).render(<SceneFrame />); return;
   }
   const page = q.get("page") || "VENUS_PLUGINS", node = registry[page];
+  if (!node) console.warn("No page called " + page);
   const Page = node && node.screen && node.screen.getComponent();
   if (q.get("search")) setTimeout(() => { const input = document.querySelector("input"); if (input) { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(input, q.get("search")); input.dispatchEvent(new Event("input", { bubbles: true })); } }, 300);
   function Frame() {
     const [, bump] = React.useState(0);
     rerender = () => bump(n => n + 1);
     const title = node && node.useTitle ? node.useTitle() : page;
-    return <RNW.View style={{ width: 412, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
+    return <RNW.View style={{ width: D.W, minHeight: "100vh", backgroundColor: D.tok("BACKGROUND_BASE_LOW") }}>
       <RNW.View style={{ height: 56, flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16 }}>
         {React.createElement(D.makeIcon("ArrowLargeLeftIcon"), { size: "md", color: D.tok("INTERACTIVE_ICON_DEFAULT") })}
         <D.Text variant="heading-lg/bold" color="text-strong">{title}</D.Text>
@@ -132,6 +139,8 @@ window.__venusStart = function () {
 // tap=<text>: taps the first element whose accessibility label or text is exactly that, after the page draws.
 if (q.get("tap")) setTimeout(() => {
   const want = q.get("tap"), all = Array.from(document.querySelectorAll("#root [aria-label], #root div[tabindex], #root [role]"));
-  const hit = all.find(e => e.getAttribute("aria-label") === want) || all.find(e => (e.innerText || "").trim() === want);
+  // A row's own text (its title, without the description under it) taps the row it's in.
+  const hit = all.find(e => e.getAttribute("aria-label") === want) || all.find(e => (e.innerText || "").trim() === want) ||
+    Array.from(document.querySelectorAll("#root div[dir], #root span")).find(e => !e.children.length && (e.textContent || "").trim() === want);
   if (hit) hit.click(); else console.warn("tap: nothing labelled " + want);
 }, 400);
