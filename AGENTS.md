@@ -192,7 +192,8 @@ python3 tests/ui/i18n.py drop "Old text"               # remove (or `add texts.j
   for a first launch, `theme=light|midnight|darker`, `lang=de`, `search=` typed into the Features search bar, `tap=` the label or text of something to tap first.
 - **Inside Discord:** `scene=` draws a Discord screen with what Venus adds to it, instead of a settings page
   (`tests/ui/scenes.jsx`). Each scene turns on the features it draws (`SCENE_SETTINGS`, which is also the list
-  `--scenes` reads, so add a new scene there); `on=`/`set=` still win: `serverMenu` (the server hold menu with Server info), `serverInfo` (the Server info sheet),
+  `--scenes` reads, so add a new scene there); `on=`/`set=` still win: `serverMenu` (the server hold menu with Server info), `serverInfo` (the Server info sheet), `serverEditMenu` and `serverEdit` (Edit servers locally's
+  menu row, the server list with local names and icons, and its sheet; `server=1|2` and `set={"serverEdits":…}` for saved edits),
   `readAll` and `readAllHold` (the Read all pill and its choices), `reviews` (a profile with the Reviews card), `hiddenChannel` (the locked-channel dialog), `settings` (Discord's Settings screen with the Venus section), `youBar` (the profile bar buttons), `translateBar` (the Translate pill in a chat), `bulkDelete` (the selection bar in a chat, after Select Messages), `messageMenu` (a message's hold menu with Translate), `serverSheet` (the server sheet with the Reviews row); parameters
   for edge cases are listed at the top of `scenes.jsx`. Check these too when a feature's settings change what
   it does in Discord, and add a scene for any other place Venus draws.

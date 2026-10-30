@@ -71,6 +71,40 @@
       "options": []
     },
     {
+      "name": "Always trust links and files",
+      "description": "Opens links and files without Discord's \"Are you sure?\" warnings. Based on AlwaysTrust by zt and Trwy.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Anonymous file names",
       "description": "Files you send get a random name instead of the one on your phone. Based on Anonymous File Names by k1ng_op.",
       "default": true,
@@ -629,6 +663,40 @@
       "options": []
     },
     {
+      "name": "Edit servers locally",
+      "description": "Give any server your own name and icon. Only you see them. Based on EditServers by mwittrien.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Favourite any image or video",
       "description": "Star any image or video to keep it in your GIF favourites.",
       "default": true,
@@ -936,7 +1004,7 @@
     },
     {
       "name": "Load full-quality images",
-      "description": "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy. Based on Uncompressed Discord Images by Knewest.",
+      "description": "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy, and profile pictures stay sharp. Based on Uncompressed Discord Images by Knewest and HighResProfileImages by Kawtious.",
       "default": true,
       "category": "Features",
       "dependencies": [
@@ -1414,6 +1482,74 @@
     {
       "name": "Skip delete confirmation",
       "description": "Messages and link previews are removed right away, with no \"Are you sure?\". It can't be undone.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Skip pin confirmation",
+      "description": "Pins and unpins messages without asking first. Based on NoConfirmPin by Skamt.",
+      "default": true,
+      "category": "Features",
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.discord",
+          "name": "Discord",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#5865F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "350.8 - Stable",
+              "versionCodes": {
+                "ARM64_V8A": 350008,
+                "ARMEABI_V7A": 350008,
+                "X86_64": 350008,
+                "X86": 350008
+              },
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Tap mentions to open profiles",
+      "description": "Tap an @mention in the message bar to see who it is. Based on ClickableMentions by mwittrien.",
       "default": true,
       "category": "Features",
       "dependencies": [
