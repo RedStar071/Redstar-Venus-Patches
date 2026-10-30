@@ -45,9 +45,12 @@
     if (features.serverInfo) selectModules([1390, 16748]);
     if (features.fixEmbeds) selectModules([1390, 7174]);
     if (features.tenorGifs) selectModules([1295, 9733]);
-    if (features.hideBlocked) selectModules([4760, 5432, 7308, 11624]);
+    if (features.hideBlocked) selectModules([584, 2065, 2116, 4760, 5432, 7015, 7308, 11624]);
     if (features.staffTag) targetModules[7742] = 1;
-    if (features.fullImages) selectModules([1496, 8388]);
+    if (features.fullImages) selectModules([1415, 1496, 8388]);
+    if (features.alwaysTrust) selectModules([8260, 8488]);
+    if (features.noConfirmPin) selectModules([5300, 1126]);
+    if (features.clickableMentions) selectModules([1390, 2065, 2116, 11953]);
     if (features.removedAlerts) selectModules([584, 1390, 6098, 7018, 8633, 9699, 13933, 13968]);
     if (features.bulkDelete) selectModules([584, 1085, 1390, 2065, 2116, 4750, 5432, 7174, 7742, 9675, 10368, 10694]);
     if (features.experiments) selectModules([584, 1390, 1401]);
@@ -73,7 +76,7 @@
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
         messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
-        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, removedAlerts:false, removedAlertsFriends:true, removedAlertsServers:true, removedAlertsClosed:true, removedAlertsPush:false, fullImages:false, fullImagesChat:true, fullImagesViewer:true, fullImagesGifs:false, hideAnything:false, hideAnythingSpots:"", language:"auto", hiddenFeatures:"" };
+        fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, hideBlockedCloseDms:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, removedAlerts:false, removedAlertsFriends:true, removedAlertsServers:true, removedAlertsClosed:true, removedAlertsPush:false, fullImages:false, fullImagesChat:true, fullImagesViewer:true, fullImagesGifs:false, fullImagesAvatars:true, alwaysTrust:false, alwaysTrustLinks:true, alwaysTrustFiles:true, noConfirmPin:false, clickableMentions:false, hideAnything:false, hideAnythingSpots:"", language:"auto", hiddenFeatures:"" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
     function defaultSettings() {
@@ -90,7 +93,7 @@
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
             messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
-            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, removedAlerts: false, removedAlertsFriends: true, removedAlertsServers: true, removedAlertsClosed: true, removedAlertsPush: false, fullImages: false, fullImagesChat: true, fullImagesViewer: true, fullImagesGifs: false, hideAnything: false, hideAnythingSpots: "", language: "auto", hiddenFeatures: ""
+            fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, hideBlockedCloseDms: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, removedAlerts: false, removedAlertsFriends: true, removedAlertsServers: true, removedAlertsClosed: true, removedAlertsPush: false, fullImages: false, fullImagesChat: true, fullImagesViewer: true, fullImagesGifs: false, fullImagesAvatars: true, alwaysTrust: false, alwaysTrustLinks: true, alwaysTrustFiles: true, noConfirmPin: false, clickableMentions: false, hideAnything: false, hideAnythingSpots: "", language: "auto", hiddenFeatures: ""
         }));
     }
     // Backup and restore (#68): when you last saved a backup, and whether a restore is being applied right now.
@@ -1027,7 +1030,7 @@
     const featureFor = key => {
         const cached = featureTable[key];
         if (cached !== undefined) return cached;
-        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : /^fullImages[A-Z]/.test(key) ? "fullImages" : /^hideAnything[A-Z]/.test(key) ? "hideAnything" : key;
+        return featureTable[key] = key === "reviewWarning" ? "reviewDB" : key === "emojis" || key === "stickers" || key === "hyperlinks" ? "freeNitro" : key === "noDeleteSave" || key === "noDeleteLimit" || key === "noDeleteEdits" || key === "noDeleteColor" || key === "noDeleteBrightness" ? "noDelete" : /^pi[A-Z]/.test(key) ? "platformIndicators" : key === "pastelAll" || key === "pastelContent" ? "pastelize" : key === "readAllMode" ? "readAll" : /^quests[A-Z]/.test(key) ? "quests" : /^badges[A-Z]/.test(key) ? "badges" : /^gesture[A-Z]/.test(key) ? "gestures" : /^translate[A-Z]/.test(key) ? "translate" : /^removedAlerts[A-Z]/.test(key) ? "removedAlerts" : /^userNotif[A-Z]/.test(key) ? "userNotif" : /^accountSwitcher[A-Z]/.test(key) ? "accountSwitcher" : /^hiddenChannels[A-Z]/.test(key) ? "hiddenChannels" : /^customThemes[A-Z]/.test(key) ? "customThemes" : /^materialYou[A-Z]/.test(key) ? "materialYou" : /^iconPacks[A-Z]/.test(key) ? "iconPacks" : /^messageHighlight[A-Z]/.test(key) ? "messageHighlight" : /^serverInfo[A-Z]/.test(key) ? "serverInfo" : /^fixEmbeds[A-Z]/.test(key) ? "fixEmbeds" : /^tenorGifs[A-Z]/.test(key) ? "tenorGifs" : /^hideBlocked[A-Z]/.test(key) ? "hideBlocked" : /^bulkDelete[A-Z]/.test(key) ? "bulkDelete" : key === "systemFontSource" ? "systemFont" : key === "systemEmojiSource" ? "systemEmoji" : /^cleanChannels[A-Z]/.test(key) ? "cleanChannels" : /^anonFiles[A-Z]/.test(key) ? "anonFiles" : /^staffTag[A-Z]/.test(key) ? "staffTag" : /^fullImages[A-Z]/.test(key) ? "fullImages" : /^alwaysTrust[A-Z]/.test(key) ? "alwaysTrust" : /^hideAnything[A-Z]/.test(key) ? "hideAnything" : key;
     };
     // Section titles are read whenever Discord draws the list, so they follow the language too. "Venus" is a name.
     function section(label, keys) {
@@ -1062,7 +1065,7 @@
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], hideAnything:[10260, "XLargeIcon"], fullImages:[11587, "ImagesIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], hideAnything:[10260, "XLargeIcon"], fullImages:[11587, "ImagesIcon"], alwaysTrust:[10410, "ShieldIcon"], noConfirmPin:[10334, "PinIcon"], clickableMentions:[8213, "AtIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1103,10 +1106,13 @@
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed", "Imgur", "Newgrounds",
             "Post style", "Translate posts", "Full post", "Media", "Text", "File", "Translate", "Gallery"], tenorGifs:["Tenor", "GIF", "GIFs", "Klipy", "GIFs from", "Only Tenor"],
-        hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "blocked", "ignored", "replies"],
+        hideBlocked:["Blocked messages", "Ignored messages", "Replies to them", "Remove blocked users", "RemoveBlockedUsers", "Close their DM", "blocked", "ignored", "replies"],
         anonFiles:["File names", "Random name", "Privacy", "Rename"],
         staffTag:["Owner", "Admin", "Manager", "Mod", "Crown", "Staff", "Moderator", "Tags", "Staff tags", "StaffTag", "Label", "Badge"],
-        fullImages:["Uncompressed", "Uncompressed images", "Original", "Full quality", "Lossless", "Compression", "Blurry", "Thumbnail", "Resolution", "Pictures", "Photos"],
+        alwaysTrust:["AlwaysTrust", "Always Trust", "Leaving Discord", "Untrusted domain", "Suspicious file", "Dangerous download", "Links", "Downloads"],
+        noConfirmPin:["NoConfirmPin", "Pin", "Unpin", "Pinned messages"],
+        clickableMentions:["ClickableMentions", "Mentions", "Profile", "Message bar"],
+        fullImages:["High-res profile pictures", "HighResProfileImages", "Avatars", "Profile pictures", "Banners", "Uncompressed", "Uncompressed images", "Original", "Full quality", "Lossless", "Compression", "Blurry", "Thumbnail", "Resolution", "Pictures", "Photos"],
         removedAlerts:["Removed", "Unfriend", "Friend", "Kicked", "Banned", "Server", "Left", "Alert", "Notifier", "Relationship", "Connection", "Removed connection alerts", "Relationship notifier", "Notify"],
         cleanChannels:["Emoji", "Symbols and dividers", "Fancy letters", "Spaces instead of dashes", "Spaces in channel names", "general chat", "Categories", "Channel names", "Decorations"],
         experiments:["Dev Tools", "Experiments", "Experiment", "Developer", "Staff"],
@@ -1559,6 +1565,8 @@
         withOptions("messages", "translate", "VENUS_TRANSLATE", "Translate messages", "Shows messages in your language, using Google Translate.", "Translate messages", TranslateSettings);
         withOptions("messages", "gestures", "VENUS_GESTURES", "Double-tap to reply", "Double-tap to reply, or to edit your own message.", "Tap gestures", GestureSettings);
         toggle("messages", "quickDelete", "Skip delete confirmation", "Deletes messages without asking first. Can't be undone.");
+        toggle("messages", "noConfirmPin", "Skip pin confirmation", "Pins and unpins messages without asking first.");
+        withOptions("messages", "alwaysTrust", "VENUS_ALWAYSTRUST", "Always trust links and files", "Opens links and files without Discord's \"Are you sure?\" warnings.", "Always trust", AlwaysTrustSettings);
         toggle("messages", "jumpToTop", "Jump to first message", "A button to jump to the start of any chat.");
         toggle("messages", "favouriteAnything", "Favourite any image or video", "Star any image or video to keep it in your GIF favourites.");
         // Sending
@@ -1573,6 +1581,7 @@
         toggle("sending", "noTyping", "Hide typing indicator", "Others won't see when you're typing.");
         toggle("sending", "picker", "Show file sizes when attaching", "Photos and videos in the picker show their size.");
         toggle("sending", "anonFiles", "Anonymous file names", "Files you send get a random name instead of the one on your phone.");
+        toggle("sending", "clickableMentions", "Tap mentions to open profiles", "Tap an @mention in the message bar to see who it is.");
         // People
         withOptions("people", "pastelize", "VENUS_PASTELIZE", "Pastel name colors", "Names without a role color get a soft pastel one.", "Pastel names",
             () => ({page:PastelSettings, sections:[section("Colors", [option("pastelAll", "Replace role colors", "Every name uses its pastel color, even with a role color.", "VENUS_PASTELIZE"),
@@ -2522,7 +2531,23 @@
         }
         if (enabled("quickDelete") && (matches("AMvpS4") || matches("vXZ+Fo")))
             return popup.onConfirm();
+        // Skip pin confirmation (based on NoConfirmPin by Skamt): LongPressMessageActionSheetUtils (9685) asks "Are you sure you
+        // want to pin this message?" (WG5dyo) inside the alert's children, and "You sure you want to remove this pinned message?"
+        // (NjEPp7) as the unpin alert's body. Only those two exact texts in Discord's language skip the alert.
+        if (enabled("noConfirmPin")) {
+            alertTexts(popup.children, texts, 0);
+            if (matches("WG5dyo") || matches("NjEPp7")) return popup.onConfirm();
+        }
         return orig.apply(self, args);
+    }
+    // The plain strings inside an alert's children (a few levels of React elements), added to `out`.
+    function alertTexts(node, out, depth) {
+        if (node == null || depth > 5) return out;
+        if (typeof node === "string") { out.push(node); return out; }
+        if (Array.isArray(node)) { for (let i = 0; i < node.length && i < 20; i++) alertTexts(node[i], out, depth + 1); return out; }
+        const props = typeof node === "object" && node.props;
+        if (props) { alertTexts(props.children, out, depth + 1); if (typeof props.title === "string") out.push(props.title); }
+        return out;
     }
     function deletedKey(channelId, id) { return channelId + ":" + id; }
     function invalidateDeleted() { deletedRevision++; deletedViews.clear(); }
@@ -15396,7 +15421,7 @@
     // Hide blocked or ignored messages (#91, from Rain): filters hidden messages out of the stream createChannelStream
     // (11624) walks, before Discord groups messages or builds BLOCKED_GROUP / IGNORED_GROUP rows. MessageStore itself is
     // untouched, adjacent messages around a hidden one join into one group, and toggling an option redraws the open chat.
-    const hideBlocked = {relationships:null, references:null, version:0};
+    const hideBlocked = {relationships:null, references:null, version:0, dispatcher:null};
     function hideBlockedAuthorBlocked(msg) {
         if (!msg || typeof msg !== "object") return false;
         if (msg.blocked === true) return true;
@@ -15484,6 +15509,33 @@
         next[0] = Object.assign({}, params, {messages:wrapped, forceRender:force || params.forceRender});
         return orig.apply(self, next);
     }
+    // Close their DM (based on RemoveBlockedUsers): when you block someone, RelationshipStore gets RELATIONSHIP_ADD (or _UPDATE
+    // for a friend) with type 2. Venus then closes your DM with them through Discord's own closePrivateChannel (7015), the
+    // same as Close DM in its menu: the chat leaves the Messages list and nothing is deleted. Open on that chat, you're
+    // taken back to Friends first.
+    function hideBlockedInit(d) {
+        if (hideBlocked.dispatcher || !d || typeof d.subscribe !== "function") return;
+        hideBlocked.dispatcher = d;
+        const onBlock = event => {
+            const rel = event && event.relationship;
+            if (!rel || rel.type !== 2 || typeof rel.id !== "string" || !enabled("hideBlocked") || !settings.hideBlockedCloseDms) return;
+            later(() => hideBlockedCloseDm(rel.id), 0);
+        };
+        d.subscribe("RELATIONSHIP_ADD", onBlock);
+        d.subscribe("RELATIONSHIP_UPDATE", onBlock);
+    }
+    function hideBlockedCloseDm(userId) {
+        try {
+            const store = channelStore || inspectedExport(2065, "default");
+            const channelId = store && typeof store.getDMFromUserId === "function" ? store.getDMFromUserId(userId) : null;
+            const actions = channelId && inspectedExport(7015, "default");
+            if (!actions || typeof actions.closePrivateChannel !== "function") return;
+            const selected = inspectedExport(2116, "default");
+            const open = !!(selected && typeof selected.getChannelId === "function" && selected.getChannelId() === channelId);
+            const done = actions.closePrivateChannel(channelId, open, false);
+            if (done && typeof done.catch === "function") done.catch(() => {});
+        } catch (_) {}
+    }
     function hideBlockedChanged() {
         hideBlocked.version++;
         if (!msgStore) msgStore = inspectedExport(5432, "default");
@@ -15541,7 +15593,7 @@
         if (!React || !RN) return null;
         const on = enabled("hideBlocked"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
         const Icon = venusIcon(17072, "ChatShieldIcon");
-        const hasAny = !!(settings.hideBlockedBlocked || settings.hideBlockedIgnored || settings.hideBlockedReplies);
+        const hasAny = !!(settings.hideBlockedBlocked || settings.hideBlockedIgnored || settings.hideBlockedReplies || settings.hideBlockedCloseDms);
         const groups = [
             !on ? offCard("status", Icon, "hideBlocked") : !hasAny ? statusCard("status", "Turn on at least one option below.",
                 {title:tr("Nothing hidden"), IconComponent:Icon}) : null,
@@ -15550,6 +15602,8 @@
                 switchRow(Switch, "hideBlockedBlocked", "Blocked messages", "Hides the \"blocked messages\" row and the messages inside it.", rowIcon(5036, "UserMinusIcon")),
                 switchRow(Switch, "hideBlockedIgnored", "Ignored messages", "Hides the \"ignored messages\" row from people you've ignored.", rowIcon(6650, "EyeSlashIcon")),
                 switchRow(Switch, "hideBlockedReplies", "Replies to them", "Also hides messages that reply to someone you've blocked or ignored.", rowIcon(12838, "ArrowAngleLeftUpIcon"))),
+            el(Group, {key:"block", title:tr("When you block someone")},
+                switchRow(Switch, "hideBlockedCloseDms", "Close their DM", "Your DM with them leaves the Messages list. No messages are deleted.", rowIcon(8194, "ChatIcon"))),
             footnote("note", "Changes show in chat right away, with no restart.")
         ];
         return settingsBody(ui, groups);
@@ -16031,20 +16085,139 @@
         });
         return exports;
     }
+    // High-res profile pictures (based on HighResProfileImages by Kawtious): AvatarUtils (1415) asks the CDN for an avatar or
+    // banner only as big as it's drawn (size=64, 128...), which blurs in profiles and full screen. Venus asks for at least 512
+    // (avatars) or 1024 (banners) instead: still powers of two the CDN accepts, and small enough for long member lists.
+    const FULL_AVATAR_CALLS = ["getUserAvatarURL", "getGuildMemberAvatarURL", "getGuildMemberAvatarURLSimple", "getUserAvatarSource",
+        "getGuildMemberAvatarSource", "getUserBannerURL", "getGuildMemberBannerURL"];
+    const FULL_AVATAR_URL = /^https:\/\/(?:cdn\.discordapp\.com|media\.discordapp\.net)\/(?:avatars|banners|guilds)\//;
+    const FULL_AVATAR_SIZE = /([?&])size=(\d+)/;
+    function fullAvatarUrl(url, banner) {
+        if (typeof url !== "string" || url.length > 2048 || !FULL_AVATAR_URL.test(url)) return url;
+        const want = banner ? 1024 : 512;
+        return url.replace(FULL_AVATAR_SIZE, (all, sep, n) => Number(n) >= want ? all : sep + "size=" + want);
+    }
+    function fullAvatarHook(banner) {
+        return (orig, self, args) => {
+            const out = orig.apply(self, args);
+            if (!settings.fullImagesAvatars || !enabled("fullImages")) return out;
+            try {
+                if (typeof out === "string") return fullAvatarUrl(out, banner);
+                if (out && typeof out === "object" && !Array.isArray(out) && typeof out.uri === "string") {
+                    const uri = fullAvatarUrl(out.uri, banner);
+                    return uri === out.uri ? out : Object.assign({}, out, {uri});
+                }
+            } catch (_) {}
+            return out;
+        };
+    }
+    function hookFullAvatars(exports) {
+        const hookAll = target => { FULL_AVATAR_CALLS.forEach(name => { target = hookExport(target, name, fullAvatarHook(name.indexOf("Banner") >= 0)); }); return target; };
+        exports = hookAll(exports);
+        if (exports && exports.default && typeof exports.default === "object") {
+            const inner = hookAll(exports.default);
+            if (inner !== exports.default) exports = replaceValue(exports, "default", inner);
+        }
+        return exports;
+    }
+    // Always trust links and files (based on AlwaysTrust by zt and Trwy): MaskedLinkStore.isTrustedDomain (8488) decides
+    // whether a link asks "Leaving Discord", and SuspiciousDownloadUtils.isSuspiciousDownload (8260) whether a file link
+    // warns it may be dangerous. Domains Discord blocks outright are a separate check and stay blocked.
+    function alwaysTrustDomain(orig, self, args) {
+        return enabled("alwaysTrust") && settings.alwaysTrustLinks ? true : orig.apply(self, args);
+    }
+    function alwaysTrustFile(orig, self, args) {
+        return enabled("alwaysTrust") && settings.alwaysTrustFiles ? null : orig.apply(self, args);
+    }
+    function AlwaysTrustSettings() {
+        useSettings("alwaysTrust");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("alwaysTrust"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
+        const Icon = venusIcon(10410, "ShieldIcon");
+        const any = !!(settings.alwaysTrustLinks || settings.alwaysTrustFiles);
+        const groups = [
+            !on ? offCard("status", Icon, "alwaysTrust") : !any ? statusCard("status", "Turn on at least one option below.", {IconComponent:Icon}) : null,
+            el(Group, {key:"what", title:tr("Skip the warning for")},
+                switchRow(Switch, "alwaysTrustLinks", "Links", "No \"Leaving Discord\" before opening links to other sites.", rowIcon(7701, "LinkExternalSmallIcon")),
+                switchRow(Switch, "alwaysTrustFiles", "Downloads", "No \"potentially dangerous download\" before opening files.", rowIcon(5044, "DownloadIcon"))),
+            footnote("note", "Links Discord knows are harmful stay blocked.")];
+        return settingsBody(ui, groups);
+    }
+    // Tap mentions to open profiles (based on ClickableMentions by mwittrien). The message bar is a native view
+    // (ChatInputNativeComponent, 11953) that only reports taps on attachments, but every tap moves the cursor and arrives
+    // as onSelectionOrTextChange. When the text hasn't changed and the cursor lands inside an @mention, Venus opens that
+    // person's profile sheet (showUserProfileActionSheet, 8299). Typing, and mentions picked from the list, never open one.
+    const mentionTaps = new WeakMap();
+    const MENTION_TOKEN = /<@!?(\d{17,20})>|@([^\s@#:<>`]{2,32})/g;
+    function clickableMentionsProps(props) {
+        const orig = props && props.onSelectionOrTextChange;
+        if (typeof orig !== "function" || !enabled("clickableMentions")) return props;
+        let wrapped = mentionTaps.get(orig);
+        if (!wrapped) {
+            const state = {text:undefined};
+            wrapped = function (event) {
+                try { mentionTapCheck(state, event && event.nativeEvent); } catch (_) {}
+                return orig.apply(this, arguments);
+            };
+            mentionTaps.set(orig, wrapped);
+        }
+        return Object.assign({}, props, {onSelectionOrTextChange:wrapped});
+    }
+    function mentionTapCheck(state, e) {
+        if (!e || typeof e.text !== "string") return;
+        const text = e.text, same = state.text === text, at = e.start;
+        state.text = text;
+        if (!same || typeof at !== "number" || at !== e.end || text.length > 4000) return;
+        MENTION_TOKEN.lastIndex = 0;
+        let m;
+        while ((m = MENTION_TOKEN.exec(text))) {
+            const start = m.index, end = start + m[0].length;
+            if (start >= at) return;
+            if (m[2] && start > 0 && !/\s/.test(text[start - 1])) continue;
+            if (at < end) { mentionOpen(m[1], m[2]); return; }
+        }
+    }
+    function mentionUser(id, name) {
+        const users = userStore || inspectedExport(1390, "default");
+        if (!users) return null;
+        if (id) return typeof users.getUser === "function" ? users.getUser(id) : null;
+        const wanted = name.toLowerCase();
+        let user = typeof users.findByTag === "function" ? users.findByTag(wanted) : null;
+        if (user || typeof users.getUsers !== "function") return user;
+        const all = users.getUsers();
+        for (const key in all) {
+            const u = all[key];
+            if (u && (typeof u.globalName === "string" && u.globalName.toLowerCase() === wanted || typeof u.username === "string" && u.username.toLowerCase() === wanted)) return u;
+        }
+        return null;
+    }
+    function mentionOpen(id, name) {
+        const user = mentionUser(id, name), show = user && user.id ? inspectedExport(8299, "default") : null;
+        if (typeof show !== "function") return;
+        const selected = inspectedExport(2116, "default");
+        const channelId = selected && typeof selected.getChannelId === "function" ? selected.getChannelId() : undefined;
+        const store = channelStore || inspectedExport(2065, "default");
+        const channel = channelId && store && typeof store.getChannel === "function" ? store.getChannel(channelId) : null;
+        haptic("SELECTION");
+        try { if (RN && RN.Keyboard && typeof RN.Keyboard.dismiss === "function") RN.Keyboard.dismiss(); } catch (_) {}
+        later(() => { try { show({userId:user.id, channelId, guildId:channel && channel.guild_id || undefined}); } catch (_) {} }, 60);
+    }
     function FullImagesSettings() {
         useSettings("fullImages");
         const ui = reviewUI();
         if (!React || !RN) return null;
         const on = enabled("fullImages"), Group = ui.TableRowGroup || RN.View, Switch = ui.TableSwitchRow;
         const Icon = venusIcon(11587, "ImagesIcon");
-        const where = !!(settings.fullImagesChat || settings.fullImagesViewer);
+        const where = !!(settings.fullImagesChat || settings.fullImagesViewer || settings.fullImagesAvatars);
         const groups = [
             !on ? offCard("status", Icon, "fullImages") : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
                 title:where ? tr("Loading pictures as uploaded") : tr("Nothing loads in full"),
                 body:where ? tr("Pictures people upload show in their original quality, not Discord's smaller copy.") : tr("Turn on at least one option below.")}),
             el(Group, {key:"where", title:tr("Load in full")},
                 switchRow(Switch, "fullImagesChat", "In chat", "Pictures in messages, as soon as they appear.", rowIcon(8194, "ChatIcon")),
-                switchRow(Switch, "fullImagesViewer", "When opened", "Pictures you tap to view full screen.", rowIcon(15327, "FullscreenEnterIcon"))),
+                switchRow(Switch, "fullImagesViewer", "When opened", "Pictures you tap to view full screen.", rowIcon(15327, "FullscreenEnterIcon")),
+                switchRow(Switch, "fullImagesAvatars", "Profile pictures and banners", "Sharp at any size, instead of Discord's small copy.", rowIcon(10287, "UserCircleIcon"))),
             el(Group, {key:"data", title:tr("Mobile data")},
                 switchRow(Switch, "fullImagesGifs", "GIFs and animated pictures", "Loads the whole GIF instead of Discord's lighter copy. Can use a lot of data.", rowIcon(9748, "GifIcon"))),
             footnote("note", "Only pictures people upload to Discord change, not links to other sites. Pictures over 16 megapixels stay as Discord sends them, so the app doesn't run out of memory. Pictures already on screen update when you reopen the chat.")];
@@ -17014,8 +17187,8 @@
             case 9735: return features.favouriteAnything ? hookExport(exports, "useFavoriteGIFsMobile", favouriteList) : exports;
             case 2065: channelStore = exports.default; return exports;
             case 11668: return features.noTyping ? replaceValue(exports, "default", hookExport(hookExport(exports.default, "startTyping", typing), "stopTyping", typing)) : exports;
-            case 1126: if (features.quickDelete) locale = exports; return exports;
-            case 5300: return features.quickDelete ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
+            case 1126: if (features.quickDelete || features.noConfirmPin) locale = exports; return exports;
+            case 5300: return features.quickDelete || features.noConfirmPin ? replaceValue(exports, "default", hookExport(exports.default, "show", quickConfirm)) : exports;
             case 5434: if (features.noDelete) { messageRecords = exports; restoreDeleted(); } return exports;
             case 1390:
                 if (exports && exports.default && (features.validUser || features.splitMessages || features.fixEmbeds || features.translate || features.userNotif || features.removedAlerts || features.accountSwitcher || features.appIcons || features.nitroThemes || features.messageHighlight || features.serverInfo || features.noDelete || features.reviewDB || features.platformIndicators || features.hiddenChannels || features.gestures || features.freeNitro || features.badges || features.bulkDelete || features.experiments))
@@ -17032,12 +17205,17 @@
             case 7386: if (features.quests) questAttach(exports.default); return exports;
             case 1496: return features.fullImages ? hookExport(exports, "getMobileOptimizedSrc", fullImagesSrc) : exports;
             case 8388: return features.fullImages ? hookFullImagesViewer(exports) : exports;
+            case 1415: return features.fullImages ? hookFullAvatars(exports) : exports;
+            case 8488: return features.alwaysTrust && exports && exports.default ? replaceValue(exports, "default", hookExport(exports.default, "isTrustedDomain", alwaysTrustDomain)) : exports;
+            case 8260: return features.alwaysTrust ? hookExport(exports, "isSuspiciousDownload", alwaysTrustFile) : exports;
+            case 11953: return features.clickableMentions && exports && exports.default ? replaceValue(exports, "default", propsComponent(exports.default, clickableMentionsProps)) : exports;
             case 7018: return features.removedAlerts ? hookRemovedMine(exports, ["removeFriend", "removeRelationship"]) : exports;
             case 6098: return features.removedAlerts ? hookRemovedMine(exports, ["deleteGuild"]) : exports;
             case 8633: return features.removedAlerts ? hookRemovedMine(exports, ["leaveGuild", "deleteGuild"]) : exports;
             case 584:
                 if (features.userNotif && exports && exports.default) userNotifInit(exports.default);
                 if (features.removedAlerts && exports && exports.default) removedInit(exports.default);
+                if (features.hideBlocked && exports && exports.default) hideBlockedInit(exports.default);
                 if (features.translate && exports && exports.default) translateInit(exports.default);
                 if (features.validUser && exports && exports.default) validInit(exports.default);
                 if (features.quests) questsInit(exports.default);
