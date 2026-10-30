@@ -8271,10 +8271,10 @@
             animateLayout(); haptic("SELECTION"); setIcon(value); setBroken(""); setLink(null);
         };
         const commit = next => { serverEditSet(guildId, next); haptic("SELECTION"); reviewToast(ui, next ? "Saved on this phone" : "Back to the real name and icon", venusIcon(6868, "CircleCheckIcon")); close(); };
-        const button = (key, text, onPress, variant, disabled) => Button ? el(Button, {key, text:tr(text), size:"lg", variant, disabled:!!disabled, onPress}) :
-            el(RN.Pressable || RN.View, {key, onPress:disabled ? undefined : onPress, accessibilityRole:"button", accessibilityLabel:tr(text),
+        const button = (key, text, onPress, variant, disabled) => Button ? el(Button, {key, text, size:"lg", variant, disabled:!!disabled, onPress}) :
+            el(RN.Pressable || RN.View, {key, onPress:disabled ? undefined : onPress, accessibilityRole:"button", accessibilityLabel:text,
                 style:{height:48, borderRadius:24, alignItems:"center", justifyContent:"center", backgroundColor:variant === "primary" ? "#5865f2" : "#4e5058", opacity:disabled ? 0.5 : 1}},
-                el(RN.Text, {style:{color:"#ffffff", fontWeight:"600"}}, tr(text)));
+                el(RN.Text, {style:{color:"#ffffff", fontWeight:"600"}}, text));
         const linkShown = serverEditLink(icon) ? icon.replace(/^https:\/\//i, "").replace(/[?#].*$/, "") : "";
         const body = [
             el(RN.View, {key:"hero", style:s.hero},
@@ -8300,8 +8300,8 @@
                 link != null ? inputWithButton(ui, "linkInput", {value:link, placeholder:"https://", autoCapitalize:"none", autoCorrect:false, keyboardType:"url",
                     autoFocus:true, returnKeyType:"done", onSubmitEditing:useLink, accessibilityLabel:tr("Use a link")}, text => setLink(String(text || "")), "Use", useLink, !String(link).trim()) : null),
             el(RN.View, {key:"buttons", style:{gap:10, paddingTop:4}},
-                button("save", "Save", () => commit(draft), "primary", !changed || failed),
-                edited ? button("reset", "Use the real name and icon", () => commit(null), "secondary") : null)];
+                button("save", tr("Save"), () => commit(draft), "primary", !changed || failed),
+                edited ? button("reset", tr("Use the real name and icon"), () => commit(null), "secondary") : null)];
         return serverEditScroll(ui, header, el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:20}}, body.filter(Boolean)));
     }
     function openServerEdit(guildId) {
