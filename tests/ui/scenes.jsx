@@ -4,6 +4,10 @@
 // screen the way Discord's do.
 //   scene=serverMenu   the server list with Game Night held: Discord's hold menu plus Venus's Server info row
 //   scene=serverInfo   the Server info sheet (Server info tapped in that menu)
+//   scene=serverEditMenu  the server list with Game Night held, with Edit servers locally on: the menu's Edit locally row, and the
+//                      list drawn through GuildStore, so set={"serverEdits":{...}} shows local names and icons in it
+//   scene=serverEdit   the Edit locally sheet for Game Night (Edit locally tapped in that menu); server=1 or 2 opens Art Room or Work Devs
+//                      (fixed IDs 1100000000000000002 / ...003), so set={"serverEdits":{...}} can give them a saved edit
 //   scene=readAll      the server list with the Read all pill above the servers
 //   scene=readAllHold  Read all held: the one-time choices sheet
 //   scene=reviews      Alex's profile with Venus's Reviews card under the note (reviews=0: none yet; signed in: set={"reviewAuth":{"token":"x","account":"123456789012345678"}})
@@ -51,7 +55,7 @@ const chan = n => Array.from({ length: n }, (_, i) => ({ channel: { id: String(i
 
 // The saved settings each scene starts from: the features it draws, plus the options its description names.
 export const SCENE_SETTINGS = {
-  serverMenu: { serverInfo: true }, serverInfo: { serverInfo: true }, readAll: { readAll: true }, readAllHold: { readAll: true },
+  serverMenu: { serverInfo: true }, serverInfo: { serverInfo: true }, serverEditMenu: { serverEdit: true, serverInfo: true }, serverEdit: { serverEdit: true }, readAll: { readAll: true }, readAllHold: { readAll: true },
   reviews: { reviewDB: true }, serverSheet: { reviewDB: true }, hiddenChannel: { hiddenChannels: true }, settings: {},
   youBar: { youBarSettings: true, accountSwitcher: true }, translateBar: { translate: true, translateMode: "manual" },
   messageMenu: { translate: true }, bulkDelete: { bulkDelete: true }, longMessageFailed: { splitMessages: true }, longEdit: { splitMessages: true },
@@ -60,7 +64,7 @@ export const SCENE_SETTINGS = {
 };
 
 // The stand-in modules: Discord's stores the sheet reads, its sheets, and the two guild-bar modules Venus hooks.
-export const hooked = [1390, 5108, 16748, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379,
+export const hooked = [1390, 5108, 16748, 2087, 1415, 16754, 13181, 1085, 2065, 4750, 1112, 16858, 10368, 5432, 9675, 14213, 7174, 9379,
   14827, 16467, 12854, 13425, 9115, 11935, 11942, 11946, 11957, 11956,
   13092, 14279, 10533, 13418, 8525, 12364, 12365, 10614, 6882, 13402, 16466, 16575, 11997, 14206, 14212, 14143, 14216];
 let host = null; // the Scene, once drawn: shows and hides sheets
@@ -86,7 +90,7 @@ export function modules(store, me) {
     6031: { default: store({ getStickersByGuildId: () => new Array(3).fill({}) }) },
     6098: { default: { requestMembersById() {} } },
     8301: { getUser: () => Promise.resolve() }, 8299: { default: o => console.log("TOAST open profile " + o.userId) },
-    1415: { default: { getUserAvatarURL: () => null } },
+    1415: { default: { getUserAvatarURL: () => null, getGuildIconURL: g => g && g.icon ? "https://cdn.discordapp.com/icons/" + g.id + "/" + g.icon + ".png" : null } },
     6899: { ActionSheet }, 6839: { BottomSheetTitleHeader: SheetHeader }, 6894: { ActionSheetCloseButton: SheetClose },
     5056: { default: { hideActionSheet: key => host && host.hide(key) }, showActionSheet: o => host && host.show(o.key, o.content) },
     6891: { showSimpleActionSheet: o => host && host.show(o.key, <SimpleSheet {...o} />) },
@@ -344,9 +348,11 @@ function SimpleSheet(props) {
 function guildBarItem(section, index) {
   if (section === SECTIONS.SEPARATOR) return <RN.View key="sep" style={{ alignSelf: "center", width: 32, height: 2, borderRadius: 1, marginVertical: 5, backgroundColor: D.tok("BACKGROUND_MOD_STRONG") }} />;
   if (section === SECTIONS.MESSAGES) return <RN.View key="dm" style={iconBox(D.tok("BACKGROUND_BRAND"), 16)}>{React.createElement(D.makeIcon("ChatIcon"), { size: "md", color: "#fff" })}</RN.View>;
-  const g = guilds[index];
-  return <RN.View key={g.id} style={[iconBox(D.tok("BACKGROUND_SURFACE_HIGH"), 16), { position: "relative" }]}>
-    <D.Text variant="text-md/semibold" color="text-strong">{g.name.split(" ").map(w => w[0]).join("")}</D.Text>
+  // Through GuildStore and AvatarUtils, like Discord's GuildsBarGuild, so Edit servers locally shows here too.
+  const store = global.__r(2087).default, g = store.getGuild(guilds[index].id) || guilds[index], uri = global.__r(1415).default.getGuildIconURL({ id: g.id, icon: g.icon, size: 96 });
+  return <RN.View key={g.id} style={[iconBox(D.tok("BACKGROUND_SURFACE_HIGH"), 16), { position: "relative", overflow: "visible" }]}>
+    {uri ? <RN.Image source={{ uri }} style={{ width: 48, height: 48, borderRadius: 16 }} /> :
+      <D.Text variant="text-md/semibold" color="text-strong">{g.name.split(" ").filter(Boolean).map(w => w[0]).join("").slice(0, 3)}</D.Text>}
     {index !== 1 ? <RN.View style={{ position: "absolute", left: -12, width: 4, height: 8, borderRadius: 2, backgroundColor: D.tok("TEXT_STRONG") }} /> : null}
   </RN.View>;
 }
@@ -361,7 +367,7 @@ function GuildBar({ defined }) {
 // The channel list next to it, so the bar sits in context.
 function Channels() {
   return <RN.View style={{ flex: 1, backgroundColor: D.tok("BACKGROUND_BASE_LOWER"), borderTopLeftRadius: 16, padding: 16, gap: 10 }}>
-    <D.Text variant="heading-md/bold" color="text-strong">Game Night</D.Text>
+    <D.Text variant="heading-md/bold" color="text-strong">{(global.__r(2087).default.getGuild(guild.id) || guild).name}</D.Text>
     {["general", "clips", "memes", "lfg"].map(c => <RN.View key={c} style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
       {React.createElement(D.makeIcon("HashmarkIcon"), { size: "sm", color: D.tok("CHANNEL_ICON") })}<D.Text variant="text-md/medium" color="text-muted">{c}</D.Text></RN.View>)}
   </RN.View>;
@@ -497,6 +503,7 @@ export function Scene({ name, defined, registry }) {
         else actions.sendMessage("1", { content: line.repeat(70), invalidEmojis: [], validNonShortcutEmojis: [] }, false, {});
       }, 300);
     }
+    if (name === "serverEdit") { const row = defined[16748].exports.default((guilds[Number(q.get("server")) || 0] || guild).id).find(it => it.label === "Edit locally"); if (row) row.action(); else console.warn("No Edit locally row"); }
     if (name === "serverInfo") { const row = defined[16748].exports.default(guild.id).find(it => it.label === "Server info"); if (row) row.action(); else console.warn("No Server info row"); }
     // A hold: the pill's own onLongPress, found through React's props on the element (a browser has no long press).
     // Retried until the pill is drawn: with lang= it waits for the language pack, and its label isn't English.
@@ -529,7 +536,7 @@ export function Scene({ name, defined, registry }) {
     <RN.View style={{ flexDirection: "row", height: 520 }}>
       <GuildBar defined={defined} />
       <Channels />
-      {name === "serverMenu" ? <GuildMenu defined={defined} /> : null}
+      {name === "serverMenu" || name === "serverEditMenu" ? <GuildMenu defined={defined} /> : null}
     </RN.View>
   </RN.View>;
 }
