@@ -429,6 +429,10 @@ BOOTSTRAP_MODULES = [
     (7308, 'modules/replies/ReferencedMessageStore.tsx', ['default'], 'ReferencedMessageStore (Hide blocked or ignored messages: replies)'),
     (11624, 'modules/messages/native/createChannelStream.tsx', ['default'], 'createChannelStream (Hide blocked or ignored messages)'),
     (17072, 'design/components/Icon/native/redesign/generated/ChatShieldIcon.tsx', ['ChatShieldIcon'], 'ChatShieldIcon (Hide blocked or ignored messages)'),
+    (7015, 'actions/ChannelActionCreators.tsx', ['default'], 'ChannelActionCreators (Hide blocked: Close their DM)'),
+    (8260, 'modules/suspicious_downloads/SuspiciousDownloadUtils.tsx', ['isSuspiciousDownload'], 'SuspiciousDownloadUtils (Always trust)'),
+    (8488, 'stores/MaskedLinkStore.tsx', ['default'], 'MaskedLinkStore (Always trust)'),
+    (11953, 'modules/chat_input/native/ChatInputNativeComponent.tsx', ['displayName', 'default'], 'ChatInputNativeComponent (Tap mentions to open profiles)'),
 ]
 
 

@@ -26,12 +26,14 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | --- | --- | --- |
 | **Messages** | Keep deleted messages | Deleted messages stay in chat, outlined in red, and edits keep their history. Pick their color, brightness and how many to keep |
 | | Bulk delete messages | Select multiple messages in chat and delete them all at once |
-| | Hide blocked or ignored messages | Removes the "blocked messages" and "ignored messages" rows from chat, and can hide replies to them too |
+| | Hide blocked or ignored messages | Removes the "blocked messages" and "ignored messages" rows from chat, and can hide replies to them too. Can also close your DM with someone as soon as you block them, so they leave the Messages list (no messages are deleted). Based on RemoveBlockedUsers |
 | | Message highlights | Pick bar width, plus the color and brightness of replies and mentions |
 | | Translate messages | Messages in other languages show in yours, automatically or only when you ask: a whole chat from a bar that appears when it has messages in another language, or one message from its menu. Translate into Discord's language, your phone's, or any of 70 others |
 | | Double-tap to reply | Double-tap a message to reply, or your own to edit it |
-| | Load full-quality images | Pictures in chat and full screen load the file that was uploaded instead of Discord's smaller, compressed copy. Choose chat, full screen or both, and whether GIFs load whole too. Pictures over 16 megapixels stay as Discord sends them so the app doesn't run out of memory. Based on Uncompressed Discord Images by Knewest |
+| | Load full-quality images | Pictures in chat and full screen load the file that was uploaded instead of Discord's smaller, compressed copy. Choose chat, full screen or both, and whether GIFs load whole too. Profile pictures and banners load at a high resolution, so they stay sharp in profiles and full screen. Pictures over 16 megapixels stay as Discord sends them so the app doesn't run out of memory. Based on Uncompressed Discord Images by Knewest and HighResProfileImages by Kawtious |
 | | Skip delete confirmation | Messages and link previews are removed with no "Are you sure?" |
+| | Skip pin confirmation | Pinning and unpinning a message happen at once, with no "Are you sure?". Based on NoConfirmPin by Skamt |
+| | Always trust links and files | No "Leaving Discord" before opening links, and no "potentially dangerous download" warning before opening files, each with its own switch. Links Discord knows are harmful stay blocked. Based on AlwaysTrust by zt and Trwy |
 | | Jump to first message | A button to go straight to the start of a chat |
 | | Favourite any image or video | Star any image or video to keep it in your GIF favourites |
 | **Sending** | Send Nitro stickers and emojis as links | Sends Nitro emojis and stickers as links that show as the image |
@@ -42,6 +44,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | | Hide typing indicator | Others won't see when you're typing |
 | | Show file sizes when attaching | Photos and videos in the picker show their size |
 | | Anonymous file names | Files you send get a random name like `k3Vq9TzL0b.jpg` instead of the one on your phone, so names like `IMG_20261027_142233.jpg` or `Bank statement March.pdf` never reach Discord. The file type stays, so previews and players still work. Spoilers stay spoilers. Based on Anonymous File Names by k1ng_op |
+| | Tap mentions to open profiles | Tap an @mention you typed in the message bar to open that person's profile, to check you picked the right one. Typing never opens one. Based on ClickableMentions by mwittrien |
 | **People** | Pastel name colors | Names without a role color get a soft pastel color |
 | | Show device indicators | Desktop, mobile, web, console or VR icons next to names |
 | | Show owner and mod tags | Shows an Owner, Admin, Manager or Mod tag next to people's names in chat, worked out from the roles you can see. Pick who gets one and whether owners get a crown. Based on StaffTag by mwittrien |

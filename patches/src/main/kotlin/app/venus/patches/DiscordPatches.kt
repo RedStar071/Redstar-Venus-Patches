@@ -74,7 +74,7 @@ private val runtimeAssets = rawResourcePatch {
             "{picker:$pickerSelected,voice:$voiceSelected,copyBios:$copyBiosSelected," +
                 "favouriteAnything:$favouriteAnythingSelected,freeNitro:$freeNitroSelected," +
                 listOf("noTyping", "quickDelete", "noDelete", "jumpToTop", "hiddenChannels", "pastelize", "platformIndicators", "reviewDB", "readAll", "quests", "badges", "systemFont",
-                    "systemEmoji", "gestures", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag", "removedAlerts", "fullImages", "hideAnything")
+                    "systemEmoji", "gestures", "validUser", "youBarSettings", "splitMessages", "translate", "userNotif", "accountSwitcher", "appIcons", "nitroThemes", "customThemes", "materialYou", "iconPacks", "messageHighlight", "serverInfo", "fixEmbeds", "tenorGifs", "hideBlocked", "bulkDelete", "experiments", "cleanChannels", "noHandsfree", "anonFiles", "staffTag", "removedAlerts", "fullImages", "hideAnything", "alwaysTrust", "noConfirmPin", "clickableMentions")
                     .joinToString(",") { "$it:${it in additionalSelections}" } + "}"
         )
         asset.writeText(selected)
@@ -260,7 +260,19 @@ val removedConnectionAlerts = bundledPlugin("removedAlerts", "Alert when you're 
 
 @Suppress("unused")
 val fullQualityImages = bundledPlugin("fullImages", "Load full-quality images",
-    "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy. Based on Uncompressed Discord Images by Knewest.")
+    "Pictures in chat and full screen load as uploaded, not as Discord's smaller, compressed copy, and profile pictures stay sharp. Based on Uncompressed Discord Images by Knewest and HighResProfileImages by Kawtious.")
+
+@Suppress("unused")
+val alwaysTrust = bundledPlugin("alwaysTrust", "Always trust links and files",
+    "Opens links and files without Discord's \"Are you sure?\" warnings. Based on AlwaysTrust by zt and Trwy.")
+
+@Suppress("unused")
+val noConfirmPin = bundledPlugin("noConfirmPin", "Skip pin confirmation",
+    "Pins and unpins messages without asking first. Based on NoConfirmPin by Skamt.")
+
+@Suppress("unused")
+val clickableMentions = bundledPlugin("clickableMentions", "Tap mentions to open profiles",
+    "Tap an @mention in the message bar to see who it is. Based on ClickableMentions by mwittrien.")
 
 @Suppress("unused")
 val copyBios = rawResourcePatch(
