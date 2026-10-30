@@ -8170,9 +8170,20 @@
     function serverEditHookAvatars(exports) {
         const utils = exports && exports.default;
         if (!utils || typeof utils.getGuildIconURL !== "function") return exports;
-        const hooked = hookExport(utils, "getGuildIconURL", (orig, self, args) => {
-            const icon = args[0] && args[0].icon;
-            return typeof icon === "string" && icon.indexOf(SERVER_EDIT_ICON) === 0 ? serverEdit.icons.get(icon) || null : orig.apply(self, args);
+        // Discord 350.8 builds the icon link two ways: getGuildIconURL returns a string, while
+        // getGuildIconSource (used by GuildIcon, the server bar and the drawer) builds its own CDN
+        // link without calling getGuildIconURL. Both have to turn the token into the picture,
+        // otherwise the token becomes a broken CDN link and the tile shows up blank.
+        const token = args => { const icon = args[0] && args[0].icon; return typeof icon === "string" && icon.indexOf(SERVER_EDIT_ICON) === 0 ? icon : null; };
+        let hooked = hookExport(utils, "getGuildIconURL", (orig, self, args) => {
+            const icon = token(args);
+            return icon ? serverEdit.icons.get(icon) || null : orig.apply(self, args);
+        });
+        if (typeof hooked.getGuildIconSource === "function") hooked = hookExport(hooked, "getGuildIconSource", (orig, self, args) => {
+            const icon = token(args);
+            if (!icon) return orig.apply(self, args);
+            const uri = serverEdit.icons.get(icon);
+            return uri ? {uri} : null;
         });
         return hooked === utils ? exports : replaceValue(exports, "default", hooked);
     }
