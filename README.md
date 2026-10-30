@@ -57,6 +57,7 @@ Open **Discord Settings → Venus → Features** to turn things on or off at any
 | **Servers** | Read all button | Marks servers, DMs or both as read in one tap |
 | | Show hidden channels | Channels you can't open appear with a lock. Only a tap opens their details menu, which you can turn off |
 | | Server info | Hold a server's icon to see live details: who's online, channels, roles, emojis, boost progress, the owner, your friends there, when it was made and when you joined |
+| | Edit servers locally | Give any server your own name and icon, from a picture on your phone or a link. Hold a server's icon and tap **Edit locally**, or pick one on the Venus page, which lists every server you've edited and resets them. Only this phone sees it: Discord's own server settings always show the real name and icon, so nothing is ever saved to the server. Backups keep names and icon links; pictures from your phone stay on it. Based on EditServers by mwittrien |
 | | Clean channel names | Removes emoji, dividers and symbols (🎫┃, ✦, 「」) and fancy fonts (𝐂𝐎𝐌𝐌𝐔𝐍𝐈𝐓𝐘) from channel and category names, each with its own switch, and can show "general chat" instead of "general-chat". Only how names look changes: links, mentions and search still use the real name, and a name made only of emoji stays as it is |
 | **Appearance** | Use your phone's font | Replaces Discord's font everywhere |
 | | Use your phone's emojis | Your phone's emojis instead of Discord's, or the emojis from a color emoji font you import (like Twemoji or Noto Color Emoji) |

@@ -148,6 +148,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 6906 | `design/components/Icon/native/redesign/generated/ChevronSmallRightIcon.tsx` | ChevronSmallRightIcon | ChevronSmallRightIcon |
 | 6923 | `stores/views/PrivateChannelSortStore.tsx` | default | PrivateChannelSortStore (Read all, more than 20 unread DMs) |
 | 7012 | `actions/GuildSubscriptionsActionCreators.tsx` | subscribeGuild | GuildSubscriptionsActionCreators |
+| 7015 | `actions/ChannelActionCreators.tsx` | default | ChannelActionCreators (Hide blocked: Close their DM) |
 | 7018 | `actions/RelationshipActionCreators.tsx` | default, removeFriend, removeRelationship | RelationshipActionCreators (Alert when you're removed) |
 | 7047 | `modules/stickers/StickerSendability.tsx` | SENDABLE, SENDABLE_WITH_PREMIUM, NONSENDABLE | StickerUtils |
 | 7092 | `design/components/Icon/native/redesign/generated/SettingsIcon.tsx` | SettingsIcon | SettingsIcon |
@@ -177,6 +178,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8132 | `design/components/Icon/native/redesign/generated/InstagramNeutralIcon.tsx` | InstagramNeutralIcon | InstagramNeutralIcon (Fix link previews) |
 | 8194 | `design/components/Icon/native/redesign/generated/ChatIcon.tsx` | ChatIcon | ChatIcon |
 | 8196 | `design/components/Icon/native/redesign/generated/ThreadIcon.tsx` | ThreadIcon | ThreadIcon (preview channel header) |
+| 8197 | `design/components/Icon/native/redesign/generated/FolderIcon.tsx` | FolderIcon | FolderIcon |
 | 8201 | `design/components/Icon/native/redesign/generated/TextLockIcon.tsx` | TextLockIcon | TextLockIcon |
 | 8203 | `design/components/Icon/native/redesign/generated/TextIcon.tsx` | TextIcon | TextIcon |
 | 8204 | `design/components/Icon/native/redesign/generated/ImageWarningIcon.tsx` | ImageWarningIcon | ImageWarningIcon (Bring back Tenor GIFs) |
@@ -185,6 +187,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8213 | `design/components/Icon/native/redesign/generated/AtIcon.tsx` | AtIcon | AtIcon |
 | 8218 | `design/components/Icon/native/redesign/generated/LockIcon.tsx` | LockIcon | LockIcon |
 | 8229 | `design/components/Icon/native/redesign/generated/AppsIcon.tsx` | AppsIcon | AppsIcon |
+| 8260 | `modules/suspicious_downloads/SuspiciousDownloadUtils.tsx` | isSuspiciousDownload | SuspiciousDownloadUtils (Always trust) |
 | 8299 | `modules/user_profile/native/showUserProfileActionSheet.tsx` | default, showUserProfileActionSheet | showUserProfileActionSheet |
 | 8301 | `actions/UserActionCreators.tsx` | fetchCurrentUser, acceptAgreements, setFlag | UserActionCreators |
 | 8304 | `../discord_common/js/shared/shared-constants/BadgeId.tsx` | BadgeId | BadgeId (Badge Completer) |
@@ -194,10 +197,12 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8396 | `design/components/Icon/native/redesign/generated/PlayIcon.tsx` | PlayIcon | PlayIcon (preview Watch button) |
 | 8398 | `design/components/Icon/native/redesign/generated/PauseIcon.tsx` | PauseIcon | PauseIcon (preview player) |
 | 8449 | `modules/icymi/ICYMIStore.tsx` | ICYMIStore | ICYMIStore (Hidden channels keeps its real VIEW_CHANNEL answers) |
+| 8488 | `stores/MaskedLinkStore.tsx` | default | MaskedLinkStore (Always trust) |
 | 8525 | `design/components/SegmentedControl/native/SegmentedControlState.native.tsx` | useSegmentedControlState | SegmentedControlState (Remove anything: profile tabs) |
 | 8575 | `design/void/Form/native/index.tsx` | Form, FormArrow, FormCheckbox | Form |
 | 8617 | `design/components/Icon/native/redesign/generated/ShieldUserIcon.tsx` | ShieldUserIcon | ShieldUserIcon |
 | 8633 | `modules/guild_settings/GuildSettingsActionCreators.tsx` | default, leaveGuild, deleteGuild | GuildSettingsActionCreators (Alert when you're removed) |
+| 8634 | `modules/guild_settings/GuildSettingsStore.tsx` | default, EMPTY_METADATA | GuildSettingsStore (Edit servers locally: imports the real GuildStore) |
 | 8675 | `design/components/Icon/native/redesign/generated/CalendarIcon.tsx` | CalendarIcon | CalendarIcon |
 | 8768 | `design/components/Icon/native/redesign/generated/BellIcon.tsx` | BellIcon | BellIcon |
 | 8775 | `design/components/SegmentedControl/native/SegmentedControlItem.native.tsx` | SegmentedControlItem | SegmentedControlItem (Remove anything: marks profile tabs) |
@@ -205,6 +210,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 8921 | `design/components/Icon/native/redesign/generated/TrophyIcon.tsx` | TrophyIcon | TrophyIcon (Badge Completer) |
 | 8956 | `design/components/Icon/native/redesign/generated/ReactionIcon.tsx` | ReactionIcon | ReactionIcon |
 | 9031 | `design/components/Icon/native/redesign/generated/NitroWheelIcon.tsx` | NitroWheelIcon | NitroWheelIcon |
+| 9035 | `design/components/Icon/native/redesign/generated/OrbsIcon.tsx` | OrbsIcon | OrbsIcon |
 | 9071 | `design/components/Icon/native/redesign/generated/TagIcon.tsx` | TagIcon | TagIcon |
 | 9099 | `design/components/Icon/native/redesign/generated/GlobeEarthIcon.tsx` | GlobeEarthIcon | GlobeEarthIcon |
 | 9101 | `design/components/Icon/native/redesign/generated/YoutubeNeutralIcon.tsx` | YoutubeNeutralIcon | YoutubeNeutralIcon (Fix link previews) |
@@ -247,6 +253,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 10260 | `design/components/Icon/native/redesign/generated/XLargeIcon.tsx` | XLargeIcon | XLargeIcon (Remove anything icon) |
 | 10262 | `design/components/Icon/native/redesign/generated/CrownIcon.tsx` | CrownIcon | CrownIcon |
 | 10287 | `design/components/Icon/native/redesign/generated/UserCircleIcon.tsx` | UserCircleIcon | UserCircleIcon |
+| 10293 | `design/components/Icon/native/redesign/generated/ArrowSmallRightIcon.tsx` | ArrowSmallRightIcon | ArrowSmallRightIcon |
 | 10310 | `design/components/Icon/native/redesign/generated/PlusLargeIcon.tsx` | PlusLargeIcon | PlusLargeIcon (preview message bar) |
 | 10334 | `design/components/Icon/native/redesign/generated/PinIcon.tsx` | PinIcon | PinIcon (Icon packs preview) |
 | 10347 | `design/components/Icon/native/redesign/generated/BellSlashIcon.tsx` | BellSlashIcon | BellSlashIcon |
@@ -254,6 +261,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 10410 | `design/components/Icon/native/redesign/generated/ShieldIcon.tsx` | ShieldIcon | ShieldIcon |
 | 10473 | `design/components/Icon/native/redesign/generated/ArrowLargeUpIcon.tsx` | ArrowLargeUpIcon | ArrowLargeUpIcon |
 | 10483 | `design/components/Icon/native/redesign/generated/XSmallBoldIcon.tsx` | XSmallBoldIcon | XSmallBoldIcon (Remove anything: red X badge) |
+| 10515 | `modules/user_profile/native/UserProfileCustomStatusBubble.tsx` | default | UserProfileCustomStatusBubble (Remove anything: your status bubble) |
 | 10533 | `modules/user_profile/native/UserProfilePrimaryInfo.tsx` | default, DisplayName, UserTagAndPronouns | UserProfileHeaderName |
 | 10534 | `design/components/Icon/native/redesign/generated/ChevronSmallDownIcon.tsx` | ChevronSmallDownIcon | ChevronSmallDownIcon (preview channel category) |
 | 10614 | `modules/user_profile/native/UserProfileAboutMeCard.tsx` | default, a6XYD9 | UserProfileAboutMeCard (Remove anything: Member Since dates) |
@@ -263,6 +271,8 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 10664 | `modules/settings/native/renderer/SettingBuilders.tsx` | createToggle, createStatic, createRoute | createSettingsList |
 | 10694 | `modules/messages/native/MessagesHandlers.tsx` | MessagesHandlers | MessagesHandlers |
 | 10725 | `modules/oauth2/native/OAuth2AuthorizeModal.tsx` | default | OAuth2AuthorizeModal |
+| 10748 | `modules/main_tabs_v2/native/shared_components/user_list/useMemberListAction.tsx` | default | useMemberListAction (Remove anything: New Group) |
+| 10759 | `design/components/Icon/native/redesign/generated/ChatPlusIcon.tsx` | ChatPlusIcon | ChatPlusIcon |
 | 10764 | `design/components/Icon/native/redesign/generated/TimerIcon.tsx` | TimerIcon | TimerIcon |
 | 10771 | `design/components/Icon/native/redesign/generated/VideoIcon.tsx` | VideoIcon | VideoIcon |
 | 10782 | `modules/replies/native/replyToMessage.tsx` | default | replyToMessage |
@@ -281,10 +291,12 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 11762 | `modules/channel_list_v2/native/RedesignChannelListConstants.tsx` | SEARCH_BAR_MARGIN_BOTTOM | RedesignChannelListConstants (Remove anything: search row margin) |
 | 11828 | `design/components/Icon/native/redesign/generated/ShopIcon.tsx` | ShopIcon | ShopIcon (Hide extra buttons) |
 | 11841 | `design/components/Icon/native/redesign/generated/ArrowsUpDownIcon.tsx` | ArrowsUpDownIcon | ArrowsUpDownIcon |
+| 11864 | `modules/chat_input/native/accessories/ChatInputExpressionButton.tsx` | default | ChatInputExpressionButton (Remove anything: emoji button) |
 | 11935 | `modules/chat_input/native/action_buttons/ChatInputActions.tsx` | displayName, default | ChatInputSendAndGiftButton |
 | 11940 | `modules/media_keyboard/native/MediaKeyboardButtonIcon.tsx` | MediaKeyboardButtonIcon | MediaKeyboardButtonIcon (Remove anything: attach button) |
 | 11942 | `modules/chat_input/native/action_buttons/ChatInputActionButtonApps.tsx` | default | ChatInputActionButtonApps (Remove anything: Apps button) |
 | 11946 | `modules/chat_input/native/action_buttons/ChatInputActionButtonGiftOrThread.tsx` | default | ChatInputActionButtonGiftOrThread (Remove anything: gift/thread button) |
+| 11953 | `modules/chat_input/native/ChatInputNativeComponent.tsx` | displayName, default | ChatInputNativeComponent (Tap mentions to open profiles) |
 | 11956 | `modules/chat_input/native/accessories/ChatInputSendButton.tsx` | default | ChatInputSendButton (Remove anything: canSendVoiceMessage) |
 | 11957 | `modules/voice_messages/native/components/VoiceMessageButton.tsx` | default | VoiceMessageButton (Remove anything: voice message button) |
 | 11968 | `components_native/chat/JumpToPresentButton.tsx` | default | JumpToPresentButton |
@@ -299,6 +311,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 12133 | `modules/multi_account/MultiAccountActionCreators.tsx` | validateMultiAccountTokens, switchAccount, moveAccount | MultiAccountActionCreators |
 | 12146 | `modules/chat_input/native/action_buttons/ChatInputRightActions.tsx` | displayName, default | ChatInputGiftButton |
 | 12178 | `design/components/Icon/native/redesign/generated/ChatWarningIcon.tsx` | ChatWarningIcon | ChatWarningIcon |
+| 12208 | `components_native/chat/ChatBeginningRow.tsx` | default | ChatBeginningRow (Remove anything: bot DM Mute / Deauthorize / Report Spam) |
 | 12271 | `design/components/Icon/native/redesign/generated/HeadphonesIcon.tsx` | HeadphonesIcon | HeadphonesIcon (Keep Bluetooth audio clear in calls) |
 | 12274 | `design/components/Icon/native/redesign/generated/StickerIcon.tsx` | StickerIcon | StickerIcon |
 | 12325 | `design/components/Icon/native/redesign/generated/BoostTier1Icon.tsx` | BoostTier1Icon | BoostTier1Icon |
@@ -352,6 +365,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15139 | `actions/ConsentActionCreators.tsx` | setConsents | ConsentActionCreators (Badge Completer) |
 | 15232 | `design/components/Icon/native/redesign/generated/LaptopPhoneIcon.tsx` | LaptopPhoneIcon | LaptopPhoneIcon |
 | 15241 | `design/components/Icon/native/redesign/generated/PuzzlePieceIcon.tsx` | PuzzlePieceIcon | PuzzlePieceIcon |
+| 15257 | `design/components/Icon/native/redesign/generated/RefreshIcon.tsx` | RefreshIcon | RefreshIcon |
 | 15285 | `design/components/Icon/native/redesign/generated/FiltersHorizontalIcon.tsx` | FiltersHorizontalIcon | FiltersHorizontalIcon (translate bar, #82) |
 | 15327 | `design/components/Icon/native/redesign/generated/FullscreenEnterIcon.tsx` | FullscreenEnterIcon | FullscreenEnterIcon (Load full-quality images) |
 | 15371 | `modules/quests/native/QuestHooks.native.tsx` | useMobileQuestDockHeight, useMobileQuestDock, useIsMobileQuestDockVisibleToUser | useMobileQuestDock |
@@ -371,6 +385,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 15894 | `design/components/Icon/native/redesign/generated/BeakerIcon.tsx` | BeakerIcon | BeakerIcon (Experimental chip) |
 | 15928 | `design/components/Icon/native/redesign/generated/DoubleCheckmarkIcon.tsx` | DoubleCheckmarkIcon | DoubleCheckmarkIcon |
 | 15974 | `design/components/Icon/native/redesign/generated/LettersIcon.tsx` | LettersIcon | LettersIcon |
+| 16074 | `modules/virtual_currency/native/BalanceWidgetMenu.tsx` | default | BalanceWidgetMenu (Remove anything: Orbs Balance) |
 | 16121 | `design/components/Icon/native/redesign/generated/BugIcon.tsx` | BugIcon | BugIcon |
 | 16373 | `modules/auth/native/components/Auth.tsx` | default, TrackRegistrationContext | Auth & TrackRegistrationContext (Account switcher) |
 | 16375 | `modules/auth/native/RegistrationStepsUtils.tsx` | getAllAuthScreens | RegistrationStepsUtils (Account switcher) |
@@ -384,6 +399,7 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16501 | `modules/main_tabs_v2/native/shared_components/happening_now/useHappeningNowData.tsx` | HappeningNowItem, MemberListRowTypes | useHappeningNowData (Hidden channels keeps its real VIEW_CHANNEL answers) |
 | 16521 | `design/components/Icon/native/redesign/generated/SpotifyNeutralIcon.tsx` | SpotifyNeutralIcon | SpotifyNeutralIcon (Fix link previews) |
 | 16575 | `modules/channel_list_v2/native/RedesignGuildHeader.tsx` | useRedesignGuildHeaderHeight | RedesignGuildHeader (Remove anything: channel list header closes up) |
+| 16577 | `modules/channel_list_v2/native/components/ChannelListStickyHeader.tsx` | default | ChannelListStickyHeader (Remove anything: member count / Community) |
 | 16663 | `design/components/Icon/native/redesign/generated/BoostTier2Icon.tsx` | BoostTier2Icon | BoostTier2Icon |
 | 16671 | `modules/guild_sidebar/native/ChannelInfo.tsx` | default | ChannelInfo |
 | 16744 | `modules/guilds_bar/native/GuildsBarConstants.tsx` | MESSAGES, FAVORITES, PENDING_JOIN_REQUESTS | FastListRenderSections |
@@ -397,6 +413,11 @@ The supported Discord version and bundle hash live in `DiscordPatches.kt` and `H
 | 16858 | `modules/main_tabs_v2/native/you_bar/YouBarNotificationsButton.tsx` | default | YouBarButtons |
 | 16947 | `design/components/Icon/native/redesign/generated/PaintbrushThinIcon.tsx` | PaintbrushThinIcon | PaintbrushThinIcon |
 | 17072 | `design/components/Icon/native/redesign/generated/ChatShieldIcon.tsx` | ChatShieldIcon | ChatShieldIcon (Hide blocked or ignored messages) |
+| 17096 | `design/components/Icon/native/redesign/generated/ImagePlusIcon.tsx` | ImagePlusIcon | ImagePlusIcon |
 | 17143 | `design/components/Icon/native/redesign/generated/SparklesIcon.tsx` | SparklesIcon | SparklesIcon (Unlock Nitro themes) |
+| 17487 | `modules/search/native/components/tabs/hooks/useSearchSegmentedControlState.tsx` | useSearchSegmentedControlState | useSearchSegmentedControlState (Remove anything: details tabs) |
+| 17499 | `modules/main_tabs_v2/native/sidebar/details/header_v2/ChannelDetailsNavigationBar.tsx` | default | ChannelDetailsNavigationBar (Remove anything: details search / mute / settings / more) |
+| 17567 | `modules/user_profile/native/UserProfileYourFriendsCard.tsx` | default | UserProfileYourFriendsCard (Remove anything: Friends) |
 | 17697 | `modules/app_icons/native/AppIconsCoachmark.tsx` | default | AppIconsCoachmark |
 | 18051 | `modules/app_icons/native/AppIconPremiumManager.tsx` | default | AppIconPremiumManager |
+| 18285 | `modules/guild_settings/native/GuildSettingsModalLanding.tsx` | default | GuildSettingsModalLanding (Edit servers locally: imports the real GuildStore) |
