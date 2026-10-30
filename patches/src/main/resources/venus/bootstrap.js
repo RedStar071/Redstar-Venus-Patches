@@ -16211,9 +16211,9 @@
         const Icon = venusIcon(11587, "ImagesIcon");
         const where = !!(settings.fullImagesChat || settings.fullImagesViewer || settings.fullImagesAvatars);
         const groups = [
-            !on ? offCard("status", Icon, "fullImages") : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
-                title:where ? tr("Loading pictures as uploaded") : tr("Nothing loads in full"),
-                body:where ? tr("Pictures people upload show in their original quality, not Discord's smaller copy.") : tr("Turn on at least one option below.")}),
+            // On, the switches below already say what loads in full; the card only speaks up when none of them is on.
+            !on ? offCard("status", Icon, "fullImages") : where ? null : VenusStatusCard({key:"status", IconComponent:Icon, accent:true,
+                title:tr("Nothing loads in full"), body:tr("Turn on at least one option below.")}),
             el(Group, {key:"where", title:tr("Load in full")},
                 switchRow(Switch, "fullImagesChat", "In chat", "Pictures in messages, as soon as they appear.", rowIcon(8194, "ChatIcon")),
                 switchRow(Switch, "fullImagesViewer", "When opened", "Pictures you tap to view full screen.", rowIcon(15327, "FullscreenEnterIcon")),
