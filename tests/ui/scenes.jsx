@@ -90,7 +90,9 @@ export function modules(store, me) {
     6031: { default: store({ getStickersByGuildId: () => new Array(3).fill({}) }) },
     6098: { default: { requestMembersById() {} } },
     8301: { getUser: () => Promise.resolve() }, 8299: { default: o => console.log("TOAST open profile " + o.userId) },
-    1415: { default: { getUserAvatarURL: () => null, getGuildIconURL: g => g && g.icon ? "https://cdn.discordapp.com/icons/" + g.id + "/" + g.icon + ".png" : null } },
+    // Like 350.8: getGuildIconSource builds its own CDN link and never calls getGuildIconURL, so both need hooking.
+    1415: { default: { getUserAvatarURL: () => null, getGuildIconURL: g => g && g.icon ? "https://cdn.discordapp.com/icons/" + g.id + "/" + g.icon + ".png" : null,
+      getGuildIconSource: g => g && g.icon ? { uri: "https://cdn.discordapp.com/icons/" + g.id + "/" + g.icon + ".png?size=" + (g.size || 96) } : null } },
     6899: { ActionSheet }, 6839: { BottomSheetTitleHeader: SheetHeader }, 6894: { ActionSheetCloseButton: SheetClose },
     5056: { default: { hideActionSheet: key => host && host.hide(key) }, showActionSheet: o => host && host.show(o.key, o.content) },
     6891: { showSimpleActionSheet: o => host && host.show(o.key, <SimpleSheet {...o} />) },
@@ -348,10 +350,10 @@ function SimpleSheet(props) {
 function guildBarItem(section, index) {
   if (section === SECTIONS.SEPARATOR) return <RN.View key="sep" style={{ alignSelf: "center", width: 32, height: 2, borderRadius: 1, marginVertical: 5, backgroundColor: D.tok("BACKGROUND_MOD_STRONG") }} />;
   if (section === SECTIONS.MESSAGES) return <RN.View key="dm" style={iconBox(D.tok("BACKGROUND_BRAND"), 16)}>{React.createElement(D.makeIcon("ChatIcon"), { size: "md", color: "#fff" })}</RN.View>;
-  // Through GuildStore and AvatarUtils, like Discord's GuildsBarGuild, so Edit servers locally shows here too.
-  const store = global.__r(2087).default, g = store.getGuild(guilds[index].id) || guilds[index], uri = global.__r(1415).default.getGuildIconURL({ id: g.id, icon: g.icon, size: 96 });
+  // Through GuildStore and AvatarUtils.getGuildIconSource, like Discord's GuildsBarGuild, so Edit servers locally shows here too.
+  const store = global.__r(2087).default, g = store.getGuild(guilds[index].id) || guilds[index], source = g.icon ? global.__r(1415).default.getGuildIconSource({ id: g.id, icon: g.icon, size: 96 }) : null;
   return <RN.View key={g.id} style={[iconBox(D.tok("BACKGROUND_SURFACE_HIGH"), 16), { position: "relative", overflow: "visible" }]}>
-    {uri ? <RN.Image source={{ uri }} style={{ width: 48, height: 48, borderRadius: 16 }} /> :
+    {g.icon ? <RN.Image source={source || {}} style={{ width: 48, height: 48, borderRadius: 16 }} /> :
       <D.Text variant="text-md/semibold" color="text-strong">{g.name.split(" ").filter(Boolean).map(w => w[0]).join("").slice(0, 3)}</D.Text>}
     {index !== 1 ? <RN.View style={{ position: "absolute", left: -12, width: 4, height: 8, borderRadius: 2, backgroundColor: D.tok("TEXT_STRONG") }} /> : null}
   </RN.View>;
