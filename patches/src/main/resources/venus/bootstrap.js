@@ -43,6 +43,7 @@
     if (features.iconPacks) selectModules([81, 84, 328, 1205, 4817, 4831, 4839, 11191]);
     if (features.messageHighlight) selectModules([584, 1390, 5432, 7742]);
     if (features.serverInfo) selectModules([1390, 16748]);
+    if (features.serverEdit) selectModules([1415, 2087, 16748, 8633, 8634, 18285]);
     if (features.fixEmbeds) selectModules([1390, 7174]);
     if (features.tenorGifs) selectModules([1295, 9733]);
     if (features.hideBlocked) selectModules([584, 2065, 2116, 4760, 5432, 7015, 7308, 11624]);
@@ -75,7 +76,7 @@
         userNotif:false, userNotifFriends:true, userNotifStatus:true, userNotifMessages:true, userNotifTyping:true, userNotifPush:false,
         accountSwitcher:false, accountSwitcherYouBar:true, appIcons:false, nitroThemes:false, customThemes:false, customThemesBackground:true, materialYou:false, materialYouColor:"wallpaper", materialYouTint:"balanced",
         iconPacks:false, iconPacksTheme:true,
-        messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true,
+        messageHighlight:false, messageHighlightThickness:2, messageHighlightBrightness:50, messageHighlightPingColor:"default", serverInfo:false, serverInfoFriends:true, serverEdit:false,
         fixEmbeds:false, fixEmbedsSites:"", fixEmbedsClean:true, fixEmbedsDark:true, fixEmbedsStyle:"full", fixEmbedsTranslate:"off", fixEmbedsLanguage:"en", tenorGifs:false, tenorGifsSource:"both", hideBlocked:false, hideBlockedBlocked:true, hideBlockedIgnored:true, hideBlockedReplies:false, hideBlockedCloseDms:false, bulkDelete:false, bulkDeleteConfirm:true, bulkDeleteIncludeCached:true, experiments:false, noHandsfree:false, cleanChannels:false, cleanChannelsEmoji:true, cleanChannelsSymbols:true, cleanChannelsFonts:true, cleanChannelsSpaces:false, anonFiles:false, staffTag:false, staffTagOwner:true, staffTagAdmin:true, staffTagManager:true, staffTagMod:true, staffTagCrown:true, removedAlerts:false, removedAlertsFriends:true, removedAlertsServers:true, removedAlertsClosed:true, removedAlertsPush:false, fullImages:false, fullImagesChat:true, fullImagesViewer:true, fullImagesGifs:false, fullImagesAvatars:true, alwaysTrust:false, alwaysTrustLinks:true, alwaysTrustFiles:true, noConfirmPin:false, clickableMentions:false, hideAnything:false, hideAnythingSpots:"", language:"auto", hiddenFeatures:"" };
     // The settings every feature starts from, for Reset to defaults on the Backup page.
     let DEFAULT_SETTINGS = null;
@@ -92,7 +93,7 @@
             userNotif: false, userNotifFriends: true, userNotifStatus: true, userNotifMessages: true, userNotifTyping: true, userNotifPush: false,
             accountSwitcher: false, accountSwitcherYouBar: true, appIcons: false, nitroThemes: false, customThemes: false, customThemesBackground: true, materialYou: false, materialYouColor: "wallpaper", materialYouTint: "balanced",
             iconPacks: false, iconPacksTheme: true,
-            messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true,
+            messageHighlight: false, messageHighlightThickness: 2, messageHighlightBrightness: 50, messageHighlightPingColor: "default", serverInfo: false, serverInfoFriends: true, serverEdit: false,
             fixEmbeds: false, fixEmbedsSites: "", fixEmbedsClean: true, fixEmbedsDark: true, fixEmbedsStyle: "full", fixEmbedsTranslate: "off", fixEmbedsLanguage: "en", tenorGifs: false, tenorGifsSource: "both", hideBlocked: false, hideBlockedBlocked: true, hideBlockedIgnored: true, hideBlockedReplies: false, hideBlockedCloseDms: false, bulkDelete: false, bulkDeleteConfirm: true, bulkDeleteIncludeCached: true, experiments: false, noHandsfree: false, cleanChannels: false, cleanChannelsEmoji: true, cleanChannelsSymbols: true, cleanChannelsFonts: true, cleanChannelsSpaces: false, anonFiles: false, staffTag: false, staffTagOwner: true, staffTagAdmin: true, staffTagManager: true, staffTagMod: true, staffTagCrown: true, removedAlerts: false, removedAlertsFriends: true, removedAlertsServers: true, removedAlertsClosed: true, removedAlertsPush: false, fullImages: false, fullImagesChat: true, fullImagesViewer: true, fullImagesGifs: false, fullImagesAvatars: true, alwaysTrust: false, alwaysTrustLinks: true, alwaysTrustFiles: true, noConfirmPin: false, clickableMentions: false, hideAnything: false, hideAnythingSpots: "", language: "auto", hiddenFeatures: ""
         }));
     }
@@ -329,6 +330,7 @@
         if (starter.done) extra.setupDone = true;
         if (features.hideAnything && settings.hideAnythingSpots) { const labels = hideRowLabels(); if (labels) extra.hideAnythingLabels = labels; }
         if (features.materialYou && materialYou.system) extra.materialYouSystem = materialYou.system;
+        if (features.serverEdit && serverEdits.size) extra.serverEdits = serverEditData(false);
         if (features.nitroThemes && nitroTheme.preset != null) extra.nitroTheme = {preset:nitroTheme.preset, theme:nitroTheme.theme};
         return JSON.stringify(Object.keys(extra).length ? Object.assign({}, settings, extra) : settings);
     }
@@ -628,6 +630,7 @@
                     loaded.userNotifIds.slice(0, USER_NOTIF_MAX_IDS).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) userNotif.ids.add(id); });
                 }
                 if (features.removedAlerts) removedLoad(loaded.removedSeen);
+                if (features.serverEdit && !serverEdit.dirty) serverEditLoad(serverEditClean(loaded.serverEdits, false));
                 if (features.badges) {
                     if (Array.isArray(loaded.badgesPlayedIds))
                         loaded.badgesPlayedIds.slice(0, BADGES_MAX_PLAYED).forEach(id => { if (typeof id === "string" && /^\d{17,20}$/.test(id)) badges.played.add(id); });
@@ -1065,7 +1068,7 @@
         hiddenChannels:[8218, "LockIcon"], systemFont:[15974, "LettersIcon"], systemEmoji:[12901, "ChatSmileIcon"],
         youBarSettings:[7092, "SettingsIcon"], quests:[13012, "QuestsIcon"],
         badges:[8921, "TrophyIcon"], userNotif:[8768, "BellIcon"], accountSwitcher:[8212, "GroupIcon"], appIcons:[8229, "AppsIcon"],
-        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], hideAnything:[10260, "XLargeIcon"], fullImages:[11587, "ImagesIcon"], alwaysTrust:[10410, "ShieldIcon"], noConfirmPin:[10334, "PinIcon"], clickableMentions:[8213, "AtIcon"]};
+        customThemes:[15652, "EyeDropperIcon"], iconPacks:[11063, "ImageSparkleIcon"], messageHighlight:[16947, "PaintbrushThinIcon"], serverInfo:[5046, "CircleInformationIcon"], serverEdit:[9720, "PencilIcon"], fixEmbeds:[12910, "EmbedIcon"], tenorGifs:[9748, "GifIcon"], nitroThemes:[17143, "SparklesIcon"], materialYou:[15560, "PaintPaletteIcon"], hideBlocked:[17072, "ChatShieldIcon"], bulkDelete:[6868, "CircleCheckIcon"], experiments:[15894, "BeakerIcon"], cleanChannels:[12605, "MagicWandIcon"], noHandsfree:[12271, "HeadphonesIcon"], staffTag:[10262, "CrownIcon"], removedAlerts:[5036, "UserMinusIcon"], hideAnything:[10260, "XLargeIcon"], fullImages:[11587, "ImagesIcon"], alwaysTrust:[10410, "ShieldIcon"], noConfirmPin:[10334, "PinIcon"], clickableMentions:[8213, "AtIcon"]};
     const venusIcons = new Map();
     function venusIcon(id, name, fallback) {
         const slot = id + ":" + name;
@@ -1101,7 +1104,7 @@
         freeNitro:["Emojis", "Stickers", "Short links"], pastelize:["Replace role colors", "Color message text"],
         platformIndicators:["In DMs", "In lists", "On profiles", "Hide the phone badge"], reviewDB:["Show the be-respectful note"],
         userNotif:["Change status", "Start typing", "Send a message", "Phone notifications"], accountSwitcher:["Button on the profile bar", "Create a new account", "Export accounts", "Import accounts"],
-        hiddenChannels:["Show its details"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
+        hiddenChannels:["Show its details"], serverEdit:["Edit locally", "Name", "Icon", "Server icon", "Choose from your phone", "Use a link"], serverInfo:["Look up friends in the server", "Boosts", "Owner", "Server ID"], customThemes:["Show theme background image", "Browse Revenge themes"],
         messageHighlight:["Brightness", "Left bar width"], iconPacks:["Rosiecord", "Plumpy", "Iconsax", "Material", "MD3", "Solar", "Deco", "Themes+", "Follow theme's icon pack"],
         fixEmbeds:["Remove tracking from links", "X (Twitter)", "Twitter", "Instagram", "TikTok", "Reddit", "Bluesky", "Threads", "Tumblr", "Facebook", "Mastodon", "YouTube", "Twitch", "Spotify", "pixiv", "Bilibili", "DeviantArt", "Fur Affinity", "Pinterest", "PTT",
             "FxTwitter", "vxTwitter", "fxtumblr", "Dark Tumblr posts", "embed", "Imgur", "Newgrounds",
@@ -1600,6 +1603,7 @@
         withOptions("servers", "readAll", "VENUS_READALL", "Read all button", "A button that marks servers and DMs as read.", "Read all", ReadAllSettings);
         withOptions("servers", "hiddenChannels", "VENUS_HIDDENCHANNELS", "Show hidden channels", "Channels you can't open show with a lock. Messages stay hidden.", "Hidden channels", HiddenChannelsSettings);
         withOptions("servers", "serverInfo", "VENUS_SERVERINFO", "Server info", "Hold a server's icon to see its details, boosts and friends there.", "Server info", ServerInfoSettings);
+        withOptions("servers", "serverEdit", "VENUS_SERVEREDIT", "Edit servers locally", "Give any server your own name and icon. Only you see them.", "Edit servers", ServerEditSettings);
         withOptions("servers", "cleanChannels", "VENUS_CLEANCHANNELS", "Clean channel names", "Removes emoji and symbols from channel names, and can show spaces instead of dashes.", "Clean names", CleanChannelsSettings);
         // Appearance
         withOptions("appearance", "systemFont", "VENUS_SYSTEMFONT", "Use your phone's font", "Replaces Discord's font everywhere with your phone's or one you import. Android 9 or newer.", "Font", SystemFontSettings);
@@ -1759,7 +1763,7 @@
         const changed = Object.keys(defaults).filter(key => key !== "language" && !owns(FEATURE_ICONS, key) && features[featureFor(key)] &&
             settings[key] !== defaults[key]).length;
         return {on:keys.filter(key => settings[key]).length, total:keys.length, changed, people:features.userNotif ? userNotif.ids.size : 0,
-            themes:features.customThemes ? customThemes.list.length : 0,
+            themes:features.customThemes ? customThemes.list.length : 0, servers:features.serverEdit ? serverEdits.size : 0,
             iconPacks:features.iconPacks ? (iconPacks.active ? 1 : 0) + iconPacks.custom.length : 0,
             language:settings.language !== "auto", hidden:hiddenFeatureKeys().length};
     }
@@ -1773,6 +1777,8 @@
         if (features.customThemes && customThemes.list.length) out.themes = {active:customThemes.active || "", list:customThemes.list.slice(0, THEMES_MAX)};
         if (features.iconPacks && (iconPacks.active || iconPacks.custom.length))
             out.iconPacks = {active:iconPacks.active || "", custom:iconPacks.custom.slice(0, ICONPACKS_MAX_CUSTOM)};
+        // Pictures from this phone stay on it: a backup keeps the names and the icons that are links.
+        if (features.serverEdit && serverEdits.size) { const servers = serverEditData(true); if (Object.keys(servers).length) out.servers = servers; }
         return JSON.stringify(out, null, 1);
     }
     // A backup, or a plain venus-patches.json settings file, read back. Throws a message you can show when it isn't one.
@@ -1814,7 +1820,8 @@
             packs = {custom, active:act};
         }
         const created = wrapped && typeof data.created === "string" ? Date.parse(data.created) : NaN;
-        return {values, people, themes, iconPacks:packs, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
+        const servers = wrapped && data.servers ? serverEditClean(data.servers, true) : null;
+        return {values, people, themes, iconPacks:packs, servers, version:wrapped && typeof data.version === "string" ? data.version.slice(0, 24) : "", created:Number.isFinite(created) ? created : 0};
     }
     // Puts a backup in place: every setting it has, the rest back to how Venus starts. Switches go through setSetting,
     // so everything they start or stop (Quests, themes, kept messages) happens as if you'd flipped them yourself.
@@ -1834,6 +1841,13 @@
             if (features.customThemes && parsed.themes) {
                 customThemes.loaded = true; customThemes.list = parsed.themes.list; customThemes.active = parsed.themes.active; customThemes.error = "";
                 customThemesPersist(); customThemesApply(); notify("customThemes");
+            }
+            if (features.serverEdit && parsed.servers) {
+                // Pictures picked on this phone aren't in a backup, so a server keeps its own picture unless the backup gives it a link.
+                const next = new Map();
+                serverEdits.forEach((edit, id) => { if (serverEditFile(edit.icon) && !parsed.servers.has(id)) next.set(id, edit); });
+                parsed.servers.forEach((edit, id) => { const old = serverEdits.get(id); next.set(id, old && serverEditFile(old.icon) && !edit.icon ? {name:edit.name, icon:old.icon} : edit); });
+                serverEditLoad(next); serverEdit.dirty = true; serverEditChanged();
             }
             if (features.iconPacks && parsed.iconPacks) {
                 iconPacks.loaded = true; iconPacks.custom = parsed.iconPacks.custom; iconPacks.active = parsed.iconPacks.active; iconPacks.error = "";
@@ -1930,7 +1944,7 @@
         }).catch(() => showProblem("Couldn't restore", tr("Your clipboard is empty. Copy a Venus backup first.")));
     }
     function backupReset() {
-        confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes and people stay.", "Reset",
+        confirmAction("Reset to defaults?", "Every feature turns off and every option goes back to how Venus starts. Your themes, people and server edits stay.", "Reset",
             () => backupApply({values:Object.assign({}, defaultSettings(), {language:settings.language, hiddenFeatures:settings.hiddenFeatures}), people:null, themes:null}, true));
     }
     const BACKUP_DARK = {chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:6, borderRadius:14, backgroundColor:"#4e50584d"}};
@@ -1948,6 +1962,7 @@
             what.changed ? chip("options", 7092, "SettingsIcon", pl(what.changed, "{n} option changed", "{n} options changed")) : null,
             what.people ? chip("people", 4815, "FriendsIcon", pl(what.people, "{n} person watched", "{n} people watched")) : null,
             what.themes ? chip("themes", 15652, "EyeDropperIcon", pl(what.themes, "{n} theme", "{n} themes")) : null,
+            what.servers ? chip("servers", 9720, "PencilIcon", pl(what.servers, "{n} server edited", "{n} servers edited")) : null,
             what.iconPacks ? chip("iconPacks", 11063, "ImageSparkleIcon", pl(what.iconPacks, "{n} icon pack", "{n} icon packs")) : null,
             what.hidden ? chip("hidden", 6650, "EyeSlashIcon", pl(what.hidden, "{n} feature hidden", "{n} features hidden")) : null,
             what.language ? chip("language", 15723, "LanguageIcon", languageLabel(settings.language)) : null];
@@ -3027,6 +3042,7 @@
         if (typeof importer !== "function") return importer;
         return function () {
             const result = importer.apply(this, arguments), id = arguments[0];
+            if (result && id === 2087 && features.serverEdit) return serverEditRealResult(result);
             if (!result || id !== 4750 && id !== 4748) return result;
             const real = result.default || result;
             let facade = null;
@@ -6227,6 +6243,44 @@
             footnote("note", "Everything else comes from what Discord has already loaded, and updates while the sheet is open.")];
         return settingsBody(ui, groups);
     }
+    // Edit servers locally's page: what everyone sees next to what you see, then every server you've edited.
+    function ServerEditPreview() {
+        const s = useChatPreviewStyles(), k = usePreviewChrome();
+        const side = (key, label, color, glyph, name, size) => el(RN.View, {key, style:{flex:1, alignItems:"center", gap:8, paddingVertical:18, paddingHorizontal:8}},
+            el(RN.Text, {style:[s.muted, {fontSize:12, fontWeight:"600"}], numberOfLines:1}, label),
+            el(RN.View, {style:{width:56, height:56, borderRadius:18, backgroundColor:color, alignItems:"center", justifyContent:"center"}},
+                el(RN.Text, {style:{color:"#ffffff", fontSize:size, fontWeight:"700"}}, glyph)),
+            el(RN.Text, {style:[s.name, {fontSize:15}], numberOfLines:1}, name));
+        return el(RN.View, {key:"preview", style:[s.chat, {flexDirection:"row", alignItems:"center", paddingVertical:0}], accessible:true,
+            accessibilityLabel:tr("Everyone sees") + ": " + tr("Game Night") + ". " + tr("Only you see") + ": " + tr("Friday crew")},
+            side("real", tr("Everyone sees"), "#4e5058", "GN", tr("Game Night"), 18),
+            el(venusIcon(10293, "ArrowSmallRightIcon"), {size:"md", color:k.icon.color}),
+            side("mine", tr("Only you see"), "#eb459e", "\ud83c\udfae", tr("Friday crew"), 26));
+    }
+    function ServerEditSettings() {
+        useSettings("serverEdit");
+        const ui = reviewUI();
+        if (!React || !RN) return null;
+        const on = enabled("serverEdit"), Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, Icon = venusIcon(9720, "PencilIcon");
+        const label = item => item.edit.name || item.real && item.real.name || item.id;
+        const list = Array.from(serverEdits.keys()).map(id => ({id, edit:serverEdits.get(id), real:serverEditReal(id)}))
+            .sort((a, b) => String(label(a)).localeCompare(String(label(b))));
+        const row = item => Row ? el(Row, {key:item.id, label:label(item),
+            subLabel:!item.real ? tr("You're not in this server right now") : item.edit.name && item.edit.name !== item.real.name ? tr("Real name: {name}", {name:item.real.name}) : tr("New icon only"),
+            icon:el(ServerEditIcon, {uri:serverEditIconUri(item.real, item.edit, 64), name:label(item), size:32}), arrow:true, disabled:!on || !item.real,
+            onPress:() => openServerEdit(item.id)}) : null;
+        const groups = [
+            on ? null : offCard("status", Icon, "serverEdit"),
+            el(ServerEditPreview, {key:"preview"}),
+            on && !list.length ? statusCard("empty", "Hold a server's icon and tap Edit locally, or pick a server below.", {title:tr("No servers edited yet"), IconComponent:Icon}) : null,
+            el(Group, {key:"servers", title:list.length ? pl(list.length, "{n} server edited", "{n} servers edited") : tr("Servers")},
+                list.map(row),
+                Row ? el(Row, {key:"add", label:tr("Edit another server"), icon:rowIcon(9239, "ServerIcon"), arrow:true, disabled:!on, onPress:openServerPicker}) : null),
+            list.length ? el(Group, {key:"reset"},
+                actionRow(ui, "reset", "Reset every server", null, () => confirmAction("Reset every server?", "Every server goes back to its real name and icon.", "Reset", serverEditReset), !on, true)) : null,
+            footnote("note", "Only this phone sees these. Server settings always show the real name and icon, so nothing changes for the server or anyone in it.")];
+        return settingsBody(ui, groups);
+    }
     // Imported font and emoji files: Android's file picker, a private copy in Discord's cache (keepLocalCopy), then the native
     // side checks Android can draw it and keeps it in Discord's files. Each kind talks through its own native method, the one
     // that already reopens Discord for it (font: fileExists, emojis: getVideoDimensions), so no method carries two guards.
@@ -7718,6 +7772,7 @@
         return tr("{time} ago", {time});
     }
     function serverIconUri(guild, size) {
+        if (guild && typeof guild.icon === "string" && guild.icon.indexOf(SERVER_EDIT_ICON) === 0) return serverEdit.icons.get(guild.icon) || null;
         return guild && typeof guild.icon === "string" && guild.icon ? "https://cdn.discordapp.com/icons/" + guild.id + "/" + guild.icon + ".png?size=" + (size || 128) : null;
     }
     function serverBannerUri(guild) {
@@ -7987,6 +8042,306 @@
         const items = orig.apply(self, args), guildId = args[0] == null ? null : String(args[0]);
         if (!enabled("serverInfo") || !Array.isArray(items) || !guildId || !/^\d{17,20}$/.test(guildId)) return items;
         return items.concat([{IconComponent:venusIcon(5046, "CircleInformationIcon"), label:tr("Server info"), action:() => openServerInfo(guildId)}]);
+    }
+    // Edit servers locally (#114, based on EditServers by mwittrien): your own name and icon for any server, only on this
+    // phone. GuildStore (2087) hands out a copy of the server's record with the name and icon swapped, so everywhere Discord
+    // draws a server (the server list, headers, menus, Server info) shows them. The icon becomes a token that
+    // AvatarUtils.getGuildIconURL (1415) turns into your picture. Discord's own server settings (8633, 8634, 18285) are given
+    // the real store, so a local name or icon can never be saved to the server.
+    const SERVER_EDIT_ICON = "venus-icon:", SERVER_EDIT_MAX = 500, SERVER_EDIT_NAME = 100, SERVER_EDIT_BYTES = 8 * 1024 * 1024;
+    const serverEdits = new Map();
+    const serverEdit = {dirty:false, version:0, tokens:new Map(), icons:new Map(), copies:new WeakMap(), lists:null, store:null, orig:null, real:null};
+    function serverEditFile(uri) { return typeof uri === "string" && uri.length <= 2048 && /^file:\/\/\/\S*\/venus-server-\d{17,20}-\d+\.(png|jpe?g|webp|gif)$/i.test(uri); }
+    function serverEditLink(uri) { return typeof uri === "string" && uri.length <= 2048 && /^https:\/\/[^\s"<>]+\.[^\s"<>]+$/i.test(uri); }
+    function serverEditName(text) { return typeof text === "string" ? text.replace(/\s+/g, " ").trim().slice(0, SERVER_EDIT_NAME) : ""; }
+    // Saved edits, from the settings file or a backup. A backup never brings a picture file from another phone.
+    function serverEditClean(raw, fromBackup) {
+        const out = new Map();
+        if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+        Object.keys(raw).slice(0, SERVER_EDIT_MAX).forEach(id => {
+            const v = raw[id];
+            if (!/^\d{17,20}$/.test(id) || !v || typeof v !== "object") return;
+            const name = serverEditName(v.n), icon = serverEditLink(v.i) || !fromBackup && serverEditFile(v.i) ? v.i : "";
+            if (name || icon) out.set(id, {name, icon});
+        });
+        return out;
+    }
+    function serverEditData(forBackup) {
+        const out = {};
+        serverEdits.forEach((edit, id) => {
+            const icon = forBackup && !serverEditLink(edit.icon) ? "" : edit.icon;
+            if (edit.name || icon) out[id] = icon ? {n:edit.name, i:icon} : {n:edit.name};
+        });
+        return out;
+    }
+    function serverEditLoad(map) {
+        serverEdits.clear();
+        map.forEach((edit, id) => serverEdits.set(id, edit));
+        serverEditTokens();
+    }
+    // A fresh token on every change, so Discord's image cache never shows the picture an icon had before.
+    function serverEditTokens() {
+        serverEdit.version++;
+        serverEdit.tokens.clear(); serverEdit.icons.clear(); serverEdit.lists = null;
+        serverEdits.forEach((edit, id) => {
+            if (!edit.icon) return;
+            const token = SERVER_EDIT_ICON + id + ":" + serverEdit.version;
+            serverEdit.tokens.set(id, token); serverEdit.icons.set(token, edit.icon);
+        });
+    }
+    function serverEditEmit() {
+        const store = serverEdit.store;
+        serverEdit.lists = null;
+        if (store && typeof store.emitChange === "function") try { store.emitChange(); } catch (_) {}
+    }
+    function serverEditChanged() { serverEditTokens(); save(); notify("serverEdit"); serverEditEmit(); }
+    function serverEditRemoveFile(uri) {
+        if (!serverEditFile(uri) || !files || typeof files.removeFile !== "function") return;
+        try { Promise.resolve(files.removeFile(decodeURIComponent(uri.replace(/^file:\/\//, "")))).catch(() => {}); } catch (_) {}
+    }
+    // Saves one server's edit; with nothing left in it, the server goes back to its real name and icon. A picture from the
+    // phone that's no longer used is deleted.
+    function serverEditSet(id, edit) {
+        const old = serverEdits.get(id), name = serverEditName(edit && edit.name);
+        const icon = edit && (serverEditLink(edit.icon) || serverEditFile(edit.icon)) ? edit.icon : "";
+        if (old && old.icon && old.icon !== icon) serverEditRemoveFile(old.icon);
+        if (name || icon) serverEdits.set(id, {name, icon}); else serverEdits.delete(id);
+        serverEdit.dirty = true; serverEditChanged();
+    }
+    function serverEditReset() {
+        serverEdits.forEach(edit => serverEditRemoveFile(edit.icon));
+        serverEdits.clear(); serverEdit.dirty = true; serverEditChanged();
+    }
+    // One copy per server record and edit: records are replaced when the server changes, so a copy is never stale, and
+    // Discord's memoized rows keep getting the same object.
+    function serverEditDisplay(record) {
+        if (!record || typeof record !== "object") return record;
+        const edit = serverEdits.get(record.id);
+        if (!edit) return record;
+        const known = serverEdit.copies.get(record);
+        if (known && known.v === serverEdit.version) return known.copy;
+        const d = Object.getOwnPropertyDescriptors(record), token = serverEdit.tokens.get(record.id);
+        if (edit.name) d.name = {value:edit.name, writable:true, enumerable:true, configurable:true};
+        if (token) d.icon = {value:token, writable:true, enumerable:true, configurable:true};
+        let copy = record;
+        try { copy = Object.create(Object.getPrototypeOf(record), d); } catch (_) {}
+        serverEdit.copies.set(record, {v:serverEdit.version, copy});
+        return copy;
+    }
+    function serverEditOn() { return serverEdits.size > 0 && enabled("serverEdit"); }
+    function serverEditGetGuild(orig, self, args) { const guild = orig.apply(self, args); return serverEditOn() ? serverEditDisplay(guild) : guild; }
+    serverEditGetGuild.call1 = (orig, self, id) => { const guild = orig.call(self, id); return serverEditOn() ? serverEditDisplay(guild) : guild; };
+    // getGuilds (servers by ID) and getGuildsArray: one swapped list per list Discord hands out, until it or an edit changes.
+    function serverEditList(orig, self, args, array) {
+        const list = orig.apply(self, args);
+        if (!list || typeof list !== "object" || !serverEditOn()) return list;
+        const cache = serverEdit.lists || (serverEdit.lists = {}), slot = array ? "array" : "map", hit = cache[slot];
+        if (hit && hit.source === list && hit.v === serverEdit.version) return hit.out;
+        let out = list;
+        if (array) { if (Array.isArray(list)) out = list.map(serverEditDisplay); }
+        else { out = {}; for (const id in list) out[id] = serverEditDisplay(list[id]); }
+        cache[slot] = {source:list, v:serverEdit.version, out};
+        return out;
+    }
+    function serverEditHookStore(exports) {
+        const store = exports.default;
+        if (!store || typeof store.getGuild !== "function" || serverEdit.store) return exports;
+        serverEdit.orig = {getGuild:store.getGuild, getGuilds:store.getGuilds, getGuildsArray:store.getGuildsArray};
+        let hooked = hookExport(store, "getGuild", serverEditGetGuild);
+        hooked = hookExport(hooked, "getGuilds", (orig, self, args) => serverEditList(orig, self, args, false));
+        hooked = hookExport(hooked, "getGuildsArray", (orig, self, args) => serverEditList(orig, self, args, true));
+        serverEdit.store = hooked;
+        return hooked === store ? exports : replaceValue(exports, "default", hooked);
+    }
+    // What Discord's server settings import instead of GuildStore: the same store, answering with the real servers. It may be
+    // imported before the hooks are in, so each call looks up the original method then.
+    function serverEditRealResult(result) {
+        const real = result.default || result;
+        if (!real || typeof real.getGuild !== "function") return result;
+        if (!serverEdit.real || Object.getPrototypeOf(serverEdit.real) !== real) {
+            const facade = Object.create(real);
+            ["getGuild", "getGuilds", "getGuildsArray"].forEach(key => {
+                facade[key] = function () { const o = serverEdit.orig, fn = o && o[key] || real[key]; return fn.apply(real, arguments); };
+            });
+            serverEdit.real = facade;
+        }
+        return result.default ? cloneWith(result, "default", serverEdit.real) : serverEdit.real;
+    }
+    function serverEditHookAvatars(exports) {
+        const utils = exports && exports.default;
+        if (!utils || typeof utils.getGuildIconURL !== "function") return exports;
+        const hooked = hookExport(utils, "getGuildIconURL", (orig, self, args) => {
+            const icon = args[0] && args[0].icon;
+            return typeof icon === "string" && icon.indexOf(SERVER_EDIT_ICON) === 0 ? serverEdit.icons.get(icon) || null : orig.apply(self, args);
+        });
+        return hooked === utils ? exports : replaceValue(exports, "default", hooked);
+    }
+    function serverEditReal(id) {
+        const o = serverEdit.orig, store = serverEdit.store || serverStore(2087);
+        try { return o && store ? o.getGuild.call(store, id) : serverCall(store, "getGuild", id) || null; } catch (_) { return null; }
+    }
+    function serverEditRealList() {
+        const o = serverEdit.orig, store = serverEdit.store || serverStore(2087);
+        let all = null;
+        try { all = o && store && typeof o.getGuilds === "function" ? o.getGuilds.call(store) : serverCall(store, "getGuilds"); } catch (_) {}
+        return all && typeof all === "object" ? Object.keys(all).map(id => all[id]).filter(g => g && typeof g.id === "string") : [];
+    }
+    // The picture a server shows: the edit's, else its real icon (never a token).
+    function serverEditIconUri(guild, edit, size) {
+        if (edit && edit.icon) return edit.icon;
+        const icon = guild && guild.icon;
+        return typeof icon === "string" && icon && icon.indexOf(SERVER_EDIT_ICON) !== 0 ? "https://cdn.discordapp.com/icons/" + guild.id + "/" + icon + ".png?size=" + (size || 128) : null;
+    }
+    // Android's picker, then a copy in Discord's own files (keepLocalCopy), so the icon stays when the original is deleted.
+    function serverEditPick(guildId) {
+        const pick = inspectedExport(12803, "pick"), keep = inspectedExport(12803, "keepLocalCopy"), types = inspectedExport(12803, "types");
+        if (!files || typeof pick !== "function" || typeof keep !== "function") return Promise.reject(new Error("unreadable"));
+        return Promise.resolve().then(() => pick({type:[types && types.images || "image/*"], allowMultiSelection:false, mode:"import"})).then(picked => {
+            const file = Array.isArray(picked) ? picked[0] : picked;
+            if (!file || typeof file.uri !== "string") throw new Error("cancel");
+            if (typeof file.size === "number" && file.size > SERVER_EDIT_BYTES) throw new Error("too-large");
+            const m = /\.(png|jpe?g|webp|gif)$/i.exec(file.name || "") || /image\/(png|jpe?g|webp|gif)/i.exec(file.type || "");
+            const ext = m ? m[1].toLowerCase().replace("jpeg", "jpg") : "png";
+            return keep({files:[{uri:file.uri, fileName:"venus-server-" + guildId + "-" + Date.now() + "." + ext}], destination:"documentDirectory"});
+        }).then(copies => {
+            const copy = Array.isArray(copies) ? copies[0] : copies;
+            if (!copy || copy.status !== "success" || typeof copy.localUri !== "string") throw new Error("unreadable");
+            const uri = copy.localUri.indexOf("file://") === 0 ? copy.localUri : "file://" + copy.localUri;
+            if (!serverEditFile(uri)) throw new Error("unreadable");
+            return uri;
+        });
+    }
+    const SERVER_EDIT_DARK = {hero:{alignItems:"center", gap:10, paddingVertical:20, paddingHorizontal:16, borderRadius:20, backgroundColor:"#97979f1f"},
+        chip:{flexDirection:"row", alignItems:"center", gap:6, paddingHorizontal:10, paddingVertical:4, borderRadius:12, backgroundColor:"#4e50584d"},
+        ring:{padding:4, borderRadius:34, backgroundColor:"#2b2d31"}, acronym:{backgroundColor:"#5865f2"}, error:{color:"#f23f43"}};
+    function useServerEditStyles() {
+        return useThemed("serverEdit", c => ({hero:Object.assign({}, SERVER_EDIT_DARK.hero, {backgroundColor:c.BACKGROUND_MOD_SUBTLE}),
+            chip:Object.assign({}, SERVER_EDIT_DARK.chip, {backgroundColor:c.BACKGROUND_MOD_NORMAL || c.BACKGROUND_MOD_SUBTLE}),
+            ring:Object.assign({}, SERVER_EDIT_DARK.ring, {backgroundColor:c.MOBILE_ACTIONSHEET_BACKGROUND || c.BACKGROUND_BASE_LOW}),
+            acronym:{backgroundColor:c.BACKGROUND_BRAND || "#5865f2"}, error:{color:c.TEXT_FEEDBACK_CRITICAL || "#f23f43"}}), SERVER_EDIT_DARK);
+    }
+    // A server's icon, or its initials when it has none or the picture won't load.
+    function ServerEditIcon(props) {
+        const [broken, setBroken] = React.useState(""), s = useServerEditStyles(), size = props.size || 40;
+        const uri = props.uri && broken !== props.uri ? props.uri : null;
+        const box = {width:size, height:size, borderRadius:Math.round(size * 0.32), overflow:"hidden", alignItems:"center", justifyContent:"center"};
+        return uri && RN.Image ? el(RN.Image, {source:{uri}, style:box, accessibilityIgnoresInvertColors:true,
+                onError:() => { setBroken(uri); if (props.onError) props.onError(uri); }}) :
+            el(RN.View, {style:[box, s.acronym]}, el(RN.Text, {style:{color:"#ffffff", fontSize:Math.round(size * 0.34), fontWeight:"700"}, numberOfLines:1}, serverAcronym(props.name)));
+    }
+    function serverEditScroll(ui, header, content) {
+        const Scroll = inspectedExport(6307, "BottomSheetScrollView");
+        return Scroll ? el(ui.ActionSheet || RN.View, {header, scrollable:true}, el(Scroll, null, content)) :
+            el(ui.ActionSheet || RN.View, {header}, RN.ScrollView ? el(RN.ScrollView, {keyboardShouldPersistTaps:"handled"}, content) : content);
+    }
+    // The sheet: the server as it will look at the top, then its name and icon. Nothing changes until Save.
+    function ServerEditSheet(props) {
+        useSettings("serverEdit");
+        const ui = reviewUI(), s = useServerEditStyles(), guildId = props.guildId, real = serverEditReal(guildId);
+        const saved = serverEdits.get(guildId) || {name:"", icon:""};
+        const [name, setName] = React.useState(saved.name), [icon, setIcon] = React.useState(saved.icon);
+        const [link, setLink] = React.useState(null), [broken, setBroken] = React.useState(""), [busy, setBusy] = React.useState(false);
+        const picked = React.useRef(null);
+        if (!picked.current) picked.current = new Set();
+        // Pictures picked here but never saved are deleted once the sheet closes.
+        React.useEffect(() => () => picked.current.forEach(uri => { const now = serverEdits.get(guildId); if (!now || now.icon !== uri) serverEditRemoveFile(uri); }), [guildId]);
+        const close = () => hideReviewSheet(ui, props.sheetKey);
+        const header = ui.Header ? el(ui.Header, {title:tr("Edit locally"), trailing:ui.Close ? el(ui.Close, {onPress:close}) : undefined}) : undefined;
+        if (!real) return el(ui.ActionSheet || RN.View, {header}, el(RN.View, {style:{padding:24}},
+            serverText(tr("This server isn't available right now."), "text-md/medium", "text-muted", {color:"#949ba4", fontSize:16})));
+        const Group = ui.TableRowGroup || RN.View, Row = ui.TableRow, Button = inspectedExport(5379, "Button");
+        const draft = {name:serverEditName(name), icon}, realName = real.name || "", shown = draft.name || realName;
+        const uri = serverEditIconUri(real, draft, 160), failed = !!uri && broken === uri;
+        const changed = draft.name !== saved.name || draft.icon !== saved.icon, edited = !!(saved.name || saved.icon);
+        const pickPhone = () => {
+            if (busy) return;
+            setBusy(true);
+            serverEditPick(guildId).then(next => {
+                picked.current.add(next); animateLayout(); haptic("SELECTION");
+                setIcon(next); setBroken(""); setLink(null); setBusy(false);
+            }, error => {
+                setBusy(false);
+                if (pickerCancelled(error) || error && error.message === "cancel") return;
+                showProblem("Couldn't import", tr(error && error.message === "too-large" ? "That picture is too large. Pick one under 8 MB." : "That file couldn't be opened."));
+            });
+        };
+        const useLink = () => {
+            const value = String(link || "").trim();
+            if (!serverEditLink(value)) { showProblem("Couldn't use that link", tr("That isn't a picture link. Picture links start with https://.")); return; }
+            animateLayout(); haptic("SELECTION"); setIcon(value); setBroken(""); setLink(null);
+        };
+        const commit = next => { serverEditSet(guildId, next); haptic("SELECTION"); reviewToast(ui, next ? "Saved on this phone" : "Back to the real name and icon", venusIcon(6868, "CircleCheckIcon")); close(); };
+        const button = (key, text, onPress, variant, disabled) => Button ? el(Button, {key, text:tr(text), size:"lg", variant, disabled:!!disabled, onPress}) :
+            el(RN.Pressable || RN.View, {key, onPress:disabled ? undefined : onPress, accessibilityRole:"button", accessibilityLabel:tr(text),
+                style:{height:48, borderRadius:24, alignItems:"center", justifyContent:"center", backgroundColor:variant === "primary" ? "#5865f2" : "#4e5058", opacity:disabled ? 0.5 : 1}},
+                el(RN.Text, {style:{color:"#ffffff", fontWeight:"600"}}, tr(text)));
+        const linkShown = serverEditLink(icon) ? icon.replace(/^https:\/\//i, "").replace(/[?#].*$/, "") : "";
+        const body = [
+            el(RN.View, {key:"hero", style:s.hero},
+                el(RN.View, {style:s.ring}, el(ServerEditIcon, {key:uri || "none", uri, name:shown, size:84, onError:setBroken})),
+                serverText(shown, "heading-lg/bold", "text-strong", {color:"#f2f3f5", fontSize:20, fontWeight:"700", textAlign:"center"}, {numberOfLines:2, style:{textAlign:"center"}}),
+                draft.name && draft.name !== realName ? serverText(tr("Real name: {name}", {name:realName}), "text-sm/medium", "text-muted", {color:"#949ba4", fontSize:14}, {numberOfLines:1}) : null,
+                failed ? serverText(tr("Couldn't load that picture."), "text-sm/semibold", "text-feedback-critical", Object.assign({fontSize:14, fontWeight:"600"}, s.error)) :
+                    el(RN.View, {style:s.chip}, el(venusIcon(8218, "LockIcon"), {size:"xxs"}),
+                        serverText(tr("Only you see this"), "text-xs/semibold", "text-default", {color:"#dbdee1", fontSize:12, fontWeight:"600"}))),
+            el(RN.View, {key:"name", style:{gap:8}},
+                groupTitle("nameTitle", "Name"),
+                ui.TextInput ? el(ui.TextInput, {value:name, onChange:text => setName(String(text || "")), placeholder:realName, maxLength:SERVER_EDIT_NAME,
+                    autoCorrect:false, returnKeyType:"done", accessibilityLabel:tr("Name")}) :
+                    el(RN.TextInput, {value:name, onChangeText:setName, placeholder:realName, maxLength:SERVER_EDIT_NAME, style:{fontSize:16, padding:12, color:"#f2f3f5"}})),
+            el(RN.View, {key:"icon", style:{gap:8}},
+                el(Group, {key:"iconRows", title:tr("Icon")},
+                    Row ? el(Row, {key:"phone", label:tr(busy ? "Opening\u2026" : "Choose from your phone"), subLabel:serverEditFile(icon) ? tr("Using a picture from your phone") : tr("PNG, JPG, WebP or GIF, up to 8 MB."),
+                        icon:rowIcon(17096, "ImagePlusIcon"), arrow:true, disabled:busy, onPress:pickPhone}) : null,
+                    Row ? el(Row, {key:"link", label:tr("Use a link"), subLabel:linkShown || undefined, icon:rowIcon(5038, "LinkIcon"), arrow:link == null,
+                        onPress:() => { animateLayout(); haptic("SELECTION"); setLink(link == null ? (serverEditLink(icon) ? icon : "") : null); }}) : null,
+                    icon && Row ? el(Row, {key:"real", label:tr("Use the server's icon"), icon:rowIcon(15257, "RefreshIcon"),
+                        onPress:() => { animateLayout(); haptic("SELECTION"); setIcon(""); setBroken(""); setLink(null); }}) : null),
+                link != null ? inputWithButton(ui, "linkInput", {value:link, placeholder:"https://", autoCapitalize:"none", autoCorrect:false, keyboardType:"url",
+                    autoFocus:true, returnKeyType:"done", onSubmitEditing:useLink, accessibilityLabel:tr("Use a link")}, text => setLink(String(text || "")), "Use", useLink, !String(link).trim()) : null),
+            el(RN.View, {key:"buttons", style:{gap:10, paddingTop:4}},
+                button("save", "Save", () => commit(draft), "primary", !changed || failed),
+                edited ? button("reset", "Use the real name and icon", () => commit(null), "secondary") : null)];
+        return serverEditScroll(ui, header, el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:20}}, body.filter(Boolean)));
+    }
+    function openServerEdit(guildId) {
+        if (!enabled("serverEdit") || !React || !RN || typeof guildId !== "string") return;
+        const ui = reviewUI();
+        if (!ui.ActionSheet || typeof ui.showSheet !== "function") return;
+        const key = "VenusServerEdit:" + guildId;
+        try { ui.showSheet({key, content:el(ServerEditSheet, {guildId, sheetKey:key}), stackingBehavior:"stack"}); } catch (_) {}
+    }
+    // Every server you're in, to pick one to edit, with a search box.
+    function ServerPickSheet(props) {
+        useSettings("serverEdit");
+        const ui = reviewUI(), [query, setQuery] = React.useState("");
+        const close = () => hideReviewSheet(ui, props.sheetKey);
+        const header = ui.Header ? el(ui.Header, {title:tr("Pick a server"), trailing:ui.Close ? el(ui.Close, {onPress:close}) : undefined}) : undefined;
+        const words = searchFold(query).split(/\s+/).filter(Boolean), Group = ui.TableRowGroup || RN.View, Row = ui.TableRow;
+        const list = serverEditRealList().map(guild => ({guild, edit:serverEdits.get(guild.id)}))
+            .filter(x => { const hay = searchFold((x.guild.name || "") + " " + (x.edit && x.edit.name || "")); return words.every(w => hay.indexOf(w) >= 0); })
+            .sort((a, b) => String(a.edit && a.edit.name || a.guild.name || "").localeCompare(String(b.edit && b.edit.name || b.guild.name || ""))).slice(0, 200);
+        const rows = list.map(({guild, edit}) => Row ? el(Row, {key:guild.id, label:edit && edit.name || guild.name || guild.id,
+            subLabel:edit && edit.name && edit.name !== guild.name ? tr("Real name: {name}", {name:guild.name}) : undefined,
+            icon:el(ServerEditIcon, {uri:serverEditIconUri(guild, edit, 64), name:edit && edit.name || guild.name, size:32}), arrow:true,
+            onPress:() => { haptic("SELECTION"); close(); later(() => openServerEdit(guild.id), 250); }}) : null);
+        const content = el(RN.View, {style:{paddingHorizontal:12, paddingBottom:24, gap:16}},
+            ui.TextInput ? el(ui.TextInput, {key:"search", value:query, onChange:text => setQuery(String(text || "")), placeholder:tr("Search servers"), autoCorrect:false}) : null,
+            rows.length ? el(Group, {key:"list"}, rows) :
+                el(RN.View, {key:"none", style:{padding:24, alignItems:"center"}}, serverText(tr("No servers found"), "text-md/medium", "text-muted", {color:"#949ba4", fontSize:16})));
+        return serverEditScroll(ui, header, content);
+    }
+    function openServerPicker() {
+        if (!enabled("serverEdit") || !React || !RN) return;
+        const ui = reviewUI();
+        if (!ui.ActionSheet || typeof ui.showSheet !== "function") return;
+        try { ui.showSheet({key:"VenusServerPick", content:el(ServerPickSheet, {sheetKey:"VenusServerPick"}), stackingBehavior:"stack"}); } catch (_) {}
+    }
+    // The server icon's hold menu: Edit locally after Discord's own rows (and before Server info).
+    function serverEditMenu(orig, self, args) {
+        const items = orig.apply(self, args), guildId = args[0] == null ? null : String(args[0]);
+        if (!enabled("serverEdit") || !Array.isArray(items) || !guildId || !/^\d{17,20}$/.test(guildId)) return items;
+        return items.concat([{IconComponent:venusIcon(9720, "PencilIcon"), label:tr("Edit locally"), action:() => openServerEdit(guildId)}]);
     }
     // Rewrites a component's props before Discord's own render, through memo and forwardRef wrappers.
     // The change runs inside the render, so it may use hooks, and it always runs, so the hook count never changes.
@@ -17094,7 +17449,11 @@
             case 1401: return features.experiments ? hookStaffEnv(exports) : exports;
             case 7308: if (features.hideBlocked && exports && exports.default) hideBlocked.references = exports.default; return exports;
             case 11624: return features.hideBlocked ? hookExport(exports, "default", hideBlockedChannelStream) : exports;
-            case 2087: if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); } return exports;
+            case 2087:
+                if (features.serverEdit && exports && exports.default) exports = serverEditHookStore(exports);
+                if (features.userNotif && exports && exports.default) { userNotif.guilds = exports.default; userNotifSubscribeGuilds(); }
+                return exports;
+            case 1415: return features.serverEdit ? serverEditHookAvatars(exports) : exports;
             case 9699: if ((features.quests || features.badges || features.userNotif || features.removedAlerts) && exports && exports.default) { bgKeepAlive.fg = exports.default; backgroundSync(); } return exports;
             case 13933: return (features.quests || features.badges || features.userNotif || features.removedAlerts) ? hookGatewaySocket(exports) : exports;
             case 13968: return (features.quests || features.badges || features.userNotif || features.removedAlerts) ? hookPauseGateway(exports) : exports;
@@ -17152,7 +17511,10 @@
                 return hookExport(hookExport(exports, "default", plain), "StatusWithTyping", plain);
             }
             case 16754: return features.readAll ? hookExport(exports, "default", readAllBarProps) : exports;
-            case 16748: return features.serverInfo ? hookExport(exports, "default", serverInfoMenu) : exports;
+            case 16748:
+                // Edit locally, then Server info, after Discord's own rows.
+                if (features.serverEdit) exports = hookExport(exports, "default", serverEditMenu);
+                return features.serverInfo ? hookExport(exports, "default", serverInfoMenu) : exports;
             case 10725: if (features.reviewDB) oauthModal = exports.default; return exports;
             case 6265: if (features.reviewDB) nativeRowGroup = exports.TableRowGroup; return exports;
             case 6896: if (features.reviewDB) nativeSwitchRow = exports.TableSwitchRow; return exports;
@@ -17456,7 +17818,10 @@
             const wrappedFactory = function () {
                 let result;
                 // 7246 (the channel list) and the modules that must keep Discord's real answers get their own imports.
-                if (features.hiddenChannels && (id === 7246 || id === 6035 || id === 6078 || id === 14193 || id === 14008 || id === 16501 || id === 8449)) {
+                // Discord's own server settings (8633 GuildSettingsActionCreators, 8634 GuildSettingsStore, 18285 its landing page)
+                // read GuildStore without Edit servers locally, so a local name or icon can never be saved to the real server.
+                if (features.hiddenChannels && (id === 7246 || id === 6035 || id === 6078 || id === 14193 || id === 14008 || id === 16501 || id === 8449) ||
+                    features.serverEdit && (id === 8633 || id === 8634 || id === 18285)) {
                     const factoryArgs = Array.from(arguments);
                     factoryArgs[1] = listImport(factoryArgs[1], id);
                     factoryArgs[2] = listImport(factoryArgs[2], id);
